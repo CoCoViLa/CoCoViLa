@@ -65,7 +65,15 @@ class MouseOps
 
 	private void openObjectPopupMenu(int x, int y) {
 		ObjectPopupMenu popupMenu = new ObjectPopupMenu(canvas);
+
+		if (!canvas.currentObj.isGroup()) {
+			popupMenu.remove(popupMenu.itemMakeClass);
+		} else {
+			popupMenu.remove(popupMenu.itemViewCode);
+		}
 		popupMenu.show(canvas, x, y);
+
+
 
 		if (canvas.objects.getSelected().size() < 2) {
 			if (canvas.currentObj.isGroup()) {

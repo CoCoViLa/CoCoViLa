@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.synthesize.UnknownVariableException;
+import ee.ioc.cs.vsle.synthesize.ClassList;
 
 import java.util.ArrayList;
 
@@ -33,17 +34,36 @@ public class Alias extends ClassField {
 	 * @param varList ArrayList - list of added variables.
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException - exception thrown if the variable added is null.
 	 */
-	public void addAll(String[] input, ArrayList varList) throws UnknownVariableException {
+	public void addAll(String[] input, ArrayList varList, ClassList classList) throws UnknownVariableException {
 		for (int i = 0; i < input.length; i++) {
 			ClassField var = getVar(input[i], varList);
 
 			if (var != null) {
 				vars.add(var);
+			} else if (input[i].indexOf(".") >= 1) {
+
+				ClassField cf = new ClassField();
+
+				cf.name = input[i];
+				vars.add(cf);
+			} else if (input[i].startsWith("*.")) {
+				ClassField cf = new ClassField();
+				cf.name = input[i];
+				vars.add(cf);
 			} else {
 				throw new UnknownVariableException(input[i]);
 			}
 		}
 	} // addAll
+
+	private String getType(String str, ArrayList varList, ClassList classList) {
+		String[] list = str.trim().split(".", -1);
+		for (int k = 0; k < list.length - 1; k++) {
+			String varName = list[k];
+
+		}
+		return null;
+	}
 
 	/**
 	 * Converts the ee.ioc.cs.editor.vclass.Alias into string, returning the alias's name.

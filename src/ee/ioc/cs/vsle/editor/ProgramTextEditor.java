@@ -208,6 +208,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 					synth.makeProgramText(fullSpec, true, classList, mainClassName));
 				tabbedPane.setSelectedComponent(progText);
 			} catch (UnknownVariableException uve) {
+
 				db.p("Fatal error: variable " + uve.excDesc + " not declared");
 				ErrorWindow ew = new ErrorWindow(
 					"Fatal error: variable " + uve.excDesc + " not declared");

@@ -21,6 +21,8 @@ public class ObjectPopupMenu extends JPopupMenu {
 	JMenuItem itemForward;
 	JMenuItem itemToFront;
 	JMenuItem itemToBack;
+	JMenuItem itemMakeClass;
+	JMenuItem itemViewCode;
 
 	JMenu submenuOrder;
 
@@ -70,10 +72,25 @@ public class ObjectPopupMenu extends JPopupMenu {
                 KeyEvent.VK_H, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemHLPorts);
 
+		itemViewCode = new JMenuItem(Menu.VIEWCODE);
+		itemViewCode.addActionListener(canvas);
+		itemViewCode.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK));
+		this.add(itemViewCode);
+
+		itemMakeClass = new JMenuItem(Menu.MAKECLASS);
+		itemMakeClass.addActionListener(canvas);
+		itemMakeClass.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
+		this.add(itemMakeClass);
+
+
 		itemShowGrid = new JCheckBoxMenuItem(Menu.GRID, canvas.isGridVisible());
 		itemShowGrid.setMnemonic('G');
 		itemShowGrid.addActionListener(canvas);
 		this.add(itemShowGrid);
+
+
 
         itemBackward = new JMenuItem(Menu.BACKWARD, KeyEvent.VK_B);
 		itemBackward.addActionListener(canvas);

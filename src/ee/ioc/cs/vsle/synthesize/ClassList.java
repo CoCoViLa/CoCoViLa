@@ -24,7 +24,8 @@ public class ClassList
 	 * Returns the Annotated Class of a specified type.
 	 * @param type String - type of the Annotated Class to be returned.
 	 * @return AnnotatedClass - AnnotatedClass of a specified type.
-	 */ AnnotatedClass getType(String type) {
+	 */
+	AnnotatedClass getType(String type) {
 		for (int i = 0; i < this.size(); i++) {
 			AnnotatedClass ac = (AnnotatedClass)this.get(i);
 

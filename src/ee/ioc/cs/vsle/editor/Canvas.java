@@ -497,6 +497,12 @@ public class Canvas extends JPanel implements ActionListener {
 			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
 			objects.sendToBack(currentObj);
 			repaint();
+		} else if (e.getActionCommand().equals(Menu.MAKECLASS)) {
+			db.p(((GObjGroup)currentObj).getSpec(connections));
+		} else if (e.getActionCommand().equals(Menu.VIEWCODE)) {
+            CodeViewer cv = new CodeViewer(currentObj);
+			cv.setSize(550, 450);
+			cv.setVisible(true);
 		}
 	}
 

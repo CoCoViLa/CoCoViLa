@@ -172,7 +172,7 @@ public class GObjGroup extends GObj
 			g.fillRect(getX() - GObj.CORNER_SIZE - 1, getY() - GObj.CORNER_SIZE - 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
 			g.fillRect(getX() + (int) (getXsize() * getWidth()) + 1,
 				getY() - GObj.CORNER_SIZE - 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
-			g.fillRect(getX()  - GObj.CORNER_SIZE - 1,
+			g.fillRect(getX() - GObj.CORNER_SIZE - 1,
 				getY() + (int) (getYsize() * (getHeight())) + 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
 			g.fillRect(getX() + (int) (getXsize() * (getWidth())) + 1,
 				getY() + (int) (getYsize() * (getHeight())) + 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
@@ -273,6 +273,80 @@ public class GObjGroup extends GObj
 		g.objects = newList;
 		return g;
 
+	}
+
+	public String getSpec(ConnectionList relations) {
+		GObj obj;
+		StringBuffer s = new StringBuffer();
+		ClassField field;
+		for (int i = 0; i < objects.size(); i++) {
+			obj = (GObj) objects.get(i);
+			s.append(
+				"    " + obj.getClassName() + " " + obj.getName() + ";\n");
+			for (int j = 0; j < obj.fields.size(); j++) {
+				field = (ClassField) obj.fields.get(j);
+				if (field.value != null) {
+					if (field.type.equals("String")) {
+						s.append("        " + obj.getName() + "." + field.name
+							+ " = \"" + field.value + "\";\n");
+					} else if (field.isPrimitiveArray()) {
+						s.append(
+							"        " + obj.getName() + "." + field.name
+							+ " = {");
+						String[] split = field.value.split("%%");
+						for (int k = 0; k < split.length; k++) {
+							if (k == 0) {
+								s.append(split[k]);
+							} else
+								s.append(", " + split[k]);
+						}
+						s.append("};\n");
+
+					} else if (field.isPrimOrStringArray()) {
+						s.append(
+							"        " + obj.getName() + "." + field.name
+							+ " = {");
+						String[] split = field.value.split("%%");
+						for (int k = 0; k < split.length; k++) {
+							if (k == 0) {
+								s.append("\"" + split[k] + "\"");
+							} else
+								s.append(", \"" + split[k] + "\"");
+						}
+						s.append("};\n");
+					} else {
+						s.append(
+							"        " + obj.getName() + "." + field.name + " = "
+							+ field.value + ";\n");
+					}
+				}
+			}
+
+		}
+		Connection rel;
+		for (int j = 0; j < relations.size(); j++) {
+			rel = (Connection) relations.get(j);
+			if (this.includesObject(rel.endPort.obj) && this.includesObject(rel.beginPort.obj)) {
+				if (rel.endPort.getName().equals("any")) {
+					s.append(
+						"    " + rel.endPort.obj.getName() + "." + rel.beginPort.getName()
+						+ " = " + rel.beginPort.obj.getName() + "."
+						+ rel.beginPort.getName() + ";\n");
+				} else if (rel.beginPort.getName().equals("any")) {
+					s.append(
+						"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
+						+ " = " + rel.beginPort.obj.getName() + "."
+						+ rel.endPort.getName() + ";\n");
+				} else {
+					s.append(
+						"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
+						+ " = " + rel.beginPort.obj.getName() + "."
+						+ rel.beginPort.getName() + ";\n");
+				}
+			}
+		}
+
+		return s.toString();
 	}
 
 }

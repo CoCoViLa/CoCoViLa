@@ -93,7 +93,7 @@ public class SpecParser {
 
 		a.remove(0);
 		if (line.indexOf("alias ") >= 0) {
-			pattern = Pattern.compile("alias ([^= ]+) ? = \\((.*)\\) *");
+			pattern = Pattern.compile("alias ([^= ]+) ?= ?\\((.*)\\) *");
 			matcher2 = pattern.matcher(line);
 			if (matcher2.find()) {
 				String returnLine = matcher2.group(1) + ":" + matcher2.group(2);
@@ -538,7 +538,7 @@ public class SpecParser {
 						String name = split[0];
 						Alias a = new Alias(name);
 
-						a.addAll(list, vars);
+						a.addAll(list, vars, classList);
 						vars.add(a);
 						ClassRelation classRelation = new ClassRelation(4);
 
@@ -660,6 +660,7 @@ public class SpecParser {
 			}
 		}
 		catch (UnknownVariableException uve) {
+				uve.printStackTrace();
 			throw new UnknownVariableException(className + "." + uve.excDesc);
 
 		}
