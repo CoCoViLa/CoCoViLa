@@ -19,7 +19,7 @@ import ee.ioc.cs.vsle.util.db;
 
 class Problem implements Cloneable, Serializable {
 
-    ArrayList algorithm = new ArrayList();
+//    ArrayList algorithm = new ArrayList();
 
     private Set axioms = new HashSet(); //Collections.synchronizedSet(new HashSet());
     private Set knownVars = new HashSet(); //Collections.synchronizedSet(new HashSet());
@@ -203,7 +203,9 @@ class Problem implements Cloneable, Serializable {
         if ( currentDepth > 1 ) {
             ( ( Rel ) subGoal.get( currentDepth - 2 ) ).getAlgorithm().add( rel );
         } else {
-            algorithm.add( rel );
+//            algorithm.add( rel );
+            throw new IllegalStateException(
+				"Wrong Algorithm");
         }
     }
 

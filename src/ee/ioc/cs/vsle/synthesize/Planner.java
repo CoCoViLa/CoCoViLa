@@ -16,6 +16,7 @@ public class Planner {
     private static Planner s_planner = null;
 
     private Problem m_problem = null;
+    private ArrayList m_algorithm = new ArrayList();
 
     private Planner() {
     }
@@ -31,22 +32,23 @@ public class Planner {
 
         m_problem = problem;
         ProgramRunner.clearFoundVars();
+        m_algorithm.clear();
 
         //manage axioms
         for ( Iterator axiomIter = m_problem.getAxioms().iterator(); axiomIter
                                    .hasNext(); ) {
             Rel rel = ( Rel ) axiomIter.next();
             m_problem.getKnownVars().addAll( rel.getOutputs() );
-            m_problem.algorithm.add( rel );
+            m_algorithm.add( rel );
             axiomIter.remove();
         }
 
         //invoke linear planning
 		 db.p(m_problem.toString());
-        if ( linearForwardSearch( m_problem, computeAll, false, false ) &&
+        if ( linearForwardSearch( m_problem, m_algorithm, computeAll, false, false ) &&
              !computeAll ) {
 
-            return m_problem.algorithm;
+            return m_algorithm;
 
         //invoke planning with subtasks
         } else if ( !m_problem.getSubtaskRels().isEmpty() ) {
@@ -54,15 +56,15 @@ public class Planner {
             db.p( "Subtasks solved: " + subgoalBackwardSearch( m_problem, computeAll ) );
 
             if ( !m_problem.getTargetVars().isEmpty() ) {
-                linearForwardSearch( m_problem, computeAll, false, false );
+                linearForwardSearch( m_problem, m_algorithm, computeAll, false, false );
             }
         }
 
-        return m_problem.algorithm;
+        return m_algorithm;
     }
 
 
-    private boolean linearForwardSearch( Problem problem, boolean computeAll,
+    private boolean linearForwardSearch( Problem problem, ArrayList alg, boolean computeAll,
                                          boolean isSubtask, boolean goingBackward ) {
 
         /*
@@ -70,7 +72,7 @@ public class Planner {
          * that set. Theyre collected into these sets and added/removedall
          * together after iteration is finished
          */
-        ArrayList algorithm;
+        ArrayList algorithm = alg;
         HashSet allTargetVarsBackup = null;
         HashSet allTargetVars;
         HashSet newVars = new HashSet();
@@ -108,9 +110,9 @@ public class Planner {
                 }
             }
         }
-        else {
-            algorithm = problem.algorithm;
-        }
+//        else {
+//            algorithm = problem.algorithm;
+//        }
 
         allTargetVars = new HashSet( problem.getTargetVars() );
         HashSet foundVars = new HashSet(problem.getKnownVars());
@@ -221,7 +223,8 @@ public class Planner {
         boolean isSolved = false;
         ProblemTree tree = new ProblemTree( problem );
         db.p( "tree: " + tree );
-        start: do {
+        //start:
+                do {
             HashSet nodeSet = tree.breadthWalkthrough( tree.currentDepth );
             for ( Iterator iter = nodeSet.iterator(); iter.hasNext(); ) {
                 db.p( "!!!--------Subplanning-------!!! " + counter++ );
@@ -232,16 +235,25 @@ public class Planner {
                 if( pr.getSubGoal().getParentRel().unknownInputs > 0 ) {
                     continue;
                 }
-                if ( linearForwardSearch( pr, computeAll, true, false ) ) {
-                    pr.addToAlgorithm( pr.getSubGoal().getParentRel() );
+                if ( linearForwardSearch( pr, null, computeAll, true, false ) ) {
+                    if ( pr.currentDepth > 1 ) {
+                        pr.addToAlgorithm( pr.getSubGoal().getParentRel() );
+                    } else {
+                        m_algorithm.add( pr.getSubGoal().getParentRel() );
+                    }
+
                     pr.getKnownVars().addAll( pr.getSubGoal().getParentRel().getOutputs() );
 
                     isSolved = true;
 
                     while( pr.currentDepth > 1 ) {
                         pr.currentDepth--;
-                        if( linearForwardSearch( pr, computeAll, true, true ) ) {
-                            pr.addToAlgorithm( pr.getSubGoal().getParentRel() );
+                        if( linearForwardSearch( pr, null, computeAll, true, true ) ) {
+                            if(pr.currentDepth > 1) {
+                                pr.addToAlgorithm( pr.getSubGoal().getParentRel() );
+                            } else {
+                                m_algorithm.add( pr.getSubGoal().getParentRel() );
+                            }
                             pr.getKnownVars().addAll( pr.getSubGoal().getParentRel().getOutputs() );
                             isSolved = true;
                         } else {
@@ -251,7 +263,7 @@ public class Planner {
 
                     if( isSolved ) {
                         m_problem = pr;
-                        continue start;
+//                        continue start;
                     }
                 }
             }
