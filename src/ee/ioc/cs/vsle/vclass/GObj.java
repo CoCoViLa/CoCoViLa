@@ -32,7 +32,7 @@ public class GObj implements Serializable, Cloneable {
 	public int portOffsetY1 = 0;
 	public int portOffsetY2 = 0;
 
-	GObj() {
+	public GObj() {
 	}
 
 	public GObj(int x, int y, int width, int height, String name) {
@@ -170,14 +170,6 @@ public class GObj implements Serializable, Cloneable {
 
 	public void setSelected(boolean set) {
 		selected = set;
-	}
-
-	public void setXSize(float size) {
-		this.setXsize(size);
-	}
-
-	public void setYSize(float size) {
-		this.setYsize(size);
 	}
 
 	public void setMultXSize(float s) {

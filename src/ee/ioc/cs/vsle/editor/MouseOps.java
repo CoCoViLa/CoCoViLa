@@ -409,10 +409,10 @@ class MouseOps
 				float newYSize = (obj.getHeight() * initialYSize + (y - editor.mouseY)) / obj.getHeight();
 
 				if (newXSize > 0) {
-					obj.setXSize(newXSize);
+					obj.setXsize(newXSize);
 				}
 				if (newYSize > 0) {
-					obj.setYSize(newYSize);
+					obj.setYsize(newYSize);
 				}
 
 				for (int j = 0; j < editor.connections.size(); j++) {
