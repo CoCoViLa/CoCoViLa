@@ -78,45 +78,6 @@ public class SpecParser {
 	 together with its type information
 	 @return	a specification line with its type information
 	 @param	a	arraylist of specification lines
-	 *
-	 LineType getFieldLine(ArrayList a) {
-	 Matcher matcher2;
-	 Pattern pattern;
-
-	 while ((a.get(0)).equals("")) {
-	 a.remove(0);
-	 if (a.isEmpty()) {
-	 return null;
-	 }
-	 }
-	 String line = (String)a.get(0);
-	 a.remove(0);
-	 if (line.indexOf("=")>=0) {
-	 pattern = Pattern.compile(" *([^= ]+) *= *(([0-9.]+)|(\".*\")|(new .*\\(.*\\))) *$");
-	 matcher2 = pattern.matcher(line);
-	 if (matcher2.find()) {
-	 return new LineType(2, matcher2.group(1)+":"+matcher2.group(2));
-	 }
-	 }
-	 else {
-	 pattern = Pattern.compile("^ *([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])?) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)");
-	 matcher2 = pattern.matcher(line);
-	 if (matcher2.find()) {
-	 return new LineType(1, matcher2.group(1)+":"+matcher2.group(3));
-	 }
-	 else {
-	 return new LineType(10, line);
-	 }
-	 }
-	 return new LineType(10, line);
-	 }*/
-
-
-	/**
-	 Reads a line from an arraylist of specification lines, removes it from the arraylist and returns the line
-	 together with its type information
-	 @return	a specification line with its type information
-	 @param	a	arraylist of specification lines
 	 */
 	public LineType getLine(ArrayList a) {
 		Matcher matcher2;
@@ -582,15 +543,6 @@ public class SpecParser {
 
 					}
 					else if (lt.type == equation) {
-						pattern = Pattern.compile("(\\*\\.[_a-zA-Z]|[_a-zA-Z]\\.\\*\\.[_a-zA-Z]|[_a-zA-Z]*\\.\\*)");
-						matcher2 = pattern.matcher(lt.specLine);
-						subtasks.clear();
-						if (matcher2.find()) {
-							String[] sides = lt.specLine.split("=");
-							String leftSide = sides[0].trim();
-							String rightSide = sides[1].trim();
-
-						}
 						EquationSolver.solve(lt.specLine);
 						for (int i = 0; i < EquationSolver.relations.size(); i++) {
 							String result = (String) EquationSolver.relations.get(i);
@@ -622,7 +574,6 @@ public class SpecParser {
 					else if (lt.type == axiom) {
 						pattern = Pattern.compile("\\[([^\\]\\[]*) *-> *([^\\]\\[]*)\\]");
 						matcher2 = pattern.matcher(lt.specLine);
-						int a = 0;
 
 						subtasks.clear();
 						while (matcher2.find()) {
