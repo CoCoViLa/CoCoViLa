@@ -151,7 +151,7 @@ class Rel implements Cloneable,
                     params += ", " + RelType.TAG_SUBTASK;
                 }
             }
-            if ( subExist ) {
+            if ( subExist && inputs.size() > 0 ) {
                 params += ", ";
             }
             params += getParameters( false );
@@ -170,7 +170,7 @@ class Rel implements Cloneable,
 		subtasks.add(rel);
 	}
 
-	String getObject(String obj) {
+	static String getObject(String obj) {
 		if (obj.equals("this")) {
 			return "";
 		} else if (obj.startsWith("this")) {

@@ -196,7 +196,7 @@ public class CodeGenerator {
 
         if ( var.field.isAlias() ) {
             if ( isInput ) {
-                return getAliasSubtaskInput( (Alias)var.field, offset, num);
+                return getAliasSubtaskInput( var, offset, num);
             } else {
                 return getAliasSubtaskOutput( (Alias)var.field, offset );
             }
@@ -247,8 +247,8 @@ public class CodeGenerator {
         return s;
     }
 
-    private String getAliasSubtaskInput( Alias alias, String offset, int num ) {
-
+    private String getAliasSubtaskInput( Var input, String offset, int num ) {
+        Alias alias = (Alias)input.field;
         String aliasType = alias.getRealType();
         String aliasTmp = ALIASTMP + "_" + alias.name + "_" + ALIASTMP_NR++;
         String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType
@@ -257,7 +257,7 @@ public class CodeGenerator {
         ClassField var;
         for ( int i = 0; i < alias.vars.size(); i++ ) {
             var = ( ClassField ) alias.vars.get( i );
-            out += offset + var.name + " = " + aliasTmp + "[" + i + "];\n";
+            out += offset + Rel.getObject(input.object) + var.name + " = " + aliasTmp + "[" + i + "];\n";
         }
         return out;
     }
