@@ -73,6 +73,7 @@ public class TextDialog extends JDialog implements ActionListener {
 	public TextDialog(IconEditor editor) {
 		this.editor = editor;
 
+		// Specify the dialog window title.
 		setTitle("Text Dialog");
 
 		// Specify smaller font for title and buttons.
@@ -143,6 +144,7 @@ public class TextDialog extends JDialog implements ActionListener {
 		pnlFont.add(cbFont);
 		pnlFont.add(bttnBold);
 		pnlFont.add(bttnItalic);
+
 		// pnlFont.add(bttnUnderline);
 		pnlFont.add(lblSize);
 		pnlFont.add(spinner);
@@ -177,7 +179,12 @@ public class TextDialog extends JDialog implements ActionListener {
 		setModal(true);
 		setLocationRelativeTo(editor);
 
+		// The default focus is automatically taken by the text area for
+		// enabling the user to immediately start typing, without a need
+		// to first position the cursor to the text area.
 		taText.requestFocus();
+
+		// ACTION LISTENERS AS ANONYMOUS CLASSES
 
 		bttnBold.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
@@ -217,7 +224,6 @@ public class TextDialog extends JDialog implements ActionListener {
 				}
 			} // end actionPerformed
 		}); // end bttnUnderline Action Listener
-
 
 		bttnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
@@ -260,7 +266,6 @@ public class TextDialog extends JDialog implements ActionListener {
 				}
 			}
 		}); // end spinner change listener
-
 
 	} // TextDialog
 
@@ -316,9 +321,7 @@ public class TextDialog extends JDialog implements ActionListener {
 			if (isBold) fontStyle = Font.BOLD;
 			if (isItalic) fontStyle = fontStyle + Font.ITALIC;
 
-			font = new Font(cbFont.getSelectedItem().toString(), fontStyle,
-				Integer.parseInt(spinner.getValue().toString()));
-
+			font = new Font(cbFont.getSelectedItem().toString(), fontStyle, Integer.parseInt(spinner.getValue().toString()));
 
 			taText.setFont(font);
 
@@ -380,7 +383,7 @@ public class TextDialog extends JDialog implements ActionListener {
 	 * @param args String[] - command line arguments.
 	 */
 	public static void main(String[] args) {
-		TextDialog text = new TextDialog(new IconEditor());
+		new TextDialog(new IconEditor());
 	} // main
 
 } // end of class
