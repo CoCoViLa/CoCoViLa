@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.vclass;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import ee.ioc.cs.vsle.util.*;
 
 import java.awt.*;
 
@@ -276,6 +277,7 @@ public class GObjGroup extends GObj
 	}
 
 	public String getSpec(ConnectionList relations) {
+
 		GObj obj;
 		StringBuffer s = new StringBuffer();
 		ClassField field;
