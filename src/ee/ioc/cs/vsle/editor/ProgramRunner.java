@@ -14,11 +14,6 @@ import java.util.StringTokenizer;
 import javax.swing.JTextArea;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Aulo
- * Date: 14.10.2003
- * Time: 9:12:51
- * To change this template use Options | File Templates.
  */
 public class ProgramRunner {
 	Object genObject;

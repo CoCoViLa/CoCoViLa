@@ -24,11 +24,6 @@ import javax.swing.BorderFactory;
 
 
 /**
- * Created by IntelliJ IDEA.
- * User: Aulo
- * Date: 14.10.2003
- * Time: 9:08:55
- * To change this template use Options | File Templates.
  */
 public class ObjectPropertiesEditor extends JFrame
 	implements ActionListener, KeyListener {

@@ -17,7 +17,7 @@ import java.io.InputStreamReader;
  *                 are older than their corresponding source code.</p>
  * <p>Copyright: Copyright (c) 2004</p>
  * <p>Company: </p>
- * @author Aulo Aasmaa, Ando Saabas
+ * @author  Ando Saabas
  * @version 1.0
  */
 public class CCL

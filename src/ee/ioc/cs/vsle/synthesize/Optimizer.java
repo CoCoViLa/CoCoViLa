@@ -4,11 +4,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Ando
- * Date: 6.05.2004
- * Time: 21:22:28
- * To change this template use Options | File Templates.
  */
 public class Optimizer {
 	/**

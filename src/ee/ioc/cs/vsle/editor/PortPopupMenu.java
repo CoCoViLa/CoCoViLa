@@ -8,11 +8,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Aulo
- * Date: 14.10.2003
- * Time: 9:15:36
- * To change this template use Options | File Templates.
  */
 public class PortPopupMenu extends JPopupMenu
 	implements ActionListener {

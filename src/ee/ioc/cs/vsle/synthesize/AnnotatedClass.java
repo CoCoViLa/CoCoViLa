@@ -10,7 +10,7 @@ import java.util.ArrayList;
  * about fields and relations declared.</p>
  * <p>Copyright: Copyright (c) 2004</p>
  * <p>Company: </p>
- * @author Aulo Aasmaa, Ando Saabas
+ * @author Ando Saabas
  * @version 1.0
  */
 class AnnotatedClass {

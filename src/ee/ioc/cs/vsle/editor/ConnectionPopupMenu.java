@@ -15,7 +15,7 @@ import javax.swing.JMenuItem;
  * <p>Description: Popup menu opened if clicked on a connection line with a right mouse button.</p>
  * <p>Copyright: Copyright (c) 2004</p>
  * <p>Company: </p>
- * @author Aulo Aasmaa, Ando Saabas
+ * @author Ando Saabas
  * @version 1.0
  */
 public class ConnectionPopupMenu extends JPopupMenu implements ActionListener {

@@ -5,11 +5,6 @@ import java.io.File;
 import javax.swing.filechooser.FileFilter;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Aulo
- * Date: 14.10.2003
- * Time: 9:17:13
- * To change this template use Options | File Templates.
  */
 public class CustomFileFilter extends FileFilter {
 

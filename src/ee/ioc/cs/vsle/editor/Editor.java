@@ -18,7 +18,7 @@ import javax.swing.*;
  * Visual Specification Language ee.ioc.cs.editor.editor.Editor main module
  * for combining separate logical units (Built in the
  * IconEditor) into a structured schema.
- * @author Aulo
+ * @author Ando Saabas, Aulo Aasma
  * @link http://vsledit.sourceforge.net
  * @version 1.0
  */
@@ -169,7 +169,7 @@ public class Editor extends JFrame {
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 
-			// [Aulo] 11.02.2004
+
 			// Check if the file name ends with a required extension. If not,
 			// append the default extension to the file name.
 			if (!file.getAbsolutePath().toLowerCase().endsWith(".syn")) {
@@ -181,7 +181,7 @@ public class Editor extends JFrame {
 			setLastPath(file.getAbsolutePath());
 			boolean valid = true;
 
-			// [Aulo] 04.01.2004
+
 			// Check if file with a predefined name already exists.
 			// If file exists, confirm file overwrite, otherwise leave
 			// file as it is.
@@ -259,7 +259,7 @@ public class Editor extends JFrame {
 		menuBar.add(menu);
 		menu = new JMenu(Menu.MENU_EDIT);
 		menu.setMnemonic(KeyEvent.VK_E);
-		// [Aulo] 06.01.2004 - Commented out the Clone menu item
+
 		// as it is already defined in the object popup menu and
 		// otherwise would require implementing all the object
 		// popup items in the current menu as well.

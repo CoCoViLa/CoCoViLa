@@ -25,11 +25,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Aulo
- * Date: 14.10.2003
- * Time: 9:15:08
- * To change this template use Options | File Templates.
  */
 public class ProgramTextEditor extends JFrame implements ActionListener {
 

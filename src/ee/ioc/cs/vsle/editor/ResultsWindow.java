@@ -26,12 +26,6 @@ import javax.swing.JToolBar;
 import javax.swing.ImageIcon;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Aulo
- * Date: 14.10.2003
- * Time: 9:10:01
- * To change this template use Options | File Templates.
- *
  * Class currently not in use. Fix reference to ee.ioc.cs.editor.synthesize.Synthesizer.makeProgram method (method
  * commented out in the ee.ioc.cs.editor.synthesize.Synthesizer class)
  */
