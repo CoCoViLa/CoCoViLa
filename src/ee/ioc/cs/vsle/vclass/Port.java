@@ -61,55 +61,52 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public int getX() {
-		return (int) (obj.getXSize() * x);
+		return (int) (obj.getXsize() * x);
 	}
 
 	public int getY() {
-		return (int) (obj.getYSize() * y);
+		return (int) (obj.getYsize() * y);
 	}
 
 	public int getRealX() {
-		return (int) (obj.getXSize() * x + obj.getX());
+		return (int) (obj.getXsize() * x + obj.getX());
 	}
 
 	public int getRealY() {
-		return (int) (obj.getYSize() * y + obj.getY());
+		return (int) (obj.getYsize() * y + obj.getY());
 	}
 
 	public int getCenterX() {
-		return (int) (obj.getXSize()
+		return (int) (obj.getXsize()
 			* (x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
 	}
 
 	public int getCenterY() {
-		return (int) (obj.getYSize()
+		return (int) (obj.getYsize()
 			* (y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
 	}
 
 	public int getRealCenterX() {
-		return (int) (obj.getXSize()
+		return (int) (obj.getXsize()
 			* (obj.getX() + x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
 	}
 
 	public int getRealCenterY() {
-		return (int) (obj.getYSize()
+		return (int) (obj.getYsize()
 			* (obj.getY() + y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
 	}
 
 	public int getWidth() {
-		return (int) (obj.getXSize() * openGraphics.boundWidth);
+		return (int) (obj.getXsize() * openGraphics.boundWidth);
 	}
 
 	public int getHeight() {
-		return (int) (obj.getYSize() * openGraphics.boundHeight);
+		return (int) (obj.getYsize() * openGraphics.boundHeight);
 	}
 
 	public boolean inBoundsX(int pointX) {
-		if (obj.getX() + obj.getXSize() * (x + openGraphics.boundX) < pointX
-			&& (obj.getX()
-			+ obj.getXSize()
-			* (x + openGraphics.boundX + openGraphics.boundWidth)
-			> pointX)) {
+		if (obj.getX() + obj.getXsize() * (x + openGraphics.boundX) < pointX
+			&& (obj.getX() + obj.getXsize()* (x + openGraphics.boundX + openGraphics.boundWidth) > pointX)) {
 			return true;
 		} else {
 			return false;
@@ -118,9 +115,9 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public boolean inBoundsY(int pointY) {
-		if (obj.getY() + (obj.getYSize() * (y + openGraphics.boundY)) < pointY
+		if (obj.getY() + (obj.getYsize() * (y + openGraphics.boundY)) < pointY
 			&& (obj.getY()
-			+ obj.getXSize()
+			+ obj.getXsize()
 			* (y + openGraphics.boundY + openGraphics.boundHeight))
 			> pointY) {
 			return true;

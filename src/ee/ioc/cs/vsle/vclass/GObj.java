@@ -180,13 +180,6 @@ public class GObj implements Serializable, Cloneable {
 		this.setYsize(this.getYsize() * s);
 	}
 
-	public float getXSize() {
-		return getXsize();
-	}
-
-	public float getYSize() {
-		return getYsize();
-	}
 
 	public boolean isSelected() {
 		return selected;

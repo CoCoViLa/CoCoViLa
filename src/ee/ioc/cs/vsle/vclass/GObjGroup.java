@@ -179,10 +179,10 @@ public class GObjGroup extends GObj
 	}
 
 
-	public void setXSize(float s) {
+	public void setXsize(float s) {
 		float change = s / getXsize();
 
-		setXsize(s);
+		Xsize = s;
 
 		GObj obj;
 
@@ -195,10 +195,10 @@ public class GObjGroup extends GObj
 	}
 
 
-	public void setYSize(float s) {
+	public void setYsize(float s) {
 		float change = s / getYsize();
 
-		setYsize(s);
+		Ysize = s;
 
 		GObj obj;
 

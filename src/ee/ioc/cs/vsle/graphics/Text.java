@@ -334,8 +334,7 @@ public class Text extends Shape implements Serializable {
 
 	this.h = (int) r.getHeight();
 	this.w = (int) r.getWidth();
-
-	g2.setFont(font);
+	g2.setFont(font.deriveFont(Math.min(Xsize, Ysize)* font.getSize()));
 
 	alpha = (float) (1 - (this.transparency / 100));
 
@@ -372,7 +371,7 @@ public class Text extends Shape implements Serializable {
 		this.h = (int) r.getHeight();
 		this.w = (int) r.getWidth();
 
-		g2.setFont(font);
+		g2.setFont(font.deriveFont(Math.min(Xsize, Ysize)* font.getSize()));
 
 		alpha = (float) (1 - (this.transparency / 100));
 

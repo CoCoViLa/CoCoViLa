@@ -77,10 +77,10 @@ public class Var {
 	 * <UNCOMMENTED>
 	 * @return String
 	 */ public String toString() {
-         if(object.equals("this"))
-             return (name);
-         else
-             return (object + "." + name);
+//         if(object.equals("this"))
+ //            return (name);
+ //        else
+             return (object + "." + name).substring(5);
 	} // toString
 
 }

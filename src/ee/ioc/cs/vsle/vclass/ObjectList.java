@@ -80,8 +80,8 @@ public class ObjectList extends ArrayList
 
 		for (int i = 0; i < this.size(); i++) {
 			obj = (GObj) this.get(i);
-			obj.setXSize(obj.getXSize() * newXSize);
-			obj.setYSize(obj.getYSize() * newYSize);
+			obj.setXsize(obj.getXsize() * newXSize);
+			obj.setYsize(obj.getYsize() * newYSize);
 			obj.setX((int) (obj.getX() * newXSize));
 			obj.setY((int) (obj.getY() * newYSize));
 		}

@@ -305,8 +305,8 @@ class MouseOps
 						}
 					}
 					if (obj.controlRectContains(editor.mouseX, editor.mouseY) != 0) {
-						initialXSize = obj.getXSize();
-						initialYSize = obj.getYSize();
+						initialXSize = obj.getXsize();
+						initialYSize = obj.getYsize();
 						state = State.resize;
 					} else {
 						state = State.drag;
