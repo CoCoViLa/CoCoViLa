@@ -48,7 +48,7 @@ public class ObjectPropertiesEditor extends JFrame
 
 		JLabel label = new JLabel("Object name");
 
-		nameTextField = new JTextField(object.getName(), 10);
+		nameTextField = new JTextField(object.getName(), 6);
 		labelPane.add(label);
 		textFieldPane.add(nameTextField);
 		label = new JLabel("(String)");

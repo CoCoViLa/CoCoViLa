@@ -116,7 +116,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		tabbedPane.addTab("Run results", runResult);
 
 		SpecGenerator sgen = new SpecGenerator();
-		textArea.append(sgen.generateSpec(objects, relations));
+		textArea.append(sgen.generateSpec(objects, relations, vPackage.name));
 
 
 		getContentPane().add(tabbedPane);

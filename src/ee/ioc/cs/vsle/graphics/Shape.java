@@ -103,7 +103,7 @@ public abstract class Shape implements Serializable, Cloneable {
 	public abstract String getName();
 
 
-	public abstract double getTransparency();
+	public abstract int getTransparency();
 
 	public abstract int getLineType();
 
@@ -136,8 +136,12 @@ public abstract class Shape implements Serializable, Cloneable {
 
 	public abstract void setStrokeWidth(double d);
 
-	public abstract void setTransparency(double d);
+	public abstract void setTransparency(int d);
 
 	public abstract void setLineType(int lineType);
+
+	public abstract BasicStroke getStroke();
+
+
 
 }

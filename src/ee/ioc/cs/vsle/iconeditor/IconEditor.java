@@ -453,8 +453,11 @@ public class IconEditor
 
 				if (fieldType == null) fieldType = "";
 				if (fieldValue == null) fieldValue = "";
+				if (fieldValue.equals(""))
+					buf.append("<field name=\"" + fieldName + "\" type=\"" + fieldType + "\"/>\n");
+				else
+					buf.append("<field name=\"" + fieldName + "\" type=\"" + fieldType + "\" value=\"" + fieldValue + "\" />\n");
 
-				buf.append("<field name=\"" + fieldName + "\" type=\"" + fieldType + "\" value=\"" + fieldValue + "\" />\n");
 			}
 			buf.append("</fields>\n");
 		}
@@ -548,66 +551,67 @@ public class IconEditor
 				g2.drawRect(mListener.startX, mListener.startY, mouseX - mListener.startX, mouseY - mListener.startY);
 			} else {
 
-				float red = (float) mListener.color.getRed() / 256;
-				float green = (float) mListener.color.getGreen() / 256;
-				float blue = (float) mListener.color.getBlue() / 256;
+				int red = mListener.color.getRed();
+				int green = mListener.color.getGreen();
+				int blue = mListener.color.getBlue();
 
-				float alpha = (float) (1 - (mListener.getTransparency() / 100));
+				int alpha = mListener.getTransparency();
 				g2.setColor(new Color(red, green, blue, alpha));
 
 
-		if(mListener.lineType>0) {
-		g2.setStroke(new BasicStroke((float)mListener.strokeWidth, BasicStroke.CAP_BUTT,
-									 BasicStroke.JOIN_ROUND, 50,
-									 new float[] {mListener.lineType,mListener.lineType}
-									 , 0));
-	  } else {
-		g2.setStroke(new BasicStroke((float) mListener.strokeWidth));
-	  }
+				if (mListener.lineType > 0) {
+					g2.setStroke(new BasicStroke((float) mListener.strokeWidth, BasicStroke.CAP_BUTT,
+						BasicStroke.JOIN_ROUND, 50,
+						new float[]{mListener.lineType, mListener.lineType}
+						, 0));
+				} else {
+					g2.setStroke(new BasicStroke((float) mListener.strokeWidth));
+				}
 
 				final int width = Math.abs(mouseX - mListener.startX);
 				final int height = Math.abs(mouseY - mListener.startY);
 
-
-				if (mListener.state.equals(State.drawRect)) {
-					g2.drawRect(Math.min(mListener.startX, mouseX),
-						Math.min(mListener.startY, mouseY), width, height);
-				} else if (mListener.state.equals(State.boundingbox)) {
-					g2.setColor(Color.darkGray);
-					g2.drawRect(Math.min(mListener.startX, mouseX),
-						Math.min(mListener.startY, mouseY), width, height);
-				} else if (mListener.state.equals(State.drawFilledRect)) {
-					g2.fillRect(Math.min(mListener.startX, mouseX),
-						Math.min(mListener.startY, mouseY), width, height);
-				} else if (mListener.state.equals(State.drawLine)) {
-					g2.drawLine(mListener.startX, mListener.startY, mouseX, mouseY);
-				} else if (mListener.state.equals(State.drawOval)) {
-					g2.drawOval(Math.min(mListener.startX, mouseX),
-						Math.min(mListener.startY, mouseY), width, height);
-				} else if (mListener.state.equals(State.drawFilledOval)) {
-					g2.fillOval(Math.min(mListener.startX, mouseX),
-						Math.min(mListener.startY, mouseY), width, height);
-				} else if (mListener.state.equals(State.drawArc)) {
-					g.drawRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
-				} else if (mListener.state.equals(State.drawArc1)) {
-					g.drawRect(mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight);
-					g.drawLine(mListener.startX+  mListener.arcWidth/2,
-							   mListener.startY+ mListener.arcHeight/2,
-							   mouseX, mouseY);
-				} else if (mListener.state.equals(State.drawArc2)) {
-				    if(mListener.fill) {
-					  g2.fillArc(mListener.startX, mListener.startY, mListener.arcWidth,
-								 mListener.arcHeight, mListener.arcStartAngle,
-								 mListener.arcAngle);
-
-                   } else {
-					 g2.drawArc(mListener.startX, mListener.startY, mListener.arcWidth,
+				if (!mListener.mouseState.equals("released")) {
+					if (mListener.state.equals(State.drawRect)) {
+						g2.drawRect(Math.min(mListener.startX, mouseX),
+							Math.min(mListener.startY, mouseY), width, height);
+					} else if (mListener.state.equals(State.boundingbox)) {
+						g2.setColor(Color.darkGray);
+						g2.drawRect(Math.min(mListener.startX, mouseX),
+							Math.min(mListener.startY, mouseY), width, height);
+					} else if (mListener.state.equals(State.drawFilledRect)) {
+						g2.fillRect(Math.min(mListener.startX, mouseX),
+							Math.min(mListener.startY, mouseY), width, height);
+					} else if (mListener.state.equals(State.drawLine)) {
+						g2.drawLine(mListener.startX, mListener.startY, mouseX, mouseY);
+					} else if (mListener.state.equals(State.drawOval)) {
+						g2.drawOval(Math.min(mListener.startX, mouseX),
+							Math.min(mListener.startY, mouseY), width, height);
+					} else if (mListener.state.equals(State.drawFilledOval)) {
+						g2.fillOval(Math.min(mListener.startX, mouseX),
+							Math.min(mListener.startY, mouseY), width, height);
+					} else if (mListener.state.equals(State.drawArc)) {
+						g.drawRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
+					} else if (mListener.state.equals(State.drawArc1)) {
+						g.drawRect(mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight);
+						g.drawLine(mListener.startX + mListener.arcWidth / 2,
+							mListener.startY + mListener.arcHeight / 2,
+							mouseX, mouseY);
+					} else if (mListener.state.equals(State.drawArc2)) {
+						if (mListener.fill) {
+							g2.fillArc(mListener.startX, mListener.startY, mListener.arcWidth,
 								mListener.arcHeight, mListener.arcStartAngle,
 								mListener.arcAngle);
-				   }
-				} else if (mListener.state.equals(State.drawFilledArc)) {
-					g.drawRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
-				  }
+
+						} else {
+							g2.drawArc(mListener.startX, mListener.startY, mListener.arcWidth,
+								mListener.arcHeight, mListener.arcStartAngle,
+								mListener.arcAngle);
+						}
+					} else if (mListener.state.equals(State.drawFilledArc)) {
+						g.drawRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
+					}
+				}
 			}
 		}
 	}
@@ -1110,7 +1114,8 @@ public class IconEditor
 				if (shape instanceof Rect) {
 					shape = new Rect(shape.getX(), shape.getY(),
 						shape.width, shape.height,
-						shape.getColor().getRGB(), shape.isFilled(), shape.getStrokeWidth(), shape.getTransparency(), shape.getLineType());
+						shape.getColor().getRed(), shape.isFilled(), shape.getStrokeWidth(),
+						shape.getTransparency(), shape.getLineType());
 				} else if (shape instanceof Oval) {
 					shape = new Oval(shape.getX(), shape.getY(),
 						shape.width, shape.height,
@@ -1278,7 +1283,7 @@ public class IconEditor
 				str = str.substring(str.indexOf(":") + 1);
 				boolean fixed = Boolean.valueOf(str).booleanValue();
 
-				Line line = new Line(x1, y1, x2, y2, colorInt, strokeW, transp,lt);
+				Line line = new Line(x1, y1, x2, y2, colorInt, strokeW, transp, lt);
 				line.setFixed(fixed);
 				shapeList.add(line);
 			} else if (str.startsWith("ARC:")) {

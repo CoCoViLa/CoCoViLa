@@ -251,7 +251,7 @@ class Rel implements Cloneable,
             String left = "";
             String left2 = "";
             String right = "";
-
+            ArrayList ajut = new ArrayList();
             for ( int i = 0; i < inputs.size(); i++ ) {
                 var = ( Var ) inputs.get( i );
                 pattern = Pattern.compile( "([^a-zA-Z_])(([a-zA-Z_0-9]+\\.)*)" +

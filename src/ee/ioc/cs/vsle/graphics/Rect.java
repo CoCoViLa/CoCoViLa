@@ -12,44 +12,11 @@ public class Rect extends Shape implements Serializable {
 	String yEquation;
 	String widthEquation;
 	String heightEquation;
-
-	/**
-	 * Indicates if the shape is drawn filled or not.
-	 */
 	boolean filled = false;
-
-	/**
-	 * Shape color.
-	 */
 	Color color;
-
-	/**
-	 * Shape transparency percentage.
-	 */
-	float transparency = (float) 1.0;
-
-	private int lineType;
-
-	/**
-	 * Name of the shape.
-	 */
+    private BasicStroke stroke;
 	String name;
-
-	/**
-	 * Indicates if the shape is selected or not.
-	 */
 	private boolean selected = false;
-
-	/**
-	 * Line weight, logically equals to stroke width.
-	 */
-	private float lineWeight;
-
-	/**
-	 * Alpha value of a color, used
-	 * for defining the transparency of a filled shape.
-	 */
-	private float alpha;
 
 	/**
 	 * Defines if the shape is resizable or not.
@@ -57,15 +24,15 @@ public class Rect extends Shape implements Serializable {
 	private boolean fixed = false;
 
 	public Rect(int x, int y, int width, int height, int colorInt, boolean filled,
-				double strokeWidth, double transp) {
+				double strokeWidth, int transp) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
 		this.color = new Color(colorInt);
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), transp);
 		this.filled = filled;
-		setStrokeWidth(strokeWidth);
-		this.transparency = (float) transp;
+		stroke = new BasicStroke((float) strokeWidth);
 	} // Rect
 
 	/**
@@ -81,16 +48,21 @@ public class Rect extends Shape implements Serializable {
 	 * @param lineType int - shape line type.
 	 */
 	public Rect(int x, int y, int width, int height, int colorInt, boolean filled,
-				double strokeWidth, double transp, int lineType) {
+				double strokeWidth, int transp, int lineType) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		this.color = new Color(colorInt);
 		this.filled = filled;
-		setStrokeWidth(strokeWidth);
-		this.transparency = (float) transp;
-		this.lineType = lineType;
+		this.color = new Color(colorInt);
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), transp);
+		if (lineType > 0) {
+			stroke = new BasicStroke((float) strokeWidth, BasicStroke.CAP_BUTT,
+				BasicStroke.JOIN_ROUND, 50,
+				new float[]{lineType, lineType}, 0);
+		} else {
+			stroke = new BasicStroke((float) strokeWidth);
+		}
 	} // Rect
 
 	public void setFixed(boolean b) {
@@ -191,29 +163,20 @@ public class Rect extends Shape implements Serializable {
 		return this.filled;
 	} // isFilled
 
-	/**
-	 * Returns the transparency of the shape.
-	 * @return double - the transparency of the shape.
-	 */
-	public double getTransparency() {
-		return this.transparency;
-	} // getTransparency
+	public double getStrokeWidth() {
+		return stroke.getLineWidth();
+	}
 
-	/**
-	 * Returns the line typ of the shape.
-	 * @return int - line type of the shape.
-	 */
 	public int getLineType() {
-		return this.lineType;
+		if (stroke.getDashArray() != null)
+			return (int)stroke.getDashArray()[0];
+		else
+			return 0;
 	} // getLineType
 
-	/**
-	 * Returns the stroke with of a shape.
-	 * @return double - stroke width of a shape.
-	 */
-	public double getStrokeWidth() {
-		return this.lineWeight;
-	} // getStrokeWidth
+	public int getTransparency() {
+		return color.getAlpha();
+	} // getTransparency
 
 	/**
 	 * Resizes current object.
@@ -307,7 +270,8 @@ public class Rect extends Shape implements Serializable {
 		}
 		return "<rect x=\"" + (x - boundingboxX) + "\" y=\""
 			+ (y - boundingboxY) + "\" width=\"" + width + "\" height=\"" + height
-			+ "\" colour=\"" + colorInt + "\" filled=\"" + fill + "\" fixed=\"" + isFixed() + "\" stroke=\"" + (int) this.lineWeight + "\" lineType=\"" + this.lineType + "\" transparency=\"" + (int) this.transparency + "\"/>\n";
+			+ "\" colour=\"" + colorInt + "\" filled=\"" + fill
+			+ "\" fixed=\"" + isFixed() + "\" stroke=\"" + (int)stroke.getLineWidth() + "\" lineType=\"" + this.getLineType() + "\" transparency=\"" + getTransparency() + "\"/>\n";
 	} // toFile
 
 	public String toText() {
@@ -315,24 +279,20 @@ public class Rect extends Shape implements Serializable {
 		if (filled) fill = "true";
 		int colorInt = 0;
 		if (color != null) colorInt = color.getRGB();
-		return "RECT:" + x + ":" + y + ":" + width + ":" + height + ":" + colorInt + ":" + fill + ":" + (int) this.lineWeight + ":" + this.lineType + ":" + (int) this.transparency + ":" + isFixed();
+		return "RECT:" + x + ":" + y + ":" + width + ":" + height + ":" + colorInt + ":" + fill + ":" + (int)stroke.getLineWidth() + ":" + this.getLineType() + ":" + getTransparency() + ":" + isFixed();
 	} // toText
 
-	/**
-	 * Set width of the line stroke the rectangle is drawn with.
-	 * @param w double - rectangle drawing line stroke width.
-	 */
-	public void setStrokeWidth(double w) {
-		try {
-			if (w >= 0.0) {
-				this.lineWeight = (float) w;
-			} else {
-				throw new Exception("Stroke width undefined or negative.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	} // setStrokeWidth
+	public void setStrokeWidth(double d) {
+        stroke = new BasicStroke((float)d, stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), stroke.getDashArray(), stroke.getDashPhase());
+	}
+
+	public void setTransparency(int d) {
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)d);
+	}
+
+	public void setLineType(int lineType) {
+		stroke = new BasicStroke(stroke.getLineWidth(), stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), new float[]{lineType, lineType}, stroke.getDashPhase());
+	}
 
 	/**
 	 * Returns x coordinate of the rectangle.
@@ -366,21 +326,6 @@ public class Rect extends Shape implements Serializable {
 		return height;
 	} // getHeight
 
-	/**
-	 * Set the percentage of transparency.
-	 * @param transparencyPercentage double - the percentage of transparency.
-	 */
-	public void setTransparency(double transparencyPercentage) {
-		this.transparency = (float) transparencyPercentage;
-	} // setTransparency
-
-	/**
-	 * Specify the line type used at drawing the shape.
-	 * @param lineType int
-	 */
-	public void setLineType(int lineType) {
-		this.lineType = lineType;
-	} // setLineType
 
 	void drawDynamic(int xModifier, int yModifier, float Xsize, float Ysize,
 					 Graphics g, HashMap table) {
@@ -400,26 +345,8 @@ public class Rect extends Shape implements Serializable {
 	 * @param g2 Graphics - class graphics.
 	 */
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
-
-		if (getLineType() > 0) {
-			g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
-				BasicStroke.JOIN_ROUND, 50,
-				new float[]{getLineType(), getLineType()}
-				, 0));
-		} else {
-			g2.setStroke(new BasicStroke(lineWeight));
-		}
-
-		alpha = (float) (1 - (this.transparency / 100));
-
-		float red = 0;
-		if (color != null) red = (float) color.getRed() / 256;
-		float green = 0;
-		if (color != null) green = (float) color.getGreen() / 256;
-		float blue = 0;
-		if (color != null) blue = (float) color.getBlue() / 256;
-
-		g2.setColor(new Color(red, green, blue, alpha));
+		g2.setStroke(stroke);
+		g2.setColor(color);
 
 		int a = xModifier + (int) (Xsize * x);
 		int b = yModifier + (int) (Ysize * y);
@@ -437,6 +364,10 @@ public class Rect extends Shape implements Serializable {
 		}
 
 	} // draw
+
+	public BasicStroke getStroke() {
+		return stroke;
+	}
 
 	public Object clone() {
 		return super.clone();

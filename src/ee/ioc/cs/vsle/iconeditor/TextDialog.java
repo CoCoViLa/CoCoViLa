@@ -46,13 +46,14 @@ public class TextDialog extends JDialog implements ActionListener {
 	private JPanel pnlButton = new JPanel();
 	private JPanel pnlFont = new JPanel();
 	private JPanel pnlText = new JPanel();
+	int mouseX, mouseY;
 
 	JScrollPane textScrollPane = new JScrollPane(taText,
 		JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
 		JScrollPane.
 		HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
-	Spinner spinner = new Spinner(1, 100, 1);
+	Spinner spinner = new Spinner(1, 100, 1, 1);
 
 	/**
 	 * Booleans defining text BOLD, ITALIC and UNDERLINE
@@ -70,8 +71,10 @@ public class TextDialog extends JDialog implements ActionListener {
 	// the calling environment.
 	Font font;
 
-	public TextDialog(IconEditor editor) {
+	public TextDialog(IconEditor editor, int x, int y) {
 		this.editor = editor;
+		mouseX = x;
+		mouseY = y;
 
 		// Specify the dialog window title.
 		setTitle("Text Dialog");
@@ -236,7 +239,7 @@ public class TextDialog extends JDialog implements ActionListener {
 		bttnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				if (evt.getSource() == bttnOk) {
-					drawText();
+					drawText(mouseX, mouseY);
 					setVisible(false);
 				}
 			} // end actionPerformed
@@ -338,8 +341,8 @@ public class TextDialog extends JDialog implements ActionListener {
 	/**
 	 * Draw displayed text on the drawing area in the IconEditor
 	 */
-	private void drawText() {
-		editor.mListener.drawText(font, color, taText.getText());
+	private void drawText(int x, int y) {
+		editor.mListener.drawText(font, color, taText.getText(), x, y);
 	} // drawText
 
 	/**
@@ -383,7 +386,7 @@ public class TextDialog extends JDialog implements ActionListener {
 	 * @param args String[] - command line arguments.
 	 */
 	public static void main(String[] args) {
-		new TextDialog(new IconEditor());
+		new TextDialog(new IconEditor(), 0, 0);
 	} // main
 
 } // end of class

@@ -14,32 +14,12 @@ import java.awt.*;
  */
 public class Dot extends Shape implements Serializable {
 
-	/**
-	 * X coordinate of the dot.
-	 */
 	int x;
-
-	/**
-	 * Y coordinate of the dot.
-	 */
 	int y;
-
-	/**
-	 * Color of the dot.
-	 */
 	Color color;
-
-	/**
-	 * Alpha value of a color, used
-	 * for defining the transparency of a filled shape.
-	 */
 	private float alpha;
-
-	/**
-	 * Line weight, logically equals to stroke width.
-	 */
 	private float lineWeight;
-
+    private BasicStroke stroke;
 	/**
 	 * Name of the shape.
 	 */
@@ -178,23 +158,17 @@ public class Dot extends Shape implements Serializable {
 		return this.selected;
 	} // isSelected
 
-	/**
-	 * Set width of the line stroke the rectangle is drawn with.
-	 * @param width double - rectangle drawing line stroke width.
-	 */
-	public void setStrokeWidth(double width) {
-		this.lineWeight = (float) width;
-	} // setStrokeWidth
 
-	/**
-	 * Set the percentage of transparency.
-	 * @param transparencyPercentage double - the percentage of transparency.
-	 */
-	public void setTransparency(double transparencyPercentage) {
-		this.transparency = (float) transparencyPercentage;
-	} // setTransparency
+	public void setStrokeWidth(double d) {
+        stroke = new BasicStroke((float)d, stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), stroke.getDashArray(), stroke.getDashPhase());
+	}
+
+	public void setTransparency(int d) {
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), d);
+	}
 
 	public void setLineType(int lineType) {
+		stroke = new BasicStroke(stroke.getLineWidth(), stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), new float[]{lineType, lineType}, stroke.getDashPhase());
 	}
 
 	/**
@@ -205,29 +179,26 @@ public class Dot extends Shape implements Serializable {
 		return this.color;
 	} // getColor
 
-	/**
-	 * Returns the stroke with of a shape.
-	 * @return double - stroke width of a shape.
-	 */
 	public double getStrokeWidth() {
-		return this.lineWeight;
-	} // getStrokeWidth
+		return stroke.getLineWidth();
+	}
 
-	/**
-	 * Returns the transparency of the shape.
-	 * @return double - the transparency of the shape.
-	 */
-	public double getTransparency() {
-		return this.transparency;
+	public int getLineType() {
+		if (stroke.getDashArray() != null)
+			return (int)stroke.getDashArray()[0];
+		else
+			return 0;
+	} // getLineType
+
+	public int getTransparency() {
+		return color.getAlpha();
 	} // getTransparency
 
-	/**
-	 * Returns the line typ of the shape.
-	 * @return int - line type of the shape.
-	 */
-	public int getLineType() {
-		return 0;
-	} // getLineType
+	public BasicStroke getStroke() {
+		return stroke;
+	}
+
+
 
 	/**
 	 * Returns the x coordinate of the dot.
@@ -368,23 +339,8 @@ public class Dot extends Shape implements Serializable {
 	 * @param g2 Graphics
 	 */
 	public void draw(int xModifier, int yModifier, float sizeX, float sizeY, Graphics2D g2) {
-		g2.setStroke(new BasicStroke(this.lineWeight));
-
-		// The user can specify the percentage of transparency between 0..100%.
-		// The value of transparency is defined as a float value between 0..1.
-		alpha = (float) (1 - (this.transparency / 100));
-
-		// Separate the color to separate Red, Green and Blue, for allowing
-		// the Graphics to be drawn with a transparent color.
-		float red = 0;
-		if (color != null) red = (float) color.getRed() / 256;
-		float green = 0;
-		if (color != null) green = (float) color.getGreen() / 256;
-		float blue = 0;
-		if (color != null) blue = (float) color.getBlue() / 256;
-
-		// Set the Graphics a new transparent color.
-		g2.setColor(new Color(red, green, blue, alpha));
+		g2.setStroke(stroke);
+		g2.setColor(color);
 
 		int w = (int) this.lineWeight / 2;
 

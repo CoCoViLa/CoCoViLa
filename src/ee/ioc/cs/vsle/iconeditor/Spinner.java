@@ -17,7 +17,7 @@ public class Spinner extends JSpinner {
 	 * @param start - spinner starting value (first element).
 	 * @param end - spinner end value (last element).
 	 * @param step - spinner element step.
-	 */
+	 *
 	public Spinner(double start, double end, double step) {
 		String[] elements = setElements(start, end, step);
 		SpinnerModel model = new SpinnerListModel(elements);
@@ -30,9 +30,10 @@ public class Spinner extends JSpinner {
 	 * @param end - spinner end value (last element).
 	 * @param step - spinner element step.
 	 */
-	public Spinner(int start, int end, int step) {
+	public Spinner(int start, int end, int step, int initial) {
 		String[] elements = setElements(start, end, step);
 		SpinnerModel model = new SpinnerListModel(elements);
+		model.setValue(Integer.toString(initial));
 		this.setModel(model);
 	}
 

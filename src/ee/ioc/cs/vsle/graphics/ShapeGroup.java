@@ -61,8 +61,8 @@ public class ShapeGroup extends Shape implements Serializable {
 		return null;
 	} // getColor
 
-	public double getTransparency() {
-		return 0.0;
+	public int getTransparency() {
+		return 0;
 	} // getTransparency
 
 	/**
@@ -95,7 +95,7 @@ public class ShapeGroup extends Shape implements Serializable {
 		}
 	} // setColor
 
-	public void setTransparency(double d) {
+	public void setTransparency(int d) {
 		for (int i = 0; i < shapes.size(); i++) {
 			Shape shape = (Shape) shapes.get(i);
 			shape.setTransparency(d);
@@ -112,6 +112,10 @@ public class ShapeGroup extends Shape implements Serializable {
 			shape.setLineType(lineType);
 		}
 	} // setLineType
+
+	public BasicStroke getStroke() {
+		return null;
+	}
 
 	public String toFile(int boundingboxX, int boundingboxY) {
 		StringBuffer text = new StringBuffer();

@@ -42,8 +42,8 @@ public class OptionsDialog extends JDialog {
 	private static final JCheckBox chbShowGrid = new JCheckBox();
 
 	// Spinners.
-	Spinner spinnerGridStep = new Spinner(1, 100, 1);
-	Spinner spinnerNudgeStep = new Spinner(1, 100, 1);
+	Spinner spinnerGridStep = new Spinner(1, 100, 1, 1);
+	Spinner spinnerNudgeStep = new Spinner(1, 100, 1, 1);
 
 	// Comboboxes.
 	public static final JComboBox cbDfltLayout = new JComboBox();

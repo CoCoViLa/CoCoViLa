@@ -28,10 +28,10 @@ public class IconPalette {
 	JLabel lblZoom;
 
 	// Spinners
-	Spinner spinnerLineWidth = new Spinner(1, 10, 1);
-	Spinner spinnerTransparency = new Spinner(0, 100, 1);
-	Spinner spinnerZoom = new Spinner(10,1000,10);
-	Spinner spinnerLineType = new Spinner(0,100,1);
+	Spinner spinnerLineWidth = new Spinner(1, 10, 1,1);
+	Spinner spinnerTransparency = new Spinner(1, 255, 1,255);
+	Spinner spinnerZoom = new Spinner(10,1000,10, 100);
+	Spinner spinnerLineType = new Spinner(0,100,1, 0);
 
 	// Buttons
 	JButton selection;
@@ -70,7 +70,7 @@ public class IconPalette {
 		spinnerLineType.setMaximumSize(spinnerLineType.getPreferredSize());
 		spinnerLineType.setBorder(BorderFactory.createLineBorder(java.awt.Color.white,0));
 
-		spinnerZoom.setValue("100");
+
 
 		// Action listener added as anonymous class.
 		ChangeListener listener = new ChangeListener() {
@@ -89,7 +89,7 @@ public class IconPalette {
 			public void stateChanged(ChangeEvent e) {
 				SpinnerModel source = (SpinnerModel) e.getSource();
 				try {
-					editor.mListener.changeTransparency(Double.parseDouble(String.valueOf(source.getValue())));
+					editor.mListener.changeTransparency(Integer.parseInt(String.valueOf(source.getValue())));
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}

@@ -14,37 +14,36 @@ public class Text extends Shape implements Serializable {
 	/**
 	 * Text string represented by the shape.
 	 */
+	int x;
+	int y;
 	public int fixedX;
 	public int fixedY;
 	public String stringValue;
 	Font font;
 	Color color;
 	public String name;
-	float transparency;
 	private int h; //* Height of the text.
 	private int w;//	 * Width of the text.
-	private float alpha;
 	private boolean selected = false;
 	private boolean fixed = false;
 	boolean fixedsize = false;
 
-	public Text(int x, int y, Font font, Color color, double transp, String s) {
+	public Text(int x, int y, Font font, Color color, int transp, String s) {
 
 		this.x = x;
 		this.y = y;
 		this.font = font;
-		this.color = color;
+		this.color = new Color(color.getRed(), color.getGreen(), color.getBlue(), transp);
 		this.stringValue = s;
-		this.transparency = (float) transp;
+
 	} // Text
 
-	public Text(int x, int y, Font font, Color color, double transp, String s, boolean fixed) {
+	public Text(int x, int y, Font font, Color color, int transp, String s, boolean fixed) {
 		this.x = x;
 		this.y = y;
 		this.font = font;
-		this.color = color;
+		this.color = new Color(color.getRed(), color.getGreen(), color.getBlue(), transp);
 		this.stringValue = s;
-		this.transparency = (float) transp;
 		this.fixedsize = fixed;
 	} // Text
 
@@ -214,12 +213,8 @@ public class Text extends Shape implements Serializable {
 		this.stringValue = s;
 	} // setText
 
-	/**
-	 * Returns the transparency of the shape.
-	 * @return double - the transparency of the shape.
-	 */
-	public double getTransparency() {
-		return this.transparency;
+	public int getTransparency() {
+		return color.getAlpha();
 	} // getTransparency
 
 	/**
@@ -275,13 +270,9 @@ public class Text extends Shape implements Serializable {
 	public void drawSelection() {
 	} // drawSelection
 
-	/**
-	 * Set the percentage of transparency.
-	 * @param transparencyPercentage double - the percentage of transparency.
-	 */
-	public void setTransparency(double transparencyPercentage) {
-		this.transparency = (float) transparencyPercentage;
-	} // setTransparency
+	public void setTransparency(int d) {
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)d);
+	}
 
 	/**
 	 * Specify the line type used at drawing the shape.
@@ -289,6 +280,10 @@ public class Text extends Shape implements Serializable {
 	 */
 	public void setLineType(int lineType) {
 	} // setLineType
+
+	public BasicStroke getStroke() {
+		return null;
+	}
 
 	/**
 	 * Return a specification of the shape to be written into a file in XML format.
@@ -304,7 +299,7 @@ public class Text extends Shape implements Serializable {
 		return "<text string=\"" + stringValue + "\" colour=\"" + colorInt + "\" x=\""
 			+ (x - boundingboxX) + "\" y=\"" + (y - boundingboxY)
 			+ "\" fontname=\"" + font.getName() + "\" fontstyle=\""
-			+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\" transparency=\"" + (int) this.transparency + "\"/>\n";
+			+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\" transparency=\"" + color.getTransparency() + "\"/>\n";
 	} // toFile
 
 	public String toText() {
@@ -312,36 +307,21 @@ public class Text extends Shape implements Serializable {
 
 		if (color != null) colorInt = color.getRGB();
 
-		return "TEXT:" + x + ":" + y + ":" + colorInt + ":" + font.getName() + ":" + font.getStyle() + ":" + font.getSize() + ":" + (int) this.transparency + ":" + stringValue;
+		return "TEXT:" + x + ":" + y + ":" + colorInt + ":" + font.getName() + ":" + font.getStyle() + ":" + font.getSize() + ":" + color.getTransparency() + ":" + stringValue;
 	} // toText
 
 
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
 
-
-		/*
 		java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
 
 		Rectangle2D r = this.getFont().getStringBounds(stringValue, 0, stringValue.length(), frc);
 
 		this.h = (int) r.getHeight();
 		this.w = (int) r.getWidth();
-		g2.setFont(font.deriveFont(Math.min(Xsize, Ysize) * font.getSize()));
 
-		alpha = (float) (1 - (this.transparency / 100));
-
-		float red = 0;
-	    if(color!=null) red = (float) color.getRed() / 256;
-		float green = 0;
-	    if(color!=null) green = (float) color.getGreen() / 256;
-		float blue = 0;
-	    if(color!=null) blue = (float) color.getBlue() / 256;
-
-		g2.setColor(new Color(red, green, blue, alpha));
-
-		g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
-				java.awt.RenderingHints.VALUE_ANTIALIAS_OFF);
-        */
+		g2.setFont(font);
+		g2.setColor(color);
 
 		int a = xModifier + (int) (Xsize * x);
 		int b = yModifier + (int) (Ysize * y);
@@ -356,28 +336,18 @@ public class Text extends Shape implements Serializable {
 
 	public void drawSpecial(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2, String name, String value, double angle) {
 
-		/*java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
+		java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
 
 		Rectangle2D r = this.getFont().getStringBounds(stringValue, 0, stringValue.length(), frc);
 
 		this.h = (int) r.getHeight();
-		this.w = (int) r.getWidth();*/
+		this.w = (int) r.getWidth();
         if (!fixedsize) {
 			g2.setFont(font.deriveFont((float) Math.sqrt(Xsize * Ysize) * font.getSize()));
 		} else {
 			g2.setFont(font);
 		}
-
-		alpha = (float) (1 - (this.transparency / 100));
-
-		float red = 0;
-		if (color != null) red = (float) color.getRed() / 256;
-		float green = 0;
-		if (color != null) green = (float) color.getGreen() / 256;
-		float blue = 0;
-		if (color != null) blue = (float) color.getBlue() / 256;
-
-		g2.setColor(new Color(red, green, blue, alpha));
+		g2.setColor(color);
 
 
 		/*g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,

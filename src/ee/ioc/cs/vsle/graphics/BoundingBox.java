@@ -12,17 +12,12 @@ public class BoundingBox extends Shape implements Serializable {
 	String widthEquation;
 	String heightEquation;
 	boolean filled = false;
+	private BasicStroke stroke;
 
 	/**
 	 * Shape color.
 	 */
 	Color color;
-
-	/**
-	 * Percentage of shape transparency.
-	 */
-	float transparency = (float) 1.0;
-
 	/**
 	 * Name of the shape.
 	 */
@@ -32,17 +27,6 @@ public class BoundingBox extends Shape implements Serializable {
 	 * Shape graphics.
 	 */
 	Graphics2D g2;
-
-	/**
-	 * Line weight, logically equals to stroke width.
-	 */
-	private float lineWeight;
-
-	/**
-	 * Alpha value of a color, used
-	 * for defining the transparency of a filled shape.
-	 */
-	private float alpha;
 
 	/**
 	 * Indicates if the shape is selected or not.
@@ -60,9 +44,8 @@ public class BoundingBox extends Shape implements Serializable {
 		this.width = width;
 		this.height = height;
 		this.color = Color.lightGray;
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 70);
 		this.filled = true;
-		setStrokeWidth(1.0);
-		this.transparency = (float) 0.2;
 	} // BoundingBox
 
 	public void setFixed(boolean b) {
@@ -166,8 +149,8 @@ public class BoundingBox extends Shape implements Serializable {
 	 * Returns the transparency of the shape.
 	 * @return double - the transparency of the shape.
 	 */
-	public double getTransparency() {
-		return this.transparency;
+	public int getTransparency() {
+		return 0;
 	} // getTransparency
 
 	/**
@@ -184,7 +167,7 @@ public class BoundingBox extends Shape implements Serializable {
 	 * @return double - stroke width of a shape.
 	 */
 	public double getStrokeWidth() {
-		return this.lineWeight;
+		return 0;
 	} // getStrokeWidth
 
 	/**
@@ -250,7 +233,7 @@ public class BoundingBox extends Shape implements Serializable {
 	/**
 	 * Draw the selection markers if object selected.
 	 */
-	public void drawSelection() {
+	public void drawSelection(Graphics2D g2) {
 		g2.setColor(Color.black);
 		g2.setStroke(new BasicStroke((float) 1.0));
 		g2.fillRect(x, y, 4, 4);
@@ -279,21 +262,17 @@ public class BoundingBox extends Shape implements Serializable {
 		return "BOUNDS:" + x + ":" + y + ":" + width + ":" + height;
 	} // toText
 
-	/**
-	 * Set width of the line stroke the rectangle is drawn with.
-	 * @param width double - rectangle drawing line stroke width.
-	 */
-	public void setStrokeWidth(double width) {
-		try {
-			if (width >= 0.0) {
-				this.lineWeight = (float) width;
-			} else {
-				throw new Exception("Stroke width undefined or negative.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	} // setStrokeWidth
+	public void setStrokeWidth(double d) {
+        stroke = new BasicStroke((float)d, stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), stroke.getDashArray(), stroke.getDashPhase());
+	}
+
+	public void setTransparency(int d) {
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), d);
+	}
+
+	public void setLineType(int lineType) {
+		stroke = new BasicStroke(stroke.getLineWidth(), stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), new float[]{lineType, lineType}, stroke.getDashPhase());
+	}
 
 	/**
 	 * Returns x coordinate of the rectangle.
@@ -327,15 +306,10 @@ public class BoundingBox extends Shape implements Serializable {
 		return height;
 	} // getHeight
 
-	/**
-	 * Set the percentage of transparency.
-	 * @param transparencyPercentage double - the percentage of transparency.
-	 */
-	public void setTransparency(double transparencyPercentage) {
-		this.transparency = (float) transparencyPercentage;
-	} // setTransparency
 
-	public void setLineType(int lineType) {
+
+	public BasicStroke getStroke() {
+		return null;
 	}
 
 	void drawDynamic(int xModifier, int yModifier, float Xsize, float Ysize,
@@ -358,12 +332,8 @@ public class BoundingBox extends Shape implements Serializable {
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
 					 Graphics2D g2) {
 
-		g2.setStroke(new BasicStroke(this.lineWeight));
-
-		alpha = (float) 0.2;
-
 		// Set the box color: light-gray, with a transparency defined by "alpha" value.
-		g2.setColor(new Color(0.0f, 0.0f, 0.0f, alpha));
+		g2.setColor(color);
 
 		int a = xModifier + (int) (Xsize * x);
 		int b = yModifier + (int) (Ysize * y);
@@ -375,7 +345,7 @@ public class BoundingBox extends Shape implements Serializable {
 
 		// Draw selection markers if object selected.
 		if (selected) {
-			drawSelection();
+			drawSelection(g2);
 		}
 
 	} // draw

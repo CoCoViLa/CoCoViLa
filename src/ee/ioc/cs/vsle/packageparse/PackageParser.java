@@ -230,9 +230,9 @@ public class PackageParser {
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
 				}
-				double tr = 0.0;
+				int tr = 255;
 				if (transp != null) {
-					tr = Double.parseDouble(transp);
+					tr = Integer.parseInt(transp);
 				}
 				int lt = 0;
 				if (lineType != null) {
@@ -260,9 +260,9 @@ public class PackageParser {
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
 				}
-				double tr = 1.0;
+				int tr = 255;
 				if (transp != null) {
-					tr = Double.parseDouble(transp);
+					tr = Integer.parseInt(transp);
 				}
 				int lt = 0;
 				if (lineType != null) {
@@ -292,9 +292,9 @@ public class PackageParser {
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
 				}
-				double tr = 1.0;
+				int tr = 255;
 				if (transp != null) {
-					tr = Double.parseDouble(transp);
+					tr = Integer.parseInt(transp);
 				}
 				int lt = 0;
 				if (lineType != null) {
@@ -357,7 +357,7 @@ public class PackageParser {
 			boolean fixed = false;
 			fixed = Boolean.valueOf(s).booleanValue();
 
-			Text newText = new Text(x, y, font, new Color(colorInt), 0.0,
+			Text newText = new Text(x, y, font, new Color(colorInt), 255,
 				str, fixed);
 			newText.fixedX = fixedX;
 
@@ -377,9 +377,9 @@ public class PackageParser {
 			if (stroke != null) {
 				str = Double.parseDouble(stroke);
 			}
-			double tr = 1.0;
+			int tr = 255;
 			if (transp != null) {
-				tr = Double.parseDouble(transp);
+				tr = Integer.parseInt(transp);
 			}
 			int lt = 0;
 			if (lineType != null) {
@@ -466,15 +466,15 @@ public class PackageParser {
 			if (qName.equals("port")) {
 				if (newPort.openGraphics == null) {
 					newGraphics = new ClassGraphics();
-					newGraphics.addShape(new Oval(-4, -4, 8, 8, 12632256, true, 1.0, 0.0, 0));
-					newGraphics.addShape(new Oval(-4, -4, 8, 8, 0, false, 1.0, 0.0, 0));
+					newGraphics.addShape(new Oval(-4, -4, 8, 8, 12632256, true, 1.0, 255, 0));
+					newGraphics.addShape(new Oval(-4, -4, 8, 8, 0, false, 1.0, 255, 0));
 
 					newGraphics.setBounds(-4, -4, 8, 8);
 					newPort.openGraphics = newGraphics;
 				}
 				if (newPort.closedGraphics == null) {
 					newGraphics = new ClassGraphics();
-					newGraphics.addShape(new Oval(-4, -4, 8, 8, 0, true, 1.0, 0.0, 0));
+					newGraphics.addShape(new Oval(-4, -4, 8, 8, 0, true, 1.0, 255, 0));
 					newGraphics.setBounds(-4, -4, 8, 8);
 					newPort.closedGraphics = newGraphics;
 				}

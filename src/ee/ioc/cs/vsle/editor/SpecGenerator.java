@@ -3,6 +3,9 @@ package ee.ioc.cs.vsle.editor;
 import ee.ioc.cs.vsle.vclass.*;
 
 import java.util.ArrayList;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -12,12 +15,40 @@ import java.util.ArrayList;
  * To change this template use Options | File Templates.
  */
 public class SpecGenerator {
-	public String generateSpec(ObjectList objects, ArrayList relations) {
+	public String generateSpec(ObjectList objects, ArrayList relations, String packname) {
 		GObj obj;
 		ClassField field;
+		String methName = RuntimeProperties.packageDir + packname + ".meth";
+		String specName = RuntimeProperties.packageDir + packname + ".spec";
+		String method = "";
+		String spec  ="";
+		try {
+			BufferedReader in = new BufferedReader(new FileReader(methName));
+			String lineString = new String();
+
+			while ( (lineString = in.readLine()) != null) {
+				method += lineString+"\n";
+			}
+			in.close();
+
+			in = new BufferedReader(new FileReader(specName));
+
+			while ( (lineString = in.readLine()) != null) {
+				spec += lineString+"\n";
+			}
+			in.close();
+
+		} catch (IOException ioe)     {
+			ioe.printStackTrace();
+		}
+
+
+
+
 		StringBuffer s = new StringBuffer();
 		s.append("public class GeneratedClass {");
 		s.append("\n    /*@ specification  GeneratedClass {\n");
+		s.append(spec);
 		for (int i = 0; i < objects.size(); i++) {
 			obj = (GObj) objects.get(i);
 			s.append(
@@ -86,7 +117,11 @@ public class SpecGenerator {
 			}
 
 		}
-		s.append("    }@*/\n}");
+		s.append("    }@*/\n");
+		s.append("\t"+method);
+		s.append("\n}");
+
 		return s.toString();
 	}
 }
+

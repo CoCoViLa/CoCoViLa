@@ -26,34 +26,11 @@ public class Line extends Shape implements Serializable {
 
 
 	private BasicStroke stroke;
-	/**
-	 * Line weight, logically equals to stroke width.
-	 */
 	Color color;
 
-	/**
-	 * Indicates if the shape is selected or not.
-	 */
 	private boolean selected = false;
 
-	/**
-	 * Defines if the shape is resizable or not.
-	 */
 	private boolean fixed = false;
-
-/*	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp) {
-		startX = x1;
-		startY = y1;
-		endX = x2;
-		endY = y2;
-		this.color = new Color(colorInt);
-		this.lineWeight = (float) strokeWidth;
-		this.transparency = (float) transp;
-		this.x = Math.min(x1, x2);
-		this.y = Math.min(y1, y2);
-		this.width = Math.max(x1, x2) - this.x; // endX - startX;
-		this.height = Math.max(y1, y2) - this.y; // endY - startY;
-	}*/
 
 	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp, int lineType) {
 		startX = x1;
@@ -88,8 +65,8 @@ public class Line extends Shape implements Serializable {
         stroke = new BasicStroke((float)d, stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), stroke.getDashArray(), stroke.getDashPhase());
 	}
 
-	public void setTransparency(double d) {
-		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)d);
+	public void setTransparency(int d) {
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), d);
 	}
 
 	public void setLineType(int lineType) {
@@ -104,9 +81,24 @@ public class Line extends Shape implements Serializable {
 		return getHeight();
 	} // getRealHeight
 
+	public BasicStroke getStroke() {
+		return stroke;
+	}
+
 	public double getStrokeWidth() {
 		return stroke.getLineWidth();
 	}
+
+	public int getLineType() {
+		if (stroke.getDashArray() != null)
+			return (int)stroke.getDashArray()[0];
+		else
+			return 0;
+	} // getLineType
+
+	public int getTransparency() {
+		return color.getAlpha();
+	} // getTransparency
 
 	public String getName() {
 		return null;
@@ -161,13 +153,6 @@ public class Line extends Shape implements Serializable {
 		return this.selected;
 	} // isSelected
 
-	/**
-	 * Returns the line typ of the shape.
-	 * @return int - line type of the shape.
-	 */
-	public int getLineType() {
-		return (int)stroke.getDashArray()[0];
-	} // getLineType
 
 	/**
 	 * Set the color of a shape.
@@ -189,9 +174,7 @@ public class Line extends Shape implements Serializable {
 	 * Returns the transparency of the shape.
 	 * @return double - the transparency of the shape.
 	 */
-	public double getTransparency() {
-		return color.getAlpha();
-	} // getTransparency
+
 
 	/**
 	 * Resizes current object.
@@ -421,5 +404,10 @@ public class Line extends Shape implements Serializable {
 		}
 
 	} // draw
+
+	public Object clone() {
+		return super.clone();
+	} // clone
+
 
 }

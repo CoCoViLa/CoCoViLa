@@ -4,6 +4,7 @@ import ee.ioc.cs.vsle.vclass.Point;
 
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.iconeditor.*;
 
 import javax.swing.event.MouseInputAdapter;
@@ -37,12 +38,13 @@ class IconMouseOps
 	int relCount;
 	Point draggedBreakPoint;
 	String state = "";
+	String mouseState ="";
 
 	public int startX, startY;
 	public int arcWidth, arcHeight;
 	public boolean fill = false;
 	public double strokeWidth = 1.0;
-	public double transparency = 0.0;
+	public int transparency = 255;
 	public int lineType = 0;
 
 	public Color color = Color.black;
@@ -59,7 +61,7 @@ class IconMouseOps
 		this.editor = e;
 	}
 
-	public double getTransparency() {
+	public int getTransparency() {
 		return this.transparency;
 	}
 
@@ -82,8 +84,8 @@ class IconMouseOps
 	 * text to the location the dialog was opened from. Dialog
 	 * is modal and aligned to the center of the open application window.
 	 */
-	private void openTextEditor() {
-		new TextDialog(editor);
+	private void openTextEditor(int x, int y) {
+		new TextDialog(editor, x, y);
 	} // openTextEditor
 
 	/**
@@ -102,14 +104,14 @@ class IconMouseOps
 	 * @param color Color - font color.
 	 * @param text String - the actual string of text drawn.
 	 */
-	public void drawText(Font font, Color color, String text) {
+	public void drawText(Font font, Color color, String text, int x, int y) {
 		Shape shape = editor.getSelectedShape();
 		if (shape != null && shape instanceof Text) {
 			shape.setColor(color);
 			shape.setFont(font);
 			shape.setText(text);
 		} else {
-			Text t = new Text(editor.mouseX, editor.mouseY, font, color, getTransparency(), text);
+			Text t = new Text(x, y, font, color, getTransparency(), text);
 			editor.shapeList.add(t);
 		}
 		editor.repaint();
@@ -119,7 +121,7 @@ class IconMouseOps
 	 * Change transparency of the selected shape(s).
 	 * @param transparencyPercentage - percentage of the transparency selected from the spinner.
 	 */
-	public void changeTransparency(double transparencyPercentage) {
+	public void changeTransparency(int transparencyPercentage) {
 		this.transparency = transparencyPercentage;
 		if (editor.shapeList != null && editor.shapeList.size() > 0) {
 			for (int i = 0; i < editor.shapeList.size(); i++) {
@@ -356,7 +358,7 @@ class IconMouseOps
 					Shape shape = editor.shapeList.checkInside(x, y);
 					if (shape != null) {
 						if (shape instanceof Text) {
-							TextDialog td = new TextDialog(editor);
+							TextDialog td = new TextDialog(editor, x, y);
 							td.setText(shape.getText());
 							td.setFont(shape.getFont());
 							td.setColor(shape.getColor());
@@ -446,6 +448,7 @@ class IconMouseOps
 	public void mousePressed(MouseEvent e) {
 		editor.mouseX = e.getX();
 		editor.mouseY = e.getY();
+		mouseState = "pressed";
 		if (!(state.equals(State.drawArc1)||state.equals(State.drawArc2))) {
 			startX = e.getX();
 			startY = e.getY();
@@ -553,9 +556,9 @@ class IconMouseOps
 			editor.repaint();
 		} else if (state.equals(State.drawLine)) {
 			editor.repaint();
-			Graphics g = editor.drawingArea.getGraphics();
-			g.setColor(color);
-			g.drawLine(editor.mouseX, editor.mouseY, x, y);
+			//Graphics g = editor.drawingArea.getGraphics();
+			//g.setColor(color);
+			//g.drawLine(editor.mouseX, editor.mouseY, x, y);
 			editor.mouseX = x;
 			editor.mouseY = y;
 		} else if (state.equals(State.drawArc) || state.equals(State.drawFilledArc)) {
@@ -564,11 +567,11 @@ class IconMouseOps
 				fill = true;
 			}
 			editor.repaint();
-			Graphics g = editor.drawingArea.getGraphics();
-			g.setColor(color);
-			final int width = Math.abs(editor.mouseX - x);
-			final int height = Math.abs(editor.mouseY - y);
-			g.drawRect(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height);
+			//Graphics g = editor.drawingArea.getGraphics();
+			//g.setColor(color);
+			//final int width = Math.abs(editor.mouseX - x);
+			//final int height = Math.abs(editor.mouseY - y);
+			//g.drawRect(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height);
 			editor.mouseX = x;
 			editor.mouseY = y;
 		} else if (state.equals(State.drawText)) {
@@ -583,12 +586,12 @@ class IconMouseOps
 				fill = true;
 			}
 			editor.repaint();
-			Graphics g = editor.drawingArea.getGraphics();
-			g.setColor(color);
-			final int width = Math.abs(editor.mouseX - x);
-			final int height = Math.abs(editor.mouseY - y);
+			//Graphics g = editor.drawingArea.getGraphics();
+			//g.setColor(color);
+			//final int width = Math.abs(editor.mouseX - x);
+			//final int height = Math.abs(editor.mouseY - y);
 
-			g.drawRect(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height);
+			//g.drawRect(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height);
 			editor.mouseX = x;
 			editor.mouseY = y;
 
@@ -598,11 +601,11 @@ class IconMouseOps
 				fill = true;
 			}
 			editor.repaint();
-			Graphics g = editor.drawingArea.getGraphics();
-			g.setColor(color);
-			final int width = Math.abs(editor.mouseX - x);
-			final int height = Math.abs(editor.mouseY - y);
-			g.drawOval(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height);
+			//Graphics g = editor.drawingArea.getGraphics();
+			//g.setColor(color);
+			//final int width = Math.abs(editor.mouseX - x);
+			//final int height = Math.abs(editor.mouseY - y);
+			//g.drawOval(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height);
 			editor.mouseX = x;
 			editor.mouseY = y;
 		} else if (state.equals(State.freehand)) {
@@ -701,8 +704,11 @@ class IconMouseOps
 	 *                       is made between different states of the application.
 	 */
 	public void mouseReleased(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
 		Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
 		editor.setCursor(cursor);
+        mouseState = "released";
 
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			if (state.equals(State.drag)) {
@@ -738,6 +744,7 @@ class IconMouseOps
 					state = State.selection;
 
 				} else {
+					db.p(this.getTransparency());
 					Rect rect = new Rect(Math.min(startX, editor.mouseX),
 						Math.min(startY, editor.mouseY), width,
 						height, color.getRGB(), fill,
@@ -768,7 +775,7 @@ class IconMouseOps
 				editor.shapeList.eraseShape(editor.mouseX, editor.mouseY);
 				editor.repaint();
 			} else if (state.equals(State.drawText)) {
-				openTextEditor();
+				openTextEditor(x, y);
 			} else if (state.equals(State.addPort)) {
 				openPortPropertiesDialog();
 			}

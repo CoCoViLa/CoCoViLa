@@ -98,8 +98,8 @@ public class Polygon extends Shape {
         stroke = new BasicStroke((float)d, stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), stroke.getDashArray(), stroke.getDashPhase());
 	}
 
-	public void setTransparency(double d) {
-		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)d);
+	public void setTransparency(int d) {
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), d);
 	}
 
 	public void setLineType(int lineType) {
@@ -157,7 +157,10 @@ public class Polygon extends Shape {
 	 * @return int - line type of the shape.
 	 */
 	public int getLineType() {
-		return (int)stroke.getDashArray()[0];
+		if (stroke.getDashArray() != null)
+			return (int)stroke.getDashArray()[0];
+		else
+			return 0;
 	} // getLineType
 
 	/**
@@ -180,7 +183,7 @@ public class Polygon extends Shape {
 	 * Returns the transparency of the shape.
 	 * @return double - the transparency of the shape.
 	 */
-	public double getTransparency() {
+	public int getTransparency() {
 		return color.getAlpha();
 	} // getTransparency
 
@@ -325,6 +328,13 @@ public class Polygon extends Shape {
 		}
 
 	} // draw
+
+	public BasicStroke getStroke() {
+		return stroke;
+	}
+	public Object clone() {
+		return super.clone();
+	} // clone
 
 
 }
