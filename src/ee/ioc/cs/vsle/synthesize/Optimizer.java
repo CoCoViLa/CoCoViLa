@@ -12,14 +12,14 @@ public class Optimizer {
 	 @param algorithm an unoptimized algorithm
 	 @param targets the variables which the algorithm has to calculate (other branches are removed)
 	 */
-	static ArrayList optimize(ArrayList algorithm, HashSet targets) {
+	public ArrayList optimize(ArrayList algorithm, HashSet targets) {
 		HashSet stuff = targets;
 		Rel rel;
 		Var relVar;
 		ArrayList removeThese = new ArrayList();
 
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
-            if(!(algorithm.get(i) instanceof String))
+            if((algorithm.get(i) instanceof String))
                 continue;
             rel = (Rel) algorithm.get(i);
 			boolean relIsNeeded = false;
