@@ -924,7 +924,7 @@ public class Editor extends JFrame {
 		currentPort = null;
 		currentCon = null;
 		if (firstPort != null) {
-			if (firstPort.connections.size()>1)
+			if (firstPort.connections.size()<1)
 				firstPort.setConnected(false);
 			firstPort = null;
 		}
