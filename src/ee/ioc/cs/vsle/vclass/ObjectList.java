@@ -11,6 +11,35 @@ public class ObjectList extends ArrayList
 		super();
 	}
 
+	public void sendToBack(GObj obj) {
+		this.remove(obj);
+		this.add(0, obj);
+	}
+
+	public void bringToFront(GObj obj) {
+		this.remove(obj);
+		this.add(obj);
+	}
+
+	public void bringForward(GObj obj, int step) {
+		int objIndex = this.indexOf(obj);
+
+		if (objIndex + step < this.size()) {
+			this.remove(obj);
+			this.add(objIndex + step, obj);
+		}
+	}
+
+	public void sendBackward(GObj obj, int step) {
+		int objIndex = this.indexOf(obj);
+
+		if (objIndex - step >= 0) {
+			this.remove(obj);
+			this.add(objIndex - step, obj);
+		}
+	}
+
+
 	public GObj checkInside(int x, int y) {
 		GObj obj;
 

@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.editor;
 
 import java.awt.event.*;
 import javax.swing.*;
+import java.awt.*;
 
 
 /**
@@ -15,6 +16,12 @@ public class ObjectPopupMenu extends JPopupMenu {
 	JMenuItem itemUngroup;
 	JMenuItem itemClone;
 	JMenuItem itemHLPorts;
+	JMenuItem itemBackward;
+	JMenuItem itemForward;
+	JMenuItem itemToFront;
+	JMenuItem itemToBack;
+
+	JMenu submenuOrder;
 
 	/**
 	 * Build the popup menu by adding menu items and action listeners for the menu items in it.
@@ -23,6 +30,14 @@ public class ObjectPopupMenu extends JPopupMenu {
 	ObjectPopupMenu(MouseOps mListener) {
 		super();
 
+		submenuOrder = new JMenu(Menu.MENU_ORDER);
+
+		itemClone = new JMenuItem(Menu.CLONE, KeyEvent.VK_C);
+		itemClone.addActionListener(mListener);
+		itemClone.setAccelerator(KeyStroke.getKeyStroke(
+				KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK));
+		this.add(itemClone);
+
 		itemDelete = new JMenuItem(Menu.DELETE, KeyEvent.VK_D);
 		itemDelete.addActionListener(mListener);
 		itemDelete.setActionCommand(Menu.OBJECT_DELETE);
@@ -30,23 +45,23 @@ public class ObjectPopupMenu extends JPopupMenu {
                 KeyEvent.VK_DELETE, 0));
 		this.add(itemDelete);
 
-		itemProperties = new JMenuItem(Menu.PROPERTIES, KeyEvent.VK_R);
-		itemProperties.addActionListener(mListener);
-		itemProperties.setAccelerator(KeyStroke.getKeyStroke(
-        KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK));
-		this.add(itemProperties);
-
 		itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
 		itemGroup.addActionListener(mListener);
 		itemGroup.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK));
+				KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemGroup);
 
 		itemUngroup = new JMenuItem(Menu.UNGROUP, KeyEvent.VK_U);
 		itemUngroup.addActionListener(mListener);
 		itemUngroup.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_U, KeyEvent.CTRL_DOWN_MASK));
+				KeyEvent.VK_U, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemUngroup);
+
+		itemProperties = new JMenuItem(Menu.PROPERTIES, KeyEvent.VK_R);
+		itemProperties.addActionListener(mListener);
+		itemProperties.setAccelerator(KeyStroke.getKeyStroke(
+        KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK));
+		this.add(itemProperties);
 
 		itemHLPorts = new JMenuItem(Menu.HLPORTS, KeyEvent.VK_H);
 		itemHLPorts.addActionListener(mListener);
@@ -54,11 +69,28 @@ public class ObjectPopupMenu extends JPopupMenu {
                 KeyEvent.VK_H, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemHLPorts);
 
-		itemClone = new JMenuItem(Menu.CLONE, KeyEvent.VK_C);
-		itemClone.addActionListener(mListener);
-		itemClone.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK));
-		this.add(itemClone);
+        itemBackward = new JMenuItem(Menu.BACKWARD, KeyEvent.VK_B);
+		itemBackward.addActionListener(mListener);
+		itemBackward.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0));
+		submenuOrder.add(itemBackward);
+
+		itemForward = new JMenuItem(Menu.FORWARD, KeyEvent.VK_F);
+		itemForward.addActionListener(mListener);
+		itemForward.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, 0));
+		submenuOrder.add(itemForward);
+
+		itemToFront = new JMenuItem(Menu.TOFRONT, KeyEvent.VK_R);
+		itemToFront.addActionListener(mListener);
+		itemToFront.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, KeyEvent.CTRL_DOWN_MASK));
+		submenuOrder.add(itemToFront);
+
+		itemToBack = new JMenuItem(Menu.TOBACK, KeyEvent.VK_A);
+		itemToBack.addActionListener(mListener);
+		itemToBack.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, KeyEvent.CTRL_DOWN_MASK));
+		submenuOrder.add(itemToBack);
+		submenuOrder.setMnemonic('O');
+
+		this.add(submenuOrder);
 	}
 
 	/**
@@ -67,9 +99,16 @@ public class ObjectPopupMenu extends JPopupMenu {
 	 * @param b - enable or disable the menu item.
 	 */
 	void enableDisableMenuItem(JMenuItem item, boolean b) {
-		int index = getComponentIndex(item);
+	   if(item!=null) {
+		 Component[] components = submenuOrder.getMenuComponents();
+		 for (int i = 0; i < components.length; i++) {
+		   JMenuItem menuitem = (JMenuItem) components[i];
+		   if (menuitem == item) {
+			 submenuOrder.getMenuComponent(i).setEnabled(b);
+		   }
+		 }
+	   }
+	} // enableDisableMenuItem
 
-		getComponent(index).setEnabled(b);
-	}
 
 }

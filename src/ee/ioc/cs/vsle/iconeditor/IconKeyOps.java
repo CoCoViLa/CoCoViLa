@@ -3,9 +3,6 @@ package ee.ioc.cs.vsle.iconeditor;
 import ee.ioc.cs.vsle.graphics.*;
 
 import java.awt.event.*;
-import javax.swing.*;
-
-import ee.ioc.cs.vsle.util.*;
 
 public class IconKeyOps implements KeyListener {
 
@@ -22,7 +19,6 @@ public class IconKeyOps implements KeyListener {
   } // keyTyped
 
   public void keyReleased(KeyEvent e) {
-	db.p("CODE: "+e.getKeyCode()+" CHAR: "+e.getKeyChar()+" CTRL DOWN: "+e.isControlDown());
 	if(e.getKeyCode()==127) {        // event: delete object(s), key: del
 	  editor.deleteObjects();
 	}

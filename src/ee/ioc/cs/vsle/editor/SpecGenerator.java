@@ -65,6 +65,9 @@ public class SpecGenerator {
 
 		for (int i = 0; i < relations.size(); i++) {
 			rel = (Connection) relations.get(i);
+
+
+
 			if (rel.endPort.toString().equals("any")) {
 				s.append(
 					"    " + rel.endPort.obj.toString() + "." + rel.beginPort.toString()

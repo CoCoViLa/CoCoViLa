@@ -80,10 +80,34 @@ class MouseOps
 			}
 			popupMenu.enableDisableMenuItem(popupMenu.itemProperties, true);
 			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, false);
+
+			// Enable or disable order changing menu items.
+			if(editor.objects.indexOf(editor.currentObj)==editor.objects.size()-1) {
+			  popupMenu.enableDisableMenuItem(popupMenu.itemForward,false);
+			  popupMenu.enableDisableMenuItem(popupMenu.itemToFront,false);
+			} else {
+			  popupMenu.enableDisableMenuItem(popupMenu.itemForward,true);
+			  popupMenu.enableDisableMenuItem(popupMenu.itemToFront,true);
+			}
+
+			if(editor.objects.indexOf(editor.currentObj)==0) {
+			  popupMenu.enableDisableMenuItem(popupMenu.itemBackward,false);
+			  popupMenu.enableDisableMenuItem(popupMenu.itemToBack,false);
+			} else {
+			  popupMenu.enableDisableMenuItem(popupMenu.itemBackward,true);
+			  popupMenu.enableDisableMenuItem(popupMenu.itemToBack,true);
+			}
+
 		} else {
-			popupMenu.enableDisableMenuItem(popupMenu.itemProperties, false);
-			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
-			popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
+		  popupMenu.enableDisableMenuItem(popupMenu.itemBackward,false);
+		  popupMenu.enableDisableMenuItem(popupMenu.itemForward,false);
+		  popupMenu.enableDisableMenuItem(popupMenu.itemToFront,false);
+		  popupMenu.enableDisableMenuItem(popupMenu.itemToBack,false);
+		  popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
+		  popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
+		  popupMenu.enableDisableMenuItem(popupMenu.itemProperties, false);
+		  popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
+		  popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
 		}
 	}
 
@@ -614,6 +638,26 @@ class MouseOps
 			  editor.drawingArea.setGridVisible(isGridVisible);
 			} else if (e.getActionCommand().equals(Menu.CLEAR_ALL)) {
 				editor.clearObjects();
+			} else if (e.getActionCommand().equals(Menu.BACKWARD)) {
+			  // MOVE OBJECT BACKWARD IN THE LIST
+			  // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			  editor.objects.sendBackward(editor.currentObj, 1);
+			  editor.repaint();
+			} else if (e.getActionCommand().equals(Menu.FORWARD)) {
+			  // MOVE OBJECT FORWARD IN THE LIST
+			  // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			  editor.objects.bringForward(editor.currentObj, 1);
+			  editor.repaint();
+			} else if (e.getActionCommand().equals(Menu.TOFRONT)) {
+			  // MOVE OBJECT TO THE FRONT IN THE LIST,
+			  // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			  editor.objects.bringToFront(editor.currentObj);
+			  editor.repaint();
+			} else if (e.getActionCommand().equals(Menu.TOBACK)) {
+			  // MOVE OBJECT TO THE BACK IN THE LIST
+			  // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			  editor.objects.sendToBack(editor.currentObj);
+			  editor.repaint();
 			} else if (e.getActionCommand().equals(Menu.SPECIFICATION)) {
 				ProgramTextEditor programEditor = new ProgramTextEditor(editor.connections, editor.objects, editor.vPackage);
 

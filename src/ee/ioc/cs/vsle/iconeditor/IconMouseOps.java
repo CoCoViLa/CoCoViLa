@@ -2,7 +2,6 @@ package ee.ioc.cs.vsle.iconeditor;
 
 import ee.ioc.cs.vsle.vclass.Point;
 
-import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.iconeditor.*;
@@ -13,17 +12,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.awt.Color;
 import java.awt.Font;
-import javax.swing.JFileChooser;
-
-import java.io.FileOutputStream;
 import java.awt.Cursor;
-import javax.swing.JOptionPane;
-import java.io.File;
 import java.awt.Graphics;
+import java.awt.Rectangle;
+
 import javax.swing.SwingUtilities;
 import javax.swing.JColorChooser;
-import javax.swing.UIManager;
-import java.awt.Rectangle;
 
 import java.util.ArrayList;
 
@@ -209,8 +203,7 @@ class IconMouseOps
           popupMenu.enableDisableMenuItem(popupMenu.itemToBack,true);
         }
 
-      }
-      else {
+      } else {
         popupMenu.enableDisableMenuItem(popupMenu.itemBackward,false);
         popupMenu.enableDisableMenuItem(popupMenu.itemForward,false);
         popupMenu.enableDisableMenuItem(popupMenu.itemToFront,false);

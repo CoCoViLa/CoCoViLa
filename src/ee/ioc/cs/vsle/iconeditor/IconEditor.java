@@ -421,8 +421,8 @@ public class IconEditor
 		if(p.isArea()) buf.append("area");
 		buf.append("\" strict=\"");
 		buf.append(p.isStrict());
-		buf.append("\">\n");
-
+		buf.append("\" />\n");
+		/*
 		if(!RuntimeProperties.classIsRelation) {
 		  buf.append("<open>\n");
 		  buf.append("<graphics>\n");
@@ -436,6 +436,7 @@ public class IconEditor
 		  buf.append("</closed>\n");
 		}
 		buf.append("</port>\n");
+	    */
 	  }
 	  buf.append("</ports>");
 	}
@@ -622,20 +623,6 @@ public class IconEditor
     palette.boundingbox.setEnabled(true);
     boundingbox = null;
     repaint();
-  }
-
-  /**
-   * Method for enabling bounding box button if no bounding
-   * box is defined after it was deleted.
-   * @param theShape - the shape deleted. If not a bounding box, then
-   *                   the bounding box might still exist and the button
-   *                   is not enabled.
-   */
-  public void enableBoundingBoxButton(Shape theShape) {
-    if(theShape instanceof BoundingBox)  {
-        palette.boundingbox.setEnabled(true);
-        boundingbox = null;
-    }
   }
 
   /**
@@ -830,7 +817,10 @@ public class IconEditor
     Shape shape;
     shapeList.remove(currentShape);
 
-    enableBoundingBoxButton(currentShape);
+    if(boundingbox!=null && boundingbox.isSelected()) {
+	   palette.boundingbox.setEnabled(true);
+	   boundingbox = null;
+	}
 
     currentShape = null;
     ArrayList removable = new ArrayList();
