@@ -385,10 +385,10 @@ public class Arc extends Shape implements Serializable {
 	if (pointX >= x + width - 4 && pointY >= y && pointX <= x + width && pointY <= y + 4) {
 		return 2;
 	}
-	if (pointX >= x && pointY >= y + height / 2 - 4 && pointX <= x + 4 && pointY <= y + height / 2) {
+	if (pointX >= x && pointY >= y + height - 4 && pointX <= x + 4 && pointY <= y + height) {
 		return 3;
 	}
-	if (pointX >= x + width - 4 && pointY >= y + height / 2 - 4 && pointX <= x + width && pointY <= y + height / 2) {
+	if (pointX >= x + width - 4 && pointY >= y + height - 4 && pointX <= x + width && pointY <= y + height) {
 		return 4;
 	}
 	return 0;
@@ -434,8 +434,8 @@ public class Arc extends Shape implements Serializable {
 	g2.setStroke(new BasicStroke( (float) 1.0));
 	g2.fillRect(x, y, 4, 4);
 	g2.fillRect(x + width - 4, y, 4, 4);
-	g2.fillRect(x, y + height / 2 - 3, 4, 4);
-	g2.fillRect(x + width - 4, y + height / 2 - 3, 4, 4);
+	g2.fillRect(x, y + height - 3, 4, 4);
+	g2.fillRect(x + width - 4, y + height - 3, 4, 4);
   } // drawSelection
 
   /**
