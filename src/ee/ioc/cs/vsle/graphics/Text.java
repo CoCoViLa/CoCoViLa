@@ -63,6 +63,7 @@ public class Text extends Shape implements Serializable {
 	private boolean fixed = false;
 
 	public Text(int x, int y, Font font, Color color, double transp, String s) {
+
 		this.x = x;
 		this.y = y;
 		this.font = font;
@@ -353,9 +354,12 @@ public class Text extends Shape implements Serializable {
 
 		alpha = (float) (1 - (this.transparency / 100));
 
-		float red = (float) color.getRed() / 256;
-		float green = (float) color.getGreen() / 256;
-		float blue = (float) color.getBlue() / 256;
+		float red = 0;
+	    if(color!=null) red = (float) color.getRed() / 256;
+		float green = 0;
+	    if(color!=null) green = (float) color.getGreen() / 256;
+		float blue = 0;
+	    if(color!=null) blue = (float) color.getBlue() / 256;
 
 		g2.setColor(new Color(red, green, blue, alpha));
 

@@ -1,16 +1,13 @@
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.editor.Menu;
-import ee.ioc.cs.vsle.vclass.Point;
+
 import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.synthesize.Synthesizer;
-import ee.ioc.cs.vsle.packageparse.PackageParser;
-import ee.ioc.cs.vsle.iconeditor.AboutDialog;
-import ee.ioc.cs.vsle.iconeditor.LicenseDialog;
 
 import java.io.*;
-import java.util.ArrayList;
+
 import java.util.Properties;
 import java.awt.*;
 import java.awt.event.*;
@@ -155,10 +152,6 @@ public class Editor extends JFrame implements ChangeListener{
 			KeyEvent.VK_A, ActionEvent.CTRL_MASK));
 		menu.add(menuItem);
 		menuItem = new JMenuItem(Menu.CLEAR_ALL, KeyEvent.VK_C);
-		menuItem.addActionListener(aListener);
-		menu.add(menuItem);
-		menuItem = new JCheckBoxMenuItem(Menu.GRID, getGridVisibility());
-		menuItem.setMnemonic('G');
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
 		menuBar.add(menu);
@@ -363,12 +356,14 @@ public class Editor extends JFrame implements ChangeListener{
 	 * @param f - package file to be loaded.
 	 */
 	void loadPackage(File f) {
+	  if(f!=null) {
 		Canvas canvas = new Canvas(f);
-		tabbedPane.addTab("blaah",canvas);
+		String packageName = f.getName().substring(0,f.getName().indexOf("."));
+		tabbedPane.addTab(packageName, canvas);
 		tabbedPane.setSelectedComponent(canvas);
 		getContentPane().add(tabbedPane);
 		validate();
-
+	  }
 	} // loadPackage
 
 

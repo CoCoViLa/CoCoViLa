@@ -425,9 +425,8 @@ public class Canvas extends JPanel implements ActionListener {
 
 	/**
 	 * Open application options dialog.
+	 * @param e - Action Event.
 	 */
-
-
 	public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand().equals(Menu.OBJECT_DELETE)) {
 				deleteObjects();
