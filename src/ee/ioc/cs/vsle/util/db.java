@@ -53,4 +53,9 @@ public class db {
 		}
 	} // p
 
+   	public static void p(double f) {
+		if (RuntimeProperties.debugInfo == 1) {
+			System.out.println(f);
+		}
+	} // p
 }

@@ -199,7 +199,7 @@ public class Rect
 		try {
 			if (width >= 0.0) {
 				lineWeight = (float) width;
-				stroke = new BasicStroke(lineWeight);
+				//stroke = new BasicStroke(lineWeight);
 			}
 			else {
 				throw new Exception("Stroke width undefined or negative.");
@@ -276,7 +276,8 @@ public class Rect
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 
-		g2.setStroke(stroke);
+		//g2.setStroke(stroke);
+		db.p(stroke);
 
 		alpha = (float) (1 - (this.transparency / 100));
 
@@ -285,7 +286,9 @@ public class Rect
 		float blue = (float) color.getBlue() * 100 / 256 / 100;
 
 		g2.setColor(new Color(red, green, blue, alpha));
-
+		g2.translate(xModifier + (int) (Xsize * x), yModifier + (int) (Ysize * y));
+		g2.rotate(0.3);
+		g2.translate(-1*(xModifier + (int) (Xsize * x)), -1*(yModifier + (int) (Ysize * y)));
 		if (filled) {
 			g2.fillRect(xModifier + (int) (Xsize * x), yModifier + (int) (Ysize * y), (int) (Xsize * width), (int) (Ysize * height));
 		}
@@ -296,6 +299,11 @@ public class Rect
 		if (selected) {
 			drawSelection(g2);
 		}
+
+        g2.translate(xModifier + (int) (Xsize * x), yModifier + (int) (Ysize * y));
+           g2.rotate(-0.3);
+            g2.translate(-1*(xModifier + (int) (Xsize * x)), -1*(yModifier + (int) (Ysize * y)));
+
 
 	} // draw
 

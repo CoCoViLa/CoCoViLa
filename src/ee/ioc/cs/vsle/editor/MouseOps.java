@@ -44,6 +44,32 @@ class MouseOps
 		editor.currentObj = null;
 	}
 
+    void calcAngle(int startX, int startY, int x, int y) {
+        db.p(startX +" " +startY +" "+x +" "+y);
+        int realX = x - startX;
+        int realY = y -startY;
+        if (realX > 0 && realY> 0 ) {
+          db.p(Math.atan((double)realY/(double)realX));
+        }
+
+        if (realX < 0 && realY> 0 ) {
+          db.p(Math.atan((double)realY/(double)realX) +Math.PI);
+        }
+
+        if (realX < 0 && realY < 0 ) {
+          db.p(Math.atan((double)realY/(double)realX) +Math.PI);
+        }
+
+        if (realX > 0 && realY < 0 ) {
+          db.p(Math.atan((double)realY/(double)realX) +2*Math.PI);
+        }
+        /*if (x < editor.firstPort.getRealCenterX()) ;
+            else if (x > editor.firstPort.getRealCenterX()) db.p(Math.atan(y/x));
+            else if (y < editor.firstPort.getRealCenterY()) db.p(-Math.PI/2.0);
+            else if (y > editor.firstPort.getRealCenterY()) db.p(Math.PI/2.0);
+                  else db.p(0.0);
+          */
+    }
 	/**
 	 * Mouse entered event from the MouseMotionListener. Invoked when the mouse enters a component.
 	 * @param e MouseEvent - Mouse event performed.
@@ -58,6 +84,7 @@ class MouseOps
 	 * Mouse exited event from the MouseMotionListener. Invoked when the mouse exits a component.
 	 * @param e MouseEvent - Mouse event performed.
 	 */
+
 	public void mouseExited(MouseEvent e) {
 		Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
 
@@ -157,7 +184,8 @@ class MouseOps
 							editor.mouseY = y;
 						}
 						/* else if  (firstPort.type.equals(port.type)) {
-								}*/ else {
+								}*/
+                        else {
 							if (port == editor.firstPort) {
 								editor.firstPort.setConnected(false);
 								editor.firstPort = null;
@@ -381,6 +409,10 @@ class MouseOps
 
 		// check if port needs to be nicely drawn coz of mouseover
 		if (state.equals(State.addRelation)) {
+            if (editor.firstPort != null) {
+                calcAngle(editor.firstPort.getRealCenterX(),editor.firstPort.getRealCenterY(),x,y);
+            }
+
 			if (editor.currentPort != null) {
 				editor.currentPort.setSelected(false);
 				// currentPort=null;
@@ -487,13 +519,6 @@ class MouseOps
 		}
 	}
 
-	// *********************************************************************
-	// functions for mouse operations, to keep mouse* function somewhat tidy
-	// *********************************************************************
-
-	// *********************************************************************
-	// end of mouse control functions
-	// *********************************************************************
 
 	public void actionPerformed(ActionEvent e) {
 
@@ -534,6 +559,7 @@ class MouseOps
 							ObjectOutputStream oos = new ObjectOutputStream(fos);
 
 							editor.scheme.objCount = editor.objCount;
+							db.p(editor.scheme);
 							oos.writeObject(editor.scheme);
 							oos.close();
 						}

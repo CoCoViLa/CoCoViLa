@@ -49,8 +49,7 @@ import javax.swing.JCheckBoxMenuItem;
  * @link http://vsledit.sourceforge.net
  * @version 1.0
  */
-public class Editor
-	extends JFrame {
+public class Editor	extends JFrame {
 
 	int objCount;
 	int mouseX; // Mouse X coordinate.

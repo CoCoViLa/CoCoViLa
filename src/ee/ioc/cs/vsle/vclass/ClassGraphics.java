@@ -17,6 +17,7 @@ public class ClassGraphics
 
 	// PackageClass packageClass;
 	public boolean showFields = false;
+	public boolean relation = false;
 
 	/**
 	 * Set bounds of the graphical object.
