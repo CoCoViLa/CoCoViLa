@@ -19,12 +19,6 @@ import ee.ioc.cs.vsle.equations.EquationSolver;
 public class SpecParser {
 	public final int declaration = 1, assignment = 2, axiom = 3, equation = 4, alias = 5, specaxiom = 6, error = 10;
 
-    /** @link dependency */
-    /*# Problem lnkProblem; */
-
-    /** @link dependency */
-    /*# AnnotatedClass lnkAnnotatedClass; */
-
 	public static void main(String[] args) {
 		SpecParser p = new SpecParser();
 
@@ -176,7 +170,7 @@ public class SpecParser {
 				return new LineType(3, line);
 			}
 			else { // check if its an axiom without method specification
-				pattern = Pattern.compile("(.*) *-> *([-_a-zA-Z0-9.,]+) *$");
+				pattern = Pattern.compile("(.*) *-> *([ -_a-zA-Z0-9.,]+) *$");
 				matcher2 = pattern.matcher(line);
 				if (matcher2.find()) {
 					return new LineType(6, line);

@@ -135,6 +135,7 @@ public class Synthesizer {
 	 @param classes List of classes obtained from the ee.ioc.cs.editor.synthesize.SpecParser
 	 */
 	void generateSubclasses(ClassList classes) {
+
 		AnnotatedClass pClass;
 		String lineString = "", fileString;
 		Pattern pattern;
