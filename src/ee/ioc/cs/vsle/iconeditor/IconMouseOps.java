@@ -262,7 +262,7 @@ class IconMouseOps
 	 * @param col Color - line color. Black by default if not chosen otherwise from the color chooser.
 	 */
 	public void drawLine(Color col) {
-		Line line = new Line(startX, startY, editor.mouseX, editor.mouseY, col.getRGB(), strokeWidth, getTransparency(), getLineType());
+		Line line = new Line(startX, startY, editor.mouseX, editor.mouseY, col.getRGB(), strokeWidth, getTransparency(), lineType);
 
 		editor.mouseX = startX;
 		editor.mouseY = startY;
@@ -340,7 +340,7 @@ class IconMouseOps
 			return;
 		}
 		if (state.equals(State.drawArc2)) {
-			Arc arc = new Arc(startX, startY, arcWidth, arcHeight, arcStartAngle, arcAngle, color.getRGB(), fill, strokeWidth, getTransparency(), getLineType());
+			Arc arc = new Arc(startX, startY, arcWidth, arcHeight, arcStartAngle, arcAngle, color.getRGB(), fill, strokeWidth, getTransparency(), lineType);
 			editor.shapeList.add(arc);
 			setState(State.selection);
 		}
@@ -741,7 +741,7 @@ class IconMouseOps
 					Rect rect = new Rect(Math.min(startX, editor.mouseX),
 						Math.min(startY, editor.mouseY), width,
 						height, color.getRGB(), fill,
-						strokeWidth, getTransparency(), getLineType());
+						strokeWidth, getTransparency(), lineType);
 					editor.shapeList.add(rect);
 				}
 				editor.repaint();
@@ -750,7 +750,7 @@ class IconMouseOps
 				int height = Math.abs(editor.mouseY - startY);
 				Oval oval = new Oval(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width,
 					height, color.getRGB(), fill,
-					strokeWidth, getTransparency(), getLineType());
+					strokeWidth, getTransparency(), lineType);
 				editor.shapeList.add(oval);
 			} else if (state.equals(State.drawArc) || state.equals(State.drawFilledArc)) {
 				arcWidth = Math.abs(editor.mouseX - startX);
@@ -758,7 +758,7 @@ class IconMouseOps
                 setState(State.drawArc1);
 			} else if (state.equals(State.drawLine)) {
 				Line line = new Line(startX, startY, editor.mouseX, editor.mouseY,
-					color.getRGB(), strokeWidth, getTransparency(), getLineType());
+					color.getRGB(), strokeWidth, getTransparency(), lineType);
 				editor.shapeList.add(line);
 			} else if (state.equals(State.resize)) {
 				state = State.selection;
@@ -774,7 +774,6 @@ class IconMouseOps
 			}
 
 		}
-
 	}
 
 	/**
@@ -969,4 +968,4 @@ class IconMouseOps
 		}
 		editor.drawingArea.grabFocus();
 	}
-}
+} // end of class

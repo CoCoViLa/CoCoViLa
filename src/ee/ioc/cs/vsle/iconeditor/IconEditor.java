@@ -554,7 +554,16 @@ public class IconEditor
 
 				float alpha = (float) (1 - (mListener.getTransparency() / 100));
 				g2.setColor(new Color(red, green, blue, alpha));
-				g2.setStroke(new BasicStroke((float) mListener.strokeWidth));
+
+
+		if(mListener.lineType>0) {
+		g2.setStroke(new BasicStroke((float)mListener.strokeWidth, BasicStroke.CAP_BUTT,
+									 BasicStroke.JOIN_ROUND, 50,
+									 new float[] {mListener.lineType,mListener.lineType}
+									 , 0));
+	  } else {
+		g2.setStroke(new BasicStroke((float) mListener.strokeWidth));
+	  }
 
 				final int width = Math.abs(mouseX - mListener.startX);
 				final int height = Math.abs(mouseY - mListener.startY);
@@ -1510,4 +1519,4 @@ public class IconEditor
 		}
 	} // zoom
 
-}
+} // end of class

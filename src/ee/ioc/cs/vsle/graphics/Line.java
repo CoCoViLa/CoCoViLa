@@ -99,11 +99,11 @@ public class Line extends Shape implements Serializable {
 
 	public void setFixed(boolean b) {
 		this.fixed = b;
-	}
+	} // setFixed
 
 	public boolean isFixed() {
 		return this.fixed;
-	}
+	} // isFixed
 
 	public String toString() {
 		return getName();
@@ -427,7 +427,7 @@ public class Line extends Shape implements Serializable {
 		g2.setStroke(new BasicStroke((float) 1.0));
 		g2.fillRect(startX - 2, startY - 2, 4, 4);
 		g2.fillRect(endX - 2, endY - 2, 4, 4);
-	} // drawSelection
+	} // drawSelection 
 
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
 
