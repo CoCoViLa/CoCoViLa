@@ -231,6 +231,14 @@ public class StringUtil {
 		};
 	} // getNoString
 
+    public static String indent(int size) {
+        StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < size; i++) {
+			sb.append(' ');
+		}
+		return sb.toString();
+	}
+
 	public static void main(String[] args) {
 		java.util.Date date=new java.sql.Timestamp(System.currentTimeMillis());
 		System.out.println(asSQL(date));

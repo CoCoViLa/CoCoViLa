@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.util.VMath;
+import ee.ioc.cs.vsle.util.StringUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -174,6 +175,20 @@ public class Connection implements Serializable {
 		}
 		return null;
 	} // breakPointContains
+
+    	public String toXML() {
+		String xml = "<connection obj1=\""+beginPort.obj.name+"\" port1=\""+beginPort+
+			 " obj2=\""+endPort.obj.name+"\" port2=\""+endPort+"\">\n";
+		xml += "  <breakpoints>\n";
+		for (int i = 0; i < breakPoints.size(); i++) {
+			Point point = (Point)breakPoints.get(i);
+            xml += StringUtil.indent(4) + "<point x=\""+point.x+" y=\""+point.y+"\"/>\n";
+		}
+		xml += "  </breakpoints>\n";
+        xml += "</connection>\n";
+		return xml;
+
+	}
 
 	/**
 	 * Draw the connection line.

@@ -457,7 +457,8 @@ public class SpecParser {
 	 @param	parent
 	 @param	checkedClasses the list of classes that parser has started to check. Needed to prevent infinite loop
 	 in case of mutual declarations.
-	 */ public ClassList parseSpecification(String spec, String className, AnnotatedClass parent, HashSet checkedClasses) throws IOException, SpecParseException, EquationException {
+	 */
+	public ClassList parseSpecification(String spec, String className, AnnotatedClass parent, HashSet checkedClasses) throws IOException, SpecParseException, EquationException {
 		Matcher matcher2;
 		Pattern pattern;
 		String[] split;
@@ -584,12 +585,21 @@ public class SpecParser {
 						pattern = Pattern.compile("(.*) *-> ?(.*)\\{(.*)\\}");
 						matcher2 = pattern.matcher(lt.specLine);
 						if (matcher2.find()) {
+
+							String[] outputs = matcher2.group(2).trim().split(" *, *", -1);
+
+							if (!outputs[0].equals("")) {
+								if (outputs[0].indexOf("*")>=0) {
+									getWildCards(classList, outputs[0]);
+								}
+
+							}
 							ClassRelation classRelation = new ClassRelation(2);
 
 							if (matcher2.group(2).trim().equals("")) {
 								throw new SpecParseException("Error in line \n" + lt.specLine + "\nin class " + className + ".\nAn axiom can not have an empty output.");
 							}
-							String[] outputs = matcher2.group(2).trim().split(" *, *", -1);
+							//String[] outputs = matcher2.group(2).trim().split(" *, *", -1);
 
 							if (!outputs[0].equals("")) {
 								classRelation.addOutputs(outputs, vars);
@@ -643,6 +653,14 @@ public class SpecParser {
 		annClass.addVars(vars);
 		classList.add(annClass);
 		return classList;
+	}
+
+	private void getWildCards(ClassList classList, String output) {
+        String list[] = output.split("\\.");
+		for (int i = 0; i < list.length; i++) {
+			db.p(list[i]);
+		}
+
 	}
 
 	/**

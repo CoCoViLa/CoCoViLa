@@ -423,4 +423,17 @@ public class GObj implements Serializable, Cloneable {
 		this.graphics = graphics;
 	}
 
+	public String toXML() {
+		String xml = "<object name=\""+name+"\" type=\""+className+"\" >\n";
+        xml += "  <properties x=\""+ x+"\" y=\""+y+"\" width=\""+ width+"\" height=\""+height+"\" xsize=\""+Xsize+"\" ysize=\""+Ysize+"\" strict=\""+strict+"\" />\n";
+		xml += "  <fields>\n";
+		for (int i = 0; i < fields.size(); i++) {
+			ClassField field = (ClassField)fields.get(i);
+            xml += StringUtil.indent(4) + field.toXML();
+		}
+		xml += "  </fields>\n";
+        xml += "</object>\n";
+		return xml;
+
+	}
 }

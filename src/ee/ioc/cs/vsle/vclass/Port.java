@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.util.StringUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public int getRealX() {
-		return (int) (obj.getXSize() * x+ obj.getX());
+		return (int) (obj.getXSize() * x + obj.getX());
 	}
 
 	public int getRealY() {
@@ -245,10 +246,9 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public boolean isAny() {
-		if (name.equals("*any")|| type.equals("any") )
+		if (name.equals("*any") || type.equals("any"))
 			return true;
 		return false;
 	}
-
 
 }

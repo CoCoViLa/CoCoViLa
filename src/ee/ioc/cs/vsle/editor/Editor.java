@@ -196,7 +196,14 @@ public class Editor extends JFrame {
 				try {
 					FileOutputStream fos = new FileOutputStream(file);
 					ObjectOutputStream oos = new ObjectOutputStream(fos);
-
+                    for (int i=0;i<objects.size();i++) {
+						GObj obj = (GObj)objects.get(i);
+						db.p(obj.toXML());
+					}
+                    for (int i=0;i<connections.size();i++) {
+						Connection con = (Connection)connections.get(i);
+						db.p(con.toXML());
+					}
 					scheme.objCount = objCount;
 					oos.writeObject(scheme);
 					oos.close();
@@ -520,13 +527,12 @@ public class Editor extends JFrame {
 		for (int i = 0; i < connections.size(); i++) {
 			con = (Connection) connections.get(i);
 		}
-		db.p("objcount on enne" + objCount);
 		for (int i = 0; i < objects2.size(); i++) {
 			obj = (GObj) objects2.get(i);
 			obj.setName(obj.className + "_" + Integer.toString(objCount));
 			objCount++;
 		}
-		db.p("objcount on " + objCount);
+
 		for (int i = 0; i < selected.size(); i++) {
 			obj = (GObj) selected.get(i);
 			obj.setSelected(false);
