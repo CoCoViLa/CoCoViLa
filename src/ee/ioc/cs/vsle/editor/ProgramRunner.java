@@ -17,7 +17,7 @@ import javax.swing.JTextArea;
  */
 public class ProgramRunner {
 	Object genObject;
-	public static HashSet foundVars;
+	public static HashSet foundVars = new HashSet();
 
 	void runPropagate(Object genObject, ObjectList objects) {
 		try {
