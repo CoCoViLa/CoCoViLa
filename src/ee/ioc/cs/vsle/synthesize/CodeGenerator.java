@@ -83,12 +83,16 @@ public class CodeGenerator {
                     if ( trel.getInputs().size() == 1 && trel.getOutputs().size() == 1 ) {
                         Var in = ( Var ) trel.getInputs().get( 0 );
                         Var out = ( Var ) trel.getOutputs().get( 0 );
-
+                        boolean isRelInAlgorithm = false;
                         if ( subInputs.contains( in ) ) {
                             alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubInput( in, true ) );
                             appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
-                        } else if ( subOutputs.contains( out ) ) {
-                            appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
+                            isRelInAlgorithm = true;
+                        } //else
+                        if ( subOutputs.contains( out ) ) {
+                            if ( !isRelInAlgorithm ) {
+                                appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
+                            }
                             alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubInput( out, false ) );
                             break; //there should be no axioms after return statement.
                         }
@@ -99,7 +103,6 @@ public class CodeGenerator {
                 }
 
             }
-
             alg.append( cOT( OT_DEC, 1 ) + "}\n"
                         + cOT( OT_DEC, 1 ) + "}\n" );
 
