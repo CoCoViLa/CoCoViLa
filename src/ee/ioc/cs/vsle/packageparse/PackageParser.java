@@ -30,10 +30,12 @@ public class PackageParser {
 
 	PackageClass newClass;
 	Port newPort;
+	ClassField newField;
 	ClassGraphics newGraphics;
 	String element;
 	String path;
 	ArrayList classFields;
+	final int CLASS = 1, PORT_OPEN = 2, PORT_CLOSED = 3, PACKAGE= 4, FIELD = 5, FIELD_KNOWN = 6;
 
 	/**
 	 * Statuses:
@@ -115,10 +117,10 @@ public class PackageParser {
 								 Attributes attrs) throws SAXException {
 			element = qName;
 			if (element.equals("package")) {
-				status = 4;
+				status = PACKAGE;
 			}
 			if (element.equals("class")) {
-				status = 1;
+				status = CLASS;
 			}
 			if (element.equals("graphics")) {
 				newGraphics = new ClassGraphics();
@@ -134,7 +136,7 @@ public class PackageParser {
 			}
 
 			if (element.equals("port")) {
-				status = 2;
+				status = PORT_OPEN;
 				String name = attrs.getValue("name");
 				String type = attrs.getValue("type");
 				String x = attrs.getValue("x");
@@ -146,12 +148,18 @@ public class PackageParser {
 					Integer.parseInt(y), portConnection, strict);
 			}
 			if (element.equals("open")) {
-				status = 2;
+				status =  PORT_OPEN;
+			}
+			if (element.equals("default")) {
+				status =  FIELD;
+			}
+			if (element.equals("known")) {
+				status =  FIELD_KNOWN;
 			}
 
 
 			if (element.equals("closed")) {
-				status = 3;
+				status =  PORT_CLOSED;
 			}
 
 			if (element.equals("fields")) {
@@ -162,8 +170,9 @@ public class PackageParser {
 				String type = attrs.getValue("type");
 				String value = attrs.getValue("value");
 
-				ClassField cf = new ClassField(name, type, value);
-				classFields.add(cf);
+				newField = new ClassField(name, type, value);
+				classFields.add(newField);
+
 			}
 			if (element.equals("text")) {
 				String str = attrs.getValue("string");
@@ -284,7 +293,7 @@ public class PackageParser {
 						}
 
 				newClass.addPort(newPort);
-				status = 1;
+				status = CLASS;
 			}
 			if (qName.equals("fields")) {
 				newClass.fields = classFields;
@@ -308,12 +317,16 @@ public class PackageParser {
 						}
 					}
 				}
-
+				status = CLASS;
 			}
 			if (qName.equals("graphics")) {
-				if (status == 2) {
+				if (status == FIELD) {
+					newField.defaultGraphics = newGraphics;
+				} else if (status == FIELD_KNOWN) {
+					newField.knownGraphics = newGraphics;
+				} else if (status == PORT_OPEN) {
 					newPort.openGraphics = newGraphics;
-				} else if (status == 3) {
+				} else if (status == PORT_CLOSED) {
 					newPort.closedGraphics = newGraphics;
 				} else {
 					//newGraphics.packageClass = newClass;
@@ -329,18 +342,18 @@ public class PackageParser {
 
 			if (element.equals("name")) {
 				// if we are reading a package field
-				if (status == 4) {
+				if (status == PACKAGE) {
 					pack.name = s;
 				} else { // else we a reading a class field
 					newClass = new PackageClass(s);
 					// classNames.add(s);
 				}
 			}
-			if (element.equals("description") && status == 4) {
+			if (element.equals("description") && status == PACKAGE) {
 				pack.description = s;
 			}
 
-			if (element.equals("description") && status != 4) {
+			if (element.equals("description") && status != PACKAGE) {
 				newClass.description = s;
 			}
 			if (element.equals("icon")) {

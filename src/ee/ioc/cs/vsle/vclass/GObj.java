@@ -281,6 +281,22 @@ public class GObj implements Serializable, Cloneable {
 					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
 			}
 		}
+
+		for (int i = 0; i < fields.size(); i++) {
+			ClassField field = (ClassField)fields.get(i);
+
+			if (field.defaultGraphics != null) {
+				field.defaultGraphics.draw(xModifier ,
+					yModifier, getXsize(), getYsize(), g);
+			}
+			if (field.isKnown() && field.knownGraphics !=null) {
+				field.knownGraphics.draw(xModifier,
+					yModifier, getXsize(), getYsize(), g);
+			}
+		}
+
+
+
 		g.setColor(Color.black);
 		if (isSelected() == true) {
 			g.drawRect(getX() + portOffsetX1, getY() + portOffsetY1, 4, 4);

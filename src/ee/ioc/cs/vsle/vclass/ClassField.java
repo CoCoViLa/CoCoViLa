@@ -20,6 +20,8 @@ public class ClassField implements Cloneable, Serializable {
 	public boolean alias = false;
 	public boolean watched = false;
 	public ArrayList vars;
+	public ClassGraphics knownGraphics;
+	public ClassGraphics defaultGraphics;
 
 	/**
 	 * Class constructor.
@@ -169,4 +171,11 @@ public class ClassField implements Cloneable, Serializable {
 	public boolean isSpecField() {
 		return specField;
 	} // isSpecField
+
+	public boolean isKnown() {
+		if (value == null) {
+		    return false;
+		}
+		return true;
+	}
 }

@@ -401,7 +401,6 @@ public class Editor extends JFrame {
 				currentObj.drawClassGraphics(g2);
 			} else if (currentObj != null && !mListener.state.startsWith("??")) {
 				// ee.ioc.cs.editor.vclass.PackageClass pClass = (ee.ioc.cs.editor.vclass.PackageClass)classes.get(currentObj.name);
-				db.p("currentobja " + currentObj);
 				g2.setColor(Color.black);
 				currentObj.drawClassGraphics(g2);
 			}
