@@ -45,6 +45,6 @@ class Problem {
 	}
 
 	public String toString() {
-		return ("All: " + allVars + " Rels: " + allRels + " Known: " + knownVars + " Targets:" + targetVars + " Axioms:" + axioms);
+		return ("All: " + allVars + "\n Rels: " + allRels + "\n Known: " + knownVars + "\n Targets:" + targetVars + "\n Axioms:" + axioms);
 	}
 }

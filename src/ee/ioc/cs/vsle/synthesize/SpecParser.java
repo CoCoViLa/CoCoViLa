@@ -47,6 +47,7 @@ public class SpecParser {
 	 */
 	public String getStringFromFile(String fileName) throws IOException {
 		db.p("Retrieving " + fileName);
+
 		BufferedReader in = new BufferedReader(new FileReader(fileName));
 		String lineString, fileString = new String();
 
