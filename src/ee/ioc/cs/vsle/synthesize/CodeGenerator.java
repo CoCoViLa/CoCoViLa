@@ -107,11 +107,8 @@ public class CodeGenerator {
                         " = new Subtask_" + subNum + "();\n" );
         }
 
-        String relString = rel.toString();
-        for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
-            relString = relString.replaceFirst( RelType.TAG_SUBTASK, "subtask_" + ( start + i ) );
-        }
-        alg.append( appendExceptions( rel, relString ) );
+        appendSubtaskRelToAlg( rel, start, alg );
+
     }
 
 
@@ -141,6 +138,20 @@ public class CodeGenerator {
             else {
                 buf.append( appendExceptions( rel, s ) );
             }
+        }
+    }
+
+    private void appendSubtaskRelToAlg( Rel rel, int startInd, StringBuffer buf ) {
+
+        String relString = rel.toString();
+        for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
+            relString = relString.replaceFirst( RelType.TAG_SUBTASK, "subtask_" + ( startInd + i ) );
+        }
+        if(rel.exceptions.size() == 0 ) {
+            buf.append(cOT( OT_NOC, 0 ) + relString + ";\n" );
+        }
+        else {
+            buf.append( appendExceptions( rel, relString ) );
         }
     }
 
