@@ -37,7 +37,9 @@
         x2		CDATA   #REQUIRED
         y2		CDATA   #REQUIRED
         colour		CDATA   #IMPLIED
-        fixed           (true|false) #IMPLIED>      
+        fixed           (true|false) #IMPLIED
+        stroke		CDATA	#IMPLIED
+        transparency	CDATA	#IMPLIED>      
 <!ATTLIST rect
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
@@ -45,7 +47,9 @@
         height		CDATA   #REQUIRED
         colour		CDATA   #IMPLIED
 	filled 		(true|false) #IMPLIED
-	fixed           (true|false) #IMPLIED>
+	fixed           (true|false) #IMPLIED
+        stroke		CDATA	#IMPLIED
+        transparency	CDATA	#IMPLIED>
 <!ATTLIST arc
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
@@ -55,7 +59,9 @@
         arcAngle	CDATA   #REQUIRED
         colour		CDATA   #IMPLIED
 	filled 		(true|false) #IMPLIED
-	fixed           (true|false) #IMPLIED>
+	fixed           (true|false) #IMPLIED
+        stroke		CDATA	#IMPLIED
+        transparency	CDATA	#IMPLIED>
 <!ATTLIST bounds
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
@@ -68,7 +74,9 @@
         height		CDATA   #REQUIRED       
         colour		CDATA   #IMPLIED
 	filled 		(true|false) #IMPLIED
-	fixed           (true|false) #IMPLIED>		   
+	fixed           (true|false) #IMPLIED
+        stroke		CDATA	#IMPLIED
+        transparency	CDATA	#IMPLIED>		   
 <!ATTLIST field 
         name		CDATA   #REQUIRED
         type		CDATA   #IMPLIED
@@ -80,7 +88,8 @@
         y		CDATA   #REQUIRED
         fontname        CDATA   #REQUIRED
         fontstyle       CDATA   #REQUIRED
-        fontsize        CDATA   #REQUIRED>
+        fontsize        CDATA   #REQUIRED
+        transparency	CDATA	#IMPLIED>
 <!ATTLIST port
 	name 		CDATA 	#REQUIRED
 	type 		CDATA 	#REQUIRED
