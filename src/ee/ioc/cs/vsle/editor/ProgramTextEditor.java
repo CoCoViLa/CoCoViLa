@@ -7,15 +7,11 @@ import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.synthesize.ClassList;
 import ee.ioc.cs.vsle.synthesize.Synthesizer;
-import ee.ioc.cs.vsle.synthesize.SpecParser;
 import ee.ioc.cs.vsle.synthesize.SpecParseException;
-import ee.ioc.cs.vsle.synthesize.UnknownVariableException;
 import ee.ioc.cs.vsle.synthesize.LineErrorException;
 import ee.ioc.cs.vsle.synthesize.MutualDeclarationException;
-import ee.ioc.cs.vsle.synthesize.EquationException;
 
 import java.util.ArrayList;
 import java.util.HashSet;

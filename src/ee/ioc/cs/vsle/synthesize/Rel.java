@@ -17,7 +17,13 @@ class Rel {
 	String method;
     boolean inAlgorithm = false;
 
-	int type; /* 1 - equals, 2 - method*/
+	int type;
+
+    /** @link dependency */
+    /*# Var lnkVar; */
+
+ /* 1 - equals, 2 - method*/
+
 
 	void setFlag(int f) {
 		flag = f;

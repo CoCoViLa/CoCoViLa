@@ -24,6 +24,11 @@ import java.util.regex.Matcher;
 public class Synthesizer {
 	final int declaration = 1, assignment = 2, axiom = 3, equation = 4, alias = 5, error = 10;
     public static boolean tempIsDone = false; //indicates if it is needed to declare a TEMP variable in Rel.java when generating code, or it has already been done
+    
+
+    /** @link dependency */
+    /*# SpecParser lnkSpecParser; */
+
 	/** Does the planning.
 	 @return a program implementing the specification.
 	 @param problem the specification unfolded as a graph.

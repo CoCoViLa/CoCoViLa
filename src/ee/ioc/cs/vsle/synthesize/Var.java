@@ -20,6 +20,9 @@ class Var {
 	String object;
 	String name;
 
+    /** @link dependency */
+    /*# Rel lnkRel; */
+
 	/**
 	 * <UNCOMMENTED>
 	 * @param obj String
