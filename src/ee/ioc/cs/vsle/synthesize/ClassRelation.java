@@ -21,6 +21,7 @@ class ClassRelation
 	ArrayList inputs = new ArrayList();
 	ArrayList subtasks = new ArrayList();
 	ArrayList outputs = new ArrayList();
+        ArrayList exceptions = new ArrayList();
 
 	/**
 	 * Type of the relation.
@@ -142,24 +143,48 @@ class ClassRelation
 	 */
 	void addOutputs(String[] output, ArrayList varList) throws UnknownVariableException {
 		for (int i = 0; i < output.length; i++) {
-			ClassField var = getVar(output[i], varList);
+                    //we must have at least one output, others will be considered as exceptions
+                    if( i == 0 ) {
+                        ClassField var = getVar( output[ i ], varList );
 
-			if (var != null) {
-				outputs.add(var);
-			}
-			else if (output[i].indexOf(".") >= 1) {
-				ClassField cf = new ClassField();
+                        if ( var != null ) {
+                            outputs.add( var );
+                        } else if ( output[ i ].indexOf( "." ) >= 1 ) {
+                            ClassField cf = new ClassField();
 
-				cf.name = output[i];
-				outputs.add(cf);
-			} else if (output[i].startsWith("*.")) {
-				ClassField cf = new ClassField();
-				cf.name = output[i];
-				outputs.add(cf);
-		}
-			else {
-				throw new UnknownVariableException(output[i]);
-			}
+                            cf.name = output[ i ];
+                            outputs.add( cf );
+                        } else if ( output[ i ].startsWith( "*." ) ) {
+                            ClassField cf = new ClassField();
+                            cf.name = output[ i ];
+                            outputs.add( cf );
+                        } else {
+                            throw new UnknownVariableException( output[ i ] );
+                        }
+                    }
+                    else {
+                        //Exception can be declared explicitly in rel - (java.lang.Exception)
+                        //or java.lang.Exception exc;
+                        String s = output[ i ];
+                        Pattern pattern = Pattern.compile( ".*\\([ .A-Za-z0-9]+\\).*" );
+                        Matcher matcher = pattern.matcher( s );
+                        if ( matcher.find() ) {
+                            ClassField cf = new ClassField();
+                            cf.name = "exception";
+                            cf.type = s.replaceAll("[ ()]+", "");
+                            exceptions.add(cf);
+
+                        } else {
+                            ClassField var = getVar( s, varList );
+
+                            if ( var != null ) {
+                                exceptions.add(var);
+                            } else {
+                                throw new UnknownVariableException( output[ i ] );
+                            }
+                        }
+
+                    }
 		}
 	} // addOutputs
 
