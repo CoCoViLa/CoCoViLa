@@ -50,14 +50,14 @@ public class CodeGenerator {
             }
 
             else if ( rel.type == RelType.method_with_subtask ) {
-                genSubTasks( rel, alg );
+                genSubTasks( rel, alg, false );
             }
 
         }
         return alg.toString();
     }
 
-    private void genSubTasks( Rel rel, StringBuffer alg ) {
+    private void genSubTasks( Rel rel, StringBuffer alg, boolean isNestedSubtask ) {
         int subNum;
         int start = subCount;
 
@@ -77,7 +77,7 @@ public class CodeGenerator {
 
                 if ( trel.type == RelType.method_with_subtask ) {
                     //recursion
-                    genSubTasks( trel, alg );
+                    genSubTasks( trel, alg, true );
 
                 } else if ( trel.type == RelType.equation ) {
                     if ( trel.getInputs().size() == 1 && trel.getOutputs().size() == 1 ) {
@@ -107,7 +107,7 @@ public class CodeGenerator {
                         " = new Subtask_" + subNum + "();\n" );
         }
 
-        appendSubtaskRelToAlg( rel, start, alg );
+        appendSubtaskRelToAlg( rel, start, alg, isNestedSubtask );
 
     }
 
@@ -141,13 +141,13 @@ public class CodeGenerator {
         }
     }
 
-    private void appendSubtaskRelToAlg( Rel rel, int startInd, StringBuffer buf ) {
+    private void appendSubtaskRelToAlg( Rel rel, int startInd, StringBuffer buf, boolean isNestedSubtask ) {
 
         String relString = rel.toString();
         for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
             relString = relString.replaceFirst( RelType.TAG_SUBTASK, "subtask_" + ( startInd + i ) );
         }
-        if(rel.exceptions.size() == 0 ) {
+        if(rel.exceptions.size() == 0 || isNestedSubtask ) {
             buf.append(cOT( OT_NOC, 0 ) + relString + ";\n" );
         }
         else {
@@ -162,9 +162,11 @@ public class CodeGenerator {
                     cOT( OT_DEC, 1 ) + "}\n" );
         for ( int i = 0; i < rel.exceptions.size(); i++ ) {
             String excp = ( ( Var ) rel.exceptions.get( i ) ).name;
-
-            buf.append( cOT( OT_NOC, 0 ) + "catch( " + excp + " ex" + i + " ) {\n" +
-                        cOT( OT_NOC, 0 ) + "}\n" );
+            String instanceName = "ex" + i;
+            buf.append( cOT( OT_NOC, 0 ) + "catch( " + excp + " " + instanceName + " ) {\n" +
+                        cOT( OT_INC, 1 ) + instanceName + ".printStackTrace();\n" +
+                        cOT( OT_NOC, 0 ) + "return;\n" +
+                        cOT( OT_DEC, 1 ) + "}\n" );
         }
 
         return buf.toString();
