@@ -58,7 +58,7 @@ public class Look {
 			}
 		} else if (selectedLayout.equals(LOOK_3D)) {
 			try {
-				//UIManager.setLookAndFeel(					new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
+			  UIManager.setLookAndFeel(	new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
 			} catch (Exception uie) {
 			}
 		}

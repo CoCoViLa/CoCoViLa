@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
+import ee.ioc.cs.vsle.util.VMath;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.awt.Graphics;
@@ -51,7 +53,7 @@ public class Connection implements Serializable {
 		for (int i = 0; i < breakPoints.size() - 1; i++) {
 			p1 = (Point) breakPoints.get(i);
 			p2 = (Point) breakPoints.get(i + 1);
-			distance = calcDistance(p1.x, p1.y, p2.x, p2.y, pointX, pointY);
+			distance = VMath.calcDistance(p1.x, p1.y, p2.x, p2.y, pointX, pointY);
 			if (distance < minDistance) {
 				minDistance = distance;
 			}
@@ -70,32 +72,6 @@ public class Connection implements Serializable {
 	 * @param pointY int
 	 * @return float
 	 */
-	float calcDistance(int x1, int y1, int x2, int y2, int pointX, int pointY) {
-		int calc1 = (pointX - x1) * (x2 - x1) + (pointY - y1) * (y2 - y1);
-		int calc2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-
-		float U = (float) calc1 / (float) calc2;
-
-		float intersectX = x1 + U * (x2 - x1);
-		float intersectY = y1 + U * (y2 - y1);
-
-		double distance = Math.sqrt(
-			(pointX - intersectX) * (pointX - intersectX)
-			+ (pointY - intersectY) * (pointY - intersectY));
-
-		double distanceFromEnd1 = Math.sqrt(
-			(x1 - pointX) * (x1 - pointX) + (y1 - pointY) * (y1 - pointY));
-		double distanceFromEnd2 = Math.sqrt(
-			(x2 - pointX) * (x2 - pointX) + (y2 - pointY) * (y2 - pointY));
-		double lineLength = Math.sqrt(
-			(x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-
-		if (lineLength < Math.max(distanceFromEnd1, distanceFromEnd2)) {
-			distance = Math.max(Math.min(distanceFromEnd1, distanceFromEnd2),
-				distance);
-		}
-		return (float) distance;
-	} // calcDistance
 
 	/**
 	 * Adds a new breakpoint to the connection line.

@@ -5,317 +5,422 @@ import java.util.*;
 
 import java.awt.*;
 
-public class Rect
-	extends Shape
-	implements Serializable {
-	String xEquation;
-	String yEquation;
-	String widthEquation;
-	String heightEquation;
-	boolean filled = false;
-	Color color;
-	float transparency = (float) 1.0;
-	double rotation = 0.0;
+public class Rect extends Shape implements Serializable {
+  String xEquation;
+  String yEquation;
+  String widthEquation;
+  String heightEquation;
 
-	/**
-	 * Line weight, logically equals to stroke width.
-	 */
-	private float lineWeight;
+  /**
+   * Indicates if the shape is drawn filled or not.
+   */
+  boolean filled = false;
 
-	/**
-	 * Alpha value of a color, used
-	 * for defining the transparency of a filled shape.
-	 */
-	private float alpha;
+  /**
+   * Shape color.
+   */
+  Color color;
 
-	public Rect(int x, int y, int width, int height, int colorInt, boolean filled,
-				double strokeWidth, double transp) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.color = new Color(colorInt);
-		this.filled = filled;
-		setStrokeWidth(strokeWidth);
-		this.transparency = (float) transp;
+  /**
+   * Shape transparency percentage.
+   */
+  float transparency = (float) 1.0;
+
+  /**
+   * Name of the shape.
+   */
+  String name;
+
+  /**
+   * Indicates if the shape is selected or not.
+   */
+  private boolean selected = false;
+
+  /**
+   * Indicates if shape should be drawn antialiased or not.
+   */
+  private boolean antialiasing = true;
+
+  /**
+   * Percentage for resizing, 1 means real size.
+   */
+  private float size = 1;
+
+  /**
+   * Shape graphics
+   */
+  Graphics2D g2;
+
+  /**
+   * Line weight, logically equals to stroke width.
+   */
+  private float lineWeight;
+
+  /**
+   * Alpha value of a color, used
+   * for defining the transparency of a filled shape.
+   */
+  private float alpha;
+
+  /**
+   * Shape constructor.
+   * @param x int - shape x coordinate.
+   * @param y int - shape y coordinate.
+   * @param width int - width of the shape.
+   * @param height int - height of the shape.
+   * @param colorInt int - color of the shape.
+   * @param filled boolean - the shape is filled or not.
+   * @param strokeWidth double - line width of the shape.
+   * @param transp double - shape transparency percentage.
+   */
+  public Rect(int x, int y, int width, int height, int colorInt, boolean filled,
+			  double strokeWidth, double transp) {
+	this.x = x;
+	this.y = y;
+	this.width = width;
+	this.height = height;
+	this.color = new Color(colorInt);
+	this.filled = filled;
+	setStrokeWidth(strokeWidth);
+	this.transparency = (float) transp;
+  } // Rect
+
+  public boolean contains(int pointX, int pointY) {
+	if (pointX > x + size && pointY > y + size  && pointX < x + size + width && pointY < y + size + height ) {
+		return true;
+	}
+	return false;
+  } // contains
+
+  public String getName() {
+	return this.name;
+  } // getName
+
+  public int getRealHeight() {
+	return (int) (getHeight() * getSize());
+  } // getRealHeight
+
+  public int getRealWidth() {
+	return (int) (getWidth() * getSize());
+  } // getRealWidth
+
+  public float getSize() {
+	return this.size;
+  } // getSize
+
+  /**
+   * Returns the color of the rectangle.
+   * @return Color - color of the rectangle.
+   */
+  public Color getColor() {
+	return this.color;
+  } // getColor
+
+  public boolean isSelected() {
+	return this.selected;
+  } // isSelected
+
+  public String toString() {
+	return getName();
+  } // toString
+
+  public void setAntialiasing(boolean b) {
+	this.antialiasing = b;
+  } // setAntialiasing
+
+  public boolean isInside(int x1, int y1, int x2, int y2) {
+	if (x1 > x && y1 > y && x2 < x + (int) (size * width) && y2 < y + (int) (size * height)) {
+		return true;
+	}
+	return false;
+  } // isInside
+
+  public boolean isInsideRect(int x1, int y1, int x2, int y2) {
+	if (x1 < x && y1 < y && x2 > x + (int) (size * width) && y2 > y + (int) (size * height)) {
+		return true;
+	}
+	return false;
+  } // isInsideRect
+
+  public void setSelected(boolean b) {
+	this.selected = b;
+  } // setSelected
+
+  public void setName(String s) {
+	this.name = s;
+  } // setName
+
+  /**
+   * Set size using zoom multiplication.
+   * @param s float - set size using zoom multiplication.
+   */
+  public void setMultSize(float s) {
+	this.size = getSize() * s;
+  } // setMultSize
+
+  /**
+   * Set the color of a shape.
+   * @param col Color - color of a shape.
+   */
+  public void setColor(Color col) {
+	this.color = col;
+  } // setColor
+
+  public void setPosition(int x, int y) {
+	this.x = x;
+	this.y = y;
+  } // setPosition
+
+  /**
+   * Returns a boolean value representing if the shape is filled or not.
+   * @return boolean - a boolean value representing if the shape is filled or not.
+   */
+  public boolean isFilled() {
+	return this.filled;
+  } // isFilled
+
+  /**
+   * Returns the transparency of the shape.
+   * @return double - the transparency of the shape.
+   */
+  public double getTransparency() {
+	return this.transparency;
+  } // getTransparency
+
+  /**
+   * Returns the stroke with of a shape.
+   * @return double - stroke width of a shape.
+   */
+  public double getStrokeWidth() {
+	return this.lineWeight;
+  } // getStrokeWidth
+
+  /**
+   * Resizes current object.
+   * @param deltaW int - change of object with.
+   * @param deltaH int - change of object height.
+   * @param cornerClicked int - number of the clicked corner.
+   */
+  public void resize(int deltaW, int deltaH, int cornerClicked) {
+
+	if (cornerClicked == 1) { // TOP-LEFT
+	  if ( (this.width - deltaW) > 0 && (this.height - deltaH) > 0) {
+		this.x += deltaW;
+		this.y += deltaH;
+		this.width -= deltaW;
+		this.height -= deltaH;
+	  }
+	}
+	else if (cornerClicked == 2) { // TOP-RIGHT
+	  if ( (this.width + deltaW) > 0 && (this.height - deltaH) > 0) {
+		this.y += deltaH;
+		this.width += deltaW;
+		this.height -= deltaH;
+	  }
+	}
+	else if (cornerClicked == 3) { // BOTTOM-LEFT
+	  if ( (this.width - deltaW) > 0 && (this.height + deltaH) > 0) {
+		this.x += deltaW;
+		this.width -= deltaW;
+		this.height += deltaH;
+	  }
+	}
+	else if (cornerClicked == 4) { // BOTTOM-RIGHT
+	  if ( (this.width + deltaW) > 0 && (this.height + deltaH) > 0) {
+		this.width += deltaW;
+		this.height += deltaH;
+	  }
+	}
+  } // resize
+
+  /**
+   * Returns the number representing a corner the mouse was clicked in.
+   * 1: top-left, 2: top-right, 3: bottom-left, 4: bottom-right.
+   * Returns 0 if the click was not in the corner.
+   * @param pointX int - mouse x coordinate.
+   * @param pointY int - mouse y coordinate.
+   * @return int - corner number the mouse was clicked in.
+   */
+  public int controlRectContains(int pointX, int pointY) {
+	if ( (pointX >= x) && (pointY >= y)) {
+	  if ( (pointX <= x + 4) && (pointY <= y + 4)) {
+		return 1;
+	  }
+	}
+	if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
+	  if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
+		return 2;
+	  }
+	}
+	if ( (pointX >= x) && (pointY >= y + (int) (size * (height)) - 4)) {
+	  if ( (pointX <= x + 4) && (pointY <= y + (int) (size * (height)))) {
+		return 3;
+	  }
+	}
+	if ( (pointX >= x + (int) (size * (width)) - 4)
+		&& (pointY >= y + (int) (size * (height)) - 4)) {
+	  if ( (pointX <= x + (int) (size * (width)))
+		  && (pointY <= y + (int) (size * (height)))) {
+		return 4;
+	  }
+	}
+	return 0;
+  } // controlRectContains
+
+  /**
+   * Draw the selection markers if object selected.
+   */
+  public void drawSelection() {
+	g2.setColor(Color.black);
+	g2.setStroke(new BasicStroke( (float) 1.0));
+	g2.fillRect(x, y, 4, 4);
+	g2.fillRect(x + (int) (size * width) - 4, y, 4, 4);
+	g2.fillRect(x, y + (int) (size * height) - 4, 4, 4);
+	g2.fillRect(x + (int) (size * width) - 4, y + (int) (size * height) - 4,
+			   4, 4);
+  } // drawSelection
+
+  /**
+   * Return a specification of the shape to be written into a file in XML format.
+   * @param boundingboxX - x coordinate of the bounding box.
+   * @param boundingboxY - y coordinate of the bounding box.
+   * @return String - specification of a shape.
+   */
+  public String toFile(int boundingboxX, int boundingboxY) {
+	String fill = "false";
+
+	if (filled) {
+	  fill = "true";
+	}
+	int colorInt = 0;
+
+	if (color != null) {
+	  colorInt = color.getRGB();
+	}
+	return "<rect x=\"" + (x - boundingboxX) + "\" y=\""
+		+ (y - boundingboxY) + "\" width=\"" + width + "\" height=\"" + height
+		+ "\" colour=\"" + colorInt + "\" filled=\"" + fill + "\"/>";
+  } // toFile
+
+  public String toText() {
+	String fill = "false";
+
+	if (filled) {
+	  fill = "true";
 	}
 
-	/**
-	 * Returns the color of the rectangle.
-	 * @return Color - color of the rectangle.
-	 */
-	public Color getColor() {
-		return this.color;
-	} // getColor
+	int colorInt = 0;
 
-	/**
-	 * Set the color of a shape.
-	 * @param col Color - color of a shape.
-	 */
-	public void setColor(Color col) {
-		this.color = col;
-	} // setColor
+	if (color != null) {
+	  colorInt = color.getRGB();
+	}
+   return "RECT:"+x+":"+y+":"+width+":"+height+":"+colorInt+":"+fill+":"+(int)this.lineWeight+":"+(int)this.transparency;
+  } // toText
 
-	public void setFont(java.awt.Font f) {
+  /**
+   * Set width of the line stroke the rectangle is drawn with.
+   * @param width double - rectangle drawing line stroke width.
+   */
+  public void setStrokeWidth(double width) {
+	try {
+	  if (width >= 0.0) {
+		this.lineWeight = (float) width;
+	  }
+	  else {
+		throw new Exception("Stroke width undefined or negative.");
+	  }
+	}
+	catch (Exception e) {
+	  e.printStackTrace();
+	}
+  } // setStrokeWidth
+
+  /**
+   * Returns x coordinate of the rectangle.
+   * @return int - rectangle x coordinate.
+   */
+  public int getX() {
+	return x;
+  } // getX
+
+  /**
+   * Returns y coordinate of the rectangle.
+   * @return int - rectangle y coordinate.
+   */
+  public int getY() {
+	return y;
+  } // getY
+
+  /**
+   * Returns width of the rectangle.
+   * @return int - rectangle width.
+   */
+  int getWidth() {
+	return width;
+  } // getWidth
+
+  /**
+   * Returns height of the rectangle.
+   * @return int - rectangle height.
+   */
+  int getHeight() {
+	return height;
+  } // getHeight
+
+  /**
+   * Set the percentage of transparency.
+   * @param transparencyPercentage double - the percentage of transparency.
+   */
+  public void setTransparency(double transparencyPercentage) {
+	this.transparency = (float) transparencyPercentage;
+  } // setTransparency
+
+  void drawDynamic(int xModifier, int yModifier, float Xsize, float Ysize,
+				   Graphics g, HashMap table) {
+	/*int drawx = xModifier + x + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(xEquation, table);
+					 int drawy = yModifier + y + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(yEquation, table)
+					 int drawWidth = width + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(widthEquation, table);
+					 int drawHeight = height + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(heightEquation, table);
+					 g.drawRect(drawx, drawy, drawWidth, drawHeight);*/
+  } // drawDynamic
+
+  /**
+   * Draw rectangle.
+   * @param xModifier int -
+   * @param yModifier int -
+   * @param Xsize float - zoom factor.
+   * @param Ysize float - zoom factor.
+   * @param g Graphics - class graphics.
+   */
+  public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
+				   Graphics g) {
+	g2 = (Graphics2D) g;
+
+	g2.setStroke(new BasicStroke(this.lineWeight));
+
+	alpha = (float) (1 - (this.transparency / 100));
+
+	float red = (float) color.getRed() * 100 / 256 / 100;
+	float green = (float) color.getGreen() * 100 / 256 / 100;
+	float blue = (float) color.getBlue() * 100 / 256 / 100;
+
+	g2.setColor(new Color(red, green, blue, alpha));
+
+	if (filled) {
+	  g2.fillRect(xModifier + (int) (Xsize * x),
+				  yModifier + (int) (Ysize * y), (int) (Xsize * width),
+				  (int) (Ysize * height));
+	}
+	else {
+	  g2.drawRect(xModifier + (int) (Xsize * x),
+				  yModifier + (int) (Ysize * y), (int) (Xsize * width),
+				  (int) (Ysize * height));
 	}
 
-	public void setText(String s) {
+	if (selected) {
+	  drawSelection();
 	}
 
-	/**
-	 * Returns a boolean value representing if the shape is filled or not.
-	 * @return boolean - a boolean value representing if the shape is filled or not.
-	 */
-	public boolean isFilled() {
-		return this.filled;
-	} // isFilled
-
-	/**
-	 * Returns the transparency of the shape.
-	 * @return double - the transparency of the shape.
-	 */
-	public double getTransparency() {
-		return this.transparency;
-	} // getTransparency
-
-	/**
-	 * Returns the stroke with of a shape.
-	 * @return double - stroke width of a shape.
-	 */
-	public double getStrokeWidth() {
-		return this.lineWeight;
-	} // getStrokeWidth
-
-	/**
-	 * Resizes current object.
-	 * @param deltaW int - change of object with.
-	 * @param deltaH int - change of object height.
-	 * @param cornerClicked int - number of the clicked corner.
-	 */
-	public void resize(int deltaW, int deltaH, int cornerClicked) {
-
-		if (cornerClicked == 1) { // TOP-LEFT
-			if ((this.width - deltaW) > 0 && (this.height - deltaH) > 0) {
-				this.x += deltaW;
-				this.y += deltaH;
-				this.width -= deltaW;
-				this.height -= deltaH;
-			}
-		} else if (cornerClicked == 2) { // TOP-RIGHT
-			if ((this.width + deltaW) > 0 && (this.height - deltaH) > 0) {
-				this.y += deltaH;
-				this.width += deltaW;
-				this.height -= deltaH;
-			}
-		} else if (cornerClicked == 3) { // BOTTOM-LEFT
-			if ((this.width - deltaW) > 0 && (this.height + deltaH) > 0) {
-				this.x += deltaW;
-				this.width -= deltaW;
-				this.height += deltaH;
-			}
-		} else if (cornerClicked == 4) { // BOTTOM-RIGHT
-			if ((this.width + deltaW) > 0 && (this.height + deltaH) > 0) {
-				this.width += deltaW;
-				this.height += deltaH;
-			}
-		}
-	} // resize
-
-	/**
-	 * Returns the number representing a corner the mouse was clicked in.
-	 * 1: top-left, 2: top-right, 3: bottom-left, 4: bottom-right.
-	 * Returns 0 if the click was not in the corner.
-	 * @param pointX int - mouse x coordinate.
-	 * @param pointY int - mouse y coordinate.
-	 * @return int - corner number the mouse was clicked in.
-	 */
-	public int controlRectContains(int pointX, int pointY) {
-		if ((pointX >= x) && (pointY >= y)) {
-			if ((pointX <= x + 4) && (pointY <= y + 4)) {
-				return 1;
-			}
-		}
-		if ((pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
-			if ((pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
-				return 2;
-			}
-		}
-		if ((pointX >= x) && (pointY >= y + (int) (size * (height)) - 4)) {
-			if ((pointX <= x + 4) && (pointY <= y + (int) (size * (height)))) {
-				return 3;
-			}
-		}
-		if ((pointX >= x + (int) (size * (width)) - 4)
-			&& (pointY >= y + (int) (size * (height)) - 4)) {
-			if ((pointX <= x + (int) (size * (width)))
-				&& (pointY <= y + (int) (size * (height)))) {
-				return 4;
-			}
-		}
-		return 0;
-	} // controlRectContains
-
-	/**
-	 * Draw the selection markers if object selected.
-	 * @param g Graphics2D - Object's Graphics.
-	 */
-	private void drawSelection(Graphics2D g) {
-		g.setColor(Color.black);
-		g.setStroke(new BasicStroke((float) 1.0));
-		g.fillRect(x, y, 4, 4);
-		g.fillRect(x + (int) (size * width) - 4, y, 4, 4);
-		g.fillRect(x, y + (int) (size * height) - 4, 4, 4);
-		g.fillRect(x + (int) (size * width) - 4, y + (int) (size * height) - 4,
-			4, 4);
-	} // drawSelection
-
-	/**
-	 * Return a specification of the shape to be written into a file in XML format.
-	 * @param boundingboxX - x coordinate of the bounding box.
-	 * @param boundingboxY - y coordinate of the bounding box.
-	 * @return String - specification of a shape.
-	 */
-	public String toFile(int boundingboxX, int boundingboxY) {
-		String fill = "false";
-
-		if (filled) {
-			fill = "true";
-		}
-		int colorInt = 0;
-
-		if (color != null) {
-			colorInt = color.getRGB();
-		}
-		return "<rect x=\"" + (x - boundingboxX) + "\" y=\""
-			+ (y - boundingboxY) + "\" width=\"" + width + "\" height=\"" + height
-			+ "\" colour=\"" + colorInt + "\" filled=\"" + fill + "\"/>";
-	} // toFile
-
-	public String toText() {
-		String fill = "false";
-
-		if (filled) {
-			fill = "true";
-		}
-
-		int colorInt = 0;
-
-		if (color != null) {
-			colorInt = color.getRGB();
-		}
-		return "RECT:" + x + ":" + y + ":" + width + ":" + height + ":" + colorInt + ":" + fill + ":" + (int) this.lineWeight + ":" + (int) this.transparency;
-	}
-
-
-	/**
-	 * Set width of the line stroke the rectangle is drawn with.
-	 * @param width double - rectangle drawing line stroke width.
-	 */
-	public void setStrokeWidth(double width) {
-		try {
-			if (width >= 0.0) {
-				this.lineWeight = (float) width;
-			} else {
-				throw new Exception("Stroke width undefined or negative.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	} // setStrokeWidth
-
-	/**
-	 * Returns x coordinate of the rectangle.
-	 * @return int - rectangle x coordinate.
-	 */
-	public int getX() {
-		return x;
-	} // getX
-
-	/**
-	 * Returns y coordinate of the rectangle.
-	 * @return int - rectangle y coordinate.
-	 */
-	public int getY() {
-		return y;
-	} // getY
-
-	/**
-	 * Returns width of the rectangle.
-	 * @return int - rectangle width.
-	 */
-	int getWidth() {
-		return width;
-	} // getWidth
-
-	/**
-	 * Returns height of the rectangle.
-	 * @return int - rectangle height.
-	 */
-	int getHeight() {
-		return height;
-	} // getHeight
-
-	/**
-	 * Set the percentage of transparency.
-	 * @param transparencyPercentage double - the percentage of transparency.
-	 */
-	public void setTransparency(double transparencyPercentage) {
-		this.transparency = (float) transparencyPercentage;
-	} // setTransparency
-
-	/**
-	 * Specify rotation angle.
-	 * @param degrees double - rotation angle.
-	 */
-	public void setRotation(double degrees) {
-		this.rotation = degrees;
-	} // setRotation
-
-	void drawDynamic(int xModifier, int yModifier, float Xsize, float Ysize,
-					 Graphics g, HashMap table) {
-		/*int drawx = xModifier + x + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(xEquation, table);
-						 int drawy = yModifier + y + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(yEquation, table)
-						 int drawWidth = width + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(widthEquation, table);
-						 int drawHeight = height + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(heightEquation, table);
-						 g.drawRect(drawx, drawy, drawWidth, drawHeight);*/
-	}
-
-	/**
-	 * Draw rectangle.
-	 * @param xModifier int -
-	 * @param yModifier int -
-	 * @param Xsize float - zoom factor.
-	 * @param Ysize float - zoom factor.
-	 * @param g Graphics - class graphics.
-	 */
-	public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
-					 Graphics g) {
-		Graphics2D g2 = (Graphics2D) g;
-
-		g2.setStroke(new BasicStroke(this.lineWeight));
-
-		alpha = (float) (1 - (this.transparency / 100));
-
-		float red = (float) color.getRed() * 100 / 256 / 100;
-		float green = (float) color.getGreen() * 100 / 256 / 100;
-		float blue = (float) color.getBlue() * 100 / 256 / 100;
-
-		g2.setColor(new Color(red, green, blue, alpha));
-
-		if (filled) {
-			g2.fillRect(xModifier + (int) (Xsize * x),
-				yModifier + (int) (Ysize * y), (int) (Xsize * width),
-				(int) (Ysize * height));
-		} else {
-			g2.drawRect(xModifier + (int) (Xsize * x),
-				yModifier + (int) (Ysize * y), (int) (Xsize * width),
-				(int) (Ysize * height));
-		}
-
-		if (selected) {
-			drawSelection(g2);
-		}
-
-	} // draw
+  } // draw
 
 }

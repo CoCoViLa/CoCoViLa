@@ -4,12 +4,12 @@ import ee.ioc.cs.vsle.util.db;
 
 import java.util.HashMap;
 
-class UnaryOpNode
-	extends ExpNode {
+class UnaryOpNode extends ExpNode {
 	// An expression node to represent a unary minus operator + sin, cos, log,  abs, tan.
 	ExpNode operand;
 	String meth;
 	String sub;
+
 	UnaryOpNode(ExpNode operand, String meth) {
 		this.operand = operand;
 		this.meth = meth;
@@ -22,8 +22,7 @@ class UnaryOpNode
 	void getExpressions(String upper) {
 		if (EquationSolver.isFunction(meth)) {
 			operand.getExpressions(getOpposite(meth) + "(" + upper + ")");
-		}
-		else {
+		} else {
 			operand.getExpressions(meth + "(" + upper + ")");
 		}
 	}
@@ -58,42 +57,31 @@ class UnaryOpNode
 	double calcValue(HashMap table) {
 		if (meth.equals("sin")) {
 			return Math.sin(operand.calcValue(table));
-		}
-		else if (meth.equals("cos")) {
+		} else if (meth.equals("cos")) {
 			return Math.cos(operand.calcValue(table));
-		}
-		else if (meth.equals("tan")) {
+		} else if (meth.equals("tan")) {
 			return Math.tan(operand.calcValue(table));
-		}
-		else if (meth.equals("log")) {
+		} else if (meth.equals("log")) {
 			return Math.log(operand.calcValue(table));
-		}
-		else if (meth.equals("abs")) {
+		} else if (meth.equals("abs")) {
 			return Math.abs(operand.calcValue(table));
-		}
-		else if (meth.equals("-")) {
+		} else if (meth.equals("-")) {
 			return -1 * (operand.calcValue(table));
-		}
-		else {
+		} else
 			return 0;
-		}
 
 	}
 
 	String getOpposite(String s) {
 		if (s.equals("sin")) {
 			return "Math.asin";
-		}
-		else if (s.equals("cos")) {
+		} else if (s.equals("cos")) {
 			return "Math.acos";
-		}
-		else if (s.equals("tan")) {
+		} else if (s.equals("tan")) {
 			return "Math.atan";
-		}
-		else if (s.equals("log")) {
+		} else if (s.equals("log")) {
 			return "Math.exp";
-		}
-		else if (s.equals("abs")) {
+		} else if (s.equals("abs")) {
 			return "Math.abs";
 		}
 		return null;

@@ -10,8 +10,7 @@ class StringStack {
 	char peek() {
 		if (e.length() > 0) {
 			return e.charAt(0);
-		}
-		else {
+		} else {
 			return '#';
 		}
 	}
@@ -46,5 +45,6 @@ class StringStack {
 	}
 
 }
+
 
 ;

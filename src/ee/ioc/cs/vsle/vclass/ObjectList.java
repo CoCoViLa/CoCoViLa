@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
+import ee.ioc.cs.vsle.util.VMath;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -76,6 +78,36 @@ public class ObjectList extends ArrayList
 			}
 		}
 		return a;
+	}
+
+    public void updateRelObjs() {
+  		GObj obj;
+        for (int i = 0; i < this.size(); i++) {
+            obj = (GObj) this.get(i);
+            if (obj instanceof RelObj) {
+                obj.x = ((RelObj)obj).startPort.getRealCenterX();
+                obj.y = ((RelObj)obj).startPort.getRealCenterY();
+				obj.Xsize = (float)Math.sqrt(Math.pow((obj.x - ((RelObj)obj).endPort.getRealCenterX()), 2.0) + Math.pow((obj.y - ((RelObj)obj).endPort.getRealCenterY()), 2.0))/obj.width;
+				((RelObj)obj).angle = VMath.calcAngle(obj.x, obj.y, ((RelObj)obj).endPort.getRealCenterX(), ((RelObj)obj).endPort.getRealCenterY());
+            }
+
+
+        }
+
+    }
+
+
+	public void deleteExcessRels() {
+   		GObj obj;
+        for (int i = 0; i < this.size(); i++) {
+            obj = (GObj) this.get(i);
+            if (obj instanceof RelObj) {
+				if (!(contains(((RelObj)obj).startPort.obj) && contains(((RelObj)obj).endPort.obj))) {
+					remove(obj);
+
+				}
+            }
+        }
 	}
 
 }

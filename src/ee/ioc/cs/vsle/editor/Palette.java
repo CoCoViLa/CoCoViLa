@@ -51,7 +51,7 @@ public class Palette {
 		icon = new ImageIcon("images/rel.gif");
 		JButton draw = new JButton(icon);
 
-		draw.setActionCommand("clonedrawing");
+		draw.setActionCommand(State.cloneDrawing);
 		draw.addActionListener(mListener);
 		toolBar.add(draw);
 
