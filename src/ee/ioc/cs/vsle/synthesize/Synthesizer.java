@@ -110,7 +110,7 @@ public class Synthesizer {
 							boolean relIsNeeded = false;
 
 							for (int i = 0; i < rel.outputs.size(); i++) {
-								// ee.ioc.cs.editor.util.db.p("tema outputsid "+ rel.outputs);
+								db.p("tema outputsid "+ rel.outputs);
 								relVar = (Var) rel.outputs.get(i);
 								if (!foundVars.contains(relVar)) {
 									relIsNeeded = true;
@@ -120,13 +120,17 @@ public class Synthesizer {
 								relIsNeeded = true;
 							}
 							if (relIsNeeded && rel.subtaskFlag < 1) {
-								// ee.ioc.cs.editor.util.db.p("ja vajati "+ rel);
+								db.p("ja vajati "+ rel);
 								if (!rel.outputs.isEmpty()) {
 									newComponents.addAll(rel.outputs);
 									foundVars.addAll(rel.outputs);
 								}
 								algorithm.add(rel);
 							}
+                            if(rel.subtaskFlag > 0)
+                            {
+                                db.p("subtaskid: " + rel.subtasks);
+                            }
 
 							problem.allRels.remove(rel);
 							changed = true;
@@ -140,7 +144,7 @@ public class Synthesizer {
 			// problem.allRels.contains(rel)) {
 
 
-			// ee.ioc.cs.editor.util.db.p("foundvars " +foundVars);
+			db.p("foundvars " +foundVars);
 			problem.knownVars.addAll(newComponents);
 			problem.knownVars.removeAll(removableComponents);
 			newComponents.clear();
@@ -161,16 +165,20 @@ public class Synthesizer {
 			alg.append(algorithm.get(i)).toString();
 			alg.append(";\n");
 		}
+        db.p("Algorithm: \n" + alg.toString());
 		return alg.toString();
 
 	}
+
+
+
 
 	/**
 	 Takes an algorithm and optimizes it to only calculate the variables that are targets.
 	 @return an algorithm for calculating the target variables
 	 @param algorithm an unoptimized algorithm
 	 @param targets the variables which the algorithm has to calculate (other branches are removed)
-	 */ ArrayList optimizer(ArrayList algorithm, HashSet targets) {
+	 */ static ArrayList optimizer(ArrayList algorithm, HashSet targets) {
 		HashSet stuff = targets;
 		Rel rel;
 		Var relVar;
@@ -244,12 +252,17 @@ public class Synthesizer {
 		}
 
 		// run the planner on the obtained problem
-		String algorithm = planner(problem, computeAll);
-		String prog2 = "";
+        System.out.println(problem);
+//		String algorithm = planner(problem, computeAll);
+//        String algorithm = null;// = lin_planner(problem, computeAll);
+        Planner planner = new Planner(problem, computeAll, null);
+        String algorithm = planner.getAlgorithm();
+//        System.exit(0);//temporary
+        String prog2 = "";
 
-		String prog = "";
+        String prog = "";
 
-		ClassField field;
+        ClassField field;
 		// start building the main source file.
 		AnnotatedClass ac = classList.getType("this");
 
@@ -435,7 +448,7 @@ public class Synthesizer {
 			SpecParser sp = new SpecParser();
 			HashSet hs = new HashSet();
 			String mainClassName = new String();
-			String file = sp.getStringFromFile(fileName);
+			String file = sp.getStringFromFile( RuntimeProperties.packageDir + fileName);
 			Pattern pattern = Pattern.compile("class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+");
 			Matcher matcher = pattern.matcher(file);
 
@@ -444,7 +457,7 @@ public class Synthesizer {
 			}
 			String spec = sp.refineSpec(file);
 			ClassList classList = sp.parseSpecification(spec, "this", null, hs);
-			String prog = makeProgramText(file, false, classList, mainClassName);
+			String prog = makeProgramText(file, true, classList, mainClassName);//changed to true
 
 			makeProgram(prog, classList, mainClassName);
 		}
