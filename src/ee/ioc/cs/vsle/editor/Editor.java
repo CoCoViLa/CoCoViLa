@@ -154,6 +154,17 @@ public class Editor extends JFrame implements ChangeListener{
 		menuItem = new JMenuItem(Menu.CLEAR_ALL, KeyEvent.VK_C);
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
+
+		boolean showGrid = false;
+		String sShowGrid = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.SHOW_GRID);
+		if(sShowGrid!=null) {
+		  showGrid = Boolean.valueOf(sShowGrid).booleanValue();
+		}
+		menuItem = new JCheckBoxMenuItem(Menu.GRID, showGrid);
+		menuItem.setMnemonic('G');
+		menuItem.addActionListener(aListener);
+		menu.add(menuItem);
+
 		menuBar.add(menu);
 		menu = new JMenu(Menu.MENU_PACKAGE);
 		menu.setMnemonic(KeyEvent.VK_P);
@@ -486,8 +497,11 @@ public class Editor extends JFrame implements ChangeListener{
 	}
 
 	public void stateChanged(ChangeEvent e) {
-		if (getCurrentCanvas() != null)
-			getCurrentCanvas().drawingArea.grabFocus();
+		if (getCurrentCanvas() != null) {
+		  JCheckBoxMenuItem cb = (JCheckBoxMenuItem) menuBar.getMenu(1).getMenuComponent(2);
+		  cb.setSelected(getCurrentCanvas().isGridVisible());
+		  getCurrentCanvas().drawingArea.grabFocus();
+		}
 	}
 
 

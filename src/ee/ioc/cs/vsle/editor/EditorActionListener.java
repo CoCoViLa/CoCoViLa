@@ -65,13 +65,7 @@ public class EditorActionListener implements ActionListener {
 			} else if (e.getActionCommand().equals(Menu.EXIT)) {
 				editor.exitApplication();
 			} else if (e.getActionCommand().equals(Menu.GRID)) {
-				boolean isGridVisible = editor.getCurrentCanvas().isGridVisible();
-				if (isGridVisible) {
-					isGridVisible = false;
-				} else {
-					isGridVisible = true;
-				}
-				editor.getCurrentCanvas().setGridVisible(isGridVisible);
+				editor.getCurrentCanvas().setGridVisible(!editor.getCurrentCanvas().isGridVisible());
 			} else if (e.getActionCommand().equals(Menu.CLEAR_ALL)) {
 				editor.getCurrentCanvas().clearObjects();
 			} else if (e.getActionCommand().equals(Menu.SPECIFICATION)) {
