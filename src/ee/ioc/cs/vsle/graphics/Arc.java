@@ -9,7 +9,7 @@ import ee.ioc.cs.vsle.editor.*;
 public class Arc extends Shape implements Serializable {
 
   /**
-   * ee.ioc.cs.editor.graphics.Arc angles.
+   * Arc angles. Can be used for rotating the Arc.
    */
   int startAngle;
   int arcAngle;
@@ -83,34 +83,72 @@ public class Arc extends Shape implements Serializable {
 	this.lineWeight = (float) strokeWidth;
   } // Arc
 
+  /**
+   * Set the shape dimensions fixed in which case the shape cannot be resized.
+   * @param b boolean - fix or unfix the shape.
+   */
   public void setFixed(boolean b) {
 	this.fixed = b;
-  }
+  } // setFixed
 
+  /**
+   * Returns a boolean value representing if the shape is fixed or not.
+   * @return boolean - boolean value representing if the shape is fixed or not.
+   */
   public boolean isFixed() {
 	return this.fixed;
-  }
+  } // isFixed.
 
+  /**
+   * Returns the name of the shape.
+   * @return String - the name of the shape.
+   */
   public String getName() {
 	return this.name;
   } // getName
 
+  /**
+   * Returns the real height of the shape.
+   * @return int - the real height of the shape.
+   */
   public int getRealHeight() {
 	return getHeight();
   } // getRealHeight
 
+  /**
+   * Returns the real width of the shape.
+   * @return int - the real width of the shape.
+   */
   public int getRealWidth() {
 	return getWidth();
   } // getRealWidth
 
+  /**
+   * Returns a boolean value representing if the shape is selected or not.
+   * @return boolean - boolean value representing if the shape is selected or not.
+   */
   public boolean isSelected() {
 	return this.selected;
   } // isSelected
 
+  /**
+   * Returns the name of the shape. In future implementations should return the
+   * textual representation of the shape, ie. the return value of the currently
+   * implemented "toText" method.
+   * @return String - the name of the shape.
+   */
   public String toString() {
 	return getName();
   } // toString
 
+  /**
+   * Returns a boolean value representing if the mouse was clicked inside the shape.
+   * @param x1 int - x1 coordinate of the mouse pointer.
+   * @param y1 int - y1 coordinate of the mouse pointer.
+   * @param x2 int - x2 coordinate of the mouse pointer.
+   * @param y2 int - y2 coordinate of the mouse pointer.
+   * @return boolean - boolean value representing if the mouse was clicked inside the shape.
+   */
   public boolean isInside(int x1, int y1, int x2, int y2) {
 	if (x1 > x && y1 > y && x2 < x + width && y2 < y + height) {
 		return true;
@@ -118,6 +156,14 @@ public class Arc extends Shape implements Serializable {
 	return false;
   } // isInside
 
+  /**
+   * Returns a boolean value representing if the shape is in the selection rectangle.
+   * @param x1 int - x coordinate of the starting corner of the selection rectangle.
+   * @param y1 int - y coordinate of the starting corner of the selection rectangle.
+   * @param x2 int - x coordinate of the ending corner of the selection rectangle.
+   * @param y2 int - y coordinate of the ending corner of the selection rectangle.
+   * @return boolean - boolean value representing if the shape is in the selection rectangle.
+   */
   public boolean isInsideRect(int x1, int y1, int x2, int y2) {
 	if (x1 < x && y1 < y && x2 > x + width && y2 > y + height) {
 		return true;
@@ -125,10 +171,18 @@ public class Arc extends Shape implements Serializable {
 	return false;
   } // isInsideRect
 
+  /**
+   * Set the shape selected or unselected.
+   * @param b boolean - boolean value representing if to set the shape selected or unselected.
+   */
   public void setSelected(boolean b) {
 	this.selected = b;
   } // setSelected
 
+  /**
+   * Specify the name of the shape.
+   * @param s String - the name of the shape.
+   */
   public void setName(String s) {
 	this.name = s;
   } // setName
@@ -435,4 +489,4 @@ public class Arc extends Shape implements Serializable {
 
   } // draw
 
-}
+} // end of class
