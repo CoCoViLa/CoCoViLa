@@ -425,11 +425,11 @@ class MouseOps
 							port.setSelected(true);
 							editor.currentPort = port;
 							editor.repaint();
-						} else {
-							port.setSelected(true);
-							editor.currentPort = port;
-							editor.repaint();
 						}
+					} else {
+						port.setSelected(true);
+						editor.currentPort = port;
+						editor.repaint();
 					}
 				}
 			}
