@@ -51,9 +51,12 @@ public class Palette {
 		// read package info and add it to tables
 		for (int i = 0; i < vPackage.classes.size(); i++) {
 			PackageClass pClass = (PackageClass) vPackage.classes.get(i);
-
-			icon = new ImageIcon(
-				RuntimeProperties.packageDir + File.separator + pClass.icon);
+			if (pClass.icon.equals("default.gif")) {
+                icon = new ImageIcon("images/default.gif");
+			} else {
+				icon = new ImageIcon(
+					RuntimeProperties.packageDir + File.separator + pClass.icon);
+			}
 			buttons[i] = new JButton(icon);
 			buttons[i].setToolTipText(pClass.description);
 			if (pClass.relation == true) {
@@ -64,7 +67,6 @@ public class Palette {
 			toolBar.add(buttons[i]);
 		}
 
-		db.p("siin");
 		canvas.add(toolBar, BorderLayout.NORTH);
 	}
 

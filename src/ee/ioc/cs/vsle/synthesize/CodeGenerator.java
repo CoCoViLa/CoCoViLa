@@ -255,6 +255,7 @@ public class CodeGenerator {
                      + ")in[" + num + "];\n";
 
         ClassField var;
+
         for ( int i = 0; i < alias.vars.size(); i++ ) {
             var = ( ClassField ) alias.vars.get( i );
             out += offset + Rel.getObject(input.object) + var.name + " = " + aliasTmp + "[" + i + "];\n";

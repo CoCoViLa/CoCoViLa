@@ -1025,11 +1025,13 @@ public class IconEditor
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 
+
 				// Check if the file name ends with a required extension. If not,
 				// append the default extension to the file name.
 				if (!file.getAbsolutePath().toLowerCase().endsWith(".xml")) {
 					file = new File(file.getAbsolutePath() + ".xml");
 				}
+
 
 				// store the last open directory in system properties.
 				setLastPath(file.getAbsolutePath());
@@ -1059,6 +1061,23 @@ public class IconEditor
 					out.flush();
 					out.close();
 					JOptionPane.showMessageDialog(null, "Saved to package: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+					FileFuncs ff = new FileFuncs();
+					String className = RuntimeProperties.className;
+					String fileText = "public class " + className + " {";
+					fileText += "\n    /*@ specification " + className + " {\n";
+
+					for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
+						String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], i);
+						String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], i);
+						String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], i);
+
+						if (fieldType != null) {
+							fileText += "    "+fieldType+" "+fieldName+";\n";
+						}
+					}
+					fileText += "    }@*/\n \n}";
+					ff.writeFile(file.getParent() +System.getProperty("file.separator")+className + ".java", fileText);
+
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

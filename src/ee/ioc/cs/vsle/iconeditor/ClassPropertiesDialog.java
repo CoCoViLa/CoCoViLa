@@ -52,7 +52,7 @@ public class ClassPropertiesDialog extends JDialog {
   // Text fields
   private final JTextField fldClassName = new JTextField();
   private final JTextField fldClassDesc = new JTextField();
-  private final JTextField fldClassIcon = new JTextField();
+  private final JTextField fldClassIcon = new JTextField("default.gif");
 
   // Checkboxes
   private final JCheckBox chkRelation = new JCheckBox();
