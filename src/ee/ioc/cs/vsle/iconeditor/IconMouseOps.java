@@ -143,7 +143,7 @@ class IconMouseOps
 	 * @param portType - type of port: Integer, String, Object
 	 */
 	public void drawPort(String portName, boolean isAreaConn, boolean isStrict, String portType) {
-		IconPort p = new IconPort(portName, editor.mouseX, editor.mouseY, isAreaConn, isStrict);
+		IconPort p = new IconPort(portName, startX, startY, isAreaConn, isStrict);
 		p.type = portType;
 		editor.ports.add(p);
 		editor.repaint();
