@@ -198,7 +198,7 @@ public class CodeGenerator {
             if ( isInput ) {
                 return getAliasSubtaskInput( var, offset, num);
             } else {
-                return getAliasSubtaskOutput( (Alias)var.field, offset );
+                return getAliasSubtaskOutput( var, offset );
             }
         }
 
@@ -262,7 +262,8 @@ public class CodeGenerator {
         return out;
     }
 
-    String getAliasSubtaskOutput( Alias alias, String offset ) {
+    String getAliasSubtaskOutput( Var input, String offset ) {
+		Alias alias = (Alias)input.field;
         if(alias.vars.size() == 0) {
             return offset + "return new Object[]{ }";
         }
@@ -275,9 +276,9 @@ public class CodeGenerator {
         for ( int i = 0; i < alias.vars.size(); i++ ) {
             var = ( ClassField ) alias.vars.get( i );
             if ( i == 0 ) {
-                out += var.name;
+                out += Rel.getObject(input.object) + var.name;
             } else {
-                out += ", " + var.name;
+                out += ", " + Rel.getObject(input.object) + var.name;
             }
         }
         out += " };\n"
