@@ -178,44 +178,21 @@ class Rel implements Cloneable,
 		Pattern pattern;
 		Matcher matcher;
 
-		if (type == 4) {
-			return "";
-		}
-		if (type == 2) {
+                if ( type == RelType.alias ) {
+                    db.p( "alias inputs " + inputs + " outputs " + outputs );
+                    return "";
+                }
+		if (type == RelType.javamethod ) {
 			Var op = (Var) outputs.get(0);
-			Var input;
-			String assigns = "";
-			for (int i = 0; i < inputs.size(); i++) {
-				input = (Var) inputs.get(i);
-				if (input.field.isAlias()) {
-					if (input.field.vars.size() == 0) {
-						assigns = "Object " + input.name + " = null";
-					} else {
 
-						assigns += ((ClassField) input.field.vars.get(0)).type + "[] " + input.name +
-							" = new " +
-							((ClassField) input.field.vars.get(0)).type + "[" + input.field.vars.size() +
-							"];\n";
-						for (int k = 0; k < input.field.vars.size(); k++) {
-							String s1 = ((ClassField) input.field.vars.get(k)).toString();
-							assigns +=  CodeGenerator.OT_TAB+CodeGenerator.OT_TAB+ input.name +
-								"[" +
-								Integer.toString(k) + "] = " +
-								s1 +
-								";\n";
-						}
-						assigns += CodeGenerator.OT_TAB +CodeGenerator.OT_TAB;
-					}
-				}
-			}
 			if (op.type.equals("void")) {
 				return (getObject(object) + method + getParameters(true));
 			} else {
-				return assigns + ((Var) outputs.get(0) + " = " + getObject(object) +
+				return checkAliasInputs() + ((Var) outputs.get(0) + " = " + getObject(object) +
 					method +
 					getParameters(true));
 			}
-		} else if (type == 3) {
+		} else if (type == RelType.equation ) {
 			// if its an array assingment
 			if (inputs.size() == 0 && outputs.size() == 1) {
 				String assign;
@@ -325,16 +302,18 @@ class Rel implements Cloneable,
 
 			}
 			return m;
-		} else if (type == 5) {
+		} else if (type == RelType.subtask ) {
 			return (Var) outputs.get(0) + " = " + (Var) inputs.get(0);
 
-		} else if (type == 6) {
-			if (!outputs.isEmpty()) {
-				return ((Var) outputs.get(0) + " = " + getObject(object) +
-					method + getSubtaskParameters()); // + getParameters()
-			} else {
-				return (getObject(object) + method + getSubtaskParameters()); // + getParameters()
-			}
+                    } else if ( type == RelType.method_with_subtask ) {
+                        if ( !outputs.isEmpty() ) {
+                            return ( checkAliasInputs() + ( Var ) outputs.get( 0 ) + " = " +
+                                     getObject( object ) +
+                                     method + getSubtaskParameters() ); // + getParameters()
+                        } else {
+                            return ( checkAliasInputs() + getObject( object ) + method +
+                                     getSubtaskParameters() ); // + getParameters()
+                        }
 		} else {
 			db.p(method);
 			String s1, s2, assigns = "";
@@ -376,6 +355,36 @@ class Rel implements Cloneable,
 			return op + " = " + ip;
 		}
 	}
+
+        String checkAliasInputs() {
+            Var input;
+            String assigns = "";
+            for ( int i = 0; i < inputs.size(); i++ ) {
+                input = ( Var ) inputs.get( i );
+                if ( input.field.isAlias() ) {
+                    if ( input.field.vars.size() == 0 ) {
+                        assigns = "Object " + input.name + " = null";
+                    } else {
+
+                        assigns += ( ( ClassField ) input.field.vars.get( 0 ) ).type + "[] " + input.name +
+                                " = new " +
+                                ( ( ClassField ) input.field.vars.get( 0 ) ).type + "[" +
+                                input.field.vars.size() +
+                                "];\n";
+                        for ( int k = 0; k < input.field.vars.size(); k++ ) {
+                            String s1 = ( ( ClassField ) input.field.vars.get( k ) ).toString();
+                            assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB + input.name +
+                                    "[" +
+                                    Integer.toString( k ) + "] = " +
+                                    s1 +
+                                    ";\n";
+                        }
+                        assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB;
+                    }
+                }
+            }
+            return assigns;
+        }
 
 	public boolean equals(Object e) {
 		return this.toString().equals(((Rel) e).toString());
