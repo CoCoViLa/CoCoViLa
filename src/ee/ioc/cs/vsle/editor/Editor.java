@@ -645,7 +645,7 @@ public class Editor extends JFrame {
                         }
                 }
                 objects.removeAll(removable);
-                objects.deleteExcessRels();
+                objects.deleteExcessRels(connections);
                 repaint();
         }
         /**

@@ -97,17 +97,16 @@ public class ObjectList extends ArrayList
     }
 
 
-	public void deleteExcessRels() {
+	public void deleteExcessRels(ConnectionList con) {
    		GObj obj;
         for (int i = 0; i < this.size(); i++) {
             obj = (GObj) this.get(i);
             if (obj instanceof RelObj) {
 				if (!(contains(((RelObj)obj).startPort.obj) && contains(((RelObj)obj).endPort.obj))) {
 					remove(obj);
-
+					con.removeAll(obj.getConnections());
 				}
             }
         }
 	}
-
 }

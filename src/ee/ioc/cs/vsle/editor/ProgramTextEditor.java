@@ -132,67 +132,14 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
 		GObj obj;
 		ClassField field;
+        SpecGenerator sgen = new SpecGenerator();
+		textArea.append(sgen.generateSpec(objects, relations));
 
-		textArea.append("public class GeneratedClass {");
-		textArea.append("\n    /*@ specification  GeneratedClass {\n");
-		for (int i = 0; i < objects.size(); i++) {
-			obj = (GObj) objects.get(i);
-			textArea.append(
-				"    " + obj.getClassName() + " " + obj.getName() + ";\n");
-			for (int j = 0; j < obj.fields.size(); j++) {
-				field = (ClassField) obj.fields.get(j);
-				if (field.value != null) {
-					if (field.type.equals("String")) {
-						textArea.append("        " + obj.getName() + "." + field.name
-							+ " = \"" + field.value + "\";\n");
-					} else if (field.isPrimitiveArray()) {
-						textArea.append(
-							"        " + obj.getName() + "." + field.name
-							+ " = {");
-						String[] split = field.value.split("�");
-						for (int k = 0; k < split.length; k++) {
-							if (k == 0) {
-								textArea.append(split[k]);
-							} else
-								textArea.append(", " + split[k]);
-						}
-						textArea.append("};\n");
 
-					} else if (field.isPrimOrStringArray()) {
-						textArea.append(
-							"        " + obj.getName() + "." + field.name
-							+ " = {");
-						String[] split = field.value.split("�");
-						for (int k = 0; k < split.length; k++) {
-							if (k == 0) {
-								textArea.append("\"" + split[k] + "\"");
-							} else
-								textArea.append(", \"" + split[k] + "\"");
-						}
-						textArea.append("};\n");
-					} else {
-						textArea.append(
-							"        " + obj.getName() + "." + field.name + " = "
-							+ field.value + ";\n");
-					}
-
-				}
-
-			}
-		}
-		Connection rel;
-
-		for (int i = 0; i < relations.size(); i++) {
-			rel = (Connection) relations.get(i);
-			textArea.append(
-				"    " + rel.endPort.obj.toString() + "." + rel.endPort.toString()
-				+ " = " + rel.beginPort.obj.toString() + "."
-				+ rel.beginPort.toString() + ";\n");
-		}
-		textArea.append("    }@*/\n}");
 		getContentPane().add(tabbedPane);
 		validate();
 	}
+
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == parseSpec) {

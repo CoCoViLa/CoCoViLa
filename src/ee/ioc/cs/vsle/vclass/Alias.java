@@ -4,14 +4,7 @@ import ee.ioc.cs.vsle.synthesize.UnknownVariableException;
 
 import java.util.ArrayList;
 
-/**
- * <p>Title: ee.ioc.cs.editor.vclass.Alias</p>
- * <p>Description: <description></p>
- * <p>Copyright: Copyright (c) 2004</p>
- * <p>Company: </p>
- * @author Aulo Aasmaa, Ando Saabas
- * @version 1.0
- */
+
 public class Alias extends ClassField {
 
 	private static final String ALIAS = "alias";

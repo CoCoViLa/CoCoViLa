@@ -567,6 +567,8 @@ class MouseOps
 
 					editor.setLastPath(pack.getAbsolutePath());
 					db.p("Loading package: " + pack.getName());
+					editor.vPackage = null;
+					editor.palette.removeToolbar();
 					editor.loadPackage(pack);
 					editor.validate();
 				}

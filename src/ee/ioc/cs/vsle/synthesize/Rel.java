@@ -133,11 +133,7 @@ class Rel {
 				db.p("siin ja " + op.field);
 				if (op.field.isPrimOrStringArray()) {
 					String[] split = method.split("=");
-                    if (Synthesizer.tempIsDone == false) {
-						assign = op.field.type + " " + " TEMP =" + split[1] + ";\n";
-						Synthesizer.tempIsDone =true;
-					} else
-						assign =  "TEMP =" + split[1] + ";\n";
+					assign = op.field.type + " " + " TEMP =" + split[1] + ";\n";
 					assign += op.object + "." + op.name + " = TEMP;\n";
 					return assign;
 

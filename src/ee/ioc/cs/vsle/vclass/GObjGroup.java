@@ -9,6 +9,7 @@ import java.awt.Graphics;
 public class GObjGroup extends GObj
 	implements Serializable {
 	public ArrayList objects;
+    private int attribute1;
 
 	public GObjGroup(ArrayList objects) {
 		super();

@@ -317,6 +317,7 @@ public class OptionsDialog extends JDialog {
 		  RuntimeProperties.isAntialiasingOn = chbAntiAlias.isSelected();
 		  RuntimeProperties.gridStep = Integer.parseInt(spinnerGridStep.getModel().getValue().toString());
 		  RuntimeProperties.nudgeStep = Integer.parseInt(spinnerNudgeStep.getModel().getValue().toString());
+		  RuntimeProperties.genFileDir = sGenFilesDir;
 		  closeDialog();
         } // saveSettings
 
