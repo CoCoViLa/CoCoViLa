@@ -174,4 +174,22 @@ public class ObjectList extends ArrayList
 		return 0;
 
 	}
+
+	public Port getPort(String objName, String portName) {
+		GObj obj;
+		Port port;
+		for (int i = 0; i < this.size(); i++) {
+			obj = (GObj) this.get(i);
+			if (obj.name.equals(objName)) {
+				for (int j = 0; j < obj.ports.size(); j++) {
+					port = (Port)obj.ports.get(j);
+                    if (port.name.equals(portName)) {
+						return port;
+					}
+				}
+			}
+		}
+
+		return null;
+	}
 }

@@ -78,7 +78,7 @@ public class Connection implements Serializable {
 		if (numOfBreakPoints < 2) {
 			numOfBreakPoints++;
 		}
-		calcBreakPoints();
+		calcEndBreakPoints();
 	} // addBreakPoint
 
 	/**
@@ -96,24 +96,28 @@ public class Connection implements Serializable {
 		if (numOfBreakPoints > 0) {
 			numOfBreakPoints--;
 		}
-		calcBreakPoints();
+		calcEndBreakPoints();
 	} // removeBreakPoint
 
 	/**
 	 * Calculates breakpoint locations to cover the connection line equally.
 	 */
-	public void calcBreakPoints() {
-    	Point p;
+	public void calcAllBreakPoints() {
+		Point p;
 		if (breakPoints.size() > 1) {
 			int port1X = beginPort.getX() + beginPort.obj.getX();
 			int port1Y = beginPort.getY() + beginPort.obj.getY();
-			int port2X = endPort.getX() + endPort.obj.getX();
-			int port2Y = endPort.getY() + endPort.obj.getY();
 			Point oldPoint1 = (Point) breakPoints.get(0);
-			Point oldPoint2 = (Point) breakPoints.get(breakPoints.size() - 1);
+			int oldx = oldPoint1.x;
+			int oldy = oldPoint1.y;
 
-			for (int i = 1; i < breakPoints.size() - 1; i++) {
+			for (int i = 0; i < breakPoints.size(); i++) {
+
 				p = (Point) breakPoints.get(i);
+				p.x += (port1X - oldx);
+				p.y += (port1Y - oldy);
+
+				/*
 				if (p.x == oldPoint1.x) {
 					p.x = port1X;
 				} else if (p.x == oldPoint2.x) {
@@ -123,11 +127,8 @@ public class Connection implements Serializable {
 					p.y = port1Y;
 				} else if (p.y == oldPoint2.y) {
 					p.y = port2Y;
-				}
+				}*/
 			}
-
-			breakPoints.set(0, new Point(port1X, port1Y));
-			breakPoints.set(breakPoints.size() - 1, new Point(port2X, port2Y));
 		}
 
 		/* if (numOfBreakPoints == 1) {
@@ -156,6 +157,25 @@ public class Connection implements Serializable {
 		 }*/
 	} // calcBreakPoints
 
+	public void calcEndBreakPoints() {
+		if (breakPoints.size() > 1) {
+			int port1X = beginPort.getX() + beginPort.obj.getX();
+			int port1Y = beginPort.getY() + beginPort.obj.getY();
+			int port2X = endPort.getX() + endPort.obj.getX();
+			int port2Y = endPort.getY() + endPort.obj.getY();
+			Point oldPoint1 = (Point) breakPoints.get(0);
+			Point oldPoint2 = (Point) breakPoints.get(breakPoints.size() - 1);
+
+			oldPoint1.x += (port1X - oldPoint1.x);
+			oldPoint1.y += (port1Y - oldPoint1.y);
+
+			oldPoint2.x += (port2X - oldPoint2.x);
+			oldPoint2.y += (port2Y - oldPoint2.y);
+
+
+		}
+	}
+
 	/**
 	 * <UNCOMMENTED>
 	 * @param x int
@@ -174,16 +194,16 @@ public class Connection implements Serializable {
 		return null;
 	} // breakPointContains
 
-    	public String toXML() {
-		String xml = "<connection obj1=\""+beginPort.obj.name+"\" port1=\""+beginPort+
-			 " obj2=\""+endPort.obj.name+"\" port2=\""+endPort+"\">\n";
+	public String toXML() {
+		String xml = "<connection obj1=\"" + beginPort.obj.name + "\" port1=\"" + beginPort +
+			"\" obj2=\"" + endPort.obj.name + "\" port2=\"" + endPort + "\">\n";
 		xml += "  <breakpoints>\n";
 		for (int i = 0; i < breakPoints.size(); i++) {
-			Point point = (Point)breakPoints.get(i);
-            xml += StringUtil.indent(4) + "<point x=\""+point.x+" y=\""+point.y+"\"/>\n";
+			Point point = (Point) breakPoints.get(i);
+			xml += StringUtil.indent(4) + "<point x=\"" + point.x + " y=\"" + point.y + "\"/>\n";
 		}
 		xml += "  </breakpoints>\n";
-        xml += "</connection>\n";
+		xml += "</connection>\n";
 		return xml;
 
 	}
@@ -192,7 +212,9 @@ public class Connection implements Serializable {
 	 * Draw the connection line.
 	 * @param g Graphics
 	 */
-	public void drawRelation(Graphics g) {
+	public void drawRelation
+		(Graphics
+		g) {
 		Point p1, p2;
 
 		for (int i = 0; i < breakPoints.size() - 1; i++) {

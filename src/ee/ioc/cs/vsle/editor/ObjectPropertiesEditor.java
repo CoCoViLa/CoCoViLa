@@ -5,22 +5,13 @@ import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.util.db;
 
 import java.util.ArrayList;
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
+import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 
-import javax.swing.JFrame;
-import javax.swing.JTextField;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JCheckBox;
-import javax.swing.SwingConstants;
-import javax.swing.BorderFactory;
+import javax.swing.*;
 
 
 /**
@@ -43,10 +34,12 @@ public class ObjectPropertiesEditor extends JFrame
 		controlledObject = object;
 		JPanel buttonPane = new JPanel();
 		JPanel fullPane = new JPanel();
+
 		JPanel labelPane = new JPanel();
 		JPanel watchPane = new JPanel();
 		JPanel textFieldPane = new JPanel();
 		JPanel typePane = new JPanel();
+
 
 		labelPane.setLayout(new GridLayout(0, 1));
 		watchPane.setLayout(new GridLayout(0, 1));
@@ -89,6 +82,7 @@ public class ObjectPropertiesEditor extends JFrame
 
 				comboBoxes.add(comboBox);
 				label = new JLabel(field.name, SwingConstants.CENTER);
+				label.setToolTipText(field.description);
 				arrayNameList.add(field);
 				labelPane.add(label);
 				label = new JLabel("(" + field.type + ")");
@@ -108,6 +102,7 @@ public class ObjectPropertiesEditor extends JFrame
 				textField.setText(field.value);
 				textFields.add(textField);
 				label = new JLabel(field.name, SwingConstants.CENTER);
+				label.setToolTipText(field.description);
 				labelPane.add(label);
 				textFieldPane.add(textField);
 				label = new JLabel("(" + field.type + ")");
@@ -122,6 +117,9 @@ public class ObjectPropertiesEditor extends JFrame
 
 		}
 		JPanel contentPane = new JPanel();
+		JScrollPane areaScrollPane = new JScrollPane(contentPane,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		fullPane.setLayout(new BorderLayout());
@@ -141,8 +139,8 @@ public class ObjectPropertiesEditor extends JFrame
 			clear.setEnabled(true);
 		}
 		buttonPane.add(clear);
-
-		fullPane.add(contentPane, BorderLayout.NORTH);
+        //contentPane.setPreferredSize(new Dimension(300,200));
+		fullPane.add(areaScrollPane, BorderLayout.CENTER);
 		fullPane.add(buttonPane, BorderLayout.SOUTH);
 		setContentPane(fullPane);
 		validate();

@@ -396,7 +396,7 @@ public class Text extends Shape implements Serializable {
 	   if(color!=null) green = (float) color.getGreen() / 256;
 		float blue = 0;
 	   if(color!=null) blue = (float) color.getBlue() / 256;
-        db.p(alpha);
+
 		g2.setColor(new Color(red, green, blue, alpha));
 
 

@@ -20,7 +20,7 @@ class MouseOps
 	extends MouseInputAdapter
 	implements ActionListener {
 
-	ArrayList selectedObjs = new ArrayList();
+	ArrayList selectedObjs = new ObjectList();
 	Canvas canvas;
 	public Point draggedBreakPoint;
 	public String state = "";
@@ -386,10 +386,14 @@ class MouseOps
 
 				for (int j = 0; j < canvas.connections.size(); j++) {
 					relation = (Connection) canvas.connections.get(j);
-					if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
-						relation.calcBreakPoints();
+					if (selectedObjs.contains(relation.endPort.obj) && selectedObjs.contains(relation.beginPort.obj)) {
+						relation.calcAllBreakPoints();
+					} else if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
+						relation.calcEndBreakPoints();
 					}
+
 				}
+
 
 			}
 			canvas.objects.updateRelObjs();
@@ -411,7 +415,7 @@ class MouseOps
 				for (int j = 0; j < canvas.connections.size(); j++) {
 					relation = (Connection) canvas.connections.get(j);
 					if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
-						relation.calcBreakPoints();
+						relation.calcEndBreakPoints();
 					}
 				}
 			}

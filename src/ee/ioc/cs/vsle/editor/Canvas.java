@@ -18,9 +18,9 @@ import java.io.*;
 /**
  */
 public class Canvas extends JPanel implements ActionListener {
-	public static int joonistamisi = 0;
 	int mouseX; // Mouse X coordinate.
 	int mouseY; // Mouse Y coordinate.
+	String workDir;
 	int objCount;
 	VPackage vPackage;
 	Palette palette;
@@ -39,13 +39,12 @@ public class Canvas extends JPanel implements ActionListener {
 	JLabel posInfo;
 	DrawingArea drawingArea;
 
-	String workingDir;
-
 
 	public Canvas(File f) {
 		super();
 		if (f.exists()) {
-			RuntimeProperties.packageDir = f.getParent() + File.separator;
+			workDir = f.getParent() + File.separator;
+			RuntimeProperties.packageDir = workDir;
 			PackageParser pp = new PackageParser(f);
 			vPackage = pp.getPackage();
 			Scheme scheme = new Scheme();
@@ -77,9 +76,6 @@ public class Canvas extends JPanel implements ActionListener {
 
 		// Initializes key listeners, for keyboard shortcuts.
 		drawingArea.addKeyListener(keyListener);
-
-		infoPanel = new JPanel(new GridLayout(1, 2));
-		posInfo = new JLabel();
 
 		// Initializes key listeners, for keyboard shortcuts.
 
@@ -207,7 +203,7 @@ public class Canvas extends JPanel implements ActionListener {
 			for (int j = 0; j < connections.size(); j++) {
 				Connection relation = (Connection) connections.get(j);
 				if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
-					relation.calcBreakPoints();
+					relation.calcEndBreakPoints();
 				}
 			}
 
@@ -303,10 +299,10 @@ public class Canvas extends JPanel implements ActionListener {
 			if (obj instanceof RelObj) {
 				for (int j = 0; j < objects2.size(); j++) {
 					obj2 = (GObj) objects2.get(j);
-                    if (((RelObj)obj).startPort.obj.name.equals(obj2.name))
-						((RelObj)obj).startPort.obj = obj2;
-					if (((RelObj)obj).endPort.obj.name.equals(obj2.name))
-						((RelObj)obj).endPort.obj = obj2;
+					if (((RelObj) obj).startPort.obj.name.equals(obj2.name))
+						((RelObj) obj).startPort.obj = obj2;
+					if (((RelObj) obj).endPort.obj.name.equals(obj2.name))
+						((RelObj) obj).endPort.obj = obj2;
 				}
 			}
 		}
@@ -406,18 +402,26 @@ public class Canvas extends JPanel implements ActionListener {
 		PrintUtilities.printComponent(this);
 	} // print
 
-	public void loadScheme() {
-
+	public void loadScheme(File file) {
+		SchemeLoader sl = new SchemeLoader(file, vPackage);
 	} // loadScheme
 
-	public void saveScheme() {
-		for (int i = 0; i < objects.size(); i++) {
-			GObj obj = (GObj) objects.get(i);
-			db.p(obj.toXML());
-		}
-		for (int i = 0; i < connections.size(); i++) {
-			Connection con = (Connection) connections.get(i);
-			db.p(con.toXML());
+	public void saveScheme(File file) {
+		try {
+			PrintWriter out = new PrintWriter(
+				new BufferedWriter(new FileWriter(file)));
+
+			for (int i = 0; i < objects.size(); i++) {
+				GObj obj = (GObj) objects.get(i);
+				out.print(obj.toXML());
+			}
+			for (int i = 0; i < connections.size(); i++) {
+				Connection con = (Connection) connections.get(i);
+				out.print(con.toXML());
+			}
+			out.close();
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -512,14 +516,10 @@ public class Canvas extends JPanel implements ActionListener {
 			}
 
 
-			long time;
-			time = System.currentTimeMillis();
-			joonistamisi = 0;
 			for (int i = 0; i < objects.size(); i++) {
 				obj = (GObj) objects.get(i);
 				obj.drawClassGraphics(g2);
 			}
-			System.out.println("drawing time (ms): " + (System.currentTimeMillis() - time)+" joonistamisi "+ joonistamisi);
 
 			g2.setColor(Color.blue);
 			for (int i = 0; i < connections.size(); i++) {

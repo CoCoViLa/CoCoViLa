@@ -9,6 +9,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.*;
 import java.io.File;
+import java.io.FileInputStream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -31,9 +32,26 @@ public class EditorActionListener implements ActionListener {
 			e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem") {
 
 			if (e.getActionCommand().equals(Menu.SAVE_SCHEME)) {
-				editor.getCurrentCanvas().saveScheme();
+				JFileChooser fc = new JFileChooser();
+				int returnVal = fc.showSaveDialog(null);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = fc.getSelectedFile();
+					db.p("Saving scheme: " + file.getName());
+					editor.getCurrentCanvas().saveScheme(file);
+				}
 			} else if (e.getActionCommand().equals(Menu.LOAD_SCHEME)) {
-				editor.getCurrentCanvas().loadScheme();
+				JFileChooser fc = new JFileChooser();
+				int returnVal = fc.showOpenDialog(null);
+				if (returnVal == JFileChooser.APPROVE_OPTION) {
+					File file = fc.getSelectedFile();
+					db.p("Loading scheme: " + file.getName());
+					try {
+						editor.getCurrentCanvas().loadScheme(file);
+					} catch (Exception exc) {
+						exc.printStackTrace();
+					}
+				}
+
 			} else if (e.getActionCommand().equals(Menu.LOAD)) {
 				JFileChooser fc = new JFileChooser(editor.getLastPath());
 				CustomFileFilter synFilter = new CustomFileFilter(CustomFileFilter.extensionXML, CustomFileFilter.descriptionXML);
@@ -55,7 +73,7 @@ public class EditorActionListener implements ActionListener {
 			} else if (e.getActionCommand().equals(Menu.INFO)) {
 				String message;
 				if (editor.getCurrentPackage() != null) {
-					message =  editor.getCurrentPackage().description;
+					message = editor.getCurrentPackage().description;
 				} else {
 					message = "No packages loaded";
 				}
@@ -103,7 +121,7 @@ public class EditorActionListener implements ActionListener {
 				new AboutDialog(null, editor);
 			} else if (e.getActionCommand().equals(Menu.LICENSE)) {
 				new LicenseDialog(null, editor);
-			}  else if (e.getActionCommand().equals(Look.LOOK_WINDOWS)) {
+			} else if (e.getActionCommand().equals(Look.LOOK_WINDOWS)) {
 				try {
 					Look.changeLayout(Look.LOOK_WINDOWS);
 				} catch (Exception uie) {

@@ -110,8 +110,9 @@ class Rel {
 	}
 
 	String getObject(String obj) {
-
-		if (obj.startsWith("this")) {
+        if (obj.equals("this")) {
+			return "";
+		} else if (obj.startsWith("this")) {
 			return obj.substring(5) + ".";
 		} else {
 			return obj + ".";

@@ -23,7 +23,7 @@ import javax.swing.event.ChangeEvent;
  * @link http://vsledit.sourceforge.net
  * @version 1.0
  */
-public class Editor extends JFrame implements ChangeListener{
+public class Editor extends JFrame implements ChangeListener {
 
 	JTabbedPane tabbedPane = new JTabbedPane();
 	EditorActionListener aListener;
@@ -156,9 +156,9 @@ public class Editor extends JFrame implements ChangeListener{
 		menu.add(menuItem);
 
 		boolean showGrid = false;
-		String sShowGrid = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.SHOW_GRID);
-		if(sShowGrid!=null) {
-		  showGrid = Boolean.valueOf(sShowGrid).booleanValue();
+		String sShowGrid = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
+		if (sShowGrid != null) {
+			showGrid = Boolean.valueOf(sShowGrid).booleanValue();
 		}
 		menuItem = new JCheckBoxMenuItem(Menu.GRID, showGrid);
 		menuItem.setMnemonic('G');
@@ -367,16 +367,15 @@ public class Editor extends JFrame implements ChangeListener{
 	 * @param f - package file to be loaded.
 	 */
 	void loadPackage(File f) {
-	  if(f!=null) {
-		Canvas canvas = new Canvas(f);
-		String packageName = f.getName().substring(0,f.getName().indexOf("."));
-		tabbedPane.addTab(packageName, canvas);
-		tabbedPane.setSelectedComponent(canvas);
-		getContentPane().add(tabbedPane);
-		validate();
-	  }
+		if (f != null) {
+			Canvas canvas = new Canvas(f);
+			String packageName = f.getName().substring(0, f.getName().indexOf("."));
+			tabbedPane.addTab(packageName, canvas);
+			tabbedPane.setSelectedComponent(canvas);
+			getContentPane().add(tabbedPane);
+			validate();
+		}
 	} // loadPackage
-
 
 
 	/**
@@ -474,7 +473,7 @@ public class Editor extends JFrame implements ChangeListener{
 
 	public void clearPane() {
 		tabbedPane.remove(tabbedPane.getSelectedComponent());
-		if (tabbedPane.getTabCount()>0) {
+		if (tabbedPane.getTabCount() > 0) {
 			tabbedPane.setSelectedIndex(0);
 			getCurrentCanvas().drawingArea.grabFocus();
 		}
@@ -488,19 +487,20 @@ public class Editor extends JFrame implements ChangeListener{
 	}
 
 	public VPackage getCurrentPackage() {
-	  return getCurrentCanvas().getCurrentPackage();
+		return getCurrentCanvas().getCurrentPackage();
 	}
 
 	public Canvas getCurrentCanvas() {
-		return (Canvas)tabbedPane.getSelectedComponent();
+		return (Canvas) tabbedPane.getSelectedComponent();
 
 	}
 
 	public void stateChanged(ChangeEvent e) {
 		if (getCurrentCanvas() != null) {
-		  JCheckBoxMenuItem cb = (JCheckBoxMenuItem) menuBar.getMenu(1).getMenuComponent(2);
-		  cb.setSelected(getCurrentCanvas().isGridVisible());
-		  getCurrentCanvas().drawingArea.grabFocus();
+			JCheckBoxMenuItem cb = (JCheckBoxMenuItem) menuBar.getMenu(1).getMenuComponent(2);
+			cb.setSelected(getCurrentCanvas().isGridVisible());
+			getCurrentCanvas().drawingArea.grabFocus();
+			RuntimeProperties.packageDir = getCurrentCanvas().workDir;
 		}
 	}
 

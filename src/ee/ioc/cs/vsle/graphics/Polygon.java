@@ -312,7 +312,13 @@ public class Polygon extends Shape {
 				y[i] = (int)(yModifier + Ysize * yPoints[i]) - yFixed[i];
 		}
 
-		g2.fillPolygon(x, y, xPoints.length);
+
+		if (filled) {
+			g2.fillPolygon(x, y, xPoints.length);
+		} else {
+			g2.drawPolygon(x, y, xPoints.length);
+		}
+
 
 		if (selected) {
 			drawSelection(g2);

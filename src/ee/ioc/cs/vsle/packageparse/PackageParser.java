@@ -80,7 +80,7 @@ public class PackageParser {
 	// ===========================================================
 	class PackageHandler extends DefaultHandler {
 
-		public InputSource resolveEntity(java.lang.String publicId, java.lang.String systemId) throws SAXException{
+		public InputSource resolveEntity(java.lang.String publicId, java.lang.String systemId) throws SAXException {
 			InputSource is = null;
 			if (systemId != null && systemId.endsWith("dtd"))
 				is = new InputSource("package2.dtd");
@@ -169,7 +169,7 @@ public class PackageParser {
 
 			if (element.equals("fields")) {
 				classFields = new ArrayList();
-				;
+
 			}
 
 			if (element.equals("polygon")) {
@@ -190,8 +190,9 @@ public class PackageParser {
 				String name = attrs.getValue("name");
 				String type = attrs.getValue("type");
 				String value = attrs.getValue("value");
+				String desc = attrs.getValue("description");
 
-				newField = new ClassField(name, type, value);
+				newField = new ClassField(name, type, value, desc);
 				classFields.add(newField);
 			}
 			if (element.equals("text")) {
@@ -243,13 +244,13 @@ public class PackageParser {
 				}
 				int lt = 0;
 				if (lineType != null) {
-				  lt = Integer.parseInt(lineType);
+					lt = Integer.parseInt(lineType);
 				}
 
 				Rect newRect = new Rect(Integer.parseInt(x), Integer.parseInt(y),
 					Integer.parseInt(width), Integer.parseInt(height),
 					Integer.parseInt(color),
-					Boolean.valueOf(filled).booleanValue(),  str, tr, lt);
+					Boolean.valueOf(filled).booleanValue(), str, tr, lt);
 
 				newGraphics.addShape(newRect);
 			}
@@ -273,13 +274,13 @@ public class PackageParser {
 				}
 				int lt = 0;
 				if (lineType != null) {
-				  lt = Integer.parseInt(lineType);
+					lt = Integer.parseInt(lineType);
 				}
 
 				Oval newOval = new Oval(Integer.parseInt(x), Integer.parseInt(y),
 					Integer.parseInt(width), Integer.parseInt(height),
 					Integer.parseInt(color),
-					Boolean.valueOf(filled).booleanValue(),  str, tr, lt);
+					Boolean.valueOf(filled).booleanValue(), str, tr, lt);
 
 				newGraphics.addShape(newOval);
 			}
@@ -305,7 +306,7 @@ public class PackageParser {
 				}
 				int lt = 0;
 				if (lineType != null) {
-				  lt = Integer.parseInt(lineType);
+					lt = Integer.parseInt(lineType);
 				}
 
 				Arc newArc = new Arc(Integer.parseInt(x), Integer.parseInt(y),
@@ -346,9 +347,9 @@ public class PackageParser {
 			}
 			int lt = 0;
 			if (lineType != null) {
-			  lt = Integer.parseInt(lineType);
+				lt = Integer.parseInt(lineType);
 			}
-			polygon = new Polygon(Integer.parseInt(colour), Boolean.valueOf(filled).booleanValue(),str,tr, lt);
+			polygon = new Polygon(Integer.parseInt(colour), Boolean.valueOf(filled).booleanValue(), str, tr, lt);
 		}
 
 		private Line makeLine(Attributes attrs, ClassGraphics newGraphics) {
@@ -358,9 +359,9 @@ public class PackageParser {
 			String val = attrs.getValue("x1");
 			if (val.endsWith("rf")) {
 				x1 = newGraphics.boundWidth;
-				fixedX1 = x1 - Integer.parseInt(val.substring(0, val.length()-2));
-			} else if  (val.endsWith("f")) {
-				x1 = Integer.parseInt(val.substring(0, val.length()-1));
+				fixedX1 = x1 - Integer.parseInt(val.substring(0, val.length() - 2));
+			} else if (val.endsWith("f")) {
+				x1 = Integer.parseInt(val.substring(0, val.length() - 1));
 				fixedX1 = -1;
 			} else {
 				x1 = Integer.parseInt(val);
@@ -368,9 +369,9 @@ public class PackageParser {
 			val = attrs.getValue("x2");
 			if (val.endsWith("rf")) {
 				x2 = newGraphics.boundWidth;
-				fixedX2 = x2 - Integer.parseInt(val.substring(0, val.length()-2));
-			} else if  (val.endsWith("f")) {
-				x2 = Integer.parseInt(val.substring(0, val.length()-1));
+				fixedX2 = x2 - Integer.parseInt(val.substring(0, val.length() - 2));
+			} else if (val.endsWith("f")) {
+				x2 = Integer.parseInt(val.substring(0, val.length() - 1));
 				fixedX2 = -1;
 			} else {
 				x2 = Integer.parseInt(val);
@@ -378,9 +379,9 @@ public class PackageParser {
 			val = attrs.getValue("y1");
 			if (val.endsWith("rf")) {
 				y1 = newGraphics.boundHeight;
-				fixedY1 = y1 - Integer.parseInt(val.substring(0, val.length()-2));
-			} else if  (val.endsWith("f")) {
-				y1 = Integer.parseInt(val.substring(0, val.length()-1));
+				fixedY1 = y1 - Integer.parseInt(val.substring(0, val.length() - 2));
+			} else if (val.endsWith("f")) {
+				y1 = Integer.parseInt(val.substring(0, val.length() - 1));
 				fixedY1 = -1;
 			} else {
 				y1 = Integer.parseInt(val);
@@ -388,9 +389,9 @@ public class PackageParser {
 			val = attrs.getValue("y2");
 			if (val.endsWith("rf")) {
 				y2 = newGraphics.boundHeight;
-				fixedY2 = y2 - Integer.parseInt(val.substring(0, val.length()-2));
-			} else if  (val.endsWith("f")) {
-				y2 = Integer.parseInt(val.substring(0, val.length()-1));
+				fixedY2 = y2 - Integer.parseInt(val.substring(0, val.length() - 2));
+			} else if (val.endsWith("f")) {
+				y2 = Integer.parseInt(val.substring(0, val.length() - 1));
 				fixedY2 = -1;
 			} else {
 				y2 = Integer.parseInt(val);
@@ -409,7 +410,7 @@ public class PackageParser {
 			}
 			int lt = 0;
 			if (lineType != null) {
-			  lt = Integer.parseInt(lineType);
+				lt = Integer.parseInt(lineType);
 			}
 
 			Line newLine = new Line(x1,
@@ -453,6 +454,10 @@ public class PackageParser {
 				} catch (IOException e) {
 					db.p("Warning: class " + newClass.name + " specified in package does not exist.");
 				}
+				if (classFields.size() == 0) {
+					newClass.fields = a;
+				}
+
 				ClassField cf;
 				for (int i = 0; i < classFields.size(); i++) {
 					cf = ((ClassField) classFields.get(i));
@@ -478,25 +483,25 @@ public class PackageParser {
 				int[] fys = new int[polyYs.size()];
 
 
-				for (int i = 0; i< polyXs.size(); i++) {
-					String s = (String)polyXs.get(i);
+				for (int i = 0; i < polyXs.size(); i++) {
+					String s = (String) polyXs.get(i);
 					//parse the coordinates and check if they are fixed or reverse fixed
 					if (s.endsWith("rf")) {
 						xs[i] = newGraphics.boundWidth;
-						fxs[i] = newGraphics.boundWidth - Integer.parseInt(s.substring(0, s.length()-2));
-					} else if  (s.endsWith("f")) {
-						xs[i] = Integer.parseInt(s.substring(0, s.length()-1));
+						fxs[i] = newGraphics.boundWidth - Integer.parseInt(s.substring(0, s.length() - 2));
+					} else if (s.endsWith("f")) {
+						xs[i] = Integer.parseInt(s.substring(0, s.length() - 1));
 						fxs[i] = -1;
 					} else {
 						xs[i] = Integer.parseInt(s);
 						fxs[i] = 0;
 					}
-					s = (String)polyYs.get(i);
+					s = (String) polyYs.get(i);
 					if (s.endsWith("rf")) {
 						ys[i] = newGraphics.boundHeight;
-						fys[i] = newGraphics.boundHeight - Integer.parseInt(s.substring(0, s.length()-2));
-					} else if  (s.endsWith("f")) {
-						ys[i] = Integer.parseInt(s.substring(0, s.length()-1));
+						fys[i] = newGraphics.boundHeight - Integer.parseInt(s.substring(0, s.length() - 2));
+					} else if (s.endsWith("f")) {
+						ys[i] = Integer.parseInt(s.substring(0, s.length() - 1));
 						fys[i] = -1;
 					} else {
 						ys[i] = Integer.parseInt(s);
@@ -546,6 +551,7 @@ public class PackageParser {
 			if (element.equals("description") && status != PACKAGE) {
 				newClass.description = s;
 			}
+
 			if (element.equals("icon")) {
 				newClass.icon = s;
 			}

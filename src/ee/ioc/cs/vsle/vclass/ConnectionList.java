@@ -101,7 +101,7 @@ public class ConnectionList extends ArrayList implements Serializable {
 
 		for (int i = 0; i < this.size(); i++) {
 			relation = (Connection) this.get(i);
-			relation.calcBreakPoints();
+			relation.calcAllBreakPoints();
 		}
 	} // calcAllBreakPoints
 

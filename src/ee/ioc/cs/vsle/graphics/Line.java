@@ -383,7 +383,7 @@ public class Line extends Shape implements Serializable {
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
 		g2.setColor(color);
 	  	g2.setStroke(stroke);
-        Canvas.joonistamisi++;
+
 		int a = 0, b = 0, c = 0, d = 0;
 		if (fixedX1 == 0)
 			a = xModifier + (int) (Xsize * startX);

@@ -20,6 +20,7 @@ public class ClassField implements Cloneable, Serializable {
 	public String name;
 	public String type;
 	public String value;
+	public String description;
 	public boolean specField = false;
 	public boolean alias = false;
 	public boolean watched = false;
@@ -60,6 +61,13 @@ public class ClassField implements Cloneable, Serializable {
 		this.type = type;
 		specField = b;
 	} // ee.ioc.cs.editor.vclass.ClassField
+
+	public ClassField(String name, String type, String value, String desc) {
+		this.name = name;
+		this.type = type;
+		this.value = value;
+		description = desc;
+	}
 
 	/**
 	 * Checks if we have an ee.ioc.cs.editor.vclass.Alias class or not.
@@ -178,15 +186,15 @@ public class ClassField implements Cloneable, Serializable {
 
 	public boolean isKnown() {
 		if (value == null) {
-		    return false;
+			return false;
 		}
 		return true;
 	}
 
 	public String toXML() {
-		String xml = "<field name=\""+name+"\" type=\""+type+"\"";
-		if (value!=null)
-			xml += "value=\""+value+"\"";
+		String xml = "<field name=\"" + name + "\" type=\"" + type + "\"";
+		if (value != null)
+			xml += "value=\"" + value + "\"";
 		xml += "/>\n";
 		return xml;
 	}

@@ -19,6 +19,7 @@ public class GObj implements Serializable, Cloneable {
 	public int width, height;
 	public String className;
 	public String name;
+
 	public ArrayList ports = new ArrayList();
 	public ArrayList fields = new ArrayList();
 	public ArrayList shapes = new ArrayList();
@@ -71,39 +72,39 @@ public class GObj implements Serializable, Cloneable {
 		if (corner == 1) {
 			if (Xsize > 0.1 || changeX < 0) {
 				setX(x + changeX);
-				Xsize = (width * Xsize - changeX) /(float)width;
+				setXsize((width * Xsize - changeX) /(float)width);
 			}
 			if (Ysize > 0.1 || changeY < 0) {
 			    setY(y + changeY);
-				Ysize = (height * Ysize - changeY) /(float)height;
+				setYsize((height * Ysize - changeY) /(float)height);
 			}
 		}
 		if (corner == 2) {
 			if (Xsize > 0.1  || changeX > 0) {
-				Xsize = (width * Xsize + changeX) /(float)width;
+				setXsize((width * Xsize + changeX) /(float)width);
 			}
 			if (Ysize > 0.1  || changeY < 0) {
 			    setY(y + changeY);
-				Ysize = (height * Ysize - changeY) /(float)height;
+				setYsize((height * Ysize - changeY) /(float)height);
 			}
 		}
 
 		if (corner == 3) {
 			if (Xsize > 0.1 || changeX < 0) {
 				setX(x + changeX);
-				Xsize = (width * Xsize - changeX) /(float)width;
+				setXsize((width * Xsize - changeX) /(float)width);
 			}
 			if (Ysize > 0.1 || changeY > 0) {
-				Ysize = (height * Ysize + changeY) /(float)height;
+				setYsize((height * Ysize + changeY) /(float)height);
 			}
 		}
 
 		if (corner == 4) {
 			if (Xsize > 0.1 || changeX > 0) {
-				Xsize = (width * Xsize + changeX) /(float)width;
+				setXsize((width * Xsize + changeX) /(float)width);
 			}
 			if (Ysize > 0.1  || changeY > 0) {
-				Ysize = (height * Ysize + changeY) /(float)height;
+				setYsize((height * Ysize + changeY) /(float)height);
 			}
 		}
 
