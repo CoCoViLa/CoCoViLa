@@ -24,7 +24,7 @@ public class KeyOps implements KeyListener {
 	} // keyTyped
 
 	public void keyReleased(KeyEvent e) {
-		db.p("CODE: " + e.getKeyCode() + " CHAR: " + e.getKeyChar() + " CTRL DOWN: " + e.isControlDown());
+
 		if (e.getKeyCode() == 127) {        // event: delete object(s), key: del
 			editor.deleteObjects();
 		} else if (e.getKeyCode() == 68) {   // event: clone object(s), key: ctrl+d
