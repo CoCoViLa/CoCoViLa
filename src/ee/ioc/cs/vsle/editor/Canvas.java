@@ -10,8 +10,6 @@ import ee.ioc.cs.vsle.util.db;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.FocusListener;
-import java.awt.event.FocusEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
@@ -109,6 +107,9 @@ public class Canvas extends JPanel implements ActionListener {
 		return false;
 	} // getGridVisibility
 
+	public VPackage getCurrentPackage() {
+		return vPackage;
+	}
 
 	public void stopRelationAdding() {
 		currentObj = null;

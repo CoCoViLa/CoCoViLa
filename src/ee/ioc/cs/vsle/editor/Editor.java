@@ -477,7 +477,7 @@ public class Editor extends JFrame implements ChangeListener{
 	}
 
 	public VPackage getCurrentPackage() {
-		return null;
+	  return getCurrentCanvas().getCurrentPackage();
 	}
 
 	public Canvas getCurrentCanvas() {

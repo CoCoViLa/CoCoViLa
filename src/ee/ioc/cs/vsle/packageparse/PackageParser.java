@@ -379,7 +379,7 @@ public class PackageParser {
 				try {
 					a = sp.getFields(path + File.separator + newClass.name + ".java");
 				} catch (IOException e) {
-					db.p("Warning: class " + newClass.name + " specified in package does not exits.");
+					db.p("Warning: class " + newClass.name + " specified in package does not exist.");
 				}
 				ClassField cf;
 				for (int i = 0; i < classFields.size(); i++) {
