@@ -364,7 +364,6 @@ public class Editor extends JFrame implements ChangeListener{
 	 */
 	void loadPackage(File f) {
 		Canvas canvas = new Canvas(f);
-
 		tabbedPane.addTab("blaah",canvas);
 		tabbedPane.setSelectedComponent(canvas);
 		getContentPane().add(tabbedPane);
