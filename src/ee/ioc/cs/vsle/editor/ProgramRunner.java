@@ -17,7 +17,37 @@ import javax.swing.JTextArea;
  */
 public class ProgramRunner {
 	Object genObject;
-	public static HashSet foundVars = new HashSet();
+	private static HashSet foundVars = new HashSet();
+
+        public static void clearFoundVars() {
+            foundVars.clear();
+        }
+
+        public static void addFoundVar( Var var ) {
+            if ( isFoundVar( var ) ) {
+                return;
+            }
+            foundVars.add( var );
+        }
+
+        public static void addAllFoundVars( Collection col ) {
+            for ( Iterator iter = col.iterator(); iter.hasNext(); ) {
+                Var var = ( Var ) iter.next();
+                if ( !isFoundVar( var ) ) {
+                    foundVars.add( var );
+                }
+            }
+        }
+
+        public static boolean isFoundVar( Var var ) {
+            for ( Iterator iter = foundVars.iterator(); iter.hasNext(); ) {
+                Var in = ( Var ) iter.next();
+                if ( in.toString().equals( var.toString() ) ) {
+                    return true;
+                }
+            }
+            return false;
+        }
 
 	void runPropagate(Object genObject, ObjectList objects) {
 		try {
@@ -38,6 +68,7 @@ public class ProgramRunner {
 			String fullName;
 			Var var;
 			boolean varIsComputed;
+                        db.p("runPropagate() foundVars: " + foundVars);
 			// ee.ioc.cs.editor.util.db.p(genClass.getClass().getFields()[0]);
 			for (int i = 0; i < objects.size(); i++) {
 				obj = (GObj) objects.get(i);

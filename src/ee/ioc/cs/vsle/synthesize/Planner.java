@@ -30,7 +30,7 @@ public class Planner {
     public ArrayList invokePlaning( Problem problem, boolean computeAll ) {
 
         m_problem = problem;
-        ProgramRunner.foundVars.clear();
+        ProgramRunner.clearFoundVars();
 
         //manage axioms
         for ( Iterator axiomIter = m_problem.getAxioms().iterator(); axiomIter
@@ -203,7 +203,7 @@ public class Planner {
             problem.getTargetVars().addAll( allTargetVarsBackup );
         }
         db.p( "algorithm" + algorithm.toString() + "\n" );
-        ProgramRunner.foundVars.addAll(foundVars);
+        ProgramRunner.addAllFoundVars(foundVars);
 
         return ( isSubtask )
                 ? foundSubGoal
