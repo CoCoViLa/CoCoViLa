@@ -12,6 +12,14 @@ import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.BasicStroke;
 
+/**
+ * <p>Title: IconPort</p>
+ * <p>Description: Port class for using in Icon Editor application.</p>
+ * <p>Copyright: Copyright (c) 2004</p>
+ * <p>Company: </p>
+ * @author Aulo Aasmaa, Ando Saabas
+ * @version 1.0
+ */
 public class IconPort implements Cloneable, Serializable {
 
   GObj obj;
@@ -74,12 +82,25 @@ public class IconPort implements Cloneable, Serializable {
     return (int) (x + openGraphics.boundX + (openGraphics.boundWidth) / 2);
   } // getCenterX
 
+  /**
+   * Returns the textual format of the port. Used at saving the object to disk
+   * for later loading and continuing working on.
+   * @return String - textual format of the port.
+   */
   public String toText() {
 	return "PORT:"+getX()+":"+getY()+":"+isArea()+":"+isStrict()+":"+getName();
   } // toText
 
+  /**
+   * Returns true if the port is inside the selection rectangle and false otherwise.
+   * @param x1 int - x coordinate of the selection rectangle starting point.
+   * @param y1 int - y coordinate of the selection rectangel starting point.
+   * @param x2 int - x coordinate of the selection rectangle ending point.
+   * @param y2 int - y coordinate of the selection rectangle ending point.
+   * @return boolean - the port is inside the selection rectangle or not.
+   */
   public boolean isInsideRect(int x1, int y1, int x2, int y2) {
-	if (x1 < x && y1 < y && x2 > (x + width) && y2 > (y + height)) {
+	if (x1 < x-6 && y1 < y-6 && x2 > (x + width) && y2 > (y + height)) {
 		return true;
 	}
 	return false;
@@ -92,8 +113,6 @@ public class IconPort implements Cloneable, Serializable {
   public void setMultSize(float s1, float s2) {
 	x = (int)(x*s1/s2);
 	y = (int)(y*s1/s2);
-	//width = (int)(width*s1/s2);
-	//height = (int)(height*s1/s2);
    } // setMultSize
 
   /**
@@ -210,7 +229,7 @@ public class IconPort implements Cloneable, Serializable {
    * @return boolean - clicked inside port area or not.
    */
   public boolean isInside(int xCoord, int yCoord) {
-    if(xCoord>=getX() && xCoord<=getX()+6 && yCoord>=getY() && yCoord<=getY()+6) {
+    if(xCoord>=getX()-6 && xCoord<=getX()+6 && yCoord>=getY()-6 && yCoord<=getY()+6) {
       return true;
     }
     return false;
@@ -366,10 +385,12 @@ public class IconPort implements Cloneable, Serializable {
   public void drawSelection(Graphics2D g) {
     g.setColor(Color.black);
     g.setStroke(new BasicStroke((float)1.0));
-    g.drawRect(x+5, y+5, 3, 3); // bottom right
-    g.drawRect(x-3, y+5, 3, 3); // bottom left
-    g.drawRect(x+5, y-3, 3, 3); // top right
-    g.drawRect(x-3, y-3, 3, 3); // top left
+
+	g.drawRect(x-6, y-6, 3, 3);
+	g.drawRect(x + width-3, y-6, 3, 3);
+	g.drawRect(x-6, y + height-3, 3, 3);
+	g.drawRect(x + width-3, y + height-3, 3, 3);
+
   } // drawSelection
 
   /**
@@ -382,13 +403,14 @@ public class IconPort implements Cloneable, Serializable {
   void draw (int xModifier, int yModifier, float size, Graphics g) {
     Graphics2D g2 = (Graphics2D) g;
     this.graphics = g2;
-    g2.setColor(Color.black);
+    g2.setColor(Color.red);
 
-	int a = (int)((xModifier + x)*size);
-    int b = (int)((yModifier + y)*size);
+	int a = (int)(((xModifier + x)*size)-(height/2));
+    int b = (int)(((yModifier + y)*size)-(width/2));
 	int c = (int)(this.height * size);
 	int d = (int)(this.width * size);
-    g2.fillRect(a, b, c, d);
+
+    g2.drawOval(a, b, c, d);
 
     // Draw selection markers if object selected.
     if (selected) {
