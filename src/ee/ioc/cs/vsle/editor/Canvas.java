@@ -505,7 +505,12 @@ public class Canvas extends JPanel implements ActionListener {
 			objects.sendToBack(currentObj);
 			repaint();
 		} else if (e.getActionCommand().equals(Menu.MAKECLASS)) {
-			db.p(((GObjGroup)currentObj).getSpec(connections));
+			ClassSaveDialog csd = new ClassSaveDialog(((GObjGroup)currentObj).getSpec(connections), this);
+            csd.pack();
+
+			csd.setLocation(new java.awt.Point(mouseX, mouseY));
+			csd.setVisible(true);
+
 		} else if (e.getActionCommand().equals(Menu.VIEWCODE)) {
             CodeViewer cv = new CodeViewer(currentObj);
 			cv.setSize(550, 450);
