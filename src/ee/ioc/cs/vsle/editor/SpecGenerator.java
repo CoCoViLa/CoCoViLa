@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import ee.ioc.cs.vsle.util.db;
 
 /**
  * Created by IntelliJ IDEA.
@@ -39,7 +40,8 @@ public class SpecGenerator {
 			in.close();
 
 		} catch (IOException ioe)     {
-			ioe.printStackTrace();
+			//ioe.printStackTrace();
+                        db.p("Method file " + methName + " does not exist");
 		}
 
 
