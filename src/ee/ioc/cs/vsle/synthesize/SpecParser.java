@@ -193,6 +193,9 @@ public class SpecParser {
 			if (classes.getType(cf.type) != null) {
 				problem = makeProblem(classes, cf.type, caller + "." + cf.name, problem);
 			}
+			if (cf.type.equals("alias")) {
+				cf = rewriteWildcardAlias(cf, ac, classes);
+			}
 			var = new Var();
 			var.setObj(caller);
 			var.setField(cf);
@@ -223,7 +226,7 @@ public class SpecParser {
 					String s = checkIfAliasWildcard(classRelation);
 					if (s != null) {
 						rel = makeAliasWildcard(ac, classes, classRelation, problem, obj, s);
-                        problem.addRel(rel);
+						problem.addRel(rel);
 						isAliasRel = true;
 					}
 				}
@@ -307,6 +310,29 @@ public class SpecParser {
 
 		}
 		return problem;
+	}
+
+	private ClassField rewriteWildcardAlias(ClassField cf, AnnotatedClass ac, ClassList classes) {
+		if (cf.vars.size() == 1 && ((ClassField) cf.vars.get(0)).name.startsWith("*.")) {
+      		String wildcardVar = ((ClassField) cf.vars.get(0)).name.substring(2);
+            cf.vars.clear();
+			ClassField clf;
+			for (int i = 0; i < ac.fields.size(); i++) {
+				clf = (ClassField) ac.fields.get(i);
+				AnnotatedClass anc = classes.getType(clf.type);
+				if (anc != null) {
+					if (anc.hasField(wildcardVar)) {
+                        ClassField cf2 = new ClassField();
+						cf2.name = clf.name+"."+wildcardVar;
+						cf2.type = anc.getFieldByName(wildcardVar).type;
+						cf.vars.add(cf2);
+					}
+				}
+			}
+			return cf;
+		} else {
+			return cf;
+		}
 	}
 
 	private void isRightWildcard(ClassRelation classRelation, AnnotatedClass ac, ClassList classes, String type) {
@@ -447,7 +473,7 @@ public class SpecParser {
 		}
 		ClassField cf = (ClassField) classRelation.outputs.get(0);
 		if (problem.getAllVars().containsKey(obj + "." + cf.name)) {
-			rel.addOutput((Var)problem.getAllVars().get(obj + "." + cf.name));
+			rel.addOutput((Var) problem.getAllVars().get(obj + "." + cf.name));
 		}
 
 		rel.setUnknownInputs(rel.inputs.size());
