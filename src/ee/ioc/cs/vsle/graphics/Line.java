@@ -427,7 +427,7 @@ public class Line extends Shape implements Serializable {
 		g2.setStroke(new BasicStroke((float) 1.0));
 		g2.fillRect(startX - 2, startY - 2, 4, 4);
 		g2.fillRect(endX - 2, endY - 2, 4, 4);
-	} // drawSelection 
+	} // drawSelection
 
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
 
@@ -444,9 +444,12 @@ public class Line extends Shape implements Serializable {
 
 		alpha = (float) (1 - (this.transparency / 100));
 
-		float red = (float) color.getRed() / 256;
-		float green = (float) color.getGreen() / 256;
-		float blue = (float) color.getBlue() / 256;
+		float red = 0;
+	   if(color!=null) red = (float) color.getRed() / 256;
+		float green = 0;
+	   if(color!=null) green = (float) color.getGreen() / 256;
+		float blue = 0;
+	   if(color!=null) blue = (float) color.getBlue() / 256;
 
 		g2.setColor(new Color(red, green, blue, alpha));
 
