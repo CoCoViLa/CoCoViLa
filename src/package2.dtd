@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='us-ascii'?>
+<?xml version='1.0' encoding='us-ascii'?> 
 <!ELEMENT package (name, description, class+)>
 <!ELEMENT class 	(name, description, icon, graphics, ports?, fields?)>
 <!ELEMENT fields 	(field*)>
@@ -39,7 +39,8 @@
         colour		CDATA   #IMPLIED
         fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
-        transparency	CDATA	#IMPLIED>      
+        transparency	CDATA	#IMPLIED
+	lineType	CDATA	#IMPLIED>      
 <!ATTLIST rect
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
@@ -49,7 +50,8 @@
 	filled 		(true|false) #IMPLIED
 	fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
-        transparency	CDATA	#IMPLIED>
+        transparency	CDATA	#IMPLIED
+	lineType	CDATA	#IMPLIED>
 <!ATTLIST arc
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
@@ -61,7 +63,8 @@
 	filled 		(true|false) #IMPLIED
 	fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
-        transparency	CDATA	#IMPLIED>
+        transparency	CDATA	#IMPLIED
+	lineType	CDATA	#IMPLIED>
 <!ATTLIST bounds
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
@@ -76,7 +79,8 @@
 	filled 		(true|false) #IMPLIED
 	fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
-        transparency	CDATA	#IMPLIED>		   
+        transparency	CDATA	#IMPLIED
+	lineType	CDATA	#IMPLIED>		   
 <!ATTLIST field 
         name		CDATA   #REQUIRED
         type		CDATA   #IMPLIED
