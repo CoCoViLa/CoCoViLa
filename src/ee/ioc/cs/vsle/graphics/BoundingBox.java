@@ -128,7 +128,8 @@ public class BoundingBox extends Shape 	implements Serializable {
 
   /**
    * Set size using zoom multiplication.
-   * @param s float - set size using zoom multiplication.
+   * @param s1 float - set size using zoom multiplication.
+   * @param s2 float - set size using zoom multiplication.
    */
   public void setMultSize(float s1, float s2) {
 	x = x*(int)s1/(int)s2;
@@ -168,6 +169,15 @@ public class BoundingBox extends Shape 	implements Serializable {
   public double getTransparency() {
 	return this.transparency;
   } // getTransparency
+
+  /**
+   * Returns the line typ of the shape.
+   * @return int - line type of the shape.
+   */
+  public int getLineType() {
+	return 0;
+  } // getLineType
+
 
   /**
    * Returns the stroke with of a shape.
@@ -329,6 +339,9 @@ public class BoundingBox extends Shape 	implements Serializable {
   public void setTransparency(double transparencyPercentage) {
 	this.transparency = (float) transparencyPercentage;
   } // setTransparency
+
+  public void setLineType(int lineType) {
+  }
 
   void drawDynamic(int xModifier, int yModifier, float Xsize, float Ysize,
 				   Graphics g, HashMap table) {

@@ -18,6 +18,8 @@ public class Oval extends Shape implements Serializable {
    */
   float transparency = (float) 1.0;
 
+  private int lineType;
+
   /**
    * Name of the shape.
    */
@@ -64,9 +66,10 @@ public class Oval extends Shape implements Serializable {
    * @param fill boolean - the shape is filled or not.
    * @param strokeWidth double - shape line weight.
    * @param transp double - shape transparency percentage.
+   * @param lineType int - shape line type.
    */
   public Oval(int x, int y, int width, int height, int colorInt, boolean fill,
-			  double strokeWidth, double transp) {
+			  double strokeWidth, double transp, int lineType) {
 	this.x = x;
 	this.y = y;
 	this.width = width;
@@ -75,6 +78,7 @@ public class Oval extends Shape implements Serializable {
 	this.filled = fill;
 	this.transparency = (float) transp;
 	setStrokeWidth(strokeWidth);
+	this.lineType = lineType;
   } // Oval
 
   public void setFixed(boolean b) {
@@ -114,7 +118,8 @@ public class Oval extends Shape implements Serializable {
 
   /**
    * Set size using zoom multiplication.
-   * @param s float - set size using zoom multiplication.
+   * @param s1 float - set size using zoom multiplication.
+   * @param s2 float - set size using zoom multiplication.
    */
   public void setMultSize(float s1, float s2) {
 	x = x*(int)s1/(int)s2;
@@ -177,6 +182,14 @@ public class Oval extends Shape implements Serializable {
   } // setTransparency
 
   /**
+   * Specify the line type used at drawing the shape.
+   * @param lineType int
+   */
+  public void setLineType(int lineType) {
+	this.lineType = lineType;
+  } // setLineType
+
+  /**
    * Returns the color of the oval.
    * @return Color - color of the oval.
    */
@@ -207,6 +220,14 @@ public class Oval extends Shape implements Serializable {
   public double getTransparency() {
 	return this.transparency;
   } // getTransparency
+
+  /**
+   * Returns the line typ of the shape.
+   * @return int - line type of the shape.
+   */
+  public int getLineType() {
+	return this.lineType;
+  } // getLineType
 
   public int getX() {
 	return x;
@@ -280,7 +301,7 @@ public class Oval extends Shape implements Serializable {
 
 	return "<oval x=\"" + (x - boundingboxX) + "\" y=\""
 		+ (y - boundingboxY) + "\" width=\"" + width + "\" height=\"" + height
-		+ "\" colour=\"" + colorInt + "\" filled=\"" + fill + "\" fixed=\""+isFixed()+"\" stroke=\""+(int)this.lineWeight+"\" transparency=\""+(int)this.transparency+"\"/>\n";
+		+ "\" colour=\"" + colorInt + "\" filled=\"" + fill + "\" fixed=\""+isFixed()+"\" stroke=\""+(int)this.lineWeight+"\" lineType=\""+this.lineType+"\" transparency=\""+(int)this.transparency+"\"/>\n";
   } // toFile
 
   public String toText() {
@@ -292,7 +313,7 @@ public class Oval extends Shape implements Serializable {
 
 	if (color != null) colorInt = color.getRGB();
 
-	return "OVAL:"+x+":"+y+":"+width+":"+height+":"+colorInt+":"+fill+":"+(int)this.lineWeight+":"+(int)this.transparency+":"+isFixed();
+	return "OVAL:"+x+":"+y+":"+width+":"+height+":"+colorInt+":"+fill+":"+(int)this.lineWeight+":"+this.lineType+":"+(int)this.transparency+":"+isFixed();
   } // toText
 
   /**
@@ -340,7 +361,14 @@ public class Oval extends Shape implements Serializable {
 
 	Graphics2D g2 = (Graphics2D) g;
 
-	g2.setStroke(new BasicStroke(this.lineWeight));
+	if(getLineType()>0) {
+	  g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
+								   BasicStroke.JOIN_ROUND, 50,
+								   new float[] {getLineType(),getLineType()}
+								   , 0));
+	} else {
+	  g2.setStroke(new BasicStroke(lineWeight));
+	}
 
 	alpha = (float) (1 - (this.transparency / 100));
 

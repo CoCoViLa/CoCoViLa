@@ -45,6 +45,8 @@ public class Arc extends Shape implements Serializable {
    */
   String name;
 
+  int lineType;
+
   /**
    * Indicates if the shape is selected or not.
    */
@@ -68,9 +70,10 @@ public class Arc extends Shape implements Serializable {
    *                       a specified color or not.
    * @param strokeWidth double - width of the line the arc is drawn with.
    * @param transp double - transparency (Alpha) value (0..100%).
+   * @param lineType - shape line type.
    */
   public Arc(int x, int y, int width, int height, int startAngle, int arcAngle,
-			 int colorInt, boolean fill, double strokeWidth, double transp) {
+			 int colorInt, boolean fill, double strokeWidth, double transp, int lineType) {
 	this.x = x;
 	this.y = y;
 	this.width = width;
@@ -81,6 +84,7 @@ public class Arc extends Shape implements Serializable {
 	this.filled = fill;
 	this.transparency = (float) transp;
 	this.lineWeight = (float) strokeWidth;
+	this.lineType = lineType;
   } // Arc
 
   /**
@@ -189,7 +193,8 @@ public class Arc extends Shape implements Serializable {
 
   /**
    * Set size using zoom multiplication.
-   * @param s float - set size using zoom multiplication.
+   * @param s1 float - set size using zoom multiplication.
+   * @param s2 float - set size using zoom multiplication.
    */
   public void setMultSize(float s1, float s2) {
 	x = x*(int)s1/(int)s2;
@@ -223,6 +228,14 @@ public class Arc extends Shape implements Serializable {
   public void setTransparency(double transparencyPercentage) {
 	this.transparency = (float) transparencyPercentage;
   } // setTransparency
+
+  /**
+   * Specify the line type used at drawing the shape.
+   * @param lineType int
+   */
+  public void setLineType(int lineType) {
+	this.lineType = lineType;
+  } // setLineType
 
   /**
    * Returns the start angle of the shape.
@@ -289,6 +302,14 @@ public class Arc extends Shape implements Serializable {
   public double getTransparency() {
 	return this.transparency;
   } // getTransparency
+
+  /**
+   * Returns the line typ of the shape.
+   * @return int - line type of the shape.
+   */
+  public int getLineType() {
+	return this.lineType;
+  } // getLineType
 
   /**
    * Returns the x coordinate of the beginning of the arc.
@@ -414,7 +435,7 @@ public class Arc extends Shape implements Serializable {
 	return "<arc x=\"" + (x - boundingboxX) + "\" y=\"" + (y - boundingboxY)
 		+ "\" width=\"" + width + "\" height=\"" + height + "\" startAngle=\""
 		+ startAngle + "\" arcAngle=\"" + arcAngle + "\" colour=\"" + colorInt
-		+ "\" filled=\"" + fill + "\" fixed=\""+isFixed()+"\" stroke=\""+(int)this.lineWeight+"\" transparency=\""+(int)this.transparency+"\"/>\n";
+		+ "\" filled=\"" + fill + "\" fixed=\""+isFixed()+"\" stroke=\""+(int)this.lineWeight+"\" lineType=\""+this.lineType+"\" transparency=\""+(int)this.transparency+"\"/>\n";
   } // toFile
 
   public String toText() {
@@ -422,7 +443,7 @@ public class Arc extends Shape implements Serializable {
 	if (filled) fill = "true";
 	int colorInt = 0;
 	if (color != null) colorInt = color.getRGB();
-   return "ARC:"+x+":"+y+":"+width+":"+height+":"+startAngle+":"+arcAngle+":"+colorInt+":"+fill+":"+(int)this.lineWeight+":"+(int)this.transparency+":"+isFixed();
+   return "ARC:"+x+":"+y+":"+width+":"+height+":"+startAngle+":"+arcAngle+":"+colorInt+":"+fill+":"+(int)this.lineWeight+":"+this.lineType+":"+(int)this.transparency+":"+isFixed();
   } // toText
 
   /**
@@ -450,7 +471,14 @@ public class Arc extends Shape implements Serializable {
 
 	Graphics2D g2 = (Graphics2D) g;
 
-	g2.setStroke(new BasicStroke(this.lineWeight));
+	if(getLineType()>0) {
+	  g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
+								   BasicStroke.JOIN_ROUND, 50,
+								   new float[] {getLineType(),getLineType()}
+								   , 0));
+    } else {
+	  g2.setStroke(new BasicStroke(lineWeight));
+	}
 
 	// The user can specify the percentage of transparency between 0..100%.
 	// The value of transparency is defined as a float value between 0..1.

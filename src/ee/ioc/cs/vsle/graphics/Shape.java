@@ -4,7 +4,6 @@ import java.io.*;
 import java.util.*;
 
 import java.awt.*;
-
 import ee.ioc.cs.vsle.vclass.*;
 
 public abstract class Shape implements Serializable, Cloneable {
@@ -90,6 +89,8 @@ public abstract class Shape implements Serializable, Cloneable {
 
   public abstract void setTransparency(double transparencyPercentage);
 
+  public abstract void setLineType(int lineType);
+
   public abstract void setColor(Color col);
 
   public abstract void setStrokeWidth(double strokeWidth);
@@ -117,6 +118,8 @@ public abstract class Shape implements Serializable, Cloneable {
   public abstract double getStrokeWidth();
 
   public abstract double getTransparency();
+
+  public abstract int getLineType();
 
   public abstract void resize(int deltaW, int deltaH, int cornerClicked);
 

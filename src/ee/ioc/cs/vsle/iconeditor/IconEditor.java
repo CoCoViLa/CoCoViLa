@@ -1101,17 +1101,17 @@ public class IconEditor
 				if (shape instanceof Rect) {
 					shape = new Rect(shape.getX(), shape.getY(),
 						shape.width, shape.height,
-						shape.getColor().getRGB(), shape.isFilled(), shape.getStrokeWidth(), shape.getTransparency());
+						shape.getColor().getRGB(), shape.isFilled(), shape.getStrokeWidth(), shape.getTransparency(), shape.getLineType());
 				} else if (shape instanceof Oval) {
 					shape = new Oval(shape.getX(), shape.getY(),
 						shape.width, shape.height,
 						shape.getColor().getRGB(), shape.isFilled(),
-						shape.getStrokeWidth(), shape.getTransparency());
+						shape.getStrokeWidth(), shape.getTransparency(), shape.getLineType());
 				} else if (shape instanceof Line) {
 					shape = new Line(shape.getStartX(), shape.getStartY(),
 						shape.getEndX(), shape.getEndY(),
 						shape.getColor().getRGB(), shape.getStrokeWidth(),
-						shape.getTransparency());
+						shape.getTransparency(), shape.getLineType());
 				} else if (shape instanceof Dot) {
 					shape = new Dot(shape.getX(), shape.getY(), shape.getColor().getRGB(),
 						shape.getStrokeWidth(), shape.getTransparency());
@@ -1120,7 +1120,7 @@ public class IconEditor
 						shape.width, shape.height,
 						shape.getStartAngle(), shape.getArcAngle(),
 						shape.getColor().getRGB(), shape.isFilled(),
-						shape.getStrokeWidth(), shape.getTransparency());
+						shape.getStrokeWidth(), shape.getTransparency(), shape.getLineType());
 				} else if (shape instanceof Text) {
 					shape = new Text(shape.getX(), shape.getY(),
 						shape.getFont(), shape.getColor(),
@@ -1263,11 +1263,13 @@ public class IconEditor
 				str = str.substring(str.indexOf(":") + 1);
 				int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
+				int lt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
 				int transp = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
 				boolean fixed = Boolean.valueOf(str).booleanValue();
 
-				Line line = new Line(x1, y1, x2, y2, colorInt, strokeW, transp);
+				Line line = new Line(x1, y1, x2, y2, colorInt, strokeW, transp,lt);
 				line.setFixed(fixed);
 				shapeList.add(line);
 			} else if (str.startsWith("ARC:")) {
@@ -1290,11 +1292,13 @@ public class IconEditor
 				str = str.substring(str.indexOf(":") + 1);
 				int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
+				int lt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
 				int transp = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
 				boolean fixed = Boolean.valueOf(str).booleanValue();
 
-				Arc arc = new Arc(x, y, width, height, startAngle, arcAngle, colorInt, fill, strokeW, transp);
+				Arc arc = new Arc(x, y, width, height, startAngle, arcAngle, colorInt, fill, strokeW, transp, lt);
 				arc.setFixed(fixed);
 				shapeList.add(arc);
 			} else if (str.startsWith("BOUNDS:")) {
@@ -1347,11 +1351,13 @@ public class IconEditor
 				str = str.substring(str.indexOf(":") + 1);
 				int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
+				int lt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
 				int transp = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
 				boolean fixed = Boolean.valueOf(str).booleanValue();
 
-				Oval oval = new Oval(x, y, width, height, colorInt, fill, strokeW, transp);
+				Oval oval = new Oval(x, y, width, height, colorInt, fill, strokeW, transp, lt);
 				oval.setFixed(fixed);
 				shapeList.add(oval);
 			} else if (str.startsWith("RECT:")) {
@@ -1370,11 +1376,13 @@ public class IconEditor
 				str = str.substring(str.indexOf(":") + 1);
 				int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
+				int lt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
 				int transp = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
 				boolean fixed = Boolean.valueOf(str).booleanValue();
 
-				Rect rect = new Rect(x, y, width, height, colorInt, fill, strokeW, transp);
+				Rect rect = new Rect(x, y, width, height, colorInt, fill, strokeW, transp, lt);
 				rect.setFixed(fixed);
 				shapeList.add(rect);
 			} else if (str.startsWith("TEXT:")) {
@@ -1478,12 +1486,12 @@ public class IconEditor
 		try {
 			window = new IconEditor();
 			window.setTitle(WINDOW_TITLE);
-			window.setSize(700, 600);
+			window.setSize(775, 600);
 			window.setVisible(true);
 		} catch (Exception e) {
 			window = new IconEditor();
 			window.setTitle(WINDOW_TITLE);
-			window.setSize(700, 600);
+			window.setSize(775, 600);
 			window.setVisible(true);
 		}
 

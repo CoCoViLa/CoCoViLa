@@ -244,6 +244,14 @@ public class Text extends Shape implements Serializable {
   } // getTransparency
 
   /**
+   * Returns the line typ of the shape.
+   * @return int - line type of the shape.
+   */
+  public int getLineType() {
+	return 0;
+  } // getLineType
+
+  /**
    * Returns the color of the text.
    * @return Color - color of the text.
    */
@@ -297,6 +305,13 @@ public class Text extends Shape implements Serializable {
   public void setTransparency(double transparencyPercentage) {
 	this.transparency = (float) transparencyPercentage;
   } // setTransparency
+
+  /**
+   * Specify the line type used at drawing the shape.
+   * @param lineType int
+   */
+  public void setLineType(int lineType) {
+  } // setLineType
 
   /**
    * Return a specification of the shape to be written into a file in XML format.

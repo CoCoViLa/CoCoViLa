@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.util.queryutil.DBResult;
+import javax.swing.ImageIcon;
 
 public class RuntimeProperties {
 

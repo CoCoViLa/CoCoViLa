@@ -5,7 +5,7 @@ import ee.ioc.cs.vsle.graphics.*;
 
 import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.synthesize.SpecParser;
-
+import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -219,6 +219,7 @@ public class PackageParser {
 				String color = attrs.getValue("colour");
 				String stroke = attrs.getValue("stroke");
 				String transp = attrs.getValue("transparency");
+				String lineType = attrs.getValue("lineType");
 				double str = 1.0;
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
@@ -227,10 +228,14 @@ public class PackageParser {
 				if (transp != null) {
 					tr = Double.parseDouble(transp);
 				}
+				int lt = 0;
+				if (lineType != null) {
+				  lt = Integer.parseInt(lineType);
+				}
 
 				Line newLine = new Line(Integer.parseInt(x1),
 					Integer.parseInt(y1), Integer.parseInt(x2),
-					Integer.parseInt(y2), Integer.parseInt(color), str, tr);
+					Integer.parseInt(y2), Integer.parseInt(color), str, tr, lt);
 
 				newGraphics.addShape(newLine);
 			}
@@ -248,6 +253,7 @@ public class PackageParser {
 				String filled = attrs.getValue("filled");
 				String stroke = attrs.getValue("stroke");
 				String transp = attrs.getValue("transparency");
+				String lineType = attrs.getValue("lineType");
 				double str = 1.0;
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
@@ -256,11 +262,15 @@ public class PackageParser {
 				if (transp != null) {
 					tr = Double.parseDouble(transp);
 				}
+				int lt = 0;
+				if (lineType != null) {
+				  lt = Integer.parseInt(lineType);
+				}
 
 				Rect newRect = new Rect(Integer.parseInt(x), Integer.parseInt(y),
 					Integer.parseInt(width), Integer.parseInt(height),
 					Integer.parseInt(color),
-					Boolean.valueOf(filled).booleanValue(),  str, tr);
+					Boolean.valueOf(filled).booleanValue(),  str, tr, lt);
 
 				newGraphics.addShape(newRect);
 			}
@@ -273,6 +283,7 @@ public class PackageParser {
 				String filled = attrs.getValue("filled");
 				String stroke = attrs.getValue("stroke");
 				String transp = attrs.getValue("transparency");
+				String lineType = attrs.getValue("lineType");
 				double str = 1.0;
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
@@ -281,11 +292,15 @@ public class PackageParser {
 				if (transp != null) {
 					tr = Double.parseDouble(transp);
 				}
+				int lt = 0;
+				if (lineType != null) {
+				  lt = Integer.parseInt(lineType);
+				}
 
 				Oval newOval = new Oval(Integer.parseInt(x), Integer.parseInt(y),
 					Integer.parseInt(width), Integer.parseInt(height),
 					Integer.parseInt(color),
-					Boolean.valueOf(filled).booleanValue(),  str, tr);
+					Boolean.valueOf(filled).booleanValue(),  str, tr, lt);
 
 				newGraphics.addShape(newOval);
 			}
@@ -300,6 +315,7 @@ public class PackageParser {
 				String filled = attrs.getValue("filled");
 				String stroke = attrs.getValue("stroke");
 				String transp = attrs.getValue("transparency");
+				String lineType = attrs.getValue("lineType");
 				double str = 1.0;
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
@@ -308,12 +324,16 @@ public class PackageParser {
 				if (transp != null) {
 					tr = Double.parseDouble(transp);
 				}
+				int lt = 0;
+				if (lineType != null) {
+				  lt = Integer.parseInt(lineType);
+				}
 
 				Arc newArc = new Arc(Integer.parseInt(x), Integer.parseInt(y),
 					Integer.parseInt(width), Integer.parseInt(height),
 					Integer.parseInt(startAngle), Integer.parseInt(arcAngle),
 					Integer.parseInt(color),
-					Boolean.valueOf(filled).booleanValue(), str, tr);
+					Boolean.valueOf(filled).booleanValue(), str, tr, lt);
 
 				newGraphics.addShape(newArc);
 			}
@@ -337,14 +357,14 @@ public class PackageParser {
 			if (qName.equals("port")) {
 				if (newPort.openGraphics == null) {
 					newGraphics = new ClassGraphics();
-					newGraphics.addShape(new Oval(-4, -4, 8, 8, 0, false, 1.0, 0.0));
-					newGraphics.addShape(new Oval(-3, -3, 6, 6, 12632256, true, 1.0, 0.0));
+					newGraphics.addShape(new Oval(-4, -4, 8, 8, 0, false, 1.0, 0.0, 0));
+					newGraphics.addShape(new Oval(-3, -3, 6, 6, 12632256, true, 1.0, 0.0, 0));
 					newGraphics.setBounds(-4, -4, 8, 8);
 					newPort.openGraphics = newGraphics;
 				}
 				if (newPort.closedGraphics == null) {
 					newGraphics = new ClassGraphics();
-					newGraphics.addShape(new Oval(-4, -4, 8, 8, 0, true, 1.0, 0.0));
+					newGraphics.addShape(new Oval(-4, -4, 8, 8, 0, true, 1.0, 0.0, 0));
 					newGraphics.setBounds(-4, -4, 8, 8);
 					newPort.closedGraphics = newGraphics;
 				}

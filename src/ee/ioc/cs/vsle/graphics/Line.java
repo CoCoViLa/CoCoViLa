@@ -49,6 +49,8 @@ public class Line extends Shape implements Serializable {
 	 */
 	private float alpha;
 
+	private int lineType;
+
 	/**
 	 * Name of the shape.
 	 */
@@ -65,7 +67,7 @@ public class Line extends Shape implements Serializable {
 	private boolean fixed = false;
 
 
-	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp) {
+	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp, int lineType) {
 		startX = x1;
 		startY = y1;
 		endX = x2;
@@ -77,6 +79,7 @@ public class Line extends Shape implements Serializable {
 		this.y = Math.min(y1, y2);
 		this.width = Math.max(x1, x2) - this.x; // endX - startX;
 		this.height = Math.max(y1, y2) - this.y; // endY - startY;
+		this.lineType = lineType;
 	} // Line
 
 	public void setFixed(boolean b) {
@@ -136,7 +139,8 @@ public class Line extends Shape implements Serializable {
 
 	/**
 	 * Set size using zoom multiplication.
-	 * @param s1, s2 float - set size using zoom multiplication.
+	 * @param s1 float - set size using zoom multiplication.
+	 * @param s2 float - set size using zoom multiplication.
 	 */
 	public void setMultSize(float s1, float s2) {
 		startX = startX * (int) s1 / (int) s2;
@@ -162,6 +166,22 @@ public class Line extends Shape implements Serializable {
 	public void setTransparency(double transparencyPercentage) {
 		this.transparency = (float) transparencyPercentage;
 	} // setTransparency
+
+	/**
+	 * Specify the line type used at drawing the shape.
+	 * @param lineType int
+	 */
+	public void setLineType(int lineType) {
+	  this.lineType = lineType;
+	} // setLineType
+
+	/**
+	 * Returns the line typ of the shape.
+	 * @return int - line type of the shape.
+	 */
+	public int getLineType() {
+	  return this.lineType;
+	} // getLineType
 
 	/**
 	 * Set the color of a shape.
@@ -374,13 +394,13 @@ public class Line extends Shape implements Serializable {
 		return "<line x1=\"" + (startX - boundingboxX) + "\" y1=\""
 			+ (startY - boundingboxY) + "\" x2=\"" + (endX - boundingboxX)
 			+ "\" y2=\"" + (endY - boundingboxY) + "\" colour=\"" + colorInt
-			+ "\" fixed=\"" + isFixed() + "\" stroke=\""+(int)this.lineWeight+"\" transparency=\""+(int)this.transparency+"\"/>\n";
+			+ "\" fixed=\"" + isFixed() + "\" stroke=\""+(int)this.lineWeight+"\" lineType=\""+this.lineType+"\" transparency=\""+(int)this.transparency+"\"/>\n";
 	} // toFile
 
 	public String toText() {
 		int colorInt = 0;
 		if (color != null) colorInt = color.getRGB();
-		return "LINE:" + startX + ":" + startY + ":" + endX + ":" + endY + ":" + colorInt + ":" + (int) this.lineWeight + ":" + (int) this.transparency + ":" + isFixed();
+		return "LINE:" + startX + ":" + startY + ":" + endX + ":" + endY + ":" + colorInt + ":" + (int) this.lineWeight + ":" + this.lineType + ":" + (int) this.transparency + ":" + isFixed();
 	} // toText
 
 	/**
@@ -398,7 +418,14 @@ public class Line extends Shape implements Serializable {
 
 		Graphics2D g2 = (Graphics2D) g;
 
-		g2.setStroke(new BasicStroke(lineWeight));
+		if(getLineType()>0) {
+		  g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
+									   BasicStroke.JOIN_ROUND, 50,
+									   new float[] {getLineType(),getLineType()}
+									   , 0));
+		} else {
+		  g2.setStroke(new BasicStroke(lineWeight));
+		}
 
 		alpha = (float) (1 - (this.transparency / 100));
 

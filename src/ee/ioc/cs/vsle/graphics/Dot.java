@@ -142,7 +142,8 @@ public class Dot extends Shape implements Serializable {
 
   /**
    * Set size using zoom multiplication.
-   * @param s float - set size using zoom multiplication.
+   * @param s1 float - set size using zoom multiplication.
+   * @param s2 float - set size using zoom multiplication.
    */
   public void setMultSize(float s1, float s2) {
 	x = x*(int)s1/(int)s2;
@@ -193,6 +194,9 @@ public class Dot extends Shape implements Serializable {
 	this.transparency = (float) transparencyPercentage;
   } // setTransparency
 
+  public void setLineType(int lineType) {
+  }
+
   /**
    * Returns the color of the dot.
    * @return Color - color of the dot.
@@ -216,6 +220,14 @@ public class Dot extends Shape implements Serializable {
   public double getTransparency() {
 	return this.transparency;
   } // getTransparency
+
+  /**
+   * Returns the line typ of the shape.
+   * @return int - line type of the shape.
+   */
+  public int getLineType() {
+	return 0;
+  } // getLineType
 
   /**
    * Returns the x coordinate of the dot.

@@ -15,17 +15,25 @@ import javax.swing.event.*;
  * Time: 9:19:17
  */
 public class IconPalette {
+
 	public JToolBar toolBar;
 	IconEditor editor;
+
+    ImageIcon icon;
+
+    // Labels
 	JLabel lblLineWidth = new JLabel(" Size: ");
+	JLabel lblLineType;
 	JLabel lblTransparency;
 	JLabel lblZoom;
 
+	// Spinners
 	Spinner spinnerLineWidth = new Spinner(1, 10, 1);
 	Spinner spinnerTransparency = new Spinner(0, 100, 1);
 	Spinner spinnerZoom = new Spinner(10,1000,10);
+	Spinner spinnerLineType = new Spinner(0,100,1);
 
-	// BUTTONS
+	// Buttons
 	JButton selection;
 	JButton boundingbox;
 	JButton text;
@@ -42,11 +50,9 @@ public class IconPalette {
 	JButton addport;
 
 	public IconPalette(IconMouseOps mListener, IconEditor ed) {
-		toolBar = new JToolBar();
+	  toolBar = new JToolBar();
 
-		this.editor = ed;
-
-		ImageIcon icon;
+	  this.editor = ed;
 
 		spinnerLineWidth.setPreferredSize(new Dimension(40, 20));
 		spinnerLineWidth.setMaximumSize(spinnerLineWidth.getPreferredSize());
@@ -59,6 +65,10 @@ public class IconPalette {
 		spinnerZoom.setPreferredSize(new Dimension(50, 20));
 		spinnerZoom.setMaximumSize(spinnerZoom.getPreferredSize());
 		spinnerZoom.setBorder(BorderFactory.createLineBorder(java.awt.Color.white,0));
+
+		spinnerLineType.setPreferredSize(new Dimension(40,20));
+		spinnerLineType.setMaximumSize(spinnerLineType.getPreferredSize());
+		spinnerLineType.setBorder(BorderFactory.createLineBorder(java.awt.Color.white,0));
 
 		spinnerZoom.setValue("100");
 
@@ -102,11 +112,23 @@ public class IconPalette {
 			}
 		};
 
+		// Action listener added as anonymous class.
+		ChangeListener lineTypeListener = new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				SpinnerModel source = (SpinnerModel) e.getSource();
+				try {
+					editor.mListener.changeLineType(Integer.parseInt(String.valueOf(source.getValue())));
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		};
 
 		// add action listeners to spinners.
 		spinnerLineWidth.getModel().addChangeListener(listener);
 		spinnerTransparency.getModel().addChangeListener(transpListener);
 		spinnerZoom.getModel().addChangeListener(zoomListener);
+		spinnerLineType.getModel().addChangeListener(lineTypeListener);
 
 		//add relation and selection tool.
 		icon = new ImageIcon("images/mouse.gif");
@@ -233,12 +255,18 @@ public class IconPalette {
 	    lblZoom = new JLabel(icon);
 		lblZoom.setToolTipText("Object zoom percentage");
 
+		icon = new ImageIcon("images/linetype.gif");
+		lblLineType = new JLabel(icon);
+		lblLineType.setToolTipText("Dash style");
 
 		toolBar.add(lblTransparency);
 		toolBar.add(spinnerTransparency);
 
         toolBar.add(lblZoom);
 		toolBar.add(spinnerZoom);
+
+        toolBar.add(lblLineType);
+		 toolBar.add(spinnerLineType);
 
 		editor.mainPanel.add(toolBar, BorderLayout.NORTH);
 
@@ -248,4 +276,4 @@ public class IconPalette {
 		editor.mainPanel.remove(toolBar);
 	}
 
-}
+} // end of class

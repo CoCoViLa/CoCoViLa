@@ -65,6 +65,14 @@ public class ShapeGroup extends Shape implements Serializable {
 	return 0.0;
   } // getTransparency
 
+  /**
+   * Returns the line typ of the shape.
+   * @return int - line type of the shape.
+   */
+  public int getLineType() {
+	return 0;
+  } // getLineType
+
   public double getStrokeWidth() {
 	return 1.0;
   } // getStrokeWidth
@@ -93,6 +101,17 @@ public class ShapeGroup extends Shape implements Serializable {
 	  shape.setTransparency(d);
 	}
   } // setTransparency
+
+  /**
+   * Specify the line type used at drawing the shape.
+   * @param lineType float
+   */
+  public void setLineType(int lineType) {
+	for(int i=0;i<shapes.size();i++) {
+	  Shape shape = (Shape)shapes.get(i);
+	  shape.setLineType(lineType);
+	}
+  } // setLineType
 
   public String toFile(int boundingboxX, int boundingboxY) {
 	StringBuffer text = new StringBuffer();
