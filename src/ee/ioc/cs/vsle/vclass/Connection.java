@@ -103,9 +103,7 @@ public class Connection implements Serializable {
 	 * Calculates breakpoint locations to cover the connection line equally.
 	 */
 	public void calcBreakPoints() {
-
-		Point p;
-
+    	Point p;
 		if (breakPoints.size() > 1) {
 			int port1X = beginPort.getX() + beginPort.obj.getX();
 			int port1Y = beginPort.getY() + beginPort.obj.getY();

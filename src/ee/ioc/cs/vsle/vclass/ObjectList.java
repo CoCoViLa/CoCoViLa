@@ -1,6 +1,6 @@
 package ee.ioc.cs.vsle.vclass;
 
-import ee.ioc.cs.vsle.util.VMath;
+import ee.ioc.cs.vsle.util.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -111,18 +111,41 @@ public class ObjectList extends ArrayList
 
     public void updateRelObjs() {
   		GObj obj;
+		Point endPoint;
+		int endPointX;
+		int endPointY;
         for (int i = 0; i < this.size(); i++) {
             obj = (GObj) this.get(i);
             if (obj instanceof RelObj) {
-                obj.x = ((RelObj)obj).startPort.getAbsoluteX();
-                obj.y = ((RelObj)obj).startPort.getAbsoluteY();
-				obj.Xsize = (float)Math.sqrt(Math.pow((obj.x - ((RelObj)obj).endPort.getAbsoluteX()), 2.0) + Math.pow((obj.y - ((RelObj)obj).endPort.getAbsoluteY()), 2.0))/obj.width;
-				((RelObj)obj).angle = VMath.calcAngle(obj.x, obj.y, ((RelObj)obj).endPort.getAbsoluteX(), ((RelObj)obj).endPort.getAbsoluteY());
+				db.p("rel on "+ obj+ " tema beginPort "+ ((RelObj)obj).startPort.hashCode());
+				if (!((RelObj)obj).startPort.area) {
+	                obj.x = ((RelObj)obj).startPort.getAbsoluteX();
+    	            obj.y = ((RelObj)obj).startPort.getAbsoluteY();
+				} else {
+					endPoint = VMath.nearestPointOnRectangle
+					(((RelObj)obj).startPort.getStartX(), ((RelObj)obj).startPort.getStartY(),
+					 ((RelObj)obj).startPort.getWidth(), ((RelObj)obj).startPort.getHeight(),
+						((RelObj)obj).endPort.getAbsoluteX(), ((RelObj)obj).endPort.getAbsoluteY());
+					obj.x = endPoint.x;
+					obj.y = endPoint.y;
+
+				}
+
+				if (!((RelObj)obj).endPort.area) {
+					((RelObj)obj).endX = ((RelObj)obj).endPort.getAbsoluteX();
+					((RelObj)obj).endY = ((RelObj)obj).endPort.getAbsoluteY();
+				} else {
+					endPoint = VMath.nearestPointOnRectangle
+					(((RelObj)obj).endPort.getStartX(), ((RelObj)obj).endPort.getStartY(),
+					 ((RelObj)obj).endPort.getWidth(), ((RelObj)obj).endPort.getHeight(), obj.x, obj.y);
+					((RelObj)obj).endX = endPoint.x;
+					((RelObj)obj).endY = endPoint.y;
+				}
+				obj.Xsize = (float)Math.sqrt(Math.pow((obj.x - ((RelObj)obj).endX), 2.0) + Math.pow((obj.y - ((RelObj)obj).endY), 2.0))/obj.width;
+				((RelObj)obj).angle = VMath.calcAngle(obj.x, obj.y, ((RelObj)obj).endX, ((RelObj)obj).endY);
+
             }
-
-
         }
-
     }
 
 

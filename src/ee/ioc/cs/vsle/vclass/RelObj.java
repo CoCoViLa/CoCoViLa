@@ -10,12 +10,14 @@ public class RelObj extends GObj{
     public double angle;
     public Port startPort;
     public Port endPort;
+	public int endX, endY;
 
     public RelObj(int x, int y, int width, int height, String name) {
         super (x, y, width, height, name);
     }
-    public boolean contains(int x, int y) {
-        float f = VMath.calcDistance(startPort.getAbsoluteX(),startPort.getAbsoluteY(), endPort.getAbsoluteX(), endPort.getAbsoluteY(), x, y);
+
+    public boolean contains(int pointX, int pointY) {
+        float f = VMath.calcDistance(x, y, endX, endY, pointX, pointY);
         if (f < height+4) {
             return true;
         }

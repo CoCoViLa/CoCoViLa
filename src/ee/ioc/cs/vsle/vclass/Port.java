@@ -1,7 +1,6 @@
 package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.util.StringUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -94,6 +93,14 @@ public class Port implements Cloneable, Serializable {
 	public int getRealCenterY() {
 		return (int) (obj.getYsize()
 			* (obj.getY() + y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
+	}
+
+	public int getStartX() {
+		return (int) (obj.getXsize() * (openGraphics.boundX + x) + obj.getX());
+	}
+
+    public int getStartY() {
+		return (int) (obj.getYsize() * (openGraphics.boundY + y) + obj.getY());
 	}
 
 	public int getWidth() {

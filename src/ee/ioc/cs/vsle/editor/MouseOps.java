@@ -569,14 +569,6 @@ class MouseOps
 	}
 
 
-	// *********************************************************************
-	// functions for mouse operations, to keep mouse* function somewhat tidy
-	// *********************************************************************
-
-	// *********************************************************************
-	// end of mouse control functions
-	// *********************************************************************
-
 	public void actionPerformed(ActionEvent e) {
 		// Jbutton pressed
 		if (e.getSource().getClass().getName() == "javax.swing.JButton") {

@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.util;
 
+import ee.ioc.cs.vsle.vclass.Point;
+
 /**
  * Created by IntelliJ IDEA.
  * User: Ando
@@ -8,18 +10,63 @@ package ee.ioc.cs.vsle.util;
  * To change this template use Options | File Templates.
  */
 public class VMath {
-    /**
-     * calculates the distance of the point from the line given by 4 points
-     * @param x1
-     * @param y1
-     * @param x2
-     * @param y2
-     * @param pointX
-     * @param pointY
-     * @return
-     */
-    public static float calcDistance(int x1, int y1, int x2, int y2, int pointX, int pointY) {
-        int calc1 = (pointX - x1) * (x2 - x1) + (pointY - y1) * (y2 - y1);
+
+	public static Point nearestPointOnRectangle(int x, int y, int width, int height, int pointX, int pointY) {
+
+		if (pointX >= x + width) {
+			return nearestPointOnLine(x + width, y, x + width, y + height, pointX, pointY);
+		}
+
+		if (pointX <= x) {
+			return nearestPointOnLine(x, y, x, y + height, pointX, pointY);
+		}
+
+		if (pointY >= y + height) {
+			return nearestPointOnLine(x, y + height, x + width, y + height, pointX, pointY);
+		}
+
+		if (pointY <= y) {
+			return nearestPointOnLine(x, y, x + width, y, pointX, pointY);
+		}
+
+		return nearestPointOnLine(x, y + height, x + width, y + height, pointX, pointY);
+
+	}
+
+	public static Point nearestPointOnLine(int x1, int y1, int x2, int y2, int pointX, int pointY) {
+		double dot_ta, dot_tb;
+		dot_ta = (pointX - x1) * (x2 - x1) + (pointY - y1) * (y2 - y1);
+		if (dot_ta <= 0) // IT IS OFF THE AVERTEX
+		{
+			return new Point(x1, y1);
+		}
+		dot_tb = (pointX - x2) * (x1 - x2) + (pointY - y2) * (y1 - y2);
+		// SEE IF b IS THE NEAREST POINT - ANGLE IS OBTUSE
+		if (dot_tb <= 0) {
+			return new Point(x2, y2);
+		}
+		// FIND THE REAL NEAREST POINT ON THE LINE SEGMENT -      BASED ON RATIO
+		pointX = (int) (x1 + ((x2 - x1) * dot_ta) / (dot_ta + dot_tb));
+		pointY = (int) (y1 + ((y2 - y1) * dot_ta) / (dot_ta + dot_tb));
+		return new Point(pointX, pointY);
+	}
+
+	/**
+	 * calculates the distance of the point from the line given by 4 points
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 * @param pointX
+	 * @param pointY
+	 * @return
+	 */
+	public static float calcDistance(int x1, int y1, int x2, int y2, int pointX, int pointY) {
+
+		Point p = nearestPointOnLine(x1, y1, x2, y2, pointX, pointY);
+
+
+/*        int calc1 = (pointX - x1) * (x2 - x1) + (pointY - y1) * (y2 - y1);
         int calc2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
 
         float U = (float) calc1 / (float) calc2;
@@ -31,8 +78,6 @@ public class VMath {
             (pointX - intersectX) * (pointX - intersectX)
             + (pointY - intersectY) * (pointY - intersectY));
 
-        double distanceFromEnd1 = Math.sqrt(
-            (x1 - pointX) * (x1 - pointX) + (y1 - pointY) * (y1 - pointY));
         double distanceFromEnd2 = Math.sqrt(
             (x2 - pointX) * (x2 - pointX) + (y2 - pointY) * (y2 - pointY));
         double lineLength = Math.sqrt(
@@ -41,38 +86,45 @@ public class VMath {
         if (lineLength < Math.max(distanceFromEnd1, distanceFromEnd2)) {
             distance = Math.max(Math.min(distanceFromEnd1, distanceFromEnd2),
                 distance);
-        }
-        return (float) distance;
-    }
+        }*/
 
-    /**
-     * calculates the angle between x axis and the line give by the 4 points
-     * @param startX
-     * @param startY
-     * @param x
-     * @param y
-     * @return
-     */
-    public static double calcAngle(int startX, int startY, int x, int y) {
+		double distance = Math.sqrt((p.x - pointX) ^ 2 + (p.y - pointY) ^ 2);
 
-        int realX = x - startX;
-        int realY = y -startY;
-        if (realX >= 0 && realY>= 0 ) {
-          return (Math.atan((double)realY/(double)realX));
-        }
+		return (float) distance;
+	}
 
-        if (realX <= 0 && realY>= 0 ) {
-          return (Math.atan((double)realY/(double)realX) +Math.PI);
-        }
+	/**
+	 * calculates the angle between x axis and the line give by the 4 points
+	 * @param startX
+	 * @param startY
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public static double calcAngle(int startX, int startY, int x, int y) {
+		db.p(startX + " "+  startY+" "+x +" "+y);
 
-        if (realX <= 0 && realY <= 0 ) {
-          return(Math.atan((double)realY/(double)realX) +Math.PI);
-        }
+		int realX = x - startX;
+		int realY = y - startY;
 
-        if (realX >= 0 && realY <= 0 ) {
-          return(Math.atan((double)realY/(double)realX) +2*Math.PI);
-        }
-        return 0.0;
-    }
+		if (realX >= 0 && realY >= 0) {
+			return (Math.atan((double) realY / (double) realX));
+		}
+
+		if (realX <= 0 && realY >= 0) {
+			return (Math.atan((double) realY / (double) realX) + Math.PI);
+		}
+
+		if (realX < 0 && realY <= 0) {
+			return (Math.atan((double) realY / (double) realX) + Math.PI);
+		}
+
+		if (realX >= 0 && realY <= 0) {
+			if (realX == 0)
+				return Math.PI + Math.PI / 2;
+			return (Math.atan((double) realY / (double) realX) + 2 * Math.PI);
+		}
+		return 0.0;
+	}
 
 }

@@ -506,13 +506,17 @@ public class Canvas extends JPanel implements ActionListener {
 				currentCon.breakPoints.size() - 1);
 			g2.drawLine(p.x, p.y, mouseX, mouseY);
 		} else if (firstPort != null && mListener.state.startsWith("??") && currentObj != null) {
-			double angle = VMath.calcAngle(firstPort.getAbsoluteX(), firstPort.getAbsoluteY(), mouseX, mouseY);
-			currentObj = (RelObj) currentObj;
-			((RelObj) currentObj).angle = angle;
-			currentObj.Xsize = (float) Math.sqrt(Math.pow((mouseX - firstPort.getAbsoluteX()) / (double) currentObj.width, 2.0) + Math.pow((mouseY - firstPort.getAbsoluteY()) / (double) currentObj.width, 2.0));
-			currentObj.y = firstPort.getAbsoluteY();
-			currentObj.x = firstPort.getAbsoluteX();
-			currentObj.drawClassGraphics(g2);
+				Point p = VMath.nearestPointOnRectangle
+					(firstPort.getStartX(), firstPort.getStartY(),
+					 firstPort.getWidth(), firstPort.getHeight(), mouseX, mouseY);
+
+				double angle = VMath.calcAngle(p.x, p.y, mouseX, mouseY);
+				currentObj = (RelObj) currentObj;
+				((RelObj) currentObj).angle = angle;
+				currentObj.Xsize = (float) Math.sqrt(Math.pow((mouseX - p.x) / (double) currentObj.width, 2.0) + Math.pow((mouseY - p.y) / (double) currentObj.width, 2.0));
+				currentObj.y = p.y;
+				currentObj.x = p.x;
+				currentObj.drawClassGraphics(g2);
 		} else if (currentObj != null && !mListener.state.startsWith("?")) {
 // ee.ioc.cs.editor.vclass.PackageClass pClass = (ee.ioc.cs.editor.vclass.PackageClass)classes.get(currentObj.name);
 			g2.setColor(Color.black);
