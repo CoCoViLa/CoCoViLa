@@ -25,7 +25,7 @@ public class CodeViewer extends JFrame implements ActionListener{
 	JButton saveBtn;
 	GObj obj;
 	public CodeViewer(GObj obj) {
-		super();
+		super(obj.className + ".java");
         this.obj = obj;
 		FileFuncs ff = new FileFuncs();
 
@@ -48,6 +48,7 @@ public class CodeViewer extends JFrame implements ActionListener{
 		saveBtn = new JButton("Save");
 		saveBtn.addActionListener(this);
 		toolBar.add(saveBtn);
+                toolBar.add(new FontResizePanel(textArea));
 
 
 		specText.setLayout(new BorderLayout());

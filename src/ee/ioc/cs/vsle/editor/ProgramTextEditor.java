@@ -42,7 +42,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 	Editor editor;
 
 	public ProgramTextEditor(ArrayList relations, ObjectList objs, VPackage vPackage, Editor ed) {
-		super();
+		super("Specification");
 		editor = ed;
 		this.vPackage = vPackage;
 		objects = GroupUnfolder.unfold(objs);
@@ -67,6 +67,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		computeAll = new JButton("Compute all");
 		computeAll.addActionListener(this);
 		progToolBar.add(computeAll);
+                progToolBar.add(new FontResizePanel(textArea));
 		specText.add(progToolBar, BorderLayout.NORTH);
 		tabbedPane.addTab("Specification", specText);
 
@@ -77,7 +78,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		runProg = new JButton("Compile & Run");
 		runProg.addActionListener(this);
 		toolBar.add(runProg);
-
+                toolBar.add(new FontResizePanel(programTextArea));
 		JScrollPane programAreaScrollPane = new JScrollPane(programTextArea);
 
 		programAreaScrollPane.setVerticalScrollBarPolicy(
@@ -102,7 +103,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		resultToolBar.add(invoke);
 		invokeField = new JTextField(4);
 		resultToolBar.add(invokeField);
-
+//                resultToolBar.add(new FontResizePanel(runResultArea));
 		JScrollPane runResultAreaScrollPane = new JScrollPane(runResultArea);
 
 		runResultAreaScrollPane.setVerticalScrollBarPolicy(
