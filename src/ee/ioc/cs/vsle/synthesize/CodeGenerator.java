@@ -27,6 +27,9 @@ public class CodeGenerator {
 
     private static int subCount = 0;
 
+    private static final String ALIASTMP = "alias";
+    private static int ALIASTMP_NR = 0;
+
     private static CodeGenerator s_codeGen = null;
 
     private CodeGenerator() {}
@@ -244,13 +247,10 @@ public class CodeGenerator {
         return s;
     }
 
-    private static final String ALIASTMP = "ALIASTMP";
-    private static int ALIASTMP_NR = 0;
-
     private String getAliasSubtaskInput( Alias alias, String offset, int num ) {
 
         String aliasType = alias.getRealType();
-        String aliasTmp = ALIASTMP + ALIASTMP_NR++;
+        String aliasTmp = ALIASTMP + "_" + alias.name + "_" + ALIASTMP_NR++;
         String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType
                      + ")in[" + num + "];\n";
 
@@ -267,7 +267,7 @@ public class CodeGenerator {
             return offset + "return new Object[]{ }";
         }
 
-        String aliasTmp = ALIASTMP + ALIASTMP_NR++;
+        String aliasTmp = ALIASTMP + "_" + alias.name + "_" + ALIASTMP_NR++;
         String aliasType = alias.getRealType();
         String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
 
