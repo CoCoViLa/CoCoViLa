@@ -225,7 +225,7 @@ public class PackageParser {
 				String filled = attrs.getValue("filled");
 				String stroke = attrs.getValue("stroke");
 				String transp = attrs.getValue("transparency");
-				String lineType = attrs.getValue("lineType");
+				String lineType = attrs.getValue("linetype");
 				double str = 1.0;
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
@@ -255,7 +255,7 @@ public class PackageParser {
 				String filled = attrs.getValue("filled");
 				String stroke = attrs.getValue("stroke");
 				String transp = attrs.getValue("transparency");
-				String lineType = attrs.getValue("lineType");
+				String lineType = attrs.getValue("linetype");
 				double str = 1.0;
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);

@@ -271,7 +271,7 @@ public class Rect extends Shape implements Serializable {
 		return "<rect x=\"" + (x - boundingboxX) + "\" y=\""
 			+ (y - boundingboxY) + "\" width=\"" + width + "\" height=\"" + height
 			+ "\" colour=\"" + colorInt + "\" filled=\"" + fill
-			+ "\" fixed=\"" + isFixed() + "\" stroke=\"" + (int)stroke.getLineWidth() + "\" lineType=\"" + this.getLineType() + "\" transparency=\"" + getTransparency() + "\"/>\n";
+			+ "\" fixed=\"" + isFixed() + "\" stroke=\"" + (int)stroke.getLineWidth() + "\" linetype=\"" + this.getLineType() + "\" transparency=\"" + getTransparency() + "\"/>\n";
 	} // toFile
 
 	public String toText() {
