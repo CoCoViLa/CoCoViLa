@@ -112,12 +112,9 @@ public class ObjectList extends ArrayList
     public void updateRelObjs() {
   		GObj obj;
 		Point endPoint;
-		int endPointX;
-		int endPointY;
         for (int i = 0; i < this.size(); i++) {
             obj = (GObj) this.get(i);
             if (obj instanceof RelObj) {
-				db.p("rel on "+ obj+ " tema beginPort "+ ((RelObj)obj).startPort.hashCode());
 				if (!((RelObj)obj).startPort.area) {
 	                obj.x = ((RelObj)obj).startPort.getAbsoluteX();
     	            obj.y = ((RelObj)obj).startPort.getAbsoluteY();

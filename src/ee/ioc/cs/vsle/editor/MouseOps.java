@@ -323,6 +323,7 @@ class MouseOps
 	}
 
 	public void mouseDragged(MouseEvent e) {
+
 		int x = e.getX();
 		int y = e.getY();
 		GObj obj;

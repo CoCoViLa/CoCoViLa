@@ -10,53 +10,15 @@ import ee.ioc.cs.vsle.editor.*;
 
 public class Line extends Shape implements Serializable {
 
-	/**
-	 * Line start x coordinate.
-	 */
 	int startX;
-
-	/**
-	 * Line start y coordinate.
-	 */
 	int startY;
-
-	/**
-	 * Line end x coordinate.
-	 */
 	int endX;
-
-	/**
-	 * Line end y coordinate.
-	 */
 	int endY;
-
+	private BasicStroke stroke;
 	/**
 	 * Line weight, logically equals to stroke width.
 	 */
-	private float lineWeight;
-
-	/**
-	 * Line color.
-	 */
 	Color color;
-
-	/**
-	 * Line transparency.
-	 */
-	float transparency = (float) 1.0;
-
-	/**
-	 * Alpha value of a color, used
-	 * for defining the transparency of a filled shape.
-	 */
-	private float alpha;
-
-	private int lineType;
-
-	/**
-	 * Name of the shape.
-	 */
-	private String name;
 
 	/**
 	 * Indicates if the shape is selected or not.
@@ -68,7 +30,7 @@ public class Line extends Shape implements Serializable {
 	 */
 	private boolean fixed = false;
 
-	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp) {
+/*	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp) {
 		startX = x1;
 		startY = y1;
 		endX = x2;
@@ -80,21 +42,27 @@ public class Line extends Shape implements Serializable {
 		this.y = Math.min(y1, y2);
 		this.width = Math.max(x1, x2) - this.x; // endX - startX;
 		this.height = Math.max(y1, y2) - this.y; // endY - startY;
-	}
+	}*/
 
 	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp, int lineType) {
 		startX = x1;
 		startY = y1;
 		endX = x2;
 		endY = y2;
-		this.color = new Color(colorInt);
-		this.lineWeight = (float) strokeWidth;
-		this.transparency = (float) transp;
+		color = new Color(colorInt);
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)transp);
+
+		if (lineType > 0) {
+			stroke = new BasicStroke((float)strokeWidth, BasicStroke.CAP_BUTT,
+				BasicStroke.JOIN_ROUND, 50,
+				new float[]{lineType, lineType}, 0);
+		} else {
+			stroke = new BasicStroke((float)strokeWidth);
+		}
 		this.x = Math.min(x1, x2);
 		this.y = Math.min(y1, y2);
 		this.width = Math.max(x1, x2) - this.x; // endX - startX;
 		this.height = Math.max(y1, y2) - this.y; // endY - startY;
-		this.lineType = lineType;
 	} // Line
 
 	public void setFixed(boolean b) {
@@ -105,9 +73,17 @@ public class Line extends Shape implements Serializable {
 		return this.fixed;
 	} // isFixed
 
-	public String toString() {
-		return getName();
-	} // toString
+	public void setStrokeWidth(double d) {
+        stroke = new BasicStroke((float)d, stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), stroke.getDashArray(), stroke.getDashPhase());
+	}
+
+	public void setTransparency(double d) {
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)d);
+	}
+
+	public void setLineType(int lineType) {
+		stroke = new BasicStroke(stroke.getLineWidth(), stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), new float[]{lineType, lineType}, stroke.getDashPhase());
+	}
 
 	public boolean isFilled() {
 		return false;
@@ -117,6 +93,14 @@ public class Line extends Shape implements Serializable {
 		return getHeight();
 	} // getRealHeight
 
+	public double getStrokeWidth() {
+		return stroke.getLineWidth();
+	}
+
+	public String getName() {
+		return null;
+	}
+
 	public int getRealWidth() {
 		return getWidth();
 	} // getRealWidth
@@ -124,10 +108,6 @@ public class Line extends Shape implements Serializable {
 	public void setSelected(boolean b) {
 		this.selected = b;
 	} // setSelected
-
-	public String getName() {
-		return this.name;
-	} // getName
 
 	public boolean isInside(int x1, int y1, int x2, int y2) {
 		int minx = Math.min(startX, endX);
@@ -170,32 +150,12 @@ public class Line extends Shape implements Serializable {
 		return this.selected;
 	} // isSelected
 
-	public void setName(String s) {
-		this.name = s;
-	} // setName
-
-	/**
-	 * Set the percentage of transparency.
-	 * @param transparencyPercentage double - the percentage of transparency.
-	 */
-	public void setTransparency(double transparencyPercentage) {
-		this.transparency = (float) transparencyPercentage;
-	} // setTransparency
-
-	/**
-	 * Specify the line type used at drawing the shape.
-	 * @param lineType int
-	 */
-	public void setLineType(int lineType) {
-		this.lineType = lineType;
-	} // setLineType
-
 	/**
 	 * Returns the line typ of the shape.
 	 * @return int - line type of the shape.
 	 */
 	public int getLineType() {
-		return this.lineType;
+		return (int)stroke.getDashArray()[0];
 	} // getLineType
 
 	/**
@@ -215,19 +175,11 @@ public class Line extends Shape implements Serializable {
 	} // getColor
 
 	/**
-	 * Returns the stroke with of a shape.
-	 * @return double - stroke width of a shape.
-	 */
-	public double getStrokeWidth() {
-		return this.lineWeight;
-	} // getStrokeWidth
-
-	/**
 	 * Returns the transparency of the shape.
 	 * @return double - the transparency of the shape.
 	 */
 	public double getTransparency() {
-		return this.transparency;
+		return color.getAlpha();
 	} // getTransparency
 
 	/**
@@ -320,18 +272,6 @@ public class Line extends Shape implements Serializable {
 		return (float) distance;
 	} // calcDistance
 
-	public void setStrokeWidth(double width) {
-		try {
-			if (width >= 0.0) {
-				lineWeight = (float) width;
-			} else {
-				throw new Exception("Stroke width undefined or negative.");
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	} // setStrokeWidth
-
 	void setLine(int x1, int y1, int x2, int y2) {
 		startX = x1;
 		startY = y1;
@@ -409,13 +349,13 @@ public class Line extends Shape implements Serializable {
 		return "<line x1=\"" + (startX - boundingboxX) + "\" y1=\""
 			+ (startY - boundingboxY) + "\" x2=\"" + (endX - boundingboxX)
 			+ "\" y2=\"" + (endY - boundingboxY) + "\" colour=\"" + colorInt
-			+ "\" fixed=\"" + isFixed() + "\" stroke=\"" + (int) this.lineWeight + "\" lineType=\"" + this.lineType + "\" transparency=\"" + (int) this.transparency + "\"/>\n";
+			+ "\" fixed=\"" + isFixed() + "\" stroke=\"" + (int)stroke.getLineWidth() + "\" lineType=\"" + this.getLineType() + "\" transparency=\"" + getTransparency() + "\"/>\n";
 	} // toFile
 
 	public String toText() {
 		int colorInt = 0;
 		if (color != null) colorInt = color.getRGB();
-		return "LINE:" + startX + ":" + startY + ":" + endX + ":" + endY + ":" + colorInt + ":" + (int) this.lineWeight + ":" + this.lineType + ":" + (int) this.transparency + ":" + isFixed();
+		return "LINE:" + startX + ":" + startY + ":" + endX + ":" + endY + ":" + colorInt + ":" + (int)stroke.getLineWidth()+ ":" + getLineType()+ ":" + getTransparency() + ":" + isFixed();
 	} // toText
 
 	/**
@@ -433,26 +373,8 @@ public class Line extends Shape implements Serializable {
 
 		Graphics2D g2 = (Graphics2D) g;
 
-		if (getLineType() > 0) {
-			g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
-				BasicStroke.JOIN_ROUND, 50,
-				new float[]{getLineType(), getLineType()}
-				, 0));
-		} else {
-			g2.setStroke(new BasicStroke(lineWeight));
-		}
-
-		alpha = (float) (1 - (this.transparency / 100));
-
-		float red = 0;
-	   if(color!=null) red = (float) color.getRed() / 256;
-		float green = 0;
-	   if(color!=null) green = (float) color.getGreen() / 256;
-		float blue = 0;
-	   if(color!=null) blue = (float) color.getBlue() / 256;
-
-		g2.setColor(new Color(red, green, blue, alpha));
-
+		g2.setColor(color);
+	  	g2.setStroke(stroke);
 		if (RuntimeProperties.isAntialiasingOn) {
 			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
 				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);

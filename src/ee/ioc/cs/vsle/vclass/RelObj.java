@@ -1,5 +1,5 @@
 package ee.ioc.cs.vsle.vclass;
-import ee.ioc.cs.vsle.util.VMath;
+import ee.ioc.cs.vsle.util.*;
 
 import java.awt.*;
 
@@ -17,6 +17,7 @@ public class RelObj extends GObj{
     }
 
     public boolean contains(int pointX, int pointY) {
+		db.p("relobj "+x+" "+ y+" "+ endX+" "+ endY);
         float f = VMath.calcDistance(x, y, endX, endY, pointX, pointY);
         if (f < height+4) {
             return true;

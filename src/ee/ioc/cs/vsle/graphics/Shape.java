@@ -88,19 +88,13 @@ public abstract class Shape implements Serializable, Cloneable {
 
 	public abstract boolean isInsideRect(int x1, int y1, int x2, int y2);
 
-	public abstract void setTransparency(double transparencyPercentage);
-
-	public abstract void setLineType(int lineType);
+	//public abstract void setTransparency(double transparencyPercentage);
 
 	public abstract void setColor(Color col);
-
-	public abstract void setStrokeWidth(double strokeWidth);
 
 	public abstract void setMultSize(float s1, float s2);
 
 	public abstract void setSelected(boolean b);
-
-	public abstract void setName(String name);
 
 	public abstract void setPosition(int x, int y);
 
@@ -110,13 +104,15 @@ public abstract class Shape implements Serializable, Cloneable {
 
 	public abstract Color getColor();
 
-	public abstract String getName();
 
 	public abstract int getRealWidth();
 
 	public abstract int getRealHeight();
 
 	public abstract double getStrokeWidth();
+
+	public abstract String getName();
+
 
 	public abstract double getTransparency();
 
@@ -132,7 +128,7 @@ public abstract class Shape implements Serializable, Cloneable {
 
 	public abstract String toText();
 
-	public abstract String toString();
+	//public abstract String toString();
 
 	public abstract boolean contains(int pointX, int pointY);
 
@@ -160,5 +156,11 @@ public abstract class Shape implements Serializable, Cloneable {
 			return null;
 		}
 	} // clone
+
+	public abstract void setStrokeWidth(double d);
+
+	public abstract void setTransparency(double d);
+
+	public abstract void setLineType(int lineType);
 
 }

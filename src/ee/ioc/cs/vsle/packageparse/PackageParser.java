@@ -224,7 +224,7 @@ public class PackageParser {
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
 				}
-				double tr = 1.0;
+				double tr = 255;
 				if (transp != null) {
 					tr = Double.parseDouble(transp);
 				}

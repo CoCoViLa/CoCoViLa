@@ -64,6 +64,7 @@ public class VMath {
 	public static float calcDistance(int x1, int y1, int x2, int y2, int pointX, int pointY) {
 
 		Point p = nearestPointOnLine(x1, y1, x2, y2, pointX, pointY);
+		db.p("nearest point "+p.x+" "+p.y);
 
 
 /*        int calc1 = (pointX - x1) * (x2 - x1) + (pointY - y1) * (y2 - y1);
@@ -88,8 +89,7 @@ public class VMath {
                 distance);
         }*/
 
-		double distance = Math.sqrt((p.x - pointX) ^ 2 + (p.y - pointY) ^ 2);
-
+		double distance = Math.sqrt(Math.pow((p.x - pointX), 2.0) + Math.pow((p.y - pointY) , 2.0));
 		return (float) distance;
 	}
 
@@ -102,8 +102,6 @@ public class VMath {
 	 * @return
 	 */
 	public static double calcAngle(int startX, int startY, int x, int y) {
-		db.p(startX + " "+  startY+" "+x +" "+y);
-
 		int realX = x - startX;
 		int realY = y - startY;
 
