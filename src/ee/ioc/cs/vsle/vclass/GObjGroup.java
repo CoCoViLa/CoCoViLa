@@ -3,8 +3,7 @@ package ee.ioc.cs.vsle.vclass;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import java.awt.Color;
-import java.awt.Graphics;
+import java.awt.*;
 
 public class GObjGroup extends GObj
 	implements Serializable {
@@ -159,7 +158,7 @@ public class GObjGroup extends GObj
 
 	}
 
-	public void drawClassGraphics(Graphics g) {
+	public void drawClassGraphics(Graphics2D g) {
 		g.setColor(Color.gray);
 		g.drawRect(getX(), getY(), (int) (getWidth() * getXsize()), (int) (getHeight() * getYsize()));
 		g.setColor(Color.black);

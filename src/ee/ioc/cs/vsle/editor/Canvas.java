@@ -13,6 +13,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Date;
 import java.io.*;
 
 /**
@@ -61,9 +62,9 @@ public class Canvas extends JPanel implements ActionListener {
 		objects = scheme.objects;
 		connections = scheme.connections;
 		mListener = new MouseOps(this);
-        keyListener = new KeyOps(this);
+		keyListener = new KeyOps(this);
 		drawingArea = new DrawingArea();
-		drawingArea.setBackground(Color.white);
+		drawingArea.setBackground(Color.lightGray);
 		setGridVisible(getGridVisibility());
 		drawingArea.setFocusable(true);
 		infoPanel = new JPanel(new GridLayout(1, 2));
@@ -360,12 +361,12 @@ public class Canvas extends JPanel implements ActionListener {
 	/**
 	 * Draw object connections.
 
-	public void drawConnections() {
-		for (int i = 0; i < connections.size(); i++) {
-			Connection con = (Connection) connections.get(i);
-			con.drawRelation(getGraphics());
-		}
-	}*/
+	 public void drawConnections() {
+	 for (int i = 0; i < connections.size(); i++) {
+	 Connection con = (Connection) connections.get(i);
+	 con.drawRelation(getGraphics());
+	 }
+	 }*/
 
 	/**
 	 * Hilight ports of the object.
@@ -429,86 +430,94 @@ public class Canvas extends JPanel implements ActionListener {
 	 * @param e - Action Event.
 	 */
 	public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand().equals(Menu.OBJECT_DELETE)) {
-				deleteObjects();
-			} else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
-				openPropertiesDialog();
-			} else if (e.getActionCommand().equals(Menu.GROUP)) {
-				groupObjects();
-			} else if (e.getActionCommand().equals(Menu.UNGROUP)) {
-				ungroupObjects();
-			} else if (e.getActionCommand().equals(Menu.CLONE)) {
-				cloneObject();
-			} else if (e.getActionCommand().equals(Menu.HLPORTS)) {
-				hilightPorts();
-			} else if (e.getActionCommand().equals(Menu.GRID)) {
-			    this.setGridVisible(!this.isGridVisible());
-			}
-
-
-		 else if (e.getActionCommand().equals(Menu.BACKWARD)) {
-				// MOVE OBJECT BACKWARD IN THE LIST
-				// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-				objects.sendBackward(currentObj, 1);
-				repaint();
-			} else if (e.getActionCommand().equals(Menu.FORWARD)) {
-				// MOVE OBJECT FORWARD IN THE LIST
-				// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-				objects.bringForward(currentObj, 1);
-				repaint();
-			} else if (e.getActionCommand().equals(Menu.TOFRONT)) {
-				// MOVE OBJECT TO THE FRONT IN THE LIST,
-				// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-				objects.bringToFront(currentObj);
-				repaint();
-			} else if (e.getActionCommand().equals(Menu.TOBACK)) {
-				// MOVE OBJECT TO THE BACK IN THE LIST
-				// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-				objects.sendToBack(currentObj);
-				repaint();
-			}
+		if (e.getActionCommand().equals(Menu.OBJECT_DELETE)) {
+			deleteObjects();
+		} else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
+			openPropertiesDialog();
+		} else if (e.getActionCommand().equals(Menu.GROUP)) {
+			groupObjects();
+		} else if (e.getActionCommand().equals(Menu.UNGROUP)) {
+			ungroupObjects();
+		} else if (e.getActionCommand().equals(Menu.CLONE)) {
+			cloneObject();
+		} else if (e.getActionCommand().equals(Menu.HLPORTS)) {
+			hilightPorts();
+		} else if (e.getActionCommand().equals(Menu.GRID)) {
+			this.setGridVisible(!this.isGridVisible());
+		} else if (e.getActionCommand().equals(Menu.BACKWARD)) {
+			// MOVE OBJECT BACKWARD IN THE LIST
+			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			objects.sendBackward(currentObj, 1);
+			repaint();
+		} else if (e.getActionCommand().equals(Menu.FORWARD)) {
+			// MOVE OBJECT FORWARD IN THE LIST
+			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			objects.bringForward(currentObj, 1);
+			repaint();
+		} else if (e.getActionCommand().equals(Menu.TOFRONT)) {
+			// MOVE OBJECT TO THE FRONT IN THE LIST,
+			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			objects.bringToFront(currentObj);
+			repaint();
+		} else if (e.getActionCommand().equals(Menu.TOBACK)) {
+			// MOVE OBJECT TO THE BACK IN THE LIST
+			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			objects.sendToBack(currentObj);
+			repaint();
+		}
 	}
 
 
 	class DrawingArea extends JPanel {
-	protected void drawGrid(Graphics g) {
-		g.setColor(Color.lightGray);
-		for (int i = 0; i < getWidth(); i += RuntimeProperties.gridStep) {
-			// draw vertical lines
-			g.drawLine(i, 0, i, getHeight());
+		protected void drawGrid(Graphics g) {
+			g.setColor(Color.gray);
+			for (int i = 0; i < getWidth(); i += RuntimeProperties.gridStep) {
+				// draw vertical lines
+				g.drawLine(i, 0, i, getHeight());
 // draw horizontal lines
-			g.drawLine(0, i, getWidth(), i);
+				g.drawLine(0, i, getWidth(), i);
+			}
 		}
-	}
 
-	protected void paintComponent(Graphics g) {
-		Graphics2D g2 = (Graphics2D) g;
-		super.paintComponent(g2);
-		Connection rel;
-		if (showGrid) drawGrid(g2);
-		GObj obj;
-		if (RuntimeProperties.isAntialiasingOn) {
-			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
-				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-		}
-		for (int i = 0; i < objects.size(); i++) {
-			obj = (GObj) objects.get(i);
-			obj.drawClassGraphics(g2);
-		}
-		g2.setColor(Color.blue);
-		for (int i = 0; i < connections.size(); i++) {
-			rel = (Connection) connections.get(i);
-			rel.drawRelation(g2);
-		}
-		if (firstPort != null && mListener.state.equals(State.addRelation)) {
-			currentCon.drawRelation(g2);
-			Point p = (Point) currentCon.breakPoints.get(
-				currentCon.breakPoints.size() - 1);
-			g2.drawLine(p.x, p.y, mouseX, mouseY);
-		} else if (firstPort != null && mListener.state.startsWith("??") && currentObj != null) {
+		protected void paintComponent(Graphics g) {
+			Graphics2D g2 = (Graphics2D) g;
+			super.paintComponent(g2);
+
+			Connection rel;
+			if (showGrid) drawGrid(g2);
+			GObj obj;
+			if (RuntimeProperties.isAntialiasingOn) {
+				g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+					java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+			}
+
+			Date d = new Date();
+			long oldtime, time;
+			oldtime = d.getTime();
+
+			for (int i = 0; i < objects.size(); i++) {
+				obj = (GObj) objects.get(i);
+				obj.drawClassGraphics(g2);
+			}
+
+			d = new Date();
+			time = (d.getTime() - oldtime);
+			System.out.println("objeckts: "+ time);
+
+			g2.setColor(Color.blue);
+			for (int i = 0; i < connections.size(); i++) {
+				rel = (Connection) connections.get(i);
+				rel.drawRelation(g2);
+			}
+			if (firstPort != null && mListener.state.equals(State.addRelation)) {
+				currentCon.drawRelation(g2);
+				Point p = (Point) currentCon.breakPoints.get(
+					currentCon.breakPoints.size() - 1);
+				g2.drawLine(p.x, p.y, mouseX, mouseY);
+			} else if (firstPort != null && mListener.state.startsWith("??") && currentObj != null) {
 				Point p = VMath.nearestPointOnRectangle
 					(firstPort.getStartX(), firstPort.getStartY(),
-					 firstPort.getWidth(), firstPort.getHeight(), mouseX, mouseY);
+						firstPort.getWidth(), firstPort.getHeight(), mouseX, mouseY);
 
 				double angle = VMath.calcAngle(p.x, p.y, mouseX, mouseY);
 				currentObj = (RelObj) currentObj;
@@ -517,17 +526,16 @@ public class Canvas extends JPanel implements ActionListener {
 				currentObj.y = p.y;
 				currentObj.x = p.x;
 				currentObj.drawClassGraphics(g2);
-		} else if (currentObj != null && !mListener.state.startsWith("?")) {
-			g2.setColor(Color.black);
-			currentObj.drawClassGraphics(g2);
+			} else if (currentObj != null && !mListener.state.startsWith("?")) {
+				g2.setColor(Color.black);
+				currentObj.drawClassGraphics(g2);
+			}
+			if (mListener.state.equals(State.dragBox)) {
+				g2.setColor(Color.gray);
+				g2.drawRect(mListener.startX, mListener.startY,
+					mouseX - mListener.startX, mouseY - mListener.startY);
+			}
 		}
-		if (mListener.state.equals(State.dragBox)) {
-			g2.setColor(Color.gray);
-			g2.drawRect(mListener.startX, mListener.startY,
-				mouseX - mListener.startX, mouseY - mListener.startY);
-		}
-	}
-
 	}
 
 }

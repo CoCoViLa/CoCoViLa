@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.graphics.Shape;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -26,31 +27,28 @@ public class RelObj extends GObj {
 		return false;
 	}
 
-	public void drawClassGraphics(Graphics g) {
-		graphics.angle = angle;
-		getGraphics().draw(getX(), getY(), getXsize(), getYsize(), g);
+		void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
+		Shape s;
+
+		g2.translate(xPos, yPos);
+		g2.rotate(angle);
+		g2.translate(-1*(xPos), -1*(yPos));
+
+		for (int i = 0; i < shapes.size(); i++) {
+			s = (Shape) shapes.get(i);
+			s.draw(xPos, yPos, Xsize, Ysize, g2);
+		}
+		g2.translate(xPos, yPos);
+		g2.rotate(-1*angle);
+		g2.translate(-1*(xPos), -1*(yPos));
+	} // draw
+
+
+	public void drawClassGraphics(Graphics2D g) {
+		draw(getX(), getY(), getXsize(), getYsize(), g);
 		int xModifier = getX();
 		int yModifier = getY();
 
-		if (getGraphics().showFields == true) {
-			int textOffset = 4;
-			for (int i = 0; i < getFields().size(); i++) {
-				ClassField f = (ClassField) getFields().get(i);
-				if (f.value != null) {
-					if (f.isPrimOrStringArray()) {
-						String[] split = f.value.split("%%");
-						for (int j = 0; j < split.length; j++) {
-							g.drawString(split[j], getX() + 5, getY() + 8 + textOffset);
-							textOffset += 12;
-						}
-						textOffset += 6;
-					} else if (f.isPrimitiveOrString()) {
-						g.drawString(f.value, getX() + 5, getY() + 8 + textOffset);
-						textOffset += 18;
-					}
-				}
-			}
-		}
 		int len = fields.size();
 		for (int i = 0; i < len; i++) {
 			ClassField field = (ClassField) fields.get(i);

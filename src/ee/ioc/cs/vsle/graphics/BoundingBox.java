@@ -353,11 +353,10 @@ public class BoundingBox extends Shape implements Serializable {
 	 * @param yModifier int -
 	 * @param Xsize float - zoom factor.
 	 * @param Ysize float - zoom factor.
-	 * @param g Graphics - class graphics.
+	 * @param g2 Graphics - class graphics.
 	 */
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
-					 Graphics g) {
-		g2 = (Graphics2D) g;
+					 Graphics2D g2) {
 
 		g2.setStroke(new BasicStroke(this.lineWeight));
 

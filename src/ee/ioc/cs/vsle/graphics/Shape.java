@@ -122,7 +122,7 @@ public abstract class Shape implements Serializable, Cloneable {
 
 	public abstract int controlRectContains(int pointX, int pointY);
 
-	public abstract void draw(int x, int y, float Xsize, float Ysize, Graphics g);
+	public abstract void draw(int x, int y, float Xsize, float Ysize, Graphics2D g);
 
 	public abstract String toFile(int boundingboxX, int boundingboxY);
 
@@ -138,24 +138,12 @@ public abstract class Shape implements Serializable, Cloneable {
 
 	public Object clone() {
 		try {
-			Shape shape = (Shape) super.clone();
+			return super.clone();
+		} catch (Exception e) {
 
-			shape.ports = (ArrayList) ports.clone();
-
-			shape.fields = (ArrayList) fields.clone();
-			//deep clone each separate field
-			ClassField field;
-			for (int i = 0; i < fields.size(); i++) {
-				field = (ClassField) fields.get(i);
-				shape.fields.set(i, field.clone());
-			}
-
-			return shape;
-		} catch (CloneNotSupportedException e) {
-			e.printStackTrace();
 			return null;
 		}
-	} // clone
+	}
 
 	public abstract void setStrokeWidth(double d);
 

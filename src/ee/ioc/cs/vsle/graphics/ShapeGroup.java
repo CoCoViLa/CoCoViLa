@@ -416,7 +416,7 @@ public class ShapeGroup extends Shape implements Serializable {
 		return false;
 	} // includesObject
 
-	public void draw(int x, int y, float Xsize, float Ysize, Graphics g) {
+	public void draw(int x, int y, float Xsize, float Ysize, Graphics2D g) {
 		Shape shape;
 		for (int j = 0; j < shapes.size(); j++) {
 			shape = (Shape) shapes.get(j);

@@ -365,10 +365,7 @@ public class Oval extends Shape implements Serializable {
 		return this.selected;
 	} // isSelected
 
-	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
-
-		Graphics2D g2 = (Graphics2D) g;
-
+	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
 		if (getLineType() > 0) {
 			g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_ROUND, 50,
@@ -380,19 +377,14 @@ public class Oval extends Shape implements Serializable {
 
 		alpha = (float) (1 - (this.transparency / 100));
 
-	float red = 0;
-    if(color!=null) red = (float) color.getRed() / 256;
-	float green = 0;
-    if(color!=null) green = (float) color.getGreen() / 256;
-	float blue = 0;
-    if(color!=null) blue = (float) color.getBlue() / 256;
+		float red = 0;
+		if (color != null) red = (float) color.getRed() / 256;
+		float green = 0;
+		if (color != null) green = (float) color.getGreen() / 256;
+		float blue = 0;
+		if (color != null) blue = (float) color.getBlue() / 256;
 
 		g2.setColor(new Color(red, green, blue, alpha));
-
-		if (RuntimeProperties.isAntialiasingOn) {
-			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
-				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-		}
 
 		// Get dimensions. If fixed, do not multiply with size.
 		int a = xModifier + (int) (Xsize * x);
@@ -415,4 +407,7 @@ public class Oval extends Shape implements Serializable {
 
 	} // draw
 
+	public Object clone() {
+		return super.clone();
+	} // clone
 }

@@ -1,11 +1,11 @@
 package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.graphics.Shape;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.awt.Graphics;
-import java.awt.Color;
+import java.awt.*;
 
 public class GObj implements Serializable, Cloneable {
 
@@ -20,12 +20,14 @@ public class GObj implements Serializable, Cloneable {
 	public String name;
 	public ArrayList ports = new ArrayList();
 	public ArrayList fields = new ArrayList();
+	public ArrayList shapes = new ArrayList();
+
 	public ArrayList classRelations;
 	public boolean draggable;
 	public boolean selected;
 	public boolean group = false;
 	public boolean strict;
-	public ClassGraphics graphics;
+//	public ClassGraphics graphics;
 
 	public int portOffsetX1 = 0;
 	public int portOffsetX2 = 0;
@@ -223,47 +225,35 @@ public class GObj implements Serializable, Cloneable {
 		return ports;
 	}
 
-	public void drawClassGraphics(Graphics g) {
-		getGraphics().draw(getX(), getY(), getXsize(), getYsize(), g);
+
+	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
+		Shape s;
+		for (int i = 0; i < shapes.size(); i++) {
+			s = (Shape) shapes.get(i);
+			s.draw(xPos, yPos, Xsize, Ysize, g2);
+		}
+	} // draw
+
+	public void drawClassGraphics(Graphics2D g2) {
+		draw(getX(), getY(), getXsize(), getYsize(), g2);
 		int xModifier = getX();
 		int yModifier = getY();
-        g.setColor(Color.black);
-		if (getGraphics().showFields == true) {
-			int textOffset = 5;
-			for (int i = 0; i < getFields().size(); i++) {
-				ClassField f = (ClassField) getFields().get(i);
-				if (f.value != null) {
-					if (f.isPrimOrStringArray()) {
-						String[] split = f.value.split("%%");
-						for (int j = 0; j < split.length; j++) {
-							g.drawString(split[j], getX() + 5, getY() + 8 + textOffset);
-							textOffset += 12;
-						}
-						textOffset += 6;
-					} else if (f.isPrimitiveOrString()) {
-						g.drawString(f.value, getX() + 5, getY() + 8 + textOffset);
-						textOffset += 18;
-					}
-				}
-			}
-		}
-
-
+        g2.setColor(Color.black);
 		for (int i = 0; i < getPorts().size(); i++) {
 			Port port = (Port) getPorts().get(i);
 
 			if (port.isSelected()) {
 				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
-					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
+					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
 			} else if (port.isConnected()) {
 				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
-					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
+					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
 			} else if (port.isHilighted()) {
 				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
-					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
+					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
 			} else {
 				port.openGraphics.draw(xModifier + (int) (getXsize() * port.x),
-					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
+					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
 			}
 		}
 
@@ -271,42 +261,44 @@ public class GObj implements Serializable, Cloneable {
 			ClassField field = (ClassField)fields.get(i);
 			if (field.defaultGraphics != null) {
 				if (!TypeUtil.isArray(field.type)) {
-					field.defaultGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g, field.name, field.value);
+					field.defaultGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.name, field.value);
 				} else {
 					String[] split = field.value.split("%%");
 					int textOffset = 0;
 					for (int j = 0; j < split.length; j++) {
-						field.defaultGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g, field.name, split[j]);
+						field.defaultGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.name, split[j]);
 						textOffset += 12;
 					}
 				}
 			}
 			if (field.isKnown() && field.knownGraphics !=null) {
 				if (!TypeUtil.isArray(field.type)) {
-					field.knownGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g, field.name, field.value);
+					field.knownGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.name, field.value);
 				} else  {
 					String[] split = field.value.split("%%");
 					int textOffset = 0;
 					for (int j = 0; j < split.length; j++) {
-						field.knownGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g, field.name, split[j]);
+						field.knownGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.name, split[j]);
 						textOffset += 12;
 					}
 				}
 			}
 		}
 
-
-
-		g.setColor(Color.black);
+		g2.setColor(Color.black);
 		if (isSelected() == true) {
-			g.drawRect(getX() + portOffsetX1, getY() + portOffsetY1, 4, 4);
-			g.drawRect(getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4,
-				getY() + portOffsetY1, 4, 4);
-			g.drawRect(getX() + portOffsetX1,
-				getY() + (int) (getYsize() * (portOffsetY2 + getHeight())) - 4, 4, 4);
-			g.drawRect(getX() + (int) (getXsize() * (portOffsetX2 + getWidth())) - 4,
-				getY() + (int) (getYsize() * (+portOffsetY2 + getHeight())) - 4, 4, 4);
+			drawSelectionMarks(g2);
 		}
+	}
+
+	private void drawSelectionMarks(Graphics g) {
+		g.drawRect(getX() + portOffsetX1, getY() + portOffsetY1, 4, 4);
+		g.drawRect(getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4,
+			getY() + portOffsetY1, 4, 4);
+		g.drawRect(getX() + portOffsetX1,
+			getY() + (int) (getYsize() * (portOffsetY2 + getHeight())) - 4, 4, 4);
+		g.drawRect(getX() + (int) (getXsize() * (portOffsetX2 + getWidth())) - 4,
+			getY() + (int) (getYsize() * (+portOffsetY2 + getHeight())) - 4, 4, 4);
 	}
 
 	public Object clone() {
@@ -400,13 +392,14 @@ public class GObj implements Serializable, Cloneable {
 		this.strict = strict;
 	}
 
+	/*
 	public ClassGraphics getGraphics() {
 		return graphics;
 	}
 
 	public void setGraphics(ClassGraphics graphics) {
 		this.graphics = graphics;
-	}
+	}*/
 
 	public String toXML() {
 		String xml = "<object name=\""+name+"\" type=\""+className+"\" >\n";

@@ -2,8 +2,7 @@ package ee.ioc.cs.vsle.vclass;
 
 import java.util.ArrayList;
 import java.io.Serializable;
-import java.awt.Graphics;
-import java.awt.Color;
+import java.awt.*;
 
 public class PackageClass implements Serializable {
 	int x, y;
@@ -30,7 +29,7 @@ public class PackageClass implements Serializable {
 		graphics = gr;
 	}
 
-	void drawClassGraphics(int x, int y, Graphics g) {
+	void drawClassGraphics(int x, int y, Graphics2D g) {
 		graphics.draw(x, y, 1, 1, g);
 		for (int i = 0; i < ports.size(); i++) {
 			Port port = (Port) ports.get(i);

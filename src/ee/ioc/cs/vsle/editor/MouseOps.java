@@ -1,16 +1,18 @@
 package ee.ioc.cs.vsle.editor;
 
-import java.io.*;
-import java.util.*;
-import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.vclass.Point;
-import ee.ioc.cs.vsle.iconeditor.*;
+import ee.ioc.cs.vsle.graphics.Shape;
 
-import java.awt.*;
-import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.MouseInputAdapter;
+import java.awt.Cursor;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,6 +25,7 @@ class MouseOps
 	extends MouseInputAdapter
 	implements ActionListener {
 
+	ArrayList selectedObjs = new ArrayList();
 	Canvas canvas;
 	public Point draggedBreakPoint;
 	public String state = "";
@@ -61,9 +64,9 @@ class MouseOps
 	 * @param e MouseEvent - Mouse event performed.
 	 */
 	public void mouseExited(MouseEvent e) {
-	//	Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
+		//	Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
 
-	//	editor.setCursor(cursor);
+		//	editor.setCursor(cursor);
 	}
 
 	private void openObjectPopupMenu(int x, int y) {
@@ -81,32 +84,32 @@ class MouseOps
 			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, false);
 
 			// Enable or disable order changing menu items.
-			if(canvas.objects.indexOf(canvas.currentObj)==canvas.objects.size()-1) {
-			  popupMenu.enableDisableMenuItem(popupMenu.itemForward,false);
-			  popupMenu.enableDisableMenuItem(popupMenu.itemToFront,false);
+			if (canvas.objects.indexOf(canvas.currentObj) == canvas.objects.size() - 1) {
+				popupMenu.enableDisableMenuItem(popupMenu.itemForward, false);
+				popupMenu.enableDisableMenuItem(popupMenu.itemToFront, false);
 			} else {
-			  popupMenu.enableDisableMenuItem(popupMenu.itemForward,true);
-			  popupMenu.enableDisableMenuItem(popupMenu.itemToFront,true);
+				popupMenu.enableDisableMenuItem(popupMenu.itemForward, true);
+				popupMenu.enableDisableMenuItem(popupMenu.itemToFront, true);
 			}
 
-			if(canvas.objects.indexOf(canvas.currentObj)==0) {
-			  popupMenu.enableDisableMenuItem(popupMenu.itemBackward,false);
-			  popupMenu.enableDisableMenuItem(popupMenu.itemToBack,false);
+			if (canvas.objects.indexOf(canvas.currentObj) == 0) {
+				popupMenu.enableDisableMenuItem(popupMenu.itemBackward, false);
+				popupMenu.enableDisableMenuItem(popupMenu.itemToBack, false);
 			} else {
-			  popupMenu.enableDisableMenuItem(popupMenu.itemBackward,true);
-			  popupMenu.enableDisableMenuItem(popupMenu.itemToBack,true);
+				popupMenu.enableDisableMenuItem(popupMenu.itemBackward, true);
+				popupMenu.enableDisableMenuItem(popupMenu.itemToBack, true);
 			}
 
 		} else {
-		  popupMenu.enableDisableMenuItem(popupMenu.itemBackward,false);
-		  popupMenu.enableDisableMenuItem(popupMenu.itemForward,false);
-		  popupMenu.enableDisableMenuItem(popupMenu.itemToFront,false);
-		  popupMenu.enableDisableMenuItem(popupMenu.itemToBack,false);
-		  popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
-		  popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
-		  popupMenu.enableDisableMenuItem(popupMenu.itemProperties, false);
-		  popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
-		  popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
+			popupMenu.enableDisableMenuItem(popupMenu.itemBackward, false);
+			popupMenu.enableDisableMenuItem(popupMenu.itemForward, false);
+			popupMenu.enableDisableMenuItem(popupMenu.itemToFront, false);
+			popupMenu.enableDisableMenuItem(popupMenu.itemToBack, false);
+			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
+			popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
+			popupMenu.enableDisableMenuItem(popupMenu.itemProperties, false);
+			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
+			popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
 		}
 	}
 
@@ -127,17 +130,8 @@ class MouseOps
 			} else {
 				canvas.currentObj = canvas.objects.checkInside(x, y);
 				if (canvas.currentObj != null) {
-				/*	Port port = editor.currentObj.portContains(x, y);
-
-					if (port != null) {
-						PortPopupMenu popupMenu = new PortPopupMenu(port);
-
-						popupMenu.show(editor.getContentPane(), x, y);
-					} else {*/
-						openObjectPopupMenu(x, y);
-				//	}
+					openObjectPopupMenu(x, y);
 				}
-
 			}
 
 			if (state.equals(State.magnifier)) {
@@ -177,7 +171,7 @@ class MouseOps
 							canvas.currentCon.addBreakPoint(new Point(canvas.firstPort.getX() + canvas.firstPort.obj.getX(), canvas.firstPort.getY() + canvas.firstPort.obj.getY()));
 							canvas.mouseX = x;
 							canvas.mouseY = y;
-						}else if  (canBeConnected(canvas.firstPort, port)) {
+						} else if (canBeConnected(canvas.firstPort, port)) {
 
 							if (port == canvas.firstPort) {
 								canvas.firstPort.setConnected(false);
@@ -220,17 +214,17 @@ class MouseOps
 				if (obj == null) {
 					canvas.objects.clearSelected();
 				} else {
-					if (e.isShiftDown()) {}
-					else {
+					if (e.isShiftDown()) {
+					} else {
 						canvas.objects.clearSelected();
 						obj.setSelected(true);
 					}
 				}
 
 			} else {
-				if(state.startsWith("??")) { // if class is of type relation
-					addingSpecialRelation(y,x);
-				} else 	if (canvas.currentObj != null) {
+				if (state.startsWith("??")) { // if class is of type relation
+					addingSpecialRelation(y, x);
+				} else if (canvas.currentObj != null) {
 					addObj();
 					state = State.selection;
 					Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
@@ -254,8 +248,8 @@ class MouseOps
 					canvas.mouseX = x;
 					canvas.mouseY = y;
 				} else {
-                    Port port1 = (Port)canvas.currentObj.ports.get(0);
-                    Port port2 = (Port)canvas.currentObj.ports.get(1);
+					Port port1 = (Port) canvas.currentObj.ports.get(0);
+					Port port2 = (Port) canvas.currentObj.ports.get(1);
 					Connection con = new Connection(canvas.firstPort, port1);
 					canvas.firstPort.addConnection(con);
 					port1.addConnection(con);
@@ -265,13 +259,13 @@ class MouseOps
 					port.addConnection(con);
 					canvas.connections.add(con);
 					port.setConnected(true);
-                    RelObj thisObj = (RelObj)canvas.currentObj;
-                    thisObj.startPort = canvas.firstPort;
-                    thisObj.endPort = port;
-                    canvas.firstPort = null;
+					RelObj thisObj = (RelObj) canvas.currentObj;
+					thisObj.startPort = canvas.firstPort;
+					thisObj.endPort = port;
+					canvas.firstPort = null;
 					addObj();
-                    startAddingObject();
-                    //setState(State.selection);
+					startAddingObject();
+					//setState(State.selection);
 					canvas.objects.updateRelObjs();
 					//editor.currentObj = null;
 
@@ -295,6 +289,7 @@ class MouseOps
 
 				GObj obj = canvas.objects.checkInside(canvas.mouseX, canvas.mouseY);
 
+
 				if (obj != null) {
 					if (e.isShiftDown()) {
 						obj.setSelected(true);
@@ -310,7 +305,10 @@ class MouseOps
 						state = State.resize;
 					} else {
 						state = State.drag;
+
 						canvas.repaint();
+
+
 					}
 				} else {
 					state = State.dragBox;
@@ -318,6 +316,8 @@ class MouseOps
 					startY = canvas.mouseY;
 				}
 				// drawConnections();
+				selectedObjs = canvas.objects.getSelected();
+
 			}
 		}
 	}
@@ -329,7 +329,6 @@ class MouseOps
 		GObj obj;
 		Connection relation;
 		//this should be OPTIMZED!!!
-		ArrayList selectedObjs = canvas.objects.getSelected();
 
 		if (state.equals(State.dragBreakPoint)) {
 			draggedBreakPoint.x = x;
@@ -342,7 +341,7 @@ class MouseOps
 				obj = (GObj) selectedObjs.get(i);
 				if (!(obj instanceof RelObj)) {
 					//use the following when  snap to grid
-				    x1 = Math.round(x / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+					x1 = Math.round(x / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
 					x2 = Math.round(canvas.mouseX / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
 					y1 = Math.round(y / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
 					y2 = Math.round(canvas.mouseY / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
@@ -367,7 +366,7 @@ class MouseOps
 							// wanna remove the connection
 							if (port2 != null && !port2.obj.isSelected()) {
 								// We dont want to remove the connection, if the objects belong to the same group
-								if (! (obj.isGroup() && obj.includesObject(port2.obj))) {
+								if (!(obj.isGroup() && obj.includesObject(port2.obj))) {
 									if (Math.abs(port.getRealCenterX() - port2.getRealCenterX()) > 1 || Math.abs(port.getRealCenterY() - port2.getRealCenterY()) > 1) {
 										canvas.connections.remove(port, port2);
 									}
@@ -388,7 +387,7 @@ class MouseOps
 										port.addConnection(con);
 										canvas.connections.add(con);
 									}
-									obj.setPosition(port2.obj.x + port2.getCenterX() - ( (port.obj.x - obj.x) + port.getCenterX()), port2.obj.y + port2.getCenterY() - ( (port.obj.y - obj.y) + port.getCenterY()));
+									obj.setPosition(port2.obj.x + port2.getCenterX() - ((port.obj.x - obj.x) + port.getCenterX()), port2.obj.y + port2.getCenterY() - ((port.obj.y - obj.y) + port.getCenterY()));
 								}
 							}
 						}
@@ -447,7 +446,7 @@ class MouseOps
 		canvas.posInfo.setText(Integer.toString(x) + ", " + Integer.toString(y));
 
 		// check if port needs to be nicely drawn coz of mouseover
-		if (state.equals(State.addRelation)||state.startsWith("??")) {
+		if (state.equals(State.addRelation) || state.startsWith("??")) {
 			if (canvas.currentPort != null) {
 				canvas.currentPort.setSelected(false);
 				// currentPort=null;
@@ -460,7 +459,7 @@ class MouseOps
 				Port port = obj.portContains(x, y);
 
 				if (port != null) {
-					if (canvas.firstPort!=null) {
+					if (canvas.firstPort != null) {
 						if (canBeConnected(canvas.firstPort, port)) {
 							port.setSelected(true);
 							canvas.currentPort = port;
@@ -535,7 +534,7 @@ class MouseOps
 				canvas.drawingArea.revalidate();
 			}
 			canvas.repaint();
-		} else if (state.startsWith("??") && canvas.firstPort!=null) { //if class is of type relation
+		} else if (state.startsWith("??") && canvas.firstPort != null) { //if class is of type relation
 			canvas.repaint();
 		}
 		if (canvas.firstPort != null) {
@@ -620,6 +619,14 @@ class MouseOps
 			obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
 		}
 
+
+		obj.shapes = (ArrayList) pClass.graphics.shapes.clone();
+		Shape shape;
+		for (int i = 0; i < obj.shapes.size(); i++) {
+			shape = (Shape) obj.shapes.get(i);
+			obj.shapes.set(i, shape.clone());
+		}
+
 		obj.ports = (ArrayList) pClass.ports.clone();
 		Port port;
 
@@ -662,11 +669,9 @@ class MouseOps
 			obj.fields.set(i, field.clone());
 		}
 
-		obj.graphics = pClass.graphics;
 		obj.setName(pClass.name + "_" + Integer.toString(canvas.objCount));
 		canvas.objCount++;
 
-		obj.graphics = pClass.graphics;
 		canvas.currentObj = obj;
 		Cursor cursor;
 		if (state.startsWith("??")) {

@@ -6,7 +6,7 @@ import java.awt.*;
 
 import ee.ioc.cs.vsle.editor.*;
 
-public class Arc extends Shape implements Serializable {
+public class Arc extends Shape implements Serializable, Cloneable {
 
   /**
    * Arc angles. Can be used for rotating the Arc.
@@ -465,12 +465,9 @@ public class Arc extends Shape implements Serializable {
    * @param yModifier int -
    * @param Xsize float - defines the resizing multiplier (used at zooming), default: 1.0
    * @param Ysize float - defines the resizing multiplier (uset at zooming), default: 1.0
-   * @param g Graphics - shape graphics.
+   * @param g2 Graphics - shape graphics.
    */
-  public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
-
-	Graphics2D g2 = (Graphics2D) g;
-
+  public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
 	if(getLineType()>0) {
 	  g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
 								   BasicStroke.JOIN_ROUND, 50,
@@ -496,11 +493,6 @@ public class Arc extends Shape implements Serializable {
 	// Set the Graphics a new transparent color.
 	g2.setColor(new Color(red, green, blue, alpha));
 
-	if (RuntimeProperties.isAntialiasingOn) {
-	  g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
-						  java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-	}
-
 	int a = xModifier + (int) (Xsize * x);
 	int b = yModifier + (int) (Ysize * y);
 	int c = (int) (Xsize * width);
@@ -520,4 +512,12 @@ public class Arc extends Shape implements Serializable {
 
 	} // draw
 
+	public Object clone() {
+		try {
+			return super.clone();
+		} catch (Exception e) {
+
+			return null;
+		}
+	} // clone
 } // end of class

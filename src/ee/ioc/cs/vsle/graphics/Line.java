@@ -18,6 +18,11 @@ public class Line extends Shape implements Serializable {
 	public int fixedX2;
 	public int fixedY1;
 	public int fixedY2;
+	String x1Exp;
+    String x2Exp;
+	String y1Exp;
+	String y2Exp;
+
 
 	private BasicStroke stroke;
 	/**
@@ -374,16 +379,9 @@ public class Line extends Shape implements Serializable {
 		g2.fillRect(endX - 2, endY - 2, 4, 4);
 	} // drawSelection
 
-	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
-
-		Graphics2D g2 = (Graphics2D) g;
-
+	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
 		g2.setColor(color);
 	  	g2.setStroke(stroke);
-		if (RuntimeProperties.isAntialiasingOn) {
-			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
-				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-		}
 
 		int a = 0, b = 0, c = 0, d = 0;
 		if (fixedX1 == 0)

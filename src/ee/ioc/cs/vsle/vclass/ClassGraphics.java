@@ -9,7 +9,7 @@ import java.awt.*;
 
 public class ClassGraphics implements Serializable {
 
-	ArrayList shapes = new ArrayList();
+	public ArrayList shapes = new ArrayList();
 	public double angle = 0.0;
 	public int boundX;
 	public int boundY;
@@ -65,11 +65,10 @@ public class ClassGraphics implements Serializable {
 	 * @param yPos int - shape y coordinate value. Specifies the point to start the shape drawing from.
 	 * @param Xsize float -
 	 * @param Ysize float -
-	 * @param g Graphics -
+	 * @param g2 Graphics -
 	 */
-	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics g) {
+	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
 		Shape s;
-        Graphics2D g2 = (Graphics2D) g;
 
 		if (relation) {
 			g2.translate(xPos, yPos);
@@ -79,7 +78,7 @@ public class ClassGraphics implements Serializable {
 
 		for (int i = 0; i < shapes.size(); i++) {
 			s = (Shape) shapes.get(i);
-			s.draw(xPos, yPos, Xsize, Ysize, g);
+			s.draw(xPos, yPos, Xsize, Ysize, g2);
 		}
 		if (relation) {
 			g2.translate(xPos, yPos);
@@ -89,9 +88,8 @@ public class ClassGraphics implements Serializable {
 
 	} // draw
 
-	void drawSpecial(int xPos, int yPos, float Xsize, float Ysize, Graphics g, String name, String value) {
+	void drawSpecial(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2, String name, String value) {
 		Shape s;
-        Graphics2D g2 = (Graphics2D) g;
 
 		if (relation) {
 			g2.translate(xPos, yPos);
@@ -102,9 +100,9 @@ public class ClassGraphics implements Serializable {
 		for (int i = 0; i < shapes.size(); i++) {
 			s = (Shape) shapes.get(i);
 			if (s instanceof Text)
-				((Text)s).drawSpecial(xPos, yPos, Xsize, Ysize, g, name, value, angle);
+				((Text)s).drawSpecial(xPos, yPos, Xsize, Ysize, g2, name, value, angle);
 			else
-				s.draw(xPos, yPos, Xsize, Ysize, g);
+				s.draw(xPos, yPos, Xsize, Ysize, g2);
 		}
 		if (relation) {
 			g2.translate(xPos, yPos);
@@ -113,6 +111,7 @@ public class ClassGraphics implements Serializable {
 		}
 
 	} // draw
+
 
 
 }
