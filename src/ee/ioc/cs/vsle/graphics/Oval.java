@@ -380,9 +380,12 @@ public class Oval extends Shape implements Serializable {
 
 		alpha = (float) (1 - (this.transparency / 100));
 
-		float red = (float) color.getRed() / 256;
-		float green = (float) color.getGreen() / 256;
-		float blue = (float) color.getBlue() / 256;
+	float red = 0;
+    if(color!=null) red = (float) color.getRed() / 256;
+	float green = 0;
+    if(color!=null) green = (float) color.getGreen() / 256;
+	float blue = 0;
+    if(color!=null) blue = (float) color.getBlue() / 256;
 
 		g2.setColor(new Color(red, green, blue, alpha));
 

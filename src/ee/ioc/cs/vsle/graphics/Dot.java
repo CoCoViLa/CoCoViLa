@@ -346,57 +346,61 @@ public class Dot extends Shape implements Serializable {
 		return 0;
 	} // controlRectContains
 
-	/**
-	 * Draw the selection markers if object selected.
-	 * @param g2 Graphics2D - shape graphics.
-	 */
-	public void drawSelection(Graphics2D g2) {
-		g2.setColor(Color.black);
-		g2.setStroke(new BasicStroke((float) 1.0));
-		g2.drawRect(x, y, 4, 4);
-		g2.drawRect(x + width - 4, y, 4, 4);
-		g2.drawRect(x, y + height - 4, 4, 4);
-		g2.drawRect(x + width - 4, y + height - 4, 4, 4);
-	} // drawSelection
+ /**
+   * Draw the selection markers if object selected.
+   * @param g2 Graphics2D - shape graphics.
+   */
+  public void drawSelection(Graphics2D g2) {
+	g2.setColor(Color.black);
+	g2.setStroke(new BasicStroke( (float) 1.0));
+	g2.drawRect(x, y, 4, 4);
+	g2.drawRect(x + width - 4, y, 4, 4);
+	g2.drawRect(x, y + height - 4, 4, 4);
+	g2.drawRect(x + width - 4, y + height - 4, 4, 4);
+  } // drawSelection
 
-	/**
-	 * Draw the dot. Supports drawing with transparent colors.
-	 * @param xModifier int -
-	 * @param yModifier int -
-	 * @param sizeX float - defines the resizing multiplier for x coordinate (used at zooming), default: 1.0
-	 * @param sizeY float - defines the resizing multiplier for y coordinate (used at zooming), default: 1.0
-	 * @param g Graphics
-	 */
-	public void draw(int xModifier, int yModifier, float sizeX, float sizeY, Graphics g) {
-		Graphics2D g2 = (Graphics2D) g;
+  /**
+   * Draw the dot. Supports drawing with transparent colors.
+   * @param xModifier int -
+   * @param yModifier int -
+   * @param sizeX float - defines the resizing multiplier for x coordinate (used at zooming), default: 1.0
+   * @param sizeY float - defines the resizing multiplier for y coordinate (used at zooming), default: 1.0
+   * @param g Graphics
+   */
+  public void draw(int xModifier, int yModifier, float sizeX, float sizeY, Graphics g) {
+	Graphics2D g2 = (Graphics2D) g;
 
-		g2.setStroke(new BasicStroke(this.lineWeight));
+	g2.setStroke(new BasicStroke(this.lineWeight));
 
-		// The user can specify the percentage of transparency between 0..100%.
-		// The value of transparency is defined as a float value between 0..1.
-		alpha = (float) (1 - (this.transparency / 100));
+	// The user can specify the percentage of transparency between 0..100%.
+	// The value of transparency is defined as a float value between 0..1.
+	alpha = (float) (1 - (this.transparency / 100));
 
-		// Separate the color to separate Red, Green and Blue, for allowing
-		// the Graphics to be drawn with a transparent color.
-		float red = (float) color.getRed() / 256;
-		float green = (float) color.getGreen() / 256;
-		float blue = (float) color.getBlue() / 256;
+	// Separate the color to separate Red, Green and Blue, for allowing
+	// the Graphics to be drawn with a transparent color.
+	float red = 0;
+   if(color!=null) red = (float) color.getRed() / 256;
+	float green = 0;
+   if(color!=null) green = (float) color.getGreen() / 256;
+	float blue = 0;
+   if(color!=null) blue = (float) color.getBlue() / 256;
 
-		// Set the Graphics a new transparent color.
-		g2.setColor(new Color(red, green, blue, alpha));
+	// Set the Graphics a new transparent color.
+	g2.setColor(new Color(red, green, blue, alpha));
 
-		int w = (int) this.lineWeight / 2;
+	int w = (int) this.lineWeight / 2;
 
-		int a = xModifier + (int) (sizeX * x);
-		int b = yModifier + (int) (sizeY * y);
+	int a = xModifier + (int) (sizeX * x);
+	int b = yModifier + (int) (sizeY * y);
 
-		g2.drawRect(a, b, w, w);
+	g2.drawRect(a, b, w, w);
 
-		// Draw selection markers if object selected.
-		if (selected) {
-			drawSelection(g2);
-		}
+	// Draw selection markers if object selected.
+	if (selected) {
+	  drawSelection(g2);
+	}
+	}
 
-	} // draw
+
 
 }
