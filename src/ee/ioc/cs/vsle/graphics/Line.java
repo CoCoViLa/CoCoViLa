@@ -14,6 +14,11 @@ public class Line extends Shape implements Serializable {
 	int startY;
 	int endX;
 	int endY;
+	public int fixedX1;
+	public int fixedX2;
+	public int fixedY1;
+	public int fixedY2;
+
 	private BasicStroke stroke;
 	/**
 	 * Line weight, logically equals to stroke width.
@@ -380,15 +385,36 @@ public class Line extends Shape implements Serializable {
 				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 		}
 
-		int a = xModifier + (int) (Xsize * startX);
-		int b = yModifier + (int) (Ysize * startY);
-		int c = xModifier + (int) (Xsize * endX);
-		int d = yModifier + (int) (Ysize * endY);
+		int a = 0, b = 0, c = 0, d = 0;
+		if (fixedX1 == 0)
+			a = xModifier + (int) (Xsize * startX);
+		else if (fixedX1 == -1)
+			a = xModifier + startX;
+		else
+			a = xModifier + (int)(Xsize * startX) - fixedX1;
+
+		if (fixedX2 == 0)
+			c = xModifier + (int) (Xsize * endX);
+		else if (fixedX2 == -1)
+			c = xModifier + endX;
+		else
+			c = xModifier + (int)(Xsize * endX) - fixedX2;
+
+		if (fixedY1 == 0)
+			b = yModifier + (int) (Ysize * startY);
+		else if (fixedY1 == -1)
+			b = yModifier + startY;
+		else
+			b = yModifier + (int)(Ysize * startY) - fixedY1;
+
+		if (fixedY2 == 0)
+			d = yModifier + (int) (Ysize * endY);
+		else if (fixedY2 == -1)
+			d = yModifier + endY;
+		else
+			d = yModifier + (int)(Ysize * endY) - fixedY2;
 
 		g2.drawLine(a, b, c, d);
-
-		this.width = Math.abs(getStartX() - getEndX());
-		this.height = Math.abs(getStartY() - getEndY());
 
 		if (selected) {
 			drawSelection(g2);

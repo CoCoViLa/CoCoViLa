@@ -363,10 +363,10 @@ public class Text extends Shape implements Serializable {
 
 		g2.setColor(new Color(red, green, blue, alpha));
 
-		if (RuntimeProperties.isAntialiasingOn) {
+/*		if (RuntimeProperties.isAntialiasingOn) {
 			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
 				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-		}
+		}*/
 
 		int a = xModifier + (int) (Xsize * x);
 		int b = yModifier + (int) (Ysize * y);

@@ -1,28 +1,29 @@
 package ee.ioc.cs.vsle.vclass;
+
 import ee.ioc.cs.vsle.util.*;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 /**
 
  */
-public class RelObj extends GObj{
-    public double angle;
-    public Port startPort;
-    public Port endPort;
+public class RelObj extends GObj {
+	public double angle;
+	public Port startPort;
+	public Port endPort;
 	public int endX, endY;
 
-    public RelObj(int x, int y, int width, int height, String name) {
-        super (x, y, width, height, name);
-    }
+	public RelObj(int x, int y, int width, int height, String name) {
+		super(x, y, width, height, name);
+	}
 
-    public boolean contains(int pointX, int pointY) {
-		db.p("relobj "+x+" "+ y+" "+ endX+" "+ endY);
-        float f = VMath.calcDistance(x, y, endX, endY, pointX, pointY);
-        if (f < height+4) {
-            return true;
-        }
-        return false;
+	public boolean contains(int pointX, int pointY) {
+		float f = VMath.calcDistance(x, y, endX, endY, pointX, pointY);
+		if (f < height + 4) {
+			return true;
+		}
+		return false;
 	}
 
 	public void drawClassGraphics(Graphics g) {
@@ -50,22 +51,28 @@ public class RelObj extends GObj{
 				}
 			}
 		}
-        int len = fields.size();
+		int len = fields.size();
 		for (int i = 0; i < len; i++) {
-			ClassField field = (ClassField)fields.get(i);
+			ClassField field = (ClassField) fields.get(i);
 
 			if (field.defaultGraphics != null) {
 				field.defaultGraphics.angle = angle;
-				field.defaultGraphics.drawSpecial(xModifier ,
+				field.defaultGraphics.drawSpecial(xModifier,
 					yModifier, getXsize(), getYsize(), g, field.name, field.value);
 			}
-			if (field.isKnown() && field.knownGraphics !=null) {
+			if (field.isKnown() && field.knownGraphics != null) {
 				field.knownGraphics.angle = angle;
 				field.knownGraphics.drawSpecial(xModifier,
 					yModifier, getXsize(), getYsize(), g, field.name, field.value);
 			}
 		}
-
-
-    }
+	}
+	public Object clone() {
+		RelObj obj = (RelObj) super.clone();
+		obj.startPort = (Port)startPort.clone();
+		obj.startPort.obj = obj;
+		obj.endPort = (Port)endPort.clone();
+		obj.endPort.obj = obj;
+		return obj;
+	}
 }

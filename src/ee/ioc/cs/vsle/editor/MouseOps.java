@@ -328,7 +328,7 @@ class MouseOps
 		int y = e.getY();
 		GObj obj;
 		Connection relation;
-
+		//this should be OPTIMZED!!!
 		ArrayList selectedObjs = canvas.objects.getSelected();
 
 		if (state.equals(State.dragBreakPoint)) {
@@ -337,10 +337,20 @@ class MouseOps
 			canvas.repaint();
 		}
 		if (state.equals(State.drag)) {
+			int x1, x2, y1, y2;
 			for (int i = 0; i < selectedObjs.size(); i++) {
 				obj = (GObj) selectedObjs.get(i);
-				if (!(obj instanceof RelObj))
-				obj.setPosition(obj.getX() + (x - canvas.mouseX), obj.getY() + (y - canvas.mouseY));
+				if (!(obj instanceof RelObj)) {
+					//use the following when  snap to grid
+				    x1 = Math.round(x / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+					x2 = Math.round(canvas.mouseX / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+					y1 = Math.round(y / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+					y2 = Math.round(canvas.mouseY / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+					obj.setPosition(obj.getX() + (x1 - x2), obj.getY() + (y1 - y2));
+
+					//use this when not snap to grid
+					//obj.setPosition(obj.getX() + (x - canvas.mouseX), obj.getY() + (y - canvas.mouseY));
+				}
 
 				// check if a strict port exists on the object
 
@@ -467,8 +477,13 @@ class MouseOps
 
 		// if we're adding a new object...
 		if (canvas.currentObj != null && canvas.vPackage.hasClass(state)) {
-			canvas.currentObj.x = x;
-			canvas.currentObj.y = y;
+			//use these when snap to grid
+			canvas.currentObj.x = Math.round(x / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+			canvas.currentObj.y = Math.round(y / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+
+			//Use these when not snap to grid:
+			//canvas.currentObj.y = y;
+			//canvas.currentObj.x = x;
 
 			// Kui objektil on moni strict port, chekime kas teda kuskile panna on;
 			if (canvas.currentObj.isStrict()) {

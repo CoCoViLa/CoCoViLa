@@ -86,11 +86,6 @@ public class PackageParser {
 
 		public InputSource resolveEntity(java.lang.String publicId, java.lang.String systemId) throws SAXException{
 			InputSource is = null;
-			System.out.println("--------------------");
-			System.out.println("publicId=" + publicId);
-			System.out.println("systemId=" + systemId);
-			System.out.println("--------------------");
-			// comment the next 2 lines, if you want to see the DTD specified in the XML file.
 			if (systemId != null && systemId.endsWith("dtd"))
 				is = new InputSource("package2.dtd");
 			return is;
@@ -212,30 +207,7 @@ public class PackageParser {
 			}
 
 			if (element.equals("line")) {
-				String x1 = attrs.getValue("x1");
-				String x2 = attrs.getValue("x2");
-				String y1 = attrs.getValue("y1");
-				String y2 = attrs.getValue("y2");
-				String color = attrs.getValue("colour");
-				String stroke = attrs.getValue("stroke");
-				String transp = attrs.getValue("transparency");
-				String lineType = attrs.getValue("lineType");
-				double str = 1.0;
-				if (stroke != null) {
-					str = Double.parseDouble(stroke);
-				}
-				double tr = 255;
-				if (transp != null) {
-					tr = Double.parseDouble(transp);
-				}
-				int lt = 0;
-				if (lineType != null) {
-				  lt = Integer.parseInt(lineType);
-				}
-
-				Line newLine = new Line(Integer.parseInt(x1),
-					Integer.parseInt(y1), Integer.parseInt(x2),
-					Integer.parseInt(y2), Integer.parseInt(color), str, tr, lt);
+				Line newLine = makeLine(attrs, newGraphics);
 
 				newGraphics.addShape(newLine);
 			}
@@ -347,6 +319,76 @@ public class PackageParser {
 					Integer.parseInt(width), Integer.parseInt(height));
 			}
 
+		}
+
+		private Line makeLine(Attributes attrs, ClassGraphics newGraphics) {
+			int x1, x2, y1, y2;
+			int fixedX1 = 0, fixedX2 = 0, fixedY1 = 0, fixedY2 = 0;
+			//parse the coordinates and check if they are fixed or reverse fixed
+			String val = attrs.getValue("x1");
+			if (val.endsWith("rf")) {
+				x1 = newGraphics.boundWidth;
+				fixedX1 = x1 - Integer.parseInt(val.substring(0, val.length()-2));
+			} else if  (val.endsWith("f")) {
+				x1 = Integer.parseInt(val.substring(0, val.length()-1));
+				fixedX1 = -1;
+			} else {
+				x1 = Integer.parseInt(val);
+			}
+			val = attrs.getValue("x2");
+			if (val.endsWith("rf")) {
+				x2 = newGraphics.boundWidth;
+				fixedX2 = x2 - Integer.parseInt(val.substring(0, val.length()-2));
+			} else if  (val.endsWith("f")) {
+				x2 = Integer.parseInt(val.substring(0, val.length()-1));
+				fixedX2 = -1;
+			} else {
+				x2 = Integer.parseInt(val);
+			}
+			val = attrs.getValue("y1");
+			if (val.endsWith("rf")) {
+				y1 = newGraphics.boundHeight;
+				fixedY1 = y1 - Integer.parseInt(val.substring(0, val.length()-2));
+			} else if  (val.endsWith("f")) {
+				y1 = Integer.parseInt(val.substring(0, val.length()-1));
+				fixedY1 = -1;
+			} else {
+				y1 = Integer.parseInt(val);
+			}
+			val = attrs.getValue("y2");
+			if (val.endsWith("rf")) {
+				y2 = newGraphics.boundHeight;
+				fixedY2 = y2 - Integer.parseInt(val.substring(0, val.length()-2));
+			} else if  (val.endsWith("f")) {
+				y2 = Integer.parseInt(val.substring(0, val.length()-1));
+				fixedY2 = -1;
+			} else {
+				y2 = Integer.parseInt(val);
+			}
+			String color = attrs.getValue("colour");
+			String stroke = attrs.getValue("stroke");
+			String transp = attrs.getValue("transparency");
+			String lineType = attrs.getValue("linetype");
+			double str = 1.0;
+			if (stroke != null) {
+				str = Double.parseDouble(stroke);
+			}
+			double tr = 255;
+			if (transp != null) {
+				tr = Double.parseDouble(transp);
+			}
+			int lt = 0;
+			if (lineType != null) {
+			  lt = Integer.parseInt(lineType);
+			}
+
+			Line newLine = new Line(x1,
+				y1, x2, y2, Integer.parseInt(color), str, tr, lt);
+			newLine.fixedX1 = fixedX1;
+			newLine.fixedX2 = fixedX2;
+			newLine.fixedY1 = fixedY1;
+			newLine.fixedY2 = fixedY2;
+			return newLine;
 		}
 
 		public void endElement(String namespaceURI, String sName, String qName) throws

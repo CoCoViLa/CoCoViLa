@@ -99,7 +99,7 @@ public class Port implements Cloneable, Serializable {
 		return (int) (obj.getXsize() * (openGraphics.boundX + x) + obj.getX());
 	}
 
-    public int getStartY() {
+	public int getStartY() {
 		return (int) (obj.getYsize() * (openGraphics.boundY + y) + obj.getY());
 	}
 
@@ -113,7 +113,7 @@ public class Port implements Cloneable, Serializable {
 
 	public boolean inBoundsX(int pointX) {
 		if (obj.getX() + obj.getXsize() * (x + openGraphics.boundX) < pointX
-			&& (obj.getX() + obj.getXsize()* (x + openGraphics.boundX + openGraphics.boundWidth) > pointX)) {
+			&& (obj.getX() + obj.getXsize() * (x + openGraphics.boundX + openGraphics.boundWidth) > pointX)) {
 			return true;
 		} else {
 			return false;
@@ -124,7 +124,7 @@ public class Port implements Cloneable, Serializable {
 	public boolean inBoundsY(int pointY) {
 		if (obj.getY() + (obj.getYsize() * (y + openGraphics.boundY)) < pointY
 			&& (obj.getY()
-			+ obj.getXsize()
+			+ obj.getYsize()
 			* (y + openGraphics.boundY + openGraphics.boundHeight))
 			> pointY) {
 			return true;

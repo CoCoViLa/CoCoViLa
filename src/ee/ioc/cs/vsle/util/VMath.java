@@ -62,33 +62,7 @@ public class VMath {
 	 * @return
 	 */
 	public static float calcDistance(int x1, int y1, int x2, int y2, int pointX, int pointY) {
-
 		Point p = nearestPointOnLine(x1, y1, x2, y2, pointX, pointY);
-		db.p("nearest point "+p.x+" "+p.y);
-
-
-/*        int calc1 = (pointX - x1) * (x2 - x1) + (pointY - y1) * (y2 - y1);
-        int calc2 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
-
-        float U = (float) calc1 / (float) calc2;
-
-        float intersectX = x1 + U * (x2 - x1);
-        float intersectY = y1 + U * (y2 - y1);
-
-        double distance = Math.sqrt(
-            (pointX - intersectX) * (pointX - intersectX)
-            + (pointY - intersectY) * (pointY - intersectY));
-
-        double distanceFromEnd2 = Math.sqrt(
-            (x2 - pointX) * (x2 - pointX) + (y2 - pointY) * (y2 - pointY));
-        double lineLength = Math.sqrt(
-            (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-
-        if (lineLength < Math.max(distanceFromEnd1, distanceFromEnd2)) {
-            distance = Math.max(Math.min(distanceFromEnd1, distanceFromEnd2),
-                distance);
-        }*/
-
 		double distance = Math.sqrt(Math.pow((p.x - pointX), 2.0) + Math.pow((p.y - pointY) , 2.0));
 		return (float) distance;
 	}
@@ -104,7 +78,8 @@ public class VMath {
 	public static double calcAngle(int startX, int startY, int x, int y) {
 		int realX = x - startX;
 		int realY = y - startY;
-
+		if (realX == 0 && realY ==0)
+			return 0.0;
 		if (realX >= 0 && realY >= 0) {
 			return (Math.atan((double) realY / (double) realX));
 		}

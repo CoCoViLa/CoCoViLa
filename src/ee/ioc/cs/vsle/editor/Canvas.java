@@ -518,7 +518,6 @@ public class Canvas extends JPanel implements ActionListener {
 				currentObj.x = p.x;
 				currentObj.drawClassGraphics(g2);
 		} else if (currentObj != null && !mListener.state.startsWith("?")) {
-// ee.ioc.cs.editor.vclass.PackageClass pClass = (ee.ioc.cs.editor.vclass.PackageClass)classes.get(currentObj.name);
 			g2.setColor(Color.black);
 			currentObj.drawClassGraphics(g2);
 		}
