@@ -14,6 +14,7 @@ class Rel {
 	int subtaskFlag;
 	String object;
 	String method;
+    boolean inAlgorithm = false;
 
 	int type; /* 1 - equals, 2 - method*/
 
@@ -72,17 +73,18 @@ class Rel {
 
 	String getSubtaskParameters() {
 		String params = "(";
-
+        boolean subExist = false;
 		for (int i = 0; i < subtasks.size(); i++) {
 			if (i == 0) {
 				params += "subtask" + Integer.toString(i);
+                subExist = true;
 			}
 			else {
 				params += ", subtask" + Integer.toString(i);
 			}
 		}
 		for (int i = 0; i < inputs.size(); i++) {
-			if (i == 0) {
+			if (i == 0 && !subExist) {
 				params += (Var) inputs.get(i);
 			}
 			else {
@@ -201,10 +203,10 @@ class Rel {
 		}
 		else if (type == 6) {
 			if (!outputs.isEmpty()) {
-				return ( (Var) outputs.get(0) + " = " + object + "." + method + getSubtaskParameters() + getParameters());
+				return ( (Var) outputs.get(0) + " = " + object + "." + method + getSubtaskParameters());// + getParameters()
 			}
 			else {
-				return (object + "." + method + getSubtaskParameters() + getParameters());
+				return (object + "." + method + getSubtaskParameters());// + getParameters()
 			}
 		}
 		else {
