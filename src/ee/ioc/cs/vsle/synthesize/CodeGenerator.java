@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.synthesize;
 import java.util.*;
 import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Alias;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 public class CodeGenerator {
 
@@ -36,6 +37,7 @@ public class CodeGenerator {
         }
         offset = "";
         subCount = 0;
+        ALIASTMP_NR = 0;
         return s_codeGen;
     }
 
@@ -76,7 +78,7 @@ public class CodeGenerator {
             //apend subtask inputs to algorithm
             for ( int i = 0; i < subInputs.size(); i++ ) {
                 Var in = ( Var ) subInputs.get( i );
-                alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubtask( in, i, true ) );
+                alg.append( getObjectFromSubtask( in, cOT( OT_NOC, 0 ), i, true ) );
             }
             boolean isSubOutputInAlgorithm = false;
             for ( int i = 0; i < subAlg.size(); i++ ) {
@@ -100,7 +102,7 @@ public class CodeGenerator {
                             if ( !isSubInputInAlgorithm ) {
                                 appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
                             }
-                            alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubtask( out, 0, false ) );
+                            alg.append( getObjectFromSubtask( out, cOT( OT_NOC, 0 ), 0, false ) );
                             isSubOutputInAlgorithm = true;
                             break; //there should be no axioms after return statement.
                         }
@@ -113,7 +115,7 @@ public class CodeGenerator {
             }
             if( !isSubOutputInAlgorithm ) {
                 Var out = ( Var ) subOutputs.get( 0 );
-                alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubtask( out, 0, false ) );
+                alg.append( getObjectFromSubtask( out, cOT( OT_NOC, 0 ), 0, false ) );
             }
             alg.append( cOT( OT_DEC, 1 ) + "}\n"
                         + cOT( OT_DEC, 1 ) + "}\n" );
@@ -187,7 +189,15 @@ public class CodeGenerator {
         return buf.toString();
     }
 
-    private String getObjectFromSubtask( Var var, int num, boolean isInput ) {
+    private String getObjectFromSubtask( Var var, String offset, int num, boolean isInput ) {
+
+        if ( var.field.isAlias() ) {
+            if ( isInput ) {
+                return getAliasSubtaskInput( (Alias)var.field, offset, num);
+            } else {
+                return getAliasSubtaskOutput( (Alias)var.field, offset );
+            }
+        }
 
         String varType = var.type;
         TypeToken token = null;
@@ -208,33 +218,71 @@ public class CodeGenerator {
             token = TOKEN_LONG;
         } else if ( varType.equals( TOKEN_BOOLEAN.getType() ) ) {
             token = TOKEN_BOOLEAN;
-        } else if ( varType.equals( "alias" ) ) {
-            varType = ((Alias)var.field).getRealType();
-            token = TOKEN_OBJECT;
         } else {
             token = TOKEN_OBJECT;
         }
 
-        String s = null;
+        String s = offset;
 
         if ( isInput ) {
             if ( token == TOKEN_OBJECT ) {
-                s = var.toString() + " = (" + varType + ")in[" + num + "];\n";
+                s += var.toString() + " = (" + varType + ")in[" + num + "];\n";
             } else {
-                s = var.toString()
+                s += var.toString()
                     + " = ((" + token.getObjType() + ")in[" + num + "])."
                     + token.getMethod() + "();\n";
             }
         } else {
             if ( token == TOKEN_OBJECT ) {
-                s = "return new Object[]{ " + var.toString() + "};\n";
+                s += "return new Object[]{ " + var.toString() + "};\n";
             } else {
-                s = "return new Object[]{ new "
+                s += "return new Object[]{ new "
                     + token.getObjType() + "( " + var.toString() + " )" + "};\n";
             }
         }
 
         return s;
+    }
+
+    private static final String ALIASTMP = "ALIASTMP";
+    private static int ALIASTMP_NR = 0;
+
+    private String getAliasSubtaskInput( Alias alias, String offset, int num ) {
+
+        String aliasType = alias.getRealType();
+        String aliasTmp = ALIASTMP + ALIASTMP_NR++;
+        String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType
+                     + ")in[" + num + "];\n";
+
+        ClassField var;
+        for ( int i = 0; i < alias.vars.size(); i++ ) {
+            var = ( ClassField ) alias.vars.get( i );
+            out += offset + var.name + " = " + aliasTmp + "[" + i + "];\n";
+        }
+        return out;
+    }
+
+    String getAliasSubtaskOutput( Alias alias, String offset ) {
+        if(alias.vars.size() == 0) {
+            return offset + "return new Object[]{ }";
+        }
+
+        String aliasTmp = ALIASTMP + ALIASTMP_NR++;
+        String aliasType = alias.getRealType();
+        String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
+
+        ClassField var;
+        for ( int i = 0; i < alias.vars.size(); i++ ) {
+            var = ( ClassField ) alias.vars.get( i );
+            if ( i == 0 ) {
+                out += var.name;
+            } else {
+                out += ", " + var.name;
+            }
+        }
+        out += " };\n";
+
+        return out;
     }
 
     private static class TypeToken {
