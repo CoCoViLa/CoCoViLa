@@ -313,9 +313,7 @@ class IconMouseOps
 			editor.shapeList.add(arc);
 			setState(State.selection);
 		}
-
-				// editor.repaint();
-		// LISTEN RIGHT MOUSE BUTTON
+   	    // LISTEN RIGHT MOUSE BUTTON
 		if (SwingUtilities.isRightMouseButton(e)) {
 			popupMenuListener(x, y);
 		} // END OF LISTENING RIGHT MOUSE BUTTON
@@ -540,7 +538,6 @@ class IconMouseOps
 			final int width = Math.abs(editor.mouseX - x);
 			final int height = Math.abs(editor.mouseY - y);
 			g.drawRect(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height);
-			//g.drawArc(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height, 0, 180);
 			editor.mouseX = x;
 			editor.mouseY = y;
 		} else if (state.equals(State.drawText)) {
@@ -724,19 +721,14 @@ class IconMouseOps
 					height, color.getRGB(), fill,
 					strokeWidth, getTransparency());
 				editor.shapeList.add(oval);
-				// editor.repaint();
 			} else if (state.equals(State.drawArc) || state.equals(State.drawFilledArc)) {
 				arcWidth = Math.abs(editor.mouseX - startX);
 				arcHeight = Math.abs(editor.mouseY - startY);
                 setState(State.drawArc1);
-				//Arc arc = new Arc(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width, height, 0, 180, color.getRGB(), fill, strokeWidth, getTransparency());
-				//editor.shapeList.add(arc);
-				// editor.repaint();
 			} else if (state.equals(State.drawLine)) {
 				Line line = new Line(startX, startY, editor.mouseX, editor.mouseY,
 					color.getRGB(), strokeWidth, getTransparency());
 				editor.shapeList.add(line);
-				// editor.repaint();
 			} else if (state.equals(State.resize)) {
 				state = State.selection;
 			} else if (state.equals(State.freehand)) {
