@@ -300,11 +300,6 @@ public class SchemeLoader {
 							shape = (Shape) relObj.shapes.get(i);
 							relObj.shapes.set(i, shape.clone());
 						}
-
-						relObj.startPort = ((Port) relObj.ports.get(0));
-						relObj.endPort = (Port) relObj.ports.get(1);
-
-
 					}
 				}
 			}
@@ -318,10 +313,11 @@ public class SchemeLoader {
 					if (obj instanceof RelObj) {
                         Port port = (Port)obj.ports.get(0);
 						Connection con = (Connection)port.connections.get(0);
-						((RelObj)obj).startPort.obj = con.beginPort.obj;
+						((RelObj)obj).startPort = con.beginPort;
+						//((RelObj)obj).startPort.obj = con.beginPort.obj;
 						port = (Port)obj.ports.get(1);
 						con = (Connection)port.connections.get(0);
-                        ((RelObj)obj).endPort.obj = con.endPort.obj;
+                        ((RelObj)obj).endPort = con.endPort;
 
 					}
 				}

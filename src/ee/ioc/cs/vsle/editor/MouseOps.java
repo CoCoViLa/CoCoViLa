@@ -393,7 +393,7 @@ class MouseOps
 					if (selectedObjs.contains(relation.endPort.obj) && selectedObjs.contains(relation.beginPort.obj)) {
 						relation.calcAllBreakPoints();
 					} else if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
-						relation.calcAllBreakPoints();
+						relation.calcEndBreakPoints();
 					}
 
 				}
