@@ -43,6 +43,7 @@ public class Planner {
         }
         m_problem.getAxioms().removeAll( removableAxioms );
         //invoke linear planning
+		 db.p(m_problem.toString());
         if ( linearForwardSearch( m_problem, computeAll, false, false ) &&
              !computeAll ) {
             return m_problem.algorithm;

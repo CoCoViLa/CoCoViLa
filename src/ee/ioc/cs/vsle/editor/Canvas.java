@@ -437,6 +437,13 @@ public class Canvas extends JPanel implements ActionListener {
 	}
 
 
+	public void saveSchemeAsClass(String classText) {
+		ObjectPropertiesEditor prop = new ObjectPropertiesEditor((GObj) objects.getSelected().get(0), this);
+		prop.pack();
+		prop.setVisible(true);
+
+	}
+
 	/**
 	 * Open the object properties dialog.
 	 */

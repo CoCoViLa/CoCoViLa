@@ -41,11 +41,11 @@ public class Alias extends ClassField {
 
 			if (var != null) {
 				vars.add(var);
-			} else if (input[i].indexOf(".") >= 1) {
+			} else if (input[i].indexOf(".") >= 1 && !input[i].startsWith("*.")) {
 				String[] split = input[i].trim().split("\\.", -1);
 				ClassField thisVar = getVar(split[0], varList);
 				AnnotatedClass ac = classList.getType(thisVar.type);
-                String newType = "";
+				String newType = "";
 				for (int k = 1; k < split.length; k++) {
 					ClassField cf = classList.getType(thisVar.type).getFieldByName(split[k]);
 					if (cf != null) {
@@ -56,7 +56,7 @@ public class Alias extends ClassField {
 
 
 				ClassField cfNew = new ClassField();
-                cfNew.type = newType;
+				cfNew.type = newType;
 				cfNew.name = input[i];
 				vars.add(cfNew);
 			} else if (input[i].startsWith("*.")) {
@@ -69,14 +69,6 @@ public class Alias extends ClassField {
 		}
 	} // addAll
 
-	private String getType(String str, ArrayList varList, ClassList classList) {
-		String[] list = str.trim().split(".", -1);
-		for (int k = 0; k < list.length - 1; k++) {
-			String varName = list[k];
-
-		}
-		return null;
-	}
 
 	/**
 	 * Converts the ee.ioc.cs.editor.vclass.Alias into string, returning the alias's name.
@@ -100,6 +92,25 @@ public class Alias extends ClassField {
 		}
 		return type;
 	} // getAliasType
+
+	public String getRealType() {
+		String type = null;
+
+		ClassField cf1, cf2;
+		for (int i = 0; i < vars.size(); i++) {
+			cf1 = (ClassField) vars.get(i);
+			if (vars.size() > 1) {
+				cf2 = (ClassField) vars.get(i + 1);
+				if (!cf1.type.equals(cf2.type)) {
+					return getAliasType();
+				}
+			} else
+				type = cf1.type+"[]";
+
+		}
+		return type;
+	}
+
 
 	/**
 	 * Returns a variable defined by the varName method input parameter from

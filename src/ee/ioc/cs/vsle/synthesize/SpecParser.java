@@ -5,6 +5,7 @@ import ee.ioc.cs.vsle.util.db;
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
+
 import ee.ioc.cs.vsle.vclass.*;
 //import ee.ioc.cs.vsle.util.db;
 //import ee.ioc.cs.vsle.ccl.*;
@@ -27,16 +28,14 @@ public class SpecParser {
 			ArrayList a = p.getSpec(p.refineSpec(s));
 
 			while (!a.isEmpty()) {
-				if (! (a.get(0)).equals("")) {
+				if (!(a.get(0)).equals("")) {
 					db.p(p.getLine(a));
-				}
-				else {
+				} else {
 					a.remove(0);
 
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			db.p(e);
 		}
 	}
@@ -51,7 +50,7 @@ public class SpecParser {
 		BufferedReader in = new BufferedReader(new FileReader(fileName));
 		String lineString, fileString = new String();
 
-		while ( (lineString = in.readLine()) != null) {
+		while ((lineString = in.readLine()) != null) {
 			fileString += lineString;
 		}
 		in.close();
@@ -83,7 +82,7 @@ public class SpecParser {
 		Matcher matcher2;
 		Pattern pattern;
 
-		while ( (a.get(0)).equals("")) {
+		while ((a.get(0)).equals("")) {
 			a.remove(0);
 			if (a.isEmpty()) {
 				return null;
@@ -99,8 +98,7 @@ public class SpecParser {
 				String returnLine = matcher2.group(1) + ":" + matcher2.group(2);
 
 				return new LineType(5, returnLine);
-			}
-			else {
+			} else {
 				return new LineType(10, line);
 			}
 		} // Extract on solve equations
@@ -109,46 +107,39 @@ public class SpecParser {
 			matcher2 = pattern.matcher(line);
 			if (matcher2.find()) {
 				return new LineType(2, matcher2.group(1) + ":" + matcher2.group(2));
-			}
-			else {
+			} else {
 
 				pattern = Pattern.compile(" *([^=]+) *= *([-_0-9a-zA-Z.()\\+\\*/^ ]+) *$");
 				matcher2 = pattern.matcher(line);
 				if (matcher2.find()) {
 					return new LineType(4, line);
-				}
-				else {
+				} else {
 					return new LineType(10, line);
 				}
 
 			}
 
-		}
-		else if (line.indexOf("->") >= 0) {
+		} else if (line.indexOf("->") >= 0) {
 			pattern = Pattern.compile("(.*) *-> *(.+) *\\{(.+)\\}");
 			matcher2 = pattern.matcher(line);
 			if (matcher2.find()) {
 				return new LineType(3, line);
-			}
-			else { // check if its an axiom without method specification
+			} else { // check if its an axiom without method specification
 				pattern = Pattern.compile("(.*) *-> *([ -_a-zA-Z0-9.,]+) *$");
 				matcher2 = pattern.matcher(line);
 				if (matcher2.find()) {
 					return new LineType(6, line);
 
-				}
-				else {
+				} else {
 					return new LineType(10, line);
 				}
 			}
-		}
-		else {
+		} else {
 			pattern = Pattern.compile("^ *([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])?) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)");
 			matcher2 = pattern.matcher(line);
 			if (matcher2.find()) {
 				return new LineType(1, matcher2.group(1) + ":" + matcher2.group(3));
-			}
-			else {
+			} else {
 				return new LineType(10, line);
 			}
 		}
@@ -186,124 +177,137 @@ public class SpecParser {
 	 @param caller caller, or the "parent" of the current object. The objects name will be caller + . + obj.name
 	 @param problem the problem itself (needed because of recursion).
 	 */
-        Problem makeProblem( ClassList classes, String type, String caller, Problem problem ) throws
-                SpecParseException {
-            // ee.ioc.cs.editor.util.db.p("CLASSES: "+classes);
-            // ee.ioc.cs.editor.util.db.p("TYPE: "+type);
-            AnnotatedClass ac = classes.getType( type );
-            ClassField cf = null;
-            ClassRelation classRelation;
-            Var var, var1, var2;
-            Rel rel;
-            HashSet relSet = new HashSet();
+	Problem makeProblem(ClassList classes, String type, String caller, Problem problem) throws
+		SpecParseException {
+		// ee.ioc.cs.editor.util.db.p("CLASSES: "+classes);
+		// ee.ioc.cs.editor.util.db.p("TYPE: "+type);
+		AnnotatedClass ac = classes.getType(type);
+		ClassField cf = null;
+		ClassRelation classRelation;
+		Var var, var1, var2;
+		Rel rel;
+		HashSet relSet = new HashSet();
 
-            for ( int j = 0; j < ac.fields.size(); j++ ) {
-                cf = ( ClassField ) ac.fields.get( j );
-                if ( classes.getType( cf.type ) != null ) {
-                    problem = makeProblem( classes, cf.type, caller + "." + cf.name, problem );
-                }
-                var = new Var();
-                var.setObj( caller );
-                var.setField( cf );
-                var.setName( cf.name );
-                var.setType( cf.type );
-                problem.addVar( var );
-            }
+		for (int j = 0; j < ac.fields.size(); j++) {
+			cf = (ClassField) ac.fields.get(j);
+			if (classes.getType(cf.type) != null) {
+				problem = makeProblem(classes, cf.type, caller + "." + cf.name, problem);
+			}
+			var = new Var();
+			var.setObj(caller);
+			var.setField(cf);
+			var.setName(cf.name);
+			var.setType(cf.type);
+			problem.addVar(var);
+		}
 
-            for ( int j = 0; j < ac.classRelations.size(); j++ ) {
-                classRelation = ( ClassRelation ) ac.classRelations.get( j );
-                cf = null;
-                String obj = caller;
+		for (int j = 0; j < ac.classRelations.size(); j++) {
+			classRelation = (ClassRelation) ac.classRelations.get(j);
+			cf = null;
+			String obj = caller;
 
-                rel = new Rel();
-                boolean isAliasRel = false;
+			rel = new Rel();
+			boolean isAliasRel = false;
 
-                /* If we have a relation alias = alias, we rewrite it into new relations, ie we create
-                 a relation for each component of the alias structure*/
-                if ( classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1 ) {
-                    ClassField cf1 = ( ClassField ) classRelation.inputs.get( 0 );
-                    ClassField cf2 = ( ClassField ) classRelation.outputs.get( 0 );
 
-                    if ( problem.getAllVars().containsKey( obj + "." + cf1.name ) ) {
-                        Var v1 = ( Var ) problem.getAllVars().get( obj + "." + cf1.name );
-                        Var v2 = ( Var ) problem.getAllVars().get( obj + "." + cf2.name );
 
-                        if ( v1.field.isAlias() && v2.field.isAlias() ) {
-                            db.p( ( ( Alias ) v1.field ).getAliasType() + " " +
-                                  ( ( Alias ) v2.field ).getAliasType() );
-                            if ( !( ( Alias ) v1.field ).getAliasType().equals( ( ( Alias ) v2.field ).
-                                    getAliasType() ) ) {
-                                throw new AliasException( "Differently typed aliases connected: " + obj +
-                                        "." + cf1.name + " and " + obj + "." + cf2.name );
-                            }
-                            isAliasRel = true;
-                            for ( int i = 0; i < v1.field.vars.size(); i++ ) {
-                                String s1 = ( ( ClassField ) v1.field.vars.get( i ) ).name;
-                                String s2 = ( ( ClassField ) v2.field.vars.get( i ) ).name;
 
-                                var1 = ( Var ) problem.getAllVars().get( v1.object + "." + s1 );
-                                var2 = ( Var ) problem.getAllVars().get( v2.object + "." + s2 );
-                                rel = new Rel();
-                                rel.setUnknownInputs( classRelation.inputs.size() );
-                                rel.setSubtaskFlag( classRelation.subtasks.size() );
-                                rel.setObj( obj );
-                                rel.setType( 5 );
+			/* If we have a relation alias = alias, we rewrite it into new relations, ie we create
+			 a relation for each component of the alias structure*/
+			if (classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1) {
+				ClassField cf1 = (ClassField) classRelation.inputs.get(0);
+				ClassField cf2 = (ClassField) classRelation.outputs.get(0);
 
-                                rel.addInput( var2 );
-                                rel.addOutput( var1 );
-                                var2.addRel( rel );
-                                problem.addRel( rel );
-                            }
-                        }
-                    }
-                }
+				//if we have a relation alias = *.sth, we need to find out what it actually is
+				if (cf1.name.startsWith("*.")) {
+					String s = checkIfAliasWildcard(classRelation);
+					if (s != null) {
+						rel = makeAliasWildcard(ac, classes, classRelation, problem, obj, s);
+                        problem.addRel(rel);
+						isAliasRel = true;
+					}
+				}
 
-                if ( !isAliasRel ) {
-                    String s = checkIfRightWildcard( classRelation );
-                    if ( s != null ) {
-                        relSet = makeRightWildcardRel( ac, classes, classRelation, problem, obj, s );
-                        rel = null;
-                    } else
-                        rel = makeRel( classRelation, problem, obj );
-                    if ( classRelation.subtasks.size() > 0 ) {
-                        Rel subtaskRel = new Rel();
+				if (problem.getAllVars().containsKey(obj + "." + cf1.name)) {
+					Var v1 = (Var) problem.getAllVars().get(obj + "." + cf1.name);
+					Var v2 = (Var) problem.getAllVars().get(obj + "." + cf2.name);
 
-                        for ( int l = 0; l < classRelation.subtasks.size(); l++ ) {
-                            ClassRelation subtask = ( ClassRelation ) classRelation.subtasks.get( l );
-                            subtaskRel = makeRel( subtask, problem, obj );
-                            if ( rel != null ) {
-                                rel.addSubtask( subtaskRel );
-                            } else {
-                                Iterator varsIter = relSet.iterator();
-                                while ( varsIter.hasNext() ) {
-                                    Rel r = ( Rel ) varsIter.next();
-                                    r.addSubtask( subtaskRel );
-                                }
-                            }
-                        }
-                    }
-                }
+					if (v1.field.isAlias() && v2.field.isAlias()) {
+						db.p(((Alias) v1.field).getAliasType() + " " +
+							((Alias) v2.field).getAliasType());
+						if (!((Alias) v1.field).getAliasType().equals(((Alias) v2.field).
+							getAliasType())) {
+							throw new AliasException("Differently typed aliases connected: " + obj +
+								"." + cf1.name + " and " + obj + "." + cf2.name);
+						}
+						isAliasRel = true;
+						for (int i = 0; i < v1.field.vars.size(); i++) {
+							String s1 = ((ClassField) v1.field.vars.get(i)).name;
+							String s2 = ((ClassField) v2.field.vars.get(i)).name;
 
-                // if it is not a "real" relation (type 7), we just set the result as target, and inputs as known variables
-                if ( classRelation.type == 7 ) {
-                    setTargets( problem, classRelation, obj );
-                } else if (rel != null && classRelation.inputs.isEmpty() && rel.subtaskFlag == 0 ) { // if class relation doesnt have inputs, its an axiom
-                    problem.addAxiom( rel );
-                }
-                //else if (classRelation.inputs.isEmpty() && rel.subtaskFlag > 0) {
-                else if ( rel != null && rel.subtaskFlag > 0 ) {
-                    problem.addSubtaskRel( rel );
-                } else {
-                    if ( rel != null && rel.getSubtasks().size() == 0 ) {
-                        problem.addRel( rel );
-                    } else {
-                        problem.addAllRels( relSet );
-                    }
-                }
+							var1 = (Var) problem.getAllVars().get(v1.object + "." + s1);
+							var2 = (Var) problem.getAllVars().get(v2.object + "." + s2);
+							rel = new Rel();
+							rel.setUnknownInputs(classRelation.inputs.size());
+							rel.setSubtaskFlag(classRelation.subtasks.size());
+							rel.setObj(obj);
+							rel.setType(5);
 
-            }
-            return problem;
-        }
+							rel.addInput(var2);
+							rel.addOutput(var1);
+							var2.addRel(rel);
+							problem.addRel(rel);
+						}
+					}
+				}
+			}
+
+			if (!isAliasRel) {
+				String s = checkIfRightWildcard(classRelation);
+				if (s != null) {
+					relSet = makeRightWildcardRel(ac, classes, classRelation, problem, obj, s);
+					rel = null;
+				} else
+					rel = makeRel(classRelation, problem, obj);
+				if (classRelation.subtasks.size() > 0) {
+					Rel subtaskRel = new Rel();
+
+					for (int l = 0; l < classRelation.subtasks.size(); l++) {
+						ClassRelation subtask = (ClassRelation) classRelation.subtasks.get(l);
+						subtaskRel = makeRel(subtask, problem, obj);
+						if (rel != null) {
+							rel.addSubtask(subtaskRel);
+						} else {
+							Iterator varsIter = relSet.iterator();
+							while (varsIter.hasNext()) {
+								Rel r = (Rel) varsIter.next();
+								r.addSubtask(subtaskRel);
+							}
+						}
+					}
+				}
+			}
+
+			// if it is not a "real" relation (type 7), we just set the result as target, and inputs as known variables
+			if (classRelation.type == 7) {
+				setTargets(problem, classRelation, obj);
+			} else if (rel != null && classRelation.inputs.isEmpty() && rel.subtaskFlag == 0) { // if class relation doesnt have inputs, its an axiom
+				problem.addAxiom(rel);
+			}
+			//else if (classRelation.inputs.isEmpty() && rel.subtaskFlag > 0) {
+			else if (rel != null && rel.subtaskFlag > 0) {
+				problem.addSubtaskRel(rel);
+			} else {
+				if (rel != null && rel.getSubtasks().size() == 0) {
+					problem.addRel(rel);
+				} else {
+					problem.addAllRels(relSet);
+				}
+			}
+
+		}
+		return problem;
+	}
 
 	private void isRightWildcard(ClassRelation classRelation, AnnotatedClass ac, ClassList classes, String type) {
 		ClassField cf;
@@ -313,9 +317,16 @@ public class SpecParser {
 	}
 
 	private String checkIfRightWildcard(ClassRelation classRelation) {
-		String s =   ((ClassField)classRelation.outputs.get(0)).name;
-		if(s.startsWith("*."))
-        	return s.substring(2);
+		String s = ((ClassField) classRelation.outputs.get(0)).name;
+		if (s.startsWith("*."))
+			return s.substring(2);
+		return null;
+	}
+
+	private String checkIfAliasWildcard(ClassRelation classRelation) {
+		String s = ((ClassField) classRelation.inputs.get(0)).name;
+		if (s.startsWith("*."))
+			return s.substring(2);
 		return null;
 	}
 
@@ -335,8 +346,7 @@ public class SpecParser {
 			if (problem.getAllVars().containsKey(obj + "." + cf.name)) {
 				var = (Var) problem.getAllVars().get(obj + "." + cf.name);
 				problem.addKnown(var);
-			}
-			else {
+			} else {
 				throw new UnknownVariableException(cf.name);
 			}
 		}
@@ -345,8 +355,7 @@ public class SpecParser {
 			if (problem.getAllVars().containsKey(obj + "." + cf.name)) {
 				var = (Var) problem.getAllVars().get(obj + "." + cf.name);
 				problem.addTarget(var);
-			}
-			else {
+			} else {
 				throw new UnknownVariableException(cf.name);
 			}
 		}
@@ -355,7 +364,7 @@ public class SpecParser {
 
 
 	HashSet makeRightWildcardRel(AnnotatedClass ac, ClassList classes, ClassRelation classRelation, Problem problem, String obj, String wildcardVar) throws UnknownVariableException {
-        ClassField clf;
+		ClassField clf;
 		HashSet set = new HashSet();
 		for (int i = 0; i < ac.fields.size(); i++) {
 			clf = (ClassField) ac.fields.get(i);
@@ -379,20 +388,19 @@ public class SpecParser {
 							var = (Var) problem.getAllVars().get(obj + "." + cf.name);
 							var.addRel(rel);
 							rel.addInput(var);
-						}
-						else {
+						} else {
 							throw new UnknownVariableException(cf.name);
 						}
 					}
 					for (int k = 0; k < classRelation.outputs.size(); k++) {
-						if (k==0) {
-							if (problem.getAllVars().containsKey(obj + "." + clf.name+"."+wildcardVar)) {
-								var = (Var) problem.getAllVars().get(obj + "." + clf.name+"."+wildcardVar);
+						if (k == 0) {
+							if (problem.getAllVars().containsKey(obj + "." + clf.name + "." + wildcardVar)) {
+								var = (Var) problem.getAllVars().get(obj + "." + clf.name + "." + wildcardVar);
 								rel.addOutput(var);
 							} else {
-								throw new UnknownVariableException(obj + "." + clf.name+"."+wildcardVar);
+								throw new UnknownVariableException(obj + "." + clf.name + "." + wildcardVar);
 							}
-						} else{
+						} else {
 							cf = (ClassField) classRelation.outputs.get(k);
 							if (problem.getAllVars().containsKey(obj + "." + cf.name)) {
 								var = (Var) problem.getAllVars().get(obj + "." + cf.name);
@@ -410,6 +418,41 @@ public class SpecParser {
 		return set;
 	}
 
+
+	Rel makeAliasWildcard(AnnotatedClass ac, ClassList classes, ClassRelation classRelation, Problem problem, String obj, String wildcardVar) throws UnknownVariableException {
+		ClassField clf;
+
+		Rel rel = new Rel();
+		rel.setMethod(classRelation.method);
+		rel.setObj(obj);
+		rel.setType(classRelation.type);
+		for (int i = 0; i < ac.fields.size(); i++) {
+			clf = (ClassField) ac.fields.get(i);
+			AnnotatedClass anc = classes.getType(clf.type);
+			if (anc != null) {
+				if (anc.hasField(wildcardVar)) {
+					Var var;
+					ClassField cf;
+					if (problem.getAllVars().containsKey(obj + "." + clf.name + "." + wildcardVar)) {
+						var = (Var) problem.getAllVars().get(obj + "." + clf.name + "." + wildcardVar);
+						var.addRel(rel);
+						rel.addInput(var);
+					} else {
+						throw new UnknownVariableException(obj + "." + clf.name + "." + wildcardVar);
+					}
+
+
+				}
+			}
+		}
+		ClassField cf = (ClassField) classRelation.outputs.get(0);
+		if (problem.getAllVars().containsKey(obj + "." + cf.name)) {
+			rel.addOutput((Var)problem.getAllVars().get(obj + "." + cf.name));
+		}
+
+		rel.setUnknownInputs(rel.inputs.size());
+		return rel;
+	}
 
 
 	/**
@@ -436,8 +479,7 @@ public class SpecParser {
 				var = (Var) problem.getAllVars().get(obj + "." + cf.name);
 				var.addRel(rel);
 				rel.addInput(var);
-			}
-			else {
+			} else {
 				throw new UnknownVariableException(cf.name);
 			}
 		}
@@ -446,17 +488,16 @@ public class SpecParser {
 			if (problem.getAllVars().containsKey(obj + "." + cf.name)) {
 				var = (Var) problem.getAllVars().get(obj + "." + cf.name);
 				rel.addOutput(var);
-			}
-			else {
+			} else {
 				throw new UnknownVariableException(cf.name);
 			}
 		}
-                for (int k = 0; k < classRelation.exceptions.size(); k++ ) {
-                    cf = (ClassField) classRelation.exceptions.get(k);
-                    Var ex = new Var();
-                    ex.name = cf.type;
-                    rel.exceptions.add(ex);
-                }
+		for (int k = 0; k < classRelation.exceptions.size(); k++) {
+			cf = (ClassField) classRelation.exceptions.get(k);
+			Var ex = new Var();
+			ex.name = cf.type;
+			rel.exceptions.add(ex);
+		}
 
 		return rel;
 	}
@@ -497,8 +538,7 @@ public class SpecParser {
 						annClass.addClassRelation(classRelation);
 						db.p(classRelation);
 
-					}
-					else if (lt.type == declaration) {
+					} else if (lt.type == declaration) {
 						split = lt.specLine.split(":", -1);
 						String[] vs = split[1].trim().split(" *, *", -1);
 						String type = split[0].trim();
@@ -531,8 +571,7 @@ public class SpecParser {
 							vars.add(var);
 						}
 
-					}
-					else if (lt.type == alias) {
+					} else if (lt.type == alias) {
 						split = lt.specLine.split(":", -1);
 						String[] list = split[1].trim().split(" *, *", -1);
 						String name = split[0];
@@ -547,16 +586,16 @@ public class SpecParser {
 						classRelation.setOutput(name, vars);
 						annClass.addClassRelation(classRelation);
 						db.p(classRelation);
+						if (!list[0].startsWith("*")) {
+							classRelation = new ClassRelation(4);
+							classRelation.addOutputs(list, vars);
+							classRelation.setMethod("alias");
+							classRelation.setInput(name, vars);
+							annClass.addClassRelation(classRelation);
+							db.p(classRelation);
+						}
 
-						classRelation = new ClassRelation(4);
-						classRelation.addOutputs(list, vars);
-						classRelation.setMethod("alias");
-						classRelation.setInput(name, vars);
-						annClass.addClassRelation(classRelation);
-						db.p(classRelation);
-
-					}
-					else if (lt.type == equation) {
+					} else if (lt.type == equation) {
 						EquationSolver.solve(lt.specLine);
 						for (int i = 0; i < EquationSolver.relations.size(); i++) {
 							String result = (String) EquationSolver.relations.get(i);
@@ -584,8 +623,7 @@ public class SpecParser {
 							db.p("Equation: " + classRelation);
 
 						}
-					}
-					else if (lt.type == axiom) {
+					} else if (lt.type == axiom) {
 						pattern = Pattern.compile("\\[([^\\]\\[]*) *-> *([^\\]\\[]*)\\]");
 						matcher2 = pattern.matcher(lt.specLine);
 
@@ -602,7 +640,7 @@ public class SpecParser {
 							String[] outputs = matcher2.group(2).trim().split(" *, *", -1);
 
 							if (!outputs[0].equals("")) {
-								if (outputs[0].indexOf("*")>=0) {
+								if (outputs[0].indexOf("*") >= 0) {
 									getWildCards(classList, outputs[0]);
 								}
 
@@ -632,8 +670,7 @@ public class SpecParser {
 							annClass.addClassRelation(classRelation);
 						}
 
-					}
-					else if (lt.type == specaxiom) {
+					} else if (lt.type == specaxiom) {
 						pattern = Pattern.compile("(.*) *-> *([-_a-zA-Z0-9.,]+) *$");
 						matcher2 = pattern.matcher(lt.specLine);
 						if (matcher2.find()) {
@@ -652,15 +689,13 @@ public class SpecParser {
 							db.p(classRelation);
 							annClass.addClassRelation(classRelation);
 						}
-					}
-					else if (lt.type == error) {
+					} else if (lt.type == error) {
 						throw new LineErrorException(lt.specLine);
 					}
 				}
 			}
-		}
-		catch (UnknownVariableException uve) {
-				uve.printStackTrace();
+		} catch (UnknownVariableException uve) {
+			uve.printStackTrace();
 			throw new UnknownVariableException(className + "." + uve.excDesc);
 
 		}
@@ -670,7 +705,7 @@ public class SpecParser {
 	}
 
 	private void getWildCards(ClassList classList, String output) {
-        String list[] = output.split("\\.");
+		String list[] = output.split("\\.");
 		for (int i = 0; i < list.length; i++) {
 			db.p(list[i]);
 		}
@@ -693,12 +728,11 @@ public class SpecParser {
 				if (lt.type == assignment) {
 					split = lt.specLine.split(":", -1);
 					for (int i = 0; i < vars.size(); i++) {
-						if ( ( (ClassField) vars.get(i)).name.equals(split[0])) {
-							 ( (ClassField) vars.get(i)).value = split[1];
+						if (((ClassField) vars.get(i)).name.equals(split[0])) {
+							((ClassField) vars.get(i)).value = split[1];
 						}
 					}
-				}
-				else if (lt.type == declaration) {
+				} else if (lt.type == declaration) {
 					split = lt.specLine.split(":", -1);
 					String[] vs = split[1].trim().split(" *, *", -1);
 					String type = split[0].trim();
@@ -719,7 +753,7 @@ public class SpecParser {
 			BufferedReader in = new BufferedReader(new FileReader(RuntimeProperties.packageDir + file + ".java"));
 			String lineString, fileString = new String();
 
-			while ( (lineString = in.readLine()) != null) {
+			while ((lineString = in.readLine()) != null) {
 				fileString += lineString;
 			}
 			in.close();
@@ -727,8 +761,7 @@ public class SpecParser {
 
 				return true;
 			}
-		}
-		catch (IOException ioe) {
+		} catch (IOException ioe) {
 			db.p(ioe);
 		}
 		return false;
