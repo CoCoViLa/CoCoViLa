@@ -286,12 +286,12 @@ public class GObj implements Serializable, Cloneable {
 			ClassField field = (ClassField)fields.get(i);
 
 			if (field.defaultGraphics != null) {
-				field.defaultGraphics.draw(xModifier ,
-					yModifier, getXsize(), getYsize(), g);
+				field.defaultGraphics.drawSpecial(xModifier ,
+					yModifier, getXsize(), getYsize(), g, field.name, field.value);
 			}
 			if (field.isKnown() && field.knownGraphics !=null) {
-				field.knownGraphics.draw(xModifier,
-					yModifier, getXsize(), getYsize(), g);
+				field.knownGraphics.drawSpecial(xModifier,
+					yModifier, getXsize(), getYsize(), g, field.name, field.value);
 			}
 		}
 

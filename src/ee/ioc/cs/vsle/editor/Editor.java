@@ -391,7 +391,7 @@ public class Editor extends JFrame {
 				Point p = (Point) currentCon.breakPoints.get(
 					currentCon.breakPoints.size() - 1);
 				g2.drawLine(p.x, p.y, mouseX, mouseY);
-			} else if (firstPort != null && mListener.state.startsWith("??")) {
+			} else if (firstPort != null && mListener.state.startsWith("??") && currentObj != null) {
 				double angle = VMath.calcAngle(firstPort.getRealX(), firstPort.getRealY(), mouseX, mouseY);
 				currentObj = (RelObj) currentObj;
 				((RelObj) currentObj).angle = angle;
@@ -399,7 +399,7 @@ public class Editor extends JFrame {
 				currentObj.y = firstPort.getRealY();
 				currentObj.x = firstPort.getRealX();
 				currentObj.drawClassGraphics(g2);
-			} else if (currentObj != null && !mListener.state.startsWith("??")) {
+			} else if (currentObj != null && !mListener.state.startsWith("?")) {
 				// ee.ioc.cs.editor.vclass.PackageClass pClass = (ee.ioc.cs.editor.vclass.PackageClass)classes.get(currentObj.name);
 				g2.setColor(Color.black);
 				currentObj.drawClassGraphics(g2);

@@ -1,5 +1,8 @@
 package ee.ioc.cs.vsle.vclass;
 
+import ee.ioc.cs.vsle.graphics.Shape;
+import ee.ioc.cs.vsle.graphics.Text;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
@@ -178,4 +181,38 @@ public class ClassField implements Cloneable, Serializable {
 		}
 		return true;
 	}
+    /**
+	 * The method updates the graphics, changing Text fields with *self or *selfWithName values
+	 * to real field values, to be shown as visual feedback in the scheme editor.
+
+
+	public void updateGraphics() {
+		if (knownGraphics != null) {
+			Shape s;
+			for (int i=0; i < knownGraphics.shapes.size(); i++) {
+				s = (Shape)knownGraphics.shapes.get(i);
+				if (s instanceof Text) {
+					if (((Text)s).name.equals("self"))
+						((Text)s).stringValue = value;
+					else if (((Text)s).name.equals("selfName"))
+						((Text)s).stringValue = name +" = "+value;
+
+				}
+			}
+		}
+		if (defaultGraphics != null) {
+			for (int i=0; i < defaultGraphics.shapes.size(); i++) {
+				Shape s;
+				s = (Shape)knownGraphics.shapes.get(i);
+				if (s instanceof Text) {
+					if (((Text)s).name.equals("self"))
+						((Text)s).stringValue = value;
+					else if (((Text)s).name.equals("selfName"))
+						((Text)s).stringValue = name +" = "+value;
+
+				}
+			}
+		}
+
+	}*/
 }

@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.graphics.Shape;
+import ee.ioc.cs.vsle.graphics.Text;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -87,5 +88,31 @@ public class ClassGraphics implements Serializable {
 		}
 
 	} // draw
+
+	void drawSpecial(int xPos, int yPos, float Xsize, float Ysize, Graphics g, String name, String value) {
+		Shape s;
+        Graphics2D g2 = (Graphics2D) g;
+
+		if (relation) {
+			g2.translate(xPos, yPos);
+			g2.rotate(angle);
+			g2.translate(-1*(xPos), -1*(yPos));
+		}
+
+		for (int i = 0; i < shapes.size(); i++) {
+			s = (Shape) shapes.get(i);
+			if (s instanceof Text)
+				((Text)s).drawSpecial(xPos, yPos, Xsize, Ysize, g, name, value);
+			else
+				s.draw(xPos, yPos, Xsize, Ysize, g);
+		}
+		if (relation) {
+			g2.translate(xPos, yPos);
+			g2.rotate(-1*angle);
+			g2.translate(-1*(xPos), -1*(yPos));
+		}
+
+	} // draw
+
 
 }

@@ -35,6 +35,7 @@ public class PackageParser {
 	String element;
 	String path;
 	ArrayList classFields;
+	boolean classIsRelation;
 	final int CLASS = 1, PORT_OPEN = 2, PORT_CLOSED = 3, PACKAGE= 4, FIELD = 5, FIELD_KNOWN = 6;
 
 	/**
@@ -93,7 +94,7 @@ public class PackageParser {
 			db.p(
 				"\n** Parsing error, line " + spe.getLineNumber() + ", uri "
 				+ spe.getSystemId());
-			db.p("   " + spe.getMessage());
+			//db.p("   " + spe.getMessage());
 
 			// Use the contained exception, if any
 			Exception x = spe;
@@ -121,6 +122,11 @@ public class PackageParser {
 			}
 			if (element.equals("class")) {
 				status = CLASS;
+                String type = attrs.getValue("type");
+                classIsRelation = false;
+ 				if (type != null && type.equals("relation")) {
+					classIsRelation = true;
+				}
 			}
 			if (element.equals("graphics")) {
 				newGraphics = new ClassGraphics();
@@ -183,19 +189,17 @@ public class PackageParser {
 				int fontStyle = Integer.parseInt(attrs.getValue("fontstyle"));
 				int fontSize = Integer.parseInt(attrs.getValue("fontsize"));
 
-				db.p(
-					"string=" + str + ",colorInt=" + colorInt + ",x=" + x + ",y="
-					+ y + ",fontName=" + fontName + ",fontStyle=" + fontStyle
-					+ ",fontSize=" + fontSize);
+
 				Font font = new Font(fontName, fontStyle, fontSize);
 
-				db.p("Font " + font + " created.");
 				Text newText = new Text(x, y, font, new Color(colorInt), 0.0,
 					str);
-
-				db.p("ee.ioc.cs.editor.graphics.Text " + newText + " created.");
+                /*if (str.equals("*self"))
+					newText.name = "self";
+				else if (str.equals("*selfWithName"))
+					newText.name = "selfName";*/
 				newGraphics.addShape(newText);
-				db.p("ee.ioc.cs.editor.graphics.Text added to graphics.");
+
 			}
 
 			if (element.equals("line")) {
@@ -330,7 +334,11 @@ public class PackageParser {
 					newPort.closedGraphics = newGraphics;
 				} else {
 					//newGraphics.packageClass = newClass;
+					if (classIsRelation) {
+						newGraphics.relation = true;
+					}
 					newClass.addGraphics(newGraphics);
+
 
 				}
 			}

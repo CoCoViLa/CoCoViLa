@@ -12,7 +12,7 @@ public class Text extends Shape implements Serializable {
   /**
    * Text string represented by the shape.
    */
-  String s;
+  public String stringValue;
 
   /**
    * Font of the text.
@@ -27,7 +27,7 @@ public class Text extends Shape implements Serializable {
   /**
    * Name of the shape.
    */
-  private String name;
+  public String name;
 
   /**
    * Shape transparency percentage.
@@ -65,7 +65,7 @@ public class Text extends Shape implements Serializable {
 	this.y = y;
 	this.font = font;
 	this.color = color;
-	this.s = s;
+	this.stringValue = s;
 	this.transparency = (float) transp;
   } // Text
 
@@ -110,7 +110,8 @@ public class Text extends Shape implements Serializable {
 
   /**
    * Set size using zoom multiplication.
-   * @param s float - set size using zoom multiplication.
+   * @param s1 float - set size using zoom multiplication.
+   * @param s2 float - set size using zoom multiplication.
    */
   public void setMultSize(float s1, float s2) {
 	x = x*(int)s1/(int)s2;
@@ -207,7 +208,7 @@ public class Text extends Shape implements Serializable {
    * @return String - the text string.
    */
   public String getText() {
-	return this.s;
+	return this.stringValue;
   } // getText
 
   /**
@@ -231,7 +232,7 @@ public class Text extends Shape implements Serializable {
    * @param s String - string text.
    */
   public void setText(String s) {
-	this.s = s;
+	this.stringValue = s;
   } // setText
 
   /**
@@ -308,7 +309,7 @@ public class Text extends Shape implements Serializable {
 
 	if (color != null) colorInt = color.getRGB();
 
-	return "<text string=\"" + s + "\" colour=\"" + colorInt + "\" x=\""
+	return "<text string=\"" + stringValue + "\" colour=\"" + colorInt + "\" x=\""
 		+ (x - boundingboxX) + "\" y=\"" + (y - boundingboxY)
 		+ "\" fontname=\"" + font.getName() + "\" fontstyle=\""
 		+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\"/>\n";
@@ -319,7 +320,7 @@ public class Text extends Shape implements Serializable {
 
 	if (color != null) colorInt = color.getRGB();
 
-   return "TEXT:"+x+":"+y+":"+colorInt+":"+font.getName()+":"+font.getStyle()+":"+font.getSize()+":"+(int)this.transparency+":"+s;
+   return "TEXT:"+x+":"+y+":"+colorInt+":"+font.getName()+":"+font.getStyle()+":"+font.getSize()+":"+(int)this.transparency+":"+stringValue;
   } // toText
 
 
@@ -329,7 +330,7 @@ public class Text extends Shape implements Serializable {
 
 	java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
 
-	Rectangle2D r = this.getFont().getStringBounds(s, 0, s.length(), frc);
+	Rectangle2D r = this.getFont().getStringBounds(stringValue, 0, stringValue.length(), frc);
 
 	this.h = (int) r.getHeight();
 	this.w = (int) r.getWidth();
@@ -352,12 +353,55 @@ public class Text extends Shape implements Serializable {
 	int a = xModifier + (int) (Xsize * x);
 	int b = yModifier + (int) (Ysize * y);
 
-	g2.drawString(s,a,b);
+	g2.drawString(stringValue,a,b);
 
 	if (selected) {
 	  drawSelection();
 	}
 
   } // draw
+
+	public void drawSpecial(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g, String name, String value) {
+
+		Graphics2D g2 = (Graphics2D) g;
+
+		java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
+
+		Rectangle2D r = this.getFont().getStringBounds(stringValue, 0, stringValue.length(), frc);
+
+		this.h = (int) r.getHeight();
+		this.w = (int) r.getWidth();
+
+		g2.setFont(font);
+
+		alpha = (float) (1 - (this.transparency / 100));
+
+		float red = (float) color.getRed() / 256;
+		float green = (float) color.getGreen() / 256;
+		float blue = (float) color.getBlue() / 256;
+
+		g2.setColor(new Color(red, green, blue, alpha));
+
+		if (RuntimeProperties.isAntialiasingOn) {
+		  g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+							  java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+		}
+
+		int a = xModifier + (int) (Xsize * x);
+		int b = yModifier + (int) (Ysize * y);
+
+		if (stringValue.equals("*self"))
+			g2.drawString(value,a,b);
+		else if (stringValue.equals("*selfWithName"))
+			g2.drawString(name +" = "+ value,a,b);
+		else
+			g2.drawString(stringValue,a,b);
+
+		if (selected) {
+		  drawSelection();
+		}
+
+
+	}
 
 }

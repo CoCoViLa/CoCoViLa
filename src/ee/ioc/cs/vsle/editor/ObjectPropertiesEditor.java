@@ -184,6 +184,7 @@ public class ObjectPropertiesEditor extends JFrame
 				field.watched = b;
 				if (!textField.getText().equals("")) {
 					field.value = textField.getText();
+					//field.updateGraphics();
 				} else {
 					field.value = null;
 				}
@@ -197,6 +198,7 @@ public class ObjectPropertiesEditor extends JFrame
 				}
 				if (!s.equals("")) {
 					field.value = s;
+
 				} else {
 					field.value = null;
 				}

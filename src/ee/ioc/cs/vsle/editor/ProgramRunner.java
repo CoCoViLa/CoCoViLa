@@ -70,6 +70,7 @@ public class ProgramRunner {
 							}
 						} else {// it is type object
 						}
+						//field.updateGraphics();
 					}
 				}
 			}

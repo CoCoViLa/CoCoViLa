@@ -38,6 +38,8 @@ class MouseOps
 
 	public void setState(String state) {
 		this.state = state;
+		if (state.equals("selection"))
+			editor.currentObj = null;
 	}
 
 	void addObj() {
@@ -253,7 +255,7 @@ class MouseOps
                     startAddingObject();
                     //setState(State.selection);
 					editor.objects.updateRelObjs();
-					editor.currentObj = null;
+					//editor.currentObj = null;
 
 				}
 			}
@@ -581,7 +583,9 @@ class MouseOps
 					editor.setLastPath(pack.getAbsolutePath());
 					db.p("Loading package: " + pack.getName());
 					editor.vPackage = null;
-					editor.palette.removeToolbar();
+					if (editor.palette != null) {
+						editor.palette.removeToolbar();
+					}
 					editor.loadPackage(pack);
 					editor.validate();
 				}
@@ -728,7 +732,7 @@ class MouseOps
 			if (port.isStrict()) {
 				obj.strict = true;
 			}
-			db.p("opg " + port.openGraphics);
+
 			if (port.x + port.openGraphics.boundX < obj.portOffsetX1) {
 				obj.portOffsetX1 = port.x + port.openGraphics.boundX;
 			}
