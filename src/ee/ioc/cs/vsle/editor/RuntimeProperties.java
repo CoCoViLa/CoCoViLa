@@ -33,7 +33,9 @@ public class RuntimeProperties {
 	// Class fields stored in a DBResult (a virtual representation of a database table).
 	// The DBResult is displayed out in a table where all fields of if can be modified.
 	public static DBResult dbrClassFields = new DBResult("", classDbrFields);
-
+        public static boolean isDebugEnabled() {
+            return debugInfo == 1? true: false;
+        }
 }
 
 ;

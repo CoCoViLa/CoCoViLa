@@ -6,6 +6,7 @@ import ee.ioc.cs.vsle.util.db;
 import java.io.Serializable;
 import java.util.*;
 import java.util.regex.*;
+import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
 class Rel implements Cloneable,
 	Serializable {
@@ -321,7 +322,7 @@ class Rel implements Cloneable,
                                      getSubtaskParameters() ); // + getParameters()
                         }
 		} else {
-			db.p(method);
+			if ( RuntimeProperties.isDebugEnabled() ) db.p(method);
 			String s1, s2, assigns = "";
 			Var ip = (Var) inputs.get(0);
 			Var op = (Var) outputs.get(0);

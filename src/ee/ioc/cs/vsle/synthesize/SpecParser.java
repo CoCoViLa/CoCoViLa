@@ -236,7 +236,7 @@ public class SpecParser {
 					Var v2 = (Var) problem.getAllVars().get(obj + "." + cf2.name);
 
 					if (v1.field.isAlias() && v2.field.isAlias()) {
-						db.p(((Alias) v1.field).getAliasType() + " " +
+						if ( RuntimeProperties.isDebugEnabled() ) db.p(((Alias) v1.field).getAliasType() + " " +
 							((Alias) v2.field).getAliasType());
 						if (!((Alias) v1.field).getAliasType().equals(((Alias) v2.field).
 							getAliasType())) {
@@ -563,14 +563,14 @@ public class SpecParser {
 						classRelation.setOutput(split[0], vars);
 						classRelation.setMethod(split[0] + " = " + split[1]);
 						annClass.addClassRelation(classRelation);
-						db.p(classRelation);
+						if ( RuntimeProperties.isDebugEnabled() ) db.p(classRelation);
 
 					} else if (lt.type == declaration) {
 						split = lt.specLine.split(":", -1);
 						String[] vs = split[1].trim().split(" *, *", -1);
 						String type = split[0].trim();
 
-						db.p("Checking existence of " + RuntimeProperties.packageDir + type + ".java");
+						if ( RuntimeProperties.isDebugEnabled() ) db.p("Checking existence of " + RuntimeProperties.packageDir + type + ".java");
 						if (checkedClasses.contains(type)) {
 							throw new MutualDeclarationException(className + " <-> " + type);
 						}
@@ -612,14 +612,14 @@ public class SpecParser {
 						classRelation.setMethod("alias");
 						classRelation.setOutput(name, vars);
 						annClass.addClassRelation(classRelation);
-						db.p(classRelation);
+						if ( RuntimeProperties.isDebugEnabled() ) db.p(classRelation);
 						if (!list[0].startsWith("*")) {
 							classRelation = new ClassRelation(4);
 							classRelation.addOutputs(list, vars);
 							classRelation.setMethod("alias");
 							classRelation.setInput(name, vars);
 							annClass.addClassRelation(classRelation);
-							db.p(classRelation);
+							if ( RuntimeProperties.isDebugEnabled() ) db.p(classRelation);
 						}
 
 					} else if (lt.type == equation) {
@@ -647,7 +647,7 @@ public class SpecParser {
 							}
 							classRelation.setMethod(pieces[0]);
 							annClass.addClassRelation(classRelation);
-							db.p("Equation: " + classRelation);
+							if ( RuntimeProperties.isDebugEnabled() ) db.p("Equation: " + classRelation);
 
 						}
 					} else if (lt.type == axiom) {
@@ -656,7 +656,7 @@ public class SpecParser {
 
 						subtasks.clear();
 						while (matcher2.find()) {
-							db.p("matching " + matcher2.group(0));
+							if ( RuntimeProperties.isDebugEnabled() ) db.p("matching " + matcher2.group(0));
 							subtasks.add(matcher2.group(0));
 						}
 						lt.specLine = lt.specLine.replaceAll("\\[([^\\]\\[]*) *-> *([^\\]\\[]*)\\]", "#");
@@ -693,7 +693,7 @@ public class SpecParser {
 								classRelation.type = 6;
 							}
 							classRelation.setMethod(matcher2.group(3).trim());
-							db.p(classRelation);
+							if ( RuntimeProperties.isDebugEnabled() ) db.p(classRelation);
 							annClass.addClassRelation(classRelation);
 						}
 
@@ -713,7 +713,7 @@ public class SpecParser {
 							if (!inputs[0].equals("")) {
 								classRelation.addInputs(inputs, vars);
 							}
-							db.p(classRelation);
+							if ( RuntimeProperties.isDebugEnabled() ) db.p(classRelation);
 							annClass.addClassRelation(classRelation);
 						}
 					} else if (lt.type == error) {
@@ -734,7 +734,7 @@ public class SpecParser {
 	private void getWildCards(ClassList classList, String output) {
 		String list[] = output.split("\\.");
 		for (int i = 0; i < list.length; i++) {
-			db.p(list[i]);
+			if ( RuntimeProperties.isDebugEnabled() ) db.p(list[i]);
 		}
 
 	}
