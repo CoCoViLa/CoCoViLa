@@ -1,7 +1,7 @@
 package ee.ioc.cs.vsle.graphics;
 
 import java.io.*;
-
+import ee.ioc.cs.vsle.util.db;
 import java.awt.*;
 import java.awt.geom.*;
 
@@ -361,7 +361,7 @@ public class Text extends Shape implements Serializable {
 
   } // draw
 
-	public void drawSpecial(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g, String name, String value) {
+	public void drawSpecial(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g, String name, String value, double angle) {
 
 		Graphics2D g2 = (Graphics2D) g;
 
@@ -386,9 +386,12 @@ public class Text extends Shape implements Serializable {
 		  g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
 							  java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 		}
+		int a = xModifier + (int) (Xsize * x*Math.cos(angle));
+		int b = yModifier + (int) (Ysize * y +(Xsize * x *Math.sin(angle)));
 
-		int a = xModifier + (int) (Xsize * x);
-		int b = yModifier + (int) (Ysize * y);
+		g2.translate(xModifier, yModifier);
+		g2.rotate(-1*angle);
+		g2.translate(-1*(xModifier), -1*(yModifier));
 
 		if (stringValue.equals("*self"))
 			g2.drawString(value,a,b);
@@ -401,6 +404,9 @@ public class Text extends Shape implements Serializable {
 		  drawSelection();
 		}
 
+		g2.translate(xModifier, yModifier);
+		g2.rotate(angle);
+		g2.translate(-1*(xModifier), -1*(yModifier));
 
 	}
 

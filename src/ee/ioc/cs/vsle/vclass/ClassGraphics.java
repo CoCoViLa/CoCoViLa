@@ -102,7 +102,7 @@ public class ClassGraphics implements Serializable {
 		for (int i = 0; i < shapes.size(); i++) {
 			s = (Shape) shapes.get(i);
 			if (s instanceof Text)
-				((Text)s).drawSpecial(xPos, yPos, Xsize, Ysize, g, name, value);
+				((Text)s).drawSpecial(xPos, yPos, Xsize, Ysize, g, name, value, angle);
 			else
 				s.draw(xPos, yPos, Xsize, Ysize, g);
 		}
