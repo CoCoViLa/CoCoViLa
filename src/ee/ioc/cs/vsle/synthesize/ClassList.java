@@ -35,4 +35,7 @@ public class ClassList
 		return null;
 	} // getType
 
+
+    /** @link dependency */
+    /*# AnnotatedClass lnkAnnotatedClass; */
 }

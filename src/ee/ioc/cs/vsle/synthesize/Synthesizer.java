@@ -24,6 +24,14 @@ import java.util.regex.Matcher;
 public class Synthesizer {
 	final int declaration = 1, assignment = 2, axiom = 3, equation = 4, alias = 5, error = 10;
     public static boolean tempIsDone = false; //indicates if it is needed to declare a TEMP variable in Rel.java when generating code, or it has already been done
+
+
+    /** @link dependency */
+    /*# Planner lnkPlanner; */
+
+    /** @link dependency */
+    /*# SpecParser lnkSpecParser; */
+
 	/** Does the planning.
 	 @return a program implementing the specification.
 	 @param problem the specification unfolded as a graph.
@@ -158,7 +166,8 @@ public class Synthesizer {
 		StringBuffer alg = new StringBuffer();
 
 		if (!computeAll) {
-			algorithm = optimizer(algorithm, targets);
+			Optimizer optimizer = new Optimizer();
+			algorithm = optimizer.optimize(algorithm, targets);
 		}
 		for (int i = 0; i < algorithm.size(); i++) {
 			alg.append("        ");
@@ -355,8 +364,8 @@ public class Synthesizer {
 
 						if (! (specLines.get(0)).equals("")) {
 							if (lt.type == declaration) {
-								String split[] = lt.specLine.split(":", -1);
-								String vs[] = split[1].trim().split(" *, *", -1);
+								String[] split = lt.specLine.split(":", -1);
+								String[] vs = split[1].trim().split(" *, *", -1);
 								String type = split[0].trim();
 
 								if (!type.equals("void")) {

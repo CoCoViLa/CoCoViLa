@@ -19,6 +19,18 @@ class Rel {
 
 	int type; /* 1 - equals, 2 - method*/
 
+    /** @link dependency */
+    /*# CodeGenerator lnkCodeGenerator; */
+
+    /** @link dependency */
+    /*# CodeGenerator lnkCodeGenerator1; */
+
+    /** @link dependency */
+    /*# CodeGenerator lnkCodeGenerator2; */
+
+    /** @link dependency */
+    /*# CodeGenerator lnkCodeGenerator3; */
+
 	void setFlag(int f) {
 		flag = f;
 	}

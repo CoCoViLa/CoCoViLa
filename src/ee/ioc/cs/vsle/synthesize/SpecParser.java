@@ -19,6 +19,12 @@ import ee.ioc.cs.vsle.equations.EquationSolver;
 public class SpecParser {
 	public final int declaration = 1, assignment = 2, axiom = 3, equation = 4, alias = 5, specaxiom = 6, error = 10;
 
+    /** @link dependency */
+    /*# Problem lnkProblem; */
+
+    /** @link dependency */
+    /*# AnnotatedClass lnkAnnotatedClass; */
+
 	public static void main(String[] args) {
 		SpecParser p = new SpecParser();
 
@@ -525,7 +531,7 @@ public class SpecParser {
 					}
 					else if (lt.type == declaration) {
 						split = lt.specLine.split(":", -1);
-						String vs[] = split[1].trim().split(" *, *", -1);
+						String[] vs = split[1].trim().split(" *, *", -1);
 						String type = split[0].trim();
 
 						db.p("Checking existence of " + RuntimeProperties.packageDir + type + ".java");
@@ -586,7 +592,7 @@ public class SpecParser {
 						matcher2 = pattern.matcher(lt.specLine);
 						subtasks.clear();
 						if (matcher2.find()) {
-							String sides[] = lt.specLine.split("=");
+							String[] sides = lt.specLine.split("=");
 							String leftSide = sides[0].trim();
 							String rightSide = sides[1].trim();
 
@@ -717,7 +723,7 @@ public class SpecParser {
 				}
 				else if (lt.type == declaration) {
 					split = lt.specLine.split(":", -1);
-					String vs[] = split[1].trim().split(" *, *", -1);
+					String[] vs = split[1].trim().split(" *, *", -1);
 					String type = split[0].trim();
 
 					for (int i = 0; i < vs.length; i++) {

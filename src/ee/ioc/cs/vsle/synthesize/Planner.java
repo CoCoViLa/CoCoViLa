@@ -17,6 +17,9 @@ public class Planner {
     private boolean m_computeAll = false;
     private Planner planner;
 
+    /** @link dependency */
+    /*# Problem lnkProblem; */
+
     public Planner(Problem problem, boolean computeAll, ArrayList alg) {
         if (alg == null) {
             algorithm = new ArrayList();
@@ -202,7 +205,8 @@ public class Planner {
         }
 
         if (!m_computeAll) {
-            algorithm = Synthesizer.optimizer(algorithm, allTargetVars);
+			Optimizer optimizer = new Optimizer();
+            algorithm = optimizer.optimize(algorithm, allTargetVars);
         }
 
         return solved;

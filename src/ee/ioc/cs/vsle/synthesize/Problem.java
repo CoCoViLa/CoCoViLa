@@ -15,6 +15,12 @@ class Problem {
 	HashSet allRels = new HashSet();
 	String problemClass;
 
+    /** @link dependency */
+    /*# Var lnkVar; */
+
+    /** @link dependency */
+    /*# Rel lnkRel; */
+
 	void addAxiom(Rel rel) {
 		axioms.add(rel);
 	}
