@@ -6,9 +6,9 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.ccl.*;
-import ee.ioc.cs.vsle.synthesize.*;
+//import ee.ioc.cs.vsle.util.db;
+//import ee.ioc.cs.vsle.ccl.*;
+//import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.equations.EquationSolver;
 
@@ -186,118 +186,124 @@ public class SpecParser {
 	 @param caller caller, or the "parent" of the current object. The objects name will be caller + . + obj.name
 	 @param problem the problem itself (needed because of recursion).
 	 */
-	Problem makeProblem(ClassList classes, String type, String caller, Problem problem) throws SpecParseException {
-		// ee.ioc.cs.editor.util.db.p("CLASSES: "+classes);
-		// ee.ioc.cs.editor.util.db.p("TYPE: "+type);
-		AnnotatedClass ac = classes.getType(type);
-		ClassField cf = null;
-		ClassRelation classRelation;
-		Var var, var1, var2;
-		Rel rel;
-		HashSet relSet = new HashSet();
+        Problem makeProblem( ClassList classes, String type, String caller, Problem problem ) throws
+                SpecParseException {
+            // ee.ioc.cs.editor.util.db.p("CLASSES: "+classes);
+            // ee.ioc.cs.editor.util.db.p("TYPE: "+type);
+            AnnotatedClass ac = classes.getType( type );
+            ClassField cf = null;
+            ClassRelation classRelation;
+            Var var, var1, var2;
+            Rel rel;
+            HashSet relSet = new HashSet();
 
-		for (int j = 0; j < ac.fields.size(); j++) {
-			cf = (ClassField) ac.fields.get(j);
-			if (classes.getType(cf.type) != null) {
-				problem = makeProblem(classes, cf.type, caller + "." + cf.name, problem);
-			}
-			var = new Var();
-			var.setObj(caller);
-			var.setField(cf);
-			var.setName(cf.name);
-			var.setType(cf.type);
-			problem.addVar(var);
-		}
+            for ( int j = 0; j < ac.fields.size(); j++ ) {
+                cf = ( ClassField ) ac.fields.get( j );
+                if ( classes.getType( cf.type ) != null ) {
+                    problem = makeProblem( classes, cf.type, caller + "." + cf.name, problem );
+                }
+                var = new Var();
+                var.setObj( caller );
+                var.setField( cf );
+                var.setName( cf.name );
+                var.setType( cf.type );
+                problem.addVar( var );
+            }
 
-		for (int j = 0; j < ac.classRelations.size(); j++) {
-			classRelation = (ClassRelation) ac.classRelations.get(j);
-			cf = null;
-			String obj = caller;
+            for ( int j = 0; j < ac.classRelations.size(); j++ ) {
+                classRelation = ( ClassRelation ) ac.classRelations.get( j );
+                cf = null;
+                String obj = caller;
 
-			rel = new Rel();
-			boolean isAliasRel = false;
+                rel = new Rel();
+                boolean isAliasRel = false;
 
-			/* If we have a relation alias = alias, we rewrite it into new relations, ie we create
-			 a relation for each component of the alias structure*/
-			if (classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1) {
-				ClassField cf1 = (ClassField) classRelation.inputs.get(0);
-				ClassField cf2 = (ClassField) classRelation.outputs.get(0);
+                /* If we have a relation alias = alias, we rewrite it into new relations, ie we create
+                 a relation for each component of the alias structure*/
+                if ( classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1 ) {
+                    ClassField cf1 = ( ClassField ) classRelation.inputs.get( 0 );
+                    ClassField cf2 = ( ClassField ) classRelation.outputs.get( 0 );
 
-				if (problem.getAllVars().containsKey(obj + "." + cf1.name)) {
-					Var v1 = (Var) problem.getAllVars().get(obj + "." + cf1.name);
-					Var v2 = (Var) problem.getAllVars().get(obj + "." + cf2.name);
+                    if ( problem.getAllVars().containsKey( obj + "." + cf1.name ) ) {
+                        Var v1 = ( Var ) problem.getAllVars().get( obj + "." + cf1.name );
+                        Var v2 = ( Var ) problem.getAllVars().get( obj + "." + cf2.name );
 
-					if (v1.field.isAlias() && v2.field.isAlias()) {
-						db.p( ( (Alias) v1.field).getAliasType() + " " + ( (Alias) v2.field).getAliasType());
-						if (! ( (Alias) v1.field).getAliasType().equals( ( (Alias) v2.field).getAliasType())) {
-							throw new AliasException("Differently typed aliases connected: " + obj + "." + cf1.name + " and " + obj + "." + cf2.name);
-						}
-						isAliasRel = true;
-						for (int i = 0; i < v1.field.vars.size(); i++) {
-							String s1 = ( (ClassField) v1.field.vars.get(i)).name;
-							String s2 = ( (ClassField) v2.field.vars.get(i)).name;
+                        if ( v1.field.isAlias() && v2.field.isAlias() ) {
+                            db.p( ( ( Alias ) v1.field ).getAliasType() + " " +
+                                  ( ( Alias ) v2.field ).getAliasType() );
+                            if ( !( ( Alias ) v1.field ).getAliasType().equals( ( ( Alias ) v2.field ).
+                                    getAliasType() ) ) {
+                                throw new AliasException( "Differently typed aliases connected: " + obj +
+                                        "." + cf1.name + " and " + obj + "." + cf2.name );
+                            }
+                            isAliasRel = true;
+                            for ( int i = 0; i < v1.field.vars.size(); i++ ) {
+                                String s1 = ( ( ClassField ) v1.field.vars.get( i ) ).name;
+                                String s2 = ( ( ClassField ) v2.field.vars.get( i ) ).name;
 
-							var1 = (Var) problem.getAllVars().get(v1.object + "." + s1);
-							var2 = (Var) problem.getAllVars().get(v2.object + "." + s2);
-							rel = new Rel();
-							rel.setFlag(classRelation.inputs.size());
-							rel.setSubtaskFlag(classRelation.subtasks.size());
-							rel.setObj(obj);
-							rel.setType(5);
+                                var1 = ( Var ) problem.getAllVars().get( v1.object + "." + s1 );
+                                var2 = ( Var ) problem.getAllVars().get( v2.object + "." + s2 );
+                                rel = new Rel();
+                                rel.setUnknownInputs( classRelation.inputs.size() );
+                                rel.setSubtaskFlag( classRelation.subtasks.size() );
+                                rel.setObj( obj );
+                                rel.setType( 5 );
 
-							rel.addInput(var2);
-							rel.addOutput(var1);
-							var2.addRel(rel);
-							problem.addRel(rel);
-						}
-					}
-				}
-			}
+                                rel.addInput( var2 );
+                                rel.addOutput( var1 );
+                                var2.addRel( rel );
+                                problem.addRel( rel );
+                            }
+                        }
+                    }
+                }
 
+                if ( !isAliasRel ) {
+                    String s = checkIfRightWildcard( classRelation );
+                    if ( s != null ) {
+                        relSet = makeRightWildcardRel( ac, classes, classRelation, problem, obj, s );
+                        rel = null;
+                    } else
+                        rel = makeRel( classRelation, problem, obj );
+                    if ( classRelation.subtasks.size() > 0 ) {
+                        Rel subtaskRel = new Rel();
 
-			if (!isAliasRel) {
-				String s = checkIfRightWildcard(classRelation);
-				if (s!=null) {
-					relSet = makeRightWildcardRel(ac, classes, classRelation, problem, obj, s);
-					rel = null;
-				} else
-					rel = makeRel(classRelation, problem, obj);
-				if (classRelation.subtasks.size() > 0) {
-					Rel subtaskRel = new Rel();
+                        for ( int l = 0; l < classRelation.subtasks.size(); l++ ) {
+                            ClassRelation subtask = ( ClassRelation ) classRelation.subtasks.get( l );
+                            subtaskRel = makeRel( subtask, problem, obj );
+                            if ( rel != null ) {
+                                rel.addSubtask( subtaskRel );
+                            } else {
+                                Iterator varsIter = relSet.iterator();
+                                while ( varsIter.hasNext() ) {
+                                    Rel r = ( Rel ) varsIter.next();
+                                    r.addSubtask( subtaskRel );
+                                }
+                            }
+                        }
+                    }
+                }
 
-					for (int l = 0; l < classRelation.subtasks.size(); l++) {
-						ClassRelation subtask = (ClassRelation) classRelation.subtasks.get(l);
-						subtaskRel = makeRel(subtask, problem, obj);
-						if (rel!=null) {
-							rel.addSubtask(subtaskRel);
-						} else {
-							Iterator varsIter = relSet.iterator();
-						    while (varsIter.hasNext()) {
-                                Rel r = (Rel)varsIter.next();
-								r.addSubtask(subtaskRel);
-							}
-						}
-					}
-				}
-			}
+                // if it is not a "real" relation (type 7), we just set the result as target, and inputs as known variables
+                if ( classRelation.type == 7 ) {
+                    setTargets( problem, classRelation, obj );
+                } else if ( classRelation.inputs.isEmpty() && rel.subtaskFlag == 0 ) { // if class relation doesnt have inputs, its an axiom
+                    problem.addAxiom( rel );
+                }
+                //else if (classRelation.inputs.isEmpty() && rel.subtaskFlag > 0) {
+                else if ( rel.subtaskFlag > 0 ) {
+                    problem.addSubtaskRel( rel );
+                } else {
+                    if ( rel != null && rel.getSubtasks().size() == 0 ) {
+                        problem.addRel( rel );
+                    } else {
+                        problem.addAllRels( relSet );
+                    }
+                }
 
-			// if it is not a "real" relation (type 7), we just set the result as target, and inputs as known variables
-			if (classRelation.type == 7) {
-				setTargets(problem, classRelation, obj);
-			}
-			else if (classRelation.inputs.isEmpty()) { // if class relation doesnt have inputs, its an axiom
-				problem.addAxiom(rel);
-			}
-			else {
-				if (rel!=null)
-					problem.addRel(rel);
-				else
-					problem.addAllRels(relSet);
-			}
-
-		}
-		return problem;
-	}
+            }
+            return problem;
+        }
 
 	private void isRightWildcard(ClassRelation classRelation, AnnotatedClass ac, ClassList classes, String type) {
 		ClassField cf;
@@ -361,7 +367,7 @@ public class SpecParser {
 					Rel rel = new Rel();
 
 					rel.setMethod(classRelation.method);
-					rel.setFlag(classRelation.inputs.size());
+					rel.setUnknownInputs(classRelation.inputs.size());
 					rel.setSubtaskFlag(classRelation.subtasks.size());
 					rel.setObj(obj);
 					rel.setType(classRelation.type);
@@ -418,7 +424,7 @@ public class SpecParser {
 		Rel rel = new Rel();
 
 		rel.setMethod(classRelation.method);
-		rel.setFlag(classRelation.inputs.size());
+		rel.setUnknownInputs(classRelation.inputs.size());
 		rel.setSubtaskFlag(classRelation.subtasks.size());
 		rel.setObj(obj);
 		rel.setType(classRelation.type);
@@ -445,6 +451,13 @@ public class SpecParser {
 				throw new UnknownVariableException(cf.name);
 			}
 		}
+                for (int k = 0; k < classRelation.exceptions.size(); k++ ) {
+                    cf = (ClassField) classRelation.exceptions.get(k);
+                    Var ex = new Var();
+                    ex.name = cf.type;
+                    rel.exceptions.add(ex);
+                }
+
 		return rel;
 	}
 

@@ -13,7 +13,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
+//import java.util.Iterator;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -71,13 +71,16 @@ public class Synthesizer {
 		}
 
 		// run the planner on the obtained problem
-        System.out.println(problem);
+//        System.out.println(problem);
 //		String algorithm = planner(problem, computeAll);
 //        String algorithm = null;// = lin_planner(problem, computeAll);
-        Planner planner = new Planner(problem, computeAll, null);
+//        PlannerOld planner = new PlannerOld((Problem)problem.clone(), computeAll, null);
+        ArrayList algorithmList = Planner.getInstance().invokePlaning(problem, computeAll);
 //        ArrayList algorithm_l = planner.getAlgorithmL();
-        CodeGenerator cgg = new CodeGenerator();
-        String algorithm  = cgg.generate(planner.getAlgorithmL());//= planner.getAlgorithm();
+        String algorithm = CodeGenerator.getInstance().generate(algorithmList);
+//        CodeGenerator cgg = new CodeGenerator();
+//        algorithm = CodeGenerator.getInstance().generate(planner.getAlgorithmL());
+//        String algorithm  = cgg.generate(planner.getAlgorithmL());//= planner.getAlgorithm();
 
 //        System.exit(0);//temporary
         String prog2 = "";

@@ -6,6 +6,19 @@ import java.util.HashSet;
 /**
  */
 public class Optimizer {
+    
+    private static Optimizer s_optimizer = null;
+    
+    private Optimizer() {}
+    
+    public static Optimizer getInstance()
+    {
+        if(s_optimizer == null)
+        {
+            s_optimizer = new Optimizer();
+        }
+        return s_optimizer;
+    }
 	/**
 	 Takes an algorithm and optimizes it to only calculate the variables that are targets.
 	 @return an algorithm for calculating the target variables
@@ -24,15 +37,15 @@ public class Optimizer {
             rel = (Rel) algorithm.get(i);
 			boolean relIsNeeded = false;
 
-			for (int j = 0; j < rel.outputs.size(); j++) {
-				relVar = (Var) rel.outputs.get(j);
+			for (int j = 0; j < rel.getOutputs().size(); j++) {
+				relVar = (Var) rel.getOutputs().get(j);
 				if (stuff.contains(relVar)) {
 					relIsNeeded = true;
 				}
 			}
 
 			if (relIsNeeded) {
-				stuff.addAll(rel.inputs);
+				stuff.addAll(rel.getInputs());
 			} else {
 				removeThese.add(rel);
 			}
@@ -40,7 +53,4 @@ public class Optimizer {
 		algorithm.removeAll(removeThese);
 		return algorithm;
 	}
-
-    /** @link dependency */
-    /*# Rel lnkRel; */
 }
