@@ -30,6 +30,7 @@ public class Planner {
     public ArrayList invokePlaning( Problem problem, boolean computeAll ) {
 
         m_problem = problem;
+        ProgramRunner.foundVars.clear();
         //manage axioms
         HashSet removableAxioms = new HashSet();
 
@@ -42,47 +43,80 @@ public class Planner {
         }
         m_problem.getAxioms().removeAll( removableAxioms );
         //invoke linear planning
-        if ( linearForwardSearch( m_problem, computeAll, false ) &&
+        if ( linearForwardSearch( m_problem, computeAll, false, false ) &&
              !computeAll ) {
             return m_problem.algorithm;
         } else {
 //            long start = System.currentTimeMillis();
-            subgoalBackwardSearch( m_problem, computeAll );
-            linearForwardSearch( m_problem, computeAll, false );
+            db.p( "Subtasks solved: " + subgoalBackwardSearch( m_problem, computeAll ) );
 //            long end = System.currentTimeMillis() - start;
-//            System.err.println( "time: " + end );
+//            db.p( "time: " + end );
         }
         return m_problem.algorithm;
     }
 
-//    private boolean linearForwardSearch( Problem problem, boolean computeAll ) {
-//
-//        return linearForwardSearch( problem, computeAll, false );
-//    }
-
     private boolean linearForwardSearch( Problem problem, boolean computeAll,
-                                         boolean isSubtask ) {
+                                         boolean isSubtask, boolean goingBackward ) {
 
         /*
          * while iterating through hashset, items cant be removed from/added to
          * that set. Theyre collected into these sets and added/removedall
          * together after iteration is finished
          */
-        ArrayList algorithm = problem.algorithm;
-
+        ArrayList algorithm;
+        HashSet allTargetVarsBackup = null;
+        HashSet allTargetVars;
         HashSet newVars = new HashSet();
         HashSet removableVars = new HashSet();
-        HashSet removableTargets = new HashSet();
-        HashSet allTargetVars = new HashSet( problem.getTargetVars() );
+
+        if ( isSubtask ) {
+            algorithm = ( ArrayList ) problem.getSubGoal().getAlgorithm();
+
+            if ( !goingBackward ) {
+                problem.getKnownVars().addAll( problem.getSubGoal().getInputs() );
+            }
+
+            allTargetVarsBackup = new HashSet( problem.getTargetVars() );
+
+            problem.getTargetVars().clear();
+
+            problem.getTargetVars().addAll( problem.getSubGoal().getOutputs() );
+
+            for ( int i = 0; i < problem.getSubGoal().getInputs().size(); i++ ) {
+                Var subtaskInput = ( Var ) problem.getSubGoal().getInputs().get( i );
+                for ( Iterator iter = problem.getAllRels().iterator(); iter.hasNext(); ) {
+                    Rel rel = ( Rel ) iter.next();
+                    if ( rel.getOutputs().get( 0 ) == subtaskInput ) {
+                        iter.remove();
+                    }
+                }
+            }
+            for ( int i = 0; i < problem.getSubGoal().getOutputs().size(); i++ ) {
+                Var subtaskOutput = ( Var ) problem.getSubGoal().getOutputs().get( i );
+                for ( Iterator iter = problem.getAllRels().iterator(); iter.hasNext(); ) {
+                    Rel rel = ( Rel ) iter.next();
+                    if ( rel.getInputs().get( 0 ) == subtaskOutput ) {
+                        iter.remove();
+                    }
+                }
+            }
+        }
+        else {
+            algorithm = problem.algorithm;
+        }
+
+        allTargetVars = new HashSet( problem.getTargetVars() );
         HashSet foundVars = new HashSet(problem.getKnownVars());
 
         boolean changed = true;
+        boolean foundSubGoal = false;
 
         db.p( "------Starting linear planning--------" );
         int counter = 1;
 
-        while ( ( !computeAll && changed && !problem.getTargetVars().isEmpty() )
-                || ( changed && computeAll ) ) {
+        while ( ( ( !computeAll && changed && !problem.getTargetVars().isEmpty() )
+                  || ( changed && computeAll ) )
+                && ( !foundSubGoal ) ) {
             db.p( "----Iteration " + counter + " ----" );
             counter++;
             changed = false;
@@ -92,10 +126,9 @@ public class Planner {
                                         .hasNext(); ) {
                 Var targetVar = ( Var ) targetIter.next();
                 if ( problem.getKnownVars().contains( targetVar ) ) {
-                    removableTargets.add( targetVar );
+                    targetIter.remove();
                 }
             }
-            problem.getTargetVars().removeAll( removableTargets );
             //iterate through all knownvars
             db.p( "Known:" + problem.getKnownVars() );
             for ( Iterator knownVarsIter = problem.getKnownVars().iterator();
@@ -123,7 +156,11 @@ public class Planner {
                                 if ( !foundVars.contains( relVar ) ) {
                                     relIsNeeded = true;
                                 }
+                                if ( isSubtask && problem.getTargetVars().contains( relVar ) ) {
+                                    foundSubGoal = true;
+                                }
                             }
+
                             if ( rel.getOutputs().isEmpty() ) {
                                 relIsNeeded = true;
                             }
@@ -149,151 +186,20 @@ public class Planner {
             newVars.clear();
         }
 
-        if ( !computeAll ) {
+        if ( !computeAll /*&& !isSubtask*/ ) {
             algorithm = Optimizer.getInstance().optimize( algorithm,
                     allTargetVars );
         }
 
+        if( isSubtask ) {
+            problem.getTargetVars().addAll( allTargetVarsBackup );
+        }
         db.p( "algorithm" + algorithm.toString() + "\n" );
-        ProgramRunner.foundVars = foundVars;
+        ProgramRunner.foundVars.addAll(foundVars);
 
-        return problem.getTargetVars().isEmpty();
-    }
-
-    private boolean linearSubtaskSearch( Problem problem,
-                                          boolean computeAll, boolean goingBackward ) {
-
-        ArrayList algorithm = ( ArrayList ) problem.getSubGoal().getAlgorithm();
-
-        if(!goingBackward) {
-            problem.getKnownVars().addAll( problem.getSubGoal().getInputs() );
-        }
-        HashSet allTargetVarsBackup = new HashSet( problem.getTargetVars() );
-
-        problem.getTargetVars().clear();
-
-        problem.getTargetVars().addAll( problem.getSubGoal().getOutputs() );
-
-        HashSet foundVars = new HashSet( problem.getKnownVars() );
-
-
-        for ( int i = 0; i < problem.getSubGoal().getInputs().size(); i++ ) {
-            Var subtaskInput = ( Var ) problem.getSubGoal().getInputs().get( i );
-            for ( Iterator iter = problem.getAllRels().iterator(); iter.hasNext(); ) {
-                Rel rel = (Rel) iter.next();
-                if( rel.getOutputs().get(0) == subtaskInput ) {
-                    iter.remove();
-                }
-            }
-        }
-        for ( int i = 0; i < problem.getSubGoal().getOutputs().size(); i++ ) {
-            Var subtaskOutput = ( Var ) problem.getSubGoal().getOutputs().get( i );
-            for ( Iterator iter = problem.getAllRels().iterator(); iter.hasNext(); ) {
-                Rel rel = (Rel) iter.next();
-                if( rel.getInputs().get(0) == subtaskOutput ) {
-                    iter.remove();
-                }
-            }
-        }
-
-        /*
-         * while iterating through hashset, items cant be removed from/added to
-         * that set. Theyre collected into these sets and added/removedall
-         * together after iteration is finished
-         */
-        HashSet newVars = new HashSet();
-        HashSet removableVars = new HashSet();
-        HashSet removableTargets = new HashSet();
-
-        boolean changed = true;
-        boolean foundSubGoal = false;
-
-        db.p( "------Starting linear planning--------" );
-        int counter = 1;
-
-        while ( ( ( !computeAll && changed && !problem.getTargetVars().isEmpty() )
-                  || ( changed && computeAll ) )
-                && !foundSubGoal ) {
-
-            db.p( "----Iteration " + counter + " ----" );
-            counter++;
-            changed = false;
-
-            //remove targets if they're already known
-            for ( Iterator targetIter = problem.getTargetVars().iterator();
-                                        targetIter.hasNext(); ) {
-
-                Var targetVar = ( Var ) targetIter.next();
-
-                if ( problem.getKnownVars().contains( targetVar ) ) {
-
-                    removableTargets.add( targetVar );
-                }
-            }
-
-            problem.getTargetVars().removeAll( removableTargets );
-
-            //iterate through all knownvars
-            db.p( "Known:" + problem.getKnownVars() );
-            db.p( "Targets:" + problem.getTargetVars() );
-            for ( Iterator knownVarsIter = problem.getKnownVars().iterator(); knownVarsIter.hasNext(); ) {
-
-                Var var = ( Var ) knownVarsIter.next();
-                // Check the relations of all components
-                for ( Iterator relIter = var.getRels().iterator(); relIter.hasNext(); ) {
-                    Rel rel = ( Rel ) relIter.next();
-
-                    db.p( "rel: " + rel + " " + rel.unknownInputs + " " + rel.hashCode() );
-                    if ( problem.containsRel( rel ) ) {
-                        rel.unknownInputs--;
-
-                        removableVars.add( var );
-                        if ( rel.unknownInputs == 0 ) {
-                            db.p( "rel on see " + rel );
-
-                            boolean relIsNeeded = false;
-
-
-                            for ( int i = 0; i < rel.getOutputs().size(); i++ ) {
-                                db.p( "tema outputsid " + rel.getOutputs() );
-                                Var relVar = ( Var ) rel.getOutputs().get( i );
-                                if ( !foundVars.contains( relVar ) ) {
-                                    relIsNeeded = true;
-                                }
-                                if ( problem.getTargetVars().contains( relVar ) ) {
-                                    foundSubGoal = true;
-                                }
-                            }
-                            if ( rel.getOutputs().isEmpty() ) {
-                                relIsNeeded = true;
-                            }
-                            if ( relIsNeeded ) {
-                                db.p( "ja vajati " + rel );
-                                if ( !rel.getOutputs().isEmpty() ) {
-                                    newVars.addAll( rel.getOutputs() );
-                                    foundVars.addAll( rel.getOutputs() );
-                                }
-                                algorithm.add( rel );
-                            }
-
-                            problem.getAllRels().remove( rel );
-                            changed = true;
-                        }
-                    }
-                }
-            }
-
-            db.p( "foundvars " + foundVars );
-            problem.getKnownVars().addAll( newVars );
-            problem.getKnownVars().removeAll( removableVars );
-            newVars.clear();
-        }
-
-        problem.getTargetVars().addAll( allTargetVarsBackup );
-
-        db.p( "Sub algorithm" + algorithm.toString() + "\n" );
-
-        return foundSubGoal || problem.getTargetVars().isEmpty();
+        return ( isSubtask )
+                ? foundSubGoal
+                : problem.getTargetVars().isEmpty();
     }
 
     private boolean subgoalBackwardSearch( Problem problem,
@@ -301,7 +207,7 @@ public class Planner {
         int counter = 1;
         boolean isSolved = false;
         ProblemTree tree = new ProblemTree( problem );
-        System.err.println( "tree: " + tree );
+        db.p( "tree: " + tree );
         start: do {
             HashSet nodeSet = tree.breadthWalkthrough( tree.currentDepth );
             for ( Iterator iter = nodeSet.iterator(); iter.hasNext(); ) {
@@ -310,27 +216,32 @@ public class Planner {
                 Problem pr = node.getProblem();
 
                 db.p( "Problem: " + pr.toString() );
-                if ( linearSubtaskSearch( pr, computeAll, false ) ) {
+                if ( linearForwardSearch( pr, computeAll, true, false ) ) {
                     pr.addToAlgorithm( pr.getSubGoal().getParentRel() );
                     pr.getKnownVars().addAll( pr.getSubGoal().getParentRel().getOutputs() );
 
+                    isSolved = true;
+
                     while( pr.currentDepth > 1 ) {
                         pr.currentDepth--;
-                        if( linearSubtaskSearch( pr, computeAll, true ) ) {
+                        if( linearForwardSearch( pr, computeAll, true, true ) ) {
                             pr.addToAlgorithm( pr.getSubGoal().getParentRel() );
                             pr.getKnownVars().addAll( pr.getSubGoal().getParentRel().getOutputs() );
+                            isSolved = true;
+                        } else {
+                            isSolved = false;
                         }
                     }
 
-                    m_problem = pr;
-                    isSolved = true;
-                    continue start;
-
+                    if( isSolved ) {
+                        m_problem = pr;
+                        continue start;
+                    }
                 }
             }
         } while ( !isSolved && tree.increaseDepth() );
 
-        return true;
+        return isSolved;
 
     }
 
