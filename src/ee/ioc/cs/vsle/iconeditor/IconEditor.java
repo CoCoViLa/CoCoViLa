@@ -124,12 +124,12 @@ public class IconEditor
 		moveY = moveY * RuntimeProperties.nudgeStep;
 		for (int i = 0; i < shapeList.getSelected().size(); i++) {
 			Shape s = (Shape) shapeList.getSelected().get(i);
-			s.setPosition(s.getX() + moveX, s.getY() + moveY);
+			s.setPosition(moveX, moveY);
 		}
 		for (int i = 0; i < ports.size(); i++) {
 			IconPort p = (IconPort) ports.get(i);
 			if (p.isSelected()) {
-				p.setPosition(p.getX() + moveX, p.getY() + moveY);
+				p.setPosition(moveX, moveY);
 			}
 		}
 		repaint();
