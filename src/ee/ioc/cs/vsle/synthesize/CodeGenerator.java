@@ -7,7 +7,7 @@ public class CodeGenerator {
 
     private static String offset = "";
 
-    private static final String OT_TAB = "        ";
+    public static final String OT_TAB = "        ";
 
     private static final TypeToken TOKEN_INT = new TypeToken( "int", "Integer", "intValue" );
     private static final TypeToken TOKEN_DOUBLE = new TypeToken( "double", "Double", "doubleValue" );

@@ -13,7 +13,7 @@ import java.util.ArrayList;
  * @author Ando Saabas
  * @version 1.0
  */
-class AnnotatedClass {
+public class AnnotatedClass {
 
 	String name;
 	AnnotatedClass parent;
@@ -76,6 +76,16 @@ class AnnotatedClass {
 				return true;
 		}
 		return false;
+	}
+
+	public ClassField getFieldByName(String fieldName) {
+		ClassField f;
+		for (int j = 0; j < fields.size(); j++){
+            f = (ClassField)fields.get(j);
+			if (f.name.equals(fieldName))
+				return f;
+		}
+		return null;
 	}
 }
 

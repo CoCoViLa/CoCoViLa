@@ -192,22 +192,19 @@ class Rel implements Cloneable,
 						assigns = "Object " + input.name + " = null";
 					} else {
 
-						db.p("BOO");
-						assigns += input.field.vars.get(0) + input.name +
+						assigns += ((ClassField) input.field.vars.get(0)).type + "[] " + input.name +
 							" = new " +
-							input.field.arrayType() + "[" + input.field.vars.size() +
+							((ClassField) input.field.vars.get(0)).type + "[" + input.field.vars.size() +
 							"];\n";
-						/*for (int i = 0; i < ip.field.vars.size(); i++) {
-							s1 = ((ClassField) ip.field.vars.get(i)).toString();
-							assigns += "        " + " TEMP" +
-								Integer.toString(aliasNr) + "[" +
-								Integer.toString(i) + "] = " +
-								getObject(ip.object) + s1 +
+						for (int k = 0; k < input.field.vars.size(); k++) {
+							String s1 = ((ClassField) input.field.vars.get(k)).toString();
+							assigns +=  CodeGenerator.OT_TAB+CodeGenerator.OT_TAB+ input.name +
+								"[" +
+								Integer.toString(k) + "] = " +
+								s1 +
 								";\n";
 						}
-						assigns += "        " + op + " = " + " TEMP" +
-							Integer.toString(aliasNr);
-						//RelType.auxVarCounter++;*/
+						assigns += CodeGenerator.OT_TAB +CodeGenerator.OT_TAB;
 					}
 				}
 			}

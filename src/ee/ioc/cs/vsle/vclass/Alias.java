@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.synthesize.UnknownVariableException;
 import ee.ioc.cs.vsle.synthesize.ClassList;
+import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 
 import java.util.ArrayList;
 
@@ -41,11 +42,23 @@ public class Alias extends ClassField {
 			if (var != null) {
 				vars.add(var);
 			} else if (input[i].indexOf(".") >= 1) {
+				String[] split = input[i].trim().split("\\.", -1);
+				ClassField thisVar = getVar(split[0], varList);
+				AnnotatedClass ac = classList.getType(thisVar.type);
+                String newType = "";
+				for (int k = 1; k < split.length; k++) {
+					ClassField cf = classList.getType(thisVar.type).getFieldByName(split[k]);
+					if (cf != null) {
+						newType = cf.type;
+					}
+					thisVar = cf;
+				}
 
-				ClassField cf = new ClassField();
 
-				cf.name = input[i];
-				vars.add(cf);
+				ClassField cfNew = new ClassField();
+                cfNew.type = newType;
+				cfNew.name = input[i];
+				vars.add(cfNew);
 			} else if (input[i].startsWith("*.")) {
 				ClassField cf = new ClassField();
 				cf.name = input[i];
