@@ -105,7 +105,7 @@ public class Synthesizer {
 						rel.flag--;
 						removableComponents.add(var);
 						if (rel.flag == 0) {
-							// ee.ioc.cs.editor.util.db.p("rel on see "+ rel);
+							db.p("rel on see "+ rel);
 
 							boolean relIsNeeded = false;
 
