@@ -1,3 +1,5 @@
+//vsledit
+
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.editor.Menu;
