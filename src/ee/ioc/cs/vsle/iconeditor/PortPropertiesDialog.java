@@ -64,6 +64,8 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		pnlAttrs.add(lblIsStrict);
 		pnlAttrs.add(checkIsStrict);
 
+		cbPortType.setEditable(true);
+		cbPortType.addItem("");
 		cbPortType.addItem("int");
 		cbPortType.addItem("Object");
 		cbPortType.addItem("String");
@@ -108,6 +110,10 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	private void setPortProperties() {
 		boolean valid = true;
 		String portName = tfPortName.getText();
+
+       // Check if the port name is defined. Otherwise display the
+	   // message dialog to the user informing that the port name is
+	   // a required parameter.
 		if (portName != null && portName.trim().length() > 0) {
 			portName = portName.trim();
 		} else {
@@ -117,10 +123,30 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			tfPortName.requestFocus();
 			valid = false;
 		}
+
+        // If the port name was defined, check if the port type is defined. Otherwise
+		// if the port type was not defined, display the message dialog to the user
+		// informing that the port type is a required parameter.
+		if(valid) {
+		  if (cbPortType != null && cbPortType.getSelectedItem() != null &&
+			  cbPortType.getSelectedItem().toString().trim().length() > 0) {
+			setPortType(cbPortType.getSelectedItem().toString().trim());
+		  }
+		  else {
+			JOptionPane info_pane = new JOptionPane();
+			info_pane.showMessageDialog(null, "Please define port type.");
+			cbPortType.requestFocus();
+			valid = false;
+		  }
+		}
+
+        // Set other port properties.
 		setPortName(portName);
 		setAreaConn(checkAreaConn.isSelected());
 		setStrict(checkIsStrict.isSelected());
-		setPortType(cbPortType.getSelectedItem().toString());
+
+        // The port was defined correctly and we are creating a new port (ie not editing
+		// an already existing one), draw the new port with its properties on the canvas.
 		if (port == null) {
 			if (valid) editor.mListener.drawPort(getPortName(), isAreaConn(), isStrict(), getPortType());
 		} else {
@@ -129,6 +155,10 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			port.area = isAreaConn();
 			port.strict = isStrict();
 		}
+
+        // If the parameters were defined correctly, hide the dialog. Otherwise
+		// keep the dialog visible, allowing the user correct any noted errors in
+		// port parameters.
 		setVisible(!valid);
 	} // setPortProperties
 

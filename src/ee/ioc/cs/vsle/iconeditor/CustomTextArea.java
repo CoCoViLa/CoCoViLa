@@ -9,15 +9,15 @@ public class CustomTextArea extends JTextArea {
 	private boolean antialiasingOn;
 
 	public CustomTextArea() {
-	}
+	} // CustomTextArea
 
 	public void setTextAntialiasing(boolean b) {
 		this.antialiasingOn = b;
-	}
+	} // setTextAntialiasing
 
 	public boolean isTextAntialiased() {
 		return this.antialiasingOn;
-	}
+	} // isTextAntialiased
 
 	protected void paintComponent(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
@@ -31,5 +31,6 @@ public class CustomTextArea extends JTextArea {
 		// Paint the default look.
 		super.paintComponent(g2);
 
-	}
-}
+	} // paintComponent
+
+} // end of class

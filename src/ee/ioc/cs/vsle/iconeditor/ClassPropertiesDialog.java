@@ -525,10 +525,10 @@ public class ClassPropertiesDialog extends JDialog {
  } // setEmptyValuesValid
 
  /**
-  * For debugging.
+  * Main method for module unit testing and debugging.
   */
  public static void main(String[] args) {
    new ClassPropertiesDialog(false);
  } // main
 
-}
+} // end of class.

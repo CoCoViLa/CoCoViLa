@@ -19,21 +19,28 @@ import java.io.IOException;
 
 public class AboutDialog extends JDialog implements ActionListener {
 
+    // Panels for the dialog components.
 	private JPanel pnlMain = new JPanel();
 	private JPanel pnlButtons = new JPanel();
 
+    // Text area for the licensing information text.
 	private JTextArea taLicenseText = new JTextArea();
 
-	private JScrollPane scrollPane = new JScrollPane(taLicenseText,
-		JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-		JScrollPane.
-		HORIZONTAL_SCROLLBAR_AS_NEEDED);
+    // Scroll pane for the text area holding the licensing information.
+	private JScrollPane scrollPane = new JScrollPane(taLicenseText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
+    // Action buttons.
 	private JButton bttnOk = new JButton("OK");
 
+    // Application references.
 	IconEditor iEd;
 	Editor eEd;
 
+    /**
+     * Dialog constructor.
+     * @param iEd - Icon Editor application reference.
+     * @param eEd - Scheme Editor application reference.
+     */
 	public AboutDialog(IconEditor iEd, Editor eEd) {
 		this.iEd = iEd;
 		this.eEd = eEd;
@@ -55,8 +62,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 		getContentPane().add(pnlMain);
 		setSize(new Dimension(340, 360));
 		setResizable(false);
-		if (iEd != null)
-			setLocationRelativeTo(iEd);
+		if (iEd != null) setLocationRelativeTo(iEd);
 		else if (eEd != null) setLocationRelativeTo(eEd);
 
 		setVisible(true);
@@ -69,7 +75,7 @@ public class AboutDialog extends JDialog implements ActionListener {
 			} // end actionPerformed
 		}); // end bttnOk Action Listener
 
-	} // PortPropertiesDialog
+	} // AboutDialog
 
 	/**
 	 * Get the Lincese text from a text file specified
@@ -98,14 +104,14 @@ public class AboutDialog extends JDialog implements ActionListener {
 	 * @param evt ActionEvent - action event.
 	 */
 	public void actionPerformed(ActionEvent evt) {
-	}
+	} // actionPerformed.
 
 	/**
-	 * Main method for module unit testing.
+	 * Main method for module unit testing and debugging.
 	 * @param args String[] - command line arguments.
 	 */
 	public static void main(String[] args) {
-		AboutDialog a = new AboutDialog(new IconEditor(), null);
+		new AboutDialog(new IconEditor(), null);
 	} // main
 
-}
+} // end of class

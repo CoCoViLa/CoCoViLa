@@ -23,7 +23,7 @@ public class ClassFieldsTable extends JTable {
    * Table constructor.
    */
   public ClassFieldsTable() {
-  }
+  } // ClassFieldsTable
 
   /**
    * Set DBResult to application's JTable component.
@@ -57,6 +57,6 @@ public class ClassFieldsTable extends JTable {
       column.setMinWidth(column.getPreferredWidth());
 
     }
-  }
+  } // setData
 
 } // end class ClassFieldsTable

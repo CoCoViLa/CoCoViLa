@@ -24,12 +24,13 @@ public class ClassFieldsTableModel extends AbstractTableModel {
   private static final int iTYPE = 1;
   private static final int iVALUE = 2;
 
-  /** class CAHoldersTableModel constructor
+  /**
+   * Class constructor
    *  @param dbr DBResult
    **/
   public ClassFieldsTableModel(DBResult dbr) {
     RuntimeProperties.dbrClassFields = dbr;
-  }
+  } // ClassFieldsTableModel
 
   /* Sorts values displayed in a table by a specified column.
    * Uses class global variable "direction" with values "ascending" and "descending"
@@ -49,7 +50,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
     }
     fill(); // fill table with a sorted DBResult.
     return RuntimeProperties.dbrClassFields;
-  }
+  } // sort
 
   /**
    * Täidab tabeli väärtustega varem leitud result set'i põhjal.
@@ -64,7 +65,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
       row[iVALUE] = RuntimeProperties.dbrClassFields.getField(RuntimeProperties.classDbrFields[2], i);
     }
     fireTableDataChanged();
-  }
+  } // fill
 
   /**
    * Tagastab päringu veergude arvu.
@@ -72,7 +73,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
    */
   public int getColumnCount() {
     return RuntimeProperties.classDbrFields.length;
-  }
+  } // getColumnCount
 
   /**
    * Tagastab päringu ridade arvu.
@@ -80,7 +81,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
    */
   public int getRowCount() {
     return RuntimeProperties.dbrClassFields.getRowCount();
-  }
+  } // getRowCount
 
   /**
    * Tagastab aplikatsiooni runtime properties klassis määratud tabeli veergude pealkirjad.
@@ -89,7 +90,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
    */
   public String getColumnName(int col) {
     return RuntimeProperties.classTblFields[col];
-  }
+  } // getColumnName
 
   /**
    * Tagastab aplikatsiooni runtime properties klassis määratud dbresult-i veergude pealkirjad.
@@ -98,7 +99,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
    */
   public String getDbrColumnName(int col) {
     return RuntimeProperties.dbrClassFields.getColumnName(col + 1);
-  }
+  } // getDbrColumnName
 
   /**
    * Päringu tulemusena ning muudel põhjustel tabeli refreshimist toetav meetod.
@@ -108,7 +109,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
    */
   public void setValueAt(Object o, int row, int col) {
     RuntimeProperties.dbrClassFields.setField(col + 1, row + 1, o);
-  }
+  } // setValueAt
 
   /** Päringu tulemuste redigeerimine tabelis esitamiseks sobivaks.
    *
@@ -118,7 +119,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
    */
   public Object getValueAt(int row, int col) {
     return RuntimeProperties.dbrClassFields.getFieldAsObject(col + 1, row + 1);
-  }
+  } // getValueAt
 
   /**
    * Returns class of table column.
@@ -127,7 +128,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
    */
   public Class getColumnClass(int i) {
     return Object.class;
-  }
+  } // getColumnClass
 
   /**
    * Specify if the cell is editable or not. No need to specify if your table is generally not editable.
@@ -137,6 +138,6 @@ public class ClassFieldsTableModel extends AbstractTableModel {
    */
   public boolean isCellEditable(int row, int col) {
 	 return true;
-  }
+  } // isCellEditable
 
-} // end class CAHoldersTableModel
+} // end of class
