@@ -200,7 +200,7 @@ public class Connection implements Serializable {
 		xml += "  <breakpoints>\n";
 		for (int i = 0; i < breakPoints.size(); i++) {
 			Point point = (Point) breakPoints.get(i);
-			xml += StringUtil.indent(4) + "<point x=\"" + point.x + " y=\"" + point.y + "\"/>\n";
+			xml += StringUtil.indent(4) + "<point x=\"" + point.x + "\" y=\"" + point.y + "\"/>\n";
 		}
 		xml += "  </breakpoints>\n";
 		xml += "</connection>\n";

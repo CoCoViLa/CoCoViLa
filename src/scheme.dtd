@@ -1,0 +1,36 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<!ELEMENT scheme	(object+, connection+)>
+<!ELEMENT object 	(properties, fields+)>
+<!ELEMENT fields 	(field*)>
+<!ELEMENT connection 	(breakpoints)>
+<!ELEMENT breakpoints	(point+)>
+<!ELEMENT field 	EMPTY>
+<!ELEMENT properties 	EMPTY>
+<!ELEMENT point		EMPTY>
+
+<!ATTLIST connection
+	obj1		CDATA	#REQUIRED
+	port1		CDATA	#REQUIRED
+	obj2		CDATA	#REQUIRED
+	port2		CDATA	#REQUIRED>
+
+<!ATTLIST object
+	name		CDATA	#REQUIRED
+	type		CDATA	#IMPLIED>
+<!ATTLIST properties
+	x		CDATA	#IMPLIED
+	y		CDATA	#IMPLIED
+	width		CDATA	#IMPLIED
+	height		CDATA	#IMPLIED
+	xsize		CDATA	#IMPLIED
+	ysize		CDATA	#IMPLIED
+	strict		CDATA	#IMPLIED
+	>
+<!ATTLIST field 
+        name		CDATA   #REQUIRED
+        type		CDATA   #IMPLIED
+        value		CDATA   #IMPLIED>
+<!ATTLIST point
+        x		CDATA   #REQUIRED
+        y		CDATA   #REQUIRED>
+

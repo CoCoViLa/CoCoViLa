@@ -404,13 +404,22 @@ public class Canvas extends JPanel implements ActionListener {
 
 	public void loadScheme(File file) {
 		SchemeLoader sl = new SchemeLoader(file, vPackage);
+		scheme = sl.getScheme();
+		connections = scheme.connections;
+		objects = scheme.objects;
+		mListener.state = State.selection;
+		repaint();
+
 	} // loadScheme
 
 	public void saveScheme(File file) {
 		try {
 			PrintWriter out = new PrintWriter(
 				new BufferedWriter(new FileWriter(file)));
+			out.println("<?xml version='1.0' encoding='utf-8'?>");
 
+			out.println("<!DOCTYPE scheme SYSTEM \"scheme.dtd\">");
+            out.println("<scheme>");
 			for (int i = 0; i < objects.size(); i++) {
 				GObj obj = (GObj) objects.get(i);
 				out.print(obj.toXML());
@@ -419,6 +428,7 @@ public class Canvas extends JPanel implements ActionListener {
 				Connection con = (Connection) connections.get(i);
 				out.print(con.toXML());
 			}
+			out.println("</scheme>");
 			out.close();
 		} catch (Exception e) {
 			e.printStackTrace();

@@ -194,7 +194,7 @@ public class ClassField implements Cloneable, Serializable {
 	public String toXML() {
 		String xml = "<field name=\"" + name + "\" type=\"" + type + "\"";
 		if (value != null)
-			xml += "value=\"" + value + "\"";
+			xml += " value=\"" + value + "\"";
 		xml += "/>\n";
 		return xml;
 	}
