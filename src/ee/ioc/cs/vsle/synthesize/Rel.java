@@ -114,15 +114,7 @@ class Rel implements Cloneable,
                 params += "(";
             Var var;
             int j = 0;
-            int alias_nr = 0;
 
-            //counting the aliases so i can deduct the needed numbers from ALIASTMP_NR
-            for ( int i = 0; i < inputs.size(); i++ ) {
-                var = ( Var ) inputs.get( i );
-                if ( var.type.equals( "alias" ) ) {
-                    alias_nr++;
-                }
-            }
             String paramString = "";
             for ( int i = 0; i < inputs.size(); i++ ) {
 
@@ -130,9 +122,7 @@ class Rel implements Cloneable,
 
                 if ( !var.type.equals( "void" ) ) {
                     if ( var.type.equals( "alias" ) ) {
-                        int use_nr = CodeGenerator.ALIASTMP_NR - alias_nr;
-                        paramString = CodeGenerator.ALIASTMP + var.name + use_nr;
-                        alias_nr--;
+						paramString = CodeGenerator.ALIASTMP + var.name + relNumber;
                     } else {
                         paramString = var.toString();
                     }
@@ -382,7 +372,7 @@ class Rel implements Cloneable,
                         assigns = "Object " + input.name + " = null";
                     } else {
 
-                        String alias_tmp = CodeGenerator.ALIASTMP + input.name + CodeGenerator.ALIASTMP_NR++;
+                        String alias_tmp = CodeGenerator.ALIASTMP + input.name + relNumber;
 						assigns += ( ( ClassField ) input.field.vars.get( 0 ) ).type + "[] " + alias_tmp +
                                 " = new " +
                                 ( ( ClassField ) input.field.vars.get( 0 ) ).type + "[" +
