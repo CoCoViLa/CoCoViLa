@@ -109,7 +109,13 @@ public class Planner {
                 m_subtaskRels.add(rel);
                 removableAxioms.add(rel);
             }
-
+        }
+        relIter= m_allRels.iterator();
+        while(relIter.hasNext()) {
+            rel = (Rel)relIter.next();
+            if(rel.subtaskFlag > 0 && rel.inputs.size() > 0) {
+                m_subtaskRels.add(rel);
+            }
         }
         m_axioms.removeAll(removableAxioms);
         db.p("All Axioms:" + m_axioms);
