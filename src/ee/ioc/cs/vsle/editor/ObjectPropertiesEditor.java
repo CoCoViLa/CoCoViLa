@@ -78,7 +78,7 @@ public class ObjectPropertiesEditor extends JFrame
 				comboBox.addActionListener(this);
 
 				if (field.value != "" && field.value != null) {
-					String[] split = field.value.split("�");
+					String[] split = field.value.split("%%");
 					for (int j = 0; j < split.length; j++) {
 						comboBox.addItem(split[j]);
 					}
@@ -194,7 +194,7 @@ public class ObjectPropertiesEditor extends JFrame
 				field = (ClassField) arrayNameList.get(i);
 				String s = "";
 				for (int j = 0; j < comboBox.getItemCount(); j++) {
-					s += (String) comboBox.getItemAt(j) + "�";
+					s += (String) comboBox.getItemAt(j) + "%%";
 				}
 				if (!s.equals("")) {
 					field.value = s;

@@ -35,11 +35,6 @@ public class IconPort implements Cloneable, Serializable {
   boolean watched = false;
 
   /**
-   * Percentage for resizing, 1 means real size.
-   */
-  private float size = 1;
-
-  /**
    * Class constructor. Constructs new port for the Icon Editor.
    * @param name String - port name.
    * @param x int - port x coordinate.
@@ -81,7 +76,14 @@ public class IconPort implements Cloneable, Serializable {
 
   public String toText() {
 	return "PORT:"+getX()+":"+getY()+":"+isArea()+":"+isStrict()+":"+getName();
-  }
+  } // toText
+
+  public boolean isInsideRect(int x1, int y1, int x2, int y2) {
+	if (x1 < x && y1 < y && x2 > (x + width) && y2 > (y + height)) {
+		return true;
+	}
+	return false;
+  } // isInsideRect
 
   /**
    * Set size using zoom multiplication.

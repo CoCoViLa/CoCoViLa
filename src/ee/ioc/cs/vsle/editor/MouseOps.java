@@ -659,7 +659,7 @@ class MouseOps
 			  editor.objects.sendToBack(editor.currentObj);
 			  editor.repaint();
 			} else if (e.getActionCommand().equals(Menu.SPECIFICATION)) {
-				ProgramTextEditor programEditor = new ProgramTextEditor(editor.connections, editor.objects, editor.vPackage);
+				ProgramTextEditor programEditor = new ProgramTextEditor(editor.connections, editor.objects, editor.vPackage, editor);
 
 				programEditor.setSize(550, 450);
 				programEditor.setVisible(true);

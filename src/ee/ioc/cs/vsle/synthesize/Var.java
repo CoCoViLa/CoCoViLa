@@ -1,8 +1,7 @@
 package ee.ioc.cs.vsle.synthesize;
 
 import ee.ioc.cs.vsle.vclass.ClassField;
-
-import java.util.HashSet;
+ import java.util.HashSet;
 
 /**
  * <p>Title: ee.ioc.cs.editor.synthesize.Var</p>
@@ -12,13 +11,13 @@ import java.util.HashSet;
  * @author  Ando Saabas
  * @version 1.0
  */
-class Var {
+public class Var {
 
 	HashSet rels = new HashSet();
-	ClassField field;
-	String type;
-	String object;
-	String name;
+	public ClassField field;
+	public String type;
+	public String object;
+	public String name;
 
 	/**
 	 * <UNCOMMENTED>

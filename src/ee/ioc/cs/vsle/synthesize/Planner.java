@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.synthesize;
 
 import java.util.*;
 import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.editor.ProgramRunner;
 
 /**
  This class is responsible for  planning.
@@ -221,6 +222,7 @@ public class Planner {
             algorithm = optimizer.optimize(algorithm, allTargetVars);
         }
         db.p("algorithm" + algorithm.toString() + "\n");
+		ProgramRunner.foundVars = m_foundVars;
         return solved;
 
     }

@@ -317,7 +317,8 @@ class IconMouseOps
         boolean portSelected = false;
 
         // Check if clicked inside a port.
-        portSelected = selectPort();
+		boolean keepSelection = e.isShiftDown();
+        portSelected = selectPort(keepSelection);
 
         if(!portSelected) {
 		   Shape shape = editor.checkInside(x, y);
@@ -363,9 +364,10 @@ class IconMouseOps
    * If, then return a boolean value that the
    * implementing methods can use for not selecting
    * the underlying shapes etc.
+   * @param keepSelection - keep the already selected ports selected.
    * @return boolean - mouse was clicked on a port or not.
    */
-  public boolean selectPort() {
+  public boolean selectPort(boolean keepSelection) {
     boolean portSelected = false;
     if (editor.ports != null && editor.ports.size() > 0) {
       for (int i = 0; i < editor.ports.size(); i++) {
@@ -375,7 +377,9 @@ class IconMouseOps
           state = State.drag;
           portSelected = true;
         } else {
-          p.setSelected(false);
+		  if(!keepSelection) {
+			p.setSelected(false);
+		  }
         }
       }
     }
@@ -400,7 +404,7 @@ class IconMouseOps
         boolean portSelected = false;
 
         // Check if we have clicked inside a port.
-        portSelected = selectPort();
+        portSelected = selectPort(true);
 
         if(!portSelected) {
           shape = editor.checkInside(editor.mouseX, editor.mouseY);
@@ -471,7 +475,7 @@ class IconMouseOps
         for(int i=0;i<editor.ports.size();i++) {
           IconPort p = (IconPort)editor.ports.get(i);
           if(p.isSelected()) {
-            p.setPosition(x,y);
+            p.setPosition(p.getX() + (x - editor.mouseX),p.getY() + (y - editor.mouseY));
           }
         }
       }
@@ -802,15 +806,14 @@ class IconMouseOps
           editor.drawingArea.setGridVisible(isGridVisible);
         }
 		else if (e.getActionCommand().equals(Menu.CLASS_PROPERTIES)) {
-		  ClassPropertiesDialog c1 = new ClassPropertiesDialog();
-		  c1.setEmptyValuesValid(true);
-		  c1.setVisible(true);
+		  new ClassPropertiesDialog(true);
 		}
         else if(e.getActionCommand().equals(Menu.CLONE)) {
           editor.cloneObject();
         }
         else if(e.getActionCommand().equals(Menu.SELECT_ALL)) {
           editor.selectAllObjects(true);
+   		   editor.selectAllPorts(true);
         }
         else if (e.getActionCommand().equals(Menu.LOAD_SCHEME)) {
 		  editor.loadScheme();

@@ -32,7 +32,7 @@ public class SpecGenerator {
 						s.append(
 							"        " + obj.getName() + "." + field.name
 							+ " = {");
-						String[] split = field.value.split("�");
+						String[] split = field.value.split("%%");
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append(split[k]);
@@ -45,7 +45,7 @@ public class SpecGenerator {
 						s.append(
 							"        " + obj.getName() + "." + field.name
 							+ " = {");
-						String[] split = field.value.split("�");
+						String[] split = field.value.split("%%");
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append("\"" + split[k] + "\"");

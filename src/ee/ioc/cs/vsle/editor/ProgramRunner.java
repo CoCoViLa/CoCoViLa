@@ -6,17 +6,18 @@ import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.synthesize.Var;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
+import java.util.*;
 import javax.swing.JTextArea;
 
 /**
  */
 public class ProgramRunner {
 	Object genObject;
+	public static HashSet foundVars;
 
 	void runPropagate(Object genObject, ObjectList objects) {
 		try {
@@ -34,6 +35,9 @@ public class ProgramRunner {
 			float fl;
 			boolean b;
 
+			String fullName;
+			Var var;
+			boolean varIsComputed;
 			// ee.ioc.cs.editor.util.db.p(genClass.getClass().getFields()[0]);
 			for (int i = 0; i < objects.size(); i++) {
 				obj = (GObj) objects.get(i);
@@ -45,30 +49,38 @@ public class ProgramRunner {
 						clasType = f.getType();
 						f2 = clasType.getDeclaredField(field.name);
 						Class c = f2.getType();
+						fullName = obj.name + "." + field.name;
+						varIsComputed = false;
+						if (foundVars != null) {
+							Iterator allVarsIter = foundVars.iterator();
+							while (allVarsIter.hasNext()) {
+								var = (Var) allVarsIter.next();
 
-						if (c.toString().equals("int")) {
-							// textArea.append((String)watchFields.get(i) +": "+f.getInt(lastObj)+"\n");
-							in = f2.getInt(lastObj);
-							if (in != 0) {
+								if (fullName.equals(var.object.toString().substring(5) + "." + var.field)) {
+									varIsComputed = true;
+								}
+							}
+						}
+						if (varIsComputed) {
+							if (c.toString().equals("int")) {
+								in = f2.getInt(lastObj);
 								field.value = Integer.toString(in);
-							}
-
-						} else if (c.toString().equals("double")) {
-							d = f2.getDouble(lastObj);
-							if (d != 0) {
+							} else if (c.toString().equals("double")) {
+								d = f2.getDouble(lastObj);
 								field.value = Double.toString(d);
-							}
-
-						} else if (c.toString().equals("boolean")) {
-							b = f2.getBoolean(lastObj);
-							field.value = Boolean.toString(b);
-						} else if (c.toString().equals("char")) {// field.value =  ch;
-						} else if (c.toString().equals("float")) {
-							fl = f2.getFloat(lastObj);
-							if (fl != 0) {
+							} else if (c.toString().equals("boolean")) {
+								b = f2.getBoolean(lastObj);
+								field.value = Boolean.toString(b);
+							} else if (c.toString().equals("char")) {
+								char ch = f2.getChar(lastObj);
+								field.value = Character.toString(ch);
+							} else if (c.toString().equals("float")) {
+								fl = f2.getFloat(lastObj);
 								field.value = Float.toString(fl);
+							} else {// it is type object
+								Object o = f2.get(lastObj);
+								field.value = o.toString();
 							}
-						} else {// it is type object
 						}
 						//field.updateGraphics();
 					}
@@ -115,28 +127,28 @@ public class ProgramRunner {
 						if (c.toString().equals("int")) {
 							// textArea.append((String)watchFields.get(i) +": "+f.getInt(lastObj)+"\n");
 							runResultArea.append(
-								(String) watchFields.get(i) + ": "
-								+ f.getInt(lastObj) + "\n");
+									(String) watchFields.get(i) + ": "
+									+ f.getInt(lastObj) + "\n");
 						} else if (c.toString().equals("double")) {
 							runResultArea.append(
-								(String) watchFields.get(i) + ": "
-								+ f.getDouble(lastObj) + "\n");
+									(String) watchFields.get(i) + ": "
+									+ f.getDouble(lastObj) + "\n");
 						} else if (c.toString().equals("boolean")) {
 							runResultArea.append(
-								(String) watchFields.get(i) + ": "
-								+ f.getBoolean(lastObj) + "\n");
+									(String) watchFields.get(i) + ": "
+									+ f.getBoolean(lastObj) + "\n");
 						} else if (c.toString().equals("char")) {
 							runResultArea.append(
-								(String) watchFields.get(i) + ": "
-								+ f.getChar(lastObj) + "\n");
+									(String) watchFields.get(i) + ": "
+									+ f.getChar(lastObj) + "\n");
 						} else if (c.toString().equals("float")) {
 							runResultArea.append(
-								(String) watchFields.get(i) + ": "
-								+ f.getFloat(lastObj) + "\n");
+									(String) watchFields.get(i) + ": "
+									+ f.getFloat(lastObj) + "\n");
 						} else {
 							runResultArea.append(
-								(String) watchFields.get(i) + ": "
-								+ f.get(lastObj) + "\n");
+									(String) watchFields.get(i) + ": "
+									+ f.get(lastObj) + "\n");
 						}
 					}
 

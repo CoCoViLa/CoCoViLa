@@ -34,7 +34,7 @@ public class RelObj extends GObj{
 				ClassField f = (ClassField) getFields().get(i);
 				if (f.value != null) {
 					if (f.isPrimOrStringArray()) {
-						String[] split = f.value.split("�");
+						String[] split = f.value.split("%%");
 						for (int j = 0; j < split.length; j++) {
 							g.drawString(split[j], getX() + 5, getY() + 8 + textOffset);
 							textOffset += 12;

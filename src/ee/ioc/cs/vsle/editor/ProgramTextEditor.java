@@ -39,9 +39,11 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 	ProgramRunner runner;
 	ClassList classList;
 	String mainClassName = new String();
+    Editor editor;
 
-	public ProgramTextEditor(ArrayList relations, ObjectList objs, VPackage vPackage) {
+	public ProgramTextEditor(ArrayList relations, ObjectList objs, VPackage vPackage, Editor ed) {
 		super();
+		editor =ed;
 		this.vPackage = vPackage;
 		objects = GroupUnfolder.unfold(objs);
 
@@ -275,6 +277,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 			if (runnableObject != null) {
 				runner.runPropagate(runnableObject, objects);
 			}
+			editor.repaint();
 		}
 		if (e.getSource() == invoke) {
 			ArrayList watchFields = watchableFields(objects);
@@ -289,7 +292,9 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 				} else {
 					runner.run(watchFields, runResultArea);
 				}
+				runner.runPropagate(runnableObject, objects);
 			}
+			editor.repaint();
 		}
 	}
 

@@ -1,6 +1,6 @@
 package ee.ioc.cs.vsle.vclass;
 
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.util.*;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -249,7 +249,7 @@ public class GObj implements Serializable, Cloneable {
 				ClassField f = (ClassField) getFields().get(i);
 				if (f.value != null) {
 					if (f.isPrimOrStringArray()) {
-						String[] split = f.value.split("�");
+						String[] split = f.value.split("%%");
 						for (int j = 0; j < split.length; j++) {
 							g.drawString(split[j], getX() + 5, getY() + 8 + textOffset);
 							textOffset += 12;
@@ -282,16 +282,31 @@ public class GObj implements Serializable, Cloneable {
 			}
 		}
 
-		for (int i = 0; i < fields.size(); i++) {
+		for (int i = 0; i < fields.size(); i++) { //print all field values
 			ClassField field = (ClassField)fields.get(i);
-
 			if (field.defaultGraphics != null) {
-				field.defaultGraphics.drawSpecial(xModifier ,
-					yModifier, getXsize(), getYsize(), g, field.name, field.value);
+				if (!TypeUtil.isArray(field.type)) {
+					field.defaultGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g, field.name, field.value);
+				} else {
+					String[] split = field.value.split("%%");
+					int textOffset = 0;
+					for (int j = 0; j < split.length; j++) {
+						field.defaultGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g, field.name, split[j]);
+						textOffset += 12;
+					}
+				}
 			}
 			if (field.isKnown() && field.knownGraphics !=null) {
-				field.knownGraphics.drawSpecial(xModifier,
-					yModifier, getXsize(), getYsize(), g, field.name, field.value);
+				if (!TypeUtil.isArray(field.type)) {
+					field.knownGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g, field.name, field.value);
+				} else  {
+					String[] split = field.value.split("%%");
+					int textOffset = 0;
+					for (int j = 0; j < split.length; j++) {
+						field.knownGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g, field.name, split[j]);
+						textOffset += 12;
+					}
+				}
 			}
 		}
 

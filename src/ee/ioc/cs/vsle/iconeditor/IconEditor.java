@@ -314,6 +314,7 @@ public class IconEditor
 	xmlBuffer.append("<icon>"+classIcon+"</icon>\n");
 	xmlBuffer = appendShapes(xmlBuffer);
 	xmlBuffer = appendPorts(xmlBuffer);
+	xmlBuffer = appendClassFields(xmlBuffer);
     xmlBuffer.append("</class>\n");
 
 	return xmlBuffer;
@@ -357,7 +358,7 @@ public class IconEditor
 									  JOptionPane.INFORMATION_MESSAGE);
 	  }
     }
-  }
+  } // exportShapesToXML
 
   public void exportShapesToPackage() {
 	classParamsOk = true;
@@ -369,7 +370,7 @@ public class IconEditor
 		JOptionPane.showMessageDialog(null, "Please define a bounding box.", "Bounding box undefined", JOptionPane.INFORMATION_MESSAGE);
 	  }
 	}
-  }
+  } // exportShapesToPackage
 
   private void validateClassParams() {
 	if(RuntimeProperties.className==null ||
@@ -378,11 +379,9 @@ public class IconEditor
 	   (RuntimeProperties.className!=null&&RuntimeProperties.className.trim().length()==0) ||
 	   (RuntimeProperties.classDescription!=null&&RuntimeProperties.classDescription.trim().length()==0) ||
 	   (RuntimeProperties.classIcon!=null&&RuntimeProperties.classIcon.trim().length()==0)) {
-	   ClassPropertiesDialog c = new ClassPropertiesDialog();
-	   c.setEmptyValuesValid(false);
-	   c.setVisible(true);
+	   new ClassPropertiesDialog(false);
 	}
-  }
+  } // validateClassParams
 
   private StringBuffer appendShapes(StringBuffer buf) {
     buf.append("<graphics>\n");
@@ -398,7 +397,7 @@ public class IconEditor
     }
     buf.append("</graphics>\n");
     return buf;
-  }
+  } // appendShapes
 
   private StringBuffer appendPorts(StringBuffer buf) {
 	if(ports!=null && ports.size()>0) {
@@ -443,6 +442,25 @@ public class IconEditor
 	return buf;
   } // appendPorts
 
+  public StringBuffer appendClassFields(StringBuffer buf) {
+	ClassPropertiesDialog.removeEmptyRows();
+	if(RuntimeProperties.dbrClassFields!=null && RuntimeProperties.dbrClassFields.getRowCount()>0) {
+	 buf.append("<fields>\n");
+	 for(int i=1;i<=RuntimeProperties.dbrClassFields.getRowCount();i++) {
+	   String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0],i);
+	   String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1],i);
+	   String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2],i);
+
+      if(fieldType==null) fieldType = "";
+	  if(fieldValue==null) fieldValue = "";
+
+	   buf.append("<field name=\""+fieldName+"\" type=\""+fieldType+"\" value=\""+fieldValue+"\" />\n");
+     }
+	 buf.append("</fields>\n");
+    }
+	return buf;
+  } // appendClassFields
+
   public void selectShapesInsideBox(int x1, int y1, int x2, int y2) {
 	for (int i = 0; i < shapeList.size(); i++) {
 	  Shape shape = (Shape) shapeList.get(i);
@@ -450,7 +468,13 @@ public class IconEditor
 		shape.setSelected(true);
 	  }
 	}
-  }
+	for (int i = 0; i < ports.size(); i++) {
+	  IconPort port = (IconPort) ports.get(i);
+	  if(port.isInsideRect(x1, y1, x2, y2)) {
+		port.setSelected(true);
+      }
+    }
+  } // selectShapesInsideBox
 
   public Shape checkInside(int x, int y) {
 	for (int i = shapeList.size() - 1; i >= 0; i--) {
@@ -715,7 +739,7 @@ public class IconEditor
       e.printStackTrace();
     }
     return null;
-  }
+  } // getOsType
 
   /**
    * Open application options dialog.
@@ -724,7 +748,7 @@ public class IconEditor
     OptionsDialog o = new OptionsDialog();
     o.setVisible(true);
 	repaint();
-  }
+  } // openOptionsDialog
 
   public void saveScheme() {
 
@@ -765,6 +789,7 @@ public class IconEditor
 					  StringBuffer xml = new StringBuffer();
 
 					  xml.append(getGraphicsToString().toString());
+					  xml.append(getClassPropsToString().toString());
 
 					  FileOutputStream out = new FileOutputStream(new File(file.getAbsolutePath()));
 					  out.write(xml.toString().getBytes());
@@ -783,6 +808,9 @@ public class IconEditor
 
   } // saveScheme
 
+  /**
+   * Load the previously saved scheme and display it on the drawing canvas.
+   */
   public void loadScheme() {
 	JFileChooser fc = new JFileChooser(getLastPath());
 	CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.extensionTxt,CustomFileFilter.descriptionTxt);
@@ -806,6 +834,7 @@ public class IconEditor
 	}
   } // loadScheme
 
+  // Print the drawing canvas.
   public void print() {
 	PrintUtilities.printComponent(getDrawingArea());
   } // print
@@ -814,33 +843,38 @@ public class IconEditor
    * Method for deleting selected objects.
    */
   public void deleteObjects() {
-    Shape shape;
     shapeList.remove(currentShape);
 
+	// Enable the bounding box button if we deleted a bounding box.
     if(boundingbox!=null && boundingbox.isSelected()) {
 	   palette.boundingbox.setEnabled(true);
 	   boundingbox = null;
 	}
-
     currentShape = null;
+
+    // Remove all selected shapes.
     ArrayList removable = new ArrayList();
     for (int i = 0; i < shapeList.size(); i++) {
-      shape = (Shape) shapeList.get(i);
+      Shape shape = (Shape) shapeList.get(i);
       if (shape.isSelected()) {
         removable.add(shape);
       }
     }
     shapeList.removeAll(removable);
 
+	// Remove all selected ports.
+	removable = new ArrayList();
 	for (int i = 0; i < ports.size(); i++) {
 	  IconPort port = (IconPort) ports.get(i);
 	  if (port.isSelected()) {
-		ports.remove(port);
+		removable.add(port);
 	  }
 	}
+	ports.removeAll(removable);
 
+	// Refresh the drawing canvas.
     repaint();
-  }
+  } // deleteObjects
 
   /**
    * Method for grouping objects.
@@ -1022,8 +1056,8 @@ public class IconEditor
  } // saveToPackage
 
   /**
-   * Sets all objects selected.
-   * @param b - select or deselect shapes.
+   * Sets all objects selected or unselected, depending on the method parameter value.
+   * @param b - select or unselect shapes.
    */
   public void selectAllObjects(boolean b) {
     if(shapeList!=null && shapeList.size()>0) {
@@ -1031,9 +1065,23 @@ public class IconEditor
         Shape shape = (Shape)shapeList.get(i);
         shape.setSelected(b);
       }
-      repaint();
+	  repaint();
     }
   } // selectAllObjects
+
+  /**
+   * Sets all ports selected or unselected, depending on the method parameter value.
+   * @param b boolean - select or unselect ports.
+   */
+  public void selectAllPorts(boolean b) {
+	if(ports!=null && ports.size()>0) {
+	  for(int i=0;i<ports.size();i++) {
+		IconPort port = (IconPort)ports.get(i);
+		port.setSelected(b);
+	  }
+	  repaint();
+   }
+  } // selectAllPorts
 
   /**
    * Clones the currently selected object.
@@ -1114,6 +1162,7 @@ public class IconEditor
    */
   public void loadGraphicsFromFile(File f) {
 	try {
+	    emptyClassFields();
 		BufferedReader in = new BufferedReader(new FileReader(f));
 		String str;
 		while ((str = in.readLine()) != null) {
@@ -1125,24 +1174,75 @@ public class IconEditor
 	}
   } // loadGraphicsFromFile
 
+  /**
+   * Empty the class fields DBResult.
+   */
+  private void emptyClassFields() {
+	if(RuntimeProperties.dbrClassFields!=null && RuntimeProperties.dbrClassFields.getRowCount()>0) {
+	  while(RuntimeProperties.dbrClassFields.getRowCount()>0) {
+		RuntimeProperties.dbrClassFields.removeRow(RuntimeProperties.dbrClassFields.getRowCount());
+     }
+   }
+  } // emptyClassFields
+
+  /**
+   * Returns a StringBuffer with all class properties for saving on a disk in text format.
+   * @return StringBuffer - class properties for saving on a disk in text format.
+   */
+  public StringBuffer getClassPropsToString() {
+	StringBuffer sb = new StringBuffer();
+
+    // Add class name.
+	if(RuntimeProperties.className!=null && RuntimeProperties.className.trim().length()>0) {
+	  sb.append("CLASSNAME:"+RuntimeProperties.className.trim()+"\n");
+    }
+
+    // Add class decription.
+	if(RuntimeProperties.classDescription!=null && RuntimeProperties.classDescription.trim().length()>0) {
+	  sb.append("CLASSDESCRIPTION:"+RuntimeProperties.classDescription.trim()+"\n");
+	}
+
+    // Add class icon.
+	if(RuntimeProperties.classIcon!=null && RuntimeProperties.classIcon.trim().length()>0) {
+	  sb.append("CLASSICON:"+RuntimeProperties.classIcon.trim()+"\n");
+	}
+
+    // Add boolean value representing if the class is a relation.
+    sb.append("CLASSISRELATION:"+RuntimeProperties.classIsRelation+"\n");
+	ClassPropertiesDialog.removeEmptyRows();
+    // Add class fields.
+    if(RuntimeProperties.dbrClassFields!=null && RuntimeProperties.dbrClassFields.getRowCount()>0) {
+	  for(int i=1;i<=RuntimeProperties.dbrClassFields.getRowCount();i++) {
+		String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0],i);
+		String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1],i);
+		String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2],i);
+
+	    if(fieldType==null) fieldType = "";
+	    if(fieldValue==null) fieldValue = "";
+		sb.append("CLASSFIELD:"+fieldName+":"+fieldType+":"+fieldValue+"\n");
+      } // end for.
+    } // end adding class fields.
+	return sb;
+  } // getClassPropsToString
+
+  /**
+   * Returns a StringBuffer with all drawn class graphics for saving on a disk in text format.
+   * @return StringBuffer - class graphics for saving on a disk in text format.
+   */
   public StringBuffer getGraphicsToString() {
 	StringBuffer sb = new StringBuffer();
 
 	for(int i=0;i<shapeList.size();i++) {
 	  Shape shape = (Shape)shapeList.get(i);
-
       sb.append(shape.toText());
-
 	  sb.append("\n");
-    }
+    } // end for.
 
 	for(int i=0;i<ports.size();i++) {
 	  IconPort port = (IconPort)ports.get(i);
-
 	  sb.append(port.toText());
-
 	  sb.append("\n");
-	}
+	} // end for.
 
 	return sb;
   } // getGraphicsToString
@@ -1318,6 +1418,26 @@ public class IconEditor
 
 		IconPort port = new IconPort(str, x, y, isAreaConn, isStrict);
 	    ports.add(port);
+      } else if (str.startsWith("CLASSNAME:")) {
+		RuntimeProperties.className = str.substring(10);
+      } else if (str.startsWith("CLASSDESCRIPTION:")) {
+		RuntimeProperties.classDescription = str.substring(17);
+      } else if (str.startsWith("CLASSICON:")) {
+		RuntimeProperties.classIcon = str.substring(10);
+      } else if (str.startsWith("CLASSISRELATION:")) {
+		str = str.substring(16);
+		if(str!=null && str.equalsIgnoreCase("true") || str.equalsIgnoreCase("false")) {
+		  RuntimeProperties.classIsRelation = Boolean.valueOf(str).booleanValue();
+        }
+      } else if (str.startsWith("CLASSFIELD:")) {
+		str = str.substring(11);
+		String fieldName = str.substring(0,str.indexOf(":"));
+		str = str.substring(str.indexOf(":") + 1);
+		String fieldType = str.substring(0,str.indexOf(":"));
+		str = str.substring(str.indexOf(":") + 1);
+		String fieldValue = str;
+		String[] classFields = {fieldName,fieldType,fieldValue};
+	    RuntimeProperties.dbrClassFields.appendRow(classFields);
       }
 	}
 	repaint();
