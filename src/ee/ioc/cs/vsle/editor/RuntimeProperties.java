@@ -3,7 +3,7 @@ package ee.ioc.cs.vsle.editor;
 public class RuntimeProperties {
 
   // Application properties
-  public static String packageDir;
+  public static String packageDir = "";
   public static String genFileDir;
   public static String customLayout;
   public static int debugInfo;
