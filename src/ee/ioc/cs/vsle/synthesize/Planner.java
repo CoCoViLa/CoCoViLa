@@ -31,31 +31,36 @@ public class Planner {
 
         m_problem = problem;
         ProgramRunner.foundVars.clear();
-        //manage axioms
-        HashSet removableAxioms = new HashSet();
 
+        //manage axioms
         for ( Iterator axiomIter = m_problem.getAxioms().iterator(); axiomIter
                                    .hasNext(); ) {
             Rel rel = ( Rel ) axiomIter.next();
             m_problem.getKnownVars().addAll( rel.getOutputs() );
             m_problem.algorithm.add( rel );
-            removableAxioms.add( rel );
+            axiomIter.remove();
         }
-        m_problem.getAxioms().removeAll( removableAxioms );
+
         //invoke linear planning
 		 db.p(m_problem.toString());
         if ( linearForwardSearch( m_problem, computeAll, false, false ) &&
              !computeAll ) {
+
             return m_problem.algorithm;
-        } else {
+
+        //invoke planning with subtasks
+        } else if ( !m_problem.getSubtaskRels().isEmpty() ) {
+
             db.p( "Subtasks solved: " + subgoalBackwardSearch( m_problem, computeAll ) );
 
             if ( !m_problem.getTargetVars().isEmpty() ) {
                 linearForwardSearch( m_problem, computeAll, false, false );
             }
         }
+
         return m_problem.algorithm;
     }
+
 
     private boolean linearForwardSearch( Problem problem, boolean computeAll,
                                          boolean isSubtask, boolean goingBackward ) {
@@ -97,7 +102,7 @@ public class Planner {
                 Var subtaskOutput = ( Var ) problem.getSubGoal().getOutputs().get( i );
                 for ( Iterator iter = problem.getAllRels().iterator(); iter.hasNext(); ) {
                     Rel rel = ( Rel ) iter.next();
-                    if ( rel.getInputs().get( 0 ) == subtaskOutput ) {
+                    if ( rel.type == RelType.equation && rel.getInputs().get( 0 ) == subtaskOutput ) {
                         iter.remove();
                     }
                 }
@@ -113,7 +118,9 @@ public class Planner {
         boolean changed = true;
         boolean foundSubGoal = false;
 
-        db.p( "------Starting linear planning--------" );
+        db.p( "------Starting linear planning"
+              + ((isSubtask)? " with subgoal " + problem.getSubGoal(): "")
+              + "--------" );
         int counter = 1;
 
         while ( ( ( !computeAll && changed && !problem.getTargetVars().isEmpty() )
@@ -134,21 +141,20 @@ public class Planner {
             //iterate through all knownvars
             db.p( "Known:" + problem.getKnownVars() );
             for ( Iterator knownVarsIter = problem.getKnownVars().iterator();
-                                           knownVarsIter
-                                           .hasNext(); ) {
+                                           knownVarsIter.hasNext(); ) {
                 Var var = ( Var ) knownVarsIter.next();
+                db.p( "Current Known: " + var );
                 // Check the relations of all components
                 for ( Iterator relIter = var.getRels().iterator(); relIter
                                          .hasNext(); ) {
                     Rel rel = ( Rel ) relIter.next();
-                    db.p( "rel: " + rel + " " + rel.unknownInputs + " " +
-                          rel.hashCode() );
+                    db.p( "And its rel: " + rel );
                     if ( problem.containsRel( rel ) ) {
                         rel.unknownInputs--;
-
+                        db.p( "problem contains it " + rel + " unknownInputs: " + rel.unknownInputs );
                         removableVars.add( var );
-                        if ( rel.unknownInputs == 0 ) {
-                            db.p( "rel on see " + rel );
+                        if ( rel.unknownInputs == 0 && rel.type != RelType.method_with_subtask ) {
+                            db.p( "rel is ready to be used " + rel );
 
                             boolean relIsNeeded = false;
 
