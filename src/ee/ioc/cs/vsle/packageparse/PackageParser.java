@@ -217,9 +217,20 @@ public class PackageParser {
 				String y1 = attrs.getValue("y1");
 				String y2 = attrs.getValue("y2");
 				String color = attrs.getValue("colour");
+				String stroke = attrs.getValue("stroke");
+				String transp = attrs.getValue("transparency");
+				double str = 1.0;
+				if (stroke != null) {
+					str = Double.parseDouble(stroke);
+				}
+				double tr = 1.0;
+				if (transp != null) {
+					tr = Double.parseDouble(transp);
+				}
+
 				Line newLine = new Line(Integer.parseInt(x1),
 					Integer.parseInt(y1), Integer.parseInt(x2),
-					Integer.parseInt(y2), Integer.parseInt(color), 1.0, 0.0);
+					Integer.parseInt(y2), Integer.parseInt(color), str, tr);
 
 				newGraphics.addShape(newLine);
 			}
@@ -235,10 +246,21 @@ public class PackageParser {
 				String height = attrs.getValue("height");
 				String color = attrs.getValue("colour");
 				String filled = attrs.getValue("filled");
+				String stroke = attrs.getValue("stroke");
+				String transp = attrs.getValue("transparency");
+				double str = 1.0;
+				if (stroke != null) {
+					str = Double.parseDouble(stroke);
+				}
+				double tr = 1.0;
+				if (transp != null) {
+					tr = Double.parseDouble(transp);
+				}
+
 				Rect newRect = new Rect(Integer.parseInt(x), Integer.parseInt(y),
 					Integer.parseInt(width), Integer.parseInt(height),
 					Integer.parseInt(color),
-					Boolean.valueOf(filled).booleanValue(), 1.0, 0.0);
+					Boolean.valueOf(filled).booleanValue(),  str, tr);
 
 				newGraphics.addShape(newRect);
 			}
@@ -249,10 +271,21 @@ public class PackageParser {
 				String height = attrs.getValue("height");
 				String color = attrs.getValue("colour");
 				String filled = attrs.getValue("filled");
+				String stroke = attrs.getValue("stroke");
+				String transp = attrs.getValue("transparency");
+				double str = 1.0;
+				if (stroke != null) {
+					str = Double.parseDouble(stroke);
+				}
+				double tr = 1.0;
+				if (transp != null) {
+					tr = Double.parseDouble(transp);
+				}
+
 				Oval newOval = new Oval(Integer.parseInt(x), Integer.parseInt(y),
 					Integer.parseInt(width), Integer.parseInt(height),
 					Integer.parseInt(color),
-					Boolean.valueOf(filled).booleanValue(), 1.0, 0.0);
+					Boolean.valueOf(filled).booleanValue(),  str, tr);
 
 				newGraphics.addShape(newOval);
 			}
@@ -265,6 +298,17 @@ public class PackageParser {
 				String arcAngle = attrs.getValue("arcAngle");
 				String color = attrs.getValue("colour");
 				String filled = attrs.getValue("filled");
+				String stroke = attrs.getValue("stroke");
+				String transp = attrs.getValue("transparency");
+				double str = 1.0;
+				if (stroke != null) {
+					str = Double.parseDouble(stroke);
+				}
+				double tr = 1.0;
+				if (transp != null) {
+					tr = Double.parseDouble(transp);
+				}
+
 				Arc newArc = new Arc(Integer.parseInt(x), Integer.parseInt(y),
 					Integer.parseInt(width), Integer.parseInt(height),
 					Integer.parseInt(startAngle), Integer.parseInt(arcAngle),
