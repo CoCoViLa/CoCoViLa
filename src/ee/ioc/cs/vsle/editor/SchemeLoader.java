@@ -19,6 +19,7 @@ import ee.ioc.cs.vsle.graphics.Shape;
 public class SchemeLoader {
 	Connection connection;
 	GObj obj;
+	RelObj relObj;
 	ObjectList objects = new ObjectList();
 	ConnectionList connections = new ConnectionList();
 	VPackage vPackage;
@@ -54,7 +55,7 @@ public class SchemeLoader {
 			// I/O error
 			ioe.printStackTrace();
 		}
-		db.p("doneparsing");
+		db.p("Parsing finished");
 	} // PackageParser
 
 	// ===========================================================
@@ -112,6 +113,25 @@ public class SchemeLoader {
 
 			}
 
+			if (element.equals("relobject")) {
+				String name = attrs.getValue("name");
+				String type = attrs.getValue("type");
+				relObj = new RelObj();
+				relObj.setName(name);
+				relObj.setClassName(type);
+				objects.add(relObj);
+
+			}
+
+
+			if (element.equals("scheme")) {
+				String type = attrs.getValue("package");
+				if (!type.equals(vPackage.name)) {
+					throw new SAXException("Scheme was built with package \"" + type + "\", load this package first");
+				}
+			}
+
+
 			if (element.equals("properties")) {
 				String x = attrs.getValue("x");
 				String y = attrs.getValue("y");
@@ -129,6 +149,32 @@ public class SchemeLoader {
 				obj.setHeight(Integer.parseInt(height));
 				obj.setStrict(Boolean.valueOf(strict).booleanValue());
 			}
+
+			if (element.equals("relproperties")) {
+				String x = attrs.getValue("x");
+				String y = attrs.getValue("y");
+				String endX = attrs.getValue("endX");
+				String endY = attrs.getValue("endY");
+				String angle = attrs.getValue("angle");
+				String xsize = attrs.getValue("xsize");
+				String ysize = attrs.getValue("ysize");
+				String width = attrs.getValue("width");
+				String height = attrs.getValue("height");
+				String strict = attrs.getValue("strict");
+
+				relObj.setX(Integer.parseInt(x));
+				relObj.setY(Integer.parseInt(y));
+				relObj.endX = Integer.parseInt(endX);
+				relObj.endY = Integer.parseInt(endY);
+				relObj.angle = Double.parseDouble(angle);
+
+				relObj.setXsize(Float.parseFloat(xsize));
+				relObj.setYsize(Float.parseFloat(ysize));
+				relObj.setWidth(Integer.parseInt(width));
+				relObj.setHeight(Integer.parseInt(height));
+				relObj.setStrict(Boolean.valueOf(strict).booleanValue());
+			}
+
 
 			if (element.equals("field")) {
 				String name = new String(attrs.getValue("name"));
@@ -152,6 +198,8 @@ public class SchemeLoader {
 				Port beginPort = objects.getPort(obj1, port1);
 				Port endPort = objects.getPort(obj2, port2);
 				connection = new Connection(beginPort, endPort);
+				beginPort.setConnected(true);
+				endPort.setConnected(true);
 				connections.add(connection);
 			}
 
@@ -169,6 +217,18 @@ public class SchemeLoader {
 				for (int j = 0; j < vPackage.classes.size(); j++) {
 					PackageClass pClass = (PackageClass) vPackage.classes.get(j);
 					if (pClass.name.equals(obj.className)) {
+
+						// deep clone each separate field
+						ClassField field;
+                        ClassField objField;
+						for (int i = 0; i < pClass.fields.size(); i++) {
+							field = (ClassField) pClass.fields.get(i);
+							objField =(ClassField) obj.fields.get(i);
+                            objField.knownGraphics = field.knownGraphics;
+							objField.defaultGraphics = field.defaultGraphics;
+
+						}
+
 						obj.ports = (ArrayList) pClass.ports.clone();
 
 						obj.shapes = (ArrayList) pClass.graphics.shapes.clone();
@@ -212,7 +272,40 @@ public class SchemeLoader {
 					}
 				}
 			}
+
+			if (qName.equals("relobject")) {
+				for (int j = 0; j < vPackage.classes.size(); j++) {
+					PackageClass pClass = (PackageClass) vPackage.classes.get(j);
+					if (pClass.name.equals(relObj.className)) {
+
+						// deep clone each separate field
+						ClassField field;
+                        ClassField objField;
+						for (int i = 0; i < pClass.fields.size(); i++) {
+							field = (ClassField) pClass.fields.get(i);
+							objField =(ClassField) relObj.fields.get(i);
+                            objField.knownGraphics = field.knownGraphics;
+							objField.defaultGraphics = field.defaultGraphics;
+
+						}
+
+						relObj.ports = (ArrayList) pClass.ports.clone();
+
+						relObj.shapes = (ArrayList) pClass.graphics.shapes.clone();
+						Shape shape;
+						for (int i = 0; i < relObj.shapes.size(); i++) {
+							shape = (Shape) relObj.shapes.get(i);
+							relObj.shapes.set(i, shape.clone());
+						}
+						relObj.startPort = (Port)relObj.ports.get(0);
+						relObj.endPort = (Port)relObj.ports.get(1);
+
+					}
+				}
+			}
+
 			/*	if (qName.equals("connections")) {
+
 					for (int i = 0; i < connections.size(); i++) {
 
 					}
@@ -238,7 +331,7 @@ public class SchemeLoader {
 	 * @throws org.xml.sax.SAXParseException -
 	 */
 	public void error(SAXParseException e) throws SAXParseException {
-		db.p(e);
+		//db.p(e);
 	} // error
 
 	/**
@@ -251,7 +344,7 @@ public class SchemeLoader {
 		db.p(
 			"** Warning, line " + e.getLineNumber() + ", uri "
 			+ e.getSystemId());
-		db.p("   " + e.getMessage());
+		//db.p("   " + e.getMessage());
 	} // warning
 
 	public Scheme getScheme() {

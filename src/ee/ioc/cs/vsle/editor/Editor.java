@@ -413,6 +413,7 @@ public class Editor extends JFrame implements ChangeListener {
 		}
 
 		RuntimeProperties.customLayout = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.CUSTOM_LAYOUT);
+        RuntimeProperties.snapToGrid = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SNAP_TO_GRID));
 
 		JFrame window;
 		try {

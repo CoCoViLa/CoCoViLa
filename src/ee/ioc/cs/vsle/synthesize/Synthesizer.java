@@ -176,7 +176,7 @@ public class Synthesizer {
 					while (!specLines.isEmpty()) {
 						LineType lt = specParser.getLine(specLines);
 
-						if (! (specLines.get(0)).equals("")) {
+						//if (! (specLines.get(0)).equals("")) {
 							if (lt.type == declaration) {
 								String[] split = lt.specLine.split(":", -1);
 								String[] vs = split[1].trim().split(" *, *", -1);
@@ -202,7 +202,7 @@ public class Synthesizer {
 									}
 								}
 							}
-						}
+						//}
 					}
 				}
 				catch (Exception e) {}

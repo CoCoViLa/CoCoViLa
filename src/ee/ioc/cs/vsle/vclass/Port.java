@@ -7,6 +7,7 @@ import java.util.ArrayList;
 
 public class Port implements Cloneable, Serializable {
 
+    public String id;
 	public GObj obj;
 	int width, height;
 	public String name;
@@ -139,7 +140,10 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public String toString() {
-		return name;
+		if (id!=null)
+			return id;
+		else
+			return name;
 	}
 
 	public void setSelected(boolean b) {

@@ -1,11 +1,12 @@
-<?xml version='1.0' encoding='us-ascii'?> 
+<?xml version='1.0' encoding='us-ascii'?>
 <!ELEMENT package (name, description, class+)>
 <!ELEMENT class 	(name, description, icon, graphics, ports?, fields?)>
 <!ELEMENT fields 	(field*)>
 <!ELEMENT ports 	(port+)>
 <!ELEMENT port 		(open|closed)*>
 <!ELEMENT field 	(known|default)*>
-<!ELEMENT graphics 	(bounds| (line | rect | oval| arc) | text)*>
+<!ELEMENT polygon 	(point+)>
+<!ELEMENT graphics 	(bounds| (line | rect | oval| arc | polygon) | text)*>
 <!ELEMENT open 		(graphics)>
 <!ELEMENT closed 	(graphics)>
 <!ELEMENT known 	(graphics)>
@@ -18,6 +19,7 @@
 <!ELEMENT datatype 	(#PCDATA)>
 <!ELEMENT xpos 		(#PCDATA)>
 <!ELEMENT ypos 		(#PCDATA)>
+<!ELEMENT point		EMPTY>
 <!ELEMENT line 		EMPTY>
 <!ELEMENT arc 		EMPTY>
 <!ELEMENT bounds 	EMPTY>
@@ -31,6 +33,7 @@
 <!ATTLIST graphics 
 	showFields (true|false) #IMPLIED>
 <!ATTLIST port connection (single|area) #IMPLIED>
+
 <!ATTLIST line 
         x1		CDATA   #REQUIRED
         y1		CDATA   #REQUIRED
@@ -40,7 +43,16 @@
         fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
         transparency	CDATA	#IMPLIED
-	lineType	CDATA	#IMPLIED>      
+	linetype	CDATA	#IMPLIED>
+<!ATTLIST polygon
+        colour		CDATA   #IMPLIED
+	filled 		(true|false) #IMPLIED
+	fixed           (true|false) #IMPLIED
+        stroke		CDATA	#IMPLIED
+        transparency	CDATA	#IMPLIED
+	linetype	CDATA	#IMPLIED>
+
+
 <!ATTLIST rect
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
@@ -51,7 +63,7 @@
 	fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
         transparency	CDATA	#IMPLIED
-	lineType	CDATA	#IMPLIED>
+	linetype	CDATA	#IMPLIED>
 <!ATTLIST arc
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
@@ -63,8 +75,7 @@
 	filled 		(true|false) #IMPLIED
 	fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
-        transparency	CDATA	#IMPLIED
-	lineType	CDATA	#IMPLIED>
+        transparency	CDATA	#IMPLIED>
 <!ATTLIST bounds
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
@@ -79,12 +90,12 @@
 	filled 		(true|false) #IMPLIED
 	fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
-        transparency	CDATA	#IMPLIED
-	lineType	CDATA	#IMPLIED>		   
+        transparency	CDATA	#IMPLIED>		   
 <!ATTLIST field 
         name		CDATA   #REQUIRED
         type		CDATA   #IMPLIED
-        value		CDATA   #IMPLIED>
+        value		CDATA   #IMPLIED
+	description	CDATA   #IMPLIED>
 <!ATTLIST text 
         string		CDATA   #REQUIRED
         colour          CDATA   #IMPLIED
@@ -95,9 +106,14 @@
         fontsize        CDATA   #REQUIRED
         transparency	CDATA	#IMPLIED>
 <!ATTLIST port
+	id 		CDATA 	#IMPLIED
 	name 		CDATA 	#REQUIRED
 	type 		CDATA 	#REQUIRED
 	x 		CDATA 	#REQUIRED
 	y 		CDATA 	#REQUIRED
 	portConnection 	CDATA 	#IMPLIED
 	strict 		CDATA 	#IMPLIED>
+<!ATTLIST point
+        x		CDATA   #REQUIRED
+        y		CDATA   #REQUIRED>
+

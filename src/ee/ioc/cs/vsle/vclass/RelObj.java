@@ -19,6 +19,9 @@ public class RelObj extends GObj {
 		super(x, y, width, height, name);
 	}
 
+	public RelObj() {
+	}
+
 	public boolean contains(int pointX, int pointY) {
 		float f = VMath.pointDistanceFromLine(x, y, endX, endY, pointX, pointY);
 		if (f < height + 4) {
@@ -71,4 +74,19 @@ public class RelObj extends GObj {
 		obj.endPort = (Port)endPort.clone();
 		return obj;
 	}
+
+	public String toXML() {
+		String xml = "<relobject name=\""+name+"\" type=\""+className+"\" >\n";
+        xml += "  <relproperties x=\""+ x+"\" y=\""+y+"\" endX=\""+endX+"\" endY=\""+endY+"\" angle=\""+angle+"\" width=\""+ width+"\" height=\""+height+"\" xsize=\""+Xsize+"\" ysize=\""+Ysize+"\" strict=\""+strict+"\" />\n";
+		xml += "  <fields>\n";
+		for (int i = 0; i < fields.size(); i++) {
+			ClassField field = (ClassField)fields.get(i);
+            xml += StringUtil.indent(4) + field.toXML();
+		}
+		xml += "  </fields>\n";
+        xml += "</relobject>\n";
+		return xml;
+
+	}
+
 }

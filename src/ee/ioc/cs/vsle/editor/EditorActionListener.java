@@ -32,15 +32,28 @@ public class EditorActionListener implements ActionListener {
 			e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem") {
 
 			if (e.getActionCommand().equals(Menu.SAVE_SCHEME)) {
-				JFileChooser fc = new JFileChooser();
+
+				JFileChooser fc = new JFileChooser(editor.getLastPath());
+				CustomFileFilter synFilter = new CustomFileFilter(CustomFileFilter.extensionSyn, CustomFileFilter.descriptionSyn);
+				fc.setFileFilter(synFilter);
 				int returnVal = fc.showSaveDialog(null);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
+
 					File file = fc.getSelectedFile();
+
+					if (!file.getAbsolutePath().toLowerCase().endsWith(CustomFileFilter.extensionSyn)) {
+						file = new File(file.getAbsolutePath() + "." + CustomFileFilter.extensionSyn);
+					}
+
+					editor.setLastPath(file.getAbsolutePath());
 					db.p("Saving scheme: " + file.getName());
 					editor.getCurrentCanvas().saveScheme(file);
 				}
 			} else if (e.getActionCommand().equals(Menu.LOAD_SCHEME)) {
-				JFileChooser fc = new JFileChooser();
+				JFileChooser fc = new JFileChooser(editor.getLastPath());
+				CustomFileFilter synFilter = new CustomFileFilter(CustomFileFilter.extensionSyn, CustomFileFilter.descriptionSyn);
+				fc.setFileFilter(synFilter);
+
 				int returnVal = fc.showOpenDialog(null);
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();

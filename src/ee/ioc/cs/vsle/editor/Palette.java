@@ -55,6 +55,7 @@ public class Palette {
 			icon = new ImageIcon(
 				RuntimeProperties.packageDir + File.separator + pClass.icon);
 			buttons[i] = new JButton(icon);
+			buttons[i].setToolTipText(pClass.description);
 			if (pClass.relation == true) {
 				buttons[i].setActionCommand("??" + pClass.name); //to denote a class which is a relation
 			} else

@@ -113,9 +113,9 @@ class MouseOps
 		y = e.getY();
 
 		if (SwingUtilities.isRightMouseButton(e)) {
-            //if right mouse button clicked, check whether
+			//if right mouse button clicked, check whether
 			Connection relation = canvas.connections.nearPoint(x, y);
- 			if (relation != null) {
+			if (relation != null) {
 				ConnectionPopupMenu popupMenu = new ConnectionPopupMenu(relation, canvas.connections, canvas);
 				popupMenu.show(canvas, x, y);
 			} else {
@@ -270,14 +270,14 @@ class MouseOps
 			canvas.mouseX = e.getX();
 			canvas.mouseY = e.getY();
 			Connection con = canvas.connections.nearPoint(canvas.mouseX, canvas.mouseY);
-
 			if (con != null) {
 				draggedBreakPoint = con.breakPointContains(canvas.mouseX, canvas.mouseY);
-				if (draggedBreakPoint != null) {
-					state = State.dragBreakPoint;
-				}
-			} else {
+			}
+			if (con != null && draggedBreakPoint != null) {
+				state = State.dragBreakPoint;
 
+
+			} else {
 				GObj obj = canvas.objects.checkInside(canvas.mouseX, canvas.mouseY);
 				if (obj != null) {
 					if (e.isShiftDown()) {
@@ -295,7 +295,7 @@ class MouseOps
 					cornerClicked = canvas.objects.controlRectContains(canvas.mouseX, canvas.mouseY);
 					if (cornerClicked != 0) {
 						//if (obj.isSelected())
-							state = State.resize;
+						state = State.resize;
 
 					} else {
 						state = State.dragBox;
@@ -307,7 +307,9 @@ class MouseOps
 				selectedObjs = canvas.objects.getSelected();
 
 			}
+
 		}
+
 	}
 
 	public void mouseDragged(MouseEvent e) {
@@ -327,19 +329,20 @@ class MouseOps
 			for (int i = 0; i < selectedObjs.size(); i++) {
 				obj = (GObj) selectedObjs.get(i);
 				if (!(obj instanceof RelObj)) {
-					//use the following when  snap to grid
-					x1 = Math.round(x / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
-					x2 = Math.round(canvas.mouseX / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
-					y1 = Math.round(y / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
-					y2 = Math.round(canvas.mouseY / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
-					newX = Math.round((obj.getX() + (x1 - x2)) / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
-					newY = Math.round((obj.getY() + (y1 - y2)) / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
 
-
-					obj.setPosition(newX, newY);
-
-					//use this when not snap to grid
-					//obj.setPosition(obj.getX() + (x - canvas.mouseX), obj.getY() + (y - canvas.mouseY));
+					if (RuntimeProperties.snapToGrid == 1) {
+						//use the following when  snap to grid
+						x1 = Math.round(x / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+						x2 = Math.round(canvas.mouseX / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+						y1 = Math.round(y / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+						y2 = Math.round(canvas.mouseY / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+						newX = Math.round((obj.getX() + (x1 - x2)) / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+						newY = Math.round((obj.getY() + (y1 - y2)) / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+						obj.setPosition(newX, newY);
+					} else {
+						//use this when not snap to grid
+						obj.setPosition(obj.getX() + (x - canvas.mouseX), obj.getY() + (y - canvas.mouseY));
+					}
 				}
 
 				// check if a strict port exists on the object
@@ -463,14 +466,15 @@ class MouseOps
 		// if we're adding a new object...
 		if (canvas.currentObj != null && canvas.vPackage.hasClass(state)) {
 			//use these when snap to grid
-			canvas.currentObj.x = Math.round(x / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
-			canvas.currentObj.y = Math.round(y / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
-
-//Use these when not snap to grid:
-//canvas.currentObj.y = y;
-//canvas.currentObj.x = x;
-
-// Kui objektil on moni strict port, chekime kas teda kuskile panna on;
+			if (RuntimeProperties.snapToGrid == 1) {
+				canvas.currentObj.x = Math.round(x / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+				canvas.currentObj.y = Math.round(y / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+			} else {
+				//Use these when not snap to grid:
+				canvas.currentObj.y = y;
+				canvas.currentObj.x = x;
+			}
+			// Kui objektil on moni strict port, chekime kas teda kuskile panna on;
 			if (canvas.currentObj.isStrict()) {
 				Port port, port2;
 				GObj obj;

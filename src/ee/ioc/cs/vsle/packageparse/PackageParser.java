@@ -142,6 +142,7 @@ public class PackageParser {
 
 			if (element.equals("port")) {
 				status = PORT_OPEN;
+				String id = attrs.getValue("id");
 				String name = attrs.getValue("name");
 				String type = attrs.getValue("type");
 				String x = attrs.getValue("x");
@@ -151,6 +152,7 @@ public class PackageParser {
 
 				newPort = new Port(name, type, Integer.parseInt(x),
 					Integer.parseInt(y), portConnection, strict);
+				newPort.id = id;
 			}
 			if (element.equals("open")) {
 				status = PORT_OPEN;

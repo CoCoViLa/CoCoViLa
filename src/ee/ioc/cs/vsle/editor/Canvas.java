@@ -403,6 +403,7 @@ public class Canvas extends JPanel implements ActionListener {
 	} // print
 
 	public void loadScheme(File file) {
+
 		SchemeLoader sl = new SchemeLoader(file, vPackage);
 		scheme = sl.getScheme();
 		connections = scheme.connections;
@@ -419,7 +420,7 @@ public class Canvas extends JPanel implements ActionListener {
 			out.println("<?xml version='1.0' encoding='utf-8'?>");
 
 			out.println("<!DOCTYPE scheme SYSTEM \"scheme.dtd\">");
-            out.println("<scheme>");
+            out.println("<scheme package=\""+vPackage.name+"\">");
 			for (int i = 0; i < objects.size(); i++) {
 				GObj obj = (GObj) objects.get(i);
 				out.print(obj.toXML());

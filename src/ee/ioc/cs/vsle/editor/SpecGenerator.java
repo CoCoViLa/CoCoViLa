@@ -68,21 +68,21 @@ public class SpecGenerator {
 
 
 
-			if (rel.endPort.toString().equals("any")) {
+			if (rel.endPort.getName().equals("any")) {
 				s.append(
-					"    " + rel.endPort.obj.toString() + "." + rel.beginPort.toString()
-					+ " = " + rel.beginPort.obj.toString() + "."
-					+ rel.beginPort.toString() + ";\n");
-			}  else if  (rel.beginPort.toString().equals("any")) {
+					"    " + rel.endPort.obj.getName() + "." + rel.beginPort.getName()
+					+ " = " + rel.beginPort.obj.getName() + "."
+					+ rel.beginPort.getName() + ";\n");
+			}  else if  (rel.beginPort.getName().equals("any")) {
 				s.append(
-					"    " + rel.endPort.obj.toString() + "." + rel.endPort.toString()
-					+ " = " + rel.beginPort.obj.toString() + "."
-					+ rel.endPort.toString() + ";\n");
+					"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
+					+ " = " + rel.beginPort.obj.getName() + "."
+					+ rel.endPort.getName() + ";\n");
 			} else   {
 				s.append(
-					"    " + rel.endPort.obj.toString() + "." + rel.endPort.toString()
-					+ " = " + rel.beginPort.obj.toString() + "."
-					+ rel.beginPort.toString() + ";\n");
+					"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
+					+ " = " + rel.beginPort.obj.getName() + "."
+					+ rel.beginPort.getName() + ";\n");
 			}
 
 		}
