@@ -43,9 +43,7 @@ import javax.swing.JToolBar;
  * Time: 9:15:08
  * To change this template use Options | File Templates.
  */
-public class ProgramTextEditor
-	extends JFrame
-	implements ActionListener {
+public class ProgramTextEditor extends JFrame implements ActionListener {
 
 	JButton parseSpec, runProg, computeAll, propagate, invoke;
 	JTextArea textArea, programTextArea, runResultArea;
@@ -70,7 +68,8 @@ public class ProgramTextEditor
 		textArea.setFont(new Font("Courier New", Font.PLAIN, 12));
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 
-		areaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		areaScrollPane.setVerticalScrollBarPolicy(
+			JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 		specText = new JPanel();
 		specText.setLayout(new BorderLayout());
@@ -96,7 +95,8 @@ public class ProgramTextEditor
 
 		JScrollPane programAreaScrollPane = new JScrollPane(programTextArea);
 
-		programAreaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		programAreaScrollPane.setVerticalScrollBarPolicy(
+			JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 		progText = new JPanel();
 		progText.setLayout(new BorderLayout());
@@ -120,7 +120,8 @@ public class ProgramTextEditor
 
 		JScrollPane runResultAreaScrollPane = new JScrollPane(runResultArea);
 
-		runResultAreaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		runResultAreaScrollPane.setVerticalScrollBarPolicy(
+			JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 		runResult = new JPanel();
 		runResult.setLayout(new BorderLayout());
@@ -136,44 +137,43 @@ public class ProgramTextEditor
 		textArea.append("\n    /*@ specification  GeneratedClass {\n");
 		for (int i = 0; i < objects.size(); i++) {
 			obj = (GObj) objects.get(i);
-			textArea.append("    " + obj.getClassName() + " " + obj.getName() + ";\n");
+			textArea.append(
+				"    " + obj.getClassName() + " " + obj.getName() + ";\n");
 			for (int j = 0; j < obj.fields.size(); j++) {
 				field = (ClassField) obj.fields.get(j);
 				if (field.value != null) {
 					if (field.type.equals("String")) {
-						textArea.append("        " + obj.getName() + "." + field.name + " = \"" + field.value + "\";\n");
-					}
-					else if (field.isPrimitiveArray()) {
-						textArea.append("        " + obj.getName() + "." + field.name + " = {");
+						textArea.append("        " + obj.getName() + "." + field.name
+							+ " = \"" + field.value + "\";\n");
+					} else if (field.isPrimitiveArray()) {
+						textArea.append(
+							"        " + obj.getName() + "." + field.name
+							+ " = {");
 						String[] split = field.value.split("�");
-
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								textArea.append(split[k]);
-							}
-							else {
+							} else
 								textArea.append(", " + split[k]);
-							}
 						}
 						textArea.append("};\n");
 
-					}
-					else if (field.isPrimOrStringArray()) {
-						textArea.append("        " + obj.getName() + "." + field.name + " = {");
+					} else if (field.isPrimOrStringArray()) {
+						textArea.append(
+							"        " + obj.getName() + "." + field.name
+							+ " = {");
 						String[] split = field.value.split("�");
-
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								textArea.append("\"" + split[k] + "\"");
-							}
-							else {
+							} else
 								textArea.append(", \"" + split[k] + "\"");
-							}
 						}
 						textArea.append("};\n");
-					}
-					else {
-						textArea.append("        " + obj.getName() + "." + field.name + " = " + field.value + ";\n");
+					} else {
+						textArea.append(
+							"        " + obj.getName() + "." + field.name + " = "
+							+ field.value + ";\n");
 					}
 
 				}
@@ -184,7 +184,10 @@ public class ProgramTextEditor
 
 		for (int i = 0; i < relations.size(); i++) {
 			rel = (Connection) relations.get(i);
-			textArea.append("    " + rel.endPort.obj.toString() + "." + rel.endPort.toString() + " = " + rel.beginPort.obj.toString() + "." + rel.beginPort.toString() + ";\n");
+			textArea.append(
+				"    " + rel.endPort.obj.toString() + "." + rel.endPort.toString()
+				+ " = " + rel.beginPort.obj.toString() + "."
+				+ rel.beginPort.toString() + ";\n");
 		}
 		textArea.append("    }@*/\n}");
 		getContentPane().add(tabbedPane);
@@ -199,7 +202,8 @@ public class ProgramTextEditor
 
 			try {
 				String fullSpec = textArea.getText();
-				Pattern pattern = Pattern.compile("class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+");
+				Pattern pattern = Pattern.compile(
+					"class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+");
 				Matcher matcher = pattern.matcher(fullSpec);
 
 				if (matcher.find()) {
@@ -209,44 +213,45 @@ public class ProgramTextEditor
 
 				classList = sp.parseSpecification(spec, "this", null, hs);
 				programTextArea.setText("");
-				programTextArea.append(synth.makeProgramText(fullSpec, false, classList, mainClassName));
+				programTextArea.append(
+					synth.makeProgramText(fullSpec, false, classList,
+						mainClassName));
 				tabbedPane.setSelectedComponent(progText);
-			}
-			catch (UnknownVariableException uve) {
+			} catch (UnknownVariableException uve) {
 				db.p("Fatal error: variable " + uve.excDesc + " not declared");
-				ErrorWindow ew = new ErrorWindow("Fatal error: variable " + uve.excDesc + " not declared");
+				ErrorWindow ew = new ErrorWindow(
+					"Fatal error: variable " + uve.excDesc + " not declared");
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (LineErrorException lee) {
+			} catch (LineErrorException lee) {
 				db.p("Fatal error on line " + lee.excDesc);
-				ErrorWindow ew = new ErrorWindow("Syntax error on line '" + lee.excDesc + "'");
+				ErrorWindow ew = new ErrorWindow(
+					"Syntax error on line '" + lee.excDesc + "'");
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (MutualDeclarationException lee) {
-				db.p("Mutual recursion in specifications, between classes " + lee.excDesc);
-				ErrorWindow ew = new ErrorWindow("Mutual recursion in specifications, classes " + lee.excDesc);
+			} catch (MutualDeclarationException lee) {
+				db.p(
+					"Mutual recursion in specifications, between classes "
+					+ lee.excDesc);
+				ErrorWindow ew = new ErrorWindow(
+					"Mutual recursion in specifications, classes " + lee.excDesc);
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (EquationException ee) {
+			} catch (EquationException ee) {
 				ErrorWindow ew = new ErrorWindow(ee.excDesc);
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (SpecParseException spe) {
+			} catch (SpecParseException spe) {
 				db.p(spe.excDesc);
 				ErrorWindow ew = new ErrorWindow(spe.excDesc);
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 			validate();
@@ -258,7 +263,8 @@ public class ProgramTextEditor
 
 			try {
 				String fullSpec = textArea.getText();
-				Pattern pattern = Pattern.compile("class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+");
+				Pattern pattern = Pattern.compile(
+					"class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+");
 				Matcher matcher = pattern.matcher(fullSpec);
 
 				if (matcher.find()) {
@@ -268,44 +274,44 @@ public class ProgramTextEditor
 
 				classList = sp.parseSpecification(spec, "this", null, hs);
 				programTextArea.setText("");
-				programTextArea.append(synth.makeProgramText(fullSpec, true, classList, mainClassName));
+				programTextArea.append(
+					synth.makeProgramText(fullSpec, true, classList, mainClassName));
 				tabbedPane.setSelectedComponent(progText);
-			}
-			catch (UnknownVariableException uve) {
+			} catch (UnknownVariableException uve) {
 				db.p("Fatal error: variable " + uve.excDesc + " not declared");
-				ErrorWindow ew = new ErrorWindow("Fatal error: variable " + uve.excDesc + " not declared");
+				ErrorWindow ew = new ErrorWindow(
+					"Fatal error: variable " + uve.excDesc + " not declared");
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (LineErrorException lee) {
+			} catch (LineErrorException lee) {
 				db.p("Fatal error on line " + lee.excDesc);
-				ErrorWindow ew = new ErrorWindow("Syntax error on line '" + lee.excDesc + "'");
+				ErrorWindow ew = new ErrorWindow(
+					"Syntax error on line '" + lee.excDesc + "'");
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (EquationException ee) {
+			} catch (EquationException ee) {
 				ErrorWindow ew = new ErrorWindow(ee.excDesc);
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (MutualDeclarationException lee) {
-				db.p("Mutual recursion in specifications, between classes " + lee.excDesc);
-				ErrorWindow ew = new ErrorWindow("Mutual recursion in specifications, classes " + lee.excDesc);
+			} catch (MutualDeclarationException lee) {
+				db.p(
+					"Mutual recursion in specifications, between classes "
+					+ lee.excDesc);
+				ErrorWindow ew = new ErrorWindow(
+					"Mutual recursion in specifications, classes " + lee.excDesc);
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (SpecParseException spe) {
+			} catch (SpecParseException spe) {
 				db.p(spe.excDesc);
 				ErrorWindow ew = new ErrorWindow(spe.excDesc);
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
-			}
-			catch (Exception ex) {
+			} catch (Exception ex) {
 				ex.printStackTrace();
 			}
 
@@ -315,16 +321,18 @@ public class ProgramTextEditor
 		if (e.getSource() == runProg) {
 			Synthesizer synth = new Synthesizer();
 
-			synth.makeProgram(programTextArea.getText(), classList, mainClassName);
+			synth.makeProgram(programTextArea.getText(), classList,
+				mainClassName);
 			runner = new ProgramRunner();
 			ArrayList watchFields = watchableFields(objects);
 
 			try {
-				runnableObject = runner.compileAndRun("_" + mainClassName + "_", watchFields, runResultArea);
+				runnableObject = runner.compileAndRun("_" + mainClassName + "_",
+					watchFields, runResultArea);
 				tabbedPane.setSelectedComponent(runResult);
-			}
-			catch (CompileException ce) {
-				ErrorWindow ew = new ErrorWindow("Compilation failed:\n " + ce.excDesc);
+			} catch (CompileException ce) {
+				ErrorWindow ew = new ErrorWindow(
+					"Compilation failed:\n " + ce.excDesc);
 
 				ew.setSize(600, 300);
 				ew.setVisible(true);
@@ -348,8 +356,7 @@ public class ProgramTextEditor
 					for (int i = 0; i < k; i++) {
 						runner.run(watchFields, runResultArea);
 					}
-				}
-				else {
+				} else {
 					runner.run(watchFields, runResultArea);
 				}
 			}

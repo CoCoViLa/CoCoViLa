@@ -22,6 +22,7 @@ import javax.swing.JCheckBox;
 import javax.swing.SwingConstants;
 import javax.swing.BorderFactory;
 
+
 /**
  * Created by IntelliJ IDEA.
  * User: Aulo
@@ -29,8 +30,7 @@ import javax.swing.BorderFactory;
  * Time: 9:08:55
  * To change this template use Options | File Templates.
  */
-public class ObjectPropertiesEditor
-	extends JFrame
+public class ObjectPropertiesEditor extends JFrame
 	implements ActionListener, KeyListener {
 	ArrayList textFields = new ArrayList(), watchFields = new ArrayList();
 	ArrayList comboBoxes = new ArrayList();
@@ -40,6 +40,7 @@ public class ObjectPropertiesEditor
 	GObj controlledObject;
 	JTextField nameTextField;
 	JButton clear, ok;
+
 	public ObjectPropertiesEditor(GObj object) {
 		super();
 		controlledObject = object;
@@ -81,14 +82,13 @@ public class ObjectPropertiesEditor
 
 				if (field.value != "" && field.value != null) {
 					String[] split = field.value.split("�");
-
 					for (int j = 0; j < split.length; j++) {
 						comboBox.addItem(split[j]);
 					}
 				}
 				JTextField jtf = (JTextField) (comboBox.getEditor().getEditorComponent());
-
 				jtf.addKeyListener(this);
+
 
 				comboBoxes.add(comboBox);
 				label = new JLabel(field.name, SwingConstants.CENTER);
@@ -97,9 +97,9 @@ public class ObjectPropertiesEditor
 				label = new JLabel("(" + field.type + ")");
 				typePane.add(label);
 
+
 				textFieldPane.add(comboBox);
-			}
-			else if (field.isPrimitiveOrString()) {
+			} else if (field.isPrimitiveOrString()) {
 				textField = new JTextField();
 				textField.addKeyListener(this);
 				textField.setName(field.name);
@@ -118,6 +118,7 @@ public class ObjectPropertiesEditor
 				watchFields.add(watch);
 			}
 
+
 		}
 		JPanel contentPane = new JPanel();
 
@@ -135,8 +136,7 @@ public class ObjectPropertiesEditor
 		clear.addActionListener(this);
 		if (object.fields.size() == 0) {
 			clear.setEnabled(false);
-		}
-		else {
+		} else {
 			clear.setEnabled(true);
 		}
 		buttonPane.add(clear);
@@ -147,23 +147,24 @@ public class ObjectPropertiesEditor
 		validate();
 	}
 
-	public void keyTyped(KeyEvent e) {}
+	public void keyTyped(KeyEvent e) {
 
-	public void keyReleased(KeyEvent e) {}
+	}
+
+	public void keyReleased(KeyEvent e) {
+
+	}
 
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyChar() == KeyEvent.VK_ENTER) {
 			JTextField jtf = (JTextField) (e.getSource());
 			JComboBox thisComboBox = getComboBox(jtf);
-
-			// String newSelection = (String)thisComboBox.getSelectedItem();
+			//String newSelection = (String)thisComboBox.getSelectedItem();
 			thisComboBox.addItem(jtf.getText());
 
-		}
-		else if (e.getKeyChar() == KeyEvent.VK_DELETE) {
+		} else if (e.getKeyChar() == KeyEvent.VK_DELETE) {
 			JTextField jtf = (JTextField) (e.getSource());
 			JComboBox thisComboBox = getComboBox(jtf);
-
 			thisComboBox.removeItem(thisComboBox.getSelectedItem());
 
 		}
@@ -173,34 +174,29 @@ public class ObjectPropertiesEditor
 		JTextField textField;
 		ClassField field;
 		boolean b;
-
 		db.p(e);
 		if (e.getSource() == ok) {
 			for (int i = 0; i < textFields.size(); i++) {
 				textField = (JTextField) textFields.get(i);
 				field = (ClassField) primitiveNameList.get(i);
-				b = ( (JCheckBox) watchFields.get(i)).isSelected();
+				b = ((JCheckBox) watchFields.get(i)).isSelected();
 				field.watched = b;
 				if (!textField.getText().equals("")) {
 					field.value = textField.getText();
-				}
-				else {
+				} else {
 					field.value = null;
 				}
 			}
 			for (int i = 0; i < comboBoxes.size(); i++) {
 				JComboBox comboBox = (JComboBox) comboBoxes.get(i);
-
 				field = (ClassField) arrayNameList.get(i);
 				String s = "";
-
 				for (int j = 0; j < comboBox.getItemCount(); j++) {
 					s += (String) comboBox.getItemAt(j) + "�";
 				}
 				if (!s.equals("")) {
 					field.value = s;
-				}
-				else {
+				} else {
 					field.value = null;
 				}
 			}
@@ -213,7 +209,8 @@ public class ObjectPropertiesEditor
 			for (int i = 0; i < textFields.size(); i++) {
 				textField = (JTextField) textFields.get(i);
 				field = (ClassField) controlledObject.fields.get(i);
-				( (JCheckBox) watchFields.get(i)).setSelected(false); field.watched = false;
+				((JCheckBox) watchFields.get(i)).setSelected(false);
+				field.watched = false;
 				field.value = null;
 				textField.setText("");
 			}
@@ -223,7 +220,6 @@ public class ObjectPropertiesEditor
 	JComboBox getComboBox(JTextField jtf) {
 		for (int i = 0; i < comboBoxes.size(); i++) {
 			JComboBox jcb = (JComboBox) comboBoxes.get(i);
-
 			if (jtf == jcb.getEditor().getEditorComponent()) {
 				return jcb;
 			}

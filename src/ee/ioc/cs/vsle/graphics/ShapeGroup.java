@@ -1,12 +1,11 @@
 package ee.ioc.cs.vsle.graphics;
 
-import ee.ioc.cs.vsle.graphics.Shape;
-import ee.ioc.cs.vsle.vclass.Port;
-import ee.ioc.cs.vsle.util.db;
+import java.io.*;
+import java.util.*;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.awt.Graphics;
+import java.awt.*;
+
+import ee.ioc.cs.vsle.vclass.*;
 
 public class ShapeGroup
 	extends Shape
@@ -112,8 +111,7 @@ public class ShapeGroup
 					if (!theShape.getName().equals(BoundingBox.name)) {
 						shapes.remove(theShape);
 					}
-				}
-				else {
+				} else {
 					shapes.remove(theShape);
 				}
 			}
@@ -163,7 +161,6 @@ public class ShapeGroup
 
 	public ArrayList getSelected() {
 		ArrayList a = new ArrayList();
-
 		for (int i = 0; i < shapes.size(); i++) {
 			Shape shape = (Shape) shapes.get(i);
 
@@ -177,7 +174,6 @@ public class ShapeGroup
 	void setBounds() {
 		int x1, x2, y1, y2;
 		Shape shape;
-
 		if (shapes != null && shapes.size() > 0) {
 			shape = (Shape) shapes.get(0);
 			x1 = shape.x + shape.portOffsetX1;
@@ -213,13 +209,16 @@ public class ShapeGroup
 		}
 	}
 
-	public void setFont(java.awt.Font f) {}
+	public void setFont(java.awt.Font f) {
+	}
 
-	public void setText(String s) {}
+	public void setText(String s) {
+	}
 
 	public boolean contains(int pointX, int pointY) {
-		if ( (pointX > x) && (pointY > y)) {
-			if ( (pointX < x + (int) (size * width)) && (pointY < y + (int) (size * height))) {
+		if ((pointX > x) && (pointY > y)) {
+			if ((pointX < x + (int) (size * width))
+				&& (pointY < y + (int) (size * height))) {
 				return true;
 			}
 		}
@@ -227,8 +226,9 @@ public class ShapeGroup
 	}
 
 	public boolean isInside(int x1, int y1, int x2, int y2) {
-		if ( (x1 < x) && (y1 < y)) {
-			if ( (x2 > x + (int) (size * width)) && (y2 > y + (int) (size * height))) {
+		if ((x1 < x) && (y1 < y)) {
+			if ((x2 > x + (int) (size * width))
+				&& (y2 > y + (int) (size * height))) {
 				return true;
 			}
 		}
@@ -364,7 +364,7 @@ public class ShapeGroup
 	}
 
 	public Object clone() {
-		ShapeGroup g = (ShapeGroup)super.clone();
+		ShapeGroup g = (ShapeGroup) super.clone();
 		Shape shape;
 		ArrayList newList = new ArrayList();
 

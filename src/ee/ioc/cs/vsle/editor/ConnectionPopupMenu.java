@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.editor;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.ConnectionList;
 import ee.ioc.cs.vsle.editor.Menu;
+
 import java.awt.Container;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -17,9 +18,7 @@ import javax.swing.JMenuItem;
  * @author Aulo Aasmaa, Ando Saabas
  * @version 1.0
  */
-public class ConnectionPopupMenu
-	extends JPopupMenu
-	implements ActionListener {
+public class ConnectionPopupMenu extends JPopupMenu implements ActionListener {
 
 	Connection connection;
 	ConnectionList connections;
@@ -30,7 +29,8 @@ public class ConnectionPopupMenu
 	 * @param relation ee.ioc.cs.editor.vclass.Connection - selected connection.
 	 * @param relations ee.ioc.cs.editor.vclass.ConnectionList - list of all defined connections.
 	 * @param contentPane Container - editor's content pane.
-	 */ConnectionPopupMenu(Connection relation, ConnectionList relations, Container contentPane) {
+	 */
+	ConnectionPopupMenu(Connection relation, ConnectionList relations, Container contentPane) {
 		super();
 
 		this.connection = relation;
@@ -59,14 +59,13 @@ public class ConnectionPopupMenu
 	/**
 	 * Action event listener.
 	 * @param e ActionEvent - performed action event.
-	 */ public void actionPerformed(ActionEvent e) {
+	 */
+	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand() == Menu.RELATION_DELETE) {
 			connections.remove(connection);
-		}
-		else if (e.getActionCommand() == Menu.ADDBREAKPOINT) {
+		} else if (e.getActionCommand() == Menu.ADDBREAKPOINT) {
 			connection.addBreakPoint();
-		}
-		else {
+		} else {
 			connection.removeBreakPoint();
 		}
 		contentPane.repaint();

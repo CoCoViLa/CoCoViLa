@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.awt.Graphics;
 import java.awt.Color;
 
-public class GObj
-	implements Serializable, Cloneable {
+public class GObj implements Serializable, Cloneable {
 
 	public float Xsize = 1; // percentage for resizing, 1 means real size
 	public float Ysize = 1;
@@ -33,7 +32,8 @@ public class GObj
 	public int portOffsetY1 = 0;
 	public int portOffsetY2 = 0;
 
-	GObj() {}
+	GObj() {
+	}
 
 	public GObj(int x, int y, int width, int height, String name) {
 		this.setX(x);
@@ -44,8 +44,10 @@ public class GObj
 	}
 
 	public boolean contains(int pointX, int pointY) {
-		if ( (pointX > getX() + (int) (getXsize() * portOffsetX1)) && (pointY > getY() + (int) (getYsize() * portOffsetY1))) {
-			if ( (pointX < getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) && (pointY < getY() + (int) (getYsize() * (getHeight() + portOffsetY2))))) {
+		if ((pointX > getX() + (int) (getXsize() * portOffsetX1))
+			&& (pointY > getY() + (int) (getYsize() * portOffsetY1))) {
+			if ((pointX < getX() + (int) (getXsize() * (getWidth() + portOffsetX2))
+				&& (pointY < getY() + (int) (getYsize() * (getHeight() + portOffsetY2))))) {
 				return true;
 			}
 		}
@@ -53,8 +55,9 @@ public class GObj
 	}
 
 	public boolean isInside(int x1, int y1, int x2, int y2) {
-		if ( (x1 < getX() + portOffsetX1) && (y1 < getY() + portOffsetY1)) {
-			if ( (x2 > getX() + (int) (getXsize() * getWidth()) + portOffsetX2) && (y2 > getY() + (int) (getYsize() * getHeight()) + portOffsetY2)) {
+		if ((x1 < getX() + portOffsetX1) && (y1 < getY() + portOffsetY1)) {
+			if ((x2 > getX() + (int) (getXsize() * getWidth()) + portOffsetX2)
+				&& (y2 > getY() + (int) (getYsize() * getHeight()) + portOffsetY2)) {
 				return true;
 			}
 		}
@@ -74,23 +77,30 @@ public class GObj
 	}
 
 	public int controlRectContains(int pointX, int pointY) {
-		if ( (pointX >= getX() + portOffsetX1) && (pointY >= getY() + portOffsetY1)) {
-			if ( (pointX <= getX() + portOffsetX1 + 4) && (pointY <= getY() + portOffsetY1 + 4)) {
+		if ((pointX >= getX() + portOffsetX1) && (pointY >= getY() + portOffsetY1)) {
+			if ((pointX <= getX() + portOffsetX1 + 4)
+				&& (pointY <= getY() + portOffsetY1 + 4)) {
 				return 1;
 			}
 		}
-		if ( (pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4) && (pointY >= getY() + portOffsetY1)) {
-			if ( (pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2))) && (pointY <= getY() + portOffsetY1 + 4)) {
+		if ((pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4)
+			&& (pointY >= getY() + portOffsetY1)) {
+			if ((pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)))
+				&& (pointY <= getY() + portOffsetY1 + 4)) {
 				return 2;
 			}
 		}
-		if ( (pointX >= getX() + portOffsetX1) && (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) - 4)) {
-			if ( (pointX <= getX() + portOffsetX1 + 4) && (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)))) {
+		if ((pointX >= getX() + portOffsetX1)
+			&& (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) - 4)) {
+			if ((pointX <= getX() + portOffsetX1 + 4)
+				&& (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)))) {
 				return 3;
 			}
 		}
-		if ( (pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4) && (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) - 4)) {
-			if ( (pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2))) && (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)))) {
+		if ((pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4)
+			&& (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) - 4)) {
+			if ((pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)))
+				&& (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)))) {
 				return 4;
 			}
 		}
@@ -212,8 +222,7 @@ public class GObj
 	public boolean includesObject(GObj obj) {
 		if (obj == this) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
@@ -236,21 +245,17 @@ public class GObj
 
 		if (getGraphics().showFields == true) {
 			int textOffset = 4;
-
 			for (int i = 0; i < getFields().size(); i++) {
 				ClassField f = (ClassField) getFields().get(i);
-
 				if (f.value != null) {
 					if (f.isPrimOrStringArray()) {
 						String[] split = f.value.split("�");
-
 						for (int j = 0; j < split.length; j++) {
 							g.drawString(split[j], getX() + 5, getY() + 8 + textOffset);
 							textOffset += 12;
 						}
 						textOffset += 6;
-					}
-					else if (f.isPrimitiveOrString()) {
+					} else if (f.isPrimitiveOrString()) {
 						g.drawString(f.value, getX() + 5, getY() + 8 + textOffset);
 						textOffset += 18;
 					}
@@ -258,37 +263,42 @@ public class GObj
 			}
 		}
 
+
 		for (int i = 0; i < getPorts().size(); i++) {
 			Port port = (Port) getPorts().get(i);
 
 			if (port.isSelected()) {
-				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x), yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
-			}
-			else if (port.isConnected()) {
-				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x), yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
-			}
-			else if (port.isHilighted()) {
-				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x), yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
-			}
-			else {
-				port.openGraphics.draw(xModifier + (int) (getXsize() * port.x), yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
+				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
+					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
+			} else if (port.isConnected()) {
+				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
+					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
+			} else if (port.isHilighted()) {
+				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
+					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
+			} else {
+				port.openGraphics.draw(xModifier + (int) (getXsize() * port.x),
+					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g);
 			}
 		}
 		g.setColor(Color.black);
 		if (isSelected() == true) {
 			g.drawRect(getX() + portOffsetX1, getY() + portOffsetY1, 4, 4);
-			g.drawRect(getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4, getY() + portOffsetY1, 4, 4);
-			g.drawRect(getX() + portOffsetX1, getY() + (int) (getYsize() * (portOffsetY2 + getHeight())) - 4, 4, 4);
-			g.drawRect(getX() + (int) (getXsize() * (portOffsetX2 + getWidth())) - 4, getY() + (int) (getYsize() * ( +portOffsetY2 + getHeight())) - 4, 4, 4);
+			g.drawRect(getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4,
+				getY() + portOffsetY1, 4, 4);
+			g.drawRect(getX() + portOffsetX1,
+				getY() + (int) (getYsize() * (portOffsetY2 + getHeight())) - 4, 4, 4);
+			g.drawRect(getX() + (int) (getXsize() * (portOffsetX2 + getWidth())) - 4,
+				getY() + (int) (getYsize() * (+portOffsetY2 + getHeight())) - 4, 4, 4);
 		}
 	}
 
 	public Object clone() {
 		try {
-			GObj obj = (GObj)super.clone();
+			GObj obj = (GObj) super.clone();
 			Port port;
 
-			obj.setPorts( (ArrayList) getPorts().clone());
+			obj.setPorts((ArrayList) getPorts().clone());
 			for (int i = 0; i < obj.getPorts().size(); i++) {
 				port = (Port) obj.getPorts().get(i);
 				port = (Port) port.clone();
@@ -298,7 +308,7 @@ public class GObj
 				port.connections = new ArrayList();
 			}
 
-			obj.setFields( (ArrayList) getFields().clone());
+			obj.setFields((ArrayList) getFields().clone());
 			// deep clone each separate field
 			ClassField field;
 
@@ -308,8 +318,7 @@ public class GObj
 			}
 
 			return obj;
-		}
-		catch (CloneNotSupportedException e) {
+		} catch (CloneNotSupportedException e) {
 			db.p("Unable to clone.");
 			return null;
 		}

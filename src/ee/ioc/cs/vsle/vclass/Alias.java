@@ -12,8 +12,7 @@ import java.util.ArrayList;
  * @author Aulo Aasmaa, Ando Saabas
  * @version 1.0
  */
-public class Alias
-	extends ClassField {
+public class Alias extends ClassField {
 
 	private static final String ALIAS = "alias";
 
@@ -47,8 +46,7 @@ public class Alias
 
 			if (var != null) {
 				vars.add(var);
-			}
-			else {
+			} else {
 				throw new UnknownVariableException(input[i]);
 			}
 		}

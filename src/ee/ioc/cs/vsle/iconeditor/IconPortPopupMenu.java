@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import ee.ioc.cs.vsle.editor.Menu;
 
 import java.awt.event.KeyEvent;
@@ -9,7 +8,6 @@ import java.awt.event.ActionListener;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 
-
 /**
  * Created by IntelliJ IDEA.
  * User: Aulo
@@ -17,7 +15,8 @@ import javax.swing.JMenuItem;
  * Time: 9:15:36
  * To change this template use Options | File Templates.
  */
-public class IconPortPopupMenu extends JPopupMenu
+public class IconPortPopupMenu
+	extends JPopupMenu
 	implements ActionListener {
 
 	IconPort port;
@@ -29,7 +28,6 @@ public class IconPortPopupMenu extends JPopupMenu
 		this.editor = editor;
 
 		JMenuItem menuItem = new JMenuItem(Menu.DELETE, KeyEvent.VK_D);
-
 		menuItem.addActionListener(this);
 		menuItem.setActionCommand(Menu.DELETE);
 		this.add(menuItem);
@@ -46,7 +44,6 @@ public class IconPortPopupMenu extends JPopupMenu
 			editor.repaint();
 		} else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
 			PortPropertiesDialog ppd = new PortPropertiesDialog(editor, port);
-
 			ppd.setPortName(port.getName());
 			ppd.setStrict(port.isStrict());
 			ppd.setAreaConn(port.isArea());

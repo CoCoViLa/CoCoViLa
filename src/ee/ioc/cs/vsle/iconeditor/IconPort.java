@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
 import ee.ioc.cs.vsle.vclass.ClassField;
@@ -12,7 +11,6 @@ import java.awt.Graphics2D;
 import java.awt.Graphics;
 import java.awt.Color;
 import java.awt.BasicStroke;
-
 
 public class IconPort implements Cloneable, Serializable {
 
@@ -75,6 +73,10 @@ public class IconPort implements Cloneable, Serializable {
 	int getCenterX() {
 		return (int) (x + openGraphics.boundX + (openGraphics.boundWidth) / 2);
 	} // getCenterX
+
+	public String toText() {
+		return "PORT:" + getX() + ":" + getY() + ":" + isArea() + ":" + isStrict() + ":" + getName();
+	}
 
 	/**
 	 * Returns center y coordinate of the port.
@@ -147,9 +149,7 @@ public class IconPort implements Cloneable, Serializable {
 	public void setSelected(boolean b) {
 		selected = b;
 		if (b) {
-			if (graphics != null) {
-				drawSelection(graphics);
-			}
+			if (graphics != null) drawSelection(graphics);
 		}
 	} // setSelected
 
@@ -294,7 +294,6 @@ public class IconPort implements Cloneable, Serializable {
 	 */
 	int getNumber() {
 		IconPort port;
-
 		for (int j = 0; j < obj.ports.size(); j++) {
 			port = (IconPort) obj.ports.get(j);
 			if (port == this) {
@@ -364,7 +363,6 @@ public class IconPort implements Cloneable, Serializable {
 	 */
 	void draw(int xModifier, int yModifier, float size, Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
-
 		this.graphics = g2;
 		g2.setColor(Color.black);
 
@@ -376,5 +374,6 @@ public class IconPort implements Cloneable, Serializable {
 		}
 
 	} // draw
+
 
 }

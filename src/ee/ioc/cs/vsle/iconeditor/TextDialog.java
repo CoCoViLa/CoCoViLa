@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import java.awt.BorderLayout;
 import java.awt.GraphicsEnvironment;
 import java.awt.Dimension;
@@ -23,7 +22,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.border.TitledBorder;
 import javax.swing.BorderFactory;
-
 
 public class TextDialog extends JDialog implements ActionListener {
 
@@ -49,7 +47,10 @@ public class TextDialog extends JDialog implements ActionListener {
 	private JPanel pnlFont = new JPanel();
 	private JPanel pnlText = new JPanel();
 
-	JScrollPane textScrollPane = new JScrollPane(taText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+	JScrollPane textScrollPane = new JScrollPane(taText,
+		JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+		JScrollPane.
+		HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 	Spinner spinner = new Spinner(1, 100, 1);
 
@@ -78,7 +79,6 @@ public class TextDialog extends JDialog implements ActionListener {
 		Font f = new Font("Arial", Font.BOLD, 11);
 
 		TitledBorder textBorder = BorderFactory.createTitledBorder("Text to be displayed");
-
 		textBorder.setTitleFont(f);
 		textScrollPane.setBorder(textBorder);
 
@@ -91,7 +91,6 @@ public class TextDialog extends JDialog implements ActionListener {
 
 		// add color chooser tool
 		ImageIcon icon = new ImageIcon("images/colorchooser.gif");
-
 		bttnColor = new JButton(icon);
 		bttnColor.setToolTipText("Color chooser");
 
@@ -219,6 +218,7 @@ public class TextDialog extends JDialog implements ActionListener {
 			} // end actionPerformed
 		}); // end bttnUnderline Action Listener
 
+
 		bttnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				if (evt.getSource() == bttnCancel) {
@@ -261,6 +261,7 @@ public class TextDialog extends JDialog implements ActionListener {
 			}
 		}); // end spinner change listener
 
+
 	} // TextDialog
 
 	/**
@@ -270,10 +271,7 @@ public class TextDialog extends JDialog implements ActionListener {
 	 */
 	private void openColorChooser() {
 		Color col = JColorChooser.showDialog(this, "Choose Color", Color.black);
-
-		if (col != null) {
-			this.color = col;
-		}
+		if (col != null) this.color = col;
 	} // openColorChooser
 
 	/**
@@ -311,18 +309,16 @@ public class TextDialog extends JDialog implements ActionListener {
 	 * combobox and the size from the spinner.
 	 */
 	private void changeTextFont() {
-		if (cbFont != null && cbFont.getItemCount() > 0 && cbFont.getSelectedItem() != null && spinner != null && spinner.getValue() != null && spinner.getValue().toString().trim().length() > 0) {
+		if (cbFont != null && cbFont.getItemCount() > 0 && cbFont.getSelectedItem() != null &&
+			spinner != null && spinner.getValue() != null && spinner.getValue().toString().trim().length() > 0) {
 
 			int fontStyle = Font.PLAIN;
+			if (isBold) fontStyle = Font.BOLD;
+			if (isItalic) fontStyle = fontStyle + Font.ITALIC;
 
-			if (isBold) {
-				fontStyle = Font.BOLD;
-			}
-			if (isItalic) {
-				fontStyle = fontStyle + Font.ITALIC;
-			}
+			font = new Font(cbFont.getSelectedItem().toString(), fontStyle,
+				Integer.parseInt(spinner.getValue().toString()));
 
-			font = new Font(cbFont.getSelectedItem().toString(), fontStyle, Integer.parseInt(spinner.getValue().toString()));
 
 			taText.setFont(font);
 
@@ -352,9 +348,7 @@ public class TextDialog extends JDialog implements ActionListener {
 	 */
 	private void setComboBoxValues(JComboBox cb, Object[] values, Object defaultSelection) {
 		if (cb != null) {
-			while (cb.getItemCount() > 0) {
-				cb.removeItemAt(0);
-			}
+			while (cb.getItemCount() > 0) cb.removeItemAt(0);
 			if (values != null && values.length > 0) {
 				for (int i = 0; i < values.length; i++) {
 					cb.addItem(values[i]);
@@ -378,7 +372,8 @@ public class TextDialog extends JDialog implements ActionListener {
 	 * Action listener.
 	 * @param evt ActionEvent - action event.
 	 */
-	public void actionPerformed(ActionEvent evt) {} // actionPerformed
+	public void actionPerformed(ActionEvent evt) {
+	} // actionPerformed
 
 	/**
 	 * Main method for module unit testing.

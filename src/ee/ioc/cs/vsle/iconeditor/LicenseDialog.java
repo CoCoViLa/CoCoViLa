@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import ee.ioc.cs.vsle.editor.Editor;
 import ee.ioc.cs.vsle.util.PropertyBox;
 
@@ -22,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 
-
 public class LicenseDialog extends JDialog implements ActionListener {
 
 	private JPanel pnlMain = new JPanel();
@@ -35,7 +33,10 @@ public class LicenseDialog extends JDialog implements ActionListener {
 
 	private JTextArea taLicenseText = new JTextArea();
 
-	private JScrollPane scrollPane = new JScrollPane(taLicenseText, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+	private JScrollPane scrollPane = new JScrollPane(taLicenseText,
+		JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+		JScrollPane.
+		HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 	private JButton bttnOk = new JButton("OK");
 
@@ -53,7 +54,6 @@ public class LicenseDialog extends JDialog implements ActionListener {
 		cbLang.addItem("Eesti");
 
 		FlowLayout fl = new FlowLayout();
-
 		fl.setAlignment(FlowLayout.LEFT);
 
 		pnlHeader.setLayout(fl);
@@ -75,11 +75,9 @@ public class LicenseDialog extends JDialog implements ActionListener {
 		getContentPane().add(pnlMain);
 		setSize(new Dimension(500, 600));
 		setResizable(false);
-		if (iEd != null) {
+		if (iEd != null)
 			setLocationRelativeTo(iEd);
-		} else if (eEd != null) {
-			setLocationRelativeTo(eEd);
-		}
+		else if (eEd != null) setLocationRelativeTo(eEd);
 
 		setVisible(true);
 
@@ -100,6 +98,7 @@ public class LicenseDialog extends JDialog implements ActionListener {
 			}
 		}); // end cbLang item listener
 
+
 	} // PortPropertiesDialog
 
 	/**
@@ -109,16 +108,13 @@ public class LicenseDialog extends JDialog implements ActionListener {
 	 */
 	public String getLicenseText() {
 		StringBuffer textBuffer = new StringBuffer();
-
 		try {
 			String fileName = PropertyBox.GPL_EN_LICENSE_FILE_NAME;
-
 			if (cbLang != null && cbLang.getSelectedItem() != null && cbLang.getSelectedItem().toString().equalsIgnoreCase("Eesti")) {
 				fileName = PropertyBox.GPL_EE_LICENSE_FILE_NAME;
 			}
 			BufferedReader in = new BufferedReader(new FileReader(fileName));
 			String str;
-
 			while ((str = in.readLine()) != null) {
 				textBuffer.append(str);
 				textBuffer.append("\n");
@@ -134,7 +130,8 @@ public class LicenseDialog extends JDialog implements ActionListener {
 	 * Action listener.
 	 * @param evt ActionEvent - action event.
 	 */
-	public void actionPerformed(ActionEvent evt) {}
+	public void actionPerformed(ActionEvent evt) {
+	}
 
 	/**
 	 * Main method for module unit testing.

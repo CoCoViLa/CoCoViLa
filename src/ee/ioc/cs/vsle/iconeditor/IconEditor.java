@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.iconeditor.IconMouseOps;
 import ee.ioc.cs.vsle.vclass.VPackage;
@@ -21,15 +20,13 @@ import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.editor.State;
 import ee.ioc.cs.vsle.util.db;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Properties;
 
 import java.awt.Graphics;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.AWTEvent;
 import java.awt.Color;
 import java.awt.GridLayout;
@@ -54,8 +51,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JFileChooser;
 import javax.swing.JCheckBoxMenuItem;
 
-
-public class IconEditor extends JFrame {
+public class IconEditor
+	extends JFrame {
 
 	int mouseX, mouseY; // Mouse X and Y coordinates.
 	int shapeCount;
@@ -101,6 +98,8 @@ public class IconEditor extends JFrame {
 		});
 
 		scheme = new Scheme();
+		shapeList.addAll(scheme.objects);
+		scheme.packageName = "IconEditor";
 		mListener = new IconMouseOps(this);
 
 		drawingArea = new DrawingArea();
@@ -114,7 +113,10 @@ public class IconEditor extends JFrame {
 
 		drawingArea.addMouseMotionListener(mListener);
 		drawingArea.setPreferredSize(drawAreaSize);
-		JScrollPane areaScrollPane = new JScrollPane(drawingArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane areaScrollPane = new JScrollPane(drawingArea,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.
+			HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.add(areaScrollPane, BorderLayout.CENTER);
@@ -128,9 +130,9 @@ public class IconEditor extends JFrame {
 		getContentPane().add(mainPanel);
 
 		Look look = new Look();
-
 		look.setGUI(this);
-		look.changeLayout(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT));
+		look.changeLayout(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.DEFAULT_LAYOUT));
 	}
 
 	/**
@@ -140,7 +142,8 @@ public class IconEditor extends JFrame {
 	public void changeLayout(String selectedLayout) {
 		if (selectedLayout.equals(Look.LOOK_WINDOWS)) {
 			try {
-				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+				UIManager.setLookAndFeel(
+					"com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
 				SwingUtilities.updateComponentTreeUI(this);
 			} catch (Exception uie) {
 				uie.printStackTrace();
@@ -154,14 +157,16 @@ public class IconEditor extends JFrame {
 			}
 		} else if (selectedLayout.equals(Look.LOOK_MOTIF)) {
 			try {
-				UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+				UIManager.setLookAndFeel(
+					"com.sun.java.swing.plaf.motif.MotifLookAndFeel");
 				SwingUtilities.updateComponentTreeUI(this);
 			} catch (Exception uie) {
 				uie.printStackTrace();
 			}
 		} else if (selectedLayout.equals(Look.LOOK_3D)) {
 			try {
-				UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
+				UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.
+					KunststoffLookAndFeel());
 				SwingUtilities.updateComponentTreeUI(this);
 			} catch (Exception uie) {
 				uie.printStackTrace();
@@ -171,10 +176,8 @@ public class IconEditor extends JFrame {
 
 	public boolean getGridVisibility() {
 		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
-
 		if (vis != null) {
 			int v = Integer.parseInt(vis);
-
 			if (v < 1) {
 				return false;
 			} else {
@@ -187,7 +190,6 @@ public class IconEditor extends JFrame {
 	public int getGridStep() {
 		String sGridStep = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP);
 		int iGridStep = 10;
-
 		if (sGridStep != null) {
 			iGridStep = Integer.parseInt(sGridStep);
 		}
@@ -302,6 +304,23 @@ public class IconEditor extends JFrame {
 	}
 
 	/**
+	 * Returns XML representing shapes on the screen.
+	 * @return StringBuffer - XML representing shapes on the screen.
+	 */
+	public StringBuffer getShapesInXML() {
+		StringBuffer xmlBuffer = new StringBuffer();
+		xmlBuffer.append("<?xml version='1.0' encoding='utf-8'?>");
+		xmlBuffer.append("\n");
+		xmlBuffer.append("<drawing>");
+
+		xmlBuffer = appendShapes(xmlBuffer);
+		xmlBuffer = appendPorts(xmlBuffer);
+		xmlBuffer.append("</drawing>");
+
+		return xmlBuffer;
+	} // getShapesInXML
+
+	/**
 	 * Save shape to file in XML format.
 	 */
 	public void exportShapesToXML() {
@@ -309,30 +328,25 @@ public class IconEditor extends JFrame {
 		StringBuffer xmlBuffer = new StringBuffer();
 
 		if (boundingbox != null) {
-			xmlBuffer.append("<?xml version='1.0' encoding='utf-8'?>");
-			xmlBuffer.append("\n");
-			xmlBuffer.append("<drawing>");
-			xmlBuffer = appendShapes(xmlBuffer);
-			xmlBuffer = appendPorts(xmlBuffer);
-			xmlBuffer.append("</drawing>");
+			xmlBuffer = getShapesInXML();
 			saveToFile(xmlBuffer.toString(), "xml");
 		} else {
-			JOptionPane.showMessageDialog(null, "Please define a bounding box.", "Bounding box undefined", JOptionPane.INFORMATION_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Please define a bounding box.",
+				"Bounding box undefined",
+				JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
 	private StringBuffer appendShapes(StringBuffer buf) {
 		buf.append("<graphics>");
-		buf.append(boundingbox.toFile(0, 0));
+		if (boundingbox != null) buf.append(boundingbox.toFile(0, 0));
 		for (int i = 0; i < shapeList.size(); i++) {
 			Shape shape = (Shape) shapeList.get(i);
-
 			if (!(shape instanceof BoundingBox)) {
-				String shapeXML = shape.toFile(boundingbox.x, boundingbox.y);
+				String shapeXML = null;
+				shapeXML = shape.toFile(boundingbox.x, boundingbox.y);
 
-				if (shapeXML != null) {
-					buf.append(shapeXML);
-				}
+				if (shapeXML != null) buf.append(shapeXML);
 			}
 		}
 		buf.append("</graphics>");
@@ -349,12 +363,12 @@ public class IconEditor extends JFrame {
 				buf.append(p.getName());
 				buf.append("\" x=\"");
 				buf.append(p.getX() - boundingbox.x);
+
 				buf.append("\" y=\"");
 				buf.append(p.getY() - boundingbox.y);
+
 				buf.append("\" portConnection=\"");
-				if (p.isArea()) {
-					buf.append("area");
-				}
+				if (p.isArea()) buf.append("area");
 				buf.append("\" strict=\"");
 				buf.append(p.isStrict());
 				buf.append("\">");
@@ -387,9 +401,7 @@ public class IconEditor extends JFrame {
 		private int gridStep = 10;
 
 		public void setGridStep(int i) {
-			if (i > 0) {
-				this.gridStep = i;
-			}
+			if (i > 0) this.gridStep = i;
 		}
 
 		public boolean isGridVisible() {
@@ -414,29 +426,25 @@ public class IconEditor extends JFrame {
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 
-			if (this.showGrid) {
-				drawGrid(g);
-			}
+			if (this.showGrid) drawGrid(g);
 
-			// joonistame koik listis olevad objektid ekraanile, see k�ib v�ga lihtsalt. tegelt v�iks j�rgneva panna
-			// ka shapeListi meetodiks, st siin �tleks lihtsalt shapeList.draw(g), aga suurt vahet pole
+			//joonistame koik listis olevad objektid ekraanile, see k�ib v�ga lihtsalt. tegelt v�iks j�rgneva panna
+			//ka shapeListi meetodiks, st siin ytleks lihtsalt shapeList.draw(g), aga suurt vahet pole
 			Shape shape;
 			boolean antiAliasing = isAntialiasingOn();
-
 			Shape.setAntialiasing(antiAliasing);
 
 			for (int i = 0; i < shapeList.size(); i++) {
 				shape = (Shape) shapeList.get(i);
-				// 2 esimest parameetrit 0,0.0 on offset ehk palju me teda nihutame (oli vajalik kui shape on objekti graafika osa sest
-				// siis peame arvestama ka objekti asukohta, antud juhul pole oluline, aga ma ei viitsi meetodeid �mber
-				// kirjutada, tulevikus v�ib seda teha. Kolmas parameeter ehk 1 on suurenduskordaja
+				//2 esimest parameetrit 0,0.0 on offset ehk palju me teda nihutame (oli vajalik kui shape on objekti graafika osa sest
+				//siis peame arvestama ka objekti asukohta, antud juhul pole oluline, aga ma ei viitsi meetodeid �mber
+				//kirjutada, tulevikus v�ib seda teha. Kolmas parameeter ehk 1 on suurenduskordaja
 				if (g != null) {
 					shape.draw(0, 0, 1f, 1f, g);
 				}
 			}
 
 			IconPort port;
-
 			for (int i = 0; i < ports.size(); i++) {
 				port = (IconPort) ports.get(i);
 				if (g != null) {
@@ -444,38 +452,8 @@ public class IconEditor extends JFrame {
 				}
 			}
 
-			// That's all with drawing!
-			// Look at classes Shape and ShapeList.
-
-			/* We do not need this code, but we will keep it for reference.
-			 Connection rel;
-
-			 GObj obj;
-			 for (int i = 0; i < objects.size(); i++) {
-			 obj = (GObj)objects.get(i);
-			 obj.drawClassGraphics(g);
-			 }
-			 g.setColor(Color.blue);
-			 for (int i = 0; i < connections.size(); i++) {
-			 rel = (Connection)connections.get(i);
-			 rel.drawRelation(g);
-			 }
-
-			 if (firstPort != null) {
-			 currentCon.drawRelation(g);
-			 Point p = (Point)currentCon.breakPoints.get(currentCon.breakPoints.size()-1);
-			 g.drawLine(p.x, p.y, mouseX, mouseY);
-			 }
-			 g.setColor(Color.black); */
-			
-			/*
-			 if (currentShape != null) {
-			 currentShape.drawClassGraphics(g);
-			 } */
-
 			if (mListener.state.equals(State.dragBox)) {
 				Graphics2D g2 = (Graphics2D) g;
-
 				g2.setColor(Color.gray);
 				g2.setStroke(new BasicStroke((float) 1.0));
 				g2.drawRect(mListener.startX, mListener.startY, mouseX - mListener.startX, mouseY - mListener.startY);
@@ -483,33 +461,52 @@ public class IconEditor extends JFrame {
 
 				Graphics2D g2 = (Graphics2D) g;
 
-				g2.setColor(mListener.color);
-				g2.setStroke(new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[] { 4}, 0));
+				if (isAntialiasingOn()) {
+					g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+						java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+				}
+
+				float red = (float) mListener.color.getRed() * 100 / 256 / 100;
+				float green = (float) mListener.color.getGreen() * 100 / 256 / 100;
+				float blue = (float) mListener.color.getBlue() * 100 / 256 / 100;
+
+				float alpha = (float) (1 - (mListener.getTransparency() / 100));
+				g2.setColor(new Color(red, green, blue, alpha));
+				g2.setStroke(new BasicStroke((float) mListener.strokeWidth));
+
 				final int width = Math.abs(mouseX - mListener.startX);
 				final int height = Math.abs(mouseY - mListener.startY);
 
+
 				if (mListener.state.equals(State.drawRect)) {
-					g.drawRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
+					g.drawRect(Math.min(mListener.startX, mouseX),
+						Math.min(mListener.startY, mouseY), width, height);
 				} else if (mListener.state.equals(State.boundingbox)) {
 					g.setColor(Color.darkGray);
-					g.drawRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
+					g.drawRect(Math.min(mListener.startX, mouseX),
+						Math.min(mListener.startY, mouseY), width, height);
 				} else if (mListener.state.equals(State.drawFilledRect)) {
-
-					g.fillRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
+					g.fillRect(Math.min(mListener.startX, mouseX),
+						Math.min(mListener.startY, mouseY), width, height);
 				} else if (mListener.state.equals(State.drawLine)) {
 					g.drawLine(mListener.startX, mListener.startY, mouseX, mouseY);
 				} else if (mListener.state.equals(State.drawOval)) {
-					g.drawOval(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
+					g.drawOval(Math.min(mListener.startX, mouseX),
+						Math.min(mListener.startY, mouseY), width, height);
 				} else if (mListener.state.equals(State.drawFilledOval)) {
-					g.fillOval(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
+					g.fillOval(Math.min(mListener.startX, mouseX),
+						Math.min(mListener.startY, mouseY), width, height);
 				} else if (mListener.state.equals(State.drawArc)) {
-					g.drawArc(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height, 0, 180);
+					g.drawArc(Math.min(mListener.startX, mouseX),
+						Math.min(mListener.startY, mouseY),
+						width, height, 0, 180);
 				} else if (mListener.state.equals(State.drawFilledArc)) {
-					g.fillArc(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height, 0, 180);
+					g.fillArc(Math.min(mListener.startX, mouseX),
+						Math.min(mListener.startY, mouseY),
+						width, height, 0, 180);
 				}
 
 			}
-
 		}
 	}
 
@@ -519,7 +516,8 @@ public class IconEditor extends JFrame {
 	 * @param text - text displayed in the information dialog.
 	 */
 	public void showInfoDialog(String title, String text) {
-		JOptionPane.showMessageDialog(null, text, title, JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(null, text, title,
+			JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	/**
@@ -537,16 +535,18 @@ public class IconEditor extends JFrame {
 	 * Close application.
 	 */
 	public void exitApplication() {
-		int confirmed = JOptionPane.showConfirmDialog(null, "Exit Application?", Menu.EXIT, JOptionPane.OK_CANCEL_OPTION);
-
+		int confirmed = JOptionPane.showConfirmDialog(null,
+			"Exit Application?",
+			Menu.EXIT,
+			JOptionPane.OK_CANCEL_OPTION);
 		switch (confirmed) {
-		case JOptionPane.OK_OPTION:
-			System.exit(0);
-
-		case JOptionPane.CANCEL_OPTION:
-			break;
+			case JOptionPane.OK_OPTION:
+				System.exit(0);
+			case JOptionPane.CANCEL_OPTION:
+				break;
 		}
 	}
+
 
 	/**
 	 * Store application properties.
@@ -555,11 +555,9 @@ public class IconEditor extends JFrame {
 	 * @param propValue - saved property value.
 	 */
 	public static void setProperty(String propFile, String propName,
-	String propValue) {
-		db.p(propFile + " " + propName + " " + propValue);
+								   String propValue) {
 		// Read properties file.
 		Properties properties = new Properties();
-
 		try {
 			properties.load(new FileInputStream(propFile + ".properties"));
 		} catch (IOException e) {
@@ -578,8 +576,11 @@ public class IconEditor extends JFrame {
 	 * Removes all objects.
 	 */
 	public void clearObjects() {
-		shapeList.removeAll(shapeList);
-		enableBoundingBoxButton(null);
+		mListener.state = State.selection;
+		shapeList = new ShapeGroup(new ArrayList());
+		ports = new ArrayList();
+		palette.boundingbox.setEnabled(true);
+		boundingbox = null;
 		repaint();
 	}
 
@@ -607,7 +608,8 @@ public class IconEditor extends JFrame {
 	}
 
 	public static String getSystemDocUrl() {
-		return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DOCUMENTATION_URL);
+		return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.DOCUMENTATION_URL);
 	}
 
 	/**
@@ -638,10 +640,10 @@ public class IconEditor extends JFrame {
 			if (url != null && url.trim().length() > 0) {
 				// Get OS type.
 				String osType = getOsType();
-
 				// Open URL with OS-specific methods.
 				if (osType != null && osType.equalsIgnoreCase("Windows")) {
-					Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
+					Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " +
+						url);
 				}
 			}
 		} catch (Exception e) {
@@ -669,11 +671,9 @@ public class IconEditor extends JFrame {
 	 */
 	public static String getOsType() {
 		Properties sysProps = System.getProperties();
-
 		try {
 			if (sysProps != null) {
 				String osType = sysProps.getProperty("os.name");
-
 				if (isWin(osType)) {
 					return "Windows";
 				} else {
@@ -691,7 +691,6 @@ public class IconEditor extends JFrame {
 	 */
 	public void openOptionsDialog() {
 		OptionsDialog o = new OptionsDialog();
-
 		o.setVisible(true);
 	}
 
@@ -700,14 +699,12 @@ public class IconEditor extends JFrame {
 	 */
 	public void deleteObjects() {
 		Shape shape;
-
 		shapeList.remove(currentShape);
 
 		enableBoundingBoxButton(currentShape);
 
 		currentShape = null;
 		ArrayList removable = new ArrayList();
-
 		for (int i = 0; i < shapeList.size(); i++) {
 			shape = (Shape) shapeList.get(i);
 			if (shape.isSelected()) {
@@ -731,13 +728,11 @@ public class IconEditor extends JFrame {
 			shape.setSelected(false);
 		}
 		ShapeGroup sg = new ShapeGroup(selected);
-
 		sg.strict = true;
 		sg.setAsGroup(true);
 		shapeList.removeAll(selected);
 		shapeList.add(sg);
 		repaint();
-		db.p(sg);
 	}
 
 	/**
@@ -745,7 +740,6 @@ public class IconEditor extends JFrame {
 	 */
 	public void ungroupObjects() {
 		Shape shape;
-
 		for (int i = 0; i < shapeList.getSelected().size(); i++) {
 			shape = (Shape) shapeList.getSelected().get(i);
 			if (shape.isGroup()) {
@@ -769,7 +763,6 @@ public class IconEditor extends JFrame {
 					return f.isDirectory() || f.getName().toLowerCase().endsWith("." + format.toLowerCase());
 				}
 			};
-
 			return filter;
 		}
 		return null;
@@ -794,7 +787,6 @@ public class IconEditor extends JFrame {
 			fc.setFileFilter(getFileFilter(format));
 
 			int returnVal = fc.showSaveDialog(null);
-
 			if (returnVal == JFileChooser.APPROVE_OPTION) {
 				File file = fc.getSelectedFile();
 
@@ -815,8 +807,11 @@ public class IconEditor extends JFrame {
 				// file as it is.
 				if (file.exists()) {
 					JOptionPane confirmPane = new JOptionPane();
-
-					if (confirmPane.showConfirmDialog(null, "File exists.\nOverwrite file?", "Confirm Save", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
+					if (confirmPane.showConfirmDialog(null,
+						"File exists.\nOverwrite file?",
+						"Confirm Save",
+						JOptionPane.OK_CANCEL_OPTION) ==
+						JOptionPane.CANCEL_OPTION) {
 						valid = false;
 					}
 				}
@@ -824,11 +819,12 @@ public class IconEditor extends JFrame {
 					// Save scheme.
 					try {
 						FileOutputStream out = new FileOutputStream(new File(file.getAbsolutePath()));
-
 						out.write(content.getBytes());
 						out.flush();
 						out.close();
-						JOptionPane.showMessageDialog(null, "Saved to: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+						JOptionPane.showMessageDialog(null, "Saved to: " + file.getName(),
+							"Saved",
+							JOptionPane.INFORMATION_MESSAGE);
 
 					} catch (Exception exc) {
 						exc.printStackTrace();
@@ -848,10 +844,9 @@ public class IconEditor extends JFrame {
 	 */
 	public boolean isAntialiasingOn() {
 		boolean antiAliasingOn = true;
-
 		try {
-			int iAntiAliasing = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.ANTI_ALIASING));
-
+			int iAntiAliasing = Integer.parseInt(PropertyBox.getProperty(PropertyBox.
+				APP_PROPS_FILE_NAME, PropertyBox.ANTI_ALIASING));
 			if (iAntiAliasing < 1) {
 				antiAliasingOn = false;
 			}
@@ -869,7 +864,6 @@ public class IconEditor extends JFrame {
 		if (shapeList != null && shapeList.size() > 0) {
 			for (int i = 0; i < shapeList.size(); i++) {
 				Shape shape = (Shape) shapeList.get(i);
-
 				shape.setSelected(b);
 			}
 			repaint();
@@ -881,19 +875,33 @@ public class IconEditor extends JFrame {
 	 */
 	public void cloneObject() {
 		Shape shape = null;
-
 		if (currentShape instanceof Rect) {
-			shape = new Rect(currentShape.getX(), currentShape.getY(), currentShape.width, currentShape.height, currentShape.getColor().getRGB(), currentShape.isFilled(), currentShape.getStrokeWidth(), currentShape.getTransparency());
+			shape = new Rect(currentShape.getX(), currentShape.getY(),
+				currentShape.width, currentShape.height,
+				currentShape.getColor().getRGB(), currentShape.isFilled(), currentShape.getStrokeWidth(), currentShape.getTransparency());
 		} else if (currentShape instanceof Oval) {
-			shape = new Oval(currentShape.getX(), currentShape.getY(), currentShape.width, currentShape.height, currentShape.getColor().getRGB(), currentShape.isFilled(), currentShape.getStrokeWidth(), currentShape.getTransparency());
+			shape = new Oval(currentShape.getX(), currentShape.getY(),
+				currentShape.width, currentShape.height,
+				currentShape.getColor().getRGB(), currentShape.isFilled(),
+				currentShape.getStrokeWidth(), currentShape.getTransparency());
 		} else if (currentShape instanceof Line) {
-			shape = new Line(currentShape.getStartX(), currentShape.getStartY(), currentShape.getEndX(), currentShape.getEndY(), currentShape.getColor().getRGB(), currentShape.getStrokeWidth(), currentShape.getTransparency());
+			shape = new Line(currentShape.getStartX(), currentShape.getStartY(),
+				currentShape.getEndX(), currentShape.getEndY(),
+				currentShape.getColor().getRGB(), currentShape.getStrokeWidth(),
+				currentShape.getTransparency());
 		} else if (currentShape instanceof Dot) {
-			shape = new Dot(currentShape.getX(), currentShape.getY(), currentShape.getColor().getRGB(), currentShape.getStrokeWidth(), currentShape.getTransparency());
+			shape = new Dot(currentShape.getX(), currentShape.getY(), currentShape.getColor().getRGB(),
+				currentShape.getStrokeWidth(), currentShape.getTransparency());
 		} else if (currentShape instanceof Arc) {
-			shape = new Arc(currentShape.getX(), currentShape.getY(), currentShape.width, currentShape.height, currentShape.getStartAngle(), currentShape.getArcAngle(), currentShape.getColor().getRGB(), currentShape.isFilled(), currentShape.getStrokeWidth(), currentShape.getTransparency());
+			shape = new Arc(currentShape.getX(), currentShape.getY(),
+				currentShape.width, currentShape.height,
+				currentShape.getStartAngle(), currentShape.getArcAngle(),
+				currentShape.getColor().getRGB(), currentShape.isFilled(),
+				currentShape.getStrokeWidth(), currentShape.getTransparency());
 		} else if (currentShape instanceof Text) {
-			shape = new Text(currentShape.getX(), currentShape.getY(), currentShape.getFont(), currentShape.getColor(), currentShape.getTransparency(), currentShape.getText());
+			shape = new Text(currentShape.getX(), currentShape.getY(),
+				currentShape.getFont(), currentShape.getColor(),
+				currentShape.getTransparency(), currentShape.getText());
 		}
 
 		if (shape != null) {
@@ -915,14 +923,214 @@ public class IconEditor extends JFrame {
 		if (shapeList != null && shapeList.size() > 0) {
 			for (int i = 0; i < shapeList.size(); i++) {
 				Shape s = (Shape) shapeList.get(i);
-
-				if (s.isSelected()) {
-					return s;
-				}
+				if (s.isSelected()) return s;
 			}
 		}
 		return null;
 	} // getSelectedShape
+
+	/**
+	 * Load graphics.
+	 * @param f - package file to be loaded.
+	 */
+	public void loadGraphicsFromFile(File f) {
+		try {
+			BufferedReader in = new BufferedReader(new FileReader(f));
+			String str;
+			while ((str = in.readLine()) != null) {
+				processShapes(str);
+			}
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	} // loadGraphicsFromFile
+
+	public StringBuffer getGraphicsToString() {
+		StringBuffer sb = new StringBuffer();
+
+		for (int i = 0; i < shapeList.size(); i++) {
+			Shape shape = (Shape) shapeList.get(i);
+
+			sb.append(shape.toText());
+
+			sb.append("\n");
+		}
+
+		for (int i = 0; i < ports.size(); i++) {
+			IconPort port = (IconPort) ports.get(i);
+
+			sb.append(port.toText());
+
+			sb.append("\n");
+		}
+
+		return sb;
+	} // getGraphicsToString
+
+	public void processShapes(String str) {
+		System.out.println("processShapes(" + str + ")");
+		if (str != null) {
+			if (str.startsWith("LINE:")) {
+				str = str.substring(5);
+				int x1 = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int y1 = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int x2 = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int y2 = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int colorInt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int transp = Integer.parseInt(str);
+
+				Line line = new Line(x1, y1, x2, y2, colorInt, strokeW, transp);
+				shapeList.add(line);
+			} else if (str.startsWith("ARC:")) {
+				str = str.substring(4);
+				int x = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int y = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int width = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int height = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int startAngle = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int arcAngle = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int colorInt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				boolean fill = Boolean.valueOf(str.substring(0, str.indexOf(":"))).booleanValue();
+				str = str.substring(str.indexOf(":") + 1);
+				int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int transp = Integer.parseInt(str);
+
+				Arc arc = new Arc(x, y, width, height, startAngle, arcAngle, colorInt, fill, strokeW, transp);
+				shapeList.add(arc);
+			} else if (str.startsWith("BOUNDS:")) {
+				str = str.substring(7);
+				int x = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int y = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int width = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int height = Integer.parseInt(str);
+				BoundingBox b = new BoundingBox(x, y, width, height);
+				this.boundingbox = b;
+				shapeList.add(b);
+				palette.boundingbox.setEnabled(false);
+			} else if (str.startsWith("DOT:")) {
+				str = str.substring(4);
+				int x = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int y = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int width = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int height = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int colorInt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int transp = Integer.parseInt(str);
+				Dot dot = new Dot(x, y, colorInt, strokeW, transp);
+				shapeList.add(dot);
+			} else if (str.startsWith("OVAL:")) {
+				str = str.substring(5);
+				int x = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int y = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int width = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int height = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int colorInt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				boolean fill = Boolean.valueOf(str.substring(0, str.indexOf(":"))).booleanValue();
+				str = str.substring(str.indexOf(":") + 1);
+				int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int transp = Integer.parseInt(str);
+				Oval oval = new Oval(x, y, width, height, colorInt, fill, strokeW, transp);
+				shapeList.add(oval);
+			} else if (str.startsWith("RECT:")) {
+				str = str.substring(5);
+				int x = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int y = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int width = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int height = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int colorInt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				boolean fill = Boolean.valueOf(str.substring(0, str.indexOf(":"))).booleanValue();
+				str = str.substring(str.indexOf(":") + 1);
+				int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int transp = Integer.parseInt(str);
+				Rect rect = new Rect(x, y, width, height, colorInt, fill, strokeW,
+					transp);
+				shapeList.add(rect);
+			} else if (str.startsWith("TEXT:")) {
+				str = str.substring(5);
+				int x = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int y = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int colorInt = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				String fontName = str.substring(0, str.indexOf(":"));
+				str = str.substring(str.indexOf(":") + 1);
+				String fontStyle = str.substring(0, str.indexOf(":"));
+				str = str.substring(str.indexOf(":") + 1);
+				int fontSize = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int transp = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+
+				Font font = null;
+
+				db.p(x + "," + y + "," + colorInt + "," + fontName + "," + fontStyle + "," + fontSize + "," + transp + "," + str);
+
+				if (fontStyle.equalsIgnoreCase("0"))
+					font = new Font(fontName, Font.PLAIN, fontSize);
+				else if (fontStyle.equalsIgnoreCase("1"))
+					font = new Font(fontName, Font.BOLD, fontSize);
+				else if (fontStyle.equalsIgnoreCase("2")) font = new Font(fontName, Font.ITALIC, fontSize);
+				if (font != null) {
+					Text text = new Text(x, y, font, new Color(colorInt), transp, str);
+					shapeList.add(text);
+				}
+
+			} else if (str.startsWith("PORT:")) {
+				str = str.substring(5);
+				int x = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				int y = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				str = str.substring(str.indexOf(":") + 1);
+				boolean isAreaConn = Boolean.valueOf(str.substring(0, str.indexOf(":"))).booleanValue();
+				str = str.substring(str.indexOf(":") + 1);
+				boolean isStrict = Boolean.valueOf(str.substring(0, str.indexOf(":"))).booleanValue();
+				str = str.substring(str.indexOf(":") + 1);
+
+				IconPort port = new IconPort(str, x, y, isAreaConn, isStrict);
+				ports.add(port);
+			}
+		}
+		repaint();
+	} // processShapes
+
 
 	/**
 	 * Main method for module unit-testing.
@@ -931,11 +1139,10 @@ public class IconEditor extends JFrame {
 	public static void main(String[] args) {
 
 		String directory = System.getProperty("user.dir") + System.getProperty("file.separator");
-
 		PropertyBox.APP_PROPS_FILE_PATH = directory;
-		RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
+		RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(PropertyBox.
+			APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
 		JFrame window;
-
 		try {
 			RuntimeProperties.packageDir = directory;
 			window = new IconEditor();
@@ -951,8 +1158,11 @@ public class IconEditor extends JFrame {
 
 		// log application executions, also making sure that the properties file is
 		// available for writing (required by some of current application modules).
-		RuntimeProperties.genFileDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
-		setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
+		RuntimeProperties.genFileDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.GENERATED_FILES_DIR);
+		setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_EXECUTED,
+			new java.util.Date().toString());
+
 
 	}
 

@@ -1,11 +1,9 @@
 package ee.ioc.cs.vsle.graphics;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.io.Serializable;
-import java.awt.Font;
-import java.awt.BasicStroke;
+import java.io.*;
+
+import java.awt.*;
+import java.awt.geom.*;
 
 public class Text
 	extends Shape
@@ -15,6 +13,8 @@ public class Text
 	Font font;
 	Color color;
 	float transparency;
+	private int h;
+	private int w;
 
 	/**
 	 * Alpha value of a color, used
@@ -31,7 +31,8 @@ public class Text
 		this.transparency = (float) transp;
 	}
 
-	public void setStrokeWidth() {}
+	public void setStrokeWidth() {
+	}
 
 	/**
 	 * Returns the used font.
@@ -97,12 +98,21 @@ public class Text
 		return y;
 	}
 
-	int getWidth() {
-		return width;
+	public boolean contains(int pointX, int pointY) {
+		if (pointX >= x && pointX <= x + this.w &&
+			pointY >= y - this.h && pointY <= y) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
-	int getHeight() {
-		return height;
+	public boolean isInside(int x1, int y1, int x2, int y2) {
+		if (x >= x1 && y >= y1 && (x + this.w) <= x2 && (y - this.h) <= y2) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 
 	/**
@@ -110,12 +120,6 @@ public class Text
 	 * @param g Graphics2D - Object's Graphics.
 	 */
 	private void drawSelection(Graphics2D g) {
-		g.setColor(Color.black);
-		g.setStroke(new BasicStroke( (float) 1.0));
-		g.drawRect(x, y, 4, 4);
-		g.drawRect(x + (int) (size * (g.getClipBounds().getWidth())) - 4, y, 4, 4);
-		g.drawRect(x, y + (int) (size * (g.getClipBounds().getHeight())) - 4, 4, 4);
-		g.drawRect(x + (int) (size * (g.getClipBounds().getWidth())) - 4, y + (int) (size * (g.getClipBounds().getHeight())) - 4, 4, 4);
 	} // drawSelection
 
 	/**
@@ -138,12 +142,33 @@ public class Text
 		if (color != null) {
 			colorInt = color.getRGB();
 		}
-		return "<text string=\"" + s + "\" colour=\"" + colorInt + "\" x=\"" + (x - boundingboxX) + "\" y=\"" + (y - boundingboxY) + "\" fontname=\"" + font.getName() + "\" fontstyle=\"" + font.getStyle() + "\" fontsize=\"" + font.getSize() + "\"/>";
+		return "<text string=\"" + s + "\" colour=\"" + colorInt + "\" x=\""
+			+ (x - boundingboxX) + "\" y=\"" + (y - boundingboxY)
+			+ "\" fontname=\"" + font.getName() + "\" fontstyle=\""
+			+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\"/>";
 	} // toFile
 
-	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
+	public String toText() {
+		int colorInt = 0;
+
+		if (color != null) {
+			colorInt = color.getRGB();
+		}
+		return "TEXT:" + x + ":" + y + ":" + colorInt + ":" + font.getName() + ":" + font.getStyle() + ":" + font.getSize() + ":" + (int) this.transparency + ":" + s;
+	}
+
+
+	public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
+					 Graphics g) {
 		System.out.println("x=" + x + ", y=" + y);
 		Graphics2D g2 = (Graphics2D) g;
+
+		java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
+
+		Rectangle2D r = this.getFont().getStringBounds(s, 0, s.length(), frc);
+		// db.p("SIZE: "+r.getHeight()+", "+r.getWidth()+", "+r.getX()+", "+r.getY());
+		this.h = (int) r.getHeight();
+		this.w = (int) r.getWidth();
 
 		g2.setFont(font);
 
@@ -156,13 +181,12 @@ public class Text
 		g2.setColor(new Color(red, green, blue, alpha));
 
 		if (isAntialiasingOn()) {
-			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 		}
 
-		g2.drawString(s, xModifier + (int) (Xsize * x), yModifier + (int) (Ysize * y));
-
-		this.width = g2.getClipBounds().width;
-		this.height = g2.getClipBounds().height;
+		g2.drawString(s, xModifier + (int) (Xsize * x),
+			yModifier + (int) (Ysize * y));
 
 		if (selected) {
 			drawSelection(g2);

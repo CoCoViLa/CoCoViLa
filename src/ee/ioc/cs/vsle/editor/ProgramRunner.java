@@ -29,7 +29,8 @@ public class ProgramRunner {
 			Class clas = genObject.getClass();
 
 			/* Method method = clas.getMethod("compute", null);
-			 method.invoke(genObject, null);*/Field f, f2;
+			 method.invoke(genObject, null);*/
+			Field f, f2;
 			Object lastObj;
 			GObj obj;
 			ClassField field;
@@ -57,38 +58,33 @@ public class ProgramRunner {
 								field.value = Integer.toString(in);
 							}
 
-						}
-						else if (c.toString().equals("double")) {
+						} else if (c.toString().equals("double")) {
 							d = f2.getDouble(lastObj);
 							if (d != 0) {
 								field.value = Double.toString(d);
 							}
 
-						}
-						else if (c.toString().equals("boolean")) {
+						} else if (c.toString().equals("boolean")) {
 							b = f2.getBoolean(lastObj);
 							field.value = Boolean.toString(b);
-						}
-						else if (c.toString().equals("char")) { // field.value =  ch;
-						}
-						else if (c.toString().equals("float")) {
+						} else if (c.toString().equals("char")) {// field.value =  ch;
+						} else if (c.toString().equals("float")) {
 							fl = f2.getFloat(lastObj);
 							if (fl != 0) {
 								field.value = Float.toString(fl);
 							}
-						}
-						else { // it is type object
+						} else {// it is type object
 						}
 					}
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
 	}
 
-	Object compileAndRun(String programName, ArrayList watchFields, JTextArea runResultArea) throws CompileException {
+	Object compileAndRun(String programName, ArrayList watchFields,
+						 JTextArea runResultArea) throws CompileException {
 		genObject = makeGeneratedObject(programName);
 		run(watchFields, runResultArea);
 		return genObject;
@@ -108,7 +104,7 @@ public class ProgramRunner {
 			for (int i = 0; i < watchFields.size(); i++) {
 				lastObj = genObject;
 				clas = genObject.getClass();
-				st = new StringTokenizer( (String) watchFields.get(i), ".");
+				st = new StringTokenizer((String) watchFields.get(i), ".");
 				while (st.hasMoreElements()) {
 					String s = st.nextToken();
 
@@ -117,28 +113,34 @@ public class ProgramRunner {
 					if (st.hasMoreElements()) {
 						clas = f.getType();
 						lastObj = f.get(lastObj);
-					}
-					else {
+					} else {
 						Class c = f.getType();
 
 						if (c.toString().equals("int")) {
 							// textArea.append((String)watchFields.get(i) +": "+f.getInt(lastObj)+"\n");
-							runResultArea.append( (String) watchFields.get(i) + ": " + f.getInt(lastObj) + "\n");
-						}
-						else if (c.toString().equals("double")) {
-							runResultArea.append( (String) watchFields.get(i) + ": " + f.getDouble(lastObj) + "\n");
-						}
-						else if (c.toString().equals("boolean")) {
-							runResultArea.append( (String) watchFields.get(i) + ": " + f.getBoolean(lastObj) + "\n");
-						}
-						else if (c.toString().equals("char")) {
-							runResultArea.append( (String) watchFields.get(i) + ": " + f.getChar(lastObj) + "\n");
-						}
-						else if (c.toString().equals("float")) {
-							runResultArea.append( (String) watchFields.get(i) + ": " + f.getFloat(lastObj) + "\n");
-						}
-						else {
-							runResultArea.append( (String) watchFields.get(i) + ": " + f.get(lastObj) + "\n");
+							runResultArea.append(
+								(String) watchFields.get(i) + ": "
+								+ f.getInt(lastObj) + "\n");
+						} else if (c.toString().equals("double")) {
+							runResultArea.append(
+								(String) watchFields.get(i) + ": "
+								+ f.getDouble(lastObj) + "\n");
+						} else if (c.toString().equals("boolean")) {
+							runResultArea.append(
+								(String) watchFields.get(i) + ": "
+								+ f.getBoolean(lastObj) + "\n");
+						} else if (c.toString().equals("char")) {
+							runResultArea.append(
+								(String) watchFields.get(i) + ": "
+								+ f.getChar(lastObj) + "\n");
+						} else if (c.toString().equals("float")) {
+							runResultArea.append(
+								(String) watchFields.get(i) + ": "
+								+ f.getFloat(lastObj) + "\n");
+						} else {
+							runResultArea.append(
+								(String) watchFields.get(i) + ": "
+								+ f.get(lastObj) + "\n");
 						}
 					}
 
@@ -146,8 +148,7 @@ public class ProgramRunner {
 			}
 			runResultArea.append("----------------------\n");
 
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
 	}
@@ -161,8 +162,7 @@ public class ProgramRunner {
 			Object o = clas.newInstance();
 
 			return o;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace(System.err);
 			return null;
 		}

@@ -1,13 +1,14 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import ee.ioc.cs.vsle.vclass.Point;
-import ee.ioc.cs.vsle.vclass.Scheme;
+
 import ee.ioc.cs.vsle.util.PrintUtilities;
+import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.editor.Look;
 import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.graphics.Shape;
+import ee.ioc.cs.vsle.graphics.ShapeGroup;
 import ee.ioc.cs.vsle.graphics.Rect;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.graphics.Line;
@@ -17,7 +18,7 @@ import ee.ioc.cs.vsle.graphics.Oval;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.editor.State;
 import ee.ioc.cs.vsle.editor.Menu;
-import ee.ioc.cs.vsle.editor.SynFilter;
+import ee.ioc.cs.vsle.editor.CustomFileFilter;
 
 import javax.swing.event.MouseInputAdapter;
 import java.awt.event.ActionListener;
@@ -26,7 +27,7 @@ import java.awt.event.MouseEvent;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JFileChooser;
-import java.io.ObjectOutputStream;
+
 import java.io.FileOutputStream;
 import java.awt.Cursor;
 import javax.swing.JOptionPane;
@@ -35,13 +36,9 @@ import java.awt.Graphics;
 import javax.swing.SwingUtilities;
 import javax.swing.JColorChooser;
 import javax.swing.UIManager;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
 import java.awt.Rectangle;
-import java.awt.Graphics2D;
 
 import java.util.ArrayList;
-
 
 /**
  * Created by IntelliJ IDEA.
@@ -51,7 +48,8 @@ import java.util.ArrayList;
  * To change this template use Options | File Templates.
  */
 
-class IconMouseOps extends MouseInputAdapter
+class IconMouseOps
+	extends MouseInputAdapter
 	implements ActionListener {
 
 	IconEditor editor;
@@ -60,11 +58,11 @@ class IconMouseOps extends MouseInputAdapter
 	Point draggedBreakPoint;
 	String state = "";
 	float initialSize;
-	int startX, startY;
-	boolean fill = false;
-	double strokeWidth = 1.0;
-	double transparency = 0.0;
-	Color color = Color.black;
+	public int startX, startY;
+	public boolean fill = false;
+	public double strokeWidth = 1.0;
+	public double transparency = 0.0;
+	public Color color = Color.black;
 	boolean dragged = false;
 	int cornerClicked;
 
@@ -74,6 +72,10 @@ class IconMouseOps extends MouseInputAdapter
 	 */
 	public IconMouseOps(IconEditor e) {
 		this.editor = e;
+	}
+
+	public double getTransparency() {
+		return this.transparency;
 	}
 
 	/**
@@ -102,7 +104,6 @@ class IconMouseOps extends MouseInputAdapter
 	 */
 	private void openPortPropertiesDialog() {
 		PortPropertiesDialog pd = new PortPropertiesDialog(editor, null);
-
 		pd.setModal(true);
 	} // openPortPropertiesDialog
 
@@ -114,14 +115,12 @@ class IconMouseOps extends MouseInputAdapter
 	 */
 	public void drawText(Font font, Color color, String text) {
 		Shape shape = editor.getSelectedShape();
-
 		if (shape != null && shape instanceof Text) {
 			shape.setColor(color);
 			shape.setFont(font);
 			shape.setText(text);
 		} else {
-			Text t = new Text(editor.mouseX, editor.mouseY, font, color, transparency, text);
-
+			Text t = new Text(editor.mouseX, editor.mouseY, font, color, getTransparency(), text);
 			editor.shapeList.add(t);
 		}
 		editor.repaint();
@@ -132,7 +131,6 @@ class IconMouseOps extends MouseInputAdapter
 		if (editor.shapeList != null && editor.shapeList.size() > 0) {
 			for (int i = 0; i < editor.shapeList.size(); i++) {
 				Shape s = (Shape) editor.shapeList.get(i);
-
 				if (s.isSelected()) {
 					s.setTransparency(transparency);
 				}
@@ -146,7 +144,6 @@ class IconMouseOps extends MouseInputAdapter
 		if (editor.shapeList != null && editor.shapeList.size() > 0) {
 			for (int i = 0; i < editor.shapeList.size(); i++) {
 				Shape s = (Shape) editor.shapeList.get(i);
-
 				if (s.isSelected()) {
 					s.setStrokeWidth(strokeWidth);
 				}
@@ -163,16 +160,20 @@ class IconMouseOps extends MouseInputAdapter
 	 */
 	public void drawPort(String portName, boolean isAreaConn, boolean isStrict) {
 		IconPort p = new IconPort(portName, editor.mouseX, editor.mouseY, isAreaConn, isStrict);
-
 		editor.ports.add(p);
 		editor.repaint();
 	} // drawPort
 
+	/**
+	 * Opens new popup menu for specifying port properties.
+	 * @param port IconPort - port whose properties are to be set.
+	 * @param x int - x coordinate of the port.
+	 * @param y int - y coordinate of the port.
+	 */
 	private void openPortPopupMenu(IconPort port, int x, int y) {
 		IconPortPopupMenu popupMenu = new IconPortPopupMenu(port, editor);
-
 		popupMenu.show(editor.getContentPane(), x, y);
-	}
+	} // openPortPopupMenu
 
 	/**
 	 * Method for building the Shape Popup Menu, and for enabling and disabling menu items
@@ -184,9 +185,9 @@ class IconMouseOps extends MouseInputAdapter
 	 * @param y int - mouse y coordinate for opening the menu.
 	 */
 	private void openShapePopupMenu(int x, int y) {
-		if (editor.shapeList != null && editor.shapeList.size() > 0 && editor.shapeList.getSelected().size() > 0) {
+		if (editor.shapeList != null && editor.shapeList.size() > 0 &&
+			editor.shapeList.getSelected().size() > 0) {
 			ShapePopupMenu popupMenu = new ShapePopupMenu(editor.mListener);
-
 			popupMenu.show(editor.getContentPane(), x, y);
 			editor.currentShape = editor.shapeList.checkInside(x, y);
 
@@ -245,7 +246,7 @@ class IconMouseOps extends MouseInputAdapter
 	 * @param col Color - line color. Black by default if not chosen otherwise from the color chooser.
 	 */
 	public void drawLine(Color col) {
-		Line line = new Line(startX, startY, editor.mouseX, editor.mouseY, col.getRGB(), strokeWidth, transparency);
+		Line line = new Line(startX, startY, editor.mouseX, editor.mouseY, col.getRGB(), strokeWidth, getTransparency());
 
 		editor.mouseX = startX;
 		editor.mouseY = startY;
@@ -259,8 +260,7 @@ class IconMouseOps extends MouseInputAdapter
 	 * @param col Color - dot color. Black by default if not chosen otherwise from the color chooser.
 	 */
 	public void drawDot(Color col) {
-		Dot dot = new Dot(startX, startY, col.getRGB(), strokeWidth, transparency);
-
+		Dot dot = new Dot(startX, startY, col.getRGB(), strokeWidth, getTransparency());
 		editor.shapeList.add(dot);
 		editor.repaint();
 	} // drawDot
@@ -283,11 +283,9 @@ class IconMouseOps extends MouseInputAdapter
 	public void popupMenuListener(int x, int y) {
 		// Check if clicked on a port, else open shape popup menu.
 		boolean portMenuOpened = false;
-
 		if (editor.ports != null && editor.ports.size() > 0) {
 			for (int i = 0; i < editor.ports.size(); i++) {
 				IconPort p = (IconPort) editor.ports.get(i);
-
 				if (p.isInside(x, y)) {
 					portMenuOpened = true;
 					openPortPopupMenu(p, x, y);
@@ -309,7 +307,6 @@ class IconMouseOps extends MouseInputAdapter
 	 */
 	public void mouseClicked(MouseEvent e) {
 		int x, y;
-
 		x = e.getX();
 		y = e.getY();
 
@@ -323,11 +320,9 @@ class IconMouseOps extends MouseInputAdapter
 
 				if (e.getClickCount() == 2) {
 					Shape shape = editor.shapeList.checkInside(x, y);
-
 					if (shape != null) {
 						if (shape instanceof Text) {
 							TextDialog td = new TextDialog(editor);
-
 							td.setText(shape.getText());
 							td.setFont(shape.getFont());
 							td.setColor(shape.getColor());
@@ -342,7 +337,6 @@ class IconMouseOps extends MouseInputAdapter
 
 				if (!portSelected) {
 					Shape shape = editor.shapeList.checkInside(x, y);
-
 					if (shape == null) {
 						editor.shapeList.clearSelected();
 					} else {
@@ -361,7 +355,6 @@ class IconMouseOps extends MouseInputAdapter
 					addShape(editor.currentShape);
 					state = State.selection;
 					Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
-
 					editor.setCursor(cursor);
 				}
 
@@ -381,11 +374,9 @@ class IconMouseOps extends MouseInputAdapter
 	 */
 	public boolean selectPort() {
 		boolean portSelected = false;
-
 		if (editor.ports != null && editor.ports.size() > 0) {
 			for (int i = 0; i < editor.ports.size(); i++) {
 				IconPort p = (IconPort) editor.ports.get(i);
-
 				if (p.isInside(editor.mouseX, editor.mouseY)) {
 					p.setSelected(true);
 					state = State.drag;
@@ -480,12 +471,12 @@ class IconMouseOps extends MouseInputAdapter
 
 		editor.setCursor(cursor);
 
+
 		if (state.equals(State.drag)) {
 
 			if (editor.ports != null && editor.ports.size() > 0) {
 				for (int i = 0; i < editor.ports.size(); i++) {
 					IconPort p = (IconPort) editor.ports.get(i);
-
 					if (p.isSelected()) {
 						p.setPosition(x, y);
 					}
@@ -493,7 +484,6 @@ class IconMouseOps extends MouseInputAdapter
 			}
 
 			ArrayList selectedShapes = editor.shapeList.getSelected();
-
 			for (int i = 0; i < selectedShapes.size(); i++) {
 				shape = (Shape) selectedShapes.get(i);
 				shape.setPosition(shape.getX() + (x - editor.mouseX), shape.getY() + (y - editor.mouseY));
@@ -509,7 +499,6 @@ class IconMouseOps extends MouseInputAdapter
 		} else if (state.equals(State.drawLine)) {
 			editor.repaint();
 			Graphics g = editor.drawingArea.getGraphics();
-
 			g.setColor(color);
 			g.drawLine(editor.mouseX, editor.mouseY, x, y);
 			editor.mouseX = x;
@@ -521,11 +510,9 @@ class IconMouseOps extends MouseInputAdapter
 			}
 			editor.repaint();
 			Graphics g = editor.drawingArea.getGraphics();
-
 			g.setColor(color);
 			final int width = Math.abs(editor.mouseX - x);
 			final int height = Math.abs(editor.mouseY - y);
-
 			g.drawArc(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height, 0, 180);
 			editor.mouseX = x;
 			editor.mouseY = y;
@@ -542,7 +529,6 @@ class IconMouseOps extends MouseInputAdapter
 			}
 			editor.repaint();
 			Graphics g = editor.drawingArea.getGraphics();
-
 			g.setColor(color);
 			final int width = Math.abs(editor.mouseX - x);
 			final int height = Math.abs(editor.mouseY - y);
@@ -558,11 +544,9 @@ class IconMouseOps extends MouseInputAdapter
 			}
 			editor.repaint();
 			Graphics g = editor.drawingArea.getGraphics();
-
 			g.setColor(color);
 			final int width = Math.abs(editor.mouseX - x);
 			final int height = Math.abs(editor.mouseY - y);
-
 			g.drawOval(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height);
 			editor.mouseX = x;
 			editor.mouseY = y;
@@ -577,10 +561,8 @@ class IconMouseOps extends MouseInputAdapter
 			editor.repaint();
 		} else if (state.equals(State.resize)) {
 			int width = x - editor.mouseX;
-
 			editor.mouseX = x;
 			int height = y - editor.mouseY;
-
 			editor.mouseY = y;
 			editor.currentShape.resize(width, height, cornerClicked);
 			editor.repaint();
@@ -598,20 +580,21 @@ class IconMouseOps extends MouseInputAdapter
 		int x = e.getX();
 		int y = e.getY();
 
-		// update mouse position in info label
+		//update mouse position in info label
 		editor.posInfo.setText(Integer.toString(x) + ", " + Integer.toString(y));
 
 		// LISTEN LEFT MOUSE BUTTON
 		if (SwingUtilities.isLeftMouseButton(e)) {
-			// update mouse position on info label
+			//update mouse position on info label
 			editor.posInfo.setText(Integer.toString(x) + ", " + Integer.toString(y));
 			// editor.currentShape = editor.shapeList.checkInside(x, y);
 			if (editor.currentShape != null) {
 				editor.currentShape.x = x;
 				editor.currentShape.y = y;
 
-				Rectangle rect = new Rectangle(x - 10, y - 10, editor.currentShape.getRealWidth() + 10, editor.currentShape.getRealHeight() + 10);
-
+				Rectangle rect = new Rectangle(x - 10, y - 10,
+					editor.currentShape.getRealWidth() + 10,
+					editor.currentShape.getRealHeight() + 10);
 				editor.drawingArea.scrollRectToVisible(rect);
 				if (x + editor.currentShape.getRealWidth() > editor.drawAreaSize.width) {
 					editor.drawAreaSize.width = x + editor.currentShape.getRealWidth();
@@ -619,7 +602,8 @@ class IconMouseOps extends MouseInputAdapter
 					editor.drawingArea.setPreferredSize(editor.drawAreaSize);
 				}
 
-				if (y + editor.currentShape.getRealHeight() > editor.drawAreaSize.height) {
+				if (y + editor.currentShape.getRealHeight() >
+					editor.drawAreaSize.height) {
 					editor.drawAreaSize.height = y + editor.currentShape.getRealHeight();
 					editor.drawingArea.setPreferredSize(editor.drawAreaSize);
 					editor.drawingArea.revalidate();
@@ -636,11 +620,7 @@ class IconMouseOps extends MouseInputAdapter
 	 *                       is made between different states of the application.
 	 */
 	public void mouseReleased(MouseEvent e) {
-		int x = e.getX();
-		int y = e.getY();
-
 		Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
-
 		editor.setCursor(cursor);
 
 		if (SwingUtilities.isLeftMouseButton(e)) {
@@ -654,7 +634,6 @@ class IconMouseOps extends MouseInputAdapter
 			}
 			if (editor.shapeList.getSelected() != null && editor.shapeList.getSelected().size() > 0) {
 				String selShapes = editor.shapeList.getSelected().toString();
-
 				if (selShapes != null) {
 					selShapes = selShapes.replaceAll("null ", " ");
 				}
@@ -669,8 +648,8 @@ class IconMouseOps extends MouseInputAdapter
 				final int height = Math.abs(editor.mouseY - startY);
 
 				if (state.equals(State.boundingbox)) {
-					BoundingBox box = new BoundingBox(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width, height);
-
+					BoundingBox box = new BoundingBox(Math.min(startX, editor.mouseX),
+						Math.min(startY, editor.mouseY), width, height);
 					editor.boundingbox = box;
 					// ONLY ONE BOUNDING BOX IS ALLOWED.
 					editor.shapeList.add(box);
@@ -678,30 +657,32 @@ class IconMouseOps extends MouseInputAdapter
 					state = State.selection;
 
 				} else {
-					Rect rect = new Rect(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width, height, color.getRGB(), fill, strokeWidth, transparency);
-
+					Rect rect = new Rect(Math.min(startX, editor.mouseX),
+						Math.min(startY, editor.mouseY), width,
+						height, color.getRGB(), fill,
+						strokeWidth, getTransparency());
 					editor.shapeList.add(rect);
 				}
-				editor.repaint();
+				// editor.repaint();
 			} else if (state.equals(State.drawOval) || state.equals(State.drawFilledOval)) {
 				int width = Math.abs(editor.mouseX - startX);
 				int height = Math.abs(editor.mouseY - startY);
-				Oval oval = new Oval(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width, height, color.getRGB(), fill, strokeWidth, transparency);
-
+				Oval oval = new Oval(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width,
+					height, color.getRGB(), fill,
+					strokeWidth, getTransparency());
 				editor.shapeList.add(oval);
-				editor.repaint();
+				// editor.repaint();
 			} else if (state.equals(State.drawArc) || state.equals(State.drawFilledArc)) {
 				int width = Math.abs(editor.mouseX - startX);
 				int height = Math.abs(editor.mouseY - startY);
-				Arc arc = new Arc(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width, height, 0, 180, color.getRGB(), fill, strokeWidth, transparency);
-
+				Arc arc = new Arc(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width, height, 0, 180, color.getRGB(), fill, strokeWidth, getTransparency());
 				editor.shapeList.add(arc);
-				editor.repaint();
+				// editor.repaint();
 			} else if (state.equals(State.drawLine)) {
-				Line line = new Line(startX, startY, editor.mouseX, editor.mouseY, color.getRGB(), strokeWidth, transparency);
-
+				Line line = new Line(startX, startY, editor.mouseX, editor.mouseY,
+					color.getRGB(), strokeWidth, getTransparency());
 				editor.shapeList.add(line);
-				editor.repaint();
+				// editor.repaint();
 			} else if (state.equals(State.resize)) {
 				state = State.selection;
 			} else if (state.equals(State.freehand)) {
@@ -724,7 +705,6 @@ class IconMouseOps extends MouseInputAdapter
 	 */
 	public void mouseEntered(MouseEvent e) {
 		Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
-
 		editor.setCursor(cursor);
 	}
 
@@ -734,7 +714,6 @@ class IconMouseOps extends MouseInputAdapter
 	 */
 	public void mouseExited(MouseEvent e) {
 		Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
-
 		editor.setCursor(cursor);
 	}
 
@@ -746,32 +725,41 @@ class IconMouseOps extends MouseInputAdapter
 		if (editor.shapeList != null && editor.shapeList.size() > 0) {
 			for (int i = 0; i < editor.shapeList.size(); i++) {
 				Shape s = (Shape) editor.shapeList.get(i);
-
 				if (s != null && s.isSelected()) {
 					s.setColor(col);
+					editor.repaint();
 				}
 			}
 		}
 	} // change object colors
 
-	// *********************************************************************
-	// end of mouse control functions
-	// *********************************************************************
+	//*********************************************************************
+	//	end of mouse control functions
+	//*********************************************************************
 
 	public void actionPerformed(ActionEvent e) {
 
 		// JmenuItem chosen
-		if (e.getSource().getClass().getName() == "javax.swing.JMenuItem" || e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem") {
+		if (e.getSource().getClass().getName() == "javax.swing.JMenuItem"
+			|| e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem") {
 			if (e.getActionCommand().equals(Menu.SAVE_SCHEME)) {
-
+				db.p("save");
 				JFileChooser fc = new JFileChooser(editor.getLastPath());
-				SynFilter synFilter = new SynFilter();
+				CustomFileFilter txtFilter = new CustomFileFilter(CustomFileFilter.extensionTxt, CustomFileFilter.descriptionTxt);
 
-				fc.setFileFilter(synFilter);
+
+				fc.setFileFilter(txtFilter);
 				int returnVal = fc.showSaveDialog(null);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
+
+					// [Aulo] 11.02.2004
+					// Check if the file name ends with a required extension. If not,
+					// append the default extension to the file name.
+					if (!file.getAbsolutePath().toLowerCase().endsWith(CustomFileFilter.extensionTxt)) {
+						file = new File(file.getAbsolutePath() + "." + CustomFileFilter.extensionTxt);
+					}
 
 					// store the last open directory in system properties.
 					editor.setLastPath(file.getAbsolutePath());
@@ -791,23 +779,27 @@ class IconMouseOps extends MouseInputAdapter
 					if (valid) {
 						// Save scheme.
 						try {
-							FileOutputStream fos = new FileOutputStream(file);
-							ObjectOutputStream oos = new ObjectOutputStream(fos);
+							StringBuffer xml = new StringBuffer();
 
-							editor.scheme.objCount = shapeCount;
-							oos.writeObject(editor.scheme);
-							oos.close();
+							xml.append(editor.getGraphicsToString().toString());
+
+							FileOutputStream out = new FileOutputStream(new File(file.getAbsolutePath()));
+							out.write(xml.toString().getBytes());
+							out.flush();
+							out.close();
+							JOptionPane.showMessageDialog(null, "Saved to: " + file.getName(),
+								"Saved",
+								JOptionPane.INFORMATION_MESSAGE);
+
 						} catch (Exception exc) {
 							exc.printStackTrace();
 						}
 					}
 				}
-
 			} else if (e.getActionCommand().equals(Menu.CLEAR_ALL)) {
 				editor.clearObjects();
 			} else if (e.getActionCommand().equals(Menu.GRID)) {
 				boolean isGridVisible = editor.drawingArea.isGridVisible();
-
 				if (isGridVisible) {
 					isGridVisible = false;
 				} else {
@@ -821,24 +813,21 @@ class IconMouseOps extends MouseInputAdapter
 				editor.selectAllObjects(true);
 			} else if (e.getActionCommand().equals(Menu.LOAD_SCHEME)) {
 				JFileChooser fc = new JFileChooser(editor.getLastPath());
-				SynFilter filter = new SynFilter();
+				CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.extensionTxt, CustomFileFilter.descriptionTxt);
 
 				fc.setFileFilter(filter);
 				int returnVal = fc.showOpenDialog(null);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
-
 					editor.setLastPath(file.getAbsolutePath());
 					try {
-						FileInputStream fis = new FileInputStream(file);
-						ObjectInputStream ois = new ObjectInputStream(fis);
-
-						editor.scheme = (Scheme) ois.readObject();
-						ois.close();
-						shapeCount = editor.scheme.objCount;
-						editor.mListener.setState(State.selection);
-						editor.repaint();
+						state = State.selection;
+						editor.shapeCount = 0;
+						editor.shapeList = new ShapeGroup(new ArrayList());
+						editor.ports = new ArrayList();
+						editor.palette.boundingbox.setEnabled(true);
+						editor.loadGraphicsFromFile(file);
 					} catch (Exception exc) {
 						exc.printStackTrace();
 					}
@@ -850,11 +839,11 @@ class IconMouseOps extends MouseInputAdapter
 				editor.exitApplication();
 			} else if (e.getActionCommand().equals(Menu.DOCS)) {
 				String documentationUrl = editor.getSystemDocUrl();
-
 				if (documentationUrl != null && documentationUrl.trim().length() > 0) {
 					editor.openInBrowser(documentationUrl);
 				} else {
-					editor.showInfoDialog("Missing information", "No documentation URL defined in properties.");
+					editor.showInfoDialog("Missing information",
+						"No documentation URL defined in properties.");
 				}
 			} else if (e.getActionCommand().equals(Menu.LICENSE)) {
 				new LicenseDialog(editor, null);
@@ -882,10 +871,12 @@ class IconMouseOps extends MouseInputAdapter
 				// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
 				editor.shapeList.sendToBack(editor.currentShape);
 				editor.repaint();
-			} else if (e.getActionCommand().equals(Menu.PROPERTIES)) {/*
+			} else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
+				/*
 				 ObjectPropertiesEditor prop = new ObjectPropertiesEditor(editor.currentObj);
-				 prop.pack();
-				 prop.setVisible(true); */} else if (e.getActionCommand().equals(Menu.GROUP)) {
+						   prop.pack();
+						   prop.setVisible(true); */
+			} else if (e.getActionCommand().equals(Menu.GROUP)) {
 				editor.groupObjects();
 			} else if (e.getActionCommand().equals(Menu.UNGROUP)) {
 				editor.ungroupObjects();
@@ -895,7 +886,8 @@ class IconMouseOps extends MouseInputAdapter
 				editor.clearObjects();
 			} else if (e.getActionCommand().equals(Look.LOOK_WINDOWS)) {
 				try {
-					UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+					UIManager.setLookAndFeel(
+						"com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
 					SwingUtilities.updateComponentTreeUI(editor);
 				} catch (Exception uie) {
 					uie.printStackTrace();
@@ -909,14 +901,16 @@ class IconMouseOps extends MouseInputAdapter
 				}
 			} else if (e.getActionCommand().equals(Look.LOOK_MOTIF)) {
 				try {
-					UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+					UIManager.setLookAndFeel(
+						"com.sun.java.swing.plaf.motif.MotifLookAndFeel");
 					SwingUtilities.updateComponentTreeUI(editor);
 				} catch (Exception uie) {
 					uie.printStackTrace();
 				}
 			} else if (e.getActionCommand().equals(Look.LOOK_3D)) {
 				try {
-					UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
+					UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.
+						KunststoffLookAndFeel());
 					SwingUtilities.updateComponentTreeUI(editor);
 				} catch (Exception uie) {
 					uie.printStackTrace();
@@ -927,7 +921,7 @@ class IconMouseOps extends MouseInputAdapter
 
 		}
 
-		// Jbutton pressed
+		//Jbutton pressed
 		if (e.getSource().getClass().getName() == "javax.swing.JButton") {
 			if (e.getActionCommand().equals(State.selection)) {
 				editor.mListener.setState(State.selection);
@@ -951,12 +945,11 @@ class IconMouseOps extends MouseInputAdapter
 				editor.mListener.setState(State.drawFilledOval);
 			} else if (e.getActionCommand().equals(State.chooseColor)) {
 				Color col = JColorChooser.showDialog(editor, "Choose Color", Color.black);
-
 				if (col != null) {
 					this.color = col;
 				}
 				changeObjectColors(col);
-				editor.repaint();
+				//editor.repaint();
 			} else if (e.getActionCommand().equals(State.freehand)) {
 				editor.mListener.setState(State.freehand);
 			} else if (e.getActionCommand().equals(State.eraser)) {
@@ -969,14 +962,14 @@ class IconMouseOps extends MouseInputAdapter
 				editor.mListener.setState(e.getActionCommand());
 				Shape shape;
 				PackageClass pClass = editor.vPackage.getClass(state);
+				shape = new Shape(0, 0, pClass.graphics.getWidth(),
+					pClass.graphics.getHeight(), state);
 
-				shape = new Shape(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), state);
 
-				// clone fields arraylist
+				//clone fields arraylist
 				shape.fields = (ArrayList) pClass.fields.clone();
-				// deep clone each separate field
+				//deep clone each separate field
 				ClassField field;
-
 				for (int i = 0; i < shape.fields.size(); i++) {
 					field = (ClassField) shape.fields.get(i);
 					shape.fields.set(i, field.clone());
@@ -989,9 +982,9 @@ class IconMouseOps extends MouseInputAdapter
 				shape.graphics = pClass.graphics;
 				editor.currentShape = shape;
 				Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
-
 				editor.setCursor(cursor);
 			}
+
 
 		}
 	}

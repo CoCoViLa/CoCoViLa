@@ -1,12 +1,8 @@
 package ee.ioc.cs.vsle.graphics;
 
-import ee.ioc.cs.vsle.util.db;
+import java.io.*;
 
-import java.io.Serializable;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.BasicStroke;
+import java.awt.*;
 
 public class Arc
 	extends Shape
@@ -33,10 +29,6 @@ public class Arc
 	 * Color of the arc.
 	 */
 	Color color;
-
-	/**
-	 * ee.ioc.cs.editor.graphics.Arc stroke width.
-	 */private BasicStroke stroke;
 
 	/**
 	 * ee.ioc.cs.editor.graphics.Line weight, logically equals to stroke width.
@@ -67,7 +59,8 @@ public class Arc
 	 * @param strokeWidth double - width of the line the arc is drawn with.
 	 * @param transp double - transparency (Alpha) value (0..100%).
 	 */
-	public Arc(int x, int y, int width, int height, int startAngle, int arcAngle, int colorInt, boolean fill, double strokeWidth, double transp) {
+	public Arc(int x, int y, int width, int height, int startAngle, int arcAngle,
+			   int colorInt, boolean fill, double strokeWidth, double transp) {
 		this.x = x;
 		this.y = y;
 		this.width = width;
@@ -77,8 +70,8 @@ public class Arc
 		this.color = new Color(colorInt);
 		this.filled = fill;
 		this.transparency = (float) transp;
-		setStrokeWidth(strokeWidth);
-	} // ee.ioc.cs.editor.graphics.Arc
+		this.lineWeight = (float) strokeWidth;
+	} // Arc
 
 	/**
 	 * Set the color of a shape.
@@ -88,9 +81,11 @@ public class Arc
 		this.color = col;
 	} // setColor
 
-	public void setFont(java.awt.Font f) {}
+	public void setFont(java.awt.Font f) {
+	}
 
-	public void setText(String s) {}
+	public void setText(String s) {
+	}
 
 	/**
 	 * Set the percentage of transparency.
@@ -137,7 +132,7 @@ public class Arc
 	 * @return double - stroke width of a shape.
 	 */
 	public double getStrokeWidth() {
-		return this.stroke.getLineWidth();
+		return this.lineWeight;
 	} // getStrokeWidth
 
 	/**
@@ -147,14 +142,11 @@ public class Arc
 	public void setStrokeWidth(double width) {
 		try {
 			if (width >= 0.0) {
-				lineWeight = (float) width;
-				stroke = new BasicStroke(lineWeight);
-			}
-			else {
+				this.lineWeight = (float) width;
+			} else {
 				throw new Exception("Stroke width undefined or negative.");
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	} // setStrokeWidth
@@ -208,31 +200,28 @@ public class Arc
 	 * @param cornerClicked int - number of the clicked corner.
 	 */
 	public void resize(int deltaW, int deltaH, int cornerClicked) {
-		db.p("width=" + this.width + ", height=" + this.height);
+
 		if (cornerClicked == 1) { // TOP-LEFT
-			if ( (this.width - deltaW) > 0 && (this.height - 2 * deltaH) > 0) {
+			if ((this.width - deltaW) > 0 && (this.height - 2 * deltaH) > 0) {
 				this.x += deltaW;
 				this.y += deltaH;
 				this.width -= deltaW;
 				this.height -= 2 * deltaH;
 			}
-		}
-		else if (cornerClicked == 2) { // TOP-RIGHT
-			if ( (this.width + deltaW) > 0 && (this.height - 2 * deltaH) > 0) {
+		} else if (cornerClicked == 2) { // TOP-RIGHT
+			if ((this.width + deltaW) > 0 && (this.height - 2 * deltaH) > 0) {
 				this.y += deltaH;
 				this.width += deltaW;
 				this.height -= 2 * deltaH;
 			}
-		}
-		else if (cornerClicked == 3) { // BOTTOM-LEFT
-			if ( (this.width - deltaW) > 0 && (this.height + deltaH) > 0) {
+		} else if (cornerClicked == 3) { // BOTTOM-LEFT
+			if ((this.width - deltaW) > 0 && (this.height + deltaH) > 0) {
 				this.x += deltaW;
 				this.width -= deltaW;
 				this.height += deltaH;
 			}
-		}
-		else if (cornerClicked == 4) { // BOTTOM-RIGHT
-			if ( (this.width + deltaW) > 0 && (this.height + deltaH) > 0) {
+		} else if (cornerClicked == 4) { // BOTTOM-RIGHT
+			if ((this.width + deltaW) > 0 && (this.height + deltaH) > 0) {
 				this.width += deltaW;
 				this.height += deltaH;
 			}
@@ -248,23 +237,25 @@ public class Arc
 	 * @return int - corner number the mouse was clicked in.
 	 */
 	public int controlRectContains(int pointX, int pointY) {
-		if ( (pointX >= x) && (pointY >= y)) {
-			if ( (pointX <= x + 4) && (pointY <= y + 4)) {
+		if ((pointX >= x) && (pointY >= y)) {
+			if ((pointX <= x + 4) && (pointY <= y + 4)) {
 				return 1;
 			}
 		}
-		if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
-			if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
+		if ((pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
+			if ((pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
 				return 2;
 			}
 		}
-		if ( (pointX >= x) && (pointY >= y + (int) (size * (height / 2)) - 4)) {
-			if ( (pointX <= x + 4) && (pointY <= y + (int) (size * (height / 2)))) {
+		if ((pointX >= x) && (pointY >= y + (int) (size * (height / 2)) - 4)) {
+			if ((pointX <= x + 4) && (pointY <= y + (int) (size * (height / 2)))) {
 				return 3;
 			}
 		}
-		if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y + (int) (size * (height / 2)) - 4)) {
-			if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + (int) (size * (height / 2)))) {
+		if ((pointX >= x + (int) (size * (width)) - 4)
+			&& (pointY >= y + (int) (size * (height / 2)) - 4)) {
+			if ((pointX <= x + (int) (size * (width)))
+				&& (pointY <= y + (int) (size * (height / 2)))) {
 				return 4;
 			}
 		}
@@ -288,8 +279,27 @@ public class Arc
 		if (color != null) {
 			colorInt = color.getRGB();
 		}
-		return "<arc x=\"" + (x - boundingboxX) + "\" y=\"" + (y - boundingboxY) + "\" width=\"" + width + "\" height=\"" + height + "\" startAngle=\"" + startAngle + "\" arcAngle=\"" + arcAngle + "\" colour=\"" + colorInt + "\" filled=\"" + fill + "\"/>";
+		return "<arc x=\"" + (x - boundingboxX) + "\" y=\"" + (y - boundingboxY)
+			+ "\" width=\"" + width + "\" height=\"" + height + "\" startAngle=\""
+			+ startAngle + "\" arcAngle=\"" + arcAngle + "\" colour=\"" + colorInt
+			+ "\" filled=\"" + fill + "\"/>";
 	} // toFile
+
+	public String toText() {
+		String fill = "false";
+
+		if (filled) {
+			fill = "true";
+		}
+
+		int colorInt = 0;
+
+		if (color != null) {
+			colorInt = color.getRGB();
+		}
+		return "ARC:" + x + ":" + y + ":" + width + ":" + height + ":" + startAngle + ":" + arcAngle + ":" + colorInt + ":" + fill + ":" + (int) this.lineWeight + ":" + (int) this.transparency;
+	}
+
 
 	/**
 	 * Draw the selection markers if object selected.
@@ -297,11 +307,12 @@ public class Arc
 	 */
 	private void drawSelection(Graphics2D g) {
 		g.setColor(Color.black);
-		g.setStroke(new BasicStroke( (float) 1.0));
+		g.setStroke(new BasicStroke((float) 1.0));
 		g.fillRect(x, y, 4, 4);
 		g.fillRect(x + (int) (size * width) - 4, y, 4, 4);
 		g.fillRect(x, y + (int) (size * height / 2) - 4, 4, 4);
-		g.fillRect(x + (int) (size * width) - 4, y + (int) (size * height / 2) - 4, 4, 4);
+		g.fillRect(x + (int) (size * width) - 4,
+			y + (int) (size * height / 2) - 4, 4, 4);
 	} // drawSelection
 
 	/**
@@ -314,16 +325,18 @@ public class Arc
 
 	/**
 	 * Draw the arc. Supports drawing with transparent colors.
-	 * @param xModifier int
-	 * @param yModifier int
-	 * @param size float - defines the resizing multiplier (used at zooming), default: 1.0
-	 * @param g Graphics
+	 * @param xModifier int -
+	 * @param yModifier int -
+	 * @param Xsize float - defines the resizing multiplier (used at zooming), default: 1.0
+	 * @param Ysize float - defines the resizing multiplier (uset at zooming), default: 1.0
+	 * @param g Graphics -
 	 */
-	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
+	public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
+					 Graphics g) {
 
 		Graphics2D g2 = (Graphics2D) g;
 
-		g2.setStroke(stroke);
+		g2.setStroke(new BasicStroke(this.lineWeight));
 
 		// The user can specify the percentage of transparency between 0..100%.
 		// The value of transparency is defined as a float value between 0..1.
@@ -339,14 +352,20 @@ public class Arc
 		g2.setColor(new Color(red, green, blue, alpha));
 
 		if (isAntialiasingOn()) {
-			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 		}
 
 		if (filled) {
-			g2.fillArc(xModifier + (int) (Xsize * x), yModifier + (int) (Ysize * y), (int) (Xsize * width), (int) (Ysize * height), startAngle, arcAngle);
-		}
-		else {
-			g2.drawArc(xModifier + (int) (Xsize * x), yModifier + (int) (Ysize * y), (int) (Xsize * width), (int) (Ysize * height), startAngle, arcAngle);
+			g2.fillArc(xModifier + (int) (Xsize * x),
+				yModifier + (int) (Ysize * y), (int) (Xsize * width),
+				(int) (Ysize * height)
+				, startAngle, arcAngle);
+		} else {
+			g2.drawArc(xModifier + (int) (Xsize * x),
+				yModifier + (int) (Ysize * y), (int) (Xsize * width),
+				(int) (Ysize * height)
+				, startAngle, arcAngle);
 		}
 
 		// Draw selection markers if object selected.

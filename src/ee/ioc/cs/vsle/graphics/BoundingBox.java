@@ -1,13 +1,9 @@
 package ee.ioc.cs.vsle.graphics;
 
-import ee.ioc.cs.vsle.util.db;
+import java.io.*;
+import java.util.*;
 
-import java.util.HashMap;
-import java.io.Serializable;
-import java.awt.Graphics;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.*;
 
 public class BoundingBox
 	extends Shape
@@ -18,7 +14,6 @@ public class BoundingBox
 	String heightEquation;
 	boolean filled = false;
 	Color color;
-	private BasicStroke stroke;
 	float transparency = (float) 1.0;
 	double rotation = 0.0;
 
@@ -62,9 +57,11 @@ public class BoundingBox
 		this.color = col;
 	} // setColor
 
-	public void setFont(java.awt.Font f) {}
+	public void setFont(java.awt.Font f) {
+	}
 
-	public void setText(String s) {}
+	public void setText(String s) {
+	}
 
 	/**
 	 * Returns a boolean value representing if the shape is filled or not.
@@ -87,7 +84,7 @@ public class BoundingBox
 	 * @return double - stroke width of a shape.
 	 */
 	public double getStrokeWidth() {
-		return this.stroke.getLineWidth();
+		return this.lineWeight;
 	} // getStrokeWidth
 
 	/**
@@ -97,31 +94,28 @@ public class BoundingBox
 	 * @param cornerClicked int - number of the clicked corner.
 	 */
 	public void resize(int deltaW, int deltaH, int cornerClicked) {
-		db.p("width=" + this.width + ", height=" + this.height);
+
 		if (cornerClicked == 1) { // TOP-LEFT
-			if ( (this.width - deltaW) > 0 && (this.height - deltaH) > 0) {
+			if ((this.width - deltaW) > 0 && (this.height - deltaH) > 0) {
 				this.x += deltaW;
 				this.y += deltaH;
 				this.width -= deltaW;
 				this.height -= deltaH;
 			}
-		}
-		else if (cornerClicked == 2) { // TOP-RIGHT
-			if ( (this.width + deltaW) > 0 && (this.height - deltaH) > 0) {
+		} else if (cornerClicked == 2) { // TOP-RIGHT
+			if ((this.width + deltaW) > 0 && (this.height - deltaH) > 0) {
 				this.y += deltaH;
 				this.width += deltaW;
 				this.height -= deltaH;
 			}
-		}
-		else if (cornerClicked == 3) { // BOTTOM-LEFT
-			if ( (this.width - deltaW) > 0 && (this.height + deltaH) > 0) {
+		} else if (cornerClicked == 3) { // BOTTOM-LEFT
+			if ((this.width - deltaW) > 0 && (this.height + deltaH) > 0) {
 				this.x += deltaW;
 				this.width -= deltaW;
 				this.height += deltaH;
 			}
-		}
-		else if (cornerClicked == 4) { // BOTTOM-RIGHT
-			if ( (this.width + deltaW) > 0 && (this.height + deltaH) > 0) {
+		} else if (cornerClicked == 4) { // BOTTOM-RIGHT
+			if ((this.width + deltaW) > 0 && (this.height + deltaH) > 0) {
 				this.width += deltaW;
 				this.height += deltaH;
 			}
@@ -137,23 +131,25 @@ public class BoundingBox
 	 * @return int - corner number the mouse was clicked in.
 	 */
 	public int controlRectContains(int pointX, int pointY) {
-		if ( (pointX >= x) && (pointY >= y)) {
-			if ( (pointX <= x + 4) && (pointY <= y + 4)) {
+		if ((pointX >= x) && (pointY >= y)) {
+			if ((pointX <= x + 4) && (pointY <= y + 4)) {
 				return 1;
 			}
 		}
-		if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
-			if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
+		if ((pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
+			if ((pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
 				return 2;
 			}
 		}
-		if ( (pointX >= x) && (pointY >= y + (int) (size * (height)) - 4)) {
-			if ( (pointX <= x + 4) && (pointY <= y + (int) (size * (height)))) {
+		if ((pointX >= x) && (pointY >= y + (int) (size * (height)) - 4)) {
+			if ((pointX <= x + 4) && (pointY <= y + (int) (size * (height)))) {
 				return 3;
 			}
 		}
-		if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y + (int) (size * (height)) - 4)) {
-			if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + (int) (size * (height)))) {
+		if ((pointX >= x + (int) (size * (width)) - 4)
+			&& (pointY >= y + (int) (size * (height)) - 4)) {
+			if ((pointX <= x + (int) (size * (width)))
+				&& (pointY <= y + (int) (size * (height)))) {
 				return 4;
 			}
 		}
@@ -166,11 +162,12 @@ public class BoundingBox
 	 */
 	private void drawSelection(Graphics2D g) {
 		g.setColor(Color.black);
-		g.setStroke(new BasicStroke( (float) 1.0));
+		g.setStroke(new BasicStroke((float) 1.0));
 		g.fillRect(x, y, 4, 4);
 		g.fillRect(x + (int) (size * width) - 4, y, 4, 4);
 		g.fillRect(x, y + (int) (size * height) - 4, 4, 4);
-		g.fillRect(x + (int) (size * width) - 4, y + (int) (size * height) - 4, 4, 4);
+		g.fillRect(x + (int) (size * width) - 4, y + (int) (size * height) - 4,
+			4, 4);
 	} // drawSelection
 
 	/**
@@ -180,8 +177,14 @@ public class BoundingBox
 	 * @return String - specification of a shape.
 	 */
 	public String toFile(int boundingboxX, int boundingboxY) {
-		return "<bounds x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\"/>";
+		return "<bounds x=\"0\" y=\"0\" width=\"" + width + "\" height=\""
+			+ height + "\"/>";
 	} // toFile
+
+	public String toText() {
+		return "BOUNDS:" + x + ":" + y + ":" + width + ":" + height;
+	}
+
 
 	/**
 	 * Set width of the line stroke the rectangle is drawn with.
@@ -190,14 +193,11 @@ public class BoundingBox
 	public void setStrokeWidth(double width) {
 		try {
 			if (width >= 0.0) {
-				lineWeight = (float) width;
-				stroke = new BasicStroke(lineWeight);
-			}
-			else {
+				this.lineWeight = (float) width;
+			} else {
 				throw new Exception("Stroke width undefined or negative.");
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	} // setStrokeWidth
@@ -250,12 +250,14 @@ public class BoundingBox
 		this.rotation = degrees;
 	} // setRotation
 
-	void drawDynamic(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g, HashMap table) { /* int drawx = xModifier + x + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(xEquation, table);
-			int drawy = yModifier + y + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(yEquation, table)
-			int drawWidth = width + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(widthEquation, table);
-			int drawHeight = height + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(heightEquation, table);
-			g.drawRect(drawx, drawy, drawWidth, drawHeight);*/
-	 }
+	void drawDynamic(int xModifier, int yModifier, float Xsize, float Ysize,
+					 Graphics g, HashMap table) {
+		/*int drawx = xModifier + x + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(xEquation, table);
+			 int drawy = yModifier + y + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(yEquation, table)
+			 int drawWidth = width + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(widthEquation, table);
+			 int drawHeight = height + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(heightEquation, table);
+			 g.drawRect(drawx, drawy, drawWidth, drawHeight);*/
+	}
 
 	/**
 	 * Draw rectangle.
@@ -265,10 +267,11 @@ public class BoundingBox
 	 * @param Ysize float - zoom factor.
 	 * @param g Graphics - class graphics.
 	 */
-	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
+	public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
+					 Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 
-		g2.setStroke(stroke);
+		g2.setStroke(new BasicStroke(this.lineWeight));
 
 		alpha = (float) 0.2;
 
@@ -276,7 +279,9 @@ public class BoundingBox
 		g2.setColor(new Color(0.0f, 0.0f, 0.0f, alpha));
 
 		// draw the bounding box rectangle.
-		g2.fillRect(xModifier + (int) (Xsize * x), yModifier + (int) (Ysize * y), (int) (Xsize * width), (int) (Ysize * height));
+		g2.fillRect(xModifier + (int) (Xsize * x),
+			yModifier + (int) (Ysize * y), (int) (Xsize * width),
+			(int) (Ysize * height));
 
 		// Draw selection markers if object selected.
 		if (selected) {

@@ -1,10 +1,8 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
 import javax.swing.SpinnerListModel;
-
 
 /**
  * Module: LineWidthSpinner
@@ -23,7 +21,6 @@ public class Spinner extends JSpinner {
 	public Spinner(double start, double end, double step) {
 		String[] elements = setElements(start, end, step);
 		SpinnerModel model = new SpinnerListModel(elements);
-
 		this.setModel(model);
 	}
 
@@ -36,7 +33,6 @@ public class Spinner extends JSpinner {
 	public Spinner(int start, int end, int step) {
 		String[] elements = setElements(start, end, step);
 		SpinnerModel model = new SpinnerListModel(elements);
-
 		this.setModel(model);
 	}
 
@@ -49,7 +45,6 @@ public class Spinner extends JSpinner {
 	 */
 	private String[] setElements(int start, int end, int step) {
 		int elementCount = ((end - start) / step) + 1;
-
 		start = start - step;
 		String[] elements = new String[elementCount];
 
@@ -69,7 +64,6 @@ public class Spinner extends JSpinner {
 	 */
 	private String[] setElements(double start, double end, double step) {
 		int elementCount = (int) ((end - start) / step) + 1;
-
 		start = start - step;
 		String[] elements = new String[elementCount];
 

@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Dimension;
@@ -14,7 +13,6 @@ import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
-
 
 public class PortPropertiesDialog extends JDialog implements ActionListener {
 
@@ -69,7 +67,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		getContentPane().add(pnlMain);
 		setSize(new Dimension(220, 130));
 		setResizable(false);
-		// setModal(true);
+//    setModal(true);
 		setLocationRelativeTo(editor);
 		setVisible(true);
 
@@ -99,13 +97,11 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	private void setPortProperties() {
 		boolean valid = true;
 		String portName = tfPortName.getText();
-
 		if (portName != null && portName.trim().length() > 0) {
 			portName = portName.trim();
 		} else {
 			// display information dialog to application user
 			JOptionPane info_pane = new JOptionPane();
-
 			info_pane.showMessageDialog(null, "Please define port name.");
 			tfPortName.requestFocus();
 			valid = false;
@@ -115,9 +111,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		setStrict(checkIsStrict.isSelected());
 
 		if (port == null) {
-			if (valid) {
-				editor.mListener.drawPort(getPortName(), isAreaConn(), isStrict());
-			}
+			if (valid) editor.mListener.drawPort(getPortName(), isAreaConn(), isStrict());
 		} else {
 			port.setName(getPortName());
 			port.area = isAreaConn();
@@ -159,7 +153,8 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	 * Action listener.
 	 * @param evt ActionEvent - action event.
 	 */
-	public void actionPerformed(ActionEvent evt) {}
+	public void actionPerformed(ActionEvent evt) {
+	}
 
 	/**
 	 * Main method for module unit testing.

@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.editor;
 
 import java.io.*;
 import java.util.*;
+
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.vclass.Point;
@@ -44,32 +45,6 @@ class MouseOps
 		editor.currentObj = null;
 	}
 
-    void calcAngle(int startX, int startY, int x, int y) {
-        db.p(startX +" " +startY +" "+x +" "+y);
-        int realX = x - startX;
-        int realY = y -startY;
-        if (realX > 0 && realY> 0 ) {
-          db.p(Math.atan((double)realY/(double)realX));
-        }
-
-        if (realX < 0 && realY> 0 ) {
-          db.p(Math.atan((double)realY/(double)realX) +Math.PI);
-        }
-
-        if (realX < 0 && realY < 0 ) {
-          db.p(Math.atan((double)realY/(double)realX) +Math.PI);
-        }
-
-        if (realX > 0 && realY < 0 ) {
-          db.p(Math.atan((double)realY/(double)realX) +2*Math.PI);
-        }
-        /*if (x < editor.firstPort.getRealCenterX()) ;
-            else if (x > editor.firstPort.getRealCenterX()) db.p(Math.atan(y/x));
-            else if (y < editor.firstPort.getRealCenterY()) db.p(-Math.PI/2.0);
-            else if (y > editor.firstPort.getRealCenterY()) db.p(Math.PI/2.0);
-                  else db.p(0.0);
-          */
-    }
 	/**
 	 * Mouse entered event from the MouseMotionListener. Invoked when the mouse enters a component.
 	 * @param e MouseEvent - Mouse event performed.
@@ -84,11 +59,9 @@ class MouseOps
 	 * Mouse exited event from the MouseMotionListener. Invoked when the mouse exits a component.
 	 * @param e MouseEvent - Mouse event performed.
 	 */
-
 	public void mouseExited(MouseEvent e) {
-		Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
-
-		editor.setCursor(cursor);
+	//	Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
+    //	editor.setCursor(cursor);
 	}
 
 	private void openObjectPopupMenu(int x, int y) {
@@ -99,15 +72,13 @@ class MouseOps
 		if (editor.objects.getSelected().size() < 2) {
 			if (editor.currentObj.isGroup()) {
 				popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, true);
-			}
-			else {
+			} else {
 				popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
 			}
 			popupMenu.enableDisableMenuItem(popupMenu.itemProperties, true);
 			popupMenu.enableDisableMenuItem(popupMenu.itemHLPorts, true);
 			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, false);
-		}
-		else {
+		} else {
 			popupMenu.enableDisableMenuItem(popupMenu.itemProperties, false);
 			popupMenu.enableDisableMenuItem(popupMenu.itemHLPorts, false);
 			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
@@ -129,8 +100,7 @@ class MouseOps
 				ConnectionPopupMenu popupMenu = new ConnectionPopupMenu(relation, editor.connections, editor.getContentPane());
 
 				popupMenu.show(editor.getContentPane(), x, y);
-			}
-			else {
+			} else {
 				editor.currentObj = editor.objects.checkInside(x, y);
 				if (editor.currentObj != null) {
 					Port port = editor.currentObj.portContains(x, y);
@@ -139,8 +109,7 @@ class MouseOps
 						PortPopupMenu popupMenu = new PortPopupMenu(port);
 
 						popupMenu.show(editor.getContentPane(), x, y);
-					}
-					else {
+					} else {
 						openObjectPopupMenu(x, y);
 					}
 				}
@@ -185,13 +154,12 @@ class MouseOps
 						}
 						/* else if  (firstPort.type.equals(port.type)) {
 								}*/
-                        else {
+						else {
 							if (port == editor.firstPort) {
 								editor.firstPort.setConnected(false);
 								editor.firstPort = null;
 								editor.currentCon = null;
-							}
-							else {
+							} else {
 								port.setConnected(true);
 								editor.currentCon.beginPort = editor.firstPort;
 								editor.currentCon.endPort = port;
@@ -204,8 +172,7 @@ class MouseOps
 							}
 						}
 					}
-				}
-				else {
+				} else {
 					if (editor.firstPort != null) {
 						editor.currentCon.addBreakPoint(new Point(x, y));
 						// firstPort.setConnected(false);
@@ -219,26 +186,25 @@ class MouseOps
 
 				if (con != null) {
 					con.selected = true;
-				}
-				else {
+				} else {
 					editor.connections.clearSelected();
 				}
 				GObj obj = editor.objects.checkInside(x, y);
 
 				if (obj == null) {
 					editor.objects.clearSelected();
-				}
-				else {
-					if (e.isShiftDown()) {}
-					else {
+				} else {
+					if (e.isShiftDown()) {
+					} else {
 						editor.objects.clearSelected();
 						obj.setSelected(true);
 					}
 				}
 
-			}
-			else {
-				if (editor.currentObj != null) {
+			} else {
+				if (state.startsWith("??")) { //if class is of type relation
+					addingSpecialRelation(y, x);
+				} else if (editor.currentObj != null) {
 					addObj(x, y, state);
 					state = State.selection;
 					Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
@@ -249,6 +215,24 @@ class MouseOps
 		}
 
 		editor.repaint();
+	}
+
+	private void addingSpecialRelation(int y, int x) {
+		GObj obj = editor.objects.checkInside(x, y);
+		if (obj != null) {
+			Port port = obj.portContains(x, y);
+			if (port != null) {
+				if (editor.firstPort == null) {
+					editor.firstPort = port;
+					editor.firstPort.setConnected(true);
+					editor.obj1 = obj;
+					editor.mouseX = x;
+					editor.mouseY = y;
+				} else {
+
+				}
+			}
+		}
 	}
 
 	public void mousePressed(MouseEvent e) {
@@ -262,16 +246,14 @@ class MouseOps
 				if (draggedBreakPoint != null) {
 					state = State.dragBreakPoint;
 				}
-			}
-			else {
+			} else {
 
 				GObj obj = editor.objects.checkInside(editor.mouseX, editor.mouseY);
 
 				if (obj != null) {
 					if (e.isShiftDown()) {
 						obj.setSelected(true);
-					}
-					else {
+					} else {
 						if (!obj.isSelected()) {
 							editor.objects.clearSelected();
 							obj.setSelected(true);
@@ -281,13 +263,11 @@ class MouseOps
 						initialXSize = obj.getXSize();
 						initialYSize = obj.getYSize();
 						state = State.resize;
-					}
-					else {
+					} else {
 						state = State.drag;
 						editor.repaint();
 					}
-				}
-				else {
+				} else {
 					state = State.dragBox;
 					startX = editor.mouseX;
 					startY = editor.mouseY;
@@ -330,7 +310,7 @@ class MouseOps
 							// wanna remove the connection
 							if (port2 != null && !port2.obj.isSelected()) {
 								// We dont want to remove the connection, if the objects belong to the same group
-								if (! (obj.isGroup() && obj.includesObject(port2.obj))) {
+								if (!(obj.isGroup() && obj.includesObject(port2.obj))) {
 									if (Math.abs(port.getRealCenterX() - port2.getRealCenterX()) > 1 || Math.abs(port.getRealCenterY() - port2.getRealCenterY()) > 1) {
 										editor.connections.remove(port, port2);
 									}
@@ -351,7 +331,7 @@ class MouseOps
 										port.addConnection(con);
 										editor.connections.add(con);
 									}
-									obj.setPosition(port2.obj.x + port2.getCenterX() - ( (port.obj.x - obj.x) + port.getCenterX()), port2.obj.y + port2.getCenterY() - ( (port.obj.y - obj.y) + port.getCenterY()));
+									obj.setPosition(port2.obj.x + port2.getCenterX() - ((port.obj.x - obj.x) + port.getCenterX()), port2.obj.y + port2.getCenterY() - ((port.obj.y - obj.y) + port.getCenterY()));
 								}
 							}
 						}
@@ -409,10 +389,6 @@ class MouseOps
 
 		// check if port needs to be nicely drawn coz of mouseover
 		if (state.equals(State.addRelation)) {
-            if (editor.firstPort != null) {
-                calcAngle(editor.firstPort.getRealCenterX(),editor.firstPort.getRealCenterY(),x,y);
-            }
-
 			if (editor.currentPort != null) {
 				editor.currentPort.setSelected(false);
 				// currentPort=null;
@@ -487,7 +463,11 @@ class MouseOps
 				editor.drawingArea.revalidate();
 			}
 			editor.repaint();
+		} else if (state.startsWith("??") && editor.firstPort!=null) { //if class is of type relation
+			editor.repaint();
 		}
+
+
 		if (editor.firstPort != null) {
 			editor.mouseX = x;
 			editor.mouseY = y;
@@ -519,6 +499,13 @@ class MouseOps
 		}
 	}
 
+	// *********************************************************************
+	// functions for mouse operations, to keep mouse* function somewhat tidy
+	// *********************************************************************
+
+	// *********************************************************************
+	// end of mouse control functions
+	// *********************************************************************
 
 	public void actionPerformed(ActionEvent e) {
 
@@ -527,7 +514,7 @@ class MouseOps
 			if (e.getActionCommand().equals(Menu.SAVE_SCHEME)) {
 				db.p("save");
 				JFileChooser fc = new JFileChooser(editor.getLastPath());
-				SynFilter synFilter = new SynFilter();
+				CustomFileFilter synFilter = new CustomFileFilter(CustomFileFilter.extensionSyn, CustomFileFilter.descriptionSyn);
 
 				fc.setFileFilter(synFilter);
 				int returnVal = fc.showSaveDialog(null);
@@ -535,7 +522,13 @@ class MouseOps
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
 					File file = fc.getSelectedFile();
 
-					db.p("Saving scheme: " + file.getName());
+// [Aulo] 11.02.2004
+// Check if the file name ends with a required extension. If not,
+// append the default extension to the file name.
+					if (!file.getAbsolutePath().toLowerCase().endsWith(".syn")) {
+						file = new File(file.getAbsolutePath() + ".syn");
+					}
+
 
 					// store the last open directory in system properties.
 					editor.setLastPath(file.getAbsolutePath());
@@ -559,19 +552,20 @@ class MouseOps
 							ObjectOutputStream oos = new ObjectOutputStream(fos);
 
 							editor.scheme.objCount = editor.objCount;
-							db.p(editor.scheme);
 							oos.writeObject(editor.scheme);
 							oos.close();
-						}
-						catch (Exception exc) {
+							JOptionPane.showMessageDialog(null, "Saved to: " + file.getName(),
+								"Saved",
+								JOptionPane.INFORMATION_MESSAGE);
+
+						} catch (Exception exc) {
 							exc.printStackTrace();
 						}
 					}
 				}
-			}
-			else if (e.getActionCommand().equals(Menu.LOAD_SCHEME)) {
+			} else if (e.getActionCommand().equals(Menu.LOAD_SCHEME)) {
 				JFileChooser fc = new JFileChooser(editor.getLastPath());
-				SynFilter filter = new SynFilter();
+				CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.extensionSyn, CustomFileFilter.descriptionSyn);
 
 				fc.setFileFilter(filter);
 				int returnVal = fc.showOpenDialog(null);
@@ -598,14 +592,12 @@ class MouseOps
 						editor.mListener.setState(State.selection);
 						editor.repaint();
 
-					}
-					catch (Exception exc) {
+					} catch (Exception exc) {
 						exc.printStackTrace();
 					}
 				}
 
-			}
-			else if (e.getActionCommand().equals(Menu.LOAD)) {
+			} else if (e.getActionCommand().equals(Menu.LOAD)) {
 				// JFileChooser fc = new JFileChooser(System.getProperty("user.dir")+System.getProperty("file.separator"));
 				// [Aulo] 05.01.2004 - remember last document path.
 				JFileChooser fc = new JFileChooser(editor.getLastPath());
@@ -619,32 +611,25 @@ class MouseOps
 					editor.loadPackage(pack);
 					editor.validate();
 				}
-			}
-			else if (e.getActionCommand().equals(Menu.CLOSE)) {
+			} else if (e.getActionCommand().equals(Menu.CLOSE)) {
 				editor.vPackage = null;
 				editor.palette.removeToolbar();
 				editor.validate();
-			}
-			else if (e.getActionCommand().equals(Menu.INFO)) {
+			} else if (e.getActionCommand().equals(Menu.INFO)) {
 				String message;
 
 				if (editor.vPackage != null) {
 					message = editor.vPackage.description;
-				}
-				else {
+				} else {
 					message = "No packages loaded";
 				}
 				JOptionPane.showMessageDialog(null, message);
-			}
-			else if (e.getActionCommand().equals(Menu.PRINT)) { // PrintUtilities.printComponent(editor.drawingArea);
-			}
-			else if (e.getActionCommand().equals(Menu.EXIT)) {
+			} else if (e.getActionCommand().equals(Menu.PRINT)) { // PrintUtilities.printComponent(editor.drawingArea);
+			} else if (e.getActionCommand().equals(Menu.EXIT)) {
 				editor.exitApplication();
-			}
-			else if (e.getActionCommand().equals(Menu.CLEAR_ALL)) {
+			} else if (e.getActionCommand().equals(Menu.CLEAR_ALL)) {
 				editor.clearObjects();
-			}
-			else if (e.getActionCommand().equals(Menu.SPECIFICATION)) {
+			} else if (e.getActionCommand().equals(Menu.SPECIFICATION)) {
 				ProgramTextEditor programEditor = new ProgramTextEditor(editor.connections, editor.objects, editor.vPackage);
 
 				programEditor.setSize(550, 450);
@@ -665,11 +650,9 @@ class MouseOps
 
 				}
 				editor.repaint();
-			}
-			else if (e.getActionCommand().equals(Menu.CLONE)) {
+			} else if (e.getActionCommand().equals(Menu.CLONE)) {
 				editor.cloneObjects();
-			}
-			else if (e.getActionCommand().equals(Menu.HLPORTS)) {
+			} else if (e.getActionCommand().equals(Menu.HLPORTS)) {
 				editor.hilightPorts();
 			}
 			/* else if (e.getActionCommand().equals("Run")) {
@@ -682,59 +665,48 @@ class MouseOps
 
 				if (documentationUrl != null && documentationUrl.trim().length() > 0) {
 					editor.openInBrowser(documentationUrl);
-				}
-				else {
+				} else {
 					editor.showInfoDialog("Missing information", "No documentation URL defined in properties.");
 				}
-			}
-			else if (e.getActionCommand().equals(Menu.ABOUT)) {
+			} else if (e.getActionCommand().equals(Menu.ABOUT)) {
 				editor.showInfoDialog("Credits", "Visual Specification Language ee.ioc.cs.editor.editor.Editor" + "\n" + "Ando Saabas, IOC" + "\n" + "Aulo Aasmaa" + "\n\n" + "(c) 2003");
-			}
-			else if (e.getActionCommand().equals(Menu.OBJECT_DELETE)) {
+			} else if (e.getActionCommand().equals(Menu.OBJECT_DELETE)) {
 				editor.deleteObjects();
-			}
-			else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
+			} else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
 				ObjectPropertiesEditor prop = new ObjectPropertiesEditor(editor.currentObj);
 
 				prop.pack();
 				prop.setVisible(true);
-			}
-			else if (e.getActionCommand().equals(Menu.GROUP)) {
+			} else if (e.getActionCommand().equals(Menu.GROUP)) {
 				editor.groupObjects();
-			}
-			else if (e.getActionCommand().equals(Menu.UNGROUP)) {
+			} else if (e.getActionCommand().equals(Menu.UNGROUP)) {
 				editor.ungroupObjects();
-			}
-			else if (e.getActionCommand().equals(Menu.SETTINGS)) {
+			} else if (e.getActionCommand().equals(Menu.SETTINGS)) {
 				editor.openOptionsDialog();
-			}
-			else if (e.getActionCommand().equals(Look.LOOK_WINDOWS)) {
+			} else if (e.getActionCommand().equals(Look.LOOK_WINDOWS)) {
 				try {
 					UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
 					SwingUtilities.updateComponentTreeUI(editor);
+				} catch (Exception uie) {
 				}
-				catch (Exception uie) {}
-			}
-			else if (e.getActionCommand().equals(Look.LOOK_METAL)) {
+			} else if (e.getActionCommand().equals(Look.LOOK_METAL)) {
 				try {
 					UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
 					SwingUtilities.updateComponentTreeUI(editor);
+				} catch (Exception uie) {
 				}
-				catch (Exception uie) {}
-			}
-			else if (e.getActionCommand().equals(Look.LOOK_MOTIF)) {
+			} else if (e.getActionCommand().equals(Look.LOOK_MOTIF)) {
 				try {
 					UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
 					SwingUtilities.updateComponentTreeUI(editor);
+				} catch (Exception uie) {
 				}
-				catch (Exception uie) {}
-			}
-			else if (e.getActionCommand().equals(Look.LOOK_3D)) {
+			} else if (e.getActionCommand().equals(Look.LOOK_3D)) {
 				try {
 					// UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
 					SwingUtilities.updateComponentTreeUI(editor);
+				} catch (Exception uie) {
 				}
-				catch (Exception uie) {}
 			}
 		}
 
@@ -745,32 +717,33 @@ class MouseOps
 				Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 
 				editor.setCursor(cursor);
-			}
-			else if (e.getActionCommand().equals(State.selection)) {
+			} else if (e.getActionCommand().equals(State.selection)) {
 				Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
 
 				editor.setCursor(cursor);
 				editor.mListener.setState(State.selection);
-			}
-			else if (e.getActionCommand().equals("clonedrawing")) {
+			} else if (e.getActionCommand().equals("clonedrawing")) {
 				GraphicalResult g = new GraphicalResult();
 
 				g.setSize(550, 450);
 				g.setVisible(true);
 
-			}
-			else if (e.getActionCommand().equals(State.magnifier)) {
+			} else if (e.getActionCommand().equals(State.magnifier)) {
 				editor.mListener.setState(State.magnifier);
-			}
-			else {
+			} else {
 				editor.mListener.setState(e.getActionCommand());
 				GObj obj;
-				PackageClass pClass = editor.vPackage.getClass(state);
+				PackageClass pClass;
+				if (state.startsWith("??"))
+                    pClass = editor.vPackage.getClass(state.substring(2));
+				else
+					pClass = editor.vPackage.getClass(state);
+
 
 				db.p("PCLASS: " + pClass);
 				db.p("GRAPHICS: " + pClass.graphics);
 				db.p("STATE: " + state);
-				obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), state);
+				obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.name);
 
 				obj.ports = (ArrayList) pClass.ports.clone();
 				Port port;

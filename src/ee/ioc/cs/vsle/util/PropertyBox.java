@@ -1,11 +1,9 @@
 package ee.ioc.cs.vsle.util;
 
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.FileOutputStream;
 import java.util.Properties;
-
 
 /**
  * Class for holding application properties property key values.

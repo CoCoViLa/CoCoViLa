@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.awt.Color;
 import java.awt.Graphics;
 
-public class GObjGroup
-	extends GObj
+public class GObjGroup extends GObj
 	implements Serializable {
 	public ArrayList objects;
 
@@ -55,8 +54,9 @@ public class GObjGroup
 	}
 
 	public boolean contains(int pointX, int pointY) {
-		if ( (pointX > getX()) && (pointY > getY())) {
-			if ( (pointX < getX() + (int) (getXsize() * getWidth())) && (pointY < getY() + (int) (getYsize() * getHeight()))) {
+		if ((pointX > getX()) && (pointY > getY())) {
+			if ((pointX < getX() + (int) (getXsize() * getWidth()))
+				&& (pointY < getY() + (int) (getYsize() * getHeight()))) {
 				return true;
 			}
 		}
@@ -64,8 +64,9 @@ public class GObjGroup
 	}
 
 	public boolean isInside(int x1, int y1, int x2, int y2) {
-		if ( (x1 < getX()) && (y1 < getY())) {
-			if ( (x2 > getX() + (int) (getXsize() * getWidth())) && (y2 > getY() + (int) (getYsize() * getHeight()))) {
+		if ((x1 < getX()) && (y1 < getY())) {
+			if ((x2 > getX() + (int) (getXsize() * getWidth()))
+				&& (y2 > getY() + (int) (getYsize() * getHeight()))) {
 				return true;
 			}
 		}
@@ -171,9 +172,11 @@ public class GObjGroup
 			g.drawRect(getX() - 2, getY() - 2, 4, 4);
 			g.drawRect(getX() + (int) (getXsize() * getWidth()) - 2, getY() - 2, 4, 4);
 			g.drawRect(getX() - 2, getY() + (int) (getYsize() * getHeight()) - 2, 4, 4);
-			g.drawRect(getX() + (int) (getXsize() * getWidth()) - 2, getY() + (int) (getYsize() * getHeight()) - 2, 4, 4);
+			g.drawRect(getX() + (int) (getXsize() * getWidth()) - 2,
+				getY() + (int) (getYsize() * getHeight()) - 2, 4, 4);
 		}
 	}
+
 
 	public void setXSize(float s) {
 		float change = s / getXsize();
@@ -189,6 +192,7 @@ public class GObjGroup
 			obj.setX(getX() + (int) (getXsize() * obj.difWithMasterX));
 		}
 	}
+
 
 	public void setYSize(float s) {
 		float change = s / getYsize();
@@ -247,7 +251,7 @@ public class GObjGroup
 	}
 
 	public Object clone() {
-		GObjGroup g = (GObjGroup)super.clone();
+		GObjGroup g = (GObjGroup) super.clone();
 		GObj obj;
 		ArrayList newList = new ArrayList();
 

@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.awt.Graphics;
 
 /**
+
  */
-public class Connection
-	implements Serializable {
+public class Connection implements Serializable {
 
 	public Port beginPort;
 	public Port endPort;
@@ -23,7 +23,8 @@ public class Connection
 	/**
 	 * Class constructor.
 	 */
-	public Connection() {} // ee.ioc.cs.editor.vclass.Connection
+	public Connection() {
+	} // ee.ioc.cs.editor.vclass.Connection
 
 	/**
 	 * Class constructor.
@@ -78,14 +79,20 @@ public class Connection
 		float intersectX = x1 + U * (x2 - x1);
 		float intersectY = y1 + U * (y2 - y1);
 
-		double distance = Math.sqrt( (pointX - intersectX) * (pointX - intersectX) + (pointY - intersectY) * (pointY - intersectY));
+		double distance = Math.sqrt(
+			(pointX - intersectX) * (pointX - intersectX)
+			+ (pointY - intersectY) * (pointY - intersectY));
 
-		double distanceFromEnd1 = Math.sqrt( (x1 - pointX) * (x1 - pointX) + (y1 - pointY) * (y1 - pointY));
-		double distanceFromEnd2 = Math.sqrt( (x2 - pointX) * (x2 - pointX) + (y2 - pointY) * (y2 - pointY));
-		double lineLength = Math.sqrt( (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+		double distanceFromEnd1 = Math.sqrt(
+			(x1 - pointX) * (x1 - pointX) + (y1 - pointY) * (y1 - pointY));
+		double distanceFromEnd2 = Math.sqrt(
+			(x2 - pointX) * (x2 - pointX) + (y2 - pointY) * (y2 - pointY));
+		double lineLength = Math.sqrt(
+			(x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 
 		if (lineLength < Math.max(distanceFromEnd1, distanceFromEnd2)) {
-			distance = Math.max(Math.min(distanceFromEnd1, distanceFromEnd2), distance);
+			distance = Math.max(Math.min(distanceFromEnd1, distanceFromEnd2),
+				distance);
 		}
 		return (float) distance;
 	} // calcDistance
@@ -138,14 +145,12 @@ public class Connection
 				p = (Point) breakPoints.get(i);
 				if (p.x == oldPoint1.x) {
 					p.x = port1X;
-				}
-				else if (p.x == oldPoint2.x) {
+				} else if (p.x == oldPoint2.x) {
 					p.x = port2X;
 				}
 				if (p.y == oldPoint1.y) {
 					p.y = port1Y;
-				}
-				else if (p.y == oldPoint2.y) {
+				} else if (p.y == oldPoint2.y) {
 					p.y = port2Y;
 				}
 			}

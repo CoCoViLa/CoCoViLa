@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 
+
 /**
  * Created by IntelliJ IDEA.
  * User: Aulo
@@ -11,8 +12,7 @@ import javax.swing.JMenuItem;
  * Time: 9:17:47
  * To change this template use Options | File Templates.
  */
-public class ObjectPopupMenu
-	extends JPopupMenu {
+public class ObjectPopupMenu extends JPopupMenu {
 
 	// ee.ioc.cs.editor.editor.Menu items displayed in the menu.
 	JMenuItem itemDelete;
@@ -25,7 +25,8 @@ public class ObjectPopupMenu
 	/**
 	 * Build the popup menu by adding menu items and action listeners for the menu items in it.
 	 * @param mListener - ee.ioc.cs.editor.editor.Editor mouse listener.
-	 */ObjectPopupMenu(MouseOps mListener) {
+	 */
+	ObjectPopupMenu(MouseOps mListener) {
 		super();
 
 		itemDelete = new JMenuItem(Menu.DELETE, KeyEvent.VK_D);
@@ -60,7 +61,8 @@ public class ObjectPopupMenu
 	 * Method for enabling or disabling menu items.
 	 * @param item - menu item to be enabled or disabled.
 	 * @param b - enable or disable the menu item.
-	 */ void enableDisableMenuItem(JMenuItem item, boolean b) {
+	 */
+	void enableDisableMenuItem(JMenuItem item, boolean b) {
 		int index = getComponentIndex(item);
 
 		getComponent(index).setEnabled(b);

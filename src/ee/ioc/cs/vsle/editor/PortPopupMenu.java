@@ -14,8 +14,7 @@ import javax.swing.JMenuItem;
  * Time: 9:15:36
  * To change this template use Options | File Templates.
  */
-public class PortPopupMenu
-	extends JPopupMenu
+public class PortPopupMenu extends JPopupMenu
 	implements ActionListener {
 
 	Port port;
@@ -46,15 +45,12 @@ public class PortPopupMenu
 		if (e.getActionCommand().equals("known")) {
 			port.setKnown(true);
 			port.setTarget(false);
-		}
-		else if (e.getActionCommand().equals("target")) {
+		} else if (e.getActionCommand().equals("target")) {
 			port.setKnown(false);
 			port.setTarget(true);
-		}
-		else if (e.getActionCommand().equals("watch")) {
+		} else if (e.getActionCommand().equals("watch")) {
 			port.setWatch(true);
-		}
-		else if (e.getActionCommand().equals("nowatch")) {
+		} else if (e.getActionCommand().equals("nowatch")) {
 			port.setWatch(false);
 		}
 	}

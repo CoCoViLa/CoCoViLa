@@ -4,18 +4,17 @@ import ee.ioc.cs.vsle.graphics.Shape;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.awt.Graphics;
+import java.awt.*;
 
-public class ClassGraphics
-	implements Serializable {
+public class ClassGraphics implements Serializable {
 
 	ArrayList shapes = new ArrayList();
+	public double angle = 0.0;
 	public int boundX;
 	public int boundY;
 	public int boundWidth;
 	public int boundHeight;
-
-	// PackageClass packageClass;
+//	PackageClass packageClass;
 	public boolean showFields = false;
 	public boolean relation = false;
 
@@ -69,11 +68,24 @@ public class ClassGraphics
 	 */
 	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics g) {
 		Shape s;
+        Graphics2D g2 = (Graphics2D) g;
+
+		if (relation) {
+			g2.translate(xPos, yPos);
+			g2.rotate(angle);
+			g2.translate(-1*(xPos), -1*(yPos));
+		}
 
 		for (int i = 0; i < shapes.size(); i++) {
 			s = (Shape) shapes.get(i);
 			s.draw(xPos, yPos, Xsize, Ysize, g);
 		}
+		if (relation) {
+			g2.translate(xPos, yPos);
+			g2.rotate(-1*angle);
+			g2.translate(-1*(xPos), -1*(yPos));
+		}
+
 	} // draw
 
 }

@@ -1,5 +1,3 @@
-//vsledit
-
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.editor.Menu;
@@ -49,7 +47,7 @@ import javax.swing.JCheckBoxMenuItem;
  * @link http://vsledit.sourceforge.net
  * @version 1.0
  */
-public class Editor	extends JFrame {
+public class Editor extends JFrame {
 
 	int objCount;
 	int mouseX; // Mouse X coordinate.
@@ -126,7 +124,9 @@ public class Editor	extends JFrame {
 
 		drawingArea.addMouseMotionListener(mListener);
 		drawingArea.setPreferredSize(drawAreaSize);
-		JScrollPane areaScrollPane = new JScrollPane(drawingArea, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		JScrollPane areaScrollPane = new JScrollPane(drawingArea,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.add(areaScrollPane, BorderLayout.CENTER);
@@ -142,7 +142,9 @@ public class Editor	extends JFrame {
 		Look look = new Look();
 
 		look.setGUI(this);
-		look.changeLayout(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT));
+		look.changeLayout(
+			PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+				PropertyBox.DEFAULT_LAYOUT));
 	}
 
 	/**
@@ -152,7 +154,6 @@ public class Editor	extends JFrame {
 	public int getGridStep() {
 		String sGridStep = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP);
 		int iGridStep = 10;
-
 		if (sGridStep != null) {
 			iGridStep = Integer.parseInt(sGridStep);
 		}
@@ -165,14 +166,11 @@ public class Editor	extends JFrame {
 	 */
 	public boolean getGridVisibility() {
 		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
-
 		if (vis != null) {
 			int v = Integer.parseInt(vis);
-
 			if (v < 1) {
 				return false;
-			}
-			else {
+			} else {
 				return true;
 			}
 		}
@@ -220,7 +218,8 @@ public class Editor	extends JFrame {
 		 menuItem = new JMenuItem("Clone", KeyEvent.VK_C);
 		 menuItem.addActionListener(mListener);
 		 menu.add(menuItem);
-		 */menuItem = new JMenuItem(Menu.SELECT_ALL, KeyEvent.VK_A);
+		 */
+		menuItem = new JMenuItem(Menu.SELECT_ALL, KeyEvent.VK_A);
 		menuItem.addActionListener(mListener);
 		menu.add(menuItem);
 
@@ -319,16 +318,13 @@ public class Editor	extends JFrame {
 
 	}
 
-	class DrawingArea
-		extends JPanel {
+	class DrawingArea extends JPanel {
 
 		private boolean showGrid = false;
 		private int gridStep = 10;
 
 		public void setGridStep(int i) {
-			if (i > 0) {
-				this.gridStep = i;
-			}
+			if (i > 0) this.gridStep = i;
 		}
 
 		public boolean isGridVisible() {
@@ -349,14 +345,31 @@ public class Editor	extends JFrame {
 				g.drawLine(0, i, getWidth(), i);
 			}
 		}
+    	double calcAngle(int startX, int startY, int x, int y) {
 
+			int realX = x - startX;
+			int realY = y -startY;
+			if (realX > 0 && realY> 0 ) {
+			  return (Math.atan((double)realY/(double)realX));
+			}
+
+			if (realX < 0 && realY> 0 ) {
+			  return (Math.atan((double)realY/(double)realX) +Math.PI);
+			}
+
+			if (realX < 0 && realY < 0 ) {
+			  return(Math.atan((double)realY/(double)realX) +Math.PI);
+			}
+
+			if (realX > 0 && realY < 0 ) {
+			  return(Math.atan((double)realY/(double)realX) +2*Math.PI);
+			}
+			return 0.0;
+		}
 		protected void paintComponent(Graphics g) {
 			super.paintComponent(g);
 			Connection rel;
-
-			if (this.showGrid) {
-				drawGrid(g);
-			}
+			if (this.showGrid) drawGrid(g);
 			GObj obj;
 			boolean antiAliasing = isAntialiasingOn();
 
@@ -372,21 +385,34 @@ public class Editor	extends JFrame {
 				rel.drawRelation(g);
 			}
 
-			if (firstPort != null) {
+			if (firstPort != null && mListener.state.equals(State.addRelation)) {
 				currentCon.drawRelation(g);
-				Point p = (Point) currentCon.breakPoints.get(currentCon.breakPoints.size() - 1);
+				Point p = (Point) currentCon.breakPoints.get(
+					currentCon.breakPoints.size() - 1);
 
 				g.drawLine(p.x, p.y, mouseX, mouseY);
-			}
-			g.setColor(Color.black);
-			if (currentObj != null) {
+			} else if  (firstPort != null && mListener.state.startsWith("??")) {
+                double angle = calcAngle(firstPort.getRealCenterX(),firstPort.getRealCenterY(), mouseX, mouseY);
+				currentObj.graphics.angle = angle;
+				currentObj.Xsize = (float)Math.sqrt(Math.pow((mouseX - firstPort.getRealCenterX()) / (double)currentObj.width, 2.0) + Math.pow((mouseY - firstPort.getRealCenterY()) / (double)currentObj.width, 2.0));
+				currentObj.y = firstPort.getRealCenterY();
+				currentObj.x = firstPort.getRealCenterX();
+				currentObj.drawClassGraphics(g);
+
+
+			} else if (currentObj != null) {
 				// ee.ioc.cs.editor.vclass.PackageClass pClass = (ee.ioc.cs.editor.vclass.PackageClass)classes.get(currentObj.name);
+				g.setColor(Color.black);
 				currentObj.drawClassGraphics(g);
 			}
 
+
+
+
 			if (mListener.state.equals(State.dragBox)) {
 				g.setColor(Color.gray);
-				g.drawRect(mListener.startX, mListener.startY, mouseX - mListener.startX, mouseY - mListener.startY);
+				g.drawRect(mListener.startX, mListener.startY,
+					mouseX - mListener.startX, mouseY - mListener.startY);
 			}
 		}
 	}
@@ -397,12 +423,13 @@ public class Editor	extends JFrame {
 	 * @return boolean - antialiasing on/off.
 	 */
 	public boolean isAntialiasingOn() {
-		int iAntiAliasing = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.ANTI_ALIASING));
+		int iAntiAliasing = Integer.parseInt(
+			PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+				PropertyBox.ANTI_ALIASING));
 
 		if (iAntiAliasing < 1) {
 			return false;
-		}
-		else {
+		} else {
 			return true;
 		}
 	} // isAntialiasingOn
@@ -413,7 +440,8 @@ public class Editor	extends JFrame {
 	 * @param text - text displayed in the information dialog.
 	 */
 	public void showInfoDialog(String title, String text) {
-		JOptionPane.showMessageDialog(null, text, title, JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(null, text, title,
+			JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	/**
@@ -431,7 +459,8 @@ public class Editor	extends JFrame {
 	 * Close application.
 	 */
 	public void exitApplication() {
-		int confirmed = JOptionPane.showConfirmDialog(null, "Exit Application?", Menu.EXIT, JOptionPane.OK_CANCEL_OPTION);
+		int confirmed = JOptionPane.showConfirmDialog(null, "Exit Application?",
+			Menu.EXIT, JOptionPane.OK_CANCEL_OPTION);
 
 		switch (confirmed) {
 			case JOptionPane.OK_OPTION:
@@ -584,7 +613,7 @@ public class Editor	extends JFrame {
 		for (int i = 0; i < objects.getSelected().size(); i++) {
 			obj = (GObj) objects.getSelected().get(i);
 			if (obj.isGroup()) {
-				objects.addAll( ( (GObjGroup) obj).objects);
+				objects.addAll(((GObjGroup) obj).objects);
 				objects.remove(obj);
 				obj = null;
 				currentObj = null;
@@ -621,7 +650,8 @@ public class Editor	extends JFrame {
 	 * @return String - last used path from system properties.
 	 */
 	public static String getLastPath() {
-		return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_PATH);
+		return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.LAST_PATH);
 	}
 
 	/**
@@ -629,7 +659,8 @@ public class Editor	extends JFrame {
 	 * @return String - system documentation URL.
 	 */
 	public static String getSystemDocUrl() {
-		return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DOCUMENTATION_URL);
+		return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.DOCUMENTATION_URL);
 	}
 
 	/**
@@ -641,12 +672,12 @@ public class Editor	extends JFrame {
 		if (path != null) {
 			if (path.indexOf("/") > -1) {
 				path = path.substring(0, path.lastIndexOf("/"));
-			}
-			else if (path.indexOf("\\") > -1) {
+			} else if (path.indexOf("\\") > -1) {
 				path = path.substring(0, path.lastIndexOf("\\"));
 			}
 		}
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_PATH, path);
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.LAST_PATH, path);
 	}
 
 	/**
@@ -664,11 +695,11 @@ public class Editor	extends JFrame {
 
 				// Open URL with OS-specific methods.
 				if (osType != null && osType.equalsIgnoreCase("Windows")) {
-					Runtime.getRuntime().exec("rundll32 url.dll,FileProtocolHandler " + url);
+					Runtime.getRuntime().exec(
+						"rundll32 url.dll,FileProtocolHandler " + url);
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -700,13 +731,11 @@ public class Editor	extends JFrame {
 
 				if (isWin(osType)) {
 					return "Windows";
-				}
-				else {
+				} else {
 					return "NotWindows";
 				}
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		return null;
@@ -725,9 +754,9 @@ public class Editor	extends JFrame {
 			scheme.packageName = vPackage.name;
 			palette = new Palette(vPackage, mListener, this);
 			validate();
-		}
-		else {
-			JOptionPane.showMessageDialog(null, "Cannot read file " + f, "Error", JOptionPane.INFORMATION_MESSAGE);
+		} else {
+			JOptionPane.showMessageDialog(null, "Cannot read file " + f, "Error",
+				JOptionPane.INFORMATION_MESSAGE);
 		}
 	}
 
@@ -744,6 +773,7 @@ public class Editor	extends JFrame {
 	 * Removes all objects.
 	 */
 	public void clearObjects() {
+		mListener.state = State.selection;
 		objects.removeAll(objects);
 		connections.removeAll(connections);
 		repaint();
@@ -785,9 +815,12 @@ public class Editor	extends JFrame {
 	 */
 	public static void main(String[] args) {
 
-		String directory = System.getProperty("user.dir") + System.getProperty("file.separator");
+		String directory = System.getProperty("user.dir")
+			+ System.getProperty("file.separator");
 
-		RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
+		RuntimeProperties.debugInfo = Integer.parseInt(
+			PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+				PropertyBox.DEBUG_INFO));
 
 		JFrame window;
 
@@ -795,16 +828,15 @@ public class Editor	extends JFrame {
 			if (args.length > 0) {
 				if (args[0].equals("-p")) {
 					if (args.length == 3) {
-						RuntimeProperties.packageDir = directory + args[2] + System.getProperty("file.separator");
-					}
-					else {
+						RuntimeProperties.packageDir = directory + args[2]
+							+ System.getProperty("file.separator");
+					} else {
 						RuntimeProperties.packageDir = directory;
 					}
 					Synthesizer synth = new Synthesizer();
 
 					synth.parseFromCommandLine(args[1]);
-				}
-				else {
+				} else {
 					// Esimeses hoos vaatame, kas moodulite fail on ette antud k�surealt.
 					db.p(args[0] + " read from command line.");
 					window = new Editor(directory + args[0]);
@@ -813,20 +845,23 @@ public class Editor	extends JFrame {
 					window.setVisible(true);
 				}
 
-			}
-			else {
+			} else {
 				// Kui k�surealt ei olnud ette antud, v�tame vaikev��rtuse application.properties failist.
-				db.p("No module file name was given as the command line argument, reading the application.properties file.");
-				String paletteFile = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE);
+				db.p(
+					"No module file name was given as the command line argument, reading the application.properties file.");
+				String paletteFile = PropertyBox.getProperty(
+					PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE);
 
 				if (paletteFile != null && paletteFile.trim().length() > 0) {
 					// Leidsime vastava kirje.
-					db.p("Found module file name " + paletteFile + " from the " + PropertyBox.APP_PROPS_FILE_NAME + ".properties file.");
+					db.p(
+						"Found module file name " + paletteFile + " from the "
+						+ PropertyBox.APP_PROPS_FILE_NAME + ".properties file.");
 					window = new Editor(directory + paletteFile);
-				}
-				else {
+				} else {
 					// application.properties failis polnud vastavat kirjet vaikimisi laetava faili kohta.
-					db.p("Module file name was not specified in command line nor in the application.properties file. Starting without.");
+					db.p(
+						"Module file name was not specified in command line nor in the application.properties file. Starting without.");
 					RuntimeProperties.packageDir = directory;
 					window = new Editor();
 				}
@@ -834,8 +869,7 @@ public class Editor	extends JFrame {
 				window.setSize(getWinWidth(), getWinHeight());
 				window.setVisible(true);
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			window = new Editor();
 			window.setTitle(WINDOW_TITLE);
 			window.setSize(getWinWidth(), getWinHeight());
@@ -844,8 +878,10 @@ public class Editor	extends JFrame {
 
 		// log application executions, also making sure that the properties file is
 		// available for writing (required by some of current application modules).
-		RuntimeProperties.genFileDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
+		RuntimeProperties.genFileDir = PropertyBox.getProperty(
+			PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
 	}
 
 }

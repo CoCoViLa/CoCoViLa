@@ -1,10 +1,8 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import java.awt.Frame;
 import java.awt.Toolkit;
 import java.net.URL;
-
 
 public class IconEditorSplash {
 	public static void main(String[] args) {
@@ -14,7 +12,6 @@ public class IconEditorSplash {
 		Frame splashFrame = null;
 		String splashImageUrl = "images/iesplash.gif";
 		URL imageURL = IconEditorSplash.class.getResource(splashImageUrl);
-
 		if (imageURL != null) {
 			splashFrame = SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(imageURL));
 		} else {
@@ -24,7 +21,7 @@ public class IconEditorSplash {
 		// Call the main method of the application using Reflection
 		// --------------------------------------------------------
 		try {
-			Class.forName("ee.ioc.cs.vsle.iconeditor.IconEditor").getMethod("main", new Class[] { String[].class}).invoke(null, new Object[] { args});
+			Class.forName("ee.ioc.cs.vsle.iconeditor.IconEditor").getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{args});
 		} catch (Throwable e) {
 			e.printStackTrace();
 			System.err.flush();
@@ -33,8 +30,6 @@ public class IconEditorSplash {
 
 		// Dispose the splash screen
 		// -------------------------
-		if (splashFrame != null) {
-			splashFrame.dispose();
-		}
+		if (splashFrame != null) splashFrame.dispose();
 	}
 }

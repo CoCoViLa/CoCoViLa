@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.util;
 
-
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -10,7 +9,6 @@ import java.awt.print.PrinterJob;
 import java.awt.print.PrinterException;
 
 import javax.swing.RepaintManager;
-
 
 public class PrintUtilities
 	implements Printable {
@@ -26,7 +24,6 @@ public class PrintUtilities
 
 	public void print() {
 		PrinterJob printJob = PrinterJob.getPrinterJob();
-
 		printJob.setPrintable(this);
 		if (printJob.printDialog()) {
 			try {
@@ -42,7 +39,6 @@ public class PrintUtilities
 			return (NO_SUCH_PAGE);
 		} else {
 			Graphics2D g2d = (Graphics2D) g;
-
 			g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
 			disableDoubleBuffering(componentToBePrinted);
 			componentToBePrinted.paint(g2d);
@@ -53,13 +49,11 @@ public class PrintUtilities
 
 	public static void disableDoubleBuffering(Component c) {
 		RepaintManager currentManager = RepaintManager.currentManager(c);
-
 		currentManager.setDoubleBufferingEnabled(false);
 	}
 
 	public static void enableDoubleBuffering(Component c) {
 		RepaintManager currentManager = RepaintManager.currentManager(c);
-
 		currentManager.setDoubleBufferingEnabled(true);
 	}
 }

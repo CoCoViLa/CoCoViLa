@@ -1,8 +1,6 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import ee.ioc.cs.vsle.editor.State;
-import ee.ioc.cs.vsle.graphics.Shape;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -15,7 +13,6 @@ import javax.swing.BorderFactory;
 import javax.swing.SpinnerModel;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
-
 
 /**
  * Created by IntelliJ IDEA.
@@ -66,16 +63,10 @@ public class IconPalette {
 		spinnerTransparency.setMaximumSize(spinnerTransparency.getPreferredSize());
 		spinnerTransparency.setBorder(BorderFactory.createEtchedBorder());
 
-		// spinnerRotation.setPreferredSize(new Dimension(40, 20));
-		// spinnerRotation.setMaximumSize(spinnerRotation.getPreferredSize());
-		// spinnerRotation.setBorder(BorderFactory.createEmptyBorder());
-
-
 		// Action listener added as anonymous class.
 		ChangeListener listener = new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				SpinnerModel source = (SpinnerModel) e.getSource();
-
 				try {
 					editor.mListener.changeStrokeWidth(Double.parseDouble(String.valueOf(source.getValue())));
 				} catch (Exception ex) {
@@ -88,35 +79,8 @@ public class IconPalette {
 		ChangeListener transpListener = new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				SpinnerModel source = (SpinnerModel) e.getSource();
-
 				try {
 					editor.mListener.changeTransparency(Double.parseDouble(String.valueOf(source.getValue())));
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				}
-			}
-		};
-
-		// Action listener added as anonymous class.
-		ChangeListener rotationListener = new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				SpinnerModel source = (SpinnerModel) e.getSource();
-
-				try {
-					double degrees = Double.parseDouble(String.valueOf(source.getValue()));
-
-					if (editor.shapeList != null && editor.shapeList.size() > 0) {
-						Shape shape;
-
-						for (int i = 0; i < editor.shapeList.size(); i++) {
-							shape = (Shape) editor.shapeList.get(i);
-							if (shape.isSelected()) {
-								shape.setRotation(degrees);
-							}
-						}
-
-					}
-					editor.repaint();
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -126,9 +90,8 @@ public class IconPalette {
 		// add action listeners to spinners.
 		spinnerLineWidth.getModel().addChangeListener(listener);
 		spinnerTransparency.getModel().addChangeListener(transpListener);
-		// spinnerRotation.getModel().addChangeListener(rotationListener);
 
-		// add relation and selection tool.
+		//add relation and selection tool.
 		icon = new ImageIcon("images/mouse.gif");
 		selection = new JButton(icon);
 		selection.setActionCommand(State.selection);
@@ -239,15 +202,11 @@ public class IconPalette {
 
 		// add line width selection spinner
 		Font f = new Font("Tahoma", Font.PLAIN, 11);
-
 		lblLineWidth.setFont(f);
 		lblLineWidth.setToolTipText("Line width or point size of a selected tool");
 
 		toolBar.add(lblLineWidth);
 		toolBar.add(spinnerLineWidth);
-
-		// add transparency spinner
-		// lblTransparency.setFont(f);
 
 		icon = new ImageIcon("images/transparency.gif");
 		lblTransparency = new JLabel(icon);
@@ -255,13 +214,6 @@ public class IconPalette {
 
 		toolBar.add(lblTransparency);
 		toolBar.add(spinnerTransparency);
-
-		// add rotation spinner
-		// lblRotation.setFont(f);
-		// lblRotation.setToolTipText("Rotation in degrees");
-
-		// toolBar.add(lblRotation);
-		// toolBar.add(spinnerRotation);
 
 		editor.mainPanel.add(toolBar, BorderLayout.NORTH);
 

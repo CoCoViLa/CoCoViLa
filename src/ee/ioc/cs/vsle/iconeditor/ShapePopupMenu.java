@@ -1,11 +1,10 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import java.awt.event.KeyEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
-import ee.ioc.cs.vsle.editor.Menu;
 
+import ee.ioc.cs.vsle.editor.Menu;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,7 +13,8 @@ import ee.ioc.cs.vsle.editor.Menu;
  * Time: 9:17:47
  * To change this template use Options | File Templates.
  */
-public class ShapePopupMenu extends JPopupMenu {
+public class ShapePopupMenu
+	extends JPopupMenu {
 
 	// Menu items displayed in the menu.
 	JMenuItem itemDelete;
@@ -79,7 +79,6 @@ public class ShapePopupMenu extends JPopupMenu {
 	 */
 	void enableDisableMenuItem(JMenuItem item, boolean b) {
 		int index = getComponentIndex(item);
-
 		getComponent(index).setEnabled(b);
 	}
 

@@ -5,14 +5,14 @@ import java.io.Serializable;
 import java.awt.Graphics;
 import java.awt.Color;
 
-public class PackageClass
-	implements Serializable {
+public class PackageClass implements Serializable {
 	int x, y;
 	public String title, name;
 	public String icon;
 	public ArrayList fields = new ArrayList();
 	public ClassGraphics graphics;
 	public ArrayList ports = new ArrayList();
+
 	public PackageClass(String name) {
 		this.name = name;
 	}
@@ -36,8 +36,7 @@ public class PackageClass
 
 			if (port.type.equals("in")) {
 				g.setColor(Color.blue);
-			}
-			else if (port.type.equals("out")) {
+			} else if (port.type.equals("out")) {
 				g.setColor(Color.red);
 			}
 

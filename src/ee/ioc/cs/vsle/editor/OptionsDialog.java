@@ -31,8 +31,7 @@ import javax.swing.border.TitledBorder;
  * Time: 14:09:17
  * To change this template use Options | File Templates.
  */
-public class OptionsDialog
-	extends JDialog {
+public class OptionsDialog extends JDialog {
 
 	// Labels.
 	private static final JLabel lblGenFilesDir = new JLabel("Generated files:");
@@ -78,7 +77,8 @@ public class OptionsDialog
 		// Specify smaller font for title and buttons.
 		Font f = new Font("Arial", Font.BOLD, 11);
 
-		TitledBorder mainBorder = BorderFactory.createTitledBorder("Program settings");
+		TitledBorder mainBorder = BorderFactory.createTitledBorder(
+			"Program settings");
 
 		mainBorder.setTitleFont(f);
 
@@ -117,7 +117,6 @@ public class OptionsDialog
 
 		JPanel pnlGridSpinner = new JPanel();
 		FlowLayout fl = new FlowLayout();
-
 		fl.setAlignment(FlowLayout.LEFT);
 		pnlGridSpinner.setLayout(fl);
 		pnlGridSpinner.add(spinnerGridStep);
@@ -177,15 +176,14 @@ public class OptionsDialog
 
 		bttnSave.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				if (isVisible()) {
-					saveSettings();
-				}
+				if (isVisible()) saveSettings();
 			}
 		});
 
 		/*
 		 * Closes the dialog window.
-		 */bttnCancel.addActionListener(new ActionListener() {
+		 */
+		bttnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				closeDialog();
 			}
@@ -193,13 +191,16 @@ public class OptionsDialog
 
 		/*
 		 * Changes layout.
-		 */cbDfltLayout.addItemListener(new ItemListener() {
-			public void itemStateChanged(final ItemEvent event) {
-				if (event.getSource() == cbDfltLayout && event.getStateChange() == ItemEvent.SELECTED) {
-					Look.changeLayout(cbDfltLayout.getSelectedItem().toString());
+		 */
+		cbDfltLayout.addItemListener(
+			new ItemListener() {
+				public void itemStateChanged(final ItemEvent event) {
+					if (event.getSource() == cbDfltLayout
+						&& event.getStateChange() == ItemEvent.SELECTED) {
+						Look.changeLayout(cbDfltLayout.getSelectedItem().toString());
+					}
 				}
-			}
-		});
+			});
 
 	} // End of initialize();
 
@@ -207,16 +208,25 @@ public class OptionsDialog
 	 * Initialize dialog with stored settings from the properties file.
 	 */
 	private void initializeSettings() {
-		String sGenFilesDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
-		String sPaletteFile = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE);
-		String sDfltLayout = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT);
-		int iDebugOutput = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
+		String sGenFilesDir = PropertyBox.getProperty(
+			PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
+		String sPaletteFile = PropertyBox.getProperty(
+			PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE);
+		String sDfltLayout = PropertyBox.getProperty(
+			PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT);
+		int iDebugOutput = Integer.parseInt(
+			PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+				PropertyBox.DEBUG_INFO));
 
-		int iAntiAliasing = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.ANTI_ALIASING));
+		int iAntiAliasing = Integer.parseInt(
+			PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+				PropertyBox.ANTI_ALIASING));
 
-		int iShowGrid = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID));
+		int iShowGrid = Integer.parseInt(PropertyBox.getProperty(PropertyBox.
+			APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID));
 
-		String sGridStep = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP);
+		String sGridStep = PropertyBox.getProperty(PropertyBox.
+			APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP);
 
 		tfGenFilesDir.setText(sGenFilesDir);
 		tfPaletteFile.setText(sPaletteFile);
@@ -226,24 +236,21 @@ public class OptionsDialog
 		// Initialize debug output checkbox.
 		if (iDebugOutput < 1) {
 			chbDebugInfo.setSelected(false);
-		}
-		else {
+		} else {
 			chbDebugInfo.setSelected(true);
 		}
 
 		// Initialize antialiasing checkbox.
 		if (iAntiAliasing < 1) {
 			chbAntiAlias.setSelected(false);
-		}
-		else {
+		} else {
 			chbAntiAlias.setSelected(true);
 		}
 
 		// Initialize show grid checkbox.
 		if (iShowGrid < 1) {
 			chbShowGrid.setSelected(false);
-		}
-		else {
+		} else {
 			chbShowGrid.setSelected(true);
 		}
 	}
@@ -268,13 +275,20 @@ public class OptionsDialog
 		if (chbShowGrid.isSelected()) {
 			sShowGrid = "1";
 		}
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR, sGenFilesDir);
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE, sPaletteFile);
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT, sDfltLayout);
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO, sDebugOutput);
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.ANTI_ALIASING, sAntiAliasing);
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID, sShowGrid);
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP, spinnerGridStep.getModel().getValue().toString());
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.GENERATED_FILES_DIR, sGenFilesDir);
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.PALETTE_FILE, sPaletteFile);
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.DEFAULT_LAYOUT, sDfltLayout);
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.DEBUG_INFO, sDebugOutput);
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.ANTI_ALIASING, sAntiAliasing);
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.SHOW_GRID, sShowGrid);
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+			PropertyBox.GRID_STEP, spinnerGridStep.getModel().getValue().toString());
 
 		Shape.setAntialiasing(chbAntiAlias.isSelected());
 		closeDialog();

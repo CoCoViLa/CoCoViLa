@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-
 import java.awt.Window;
 import java.awt.Image;
 import java.awt.Frame;
@@ -9,7 +8,6 @@ import java.awt.MediaTracker;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.EventQueue;
-
 
 public class SplashWindow extends Window {
 
@@ -34,11 +32,11 @@ public class SplashWindow extends Window {
 
 		// Load the image
 		MediaTracker mt = new MediaTracker(this);
-
 		mt.addImage(splashImage, 0);
 		try {
 			mt.waitForID(0);
-		} catch (InterruptedException ie) {}
+		} catch (InterruptedException ie) {
+		}
 
 		// Center the window on the screen.
 		int imgWidth = splashImage.getWidth(this);
@@ -46,7 +44,6 @@ public class SplashWindow extends Window {
 
 		setSize(imgWidth, imgHeight);
 		Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
-
 		setLocation((screenDim.width - imgWidth) / 2, (screenDim.height - imgHeight) / 2);
 	}
 
@@ -105,16 +102,17 @@ public class SplashWindow extends Window {
 				while (!w.paintCalled) {
 					try {
 						w.wait();
-					} catch (InterruptedException e) {}
+					} catch (InterruptedException e) {
+					}
 				}
 			}
 		}
 
 		try {
 			Thread t = new Thread();
-
 			t.sleep(2000);
-		} catch (InterruptedException ie) {}
+		} catch (InterruptedException ie) {
+		}
 
 		return f;
 	}

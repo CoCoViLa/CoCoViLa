@@ -1,10 +1,10 @@
 package ee.ioc.cs.vsle.graphics;
 
-import java.io.Serializable;
-import java.awt.Color;
-import java.awt.BasicStroke;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.io.*;
+
+import java.awt.*;
+
+import ee.ioc.cs.vsle.util.*;
 
 public class Line
 	extends Shape
@@ -21,7 +21,7 @@ public class Line
 	private float lineWeight;
 
 	Color color;
-	private BasicStroke stroke;
+
 	float transparency = (float) 1.0;
 
 	/**
@@ -32,13 +32,14 @@ public class Line
 
 	double rotation = 0.0;
 
-	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp) {
+	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth,
+				double transp) {
 		startX = x1;
 		startY = y1;
 		endX = x2;
 		endY = y2;
 		this.color = new Color(colorInt);
-		setStrokeWidth(strokeWidth);
+		this.lineWeight = (float) strokeWidth;
 		this.transparency = (float) transp;
 		this.x = Math.min(x1, x2);
 		this.y = Math.min(y1, y2);
@@ -46,9 +47,11 @@ public class Line
 		this.height = Math.max(y1, y2) - this.y; // endY - startY;
 	}
 
-	public void setFont(java.awt.Font f) {}
+	public void setFont(java.awt.Font f) {
+	}
 
-	public void setText(String s) {}
+	public void setText(String s) {
+	}
 
 	/**
 	 * Set the percentage of transparency.
@@ -79,7 +82,7 @@ public class Line
 	 * @return double - stroke width of a shape.
 	 */
 	public double getStrokeWidth() {
-		return this.stroke.getLineWidth();
+		return this.lineWeight;
 	} // getStrokeWidth
 
 	/**
@@ -97,34 +100,69 @@ public class Line
 	 * @param cornerClicked int - number of the clicked corner.
 	 */
 	public void resize(int deltaW, int deltaH, int cornerClicked) {
+		db.p("startX=" + this.startX + ", endX=" + this.endX);
+		db.p("startY=" + this.startY + ", endY=" + this.endY);
 		if (cornerClicked == 1) { // TOP-LEFT
-			if ( (this.width - deltaW) >= 0 && (this.height - deltaH) >= 0) {
-				this.endX += deltaW;
-				this.endY += deltaH;
+			if ((this.width - deltaW) >= 0 && (this.height - deltaH) >= 0) {
+				if (this.startX < this.endX) {
+					this.startX += deltaW;
+				} else {
+					this.endX += deltaW;
+				}
+				if (this.startY < this.endY) {
+					this.startY += deltaH;
+				} else {
+					this.endY += deltaH;
+				}
+
 				this.width -= deltaW;
 				this.height -= deltaH;
 			}
-		}
-		else if (cornerClicked == 2) { // TOP-RIGHT
-			if ( (this.width + deltaW) >= 0 && (this.height - deltaH) >= 0) {
-				this.endX += deltaW;
-				this.endY += deltaH;
+		} else if (cornerClicked == 2) { // TOP-RIGHT
+			if ((this.width + deltaW) >= 0 && (this.height - deltaH) >= 0) {
+				if (this.startX > this.endX) {
+					this.startX += deltaW;
+				} else {
+					this.endX += deltaW;
+				}
+				if (this.startY > this.endY) {
+					this.endY += deltaH;
+				} else {
+					this.startY += deltaH;
+				}
+
 				this.width += deltaW;
 				this.height -= deltaH;
 			}
-		}
-		else if (cornerClicked == 3) { // BOTTOM-LEFT
-			if ( (this.width - deltaW) >= 0 && (this.height + deltaH) >= 0) {
-				this.startX += deltaW;
-				this.startY += deltaH;
+		} else if (cornerClicked == 3) { // BOTTOM-LEFT
+
+			if ((this.width - deltaW) >= 0 && (this.height + deltaH) >= 0) {
+				if (this.startX > this.endX) {
+					this.endX += deltaW;
+				} else {
+					this.startX += deltaW;
+				}
+				if (this.startY > this.endY) {
+					this.startY += deltaH;
+				} else {
+					this.endY += deltaH;
+				}
+
 				this.width -= deltaW;
 				this.height -= deltaH;
 			}
-		}
-		else if (cornerClicked == 4) { // BOTTOM-RIGHT
-			if ( (this.width + deltaW) >= 0 && (this.height + deltaH) >= 0) {
-				this.startX += deltaW;
-				this.startY += deltaH;
+		} else if (cornerClicked == 4) { // BOTTOM-RIGHT
+			if ((this.width + deltaW) >= 0 && (this.height + deltaH) >= 0) {
+				if (this.startX < this.endX) {
+					this.endX += deltaW;
+				} else {
+					this.startX += deltaW;
+				}
+				if (this.startY < this.endY) {
+					this.endY += deltaH;
+				} else {
+					this.startY += deltaH;
+				}
 				this.width -= deltaW;
 				this.height -= deltaH;
 			}
@@ -140,23 +178,25 @@ public class Line
 	 * @return int - corner number the mouse was clicked in.
 	 */
 	public int controlRectContains(int pointX, int pointY) {
-		if ( (pointX >= x) && (pointY >= y)) {
-			if ( (pointX <= x + 4) && (pointY <= y + 4)) {
+		if ((pointX >= x) && (pointY >= y)) {
+			if ((pointX <= x + 4) && (pointY <= y + 4)) {
 				return 1;
 			}
 		}
-		if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
-			if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
+		if ((pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
+			if ((pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
 				return 2;
 			}
 		}
-		if ( (pointX >= x) && (pointY >= y + (int) (size * (height)) - 4)) {
-			if ( (pointX <= x + 4) && (pointY <= y + (int) (size * (height)))) {
+		if ((pointX >= x) && (pointY >= y + (int) (size * (height)) - 4)) {
+			if ((pointX <= x + 4) && (pointY <= y + (int) (size * (height)))) {
 				return 3;
 			}
 		}
-		if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y + (int) (size * (height)) - 4)) {
-			if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + (int) (size * (height)))) {
+		if ((pointX >= x + (int) (size * (width)) - 4)
+			&& (pointY >= y + (int) (size * (height)) - 4)) {
+			if ((pointX <= x + (int) (size * (width)))
+				&& (pointY <= y + (int) (size * (height)))) {
 				return 4;
 			}
 		}
@@ -168,8 +208,7 @@ public class Line
 		if (this.endX > this.startX) {
 			this.endX = this.endX + (x - startX);
 			this.startX = x;
-		}
-		else {
+		} else {
 			this.startX = this.startX + (x - endX);
 			this.endX = x;
 		}
@@ -177,8 +216,7 @@ public class Line
 		if (this.endY > this.startY) {
 			this.endY = this.endY + (y - startY);
 			this.startY = y;
-		}
-		else {
+		} else {
 			this.startY = this.startY + (y - endY);
 			this.endY = y;
 		}
@@ -194,8 +232,7 @@ public class Line
 
 		if (distance <= 3) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
@@ -219,14 +256,20 @@ public class Line
 		float intersectX = x1 + U * (x2 - x1);
 		float intersectY = y1 + U * (y2 - y1);
 
-		double distance = Math.sqrt( (pointX - intersectX) * (pointX - intersectX) + (pointY - intersectY) * (pointY - intersectY));
+		double distance = Math.sqrt(
+			(pointX - intersectX) * (pointX - intersectX)
+			+ (pointY - intersectY) * (pointY - intersectY));
 
-		double distanceFromEnd1 = Math.sqrt( (x1 - pointX) * (x1 - pointX) + (y1 - pointY) * (y1 - pointY));
-		double distanceFromEnd2 = Math.sqrt( (x2 - pointX) * (x2 - pointX) + (y2 - pointY) * (y2 - pointY));
-		double lineLength = Math.sqrt( (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+		double distanceFromEnd1 = Math.sqrt(
+			(x1 - pointX) * (x1 - pointX) + (y1 - pointY) * (y1 - pointY));
+		double distanceFromEnd2 = Math.sqrt(
+			(x2 - pointX) * (x2 - pointX) + (y2 - pointY) * (y2 - pointY));
+		double lineLength = Math.sqrt(
+			(x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 
 		if (lineLength < Math.max(distanceFromEnd1, distanceFromEnd2)) {
-			distance = Math.max(Math.min(distanceFromEnd1, distanceFromEnd2), distance);
+			distance = Math.max(Math.min(distanceFromEnd1, distanceFromEnd2),
+				distance);
 		}
 		return (float) distance;
 	} // calcDistance
@@ -235,13 +278,10 @@ public class Line
 		try {
 			if (width >= 0.0) {
 				lineWeight = (float) width;
-				stroke = new BasicStroke(lineWeight);
-			}
-			else {
+			} else {
 				throw new Exception("Stroke width undefined or negative.");
 			}
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -321,8 +361,21 @@ public class Line
 		if (color != null) {
 			colorInt = color.getRGB();
 		}
-		return "<line x1=\"" + (startX - boundingboxX) + "\" y1=\"" + (startY - boundingboxY) + "\" x2=\"" + (endX - boundingboxX) + "\" y2=\"" + (endY - boundingboxY) + "\" colour=\"" + colorInt + "\"/>";
+
+		return "<line x1=\"" + (startX - boundingboxX) + "\" y1=\""
+			+ (startY - boundingboxY) + "\" x2=\"" + (endX - boundingboxX)
+			+ "\" y2=\"" + (endY - boundingboxY) + "\" colour=\"" + colorInt
+			+ "\"/>";
 	} // toFile
+
+	public String toText() {
+		int colorInt = 0;
+
+		if (color != null) {
+			colorInt = color.getRGB();
+		}
+		return "LINE:" + startX + ":" + startY + ":" + endX + ":" + endY + ":" + colorInt + ":" + (int) this.lineWeight + ":" + (int) this.transparency;
+	}
 
 	/**
 	 * Draw the selection markers if object selected.
@@ -330,7 +383,7 @@ public class Line
 	 */
 	private void drawSelection(Graphics2D g) {
 		g.setColor(Color.black);
-		g.setStroke(new BasicStroke( (float) 1.0));
+		g.setStroke(new BasicStroke((float) 1.0));
 		g.fillRect(startX - 2, startY - 2, 4, 4);
 		g.fillRect(endX - 2, endY - 2, 4, 4);
 	} // drawSelection
@@ -343,10 +396,11 @@ public class Line
 		this.rotation = degrees;
 	} // setRotation
 
-	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
+	public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
+					 Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 
-		g2.setStroke(stroke);
+		g2.setStroke(new BasicStroke(lineWeight));
 
 		alpha = (float) (1 - (this.transparency / 100));
 
@@ -357,10 +411,14 @@ public class Line
 		g2.setColor(new Color(red, green, blue, alpha));
 
 		if (isAntialiasingOn()) {
-			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
+			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 		}
 
-		g2.drawLine(xModifier + (int) (Xsize * startX), yModifier + (int) (Ysize * startY), xModifier + (int) (Xsize * endX), yModifier + (int) (Ysize * endY));
+		g2.drawLine(xModifier + (int) (Xsize * startX),
+			yModifier + (int) (Ysize * startY),
+			xModifier + (int) (Xsize * endX),
+			yModifier + (int) (Ysize * endY));
 
 		this.width = Math.abs(getStartX() - getEndX());
 		this.height = Math.abs(getStartY() - getEndY());

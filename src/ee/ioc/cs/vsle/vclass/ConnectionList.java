@@ -4,10 +4,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
+
  */
-public class ConnectionList
-	extends ArrayList
-	implements Serializable {
+public class ConnectionList extends ArrayList implements Serializable {
 
 	/**
 	 * Class constructor.
@@ -28,7 +27,7 @@ public class ConnectionList
 		Connection relation;
 
 		for (int i = 0; i < this.size(); i++) {
-			relation = (Connection)this.get(i);
+			relation = (Connection) this.get(i);
 			if (relation.distanceFromPoint(x, y) < 4) {
 				return relation;
 			}
@@ -82,8 +81,9 @@ public class ConnectionList
 		Connection con;
 
 		for (int i = 0; i < this.size(); i++) {
-			con = (Connection)this.get(i);
-			if ( (con.beginPort == p1 && con.endPort == p2) || (con.beginPort == p2 && con.endPort == p1)) {
+			con = (Connection) this.get(i);
+			if ((con.beginPort == p1 && con.endPort == p2)
+				|| (con.beginPort == p2 && con.endPort == p1)) {
 				super.remove(con);
 				p2.setConnected(false);
 				p2.connections.remove(con);
@@ -100,7 +100,7 @@ public class ConnectionList
 		Connection relation;
 
 		for (int i = 0; i < this.size(); i++) {
-			relation = (Connection)this.get(i);
+			relation = (Connection) this.get(i);
 			relation.calcBreakPoints();
 		}
 	} // calcAllBreakPoints
@@ -112,7 +112,7 @@ public class ConnectionList
 		Connection con;
 
 		for (int i = 0; i < this.size(); i++) {
-			con = (Connection)this.get(i);
+			con = (Connection) this.get(i);
 			con.selected = false;
 		}
 	} // clearSelected

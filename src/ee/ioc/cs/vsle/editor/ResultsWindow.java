@@ -35,13 +35,13 @@ import javax.swing.ImageIcon;
  * Class currently not in use. Fix reference to ee.ioc.cs.editor.synthesize.Synthesizer.makeProgram method (method
  * commented out in the ee.ioc.cs.editor.synthesize.Synthesizer class)
  */
-public class ResultsWindow
-	extends JFrame
+public class ResultsWindow extends JFrame
 	implements ActionListener {
 	JTextArea textArea;
 	Object genObject;
 	ArrayList watchPorts;
 	JButton run;
+
 	ResultsWindow(ObjectList objects) {
 		super();
 		// ee.ioc.cs.editor.synthesize.Synthesizer synth = new ee.ioc.cs.editor.synthesize.Synthesizer();
@@ -50,7 +50,8 @@ public class ResultsWindow
 		textArea.setFont(new Font("Courier", Font.PLAIN, 12));
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 
-		areaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		areaScrollPane.setVerticalScrollBarPolicy(
+			JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 		areaScrollPane.setPreferredSize(new Dimension(250, 250));
 		JToolBar toolBar = new JToolBar();
 		ImageIcon icon;
@@ -83,8 +84,7 @@ public class ResultsWindow
 			Object o = clas.newInstance();
 
 			return o;
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace(System.err);
 			return null;
 		}
@@ -123,24 +123,25 @@ public class ResultsWindow
 			for (int i = 0; i < watchPorts.size(); i++) {
 				lastObj = genClass;
 				clas = genClass.getClass();
-				st = new StringTokenizer( (String) watchPorts.get(i), ".");
+				st = new StringTokenizer((String) watchPorts.get(i), ".");
 				while (st.hasMoreElements()) {
 
 					f = clas.getDeclaredField(st.nextToken());
 					if (st.hasMoreElements()) {
 						clas = f.getType();
 						lastObj = f.get(lastObj);
-					}
-					else {
-						textArea.append( (String) watchPorts.get(i) + ": " + f.getInt(lastObj) + "\n");
-						db.p( (String) watchPorts.get(i) + ": " + f.getInt(lastObj));
+					} else {
+						textArea.append(
+							(String) watchPorts.get(i) + ": " + f.getInt(lastObj)
+							+ "\n");
+						db.p(
+							(String) watchPorts.get(i) + ": " + f.getInt(lastObj));
 					}
 
 				}
 			}
 			textArea.append("----------------------\n");
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
 	}

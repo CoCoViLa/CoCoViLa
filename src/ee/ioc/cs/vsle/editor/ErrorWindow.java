@@ -9,19 +9,19 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-public class ErrorWindow
-	extends JFrame
-	implements ActionListener {
+public class ErrorWindow extends JFrame implements ActionListener {
 
 	JTextArea textArea;
 	JPanel errorText;
+
 	ErrorWindow(String s) {
 		super();
 		textArea = new JTextArea();
 		textArea.setFont(new Font("Courier New", Font.PLAIN, 12));
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 
-		areaScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		areaScrollPane.setVerticalScrollBarPolicy(
+			JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 
 		errorText = new JPanel();
 		errorText.setLayout(new BorderLayout());
@@ -31,5 +31,6 @@ public class ErrorWindow
 		validate();
 	}
 
-	public void actionPerformed(ActionEvent e) {}
+	public void actionPerformed(ActionEvent e) {
+	}
 }

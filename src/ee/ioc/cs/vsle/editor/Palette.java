@@ -10,6 +10,7 @@ import javax.swing.JButton;
 import javax.swing.ImageIcon;
 
 /**
+
  */
 public class Palette {
 	public JToolBar toolBar;
@@ -46,6 +47,7 @@ public class Palette {
 		magnifier.setToolTipText("Magnifier");
 		toolBar.add(magnifier);
 
+
 		icon = new ImageIcon("images/rel.gif");
 		JButton draw = new JButton(icon);
 
@@ -53,13 +55,18 @@ public class Palette {
 		draw.addActionListener(mListener);
 		toolBar.add(draw);
 
+
 		// read package info and add it to tables
 		for (int i = 0; i < vPackage.classes.size(); i++) {
 			PackageClass pClass = (PackageClass) vPackage.classes.get(i);
 
-			icon = new ImageIcon(RuntimeProperties.packageDir + File.separator + pClass.icon);
+			icon = new ImageIcon(
+				RuntimeProperties.packageDir + File.separator + pClass.icon);
 			buttons[i] = new JButton(icon);
-			buttons[i].setActionCommand(pClass.name);
+			if (pClass.graphics.relation == true) {
+				buttons[i].setActionCommand("??" + pClass.name); //to denote a class which is a relation
+			} else
+				buttons[i].setActionCommand(pClass.name);
 			buttons[i].addActionListener(mListener);
 			toolBar.add(buttons[i]);
 		}

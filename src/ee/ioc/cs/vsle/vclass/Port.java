@@ -5,8 +5,7 @@ import ee.ioc.cs.vsle.util.db;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Port
-	implements Cloneable, Serializable {
+public class Port implements Cloneable, Serializable {
 
 	public GObj obj;
 	int width, height;
@@ -26,35 +25,33 @@ public class Port
 	public Port(String name, int x, int y, String portConnection, String strict) {
 		this.name = name;
 		this.x = x;
-		db.p("X=" + x);
+
 		this.y = y;
 		if (portConnection.equals("area")) {
 			area = true;
-		}
-		else {
+		} else {
 			area = false;
 
 		}
 
 		if (strict.equals("true")) {
 			this.strict = true;
-		}
-		else {
+		} else {
 			this.strict = false;
 		}
 	}
+
 
 	public Port getStrictConnected() {
 		Connection con;
 
 		for (int i = 0; i < connections.size(); i++) {
 			con = (Connection) connections.get(i);
-			// ee.ioc.cs.editor.util.db.p("Mul on pordid " +con.beginPort +" "+con.endPort);
+
 			if (con.beginPort.isStrict()) {
 				if (con.beginPort == this) {
 					return con.endPort;
-				}
-				else {
+				} else {
 					return con.beginPort;
 				}
 			}
@@ -71,19 +68,23 @@ public class Port
 	}
 
 	public int getCenterX() {
-		return (int) (obj.getXSize() * (x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
+		return (int) (obj.getXSize()
+			* (x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
 	}
 
 	public int getCenterY() {
-		return (int) (obj.getYSize() * (y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
+		return (int) (obj.getYSize()
+			* (y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
 	}
 
 	public int getRealCenterX() {
-		return (int) (obj.getXSize() * (obj.getX() + x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
+		return (int) (obj.getXSize()
+			* (obj.getX() + x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
 	}
 
 	public int getRealCenterY() {
-		return (int) (obj.getYSize() * (obj.getY() + y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
+		return (int) (obj.getYSize()
+			* (obj.getY() + y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
 	}
 
 	public int getWidth() {
@@ -95,20 +96,26 @@ public class Port
 	}
 
 	public boolean inBoundsX(int pointX) {
-		if (obj.getX() + obj.getXSize() * (x + openGraphics.boundX) < pointX && (obj.getX() + obj.getXSize() * (x + openGraphics.boundX + openGraphics.boundWidth) > pointX)) {
+		if (obj.getX() + obj.getXSize() * (x + openGraphics.boundX) < pointX
+			&& (obj.getX()
+			+ obj.getXSize()
+			* (x + openGraphics.boundX + openGraphics.boundWidth)
+			> pointX)) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 
 	}
 
 	public boolean inBoundsY(int pointY) {
-		if (obj.getY() + (obj.getYSize() * (y + openGraphics.boundY)) < pointY && (obj.getY() + obj.getXSize() * (y + openGraphics.boundY + openGraphics.boundHeight)) > pointY) {
+		if (obj.getY() + (obj.getYSize() * (y + openGraphics.boundY)) < pointY
+			&& (obj.getY()
+			+ obj.getXSize()
+			* (y + openGraphics.boundY + openGraphics.boundHeight))
+			> pointY) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 
@@ -164,8 +171,8 @@ public class Port
 
 	public String getType() {
 		for (int i = 0; i < obj.getFields().size(); i++) {
-			if ( ( (ClassField) obj.getFields().get(i)).name.equals(name)) {
-				return ( (ClassField) obj.getFields().get(i)).type;
+			if (((ClassField) obj.getFields().get(i)).name.equals(name)) {
+				return ((ClassField) obj.getFields().get(i)).type;
 			}
 		}
 		return null;
@@ -173,8 +180,8 @@ public class Port
 
 	public ClassField getField() {
 		for (int i = 0; i < obj.getFields().size(); i++) {
-			if ( ( (ClassField) obj.getFields().get(i)).name.equals(name)) {
-				return ( (ClassField) obj.getFields().get(i));
+			if (((ClassField) obj.getFields().get(i)).name.equals(name)) {
+				return ((ClassField) obj.getFields().get(i));
 			}
 		}
 		return null;
@@ -223,9 +230,8 @@ public class Port
 	public Object clone() {
 		try {
 			return super.clone();
-		}
-		catch (CloneNotSupportedException e) {
-			db.p("Unable to clone.");
+		} catch (CloneNotSupportedException e) {
+
 			return null;
 		}
 	}

@@ -11,8 +11,7 @@ import java.util.ArrayList;
  * @author Aulo Aasmaa, Ando Saabas
  * @version 1.0
  */
-public class ClassField
-	implements Cloneable, Serializable {
+public class ClassField implements Cloneable, Serializable {
 
 	public String name;
 	public String type;
@@ -25,7 +24,8 @@ public class ClassField
 	/**
 	 * Class constructor.
 	 */
-	public ClassField() {} // ee.ioc.cs.editor.vclass.ClassField
+	public ClassField() {
+	} // ee.ioc.cs.editor.vclass.ClassField
 
 	/**
 	 * Class constructor
@@ -56,8 +56,7 @@ public class ClassField
 	public boolean isAlias() {
 		if (type.equals("alias")) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	} // isAlias
@@ -71,19 +70,17 @@ public class ClassField
 
 		if (type.substring(length - 2, length).equals("[]")) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	} // isArray
 
-	String arrayType() {
+	public String arrayType() {
 		int length = type.length();
 
 		if (type.substring(length - 2, length).equals("[]")) {
 			return type.substring(0, length - 2);
-		}
-		else {
+		} else {
 			return "notArray";
 		}
 	}
@@ -103,19 +100,21 @@ public class ClassField
 	}
 
 	public boolean isPrimitive(String s) {
-		if (s.equals("int") || s.equals("double") || s.equals("float") || s.equals("long") || s.equals("short") || s.equals("boolean") || s.equals("char")) {
+		if (s.equals("int") || s.equals("double") || s.equals("float")
+			|| s.equals("long") || s.equals("short")
+			|| s.equals("boolean") || s.equals("char")) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
 
 	public boolean isPrimitive() {
-		if (type.equals("int") || type.equals("double") || type.equals("float") || type.equals("long") || type.equals("short") || type.equals("boolean") || type.equals("char")) {
+		if (type.equals("int") || type.equals("double") || type.equals("float")
+			|| type.equals("long") || type.equals("short")
+			|| type.equals("boolean") || type.equals("char")) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
@@ -135,8 +134,7 @@ public class ClassField
 	public Object clone() {
 		try {
 			return super.clone();
-		}
-		catch (CloneNotSupportedException e) {
+		} catch (CloneNotSupportedException e) {
 			System.out.println("Unable to clone.");
 			return null;
 		}

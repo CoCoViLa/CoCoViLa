@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.editor;
 
 import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
+
 import ee.ioc.cs.vsle.iconeditor.IconEditor;
 
 /**
@@ -39,27 +40,28 @@ public class Look {
 	public static void changeLayout(String selectedLayout) {
 		if (selectedLayout.equals(LOOK_WINDOWS)) {
 			try {
-				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+				UIManager.setLookAndFeel(
+					"com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+			} catch (Exception uie) {
 			}
-			catch (Exception uie) {}
-		}
-		else if (selectedLayout.equals(LOOK_METAL)) {
+		} else if (selectedLayout.equals(LOOK_METAL)) {
 			try {
-				UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+				UIManager.setLookAndFeel(
+					"javax.swing.plaf.metal.MetalLookAndFeel");
+			} catch (Exception uie) {
 			}
-			catch (Exception uie) {}
-		}
-		else if (selectedLayout.equals(LOOK_MOTIF)) {
+		} else if (selectedLayout.equals(LOOK_MOTIF)) {
 			try {
-				UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+				UIManager.setLookAndFeel(
+					"com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+			} catch (Exception uie) {
 			}
-			catch (Exception uie) {}
-		}
-		else if (selectedLayout.equals(LOOK_3D)) {
+		} else if (selectedLayout.equals(LOOK_3D)) {
 			try {
-				UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
+				UIManager.setLookAndFeel(
+					new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
+			} catch (Exception uie) {
 			}
-			catch (Exception uie) {}
 		}
 		if (ed != null) {
 			SwingUtilities.updateComponentTreeUI(ed);
