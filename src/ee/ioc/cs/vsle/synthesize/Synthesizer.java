@@ -18,201 +18,12 @@ import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
 /**
- This class is responsible for  planning and code generation.
+ This class is responsible for managing the planning and code generation process.
  @author Ando Saabas
  */
 public class Synthesizer {
 	final int declaration = 1, assignment = 2, axiom = 3, equation = 4, alias = 5, error = 10;
 
-
-    /** @link dependency */
-    /*# Planner lnkPlanner; */
-
-    /** @link dependency */
-    /*# SpecParser lnkSpecParser; */
-
-	/** Does the planning.
-	 @return a program implementing the specification.
-	 @param problem the specification unfolded as a graph.
-	 @param computeAll set to true, if we try to find everything that can be computed on the �roblem graph.
-	 */
-
-	String planner(Problem problem, boolean computeAll) {
-
-		/* while iterating through hashset, items cant be removed from/added to that set.
-		 Theyre collected into these sets and added/removedall together after iteration
-		 is finished*/
-		HashSet newComponents = new HashSet();
-		HashSet removableComponents = new HashSet();
-		HashSet removableTargets = new HashSet();
-
-		HashSet targets = new HashSet();
-		// the set of variables we know in the graph.
-		HashSet foundVars = new HashSet();
-
-		foundVars.addAll(problem.knownVars);
-
-		ArrayList algorithm = new ArrayList();
-
-		Iterator knownVarsIter;
-		Iterator relIter;
-		Iterator targetIter;
-		Iterator axiomIter;
-
-		// String algorithm ="";
-
-		Var var, targetVar, relVar;
-		Rel rel;
-		// Iterate through all components/variables
-		boolean changed = true;
-
-		targetIter = problem.targetVars.iterator();
-		while (targetIter.hasNext()) {
-			targets.add(targetIter.next());
-		}
-
-		Iterator allVarsIter = problem.allVars.values().iterator();
-
-		while (allVarsIter.hasNext()) {
-			var = (Var) allVarsIter.next();
-		}
-
-		db.p("------Starting planning--------");
-		axiomIter = problem.axioms.iterator();
-		while (axiomIter.hasNext()) {
-			rel = (Rel) axiomIter.next();
-			problem.addKnown(rel.outputs);
-			algorithm.add(rel);
-			foundVars.addAll(rel.outputs);
-		}
-		// ee.ioc.cs.editor.util.db.p("alustan probleem on:"+problem);
-		int counter = 1;
-
-		while ( (!computeAll && changed && !problem.targetVars.isEmpty()) || (changed && computeAll)) {
-			db.p("----Iteration " + counter + "----");
-			counter++;
-			changed = false;
-			targetIter = problem.targetVars.iterator();
-			while (targetIter.hasNext()) {
-				targetVar = (Var) targetIter.next();
-				if (problem.knownVars.contains(targetVar)) {
-					removableTargets.add(targetVar);
-				}
-			}
-			problem.targetVars.removeAll(removableTargets);
-			db.p("Known:" + problem.knownVars);
-			knownVarsIter = problem.knownVars.iterator();
-			while (knownVarsIter.hasNext()) {
-				var = (Var) knownVarsIter.next();
-				// Check the relations of all components
-				relIter = var.rels.iterator();
-				while (relIter.hasNext()) {
-					rel = (Rel) relIter.next();
-					if (problem.allRels.contains(rel)) {
-						rel.flag--;
-						removableComponents.add(var);
-						if (rel.flag == 0) {
-							db.p("rel on see "+ rel);
-
-							boolean relIsNeeded = false;
-
-							for (int i = 0; i < rel.outputs.size(); i++) {
-								db.p("tema outputsid "+ rel.outputs);
-								relVar = (Var) rel.outputs.get(i);
-								if (!foundVars.contains(relVar)) {
-									relIsNeeded = true;
-								}
-							}
-							if (rel.outputs.isEmpty()) {
-								relIsNeeded = true;
-							}
-							if (relIsNeeded && rel.subtaskFlag < 1) {
-								db.p("ja vajati "+ rel);
-								if (!rel.outputs.isEmpty()) {
-									newComponents.addAll(rel.outputs);
-									foundVars.addAll(rel.outputs);
-								}
-								algorithm.add(rel);
-							}
-                            if(rel.subtaskFlag > 0)
-                            {
-                                db.p("subtaskid: " + rel.subtasks);
-                            }
-
-							problem.allRels.remove(rel);
-							changed = true;
-						}
-					}
-				}
-			}
-
-			// relIter = var.rels.iterator();
-
-			// problem.allRels.contains(rel)) {
-
-
-			db.p("foundvars " +foundVars);
-			problem.knownVars.addAll(newComponents);
-			problem.knownVars.removeAll(removableComponents);
-			newComponents.clear();
-		}
-		if (problem.targetVars.isEmpty()) {
-			db.p("Problem was solved");
-		}
-		else {
-			db.p("Problem not solved");
-		}
-		StringBuffer alg = new StringBuffer();
-
-		if (!computeAll) {
-			Optimizer optimizer = new Optimizer();
-			algorithm = optimizer.optimize(algorithm, targets);
-		}
-		for (int i = 0; i < algorithm.size(); i++) {
-			alg.append("        ");
-			alg.append(algorithm.get(i)).toString();
-			alg.append(";\n");
-		}
-        db.p("Algorithm: \n" + alg.toString());
-		return alg.toString();
-
-	}
-
-
-
-
-	/**
-	 Takes an algorithm and optimizes it to only calculate the variables that are targets.
-	 @return an algorithm for calculating the target variables
-	 @param algorithm an unoptimized algorithm
-	 @param targets the variables which the algorithm has to calculate (other branches are removed)
-	 */ static ArrayList optimizer(ArrayList algorithm, HashSet targets) {
-		HashSet stuff = targets;
-		Rel rel;
-		Var relVar;
-		ArrayList removeThese = new ArrayList();
-
-		for (int i = algorithm.size() - 1; i >= 0; i--) {
-			rel = (Rel) algorithm.get(i);
-			boolean relIsNeeded = false;
-
-			for (int j = 0; j < rel.outputs.size(); j++) {
-				relVar = (Var) rel.outputs.get(j);
-				if (stuff.contains(relVar)) {
-					relIsNeeded = true;
-				}
-			}
-
-			if (relIsNeeded) {
-				stuff.addAll(rel.inputs);
-			}
-			else {
-				removeThese.add(rel);
-			}
-		}
-		algorithm.removeAll(removeThese);
-		return algorithm;
-	}
 
 	/**
 	 This method makes a compilable class from problem specification, calling createProblem,
@@ -264,7 +75,10 @@ public class Synthesizer {
 //		String algorithm = planner(problem, computeAll);
 //        String algorithm = null;// = lin_planner(problem, computeAll);
         Planner planner = new Planner(problem, computeAll, null);
-        String algorithm = planner.getAlgorithm();
+//        ArrayList algorithm_l = planner.getAlgorithmL();
+        CodeGenerator cgg = new CodeGenerator();
+        String algorithm  = cgg.generate(planner.getAlgorithmL());//= planner.getAlgorithm();
+
 //        System.exit(0);//temporary
         String prog2 = "";
 
