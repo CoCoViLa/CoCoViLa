@@ -116,10 +116,11 @@ class MouseOps
 			}
 
 			if (state.equals(State.magnifier)) {
-				editor.drawAreaSize.width = (int) (editor.drawAreaSize.width + 0.5 * editor.drawAreaSize.width);
-				editor.drawAreaSize.height = (int) (editor.drawAreaSize.height + 0.5 * editor.drawAreaSize.height);
+				editor.drawAreaSize.width = (int) (editor.drawAreaSize.width * 0.8);
+				editor.drawAreaSize.height = (int) (editor.drawAreaSize.height * 0.8);
 				editor.drawingArea.setPreferredSize(editor.drawAreaSize);
-				editor.objects.updateSize(0.5f, 0.5f);
+				editor.objects.updateSize(0.8f, 0.8f);
+				editor.drawingArea.revalidate();
 				editor.connections.calcAllBreakPoints();
 			}
 		} // **********End of RIGHT mouse button controls**********************************************
@@ -127,11 +128,13 @@ class MouseOps
 
 			// **********Magnifier	Code************************
 			if (state.equals(State.magnifier)) {
-				editor.drawAreaSize.width = (int) (editor.drawAreaSize.width * 0.9);
-				editor.drawAreaSize.height = (int) (editor.drawAreaSize.height * 0.9);
+				editor.drawAreaSize.width = (int) (editor.drawAreaSize.width * 1.25);
+				editor.drawAreaSize.height = (int) (editor.drawAreaSize.height * 1.25);
 				editor.drawingArea.setPreferredSize(editor.drawAreaSize);
-				editor.objects.updateSize(1.2f, 1.2f);
+				editor.drawingArea.revalidate();
+				editor.objects.updateSize(1.25f, 1.25f);
 				editor.connections.calcAllBreakPoints();
+
 			}
 
 			// **********Relation adding code**************************
@@ -241,10 +244,11 @@ class MouseOps
                     thisObj.startPort = editor.firstPort;
                     thisObj.endPort = port;
                     editor.firstPort = null;
-                    addObj();
+					addObj();
                     startAddingObject();
                     //setState(State.selection);
 					editor.objects.updateRelObjs();
+					editor.currentObj = null;
 
 				}
 			}
@@ -560,6 +564,10 @@ class MouseOps
 			  editor.loadScheme();
 			} else if (e.getActionCommand().equals(Menu.LOAD)) {
 				JFileChooser fc = new JFileChooser(editor.getLastPath());
+				CustomFileFilter synFilter = new CustomFileFilter(CustomFileFilter.extensionXML,CustomFileFilter.descriptionXML);
+
+				fc.setFileFilter(synFilter);
+
 				int returnVal = fc.showOpenDialog(null);
 
 				if (returnVal == JFileChooser.APPROVE_OPTION) {
