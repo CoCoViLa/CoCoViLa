@@ -17,7 +17,7 @@ class Rel implements Cloneable,
 //	static int auxVarCounter = 0;
 	List algorithm = new ArrayList(); //Collections.synchronizedList(new ArrayList()); //only for subtasks
 	Rel parentRel = null; //parent axiom containing this subtask
-
+        private int relNumber = 0;
 	int unknownInputs;
 	int subtaskFlag;
 	String object;
@@ -25,6 +25,10 @@ class Rel implements Cloneable,
 	boolean inAlgorithm = false;
 
 	int type; /* 1 - equals, 2 - method*/
+
+        Rel() {
+            relNumber = RelType.auxVarCounter++;
+        }
 
 	void setParentRel(Rel rel) {
 		if (type != RelType.subtask)
@@ -88,12 +92,9 @@ class Rel implements Cloneable,
 
 	void setType(int t) {
 		type = t;
-		if (type == RelType.alias) {
-			aliasNr = RelType.auxVarCounter++;
-		}
 	}
 
-	private int aliasNr = 0;
+
 
 	String getMaxType(List inputs) {
 		Var var;
@@ -107,68 +108,65 @@ class Rel implements Cloneable,
 		return "int";
 	}
 
-	String getParameters(boolean useBrackets) {
-		String params = "";
-		if (useBrackets)
-			params += "(";
-		Var var;
-		int j = 0;
-        int alias_nr = 0;
+        String getParameters( boolean useBrackets ) {
+            String params = "";
+            if ( useBrackets )
+                params += "(";
+            Var var;
+            int j = 0;
+            int alias_nr = 0;
 
-		//counting the aliases so i can deduct the needed numbers from ALIASTMP_NR
-		for (int i = 0; i < inputs.size(); i++) {
-			var = (Var) inputs.get(i);
-			if (var.type.equals("alias")) {
-				alias_nr++;
-			}
-		}
-        String paramString = "";
-		for (int i = 0; i < inputs.size(); i++) {
+            //counting the aliases so i can deduct the needed numbers from ALIASTMP_NR
+            for ( int i = 0; i < inputs.size(); i++ ) {
+                var = ( Var ) inputs.get( i );
+                if ( var.type.equals( "alias" ) ) {
+                    alias_nr++;
+                }
+            }
+            String paramString = "";
+            for ( int i = 0; i < inputs.size(); i++ ) {
 
-			var = (Var) inputs.get(i);
+                var = ( Var ) inputs.get( i );
 
-			if (!var.type.equals("void")) {
-				if (var.type.equals("alias")) {
-					int use_nr = CodeGenerator.ALIASTMP_NR -alias_nr;
-					paramString = CodeGenerator.ALIASTMP+var.name + use_nr;
-					alias_nr--;
-				} else {
-					paramString = var.toString();
-				}
-				if (j == 0) {
-					params += paramString;
-				} else {
-					params += ", " + paramString;
-				}
-				j++;
-			}
-		}
-		if (useBrackets)
-			return params += ")";
-		return params;
+                if ( !var.type.equals( "void" ) ) {
+                    if ( var.type.equals( "alias" ) ) {
+                        int use_nr = CodeGenerator.ALIASTMP_NR - alias_nr;
+                        paramString = CodeGenerator.ALIASTMP + var.name + use_nr;
+                        alias_nr--;
+                    } else {
+                        paramString = var.toString();
+                    }
+                    if ( j == 0 ) {
+                        params += paramString;
+                    } else {
+                        params += ", " + paramString;
+                    }
+                    j++;
+                }
+            }
+            if ( useBrackets )
+                return params += ")";
+            return params;
 
-	}
+        }
 
-	String getSubtaskParameters() {
-		String params = "(";
-		boolean subExist = false;
-		for (int i = 0; i < subtasks.size(); i++) {
-			if (i == 0) {
-				params += RelType.TAG_SUBTASK;
-				subExist = true;
-			} else {
-				params += ", " + RelType.TAG_SUBTASK;
-			}
-		}
-		for (int i = 0; i < inputs.size(); i++) {
-			if (i == 0 && !subExist) {
-				params += (Var) inputs.get(i);
-			} else {
-				params += ", " + (Var) inputs.get(i);
-			}
-		}
-		return params += ")";
-	}
+        String getSubtaskParameters() {
+            String params = "(";
+            boolean subExist = false;
+            for ( int i = 0; i < subtasks.size(); i++ ) {
+                if ( i == 0 ) {
+                    params += RelType.TAG_SUBTASK;
+                    subExist = true;
+                } else {
+                    params += ", " + RelType.TAG_SUBTASK;
+                }
+            }
+            if ( subExist ) {
+                params += ", ";
+            }
+            params += getParameters( false );
+            return params += ")";
+        }
 
 	void addInput(Var var) {
 		inputs.add(var);
@@ -251,20 +249,20 @@ class Rel implements Cloneable,
 				if (op.field.isArray() && ip.field.isAlias()) {
 
 					assigns += op.field.type + " TEMP" +
-						Integer.toString(aliasNr) +
+						Integer.toString(relNumber) +
 						" = new " +
 						op.field.arrayType() + "[" + ip.field.vars.size() +
 						"];\n";
 					for (int i = 0; i < ip.field.vars.size(); i++) {
 						s1 = ((ClassField) ip.field.vars.get(i)).toString();
 						assigns += "        " + " TEMP" +
-							Integer.toString(aliasNr) + "[" +
+							Integer.toString(relNumber) + "[" +
 							Integer.toString(i) + "] = " +
 							getObject(ip.object) + s1 +
 							";\n";
 					}
 					assigns += "        " + op + " = " + " TEMP" +
-						Integer.toString(aliasNr);
+						Integer.toString(relNumber);
 					//RelType.auxVarCounter++;
 					return assigns;
 				}
