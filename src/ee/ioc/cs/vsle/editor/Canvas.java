@@ -441,6 +441,7 @@ public class Canvas extends JPanel implements ActionListener {
 		ObjectPropertiesEditor prop = new ObjectPropertiesEditor((GObj) objects.getSelected().get(0), this);
 		prop.pack();
 		prop.setVisible(true);
+		prop.setLocationRelativeTo(this);
 
 	}
 
@@ -451,7 +452,9 @@ public class Canvas extends JPanel implements ActionListener {
 		if (objects.getSelected().size() == 1) {
 			ObjectPropertiesEditor prop = new ObjectPropertiesEditor((GObj) objects.getSelected().get(0), this);
 			prop.pack();
+			prop.setLocationRelativeTo(this);
 			prop.setVisible(true);
+
 		}
 	} // openPropertiesDialog
 
@@ -508,7 +511,7 @@ public class Canvas extends JPanel implements ActionListener {
 			ClassSaveDialog csd = new ClassSaveDialog(((GObjGroup)currentObj).getSpec(connections), this);
             csd.pack();
 
-			csd.setLocation(new java.awt.Point(mouseX, mouseY));
+			csd.setLocationRelativeTo(this);
 			csd.setVisible(true);
 
 		} else if (e.getActionCommand().equals(Menu.VIEWCODE)) {
