@@ -39,12 +39,15 @@ class IconMouseOps
 	String state = "";
 
 	public int startX, startY;
+	public int arcWidth, arcHeight;
 	public boolean fill = false;
 	public double strokeWidth = 1.0;
 	public double transparency = 0.0;
 	public Color color = Color.black;
 	boolean dragged = false;
 	int cornerClicked;
+	public int arcStartAngle;
+	public int arcAngle;
 
 	/**
 	 * Class constructor.
@@ -292,6 +295,26 @@ class IconMouseOps
 		x = e.getX();
 		y = e.getY();
 
+		if (state.equals(State.drawArc1)) {
+            setState(State.drawArc2);
+			double legOpp = startY + arcHeight/2 -y;
+			double legNear = x - (startX + arcWidth/2);
+			arcStartAngle = (int)(Math.atan(legOpp/legNear)*180/Math.PI);
+			if (legNear<0)
+				arcStartAngle = arcStartAngle +180;
+			if (legNear>0)
+				arcStartAngle = arcStartAngle +360;
+			if (arcStartAngle>360)
+				arcStartAngle = arcStartAngle - 360;
+			return;
+		}
+		if (state.equals(State.drawArc2)) {
+			Arc arc = new Arc(startX, startY, arcWidth, arcHeight, arcStartAngle, arcAngle, color.getRGB(), fill, strokeWidth, getTransparency());
+			editor.shapeList.add(arc);
+			setState(State.selection);
+		}
+
+				// editor.repaint();
 		// LISTEN RIGHT MOUSE BUTTON
 		if (SwingUtilities.isRightMouseButton(e)) {
 			popupMenuListener(x, y);
@@ -342,6 +365,7 @@ class IconMouseOps
 				}
 
 			} // END OF SELECTING SHAPES
+			/*
 			else {
 				if (editor.currentShape != null) {
 					addShape(editor.currentShape);
@@ -350,7 +374,7 @@ class IconMouseOps
 					editor.setCursor(cursor);
 				}
 
-			}
+			}*/
 
 		} // END OF LISTENING LEFT MOUSE BUTTON
 
@@ -393,8 +417,10 @@ class IconMouseOps
 	public void mousePressed(MouseEvent e) {
 		editor.mouseX = e.getX();
 		editor.mouseY = e.getY();
-		startX = e.getX();
-		startY = e.getY();
+		if (!(state.equals(State.drawArc1)||state.equals(State.drawArc2))) {
+			startX = e.getX();
+			startY = e.getY();
+		}
 
 		if (state.equals(State.selection)) {
 
@@ -513,7 +539,8 @@ class IconMouseOps
 			g.setColor(color);
 			final int width = Math.abs(editor.mouseX - x);
 			final int height = Math.abs(editor.mouseY - y);
-			g.drawArc(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height, 0, 180);
+			g.drawRect(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height);
+			//g.drawArc(Math.min(x, editor.mouseX), Math.min(y, editor.mouseY), width, height, 0, 180);
 			editor.mouseX = x;
 			editor.mouseY = y;
 		} else if (state.equals(State.drawText)) {
@@ -585,10 +612,30 @@ class IconMouseOps
 	public void mouseMoved(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
+		editor.mouseX = x;
+		editor.mouseY = y;
+        if (state.equals(State.drawArc2)) {
+			double legOpp = startY + arcHeight/2 -y;
+			double legNear = x - (startX + arcWidth/2);
+			arcAngle = (int)(Math.atan(legOpp/legNear)*180/Math.PI) - arcStartAngle;
+			if (legNear<0)
+				arcAngle = arcAngle +180;
+			if (legNear>0)
+				arcAngle = arcAngle +360;
+			if (arcAngle>360)
+				arcAngle = arcAngle - 360;
+			if(arcAngle<0) {
+				arcAngle += 360;
 
+			}
+			//else
+			//	arcAngle = (int)(Math.atan(legOpp/legNear)*180/Math.PI) - arcStartAngle;
+
+		}
 		//update mouse position in info label
 		editor.posInfo.setText(Integer.toString(x) + ", " + Integer.toString(y));
-
+        if (state.equals(State.drawArc1) || state.equals(State.drawArc2))
+			editor.repaint();
 		// LISTEN LEFT MOUSE BUTTON
 		if (SwingUtilities.isLeftMouseButton(e)) {
 			//update mouse position on info label
@@ -679,10 +726,11 @@ class IconMouseOps
 				editor.shapeList.add(oval);
 				// editor.repaint();
 			} else if (state.equals(State.drawArc) || state.equals(State.drawFilledArc)) {
-				int width = Math.abs(editor.mouseX - startX);
-				int height = Math.abs(editor.mouseY - startY);
-				Arc arc = new Arc(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width, height, 0, 180, color.getRGB(), fill, strokeWidth, getTransparency());
-				editor.shapeList.add(arc);
+				arcWidth = Math.abs(editor.mouseX - startX);
+				arcHeight = Math.abs(editor.mouseY - startY);
+                setState(State.drawArc1);
+				//Arc arc = new Arc(Math.min(startX, editor.mouseX), Math.min(startY, editor.mouseY), width, height, 0, 180, color.getRGB(), fill, strokeWidth, getTransparency());
+				//editor.shapeList.add(arc);
 				// editor.repaint();
 			} else if (state.equals(State.drawLine)) {
 				Line line = new Line(startX, startY, editor.mouseX, editor.mouseY,

@@ -313,7 +313,7 @@ public class PackageParser {
 					Integer.parseInt(width), Integer.parseInt(height),
 					Integer.parseInt(startAngle), Integer.parseInt(arcAngle),
 					Integer.parseInt(color),
-					Boolean.valueOf(filled).booleanValue(), 1.0, 0.0);
+					Boolean.valueOf(filled).booleanValue(), str, tr);
 
 				newGraphics.addShape(newArc);
 			}

@@ -579,9 +579,18 @@ public class IconEditor
 					g2.fillOval(Math.min(mListener.startX, mouseX),
 						Math.min(mListener.startY, mouseY), width, height);
 				} else if (mListener.state.equals(State.drawArc)) {
-					g2.drawArc(Math.min(mListener.startX, mouseX),
-						Math.min(mListener.startY, mouseY),
-						width, height, 0, 180);
+					g.drawRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
+					//g2.drawArc(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height, 0, 180);
+				} else if (mListener.state.equals(State.drawArc1)) {
+					g.drawRect(mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight);
+					g.drawLine(mListener.startX+  mListener.arcWidth/2,
+							   mListener.startY+ mListener.arcHeight/2,
+							   mouseX, mouseY);
+					//g2.drawArc(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height, 0, 180);
+				} else if (mListener.state.equals(State.drawArc2)) {
+					//g.drawRect(mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight);
+					g2.drawArc(mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight, mListener.arcStartAngle, mListener.arcAngle);
+					//g2.drawArc(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height, 0, 180);
 				} else if (mListener.state.equals(State.drawFilledArc)) {
 					g2.fillArc(Math.min(mListener.startX, mouseX),
 						Math.min(mListener.startY, mouseY),
