@@ -141,52 +141,39 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addOutputs(String[] output, ArrayList varList) throws UnknownVariableException {
-		for (int i = 0; i < output.length; i++) {
-                    //we must have at least one output, others will be considered as exceptions
-                    if( i == 0 ) {
-                        ClassField var = getVar( output[ i ], varList );
+        void addOutputs( String[] output, ArrayList varList ) throws UnknownVariableException {
+            for ( int i = 0; i < output.length; i++ ) {
+                //we must have at least one output, others will be considered as exceptions
+                String s = output[ i ];
+                Pattern pattern = Pattern.compile( ".*\\([ .A-Za-z0-9]+\\).*" );
+                Matcher matcher = pattern.matcher( s );
+                if ( matcher.find() ) {
+                    ClassField cf = new ClassField();
+                    cf.name = "exception";
+                    cf.type = s.replaceAll( "[ ()]+", "" );
+                    exceptions.add( cf );
 
-                        if ( var != null ) {
-                            outputs.add( var );
-                        } else if ( output[ i ].indexOf( "." ) >= 1 ) {
-                            ClassField cf = new ClassField();
+                } else {
 
-                            cf.name = output[ i ];
-                            outputs.add( cf );
-                        } else if ( output[ i ].startsWith( "*." ) ) {
-                            ClassField cf = new ClassField();
-                            cf.name = output[ i ];
-                            outputs.add( cf );
-                        } else {
-                            throw new UnknownVariableException( output[ i ] );
-                        }
+                    ClassField var = getVar( output[ i ], varList );
+
+                    if ( var != null ) {
+                        outputs.add( var );
+                    } else if ( output[ i ].indexOf( "." ) >= 1 ) {
+                        ClassField cf = new ClassField();
+
+                        cf.name = output[ i ];
+                        outputs.add( cf );
+                    } else if ( output[ i ].startsWith( "*." ) ) {
+                        ClassField cf = new ClassField();
+                        cf.name = output[ i ];
+                        outputs.add( cf );
+                    } else {
+                        throw new UnknownVariableException( output[ i ] );
                     }
-                    else {
-                        //Exception can be declared explicitly in rel - (java.lang.Exception)
-                        //or java.lang.Exception exc;
-                        String s = output[ i ];
-                        Pattern pattern = Pattern.compile( ".*\\([ .A-Za-z0-9]+\\).*" );
-                        Matcher matcher = pattern.matcher( s );
-                        if ( matcher.find() ) {
-                            ClassField cf = new ClassField();
-                            cf.name = "exception";
-                            cf.type = s.replaceAll("[ ()]+", "");
-                            exceptions.add(cf);
-
-                        } else {
-                            ClassField var = getVar( s, varList );
-
-                            if ( var != null ) {
-                                exceptions.add(var);
-                            } else {
-                                throw new UnknownVariableException( output[ i ] );
-                            }
-                        }
-
-                    }
-		}
-	} // addOutputs
+                }
+            }
+        } // addOutputs
 
 	/**
 	 * <UNCOMMENTED>
