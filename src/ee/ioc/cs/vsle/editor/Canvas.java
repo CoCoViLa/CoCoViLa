@@ -13,12 +13,12 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
-import java.util.Date;
 import java.io.*;
 
 /**
  */
 public class Canvas extends JPanel implements ActionListener {
+	public static int joonistamisi = 0;
 	int mouseX; // Mouse X coordinate.
 	int mouseY; // Mouse Y coordinate.
 	int objCount;
@@ -38,6 +38,8 @@ public class Canvas extends JPanel implements ActionListener {
 	JPanel infoPanel;
 	JLabel posInfo;
 	DrawingArea drawingArea;
+
+	String workingDir;
 
 
 	public Canvas(File f) {
@@ -64,7 +66,7 @@ public class Canvas extends JPanel implements ActionListener {
 		mListener = new MouseOps(this);
 		keyListener = new KeyOps(this);
 		drawingArea = new DrawingArea();
-		drawingArea.setBackground(Color.lightGray);
+		drawingArea.setBackground(Color.white);
 		setGridVisible(getGridVisibility());
 		drawingArea.setFocusable(true);
 		infoPanel = new JPanel(new GridLayout(1, 2));
@@ -486,7 +488,7 @@ public class Canvas extends JPanel implements ActionListener {
 
 	class DrawingArea extends JPanel {
 		protected void drawGrid(Graphics g) {
-			g.setColor(Color.gray);
+			g.setColor(Color.lightGray);
 			for (int i = 0; i < getWidth(); i += RuntimeProperties.gridStep) {
 				// draw vertical lines
 				g.drawLine(i, 0, i, getHeight());
@@ -502,6 +504,8 @@ public class Canvas extends JPanel implements ActionListener {
 			Connection rel;
 			if (showGrid) drawGrid(g2);
 			GObj obj;
+
+
 			if (RuntimeProperties.isAntialiasingOn) {
 				g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
 					java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
@@ -510,11 +514,12 @@ public class Canvas extends JPanel implements ActionListener {
 
 			long time;
 			time = System.currentTimeMillis();
+			joonistamisi = 0;
 			for (int i = 0; i < objects.size(); i++) {
 				obj = (GObj) objects.get(i);
 				obj.drawClassGraphics(g2);
 			}
-			System.out.println("objeckts: " + (System.currentTimeMillis() - time));
+			System.out.println("drawing time (ms): " + (System.currentTimeMillis() - time)+" joonistamisi "+ joonistamisi);
 
 			g2.setColor(Color.blue);
 			for (int i = 0; i < connections.size(); i++) {
@@ -532,7 +537,6 @@ public class Canvas extends JPanel implements ActionListener {
 						firstPort.getWidth(), firstPort.getHeight(), mouseX, mouseY);
 
 				double angle = VMath.calcAngle(p.x, p.y, mouseX, mouseY);
-				currentObj = (RelObj) currentObj;
 				((RelObj) currentObj).angle = angle;
 				currentObj.Xsize = (float) Math.sqrt(Math.pow((mouseX - p.x) / (double) currentObj.width, 2.0) + Math.pow((mouseY - p.y) / (double) currentObj.width, 2.0));
 				currentObj.y = p.y;

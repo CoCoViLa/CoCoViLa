@@ -12,14 +12,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Administrator
- * Date: 6.1.2004
- * Time: 23:18:00
- * To change this template use Options | File Templates.
+ * Mouse operations on Canvas.
  */
 class MouseOps
 	extends MouseInputAdapter
@@ -29,9 +24,8 @@ class MouseOps
 	Canvas canvas;
 	public Point draggedBreakPoint;
 	public String state = "";
+	int cornerClicked;
 
-	// variable for object resize
-	float initialXSize, initialYSize;
 	int startX, startY;
 
 	public MouseOps(Canvas e) {
@@ -65,13 +59,11 @@ class MouseOps
 	 */
 	public void mouseExited(MouseEvent e) {
 		//	Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
-
 		//	editor.setCursor(cursor);
 	}
 
 	private void openObjectPopupMenu(int x, int y) {
 		ObjectPopupMenu popupMenu = new ObjectPopupMenu(canvas);
-
 		popupMenu.show(canvas, x, y);
 
 		if (canvas.objects.getSelected().size() < 2) {
@@ -121,11 +113,10 @@ class MouseOps
 		y = e.getY();
 
 		if (SwingUtilities.isRightMouseButton(e)) {
+            //if right mouse button clicked, check whether
 			Connection relation = canvas.connections.nearPoint(x, y);
-
-			if (relation != null) {
+ 			if (relation != null) {
 				ConnectionPopupMenu popupMenu = new ConnectionPopupMenu(relation, canvas.connections, canvas);
-
 				popupMenu.show(canvas, x, y);
 			} else {
 				canvas.currentObj = canvas.objects.checkInside(x, y);
@@ -288,8 +279,6 @@ class MouseOps
 			} else {
 
 				GObj obj = canvas.objects.checkInside(canvas.mouseX, canvas.mouseY);
-
-
 				if (obj != null) {
 					if (e.isShiftDown()) {
 						obj.setSelected(true);
@@ -299,21 +288,20 @@ class MouseOps
 							obj.setSelected(true);
 						}
 					}
-					if (obj.controlRectContains(canvas.mouseX, canvas.mouseY) != 0) {
-						initialXSize = obj.getXsize();
-						initialYSize = obj.getYsize();
-						state = State.resize;
-					} else {
-						state = State.drag;
+					state = State.drag;
+					canvas.repaint();
 
-						canvas.repaint();
-
-
-					}
 				} else {
-					state = State.dragBox;
-					startX = canvas.mouseX;
-					startY = canvas.mouseY;
+					cornerClicked = canvas.objects.controlRectContains(canvas.mouseX, canvas.mouseY);
+					if (cornerClicked != 0) {
+						//if (obj.isSelected())
+							state = State.resize;
+
+					} else {
+						state = State.dragBox;
+						startX = canvas.mouseX;
+						startY = canvas.mouseY;
+					}
 				}
 				// drawConnections();
 				selectedObjs = canvas.objects.getSelected();
@@ -328,7 +316,6 @@ class MouseOps
 		int y = e.getY();
 		GObj obj;
 		Connection relation;
-		//this should be OPTIMZED!!!
 
 		if (state.equals(State.dragBreakPoint)) {
 			draggedBreakPoint.x = x;
@@ -336,7 +323,7 @@ class MouseOps
 			canvas.repaint();
 		}
 		if (state.equals(State.drag)) {
-			int x1, x2, y1, y2;
+			int x1, x2, y1, y2, newX, newY;
 			for (int i = 0; i < selectedObjs.size(); i++) {
 				obj = (GObj) selectedObjs.get(i);
 				if (!(obj instanceof RelObj)) {
@@ -345,14 +332,17 @@ class MouseOps
 					x2 = Math.round(canvas.mouseX / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
 					y1 = Math.round(y / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
 					y2 = Math.round(canvas.mouseY / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
-					obj.setPosition(obj.getX() + (x1 - x2), obj.getY() + (y1 - y2));
+					newX = Math.round((obj.getX() + (x1 - x2)) / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+					newY = Math.round((obj.getY() + (y1 - y2)) / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
+
+
+					obj.setPosition(newX, newY);
 
 					//use this when not snap to grid
 					//obj.setPosition(obj.getX() + (x - canvas.mouseX), obj.getY() + (y - canvas.mouseY));
 				}
 
 				// check if a strict port exists on the object
-
 				if (obj.isStrict()) {
 					Port port, port2;
 					GObj obj2;
@@ -415,16 +405,9 @@ class MouseOps
 		if (state.equals(State.resize)) {
 			for (int i = 0; i < selectedObjs.size(); i++) {
 				obj = (GObj) selectedObjs.get(i);
-				float newXSize = (obj.getWidth() * initialXSize + (x - canvas.mouseX)) / obj.getWidth();
-				float newYSize = (obj.getHeight() * initialYSize + (y - canvas.mouseY)) / obj.getHeight();
-
-				if (newXSize > 0) {
-					obj.setXsize(newXSize);
-				}
-				if (newYSize > 0) {
-					obj.setYsize(newYSize);
-				}
-
+				obj.resize(x - canvas.mouseX, y - canvas.mouseY, cornerClicked);
+				canvas.mouseX = x;
+				canvas.mouseY = y;
 				for (int j = 0; j < canvas.connections.size(); j++) {
 					relation = (Connection) canvas.connections.get(j);
 					if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
@@ -449,7 +432,6 @@ class MouseOps
 		if (state.equals(State.addRelation) || state.startsWith("??")) {
 			if (canvas.currentPort != null) {
 				canvas.currentPort.setSelected(false);
-				// currentPort=null;
 				canvas.repaint();
 			}
 
@@ -480,11 +462,11 @@ class MouseOps
 			canvas.currentObj.x = Math.round(x / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
 			canvas.currentObj.y = Math.round(y / RuntimeProperties.gridStep) * RuntimeProperties.gridStep;
 
-			//Use these when not snap to grid:
-			//canvas.currentObj.y = y;
-			//canvas.currentObj.x = x;
+//Use these when not snap to grid:
+//canvas.currentObj.y = y;
+//canvas.currentObj.x = x;
 
-			// Kui objektil on moni strict port, chekime kas teda kuskile panna on;
+// Kui objektil on moni strict port, chekime kas teda kuskile panna on;
 			if (canvas.currentObj.isStrict()) {
 				Port port, port2;
 				GObj obj;

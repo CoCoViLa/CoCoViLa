@@ -20,7 +20,7 @@ public class RelObj extends GObj {
 	}
 
 	public boolean contains(int pointX, int pointY) {
-		float f = VMath.calcDistance(x, y, endX, endY, pointX, pointY);
+		float f = VMath.pointDistanceFromLine(x, y, endX, endY, pointX, pointY);
 		if (f < height + 4) {
 			return true;
 		}

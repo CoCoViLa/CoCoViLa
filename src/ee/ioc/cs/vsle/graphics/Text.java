@@ -342,6 +342,7 @@ public class Text extends Shape implements Serializable {
 
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
 
+		/*
 		java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
 
 		Rectangle2D r = this.getFont().getStringBounds(stringValue, 0, stringValue.length(), frc);
@@ -363,7 +364,7 @@ public class Text extends Shape implements Serializable {
 
 		g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
 				java.awt.RenderingHints.VALUE_ANTIALIAS_OFF);
-
+        */
 
 		int a = xModifier + (int) (Xsize * x);
 		int b = yModifier + (int) (Ysize * y);
@@ -378,12 +379,12 @@ public class Text extends Shape implements Serializable {
 
 	public void drawSpecial(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2, String name, String value, double angle) {
 
-		java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
+		/*java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
 
 		Rectangle2D r = this.getFont().getStringBounds(stringValue, 0, stringValue.length(), frc);
 
 		this.h = (int) r.getHeight();
-		this.w = (int) r.getWidth();
+		this.w = (int) r.getWidth();*/
 
 		g2.setFont(font.deriveFont((float) Math.sqrt(Xsize * Ysize) * font.getSize()));
 
@@ -395,13 +396,13 @@ public class Text extends Shape implements Serializable {
 	   if(color!=null) green = (float) color.getGreen() / 256;
 		float blue = 0;
 	   if(color!=null) blue = (float) color.getBlue() / 256;
-
+        db.p(alpha);
 		g2.setColor(new Color(red, green, blue, alpha));
 
-		/*if (RuntimeProperties.isAntialiasingOn) {
-			g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
-				java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-		}*/
+
+		/*g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
+				java.awt.RenderingHints.VALUE_ANTIALIAS_OFF);*/
+
 		int a = xModifier + (int) (Xsize * x * Math.cos(angle));
 		int b = yModifier + (int) (Ysize * y + (Xsize * x * Math.sin(angle)));
 

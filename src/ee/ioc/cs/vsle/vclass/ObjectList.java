@@ -160,4 +160,18 @@ public class ObjectList extends ArrayList
         }
 		removeAll(toBeRemoved);
 	}
+
+	public int controlRectContains(int x, int y) {
+		GObj obj;
+		int corner;
+		for (int i = 0; i < this.size(); i++) {
+			obj = (GObj) this.get(i);
+			corner = obj.controlRectContains(x, y);
+			if (corner != 0) {
+				return corner;
+			}
+		}
+		return 0;
+
+	}
 }

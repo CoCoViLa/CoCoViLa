@@ -7,6 +7,7 @@ import ee.ioc.cs.vsle.util.*;
 import java.awt.*;
 
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.editor.Canvas;
 
 public class Line extends Shape implements Serializable {
 
@@ -280,7 +281,7 @@ public class Line extends Shape implements Serializable {
 				distance);
 		}
 		return (float) distance;
-	} // calcDistance
+	} // pointDistanceFromLine
 
 	void setLine(int x1, int y1, int x2, int y2) {
 		startX = x1;
@@ -382,7 +383,7 @@ public class Line extends Shape implements Serializable {
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
 		g2.setColor(color);
 	  	g2.setStroke(stroke);
-
+        Canvas.joonistamisi++;
 		int a = 0, b = 0, c = 0, d = 0;
 		if (fixedX1 == 0)
 			a = xModifier + (int) (Xsize * startX);

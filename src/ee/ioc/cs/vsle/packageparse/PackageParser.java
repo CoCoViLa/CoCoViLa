@@ -5,7 +5,7 @@ import ee.ioc.cs.vsle.graphics.*;
 
 import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.synthesize.SpecParser;
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
+
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -225,9 +225,6 @@ public class PackageParser {
 
 			if (element.equals("rect")) {
 				String x = attrs.getValue("x");
-				String[] split = x.split("#");
-
-
 				String y = attrs.getValue("y");
 				String width = attrs.getValue("width");
 				String height = attrs.getValue("height");
@@ -240,7 +237,7 @@ public class PackageParser {
 				if (stroke != null) {
 					str = Double.parseDouble(stroke);
 				}
-				double tr = 1.0;
+				double tr = 0.0;
 				if (transp != null) {
 					tr = Double.parseDouble(transp);
 				}
@@ -483,7 +480,6 @@ public class PackageParser {
 
 				for (int i = 0; i< polyXs.size(); i++) {
 					String s = (String)polyXs.get(i);
-					int fixedX = 0, fixedY = 0;
 					//parse the coordinates and check if they are fixed or reverse fixed
 					if (s.endsWith("rf")) {
 						xs[i] = newGraphics.boundWidth;

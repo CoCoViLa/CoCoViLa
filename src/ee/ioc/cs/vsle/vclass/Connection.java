@@ -50,7 +50,7 @@ public class Connection implements Serializable {
 		for (int i = 0; i < breakPoints.size() - 1; i++) {
 			p1 = (Point) breakPoints.get(i);
 			p2 = (Point) breakPoints.get(i + 1);
-			distance = VMath.calcDistance(p1.x, p1.y, p2.x, p2.y, pointX, pointY);
+			distance = VMath.pointDistanceFromLine(p1.x, p1.y, p2.x, p2.y, pointX, pointY);
 			if (distance < minDistance) {
 				minDistance = distance;
 			}

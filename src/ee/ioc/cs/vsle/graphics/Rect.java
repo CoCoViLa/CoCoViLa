@@ -2,6 +2,8 @@ package ee.ioc.cs.vsle.graphics;
 
 import java.io.*;
 import java.util.*;
+import ee.ioc.cs.vsle.editor.Canvas;
+import ee.ioc.cs.vsle.util.db;
 
 import java.awt.*;
 
@@ -398,7 +400,7 @@ public class Rect extends Shape implements Serializable {
 	 * @param g2 Graphics - class graphics.
 	 */
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
-
+        Canvas.joonistamisi++;
 		if (getLineType() > 0) {
 			g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
 				BasicStroke.JOIN_ROUND, 50,
@@ -416,7 +418,6 @@ public class Rect extends Shape implements Serializable {
 		if (color != null) green = (float) color.getGreen() / 256;
 		float blue = 0;
 		if (color != null) blue = (float) color.getBlue() / 256;
-
 
 		g2.setColor(new Color(red, green, blue, alpha));
 

@@ -11,6 +11,7 @@ public class GObj implements Serializable, Cloneable {
 
 	public float Xsize = 1; // percentage for resizing, 1 means real size
 	public float Ysize = 1;
+	final int CORNER_SIZE = 6;
 
 	/* difWithMasterX, difWithMasterY variables are for resizeing an object group, we need to know
 	 the intitial difference to make it work correctly*/
@@ -66,6 +67,49 @@ public class GObj implements Serializable, Cloneable {
 		return false;
 	}
 
+	public void resize (int changeX, int changeY, int corner) {
+		if (corner == 1) {
+			if (Xsize > 0.1 || changeX < 0) {
+				setX(x + changeX);
+				Xsize = (width * Xsize - changeX) /(float)width;
+			}
+			if (Ysize > 0.1 || changeY < 0) {
+			    setY(y + changeY);
+				Ysize = (height * Ysize - changeY) /(float)height;
+			}
+		}
+		if (corner == 2) {
+			if (Xsize > 0.1  || changeX > 0) {
+				Xsize = (width * Xsize + changeX) /(float)width;
+			}
+			if (Ysize > 0.1  || changeY < 0) {
+			    setY(y + changeY);
+				Ysize = (height * Ysize - changeY) /(float)height;
+			}
+		}
+
+		if (corner == 3) {
+			if (Xsize > 0.1 || changeX < 0) {
+				setX(x + changeX);
+				Xsize = (width * Xsize - changeX) /(float)width;
+			}
+			if (Ysize > 0.1 || changeY > 0) {
+				Ysize = (height * Ysize + changeY) /(float)height;
+			}
+		}
+
+		if (corner == 4) {
+			if (Xsize > 0.1 || changeX > 0) {
+				Xsize = (width * Xsize + changeX) /(float)width;
+			}
+			if (Ysize > 0.1  || changeY > 0) {
+				Ysize = (height * Ysize + changeY) /(float)height;
+			}
+		}
+
+
+	}
+
 	public Port portContains(int pointX, int pointY) {
 		Port port;
 
@@ -79,30 +123,30 @@ public class GObj implements Serializable, Cloneable {
 	}
 
 	public int controlRectContains(int pointX, int pointY) {
-		if ((pointX >= getX() + portOffsetX1) && (pointY >= getY() + portOffsetY1)) {
-			if ((pointX <= getX() + portOffsetX1 + 4)
-				&& (pointY <= getY() + portOffsetY1 + 4)) {
+		if ((pointX >= getX() + portOffsetX1 - CORNER_SIZE - 1) && (pointY >= getY() + portOffsetY1 - CORNER_SIZE - 1)) {
+			if ((pointX <= getX() + portOffsetX1 - 1)
+				&& (pointY <= getY() + portOffsetY1 -1)) {
 				return 1;
 			}
 		}
-		if ((pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4)
-			&& (pointY >= getY() + portOffsetY1)) {
-			if ((pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)))
-				&& (pointY <= getY() + portOffsetY1 + 4)) {
+		if ((pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) + 1)
+			&& (pointY >= getY() + portOffsetY1 - CORNER_SIZE - 1)) {
+			if ((pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2) + CORNER_SIZE + 1))
+				&& (pointY <= getY() + portOffsetY1 +  CORNER_SIZE)) {
 				return 2;
 			}
 		}
-		if ((pointX >= getX() + portOffsetX1)
-			&& (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) - 4)) {
-			if ((pointX <= getX() + portOffsetX1 + 4)
-				&& (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)))) {
+		if ((pointX >= getX() + portOffsetX1 - CORNER_SIZE - 1)
+			&& (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) + 1)) {
+			if ((pointX <= getX() + portOffsetX1 - 1)
+				&& (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2) + CORNER_SIZE + 1))) {
 				return 3;
 			}
 		}
-		if ((pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4)
-			&& (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) - 4)) {
-			if ((pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)))
-				&& (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)))) {
+		if ((pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) +1)
+			&& (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) + 1)) {
+			if ((pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2) + CORNER_SIZE + 1))
+				&& (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2) + CORNER_SIZE + 1))) {
 				return 4;
 			}
 		}
@@ -236,6 +280,7 @@ public class GObj implements Serializable, Cloneable {
 
 	public void drawClassGraphics(Graphics2D g2) {
 		draw(getX(), getY(), getXsize(), getYsize(), g2);
+
 		int xModifier = getX();
 		int yModifier = getY();
         g2.setColor(Color.black);
@@ -292,13 +337,13 @@ public class GObj implements Serializable, Cloneable {
 	}
 
 	private void drawSelectionMarks(Graphics g) {
-		g.drawRect(getX() + portOffsetX1, getY() + portOffsetY1, 4, 4);
-		g.drawRect(getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) - 4,
-			getY() + portOffsetY1, 4, 4);
-		g.drawRect(getX() + portOffsetX1,
-			getY() + (int) (getYsize() * (portOffsetY2 + getHeight())) - 4, 4, 4);
-		g.drawRect(getX() + (int) (getXsize() * (portOffsetX2 + getWidth())) - 4,
-			getY() + (int) (getYsize() * (+portOffsetY2 + getHeight())) - 4, 4, 4);
+		g.fillRect(getX() + portOffsetX1 - CORNER_SIZE -1, getY() + portOffsetY1 - CORNER_SIZE - 1,  CORNER_SIZE,  CORNER_SIZE);
+		g.fillRect(getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) + 1,
+			getY() + portOffsetY1  - CORNER_SIZE -1,  CORNER_SIZE,  CORNER_SIZE);
+		g.fillRect(getX() + portOffsetX1 - CORNER_SIZE -1,
+			getY() + (int) (getYsize() * (portOffsetY2 + getHeight())) + 1, CORNER_SIZE, CORNER_SIZE);
+		g.fillRect(getX() + (int) (getXsize() * (portOffsetX2 + getWidth())) + 1,
+			getY() + (int) (getYsize() * (+portOffsetY2 + getHeight())) + 1, CORNER_SIZE, CORNER_SIZE);
 	}
 
 	public Object clone() {
