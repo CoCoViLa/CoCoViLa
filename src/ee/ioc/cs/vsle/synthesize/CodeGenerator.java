@@ -13,6 +13,8 @@ public class CodeGenerator {
 
     public String generate(ArrayList algRelList) {
         boolean subRelisNeeded = false;
+        int[] subcountArr = new int[20];
+        int subInstcount = 0;
         String algorithm = "";
         StringBuffer alg = new StringBuffer();
         offset += tab;
@@ -27,7 +29,9 @@ public class CodeGenerator {
             }
             if (isString(temp) && ( (String) temp).equals("<subtask>")) {
                 subCount++;
-                alg.append(addOffset(0,0) + "class Subtask_" + subCount +
+                subInstcount++;
+                subcountArr[subCount] = subInstcount;
+                alg.append(addOffset(0,0) + "class Subtask_" + subcountArr[subCount] +
                            " implements Subtask {\n");
                 alg.append(addOffset(1,1) +
                            "public Object[] run(Object[] in) throws Exception {\n");
@@ -65,8 +69,8 @@ public class CodeGenerator {
                                addOffset(0,0) + "return out;\n" +
                                addOffset(2,1) + "}\n" +
                                addOffset(2,1) + "}\n" +
-                               addOffset(0,0) + "Subtask_" + subCount + " subtask_" + subCount +
-                               " = new Subtask_" + subCount + "();\n"
+                               addOffset(0,0) + "Subtask_" + subcountArr[subCount] + " subtask_" + subcountArr[subCount] +
+                               " = new Subtask_" + subcountArr[subCount] + "();\n"
                                );
                 }
                 continue;
@@ -82,7 +86,7 @@ public class CodeGenerator {
                             pars = ", ";
                         alg.append(addOffset(0,0) + (Var) method_subtask.outputs.get(0) +
                                    " = " + method_subtask.getObject(method_subtask.object) + method_subtask.method +
-                                   "(subtask_" + subCount + pars + method_subtask.getParameters(false) + ");\n"
+                                   "(subtask_" + subcountArr[subCount] + pars + method_subtask.getParameters(false) + ");\n"
                                    );
                         subCount--;
                         i++;
