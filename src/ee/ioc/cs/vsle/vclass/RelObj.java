@@ -15,7 +15,7 @@ public class RelObj extends GObj{
         super (x, y, width, height, name);
     }
     public boolean contains(int x, int y) {
-        float f = VMath.calcDistance(startPort.getRealX(),startPort.getRealY(), endPort.getRealX(), endPort.getRealY(), x, y);
+        float f = VMath.calcDistance(startPort.getAbsoluteX(),startPort.getAbsoluteY(), endPort.getAbsoluteX(), endPort.getAbsoluteY(), x, y);
         if (f < height+4) {
             return true;
         }

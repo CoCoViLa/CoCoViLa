@@ -23,7 +23,7 @@ class MouseOps
 	extends MouseInputAdapter
 	implements ActionListener {
 
-	Editor editor;
+	Canvas canvas;
 	public Point draggedBreakPoint;
 	public String state = "";
 
@@ -31,19 +31,19 @@ class MouseOps
 	float initialXSize, initialYSize;
 	int startX, startY;
 
-	public MouseOps(Editor e) {
-		this.editor = e;
+	public MouseOps(Canvas e) {
+		this.canvas = e;
 	}
 
 	public void setState(String state) {
 		this.state = state;
 		if (state.equals("selection"))
-			editor.currentObj = null;
+			canvas.currentObj = null;
 	}
 
 	void addObj() {
-		editor.objects.add(editor.currentObj);
-		editor.currentObj = null;
+		canvas.objects.add(canvas.currentObj);
+		canvas.currentObj = null;
 	}
 
 	/**
@@ -67,12 +67,12 @@ class MouseOps
 	}
 
 	private void openObjectPopupMenu(int x, int y) {
-		ObjectPopupMenu popupMenu = new ObjectPopupMenu(editor.mListener);
+		ObjectPopupMenu popupMenu = new ObjectPopupMenu(canvas);
 
-		popupMenu.show(editor.getContentPane(), x, y);
+		popupMenu.show(canvas, x, y);
 
-		if (editor.objects.getSelected().size() < 2) {
-			if (editor.currentObj.isGroup()) {
+		if (canvas.objects.getSelected().size() < 2) {
+			if (canvas.currentObj.isGroup()) {
 				popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, true);
 			} else {
 				popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
@@ -81,7 +81,7 @@ class MouseOps
 			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, false);
 
 			// Enable or disable order changing menu items.
-			if(editor.objects.indexOf(editor.currentObj)==editor.objects.size()-1) {
+			if(canvas.objects.indexOf(canvas.currentObj)==canvas.objects.size()-1) {
 			  popupMenu.enableDisableMenuItem(popupMenu.itemForward,false);
 			  popupMenu.enableDisableMenuItem(popupMenu.itemToFront,false);
 			} else {
@@ -89,7 +89,7 @@ class MouseOps
 			  popupMenu.enableDisableMenuItem(popupMenu.itemToFront,true);
 			}
 
-			if(editor.objects.indexOf(editor.currentObj)==0) {
+			if(canvas.objects.indexOf(canvas.currentObj)==0) {
 			  popupMenu.enableDisableMenuItem(popupMenu.itemBackward,false);
 			  popupMenu.enableDisableMenuItem(popupMenu.itemToBack,false);
 			} else {
@@ -118,15 +118,15 @@ class MouseOps
 		y = e.getY();
 
 		if (SwingUtilities.isRightMouseButton(e)) {
-			Connection relation = editor.connections.nearPoint(x, y);
+			Connection relation = canvas.connections.nearPoint(x, y);
 
 			if (relation != null) {
-				ConnectionPopupMenu popupMenu = new ConnectionPopupMenu(relation, editor.connections, editor.getContentPane());
+				ConnectionPopupMenu popupMenu = new ConnectionPopupMenu(relation, canvas.connections, canvas);
 
-				popupMenu.show(editor.getContentPane(), x, y);
+				popupMenu.show(canvas, x, y);
 			} else {
-				editor.currentObj = editor.objects.checkInside(x, y);
-				if (editor.currentObj != null) {
+				canvas.currentObj = canvas.objects.checkInside(x, y);
+				if (canvas.currentObj != null) {
 				/*	Port port = editor.currentObj.portContains(x, y);
 
 					if (port != null) {
@@ -141,66 +141,66 @@ class MouseOps
 			}
 
 			if (state.equals(State.magnifier)) {
-				editor.drawAreaSize.width = (int) (editor.drawAreaSize.width * 0.8);
-				editor.drawAreaSize.height = (int) (editor.drawAreaSize.height * 0.8);
-				editor.drawingArea.setPreferredSize(editor.drawAreaSize);
-				editor.objects.updateSize(0.8f, 0.8f);
-				editor.drawingArea.revalidate();
-				editor.connections.calcAllBreakPoints();
+				canvas.drawAreaSize.width = (int) (canvas.drawAreaSize.width * 0.8);
+				canvas.drawAreaSize.height = (int) (canvas.drawAreaSize.height * 0.8);
+				canvas.drawingArea.setPreferredSize(canvas.drawAreaSize);
+				canvas.objects.updateSize(0.8f, 0.8f);
+				canvas.drawingArea.revalidate();
+				canvas.connections.calcAllBreakPoints();
 			}
 		} // **********End of RIGHT mouse button controls**********************************************
 		else {
 
 			// **********Magnifier	Code************************
 			if (state.equals(State.magnifier)) {
-				editor.drawAreaSize.width = (int) (editor.drawAreaSize.width * 1.25);
-				editor.drawAreaSize.height = (int) (editor.drawAreaSize.height * 1.25);
-				editor.drawingArea.setPreferredSize(editor.drawAreaSize);
-				editor.drawingArea.revalidate();
-				editor.objects.updateSize(1.25f, 1.25f);
-				editor.connections.calcAllBreakPoints();
+				canvas.drawAreaSize.width = (int) (canvas.drawAreaSize.width * 1.25);
+				canvas.drawAreaSize.height = (int) (canvas.drawAreaSize.height * 1.25);
+				canvas.drawingArea.setPreferredSize(canvas.drawAreaSize);
+				canvas.drawingArea.revalidate();
+				canvas.objects.updateSize(1.25f, 1.25f);
+				canvas.connections.calcAllBreakPoints();
 
 			}
 
 			// **********Relation adding code**************************
 			if (state.equals(State.addRelation)) {
-				GObj obj = editor.objects.checkInside(x, y);
+				GObj obj = canvas.objects.checkInside(x, y);
 
 				if (obj != null) {
 					Port port = obj.portContains(x, y);
 
 					if (port != null) {
-						if (editor.firstPort == null) {
-							editor.firstPort = port;
-							editor.firstPort.setConnected(true);
-							editor.currentCon = new Connection();
-							editor.currentCon.addBreakPoint(new Point(editor.firstPort.getX() + editor.firstPort.obj.getX(), editor.firstPort.getY() + editor.firstPort.obj.getY()));
-							editor.mouseX = x;
-							editor.mouseY = y;
-						}else if  (canBeConnected(editor.firstPort, port)) {
+						if (canvas.firstPort == null) {
+							canvas.firstPort = port;
+							canvas.firstPort.setConnected(true);
+							canvas.currentCon = new Connection();
+							canvas.currentCon.addBreakPoint(new Point(canvas.firstPort.getX() + canvas.firstPort.obj.getX(), canvas.firstPort.getY() + canvas.firstPort.obj.getY()));
+							canvas.mouseX = x;
+							canvas.mouseY = y;
+						}else if  (canBeConnected(canvas.firstPort, port)) {
 
-							if (port == editor.firstPort) {
-								editor.firstPort.setConnected(false);
-								editor.firstPort = null;
-								editor.currentCon = null;
+							if (port == canvas.firstPort) {
+								canvas.firstPort.setConnected(false);
+								canvas.firstPort = null;
+								canvas.currentCon = null;
 							} else {
 								port.setConnected(true);
-								editor.currentCon.beginPort = editor.firstPort;
-								editor.currentCon.endPort = port;
-								editor.firstPort.addConnection(editor.currentCon);
-								port.addConnection(editor.currentCon);
-								editor.currentCon.addBreakPoint(new Point(port.getX() + port.obj.getX(), port.getY() + port.obj.getY()));
-								editor.connections.add(editor.currentCon);
-								editor.firstPort = null;
+								canvas.currentCon.beginPort = canvas.firstPort;
+								canvas.currentCon.endPort = port;
+								canvas.firstPort.addConnection(canvas.currentCon);
+								port.addConnection(canvas.currentCon);
+								canvas.currentCon.addBreakPoint(new Point(port.getX() + port.obj.getX(), port.getY() + port.obj.getY()));
+								canvas.connections.add(canvas.currentCon);
+								canvas.firstPort = null;
 							}
 						}
 					}
 				} else {
-					if (editor.firstPort != null) {
+					if (canvas.firstPort != null) {
 						if (e.getClickCount() == 2) {
-							editor.stopRelationAdding();
+							canvas.stopRelationAdding();
 						} else
-							editor.currentCon.addBreakPoint(new Point(x, y));
+							canvas.currentCon.addBreakPoint(new Point(x, y));
 						// firstPort.setConnected(false);
 						// firstPort=null;
 					}
@@ -208,21 +208,21 @@ class MouseOps
 
 			} // **********Selecting objects code*********************
 			else if (state.equals(State.selection)) {
-				Connection con = editor.connections.nearPoint(x, y);
+				Connection con = canvas.connections.nearPoint(x, y);
 
 				if (con != null) {
 					con.selected = true;
 				} else {
-					editor.connections.clearSelected();
+					canvas.connections.clearSelected();
 				}
-				GObj obj = editor.objects.checkInside(x, y);
+				GObj obj = canvas.objects.checkInside(x, y);
 
 				if (obj == null) {
-					editor.objects.clearSelected();
+					canvas.objects.clearSelected();
 				} else {
 					if (e.isShiftDown()) {}
 					else {
-						editor.objects.clearSelected();
+						canvas.objects.clearSelected();
 						obj.setSelected(true);
 					}
 				}
@@ -230,49 +230,49 @@ class MouseOps
 			} else {
 				if(state.startsWith("??")) { // if class is of type relation
 					addingSpecialRelation(y,x);
-				} else 	if (editor.currentObj != null) {
+				} else 	if (canvas.currentObj != null) {
 					addObj();
 					state = State.selection;
 					Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
 
-					editor.setCursor(cursor);
+					canvas.setCursor(cursor);
 				}
 			}
 		}
 
-		editor.repaint();
+		canvas.repaint();
 	}
 
 	private void addingSpecialRelation(int y, int x) {
-		GObj obj = editor.objects.checkInside(x, y);
+		GObj obj = canvas.objects.checkInside(x, y);
 		if (obj != null) {
 			Port port = obj.portContains(x, y);
 			if (port != null) {
-				if (editor.firstPort == null) {
-					editor.firstPort = port;
-					editor.firstPort.setConnected(true);
-					editor.mouseX = x;
-					editor.mouseY = y;
+				if (canvas.firstPort == null) {
+					canvas.firstPort = port;
+					canvas.firstPort.setConnected(true);
+					canvas.mouseX = x;
+					canvas.mouseY = y;
 				} else {
-                    Port port1 = (Port)editor.currentObj.ports.get(0);
-                    Port port2 = (Port)editor.currentObj.ports.get(1);
-					Connection con = new Connection(editor.firstPort, port1);
-					editor.firstPort.addConnection(con);
+                    Port port1 = (Port)canvas.currentObj.ports.get(0);
+                    Port port2 = (Port)canvas.currentObj.ports.get(1);
+					Connection con = new Connection(canvas.firstPort, port1);
+					canvas.firstPort.addConnection(con);
 					port1.addConnection(con);
-					editor.connections.add(con);
+					canvas.connections.add(con);
 					con = new Connection(port2, port);
 					port2.addConnection(con);
 					port.addConnection(con);
-					editor.connections.add(con);
+					canvas.connections.add(con);
 					port.setConnected(true);
-                    RelObj thisObj = (RelObj)editor.currentObj;
-                    thisObj.startPort = editor.firstPort;
+                    RelObj thisObj = (RelObj)canvas.currentObj;
+                    thisObj.startPort = canvas.firstPort;
                     thisObj.endPort = port;
-                    editor.firstPort = null;
+                    canvas.firstPort = null;
 					addObj();
                     startAddingObject();
                     //setState(State.selection);
-					editor.objects.updateRelObjs();
+					canvas.objects.updateRelObjs();
 					//editor.currentObj = null;
 
 				}
@@ -282,40 +282,40 @@ class MouseOps
 
 	public void mousePressed(MouseEvent e) {
 		if (state.equals(State.selection)) {
-			editor.mouseX = e.getX();
-			editor.mouseY = e.getY();
-			Connection con = editor.connections.nearPoint(editor.mouseX, editor.mouseY);
+			canvas.mouseX = e.getX();
+			canvas.mouseY = e.getY();
+			Connection con = canvas.connections.nearPoint(canvas.mouseX, canvas.mouseY);
 
 			if (con != null) {
-				draggedBreakPoint = con.breakPointContains(editor.mouseX, editor.mouseY);
+				draggedBreakPoint = con.breakPointContains(canvas.mouseX, canvas.mouseY);
 				if (draggedBreakPoint != null) {
 					state = State.dragBreakPoint;
 				}
 			} else {
 
-				GObj obj = editor.objects.checkInside(editor.mouseX, editor.mouseY);
+				GObj obj = canvas.objects.checkInside(canvas.mouseX, canvas.mouseY);
 
 				if (obj != null) {
 					if (e.isShiftDown()) {
 						obj.setSelected(true);
 					} else {
 						if (!obj.isSelected()) {
-							editor.objects.clearSelected();
+							canvas.objects.clearSelected();
 							obj.setSelected(true);
 						}
 					}
-					if (obj.controlRectContains(editor.mouseX, editor.mouseY) != 0) {
+					if (obj.controlRectContains(canvas.mouseX, canvas.mouseY) != 0) {
 						initialXSize = obj.getXsize();
 						initialYSize = obj.getYsize();
 						state = State.resize;
 					} else {
 						state = State.drag;
-						editor.repaint();
+						canvas.repaint();
 					}
 				} else {
 					state = State.dragBox;
-					startX = editor.mouseX;
-					startY = editor.mouseY;
+					startX = canvas.mouseX;
+					startY = canvas.mouseY;
 				}
 				// drawConnections();
 			}
@@ -328,18 +328,18 @@ class MouseOps
 		GObj obj;
 		Connection relation;
 
-		ArrayList selectedObjs = editor.objects.getSelected();
+		ArrayList selectedObjs = canvas.objects.getSelected();
 
 		if (state.equals(State.dragBreakPoint)) {
 			draggedBreakPoint.x = x;
 			draggedBreakPoint.y = y;
-			editor.repaint();
+			canvas.repaint();
 		}
 		if (state.equals(State.drag)) {
 			for (int i = 0; i < selectedObjs.size(); i++) {
 				obj = (GObj) selectedObjs.get(i);
 				if (!(obj instanceof RelObj))
-				obj.setPosition(obj.getX() + (x - editor.mouseX), obj.getY() + (y - editor.mouseY));
+				obj.setPosition(obj.getX() + (x - canvas.mouseX), obj.getY() + (y - canvas.mouseY));
 
 				// check if a strict port exists on the object
 
@@ -358,14 +358,14 @@ class MouseOps
 								// We dont want to remove the connection, if the objects belong to the same group
 								if (! (obj.isGroup() && obj.includesObject(port2.obj))) {
 									if (Math.abs(port.getRealCenterX() - port2.getRealCenterX()) > 1 || Math.abs(port.getRealCenterY() - port2.getRealCenterY()) > 1) {
-										editor.connections.remove(port, port2);
+										canvas.connections.remove(port, port2);
 									}
 								}
 							}
 
-							obj2 = editor.objects.checkInside(port.obj.getX() + (x - editor.mouseX) + port.getCenterX(), port.obj.getY() + (y - editor.mouseY) + port.getCenterY(), obj);
+							obj2 = canvas.objects.checkInside(port.obj.getX() + (x - canvas.mouseX) + port.getCenterX(), port.obj.getY() + (y - canvas.mouseY) + port.getCenterY(), obj);
 							if (obj2 != null && !obj2.isSelected()) {
-								port2 = obj2.portContains(port.obj.getX() + (x - editor.mouseX) + port.getCenterX(), port.obj.getY() + (y - editor.mouseY) + port.getCenterY());
+								port2 = obj2.portContains(port.obj.getX() + (x - canvas.mouseX) + port.getCenterX(), port.obj.getY() + (y - canvas.mouseY) + port.getCenterY());
 
 								if (port2 != null && port2.isStrict()) {
 									if (!port.isConnected()) {
@@ -375,7 +375,7 @@ class MouseOps
 
 										port2.addConnection(con);
 										port.addConnection(con);
-										editor.connections.add(con);
+										canvas.connections.add(con);
 									}
 									obj.setPosition(port2.obj.x + port2.getCenterX() - ( (port.obj.x - obj.x) + port.getCenterX()), port2.obj.y + port2.getCenterY() - ( (port.obj.y - obj.y) + port.getCenterY()));
 								}
@@ -384,29 +384,29 @@ class MouseOps
 					}
 				}
 
-				for (int j = 0; j < editor.connections.size(); j++) {
-					relation = (Connection) editor.connections.get(j);
+				for (int j = 0; j < canvas.connections.size(); j++) {
+					relation = (Connection) canvas.connections.get(j);
 					if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
 						relation.calcBreakPoints();
 					}
 				}
 
 			}
-			editor.objects.updateRelObjs();
-			editor.mouseX = x;
-			editor.mouseY = y;
-			editor.repaint();
+			canvas.objects.updateRelObjs();
+			canvas.mouseX = x;
+			canvas.mouseY = y;
+			canvas.repaint();
 		}
 		if (state.equals(State.dragBox)) {
-			editor.mouseX = x;
-			editor.mouseY = y;
-			editor.repaint();
+			canvas.mouseX = x;
+			canvas.mouseY = y;
+			canvas.repaint();
 		}
 		if (state.equals(State.resize)) {
 			for (int i = 0; i < selectedObjs.size(); i++) {
 				obj = (GObj) selectedObjs.get(i);
-				float newXSize = (obj.getWidth() * initialXSize + (x - editor.mouseX)) / obj.getWidth();
-				float newYSize = (obj.getHeight() * initialYSize + (y - editor.mouseY)) / obj.getHeight();
+				float newXSize = (obj.getWidth() * initialXSize + (x - canvas.mouseX)) / obj.getWidth();
+				float newYSize = (obj.getHeight() * initialYSize + (y - canvas.mouseY)) / obj.getHeight();
 
 				if (newXSize > 0) {
 					obj.setXsize(newXSize);
@@ -415,16 +415,16 @@ class MouseOps
 					obj.setYsize(newYSize);
 				}
 
-				for (int j = 0; j < editor.connections.size(); j++) {
-					relation = (Connection) editor.connections.get(j);
+				for (int j = 0; j < canvas.connections.size(); j++) {
+					relation = (Connection) canvas.connections.get(j);
 					if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
 						relation.calcBreakPoints();
 					}
 				}
 			}
-			editor.repaint();
-			editor.drawConnections();
-			editor.objects.updateRelObjs();
+			canvas.repaint();
+
+			canvas.objects.updateRelObjs();
 		}
 	}
 
@@ -433,57 +433,57 @@ class MouseOps
 		int y = e.getY();
 
 		// update mouse position in info label
-		editor.posInfo.setText(Integer.toString(x) + ", " + Integer.toString(y));
+		canvas.posInfo.setText(Integer.toString(x) + ", " + Integer.toString(y));
 
 		// check if port needs to be nicely drawn coz of mouseover
 		if (state.equals(State.addRelation)||state.startsWith("??")) {
-			if (editor.currentPort != null) {
-				editor.currentPort.setSelected(false);
+			if (canvas.currentPort != null) {
+				canvas.currentPort.setSelected(false);
 				// currentPort=null;
-				editor.repaint();
+				canvas.repaint();
 			}
 
-			GObj obj = editor.objects.checkInside(x, y);
+			GObj obj = canvas.objects.checkInside(x, y);
 
 			if (obj != null) {
 				Port port = obj.portContains(x, y);
 
 				if (port != null) {
-					if (editor.firstPort!=null) {
-						if (canBeConnected(editor.firstPort, port)) {
+					if (canvas.firstPort!=null) {
+						if (canBeConnected(canvas.firstPort, port)) {
 							port.setSelected(true);
-							editor.currentPort = port;
-							editor.repaint();
+							canvas.currentPort = port;
+							canvas.repaint();
 						}
 					} else {
 						port.setSelected(true);
-						editor.currentPort = port;
-						editor.repaint();
+						canvas.currentPort = port;
+						canvas.repaint();
 					}
 				}
 			}
 		}
 
 		// if we're adding a new object...
-		if (editor.currentObj != null && editor.vPackage.hasClass(state)) {
-			editor.currentObj.x = x;
-			editor.currentObj.y = y;
+		if (canvas.currentObj != null && canvas.vPackage.hasClass(state)) {
+			canvas.currentObj.x = x;
+			canvas.currentObj.y = y;
 
 			// Kui objektil on moni strict port, chekime kas teda kuskile panna on;
-			if (editor.currentObj.isStrict()) {
+			if (canvas.currentObj.isStrict()) {
 				Port port, port2;
 				GObj obj;
 
-				for (int i = 0; i < editor.currentObj.ports.size(); i++) {
-					port = (Port) editor.currentObj.ports.get(i);
+				for (int i = 0; i < canvas.currentObj.ports.size(); i++) {
+					port = (Port) canvas.currentObj.ports.get(i);
 					port2 = port.getStrictConnected();
 					if (port2 != null) {
 						if (Math.abs(port.getRealCenterX() - port2.getRealCenterX()) > 1 || Math.abs(port.getRealCenterY() - port2.getRealCenterY()) > 1) {
-							editor.connections.remove(port, port2);
+							canvas.connections.remove(port, port2);
 						}
 					}
 
-					obj = editor.objects.checkInside(x + port.getCenterX(), y + port.getCenterY());
+					obj = canvas.objects.checkInside(x + port.getCenterX(), y + port.getCenterY());
 					if (obj != null) {
 						port2 = obj.portContains(x + port.getCenterX(), y + port.getCenterY());
 
@@ -495,36 +495,36 @@ class MouseOps
 
 								port2.addConnection(con);
 								port.addConnection(con);
-								editor.connections.add(con);
+								canvas.connections.add(con);
 							}
-							editor.currentObj.x = port2.obj.x + port2.getCenterX() - port.getCenterX();
-							editor.currentObj.y = port2.obj.y + port2.getCenterY() - port.getCenterY();
+							canvas.currentObj.x = port2.obj.x + port2.getCenterX() - port.getCenterX();
+							canvas.currentObj.y = port2.obj.y + port2.getCenterY() - port.getCenterY();
 						}
 					}
 				}
 			}
 
-			Rectangle rect = new Rectangle(x - 10, y - 10, editor.currentObj.getRealWidth() + 10, editor.currentObj.getRealHeight() + 10);
+			Rectangle rect = new Rectangle(x - 10, y - 10, canvas.currentObj.getRealWidth() + 10, canvas.currentObj.getRealHeight() + 10);
 
-			editor.drawingArea.scrollRectToVisible(rect);
-			if (x + editor.currentObj.getRealWidth() > editor.drawAreaSize.width) {
-				editor.drawAreaSize.width = x + editor.currentObj.getRealWidth();
-				editor.drawingArea.setPreferredSize(editor.drawAreaSize);
-				editor.drawingArea.setPreferredSize(editor.drawAreaSize);
+			canvas.drawingArea.scrollRectToVisible(rect);
+			if (x + canvas.currentObj.getRealWidth() > canvas.drawAreaSize.width) {
+				canvas.drawAreaSize.width = x + canvas.currentObj.getRealWidth();
+				canvas.drawingArea.setPreferredSize(canvas.drawAreaSize);
+				canvas.drawingArea.setPreferredSize(canvas.drawAreaSize);
 			}
 
-			if (y + editor.currentObj.getRealHeight() > editor.drawAreaSize.height) {
-				editor.drawAreaSize.height = y + editor.currentObj.getRealHeight();
-				editor.drawingArea.setPreferredSize(editor.drawAreaSize);
-				editor.drawingArea.revalidate();
+			if (y + canvas.currentObj.getRealHeight() > canvas.drawAreaSize.height) {
+				canvas.drawAreaSize.height = y + canvas.currentObj.getRealHeight();
+				canvas.drawingArea.setPreferredSize(canvas.drawAreaSize);
+				canvas.drawingArea.revalidate();
 			}
-			editor.repaint();
-		} else if (state.startsWith("??") && editor.firstPort!=null) { //if class is of type relation
-			editor.repaint();
+			canvas.repaint();
+		} else if (state.startsWith("??") && canvas.firstPort!=null) { //if class is of type relation
+			canvas.repaint();
 		}
-		if (editor.firstPort != null) {
-			editor.mouseX = x;
-			editor.mouseY = y;
+		if (canvas.firstPort != null) {
+			canvas.mouseX = x;
+			canvas.mouseY = y;
 		}
 	}
 
@@ -539,17 +539,17 @@ class MouseOps
 			state = State.selection;
 		}
 		if (state.equals(State.dragBox)) {
-			editor.objects.selectObjectsInsideBox(startX, startY, editor.mouseX, editor.mouseY);
+			canvas.objects.selectObjectsInsideBox(startX, startY, canvas.mouseX, canvas.mouseY);
 			state = State.selection;
-			editor.repaint();
+			canvas.repaint();
 		}
-		if (editor.objects.getSelected() != null && editor.objects.getSelected().size() > 0) {
-			String selObjects = editor.objects.getSelected().toString();
+		if (canvas.objects.getSelected() != null && canvas.objects.getSelected().size() > 0) {
+			String selObjects = canvas.objects.getSelected().toString();
 
 			if (selObjects != null) {
 				selObjects = selObjects.replaceAll("null ", " ");
 			}
-			editor.posInfo.setText("Selection: " + selObjects);
+			canvas.posInfo.setText("Selection: " + selObjects);
 		}
 	}
 
@@ -578,171 +578,25 @@ class MouseOps
 	// *********************************************************************
 
 	public void actionPerformed(ActionEvent e) {
-
-		// JmenuItem chosen
-		if (e.getSource().getClass().getName() == "javax.swing.JMenuItem" ||
-			e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem") {
-
-			if (e.getActionCommand().equals(Menu.SAVE_SCHEME)) {
-			  editor.saveScheme();
-			} else if (e.getActionCommand().equals(Menu.LOAD_SCHEME)) {
-			  editor.loadScheme();
-			} else if (e.getActionCommand().equals(Menu.LOAD)) {
-				JFileChooser fc = new JFileChooser(editor.getLastPath());
-				CustomFileFilter synFilter = new CustomFileFilter(CustomFileFilter.extensionXML,CustomFileFilter.descriptionXML);
-
-				fc.setFileFilter(synFilter);
-
-				int returnVal = fc.showOpenDialog(null);
-
-				if (returnVal == JFileChooser.APPROVE_OPTION) {
-					File pack = fc.getSelectedFile();
-
-					editor.setLastPath(pack.getAbsolutePath());
-					db.p("Loading package: " + pack.getName());
-					editor.vPackage = null;
-					if (editor.palette != null) {
-						editor.palette.removeToolbar();
-					}
-					editor.loadPackage(pack);
-					editor.validate();
-				}
-			} else if (e.getActionCommand().equals(Menu.CLOSE)) {
-				editor.vPackage = null;
-				editor.palette.removeToolbar();
-				editor.validate();
-			} else if (e.getActionCommand().equals(Menu.INFO)) {
-				String message;
-
-				if (editor.vPackage != null) {
-					message = editor.vPackage.description;
-				} else {
-					message = "No packages loaded";
-				}
-				JOptionPane.showMessageDialog(null, message);
-			} else if (e.getActionCommand().equals(Menu.PRINT)) {
-			  editor.print();
-			} else if (e.getActionCommand().equals(Menu.EXIT)) {
-				editor.exitApplication();
-			} else if (e.getActionCommand().equals(Menu.GRID)) {
-			  boolean isGridVisible = editor.drawingArea.isGridVisible();
-			  if(isGridVisible) {
-				isGridVisible = false;
-			  } else {
-				isGridVisible = true;
-			  }
-			  editor.drawingArea.setGridVisible(isGridVisible);
-			} else if (e.getActionCommand().equals(Menu.CLEAR_ALL)) {
-				editor.clearObjects();
-			} else if (e.getActionCommand().equals(Menu.BACKWARD)) {
-			  // MOVE OBJECT BACKWARD IN THE LIST
-			  // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-			  editor.objects.sendBackward(editor.currentObj, 1);
-			  editor.repaint();
-			} else if (e.getActionCommand().equals(Menu.FORWARD)) {
-			  // MOVE OBJECT FORWARD IN THE LIST
-			  // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-			  editor.objects.bringForward(editor.currentObj, 1);
-			  editor.repaint();
-			} else if (e.getActionCommand().equals(Menu.TOFRONT)) {
-			  // MOVE OBJECT TO THE FRONT IN THE LIST,
-			  // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-			  editor.objects.bringToFront(editor.currentObj);
-			  editor.repaint();
-			} else if (e.getActionCommand().equals(Menu.TOBACK)) {
-			  // MOVE OBJECT TO THE BACK IN THE LIST
-			  // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-			  editor.objects.sendToBack(editor.currentObj);
-			  editor.repaint();
-			} else if (e.getActionCommand().equals(Menu.SPECIFICATION)) {
-				ProgramTextEditor programEditor = new ProgramTextEditor(editor.connections, editor.objects, editor.vPackage, editor);
-
-				programEditor.setSize(550, 450);
-				programEditor.setVisible(true);
-			}
-			/* else if (e.getActionCommand().equals("Planner")) {
-				 PlannerEditor plannerEditor = new PlannerEditor(objects, connections);
-				 plannerEditor.setSize(450, 260);
-				 plannerEditor.setVisible(true);
-
-				 } */
-			else if (e.getActionCommand().equals(Menu.SELECT_ALL)) {
-			  editor.selectAllObjects();
-			} else if (e.getActionCommand().equals(Menu.CLONE)) {
-				editor.cloneObject();
-			} else if (e.getActionCommand().equals(Menu.HLPORTS)) {
-				editor.hilightPorts();
-			}
-			/* else if (e.getActionCommand().equals("Run")) {
-				 ee.ioc.cs.editor.editor.ResultsWindow resultsWindow= new ee.ioc.cs.editor.editor.ResultsWindow(objects, connections, classes);
-				 resultsWindow.setSize(450, 260);
-				 resultsWindow.setVisible(true);
-				 }*/
-			else if (e.getActionCommand().equals(Menu.DOCS)) {
-				String documentationUrl = editor.getSystemDocUrl();
-
-				if (documentationUrl != null && documentationUrl.trim().length() > 0) {
-					editor.openInBrowser(documentationUrl);
-				} else {
-					editor.showInfoDialog("Missing information", "No documentation URL defined in properties.");
-				}
-
-			} else if (e.getActionCommand().equals(Menu.ABOUT)) {
-				new AboutDialog(null,editor);
-			} else if (e.getActionCommand().equals(Menu.LICENSE)) {
-			  new LicenseDialog(null,editor);
-			} else if (e.getActionCommand().equals(Menu.OBJECT_DELETE)) {
-				editor.deleteObjects();
-			} else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
-			  editor.openPropertiesDialog();
-			} else if (e.getActionCommand().equals(Menu.GROUP)) {
-				editor.groupObjects();
-			} else if (e.getActionCommand().equals(Menu.UNGROUP)) {
-				editor.ungroupObjects();
-			} else if (e.getActionCommand().equals(Menu.SETTINGS)) {
-				editor.openOptionsDialog();
-			} else if (e.getActionCommand().equals(Look.LOOK_WINDOWS)) {
-				try {
-					Look.changeLayout(Look.LOOK_WINDOWS);
-				} catch (Exception uie) {
-				}
-			} else if (e.getActionCommand().equals(Look.LOOK_METAL)) {
-				try {
-					Look.changeLayout(Look.LOOK_METAL);
-				} catch (Exception uie) {
-				}
-			} else if (e.getActionCommand().equals(Look.LOOK_MOTIF)) {
-				try {
-					Look.changeLayout(Look.LOOK_MOTIF);
-				} catch (Exception uie) {
-				}
-			} else if (e.getActionCommand().equals(Look.LOOK_CUSTOM)) {
-				try {
-					Look.changeLayout(Look.LOOK_CUSTOM);
-				} catch (Exception uie) {
-				}
-			}
-		}
-
 		// Jbutton pressed
 		if (e.getSource().getClass().getName() == "javax.swing.JButton") {
 			if (e.getActionCommand().equals(State.relation)) {
-				editor.mListener.setState(State.addRelation);
+				canvas.mListener.setState(State.addRelation);
 				Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 
-				editor.setCursor(cursor);
+				canvas.setCursor(cursor);
 			} else if (e.getActionCommand().equals(State.selection)) {
 				Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
 
-				editor.setCursor(cursor);
-				editor.mListener.setState(State.selection);
+				canvas.setCursor(cursor);
+				canvas.mListener.setState(State.selection);
 			} else if (e.getActionCommand().equals(State.magnifier)) {
-				editor.mListener.setState(State.magnifier);
+				canvas.mListener.setState(State.magnifier);
 			} else {
-				editor.mListener.setState(e.getActionCommand());
+				canvas.mListener.setState(e.getActionCommand());
 				startAddingObject();
 			}
-			editor.drawingArea.grabFocus();
+			canvas.drawingArea.grabFocus();
 		}
 	}
 
@@ -751,10 +605,10 @@ class MouseOps
 		PackageClass pClass;
 
 		if (state.startsWith("??")) {
-			pClass = editor.vPackage.getClass(state.substring(2));
+			pClass = canvas.vPackage.getClass(state.substring(2));
 			obj = new RelObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
 		} else {
-			pClass = editor.vPackage.getClass(state);
+			pClass = canvas.vPackage.getClass(state);
 			obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
 		}
 
@@ -801,19 +655,17 @@ class MouseOps
 		}
 
 		obj.graphics = pClass.graphics;
-		obj.setName(pClass.name + "_" + Integer.toString(editor.objCount));
-		editor.objCount++;
+		obj.setName(pClass.name + "_" + Integer.toString(canvas.objCount));
+		canvas.objCount++;
 
 		obj.graphics = pClass.graphics;
-		editor.currentObj = obj;
+		canvas.currentObj = obj;
 		Cursor cursor;
 		if (state.startsWith("??")) {
 			cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
 		} else {
 			cursor = new Cursor(Cursor.HAND_CURSOR);
 		}
-
-
-		editor.setCursor(cursor);
+		canvas.setCursor(cursor);
 	}
 }

@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.vclass.VPackage;
 import ee.ioc.cs.vsle.vclass.PackageClass;
+import ee.ioc.cs.vsle.util.*;
 
 import java.io.File;
 import java.awt.BorderLayout;
@@ -14,11 +15,11 @@ import javax.swing.ImageIcon;
  */
 public class Palette {
 	public JToolBar toolBar;
-	Editor editor;
+	Canvas canvas;
 
-	public Palette(VPackage vPackage, MouseOps mListener, Editor ed) {
+	public Palette(VPackage vPackage, MouseOps mListener, Canvas canv) {
 		toolBar = new JToolBar();
-		this.editor = ed;
+		this.canvas = canv;
 		JButton[] buttons = new JButton[50];
 		ImageIcon icon;
 
@@ -62,10 +63,11 @@ public class Palette {
 			toolBar.add(buttons[i]);
 		}
 
-		editor.mainPanel.add(toolBar, BorderLayout.NORTH);
+		db.p("siin");
+		canvas.add(toolBar, BorderLayout.NORTH);
 	}
 
 	void removeToolbar() {
-		editor.mainPanel.remove(toolBar);
+		canvas.remove(toolBar);
 	}
 }

@@ -35,11 +35,11 @@ public class ObjectPropertiesEditor extends JFrame
 	GObj controlledObject;
 	JTextField nameTextField;
 	JButton clear, ok;
-	Editor editor;
+	Canvas canvas;
 
-	public ObjectPropertiesEditor(GObj object, Editor editor) {
+	public ObjectPropertiesEditor(GObj object, Canvas canvas) {
 		super();
-		this.editor = editor;
+		this.canvas = canvas;
 		controlledObject = object;
 		JPanel buttonPane = new JPanel();
 		JPanel fullPane = new JPanel();
@@ -206,7 +206,7 @@ public class ObjectPropertiesEditor extends JFrame
 			controlledObject.setName(nameTextField.getText());
 			controlledObject = null;
 			this.dispose();
-			editor.repaint();
+			canvas.repaint();
 		}
 		if (e.getSource() == clear) {
 			// Clears object properties except the object name.

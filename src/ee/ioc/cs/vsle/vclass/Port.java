@@ -68,11 +68,11 @@ public class Port implements Cloneable, Serializable {
 		return (int) (obj.getYsize() * y);
 	}
 
-	public int getRealX() {
+	public int getAbsoluteX() {
 		return (int) (obj.getXsize() * x + obj.getX());
 	}
 
-	public int getRealY() {
+	public int getAbsoluteY() {
 		return (int) (obj.getYsize() * y + obj.getY());
 	}
 

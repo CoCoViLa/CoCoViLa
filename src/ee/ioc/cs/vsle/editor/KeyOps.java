@@ -11,10 +11,10 @@ import ee.ioc.cs.vsle.util.*;
 
 public class KeyOps implements KeyListener {
 
-	Editor editor;
+	Canvas canvas;
 
-	public KeyOps(Editor editor) {
-		this.editor = editor;
+	public KeyOps(Canvas canvas) {
+		this.canvas = canvas;
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -26,27 +26,27 @@ public class KeyOps implements KeyListener {
 	public void keyReleased(KeyEvent e) {
 
 		if (e.getKeyCode() == 127) {        // event: delete object(s), key: del
-			editor.deleteObjects();
+			canvas.deleteObjects();
 		} else if (e.getKeyCode() == 68) {   // event: clone object(s), key: ctrl+d
-			editor.cloneObject();
+			canvas.cloneObject();
 		} else if (e.getKeyCode() == 71) { // event: group objects, key: ctrl+g
-			editor.groupObjects();
+			canvas.groupObjects();
 		} else if (e.getKeyCode() == 85) { // event: ungroup objects, key: ctrl+u
-			editor.ungroupObjects();
+			canvas.ungroupObjects();
 		} else if (e.getKeyCode() == 39) { // event: move shape to right, key: right arrow key
-			editor.moveObject(1, 0);
+			canvas.moveObject(1, 0);
 		} else if (e.getKeyCode() == 37) { // event: move shape to left, key: left arrow key
-			editor.moveObject(-1, 0);
+			canvas.moveObject(-1, 0);
 		} else if (e.getKeyCode() == 38) { // event: move shape up, key: up arrow key
-			editor.moveObject(0, -1);
+			canvas.moveObject(0, -1);
 		} else if (e.getKeyCode() == 40) { // event: move shape down, key: down arrow key
-			editor.moveObject(0, 1);
+			canvas.moveObject(0, 1);
 		} else if (e.getKeyCode() == 72) {// event: hilight object ports, key: ctrl+h
-			editor.hilightPorts();
+			canvas.hilightPorts();
 		} else if (e.getKeyCode() == 82) {	// event: open object properties, key: ctrl+r
-			editor.openPropertiesDialog();
+			canvas.openPropertiesDialog();
 		} else if (e.getKeyCode() == 27) {	// event: escape key, return to selection
-			editor.stopRelationAdding();
+			canvas.stopRelationAdding();
 		}
 
 

@@ -114,10 +114,10 @@ public class ObjectList extends ArrayList
         for (int i = 0; i < this.size(); i++) {
             obj = (GObj) this.get(i);
             if (obj instanceof RelObj) {
-                obj.x = ((RelObj)obj).startPort.getRealX();
-                obj.y = ((RelObj)obj).startPort.getRealY();
-				obj.Xsize = (float)Math.sqrt(Math.pow((obj.x - ((RelObj)obj).endPort.getRealX()), 2.0) + Math.pow((obj.y - ((RelObj)obj).endPort.getRealY()), 2.0))/obj.width;
-				((RelObj)obj).angle = VMath.calcAngle(obj.x, obj.y, ((RelObj)obj).endPort.getRealX(), ((RelObj)obj).endPort.getRealY());
+                obj.x = ((RelObj)obj).startPort.getAbsoluteX();
+                obj.y = ((RelObj)obj).startPort.getAbsoluteY();
+				obj.Xsize = (float)Math.sqrt(Math.pow((obj.x - ((RelObj)obj).endPort.getAbsoluteX()), 2.0) + Math.pow((obj.y - ((RelObj)obj).endPort.getAbsoluteY()), 2.0))/obj.width;
+				((RelObj)obj).angle = VMath.calcAngle(obj.x, obj.y, ((RelObj)obj).endPort.getAbsoluteX(), ((RelObj)obj).endPort.getAbsoluteY());
             }
 
 

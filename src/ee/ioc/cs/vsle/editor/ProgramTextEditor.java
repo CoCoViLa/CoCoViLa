@@ -39,11 +39,11 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 	ProgramRunner runner;
 	ClassList classList;
 	String mainClassName = new String();
-    Editor editor;
+	Editor editor;
 
 	public ProgramTextEditor(ArrayList relations, ObjectList objs, VPackage vPackage, Editor ed) {
 		super();
-		editor =ed;
+		editor = ed;
 		this.vPackage = vPackage;
 		objects = GroupUnfolder.unfold(objs);
 
@@ -115,9 +115,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
 		tabbedPane.addTab("Run results", runResult);
 
-		GObj obj;
-		ClassField field;
-        SpecGenerator sgen = new SpecGenerator();
+		SpecGenerator sgen = new SpecGenerator();
 		textArea.append(sgen.generateSpec(objects, relations));
 
 
