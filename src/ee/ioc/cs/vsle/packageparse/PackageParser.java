@@ -466,8 +466,9 @@ public class PackageParser {
 			if (qName.equals("port")) {
 				if (newPort.openGraphics == null) {
 					newGraphics = new ClassGraphics();
+					newGraphics.addShape(new Oval(-4, -4, 8, 8, 12632256, true, 1.0, 0.0, 0));
 					newGraphics.addShape(new Oval(-4, -4, 8, 8, 0, false, 1.0, 0.0, 0));
-					newGraphics.addShape(new Oval(-3, -3, 6, 6, 12632256, true, 1.0, 0.0, 0));
+
 					newGraphics.setBounds(-4, -4, 8, 8);
 					newPort.openGraphics = newGraphics;
 				}
