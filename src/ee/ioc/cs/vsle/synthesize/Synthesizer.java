@@ -42,7 +42,8 @@ public class Synthesizer {
 	 * @param progText -
 	 * @param classes -
 	 * @param mainClassName -
-	 */ public void makeProgram(String progText, ClassList classes, String mainClassName) {
+	 */
+	public void makeProgram(String progText, ClassList classes, String mainClassName) {
 		generateSubclasses(classes);
 		writeFile(progText, mainClassName);
 	}
@@ -65,8 +66,7 @@ public class Synthesizer {
 		// call the packageParser to create a problem from the specification
 		try {
 			problem = sp.makeProblem(classList, "this", "this", problem);
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
@@ -75,19 +75,19 @@ public class Synthesizer {
 //		String algorithm = planner(problem, computeAll);
 //        String algorithm = null;// = lin_planner(problem, computeAll);
 //        PlannerOld planner = new PlannerOld((Problem)problem.clone(), computeAll, null);
-        ArrayList algorithmList = Planner.getInstance().invokePlaning(problem, computeAll);
+		ArrayList algorithmList = Planner.getInstance().invokePlaning(problem, computeAll);
 //        ArrayList algorithm_l = planner.getAlgorithmL();
-        String algorithm = CodeGenerator.getInstance().generate(algorithmList);
+		String algorithm = CodeGenerator.getInstance().generate(algorithmList);
 //        CodeGenerator cgg = new CodeGenerator();
 //        algorithm = CodeGenerator.getInstance().generate(planner.getAlgorithmL());
 //        String algorithm  = cgg.generate(planner.getAlgorithmL());//= planner.getAlgorithm();
 
 //        System.exit(0);//temporary
-        String prog2 = "";
+		String prog2 = "";
 
-        String prog = "";
+		String prog = "";
 
-        ClassField field;
+		ClassField field;
 		// start building the main source file.
 		AnnotatedClass ac = classList.getType("this");
 
@@ -95,14 +95,14 @@ public class Synthesizer {
 		for (int i = 0; i < ac.fields.size(); i++) {
 
 			field = (ClassField) ac.fields.get(i);
-			if (! (field.type.equals("alias") || field.type.equals("void"))) {
+			if (!(field.type.equals("alias") || field.type.equals("void"))) {
 				if (field.isSpecField()) {
 					prog += "    public _" + field.type + "_ " + field.name + " = new _" + field.type + "_();\n";
-				}
-				else if (isPrimitive(field.type)) {
+				} else if (isPrimitive(field.type)) {
 					prog += "    public " + field.type + " " + field.name + ";\n";
-				}
-				else {
+				} else if (isArray(field.type)) {
+					prog += "    public " + field.type + " " + field.name + " ;\n";
+				} else {
 					prog += "    public " + field.type + " " + field.name + " = new " + field.type + "();\n";
 				}
 			}
@@ -153,13 +153,12 @@ public class Synthesizer {
 				try {
 					BufferedReader in = new BufferedReader(new FileReader(RuntimeProperties.packageDir + File.separator + pClass.name + ".java"));
 
-					while ( (lineString = in.readLine()) != null) {
+					while ((lineString = in.readLine()) != null) {
 						fileString += lineString + "\n";
 					}
 					in.close();
 
-				}
-				catch (IOException io) {
+				} catch (IOException io) {
 					db.p(io);
 				}
 				// find the class declaration
@@ -180,35 +179,32 @@ public class Synthesizer {
 						LineType lt = specParser.getLine(specLines);
 
 						//if (! (specLines.get(0)).equals("")) {
-							if (lt.type == declaration) {
-								String[] split = lt.specLine.split(":", -1);
-								String[] vs = split[1].trim().split(" *, *", -1);
-								String type = split[0].trim();
+						if (lt.type == declaration) {
+							String[] split = lt.specLine.split(":", -1);
+							String[] vs = split[1].trim().split(" *, *", -1);
+							String type = split[0].trim();
 
-								if (!type.equals("void")) {
-									for (int i = 0; i < vs.length; i++) {
-										if (isPrimitive(type)) {
-											declars += "    public " + type + " " + vs[i] + ";\n";
-										}
-										else if (isArray(type)) {
-											declars += "    public " + type + " " + vs[i] + " ;\n";
-										}
-										else if (classes.getType(type) != null) {
-											declars += "    public _" + type + "_ " + vs[i] + " = new _" + type + "_();\n";
+							if (!type.equals("void")) {
+								for (int i = 0; i < vs.length; i++) {
+									if (isPrimitive(type)) {
+										declars += "    public " + type + " " + vs[i] + ";\n";
+									} else if (isArray(type)) {
+										declars += "    public " + type + " " + vs[i] + " ;\n";
+									} else if (classes.getType(type) != null) {
+										declars += "    public _" + type + "_ " + vs[i] + " = new _" + type + "_();\n";
 
-										}
-										else {
-											declars += "    public " + type + " " + vs[i] + " = new " + type + "();\n";
-
-										}
+									} else {
+										declars += "    public " + type + " " + vs[i] + " = new " + type + "();\n";
 
 									}
+
 								}
 							}
+						}
 						//}
 					}
+				} catch (Exception e) {
 				}
-				catch (Exception e) {}
 
 				// find spec
 				pattern = Pattern.compile("/\\*@.*specification[ \t\n]+[a-zA-Z_0-9-.]+[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *", Pattern.DOTALL);
@@ -222,8 +218,7 @@ public class Synthesizer {
 
 					out.println(fileString);
 					out.close();
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					db.p(e);
 				}
 			}
@@ -240,8 +235,7 @@ public class Synthesizer {
 
 			out.println(prog);
 			out.close();
-		}
-		catch (Exception e) {
+		} catch (Exception e) {
 			db.p(e);
 		}
 	}
@@ -249,8 +243,7 @@ public class Synthesizer {
 	boolean isPrimitive(String type) {
 		if (type.equals("int") || type.equals("double") || type.equals("float") || type.equals("long") || type.equals("short") || type.equals("boolean") || type.equals("char")) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
@@ -260,8 +253,7 @@ public class Synthesizer {
 
 		if (type.substring(length - 2, length).equals("[]")) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
@@ -274,7 +266,7 @@ public class Synthesizer {
 			SpecParser sp = new SpecParser();
 			HashSet hs = new HashSet();
 			String mainClassName = new String();
-			String file = sp.getStringFromFile( RuntimeProperties.packageDir + fileName);
+			String file = sp.getStringFromFile(RuntimeProperties.packageDir + fileName);
 			Pattern pattern = Pattern.compile("class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+");
 			Matcher matcher = pattern.matcher(file);
 
@@ -286,23 +278,17 @@ public class Synthesizer {
 			String prog = makeProgramText(file, true, classList, mainClassName);//changed to true
 
 			makeProgram(prog, classList, mainClassName);
-		}
-		catch (UnknownVariableException uve) {
+		} catch (UnknownVariableException uve) {
 			db.p("Fatal error: variable " + uve.excDesc + " not declared");
-		}
-		catch (LineErrorException lee) {
+		} catch (LineErrorException lee) {
 			db.p("Fatal error on line " + lee.excDesc);
-		}
-		catch (MutualDeclarationException lee) {
+		} catch (MutualDeclarationException lee) {
 			db.p("Mutual recursion in specifications, between classes " + lee.excDesc);
-		}
-		catch (EquationException ee) {
+		} catch (EquationException ee) {
 			db.p(ee.excDesc);
-		}
-		catch (SpecParseException spe) {
+		} catch (SpecParseException spe) {
 			db.p(spe);
-		}
-		catch (Exception ex) {
+		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
 	}

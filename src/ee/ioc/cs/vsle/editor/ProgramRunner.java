@@ -116,7 +116,6 @@ public class ProgramRunner {
 				while (st.hasMoreElements()) {
 					String s = st.nextToken();
 
-					db.p(s);
 					f = clas.getDeclaredField(s);
 					if (st.hasMoreElements()) {
 						clas = f.getType();

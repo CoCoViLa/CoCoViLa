@@ -99,11 +99,8 @@ public class CCL
 				String errBuff = new String();
 				String line;
 
-				db.p("7");
-
 				while ( (line = err.readLine()) != null) {
 					errBuff += line + "\n";
-					db.p("8");
 				}
 
 				throw new CompileException(errBuff);

@@ -33,7 +33,7 @@ public class ClassSaveDialog extends JFrame implements ActionListener {
 		this.text = text;
 		this.canvas = canvas;
 		JPanel specText = new JPanel();
-		textField = new JTextField(".java");
+		textField = new JTextField("");
 		textField.setCaretPosition(0);
 
 		JPanel buttonPane = new JPanel();
@@ -58,8 +58,14 @@ public class ClassSaveDialog extends JFrame implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == ok) {
 			FileFuncs ff = new FileFuncs();
-			if (textField.getText().length() != 0) {
-				ff.writeFile(RuntimeProperties.packageDir + textField.getText(), text);
+			String className = textField.getText();
+		    String fileText = "public class "+className+" {";
+		    fileText += "\n    /*@ specification "+className+" {\n";
+			fileText += text;
+			fileText += "    }@*/\n \n}";
+
+			if (className.length() != 0) {
+				ff.writeFile(RuntimeProperties.packageDir + className+".java", fileText);
 				this.dispose();
 				canvas.repaint();
 			}
