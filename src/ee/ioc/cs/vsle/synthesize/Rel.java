@@ -262,11 +262,17 @@ class Rel implements Cloneable,
                     left2 = matcher.group( 2 );
                     right = matcher.group( 4 );
                 }
+                ajut.add(new AjutHack(var.name, "#"+Integer.toString(i)));
                 m = m.replaceFirst( "([^a-zA-Z_]" + left2 + var.name +
                                     "[^a-zA-Z0-9_])",
-                                    left + getObject( var.object ) + var.name +
-                                    right );
-            }
+					left + getObject(var.object) + "#"+Integer.toString(i) + right);
+			}
+
+			for (int i = 0; i < inputs.size(); i++) {
+				AjutHack paar =	(AjutHack)ajut.get(i);
+				m = m.replaceFirst(paar.repl, paar.var);
+			}
+
             left2 = "";
             var = ( Var ) outputs.get( 0 );
             pattern = Pattern.compile( "([^a-zA-Z_]?)(([a-zA-Z_0-9]+\\.)*)" +
@@ -394,4 +400,15 @@ class Rel implements Cloneable,
 //            return null;
 //        }
 //	}
+}
+
+
+class AjutHack {
+	String var;
+	String repl;
+
+	public AjutHack(String name, String s) {
+		var = name;
+		repl = s;
+	}
 }
