@@ -310,8 +310,8 @@ public class Planner {
                         }
                     }
                     if (m_foundVars.contains(subRel.outputs.get(0))) {
-                        algorithm.add(rel);
                         algorithm.add("</subtask>");
+                        algorithm.add(rel);
                         newVars.addAll(rel.outputs);
                         m_foundVars.addAll(rel.outputs);
                         removableSubRels.add(rel);
