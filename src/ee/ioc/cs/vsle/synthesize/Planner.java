@@ -3,6 +3,11 @@ package ee.ioc.cs.vsle.synthesize;
 import java.util.*;
 import ee.ioc.cs.vsle.util.db;
 
+/**
+ This class is responsible for  planning.
+ @author Ando Saabas, Pavel Grigorenko
+ */
+
 public class Planner {
     private ArrayList algorithm;
 
@@ -17,9 +22,11 @@ public class Planner {
     private boolean m_computeAll = false;
     private Planner planner;
 
-    /** @link dependency */
-    /*# Problem lnkProblem; */
-
+    /**
+         @param problem the specification unfolded as a graph.
+         @param computeAll set to true, if we try to find everything that can be computed on the problem graph.
+         @param alg - algorithm
+     */
     public Planner(Problem problem, boolean computeAll, ArrayList alg) {
         if (alg == null) {
             algorithm = new ArrayList();
@@ -56,6 +63,11 @@ public class Planner {
 //        this.m_foundVars = foundVars;
 //        this.m_subtaskRels = subtaskRels;
 //    }
+
+
+    /** Does the linear planning.
+     @return true if problem is solved, otherwise false.
+     */
 
     boolean lin_planner() {
 
@@ -113,10 +125,10 @@ public class Planner {
                 removableAxioms.add(rel);
             }
         }
-        relIter= m_allRels.iterator();
-        while(relIter.hasNext()) {
-            rel = (Rel)relIter.next();
-            if(rel.subtaskFlag > 0 && rel.inputs.size() > 0) {
+        relIter = m_allRels.iterator();
+        while (relIter.hasNext()) {
+            rel = (Rel) relIter.next();
+            if (rel.subtaskFlag > 0 && rel.inputs.size() > 0) {
                 m_subtaskRels.add(rel);
             }
         }
@@ -205,13 +217,17 @@ public class Planner {
         }
 
         if (!m_computeAll) {
-			Optimizer optimizer = new Optimizer();
+            Optimizer optimizer = new Optimizer();
             algorithm = optimizer.optimize(algorithm, allTargetVars);
         }
-
+        db.p("algorithm" + algorithm.toString() + "\n");
         return solved;
 
     }
+
+    /** Does the planning with subtasks.
+     @return true if problem is solved, otherwise false.
+     */
 
     public boolean sub_planning() {
         HashSet newVars = new HashSet();
@@ -293,10 +309,16 @@ public class Planner {
                                             relIsNeeded = true;
                                         }
                                     }
+//                                    if (!rel.inAlgorithm) {
+//                                            rel.inAlgorithm = true;
+//                                            algorithm.add("<subtask>");
+//                                        }
+
                                     if (relIsNeeded) {
                                         if (!rel.inAlgorithm) {
                                             rel.inAlgorithm = true;
                                             algorithm.add("<subtask>");
+                                            algorithm.add(subRel);
                                         }
                                         m_foundVars.addAll(subVarRel.outputs);
                                         newVars.addAll(subVarRel.outputs);
@@ -310,7 +332,9 @@ public class Planner {
                         }
                     }
                     if (m_foundVars.contains(subRel.outputs.get(0))) {
-                        algorithm.add("</subtask>");
+                        if (rel.inAlgorithm) {
+                            algorithm.add("</subtask>");
+                        }
                         algorithm.add(rel);
                         newVars.addAll(rel.outputs);
                         m_foundVars.addAll(rel.outputs);
@@ -405,4 +429,9 @@ public class Planner {
         db.p(alg.toString());
         return alg.toString();
     }
+
+    public ArrayList getAlgorithmL() {
+        return algorithm;
+    }
+
 }
