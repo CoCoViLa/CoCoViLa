@@ -1,0 +1,90 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<!ELEMENT package (name, description, class+)>
+<!ELEMENT class 	(name, description, icon, graphics, ports?, fields?)>
+<!ELEMENT fields 	(field*)>
+<!ELEMENT ports 	(port+)>
+<!ELEMENT port 		(open|closed)*>
+<!ELEMENT field 	(known|default)*>
+<!ELEMENT graphics 	(bounds| (line | rect | oval| arc) | text)*>
+<!ELEMENT open 		(graphics)>
+<!ELEMENT closed 	(graphics)>
+<!ELEMENT known 	(graphics)>
+<!ELEMENT default 	(graphics)>
+<!ELEMENT name 		(#PCDATA)>
+<!ELEMENT description 	(#PCDATA)>
+<!ELEMENT portname 	(#PCDATA)>
+<!ELEMENT icon 		(#PCDATA)>
+<!ELEMENT type 		(#PCDATA)>
+<!ELEMENT datatype 	(#PCDATA)>
+<!ELEMENT xpos 		(#PCDATA)>
+<!ELEMENT ypos 		(#PCDATA)>
+<!ELEMENT line 		EMPTY>
+<!ELEMENT arc 		EMPTY>
+<!ELEMENT bounds 	EMPTY>
+<!ELEMENT rect 		EMPTY>
+<!ELEMENT oval 		EMPTY>
+<!ELEMENT strict 	EMPTY>
+<!ELEMENT text 		EMPTY>
+<!ELEMENT portConnection EMPTY>
+<!ATTLIST class
+	type (relation|class) #IMPLIED>
+<!ATTLIST graphics 
+	showFields (true|false) #IMPLIED>
+<!ATTLIST port connection (single|area) #IMPLIED>
+<!ATTLIST line 
+        x1		CDATA   #REQUIRED
+        y1		CDATA   #REQUIRED
+        x2		CDATA   #REQUIRED
+        y2		CDATA   #REQUIRED
+        colour		CDATA   #IMPLIED
+        fixed           (true|false) #IMPLIED>      
+<!ATTLIST rect
+        x		CDATA   #REQUIRED
+        y		CDATA   #REQUIRED
+        width		CDATA   #REQUIRED
+        height		CDATA   #REQUIRED
+        colour		CDATA   #IMPLIED
+	filled 		(true|false) #IMPLIED
+	fixed           (true|false) #IMPLIED>
+<!ATTLIST arc
+        x		CDATA   #REQUIRED
+        y		CDATA   #REQUIRED
+        width		CDATA   #REQUIRED
+        height		CDATA   #REQUIRED
+        startAngle	CDATA   #REQUIRED
+        arcAngle	CDATA   #REQUIRED
+        colour		CDATA   #IMPLIED
+	filled 		(true|false) #IMPLIED
+	fixed           (true|false) #IMPLIED>
+<!ATTLIST bounds
+        x		CDATA   #REQUIRED
+        y		CDATA   #REQUIRED
+        width		CDATA   #REQUIRED
+        height		CDATA   #REQUIRED>
+<!ATTLIST oval
+        x		CDATA   #REQUIRED
+        y		CDATA   #REQUIRED
+        width		CDATA   #REQUIRED
+        height		CDATA   #REQUIRED       
+        colour		CDATA   #IMPLIED
+	filled 		(true|false) #IMPLIED
+	fixed           (true|false) #IMPLIED>		   
+<!ATTLIST field 
+        name		CDATA   #REQUIRED
+        type		CDATA   #IMPLIED
+        value		CDATA   #IMPLIED>
+<!ATTLIST text 
+        string		CDATA   #REQUIRED
+        colour          CDATA   #IMPLIED
+        x		CDATA   #REQUIRED
+        y		CDATA   #REQUIRED
+        fontname        CDATA   #REQUIRED
+        fontstyle       CDATA   #REQUIRED
+        fontsize        CDATA   #REQUIRED>
+<!ATTLIST port
+	name 		CDATA 	#REQUIRED
+	type 		CDATA 	#REQUIRED
+	x 		CDATA 	#REQUIRED
+	y 		CDATA 	#REQUIRED
+	portConnection 	CDATA 	#IMPLIED
+	strict 		CDATA 	#IMPLIED>
