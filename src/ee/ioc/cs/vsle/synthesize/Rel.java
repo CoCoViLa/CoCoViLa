@@ -9,7 +9,7 @@ class Rel {
 	ArrayList outputs = new ArrayList();
 	ArrayList inputs = new ArrayList();
 	ArrayList subtasks = new ArrayList();
-
+    static int auxVarCounter = 0;
 
 	int flag;
 	int subtaskFlag;
@@ -130,15 +130,11 @@ class Rel {
 				String assign;
 				Var op = (Var) outputs.get(0);
 
-				db.p("siin ja " + op.field);
 				if (op.field.isPrimOrStringArray()) {
 					String[] split = method.split("=");
-                    if (Synthesizer.tempIsDone == false) {
-						assign = op.field.type + " " + " TEMP =" + split[1] + ";\n";
-						Synthesizer.tempIsDone =true;
-					} else
-						assign =  "TEMP =" + split[1] + ";\n";
-					assign += op.object + "." + op.name + " = TEMP;\n";
+                    assign = op.field.type + " " + " TEMP"+Integer.toString(auxVarCounter)+"=" + split[1] + ";\n";
+					assign += op.object + "." + op.name + " = TEMP"+Integer.toString(auxVarCounter)+";\n";
+					auxVarCounter++;
 					return assign;
 
 				}
@@ -158,10 +154,14 @@ class Rel {
 					return assigns;
 				}
 				if (op.field.isArray() && ip.field.isAlias()) {
+
+					assigns += op.field.type +" TEMP" + Integer.toString(auxVarCounter) + " = new " + op.field.arrayType()+"["+ip.field.vars.size()+"];\n";
 					for (int i = 0; i < ip.field.vars.size(); i++) {
 						s1 = ( (ClassField) ip.field.vars.get(i)).toString();
-						assigns += "        " + op + "[" + Integer.toString(i) + "] = " + ip.object + "." + s1 + ";\n";
+						assigns += "        " + " TEMP" + Integer.toString(auxVarCounter) + "[" + Integer.toString(i) + "] = " + ip.object + "." + s1 + ";\n";
 					}
+					assigns += "        " + op +" = "+" TEMP" + Integer.toString(auxVarCounter) ;
+					auxVarCounter++;
 					return assigns;
 				}
 			}

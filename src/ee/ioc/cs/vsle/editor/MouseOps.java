@@ -177,9 +177,7 @@ class MouseOps
 				} else {
 					if (editor.firstPort != null) {
 						if (e.getClickCount() == 2) {
-							editor.firstPort.setConnected(false);
-							editor.firstPort = null;
-							editor.currentCon = null;
+							editor.stopRelationAdding();
 						} else
 							editor.currentCon.addBreakPoint(new Point(x, y));
 						// firstPort.setConnected(false);

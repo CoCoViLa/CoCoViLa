@@ -324,6 +324,10 @@ public class PackageParser {
 				status = CLASS;
 			}
 			if (qName.equals("graphics")) {
+
+				if (classIsRelation) {
+					newGraphics.relation = true;
+				}
 				if (status == FIELD) {
 					newField.defaultGraphics = newGraphics;
 				} else if (status == FIELD_KNOWN) {
@@ -334,9 +338,6 @@ public class PackageParser {
 					newPort.closedGraphics = newGraphics;
 				} else {
 					//newGraphics.packageClass = newClass;
-					if (classIsRelation) {
-						newGraphics.relation = true;
-					}
 					newClass.addGraphics(newGraphics);
 
 

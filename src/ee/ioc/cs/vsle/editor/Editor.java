@@ -918,4 +918,20 @@ public class Editor extends JFrame {
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 			PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
 	}
+
+	public void stopRelationAdding() {
+		currentObj = null;
+		currentPort = null;
+		currentCon = null;
+		if (firstPort != null) {
+			if (firstPort.connections.size()>1)
+				firstPort.setConnected(false);
+			firstPort = null;
+		}
+
+		mListener.state = State.selection;
+		Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
+		setCursor(cursor);
+		repaint();
+	}
 }

@@ -2,7 +2,7 @@ package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
-
+import ee.ioc.cs.vsle.util.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.awt.*;

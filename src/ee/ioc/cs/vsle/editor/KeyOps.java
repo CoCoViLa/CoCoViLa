@@ -46,18 +46,7 @@ public class KeyOps implements KeyListener {
 		} else if (e.getKeyCode() == 82) {	// event: open object properties, key: ctrl+r
 			editor.openPropertiesDialog();
 		} else if (e.getKeyCode() == 27) {	// event: escape key, return to selection
-			editor.currentObj = null;
-			editor.currentPort = null;
-			editor.currentCon = null;
-			if (editor.firstPort != null) {
-				editor.firstPort.setConnected(false);
-				editor.firstPort = null;
-			}
-
-			editor.mListener.state = State.selection;
-			Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
-			editor.setCursor(cursor);
-			editor.repaint();
+			editor.stopRelationAdding();
 		}
 
 

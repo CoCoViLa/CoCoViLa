@@ -23,7 +23,7 @@ public class RelObj extends GObj{
 	}
 
 	public void drawClassGraphics(Graphics g) {
-       graphics.angle = angle;
+		graphics.angle = angle;
 		getGraphics().draw(getX(), getY(), getXsize(), getYsize(), g);
 		int xModifier = getX();
 		int yModifier = getY();
@@ -47,6 +47,22 @@ public class RelObj extends GObj{
 				}
 			}
 		}
+        int len = fields.size();
+		for (int i = 0; i < len; i++) {
+			ClassField field = (ClassField)fields.get(i);
+
+			if (field.defaultGraphics != null) {
+				field.defaultGraphics.angle = angle;
+				field.defaultGraphics.drawSpecial(xModifier ,
+					yModifier, getXsize(), getYsize(), g, field.name, field.value);
+			}
+			if (field.isKnown() && field.knownGraphics !=null) {
+				field.knownGraphics.angle = angle;
+				field.knownGraphics.drawSpecial(xModifier,
+					yModifier, getXsize(), getYsize(), g, field.name, field.value);
+			}
+		}
+
 
     }
 }
