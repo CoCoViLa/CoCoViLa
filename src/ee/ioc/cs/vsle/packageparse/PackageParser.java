@@ -29,15 +29,11 @@ public class PackageParser {
 	String element;
 	String path;
 	ArrayList classFields;
-	boolean classIsRelation;
+	Polygon polygon;
+	ArrayList polyXs = new ArrayList();
+	ArrayList polyYs = new ArrayList();
 	final int CLASS = 1, PORT_OPEN = 2, PORT_CLOSED = 3, PACKAGE = 4, FIELD = 5, FIELD_KNOWN = 6;
 
-	/**
-	 * Statuses:
-	 * 1 - class.
-	 * 2 - ports and related information.
-	 * 4 - package.
-	 */
 	int status;
 
 	/**
@@ -124,11 +120,11 @@ public class PackageParser {
 				status = PACKAGE;
 			}
 			if (element.equals("class")) {
+				newClass = new PackageClass();
 				status = CLASS;
 				String type = attrs.getValue("type");
-				classIsRelation = false;
 				if (type != null && type.equals("relation")) {
-					classIsRelation = true;
+					newClass.relation = true;
 				}
 			}
 			if (element.equals("graphics")) {
@@ -175,6 +171,21 @@ public class PackageParser {
 				classFields = new ArrayList();
 				;
 			}
+
+			if (element.equals("polygon")) {
+				//initiate them to gather all X and Y positions there.
+				makeInitialPolygon(attrs);
+
+			}
+
+			if (element.equals("point")) {
+				String x = attrs.getValue("x");
+				String y = attrs.getValue("y");
+				polyXs.add(x);
+				polyYs.add(y);
+			}
+
+
 			if (element.equals("field")) {
 				String name = attrs.getValue("name");
 				String type = attrs.getValue("type");
@@ -182,7 +193,6 @@ public class PackageParser {
 
 				newField = new ClassField(name, type, value);
 				classFields.add(newField);
-
 			}
 			if (element.equals("text")) {
 				String str = attrs.getValue("string");
@@ -321,6 +331,29 @@ public class PackageParser {
 
 		}
 
+		private void makeInitialPolygon(Attributes attrs) {
+			polyXs = new ArrayList();
+			polyYs = new ArrayList();
+			String colour = attrs.getValue("colour");
+			String filled = attrs.getValue("filled");
+			String stroke = attrs.getValue("stroke");
+			String transp = attrs.getValue("transparency");
+			String lineType = attrs.getValue("linetype");
+			double str = 1.0;
+			if (stroke != null) {
+				str = Double.parseDouble(stroke);
+			}
+			double tr = 1.0;
+			if (transp != null) {
+				tr = Double.parseDouble(transp);
+			}
+			int lt = 0;
+			if (lineType != null) {
+			  lt = Integer.parseInt(lineType);
+			}
+			polygon = new Polygon(Integer.parseInt(colour), Boolean.valueOf(filled).booleanValue(),str,tr, lt);
+		}
+
 		private Line makeLine(Attributes attrs, ClassGraphics newGraphics) {
 			int x1, x2, y1, y2;
 			int fixedX1 = 0, fixedX2 = 0, fixedY1 = 0, fixedY2 = 0;
@@ -438,11 +471,48 @@ public class PackageParser {
 				}
 				status = CLASS;
 			}
+
+			if (qName.equals("polygon")) {
+				//arrays of polygon points
+				int[] xs = new int[polyXs.size()];
+				int[] ys = new int[polyYs.size()];
+				//arrays of FIXED information about polygon points
+				int[] fxs = new int[polyXs.size()];
+				int[] fys = new int[polyYs.size()];
+
+
+				for (int i = 0; i< polyXs.size(); i++) {
+					String s = (String)polyXs.get(i);
+					int fixedX = 0, fixedY = 0;
+					//parse the coordinates and check if they are fixed or reverse fixed
+					if (s.endsWith("rf")) {
+						xs[i] = newGraphics.boundWidth;
+						fxs[i] = newGraphics.boundWidth - Integer.parseInt(s.substring(0, s.length()-2));
+					} else if  (s.endsWith("f")) {
+						xs[i] = Integer.parseInt(s.substring(0, s.length()-1));
+						fxs[i] = -1;
+					} else {
+						xs[i] = Integer.parseInt(s);
+						fxs[i] = 0;
+					}
+					s = (String)polyYs.get(i);
+					if (s.endsWith("rf")) {
+						ys[i] = newGraphics.boundHeight;
+						fys[i] = newGraphics.boundHeight - Integer.parseInt(s.substring(0, s.length()-2));
+					} else if  (s.endsWith("f")) {
+						ys[i] = Integer.parseInt(s.substring(0, s.length()-1));
+						fys[i] = -1;
+					} else {
+						ys[i] = Integer.parseInt(s);
+						fys[i] = 0;
+					}
+				}
+				polygon.setPoints(xs, ys, fxs, fys);
+				newGraphics.addShape(polygon);
+			}
+
 			if (qName.equals("graphics")) {
 
-				if (classIsRelation) {
-					newGraphics.relation = true;
-				}
 				if (status == FIELD) {
 					newField.defaultGraphics = newGraphics;
 				} else if (status == FIELD_KNOWN) {
@@ -469,7 +539,7 @@ public class PackageParser {
 				if (status == PACKAGE) {
 					pack.name = s;
 				} else { // else we a reading a class field
-					newClass = new PackageClass(s);
+					newClass.name = s;
 					// classNames.add(s);
 				}
 			}
@@ -483,23 +553,6 @@ public class PackageParser {
 			if (element.equals("icon")) {
 				newClass.icon = s;
 			}
-
-			/* if (element.equals("portname")) {
-			 newPort = new ee.ioc.cs.editor.vclass.Port(s);
-			 }
-			 if (element.equals("type")) {
-			 newPort.type = s;
-			 }
-			 if (element.equals("dataType")) {
-			 newPort.dataType = s;
-			 }
-			 if (element.equals("xpos")) {
-			 newPort.xPos = Integer.parseInt(s);
-			 }
-			 if (element.equals("ypos")) {
-			 newPort.yPos = Integer.parseInt(s);
-			 }*/
-
 		}
 
 		public void ignorableWhitespace(char buf[], int offset, int len) throws SAXException {// Purposely ignore it.

@@ -70,20 +70,9 @@ public class ClassGraphics implements Serializable {
 	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
 		Shape s;
 
-		if (relation) {
-			g2.translate(xPos, yPos);
-			g2.rotate(angle);
-			g2.translate(-1*(xPos), -1*(yPos));
-		}
-
 		for (int i = 0; i < shapes.size(); i++) {
 			s = (Shape) shapes.get(i);
 			s.draw(xPos, yPos, Xsize, Ysize, g2);
-		}
-		if (relation) {
-			g2.translate(xPos, yPos);
-			g2.rotate(-1*angle);
-			g2.translate(-1*(xPos), -1*(yPos));
 		}
 
 	} // draw
@@ -91,23 +80,12 @@ public class ClassGraphics implements Serializable {
 	void drawSpecial(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2, String name, String value) {
 		Shape s;
 
-		if (relation) {
-			g2.translate(xPos, yPos);
-			g2.rotate(angle);
-			g2.translate(-1*(xPos), -1*(yPos));
-		}
-
 		for (int i = 0; i < shapes.size(); i++) {
 			s = (Shape) shapes.get(i);
 			if (s instanceof Text)
 				((Text)s).drawSpecial(xPos, yPos, Xsize, Ysize, g2, name, value, angle);
 			else
 				s.draw(xPos, yPos, Xsize, Ysize, g2);
-		}
-		if (relation) {
-			g2.translate(xPos, yPos);
-			g2.rotate(-1*angle);
-			g2.translate(-1*(xPos), -1*(yPos));
 		}
 
 	} // draw

@@ -12,9 +12,14 @@ public class PackageClass implements Serializable {
 	public ClassGraphics graphics;
 	public ArrayList ports = new ArrayList();
 	public String description;
+	public boolean relation = false;
 
 	public PackageClass(String name) {
 		this.name = name;
+	}
+
+	public PackageClass() {
+		super();
 	}
 
 	public String toString() {

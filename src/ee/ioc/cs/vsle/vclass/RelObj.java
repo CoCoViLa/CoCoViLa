@@ -68,9 +68,7 @@ public class RelObj extends GObj {
 	public Object clone() {
 		RelObj obj = (RelObj) super.clone();
 		obj.startPort = (Port)startPort.clone();
-		obj.startPort.obj = obj;
 		obj.endPort = (Port)endPort.clone();
-		obj.endPort.obj = obj;
 		return obj;
 	}
 }

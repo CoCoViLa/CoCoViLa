@@ -294,6 +294,22 @@ public class Canvas extends JPanel implements ActionListener {
 			obj = (GObj) newObjects.get(i);
 			objects2.addAll(obj.getComponents());
 		}
+
+		GObj obj2;
+		for (int i = 0; i < objects2.size(); i++) {
+			obj = (GObj) objects2.get(i);
+			if (obj instanceof RelObj) {
+				for (int j = 0; j < objects2.size(); j++) {
+					obj2 = (GObj) objects2.get(j);
+                    if (((RelObj)obj).startPort.obj.name.equals(obj2.name))
+						((RelObj)obj).startPort.obj = obj2;
+					if (((RelObj)obj).endPort.obj.name.equals(obj2.name))
+						((RelObj)obj).endPort.obj = obj2;
+				}
+			}
+		}
+
+
 		// now the hard part - we have to clone all the connections
 		Connection con;
 		GObj beginObj;
@@ -491,18 +507,14 @@ public class Canvas extends JPanel implements ActionListener {
 					java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 			}
 
-			Date d = new Date();
-			long oldtime, time;
-			oldtime = d.getTime();
 
+			long time;
+			time = System.currentTimeMillis();
 			for (int i = 0; i < objects.size(); i++) {
 				obj = (GObj) objects.get(i);
 				obj.drawClassGraphics(g2);
 			}
-
-			d = new Date();
-			time = (d.getTime() - oldtime);
-			System.out.println("objeckts: "+ time);
+			System.out.println("objeckts: " + (System.currentTimeMillis() - time));
 
 			g2.setColor(Color.blue);
 			for (int i = 0; i < connections.size(); i++) {

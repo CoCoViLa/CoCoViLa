@@ -11,20 +11,10 @@ public abstract class Shape implements Serializable, Cloneable {
 
 	public int x;
 	public int y;
-
-	int difWithMasterX;
-	int difWithMasterY;
-
 	public int width;
 	public int height;
-
-	String className;
-
-	public ArrayList ports = new ArrayList();
-	public ArrayList fields = new ArrayList();
-
-	public ClassGraphics graphics;
-
+	int difWithMasterX;
+	int difWithMasterY;
 	//public abstract void drawSelection();
 
 	public Shape() {
@@ -35,7 +25,6 @@ public abstract class Shape implements Serializable, Cloneable {
 		this.y = y;
 		this.width = width;
 		this.height = height;
-		this.className = name;
 	}
 
 	public void setFont(Font f) {
