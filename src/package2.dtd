@@ -90,7 +90,8 @@
 	filled 		(true|false) #IMPLIED
 	fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
-        transparency	CDATA	#IMPLIED>		   
+	linetype	CDATA	#IMPLIED
+        transparency	CDATA	#IMPLIED>
 <!ATTLIST field 
         name		CDATA   #REQUIRED
         type		CDATA   #IMPLIED
@@ -104,6 +105,7 @@
         fontname        CDATA   #REQUIRED
         fontstyle       CDATA   #REQUIRED
         fontsize        CDATA   #REQUIRED
+        fixedsize	CDATA   #IMPLIED
         transparency	CDATA	#IMPLIED>
 <!ATTLIST port
 	id 		CDATA 	#IMPLIED
