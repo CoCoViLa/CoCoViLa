@@ -94,21 +94,20 @@ public class Alias extends ClassField {
 	} // getAliasType
 
 	public String getRealType() {
-		String type = null;
+		String type = "";
 
-		ClassField cf1, cf2;
-		for (int i = 0; i < vars.size(); i++) {
-			cf1 = (ClassField) vars.get(i);
-			if (vars.size() > 1) {
-				cf2 = (ClassField) vars.get(i + 1);
-				if (!cf1.type.equals(cf2.type)) {
-					return getAliasType();
-				}
-			} else
-				type = cf1.type+"[]";
-
-		}
-		return type;
+		ClassField cf1 = null, cf2;
+                if( vars.size() == 1 ) {
+                    cf1 = (ClassField) vars.get(0);
+                }
+                for ( int i = 1; i < vars.size(); i++ ) {
+                    cf1 = ( ClassField ) vars.get( i - 1 );
+                    cf2 = ( ClassField ) vars.get( i );
+                    if ( !cf1.type.equals( cf2.type ) ) {
+                        return getAliasType();
+                    }
+                }
+		return cf1.type+"[]";
 	}
 
 

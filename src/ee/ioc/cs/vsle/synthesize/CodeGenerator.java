@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.synthesize;
 
 import java.util.*;
 import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.Alias;
 
 public class CodeGenerator {
 
@@ -207,6 +208,9 @@ public class CodeGenerator {
             token = TOKEN_LONG;
         } else if ( varType.equals( TOKEN_BOOLEAN.getType() ) ) {
             token = TOKEN_BOOLEAN;
+        } else if ( varType.equals( "alias" ) ) {
+            varType = ((Alias)var.field).getRealType();
+            token = TOKEN_OBJECT;
         } else {
             token = TOKEN_OBJECT;
         }
@@ -215,7 +219,7 @@ public class CodeGenerator {
 
         if ( isInput ) {
             if ( token == TOKEN_OBJECT ) {
-                s = var.toString() + " = (" + var.type + ")in[" + num + "];\n";
+                s = var.toString() + " = (" + varType + ")in[" + num + "];\n";
             } else {
                 s = var.toString()
                     + " = ((" + token.getObjType() + ")in[" + num + "])."
