@@ -19,7 +19,9 @@ public class Optimizer {
 		ArrayList removeThese = new ArrayList();
 
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
-			rel = (Rel) algorithm.get(i);
+            if(!(algorithm.get(i) instanceof String))
+                continue;
+            rel = (Rel) algorithm.get(i);
 			boolean relIsNeeded = false;
 
 			for (int j = 0; j < rel.outputs.size(); j++) {
