@@ -47,10 +47,11 @@ public class Planner {
              !computeAll ) {
             return m_problem.algorithm;
         } else {
-//            long start = System.currentTimeMillis();
             db.p( "Subtasks solved: " + subgoalBackwardSearch( m_problem, computeAll ) );
-//            long end = System.currentTimeMillis() - start;
-//            db.p( "time: " + end );
+
+            if ( !m_problem.getTargetVars().isEmpty() ) {
+                linearForwardSearch( m_problem, computeAll, false, false );
+            }
         }
         return m_problem.algorithm;
     }
