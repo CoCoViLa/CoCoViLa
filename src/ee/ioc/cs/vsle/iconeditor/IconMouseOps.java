@@ -909,8 +909,7 @@ class IconMouseOps
 				}
 			} else if (e.getActionCommand().equals(Look.LOOK_3D)) {
 				try {
-					UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.
-						KunststoffLookAndFeel());
+					//UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.						KunststoffLookAndFeel());
 					SwingUtilities.updateComponentTreeUI(editor);
 				} catch (Exception uie) {
 					uie.printStackTrace();

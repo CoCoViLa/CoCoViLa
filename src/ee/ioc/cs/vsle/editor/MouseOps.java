@@ -40,7 +40,7 @@ class MouseOps
 		this.state = state;
 	}
 
-	void addObj(int x, int y, String state) {
+	void addObj() {
 		editor.objects.add(editor.currentObj);
 		editor.currentObj = null;
 	}
@@ -204,8 +204,8 @@ class MouseOps
 			} else {
 				if (state.startsWith("??")) { //if class is of type relation
 					addingSpecialRelation(y, x);
-				} else if (editor.currentObj != null) {
-					addObj(x, y, state);
+                } else if (editor.currentObj != null) {
+					addObj();
 					state = State.selection;
 					Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
 
@@ -229,6 +229,19 @@ class MouseOps
 					editor.mouseX = x;
 					editor.mouseY = y;
 				} else {
+                    Port port1 = (Port)editor.currentObj.ports.get(0);
+                    Port port2 = (Port)editor.currentObj.ports.get(1);
+					Connection con = new Connection(editor.firstPort, port1);
+					editor.firstPort.addConnection(con);
+					port1.addConnection(con);
+					editor.connections.add(con);
+					con = new Connection(port2, port);
+					port2.addConnection(con);
+					port.addConnection(con);
+					editor.connections.add(con);
+                    addObj();
+                    editor.firstPort = null;
+                    setState(State.selection);
 
 				}
 			}
@@ -734,16 +747,17 @@ class MouseOps
 				editor.mListener.setState(e.getActionCommand());
 				GObj obj;
 				PackageClass pClass;
-				if (state.startsWith("??"))
+                if (state.startsWith("??")) {
                     pClass = editor.vPackage.getClass(state.substring(2));
-				else
+                } else {
 					pClass = editor.vPackage.getClass(state);
+                }
 
 
 				db.p("PCLASS: " + pClass);
 				db.p("GRAPHICS: " + pClass.graphics);
 				db.p("STATE: " + state);
-				obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.name);
+				obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
 
 				obj.ports = (ArrayList) pClass.ports.clone();
 				Port port;
@@ -788,7 +802,7 @@ class MouseOps
 				}
 
 				obj.graphics = pClass.graphics;
-				obj.setName(state + "_" + Integer.toString(editor.objCount));
+				obj.setName(pClass.name + "_" + Integer.toString(editor.objCount));
 				editor.objCount++;
 
 				obj.graphics = pClass.graphics;
