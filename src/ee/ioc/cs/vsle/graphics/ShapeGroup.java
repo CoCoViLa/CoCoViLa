@@ -354,7 +354,7 @@ public class ShapeGroup extends Shape implements Serializable {
 		  s.setPosition(s.getX()+deltaX, s.getY()+deltaY);
         }
       } else {
-		shape.setPosition(shape.getX() + deltaX, shape.getY() + deltaY);
+		shape.setPosition(deltaX, deltaY);
 	  }
 	}
 	setXY();

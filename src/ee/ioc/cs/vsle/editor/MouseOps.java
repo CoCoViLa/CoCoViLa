@@ -24,7 +24,6 @@ class MouseOps
 	implements ActionListener {
 
 	Editor editor;
-	int relCount;
 	public Point draggedBreakPoint;
 	public String state = "";
 
@@ -176,7 +175,6 @@ class MouseOps
 							editor.firstPort.setConnected(true);
 							editor.currentCon = new Connection();
 							editor.currentCon.addBreakPoint(new Point(editor.firstPort.getX() + editor.firstPort.obj.getX(), editor.firstPort.getY() + editor.firstPort.obj.getY()));
-							editor.obj1 = obj;
 							editor.mouseX = x;
 							editor.mouseY = y;
 						}else if  (canBeConnected(editor.firstPort, port)) {
@@ -194,7 +192,6 @@ class MouseOps
 								editor.currentCon.addBreakPoint(new Point(port.getX() + port.obj.getX(), port.getY() + port.obj.getY()));
 								editor.connections.add(editor.currentCon);
 								editor.firstPort = null;
-								editor.obj1 = null;
 							}
 						}
 					}
@@ -254,7 +251,6 @@ class MouseOps
 				if (editor.firstPort == null) {
 					editor.firstPort = port;
 					editor.firstPort.setConnected(true);
-					editor.obj1 = obj;
 					editor.mouseX = x;
 					editor.mouseY = y;
 				} else {

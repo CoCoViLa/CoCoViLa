@@ -132,8 +132,8 @@ public class Text extends Shape implements Serializable {
   } // getRealWidth
 
   public void setPosition(int x, int y) {
-	this.x = x;
-	this.y = y;
+	this.x =  getX() + x;
+	this.y =  getY() + y;
   } // setPosition
 
   /**

@@ -41,7 +41,6 @@ public class Editor extends JFrame {
 	ConnectionList connections;
 	ObjectList objects;
 	GObj currentObj;
-	GObj obj1;
 	Port firstPort;
 	Port currentPort;
 	Connection currentCon;

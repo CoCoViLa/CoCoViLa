@@ -93,8 +93,8 @@ public class BoundingBox extends Shape 	implements Serializable {
   } // toString
 
   public void setPosition(int x, int y) {
-	this.x = x;
-	this.y = y;
+	this.x =  getX() + x;
+	this.y =  getY() + y;
   } // setPosition
 
   public int getRealHeight() {

@@ -128,8 +128,8 @@ public class Oval extends Shape implements Serializable {
   } // setSelected
 
   public void setPosition(int x, int y) {
-	this.x = x;
-	this.y = y;
+	this.x =  getX() + x;
+	this.y =  getY() + y;
   } // setPosition
 
   public boolean isInside(int x1, int y1, int x2, int y2) {

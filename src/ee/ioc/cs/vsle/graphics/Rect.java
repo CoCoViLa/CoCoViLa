@@ -161,8 +161,8 @@ public class Rect extends Shape implements Serializable {
   } // setColor
 
   public void setPosition(int x, int y) {
-	this.x = x;
-	this.y = y;
+	this.x =  getX() + x;
+	this.y =  getY() + y;
   } // setPosition
 
   /**

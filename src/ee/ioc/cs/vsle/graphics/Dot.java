@@ -165,8 +165,8 @@ public class Dot extends Shape implements Serializable {
    * @param y int - new y coordinate of the shape.
    */
   public void setPosition(int x, int y) {
-	this.x = x;
-	this.y = y;
+	this.x =  getX() + x;
+	this.y =  getY() + y;
   } // setPosition
 
   /**

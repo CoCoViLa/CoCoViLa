@@ -13,10 +13,6 @@ public class Connection implements Serializable {
 
 	public Port beginPort;
 	public Port endPort;
-	public int break1X;
-	public int break2X;
-	public int break1Y;
-	public int break2Y;
 	public int numOfBreakPoints = 0;
 	public boolean selected;
 	public ArrayList breakPoints = new ArrayList();
