@@ -280,7 +280,8 @@ public class CodeGenerator {
                 out += ", " + var.name;
             }
         }
-        out += " };\n";
+        out += " };\n"
+                + offset + "return new Object[]{ " + aliasTmp + " };\n";
 
         return out;
     }
