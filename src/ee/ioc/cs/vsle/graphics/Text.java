@@ -312,7 +312,7 @@ public class Text extends Shape implements Serializable {
 	return "<text string=\"" + stringValue + "\" colour=\"" + colorInt + "\" x=\""
 		+ (x - boundingboxX) + "\" y=\"" + (y - boundingboxY)
 		+ "\" fontname=\"" + font.getName() + "\" fontstyle=\""
-		+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\"/>\n";
+		+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\" transparency=\""+(int)this.transparency+"\"/>\n";
   } // toFile
 
   public String toText() {

@@ -414,7 +414,7 @@ public class Arc extends Shape implements Serializable {
 	return "<arc x=\"" + (x - boundingboxX) + "\" y=\"" + (y - boundingboxY)
 		+ "\" width=\"" + width + "\" height=\"" + height + "\" startAngle=\""
 		+ startAngle + "\" arcAngle=\"" + arcAngle + "\" colour=\"" + colorInt
-		+ "\" filled=\"" + fill + "\" fixed=\""+isFixed()+"\"/>\n";
+		+ "\" filled=\"" + fill + "\" fixed=\""+isFixed()+"\" stroke=\""+(int)this.lineWeight+"\" transparency=\""+(int)this.transparency+"\"/>\n";
   } // toFile
 
   public String toText() {

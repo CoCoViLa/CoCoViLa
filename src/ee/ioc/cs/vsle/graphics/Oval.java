@@ -280,7 +280,7 @@ public class Oval extends Shape implements Serializable {
 
 	return "<oval x=\"" + (x - boundingboxX) + "\" y=\""
 		+ (y - boundingboxY) + "\" width=\"" + width + "\" height=\"" + height
-		+ "\" colour=\"" + colorInt + "\" filled=\"" + fill + "\" fixed=\""+isFixed()+"\"/>\n";
+		+ "\" colour=\"" + colorInt + "\" filled=\"" + fill + "\" fixed=\""+isFixed()+"\" stroke=\""+(int)this.lineWeight+"\" transparency=\""+(int)this.transparency+"\"/>\n";
   } // toFile
 
   public String toText() {

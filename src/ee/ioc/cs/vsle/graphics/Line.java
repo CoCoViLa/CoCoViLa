@@ -374,7 +374,7 @@ public class Line extends Shape implements Serializable {
 		return "<line x1=\"" + (startX - boundingboxX) + "\" y1=\""
 			+ (startY - boundingboxY) + "\" x2=\"" + (endX - boundingboxX)
 			+ "\" y2=\"" + (endY - boundingboxY) + "\" colour=\"" + colorInt
-			+ "\" fixed=\"" + isFixed() + "\"/>\n";
+			+ "\" fixed=\"" + isFixed() + "\" stroke=\""+(int)this.lineWeight+"\" transparency=\""+(int)this.transparency+"\"/>\n";
 	} // toFile
 
 	public String toText() {
