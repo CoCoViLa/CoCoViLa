@@ -57,19 +57,19 @@ public class VMath {
 
         int realX = x - startX;
         int realY = y -startY;
-        if (realX > 0 && realY> 0 ) {
+        if (realX >= 0 && realY>= 0 ) {
           return (Math.atan((double)realY/(double)realX));
         }
 
-        if (realX < 0 && realY> 0 ) {
+        if (realX <= 0 && realY>= 0 ) {
           return (Math.atan((double)realY/(double)realX) +Math.PI);
         }
 
-        if (realX < 0 && realY < 0 ) {
+        if (realX <= 0 && realY <= 0 ) {
           return(Math.atan((double)realY/(double)realX) +Math.PI);
         }
 
-        if (realX > 0 && realY < 0 ) {
+        if (realX >= 0 && realY <= 0 ) {
           return(Math.atan((double)realY/(double)realX) +2*Math.PI);
         }
         return 0.0;

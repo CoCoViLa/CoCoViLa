@@ -10,8 +10,7 @@ public class Port implements Cloneable, Serializable {
 	public GObj obj;
 	int width, height;
 	public String name;
-	String type;
-	String dataType;
+	public String type;
 	public int x;
 	public int y;
 	boolean strict, area;
@@ -22,8 +21,9 @@ public class Port implements Cloneable, Serializable {
 	boolean watched = false;
 	boolean hilighted = false;
 
-	public Port(String name, int x, int y, String portConnection, String strict) {
+	public Port(String name, String type, int x, int y, String portConnection, String strict) {
 		this.name = name;
+		this.type = type;
 		this.x = x;
 
 		this.y = y;
@@ -65,6 +65,14 @@ public class Port implements Cloneable, Serializable {
 
 	public int getY() {
 		return (int) (obj.getYSize() * y);
+	}
+
+	public int getRealX() {
+		return (int) (obj.getXSize() * x+ obj.getX());
+	}
+
+	public int getRealY() {
+		return (int) (obj.getYSize() * y + obj.getY());
 	}
 
 	public int getCenterX() {
@@ -234,6 +242,12 @@ public class Port implements Cloneable, Serializable {
 
 			return null;
 		}
+	}
+
+	public boolean isAny() {
+		if (name.equals("*any")|| type.equals("any") )
+			return true;
+		return false;
 	}
 
 }

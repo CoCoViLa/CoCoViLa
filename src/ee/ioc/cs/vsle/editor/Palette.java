@@ -47,15 +47,6 @@ public class Palette {
 		magnifier.setToolTipText("Magnifier");
 		toolBar.add(magnifier);
 
-
-		icon = new ImageIcon("images/rel.gif");
-		JButton draw = new JButton(icon);
-
-		draw.setActionCommand(State.cloneDrawing);
-		draw.addActionListener(mListener);
-		toolBar.add(draw);
-
-
 		// read package info and add it to tables
 		for (int i = 0; i < vPackage.classes.size(); i++) {
 			PackageClass pClass = (PackageClass) vPackage.classes.get(i);

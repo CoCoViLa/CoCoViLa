@@ -1,18 +1,12 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import ee.ioc.cs.vsle.editor.State;
+import ee.ioc.cs.vsle.editor.*;
 
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.BorderLayout;
-import javax.swing.JToolBar;
-import javax.swing.JLabel;
-import javax.swing.JButton;
-import javax.swing.ImageIcon;
-import javax.swing.BorderFactory;
-import javax.swing.SpinnerModel;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
+import javax.swing.*;
+import javax.swing.event.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -26,11 +20,11 @@ public class IconPalette {
 	IconEditor editor;
 	JLabel lblLineWidth = new JLabel(" Size: ");
 	JLabel lblTransparency;
-	// JLabel lblRotation = new JLabel(" Rotation: ");
+	JLabel lblZoom;
 
 	Spinner spinnerLineWidth = new Spinner(1, 10, 1);
 	Spinner spinnerTransparency = new Spinner(0, 100, 1);
-	// Spinner spinnerRotation = new Spinner(0,180,1);
+	Spinner spinnerZoom = new Spinner(10,1000,10);
 
 	// BUTTONS
 	JButton selection;
@@ -57,11 +51,17 @@ public class IconPalette {
 
 		spinnerLineWidth.setPreferredSize(new Dimension(40, 20));
 		spinnerLineWidth.setMaximumSize(spinnerLineWidth.getPreferredSize());
-		spinnerLineWidth.setBorder(BorderFactory.createEtchedBorder());
+		spinnerLineWidth.setBorder(BorderFactory.createLineBorder(java.awt.Color.white,0));
 
 		spinnerTransparency.setPreferredSize(new Dimension(45, 20));
 		spinnerTransparency.setMaximumSize(spinnerTransparency.getPreferredSize());
-		spinnerTransparency.setBorder(BorderFactory.createEtchedBorder());
+		spinnerTransparency.setBorder(BorderFactory.createLineBorder(java.awt.Color.white,0));
+
+		spinnerZoom.setPreferredSize(new Dimension(50, 20));
+		spinnerZoom.setMaximumSize(spinnerZoom.getPreferredSize());
+		spinnerZoom.setBorder(BorderFactory.createLineBorder(java.awt.Color.white,0));
+
+		spinnerZoom.setValue("100");
 
 		// Action listener added as anonymous class.
 		ChangeListener listener = new ChangeListener() {
@@ -87,9 +87,27 @@ public class IconPalette {
 			}
 		};
 
+		// Action listener added as anonymous class.
+		ChangeListener zoomListener = new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				SpinnerModel source = (SpinnerModel) e.getSource();
+				try {
+				    editor.mListener.state = State.selection;
+					double zoomFactor = Double.parseDouble(String.valueOf(source.getValue()));
+					editor.zoom(zoomFactor, RuntimeProperties.zoomFactor);
+					RuntimeProperties.zoomFactor = zoomFactor;
+					editor.repaint();
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+		};
+
+
 		// add action listeners to spinners.
 		spinnerLineWidth.getModel().addChangeListener(listener);
 		spinnerTransparency.getModel().addChangeListener(transpListener);
+		spinnerZoom.getModel().addChangeListener(zoomListener);
 
 		//add relation and selection tool.
 		icon = new ImageIcon("images/mouse.gif");
@@ -212,8 +230,16 @@ public class IconPalette {
 		lblTransparency = new JLabel(icon);
 		lblTransparency.setToolTipText("Object transparency percentage");
 
+        icon = new ImageIcon("images/zoom.gif");
+	    lblZoom = new JLabel(icon);
+		lblZoom.setToolTipText("Object zoom percentage");
+
+
 		toolBar.add(lblTransparency);
 		toolBar.add(spinnerTransparency);
+
+        toolBar.add(lblZoom);
+		toolBar.add(spinnerZoom);
 
 		editor.mainPanel.add(toolBar, BorderLayout.NORTH);
 

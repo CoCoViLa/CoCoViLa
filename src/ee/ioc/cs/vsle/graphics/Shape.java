@@ -25,7 +25,7 @@ public abstract class Shape implements Serializable, Cloneable {
 
   public ClassGraphics graphics;
 
-  public abstract void drawSelection();
+  //public abstract void drawSelection();
 
   public Shape() {
   }
@@ -94,9 +94,7 @@ public abstract class Shape implements Serializable, Cloneable {
 
   public abstract void setStrokeWidth(double strokeWidth);
 
-  public abstract void setAntialiasing(boolean b);
-
-  public abstract void setMultSize(float s);
+  public abstract void setMultSize(float s1, float s2);
 
   public abstract void setSelected(boolean b);
 
@@ -107,8 +105,6 @@ public abstract class Shape implements Serializable, Cloneable {
   public abstract int getX();
 
   public abstract int getY();
-
-  public abstract float getSize();
 
   public abstract Color getColor();
 
@@ -135,6 +131,10 @@ public abstract class Shape implements Serializable, Cloneable {
   public abstract String toString();
 
   public abstract boolean contains(int pointX, int pointY);
+
+  public abstract void setFixed(boolean b);
+
+  public abstract boolean isFixed();
 
   public Object clone() {
 	try {

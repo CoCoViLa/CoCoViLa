@@ -45,16 +45,6 @@ public class Text extends Shape implements Serializable {
   private int w;
 
   /**
-   * Shape zoom factor. Default value: 1.
-   */
-  private float size = 1;
-
-  /**
-   * Shape graphics.
-   */
-  Graphics2D g2;
-
-  /**
    * Alpha value of a color, used
    * for defining the transparency of a filled shape.
    */
@@ -66,9 +56,9 @@ public class Text extends Shape implements Serializable {
   private boolean selected = false;
 
   /**
-   * Indicates if the shape is drawn antialiased or not.
+   * Defines if the shape is resizable or not.
    */
-  private boolean antialiasing = true;
+  private boolean fixed = false;
 
   public Text(int x, int y, Font font, Color color, double transp, String s) {
 	this.x = x;
@@ -78,6 +68,14 @@ public class Text extends Shape implements Serializable {
 	this.s = s;
 	this.transparency = (float) transp;
   } // Text
+
+  public void setFixed(boolean b) {
+	this.fixed = b;
+  }
+
+  public boolean isFixed() {
+	return this.fixed;
+  }
 
   public boolean isFilled() {
 	return false;
@@ -89,14 +87,6 @@ public class Text extends Shape implements Serializable {
 
   public void setStrokeWidth(double width) {
   } // setStrokeWidth
-
-  public float getSize() {
-	return this.size;
-  } // getSize
-
-  public void setAntialiasing(boolean b) {
-	this.antialiasing = b;
-  } // setAntialiasing
 
   /**
    * Returns the stroke with of a shape.
@@ -118,16 +108,26 @@ public class Text extends Shape implements Serializable {
 	return getName();
   } // toString
 
-  public void setMultSize(float s) {
-	this.size = getSize() * s;
-  } // setMultSize
+  /**
+   * Set size using zoom multiplication.
+   * @param s float - set size using zoom multiplication.
+   */
+  public void setMultSize(float s1, float s2) {
+	x = x*(int)s1/(int)s2;
+	y = y*(int)s1/(int)s2;
+	this.w = this.w*(int)s1/(int)s2;
+	this.h = this.h*(int)s1/(int)s2;
+	int fontsize = font.getSize()*(int)s1/(int)s2;
+
+	this.font = new Font(font.getName(), font.getStyle(), fontsize);
+   } // setMultSize
 
   public int getRealHeight() {
-	return (int) (getHeight() * getSize());
+	return getHeight();
   } // getRealHeight
 
   public int getRealWidth() {
-	return (int) (getWidth() * getSize());
+	return getWidth();
   } // getRealWidth
 
   public void setPosition(int x, int y) {
@@ -159,35 +159,6 @@ public class Text extends Shape implements Serializable {
    * @param cornerClicked int - number of the clicked corner.
    */
   public void resize(int deltaW, int deltaH, int cornerClicked) {
-
-	if (cornerClicked == 1) { // TOP-LEFT
-	  if ( (getWidth() - deltaW) > 0 && (getHeight() - 2 * deltaH) > 0) {
-		this.x += deltaW;
-		this.y += deltaH;
-		this.width -= deltaW;
-		this.height -= 2 * deltaH;
-	  }
-	}
-	else if (cornerClicked == 2) { // TOP-RIGHT
-	  if ( (getWidth() + deltaW) > 0 && (getHeight() - 2 * deltaH) > 0) {
-		this.y += deltaH;
-		this.width += deltaW;
-		this.height -= 2 * deltaH;
-	  }
-	}
-	else if (cornerClicked == 3) { // BOTTOM-LEFT
-	  if ( (getWidth() - deltaW) > 0 && (getHeight() + deltaH) > 0) {
-		this.x += deltaW;
-		this.width -= deltaW;
-		this.height += deltaH;
-	  }
-	}
-	else if (cornerClicked == 4) { // BOTTOM-RIGHT
-	  if ( (getWidth() + deltaW) > 0 && (getHeight() + deltaH) > 0) {
-		this.width += deltaW;
-		this.height += deltaH;
-	  }
-	}
   } // resize
 
   /**
@@ -216,27 +187,17 @@ public class Text extends Shape implements Serializable {
    * @return int - corner number the mouse was clicked in.
    */
   public int controlRectContains(int pointX, int pointY) {
-	if ( (pointX >= x) && (pointY >= y)) {
-	  if ( (pointX <= x + 4) && (pointY <= y + 4)) {
+	if (pointX >= x && pointY >= y && pointX <= x + 4 && pointY <= y + 4) {
 		return 1;
-	  }
 	}
-	if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
-	  if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
+	if (pointX >= x + width - 4 && pointY >= y && pointX <= x + width && pointY <= y + 4) {
 		return 2;
-	  }
 	}
-	if ( (pointX >= x) && (pointY >= y + (int) (size * (height / 2)) - 4)) {
-	  if ( (pointX <= x + 4) && (pointY <= y + (int) (size * (height / 2)))) {
+	if (pointX >= x && pointY >= y + height / 2 - 4 && pointX <= x + 4 && pointY <= y + height / 2) {
 		return 3;
-	  }
 	}
-	if ( (pointX >= x + (int) (size * (width)) - 4)
-		&& (pointY >= y + (int) (size * (height / 2)) - 4)) {
-	  if ( (pointX <= x + (int) (size * (width)))
-		  && (pointY <= y + (int) (size * (height / 2)))) {
+	if (pointX >= x + width - 4 && pointY >= y + height / 2 - 4 && pointX <= x + width && pointY <= y + height / 2) {
 		return 4;
-	  }
 	}
 	return 0;
   } // controlRectContains
@@ -298,8 +259,7 @@ public class Text extends Shape implements Serializable {
   } // getY
 
   public boolean contains(int pointX, int pointY) {
-	if (pointX >= x && pointX <= x + this.w &&
-		pointY >= y - this.h && pointY <= y) {
+	if (pointX >= x && pointX <= x + this.w && pointY >= y - this.h && pointY <= y) {
 	  return true;
 	}
 	else {
@@ -308,7 +268,7 @@ public class Text extends Shape implements Serializable {
   } // contains
 
   public boolean isInside(int x1, int y1, int x2, int y2) {
-	if (x >= x1 && y >= y1 && (x + this.w) <= x2 && (y - this.h) <= y2) {
+	if (x >= x1 && y >= y1 && x + this.w <= x2 && y - this.h <= y2) {
 	  return true;
 	}
 	else {
@@ -317,7 +277,7 @@ public class Text extends Shape implements Serializable {
   } // isInside
 
   public boolean isInsideRect(int x1, int y1, int x2, int y2) {
-	if (x1 < x && y1 < y && x2 > x + (int) this.w && y2 > y + (int) this.h) {
+	if (x1 < x && y1 < y && x2 > x + this.w && y2 > y + this.h) {
 		return true;
 	}
 	return false;
@@ -346,29 +306,26 @@ public class Text extends Shape implements Serializable {
   public String toFile(int boundingboxX, int boundingboxY) {
 	int colorInt = 0;
 
-	if (color != null) {
-	  colorInt = color.getRGB();
-	}
+	if (color != null) colorInt = color.getRGB();
+
 	return "<text string=\"" + s + "\" colour=\"" + colorInt + "\" x=\""
 		+ (x - boundingboxX) + "\" y=\"" + (y - boundingboxY)
 		+ "\" fontname=\"" + font.getName() + "\" fontstyle=\""
-		+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\"/>";
+		+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\"/>\n";
   } // toFile
 
   public String toText() {
 	int colorInt = 0;
 
-	if (color != null) {
-	  colorInt = color.getRGB();
-	}
+	if (color != null) colorInt = color.getRGB();
+
    return "TEXT:"+x+":"+y+":"+colorInt+":"+font.getName()+":"+font.getStyle()+":"+font.getSize()+":"+(int)this.transparency+":"+s;
   } // toText
 
 
-  public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
-				   Graphics g) {
-	System.out.println("x=" + x + ", y=" + y);
-	g2 = (Graphics2D) g;
+  public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
+
+	Graphics2D g2 = (Graphics2D) g;
 
 	java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
 
@@ -381,9 +338,9 @@ public class Text extends Shape implements Serializable {
 
 	alpha = (float) (1 - (this.transparency / 100));
 
-	float red = (float) color.getRed() * 100 / 256 / 100;
-	float green = (float) color.getGreen() * 100 / 256 / 100;
-	float blue = (float) color.getBlue() * 100 / 256 / 100;
+	float red = (float) color.getRed() / 256;
+	float green = (float) color.getGreen() / 256;
+	float blue = (float) color.getBlue() / 256;
 
 	g2.setColor(new Color(red, green, blue, alpha));
 
@@ -392,8 +349,10 @@ public class Text extends Shape implements Serializable {
 						  java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 	}
 
-	g2.drawString(s, xModifier + (int) (Xsize * x),
-				  yModifier + (int) (Ysize * y));
+	int a = xModifier + (int) (Xsize * x);
+	int b = yModifier + (int) (Ysize * y);
+
+	g2.drawString(s,a,b);
 
 	if (selected) {
 	  drawSelection();

@@ -36,11 +36,6 @@ public class Dot extends Shape implements Serializable {
   private float alpha;
 
   /**
-   * Shape graphics.
-   */
-  Graphics2D g2;
-
-  /**
    * Line weight, logically equals to stroke width.
    */
   private float lineWeight;
@@ -49,11 +44,6 @@ public class Dot extends Shape implements Serializable {
    * Name of the shape.
    */
   private String name;
-
-  /**
-   * Percentage for resizing, 1 means real size.
-   */
-  private float size = 1;
 
   /**
    * Dot transparency.
@@ -66,14 +56,14 @@ public class Dot extends Shape implements Serializable {
   private boolean selected = false;
 
   /**
-   * Indicates if the dot should be drawn antialiased or not.
-   */
-  private boolean antialiasing = true;
-
-  /**
    * Indicates if the dot is filled or not.
    */
   private boolean filled = false;
+
+  /**
+   * Defines if the shape is resizable or not.
+   */
+  private boolean fixed = false;
 
   /**
    * Class constructor.
@@ -92,6 +82,14 @@ public class Dot extends Shape implements Serializable {
 	this.transparency = (float) transp;
 	this.lineWeight = (float) strokeWidth;
   } // Dot
+
+  public void setFixed(boolean b) {
+	this.fixed = b;
+  }
+
+  public boolean isFixed() {
+	return this.fixed;
+  }
 
   public void setName(String s) {
 	this.name = s;
@@ -113,52 +111,45 @@ public class Dot extends Shape implements Serializable {
 	return getName();
   } // toString
 
-  public void setAntialiasing(boolean b) {
-	this.antialiasing = b;
-  } // setAntialiasing
-
   public int getRealHeight() {
-	return (int) (getHeight() * getSize());
+	return getHeight();
   } // getRealHeight
 
   public int getRealWidth() {
-	return (int) (getWidth() * getSize());
+	return getWidth();
   } // getRealWidth
 
-  public float getSize() {
-	return this.size;
-  } // getSize
-
   public boolean isInside(int x1, int y1, int x2, int y2) {
-	if (x1 > x && y1 > y && x2 < x + (int) (size * width) && y2 < y + (int) (size * height)) {
+	if (x1 > x && y1 > y && x2 < x && y2 < y) {
 		return true;
 	}
 	return false;
   } // isInside
 
   public boolean isInsideRect(int x1, int y1, int x2, int y2) {
-	if (x1 < x && y1 < y && x2 > x + (int) (size * width) && y2 > y + (int) (size * height)) {
+	if (x1 < x && y1 < y && x2 > x && y2 > y) {
 		return true;
 	}
 	return false;
   } // isInsideRect
 
   public boolean contains(int pointX, int pointY) {
-	if ( (pointX > x + size) && (pointY > y + size) ) {
-	  if ( (pointX < x + size) && (pointY < y + size) ) {
-		return true;
-	  }
+	if (pointX > x && pointY > y && pointX < x && pointY < y) {
+	  return true;
 	}
 	return false;
   } // contains
 
   /**
-   * Set the size of zoom multiplication.
-   * @param f float - zoom multiplication.
+   * Set size using zoom multiplication.
+   * @param s float - set size using zoom multiplication.
    */
-  public void setMultSize(float f) {
-	this.size = getSize() * f;
-  } // set mult size
+  public void setMultSize(float s1, float s2) {
+	x = x*(int)s1/(int)s2;
+	y = y*(int)s1/(int)s2;
+	width = width*(int)s1/(int)s2;
+	height = height*(int)s1/(int)s2;
+   } // setMultSize
 
   /**
    * Set the color of a shape.
@@ -191,6 +182,7 @@ public class Dot extends Shape implements Serializable {
    * @param width double - rectangle drawing line stroke width.
    */
   public void setStrokeWidth(double width) {
+	this.lineWeight = (float)width;
   } // setStrokeWidth
 
   /**
@@ -273,16 +265,13 @@ public class Dot extends Shape implements Serializable {
 	}
 	return "<rect x=\"" + (x - boundingboxX) + "\" y=\""
 		+ (y - boundingboxY) + "\" width=\"" + width + "\" height=\"" + height
-		+ "\" colour=\"" + colorInt + "\"/>";
+		+ "\" colour=\"" + colorInt + "\" fixed=\""+isFixed()+"\"/>\n";
   } // toFile
 
   public String toText() {
 	int colorInt = 0;
-
-	if (color != null) {
-	  colorInt = color.getRGB();
-	}
-   return "DOT:"+x+":"+y+":"+width+":"+height+":"+colorInt+":"+(int)this.lineWeight+":"+(int)this.transparency;
+	if (color != null) colorInt = color.getRGB();
+	return "DOT:"+x+":"+y+":"+width+":"+height+":"+colorInt+":"+(int)this.lineWeight+":"+(int)this.transparency+":"+isFixed();
   } // toText
 
   /**
@@ -292,33 +281,34 @@ public class Dot extends Shape implements Serializable {
    * @param cornerClicked int - number of the clicked corner.
    */
   public void resize(int deltaW, int deltaH, int cornerClicked) {
-
-	if (cornerClicked == 1) { // TOP-LEFT
-	  if ( (this.width - deltaW) > 0 && (this.height - deltaH) > 0) {
-		this.x += deltaW;
-		this.y += deltaH;
-		this.width -= deltaW;
-		this.height -= deltaH;
+	if(!isFixed()) {
+	  if (cornerClicked == 1) { // TOP-LEFT
+		if (this.width - deltaW > 0 && this.height - deltaH > 0) {
+		  this.x += deltaW;
+		  this.y += deltaH;
+		  this.width -= deltaW;
+		  this.height -= deltaH;
+		}
 	  }
-	}
-	else if (cornerClicked == 2) { // TOP-RIGHT
-	  if ( (this.width + deltaW) > 0 && (this.height - deltaH) > 0) {
-		this.y += deltaH;
-		this.width += deltaW;
-		this.height -= deltaH;
+	  else if (cornerClicked == 2) { // TOP-RIGHT
+		if (this.width + deltaW > 0 && this.height - deltaH > 0) {
+		  this.y += deltaH;
+		  this.width += deltaW;
+		  this.height -= deltaH;
+		}
 	  }
-	}
-	else if (cornerClicked == 3) { // BOTTOM-LEFT
-	  if ( (this.width - deltaW) > 0 && (this.height + deltaH) > 0) {
-		this.x += deltaW;
-		this.width -= deltaW;
-		this.height += deltaH;
+	  else if (cornerClicked == 3) { // BOTTOM-LEFT
+		if (this.width - deltaW > 0 && this.height + deltaH > 0) {
+		  this.x += deltaW;
+		  this.width -= deltaW;
+		  this.height += deltaH;
+		}
 	  }
-	}
-	else if (cornerClicked == 4) { // BOTTOM-RIGHT
-	  if ( (this.width + deltaW) > 0 && (this.height + deltaH) > 0) {
-		this.width += deltaW;
-		this.height += deltaH;
+	  else if (cornerClicked == 4) { // BOTTOM-RIGHT
+		if (this.width + deltaW > 0 && this.height + deltaH > 0) {
+		  this.width += deltaW;
+		  this.height += deltaH;
+		}
 	  }
 	}
   } // resize
@@ -332,42 +322,32 @@ public class Dot extends Shape implements Serializable {
    * @return int - corner number the mouse was clicked in.
    */
   public int controlRectContains(int pointX, int pointY) {
-	if ( (pointX >= x) && (pointY >= y)) {
-	  if ( (pointX <= x + 4) && (pointY <= y + 4)) {
+	if (pointX >= x && pointY >= y && pointX <= x + 4 && pointY <= y + 4) {
 		return 1;
-	  }
 	}
-	if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
-	  if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
+	if (pointX >= x + width - 4 && pointY >= y && pointX <= x + width && pointY <= y + 4) {
 		return 2;
-	  }
 	}
-	if ( (pointX >= x) && (pointY >= y + (int) (size * (height)) - 4)) {
-	  if ( (pointX <= x + 4) && (pointY <= y + (int) (size * (height)))) {
+	if (pointX >= x && pointY >= y + height - 4 && pointX <= x + 4 && pointY <= y + height) {
 		return 3;
-	  }
 	}
-	if ( (pointX >= x + (int) (size * (width)) - 4)
-		&& (pointY >= y + (int) (size * (height)) - 4)) {
-	  if ( (pointX <= x + (int) (size * (width)))
-		  && (pointY <= y + (int) (size * (height)))) {
+	if (pointX >= x + width - 4 && pointY >= y + height - 4 && pointX <= x + width && pointY <= y + height) {
 		return 4;
-	  }
 	}
 	return 0;
   } // controlRectContains
 
   /**
    * Draw the selection markers if object selected.
+   * @param g2 Graphics2D - shape graphics.
    */
-  public void drawSelection() {
+  public void drawSelection(Graphics2D g2) {
 	g2.setColor(Color.black);
 	g2.setStroke(new BasicStroke( (float) 1.0));
 	g2.drawRect(x, y, 4, 4);
-	g2.drawRect(x + (int) (size * width) - 4, y, 4, 4);
-	g2.drawRect(x, y + (int) (size * height) - 4, 4, 4);
-	g2.drawRect(x + (int) (size * width) - 4, y + (int) (size * height) - 4,
-			   4, 4);
+	g2.drawRect(x + width - 4, y, 4, 4);
+	g2.drawRect(x, y + height - 4, 4, 4);
+	g2.drawRect(x + width - 4, y + height - 4, 4, 4);
   } // drawSelection
 
   /**
@@ -379,7 +359,7 @@ public class Dot extends Shape implements Serializable {
    * @param g Graphics
    */
   public void draw(int xModifier, int yModifier, float sizeX, float sizeY, Graphics g) {
-	g2 = (Graphics2D) g;
+	Graphics2D g2 = (Graphics2D) g;
 
 	g2.setStroke(new BasicStroke(this.lineWeight));
 
@@ -389,20 +369,23 @@ public class Dot extends Shape implements Serializable {
 
 	// Separate the color to separate Red, Green and Blue, for allowing
 	// the Graphics to be drawn with a transparent color.
-	float red = (float) color.getRed() * 100 / 256 / 100;
-	float green = (float) color.getGreen() * 100 / 256 / 100;
-	float blue = (float) color.getBlue() * 100 / 256 / 100;
+	float red = (float) color.getRed() / 256;
+	float green = (float) color.getGreen() / 256;
+	float blue = (float) color.getBlue() / 256;
 
 	// Set the Graphics a new transparent color.
 	g2.setColor(new Color(red, green, blue, alpha));
 
 	int w = (int) this.lineWeight / 2;
 
-	g2.drawRect(xModifier + x, yModifier + y, w, w);
+	int a = xModifier + (int) (sizeX * x);
+	int b = yModifier + (int) (sizeY * y);
+
+	g2.drawRect(a, b, w, w);
 
 	// Draw selection markers if object selected.
 	if (selected) {
-	  drawSelection();
+	  drawSelection(g2);
 	}
 
   } // draw

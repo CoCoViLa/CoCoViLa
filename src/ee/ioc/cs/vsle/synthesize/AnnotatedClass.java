@@ -68,6 +68,15 @@ class AnnotatedClass {
 		return name;
 	} // toString
 
+	boolean hasField(String fieldName) {
+		ClassField f;
+		for (int j = 0; j < fields.size(); j++){
+            f = (ClassField)fields.get(j);
+			if (f.name.equals(fieldName))
+				return true;
+		}
+		return false;
+	}
 }
 
 ;

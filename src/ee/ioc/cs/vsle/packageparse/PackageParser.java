@@ -1,9 +1,6 @@
 package ee.ioc.cs.vsle.packageparse;
 
-import ee.ioc.cs.vsle.vclass.VPackage;
-import ee.ioc.cs.vsle.vclass.PackageClass;
-import ee.ioc.cs.vsle.vclass.Port;
-import ee.ioc.cs.vsle.vclass.ClassGraphics;
+import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Oval;
@@ -25,6 +22,7 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.awt.Font;
 import java.awt.Color;
+import java.util.ArrayList;
 
 
 public class PackageParser {
@@ -35,6 +33,7 @@ public class PackageParser {
 	ClassGraphics newGraphics;
 	String element;
 	String path;
+	ArrayList classFields;
 
 	/**
 	 * Statuses:
@@ -137,19 +136,34 @@ public class PackageParser {
 			if (element.equals("port")) {
 				status = 2;
 				String name = attrs.getValue("name");
+				String type = attrs.getValue("type");
 				String x = attrs.getValue("x");
 				String y = attrs.getValue("y");
 				String portConnection = attrs.getValue("portConnection");
 				String strict = attrs.getValue("strict");
 
-				newPort = new Port(name, Integer.parseInt(x),
+				newPort = new Port(name, type, Integer.parseInt(x),
 					Integer.parseInt(y), portConnection, strict);
 			}
 			if (element.equals("open")) {
 				status = 2;
 			}
+
+
 			if (element.equals("closed")) {
 				status = 3;
+			}
+
+			if (element.equals("fields")) {
+				classFields = new ArrayList();;
+			}
+ 			if (element.equals("field")) {
+				String name = attrs.getValue("name");
+				String type = attrs.getValue("type");
+				String value = attrs.getValue("value");
+
+				ClassField cf = new ClassField(name, type, value);
+				classFields.add(cf);
 			}
 			if (element.equals("text")) {
 				String str = attrs.getValue("string");
@@ -174,6 +188,7 @@ public class PackageParser {
 				newGraphics.addShape(newText);
 				db.p("ee.ioc.cs.editor.graphics.Text added to graphics.");
 			}
+
 			if (element.equals("line")) {
 				String x1 = attrs.getValue("x1");
 				String x2 = attrs.getValue("x2");
@@ -186,6 +201,8 @@ public class PackageParser {
 
 				newGraphics.addShape(newLine);
 			}
+
+
 			if (element.equals("rect")) {
 				String x = attrs.getValue("x");
 				String[] split = x.split("#");
@@ -271,6 +288,30 @@ public class PackageParser {
 				newClass.addPort(newPort);
 				status = 1;
 			}
+			if (qName.equals("fields")) {
+				newClass.fields = classFields;
+				SpecParser sp = new SpecParser();
+                ArrayList a = new ArrayList();
+				try {
+					a = sp.getFields(path + File.separator + newClass.name + ".java");
+				} catch (IOException e) {
+					db.p("Warning: class " + newClass.name + " specified in package does not exits.");
+				}
+				ClassField cf;
+				for (int i = 0; i < classFields.size();i++) {
+					cf =((ClassField) classFields.get(i));
+
+					if (cf.type == null)     {
+                        for (int j = 0; j < a.size();j++) {
+						 	if (((ClassField)a.get(j)).name == cf.name) {
+								 cf.type = ((ClassField)a.get(j)).type;
+								 cf.value = ((ClassField)a.get(j)).value;
+							 }
+						}
+					}
+				}
+
+			}
 			if (qName.equals("graphics")) {
 				if (status == 2) {
 					newPort.openGraphics = newGraphics;
@@ -294,16 +335,6 @@ public class PackageParser {
 					pack.name = s;
 				} else { // else we a reading a class field
 					newClass = new PackageClass(s);
-					SpecParser sp = new SpecParser();
-
-					try {
-						newClass.fields = sp.getFields(
-							path + File.separator + s + ".java");
-					} catch (IOException e) {
-						db.p(
-							"File read exception: class " + s
-							+ " specified in package does not exits.");
-					}
 					// classNames.add(s);
 				}
 			}
@@ -311,8 +342,8 @@ public class PackageParser {
 				pack.description = s;
 			}
 
-			if (element.equals("title")) {
-				newClass.title = s;
+			if (element.equals("description") && status != 4) {
+				newClass.description = s;
 			}
 			if (element.equals("icon")) {
 				newClass.icon = s;
@@ -376,3 +407,4 @@ public class PackageParser {
 	} // getPackage
 
 }
+

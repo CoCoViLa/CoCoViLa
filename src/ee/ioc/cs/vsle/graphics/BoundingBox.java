@@ -24,11 +24,6 @@ public class BoundingBox extends Shape 	implements Serializable {
   float transparency = (float) 1.0;
 
   /**
-   * Percentage for resizing, 1 means real size
-   */
-  private float size = 1;
-
-  /**
    * Name of the shape.
    */
   public static final String name = "BoundingBox";
@@ -55,9 +50,9 @@ public class BoundingBox extends Shape 	implements Serializable {
   private boolean selected = false;
 
   /**
-   * Indicates if the shape should be drawn antialiased or not.
+   * Defines if the shape is resizable or not.
    */
-  boolean antialiasing = true;
+  private boolean fixed = false;
 
   public BoundingBox(int x, int y, int width, int height) {
 	this.x = x;
@@ -70,6 +65,14 @@ public class BoundingBox extends Shape 	implements Serializable {
 	this.transparency = (float) 0.2;
   } // BoundingBox
 
+  public void setFixed(boolean b) {
+	this.fixed = b;
+  }
+
+  public boolean isFixed() {
+	return this.fixed;
+  }
+
   public void setName(String s) {
   } // setName
 
@@ -81,17 +84,9 @@ public class BoundingBox extends Shape 	implements Serializable {
 	this.selected = b;
   } // setSelected
 
-  public float getSize() {
-	return this.size;
-  } // getSize
-
   public boolean isSelected() {
 	return this.selected;
   } // isSelected
-
-  public void setAntialiasing(boolean b) {
-	this.antialiasing = b;
-  } // setAntialiasing
 
   public String toString() {
 	return getName();
@@ -103,41 +98,44 @@ public class BoundingBox extends Shape 	implements Serializable {
   } // setPosition
 
   public int getRealHeight() {
-	return (int) (getHeight() * getSize());
+	return getHeight();
   } // getRealHeight
 
   public int getRealWidth() {
-	return (int) (getWidth() * getSize());
+	return getWidth();
   } // getRealWidth
 
   public boolean isInside(int x1, int y1, int x2, int y2) {
-	if (x1 > x && y1 > y && x2 < x + (int) (size * width) && y2 < y + (int) (size * height)) {
+	if (x1 > x && y1 > y && x2 < x + width && y2 < y + height) {
 		return true;
 	}
 	return false;
   } // isInside
 
   public boolean isInsideRect(int x1, int y1, int x2, int y2) {
-	if (x1 < x && y1 < y && x2 > x + (int) (size * width) && y2 > y + (int) (size * height)) {
+	if (x1 < x && y1 < y && x2 > x + width && y2 > y + height) {
 		return true;
 	}
 	return false;
   } // isInsideRect
 
   public boolean contains(int pointX, int pointY) {
-	if (pointX > x + size && pointY > y + size  && pointX < x + size + width && pointY < y + size + height) {
+	if (pointX > x && pointY > y && pointX < x + width && pointY < y + height) {
 		return true;
 	}
 	return false;
   } // contains
 
   /**
-   * Set the size of zoom multiplication.
-   * @param f float - zoom multiplication factor.
+   * Set size using zoom multiplication.
+   * @param s float - set size using zoom multiplication.
    */
-  public void setMultSize(float f) {
-	this.size = getSize() * f;
-  } // setMultSize
+  public void setMultSize(float s1, float s2) {
+	x = x*(int)s1/(int)s2;
+	y = y*(int)s1/(int)s2;
+	width = width*(int)s1/(int)s2;
+	height = height*(int)s1/(int)s2;
+   } // setMultSize
 
   /**
    * Returns the color of the rectangle.
@@ -186,33 +184,34 @@ public class BoundingBox extends Shape 	implements Serializable {
    * @param cornerClicked int - number of the clicked corner.
    */
   public void resize(int deltaW, int deltaH, int cornerClicked) {
-
-	if (cornerClicked == 1) { // TOP-LEFT
-	  if ( (this.width - deltaW) > 0 && (this.height - deltaH) > 0) {
-		this.x += deltaW;
-		this.y += deltaH;
-		this.width -= deltaW;
-		this.height -= deltaH;
+	if(!isFixed()) {
+	  if (cornerClicked == 1) { // TOP-LEFT
+		if (this.width - deltaW > 0 && this.height - deltaH > 0) {
+		  this.x += deltaW;
+		  this.y += deltaH;
+		  this.width -= deltaW;
+		  this.height -= deltaH;
+		}
 	  }
-	}
-	else if (cornerClicked == 2) { // TOP-RIGHT
-	  if ( (this.width + deltaW) > 0 && (this.height - deltaH) > 0) {
-		this.y += deltaH;
-		this.width += deltaW;
-		this.height -= deltaH;
+	  else if (cornerClicked == 2) { // TOP-RIGHT
+		if (this.width + deltaW > 0 && this.height - deltaH > 0) {
+		  this.y += deltaH;
+		  this.width += deltaW;
+		  this.height -= deltaH;
+		}
 	  }
-	}
-	else if (cornerClicked == 3) { // BOTTOM-LEFT
-	  if ( (this.width - deltaW) > 0 && (this.height + deltaH) > 0) {
-		this.x += deltaW;
-		this.width -= deltaW;
-		this.height += deltaH;
+	  else if (cornerClicked == 3) { // BOTTOM-LEFT
+		if (this.width - deltaW > 0 && this.height + deltaH > 0) {
+		  this.x += deltaW;
+		  this.width -= deltaW;
+		  this.height += deltaH;
+		}
 	  }
-	}
-	else if (cornerClicked == 4) { // BOTTOM-RIGHT
-	  if ( (this.width + deltaW) > 0 && (this.height + deltaH) > 0) {
-		this.width += deltaW;
-		this.height += deltaH;
+	  else if (cornerClicked == 4) { // BOTTOM-RIGHT
+		if (this.width + deltaW > 0 && this.height + deltaH > 0) {
+		  this.width += deltaW;
+		  this.height += deltaH;
+		}
 	  }
 	}
   } // resize
@@ -226,27 +225,17 @@ public class BoundingBox extends Shape 	implements Serializable {
    * @return int - corner number the mouse was clicked in.
    */
   public int controlRectContains(int pointX, int pointY) {
-	if ( (pointX >= x) && (pointY >= y)) {
-	  if ( (pointX <= x + 4) && (pointY <= y + 4)) {
+	if (pointX >= x && pointY >= y && pointX <= x + 4 && pointY <= y + 4) {
 		return 1;
-	  }
 	}
-	if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
-	  if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
+	if (pointX >= x + width - 4 && pointY >= y && pointX <= x + width && pointY <= y + 4) {
 		return 2;
-	  }
 	}
-	if ( (pointX >= x) && (pointY >= y + (int) (size * (height)) - 4)) {
-	  if ( (pointX <= x + 4) && (pointY <= y + (int) (size * (height)))) {
+	if (pointX >= x && pointY >= y + height - 4 && pointX <= x + 4 && pointY <= y + height) {
 		return 3;
-	  }
 	}
-	if ( (pointX >= x + (int) (size * (width)) - 4)
-		&& (pointY >= y + (int) (size * (height)) - 4)) {
-	  if ( (pointX <= x + (int) (size * (width)))
-		  && (pointY <= y + (int) (size * (height)))) {
+	if (pointX >= x + width - 4 && pointY >= y + height - 4 && pointX <= x + width && pointY <= y + height) {
 		return 4;
-	  }
 	}
 	return 0;
   } // controlRectContains
@@ -258,10 +247,9 @@ public class BoundingBox extends Shape 	implements Serializable {
 	g2.setColor(Color.black);
 	g2.setStroke(new BasicStroke( (float) 1.0));
 	g2.fillRect(x, y, 4, 4);
-	g2.fillRect(x + (int) (size * width) - 4, y, 4, 4);
-	g2.fillRect(x, y + (int) (size * height) - 4, 4, 4);
-	g2.fillRect(x + (int) (size * width) - 4, y + (int) (size * height) - 4,
-			   4, 4);
+	g2.fillRect(x + width - 4, y, 4, 4);
+	g2.fillRect(x, y + height - 4, 4, 4);
+	g2.fillRect(x + width - 4, y + height - 4, 4, 4);
   } // drawSelection
 
   /**
@@ -271,8 +259,7 @@ public class BoundingBox extends Shape 	implements Serializable {
    * @return String - specification of a shape.
    */
   public String toFile(int boundingboxX, int boundingboxY) {
-	return "<bounds x=\"0\" y=\"0\" width=\"" + width + "\" height=\""
-		+ height + "\"/>";
+	return "<bounds x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\"/>\n";
   } // toFile
 
   /**
@@ -371,10 +358,13 @@ public class BoundingBox extends Shape 	implements Serializable {
 	// Set the box color: light-gray, with a transparency defined by "alpha" value.
 	g2.setColor(new Color(0.0f, 0.0f, 0.0f, alpha));
 
+	int a = xModifier + (int) (Xsize * x);
+	int b = yModifier + (int) (Ysize * y);
+	int c = (int) (Xsize * width);
+	int d = (int) (Ysize * height);
+
 	// draw the bounding box rectangle.
-	g2.fillRect(xModifier + (int) (Xsize * x),
-				yModifier + (int) (Ysize * y), (int) (Xsize * width),
-				(int) (Ysize * height));
+	g2.fillRect(a,b,c,d);
 
 	// Draw selection markers if object selected.
 	if (selected) {

@@ -37,6 +37,12 @@ public class ClassField implements Cloneable, Serializable {
 		this.type = type;
 	}
 
+	public ClassField(String name, String type, String value) {
+		this.value = value;
+		this.name = name;
+		this.type = type;
+	}
+
 	/**
 	 * Class constructor.
 	 * @param name String

@@ -233,6 +233,7 @@ public class SpecParser {
 		ClassRelation classRelation;
 		Var var, var1, var2;
 		Rel rel;
+		HashSet relSet = new HashSet();
 
 		for (int j = 0; j < ac.fields.size(); j++) {
 			cf = (ClassField) ac.fields.get(j);
@@ -292,18 +293,30 @@ public class SpecParser {
 				}
 			}
 
+
 			if (!isAliasRel) {
-				rel = makeRel(classRelation, problem, obj);
+				String s = checkIfRightWildcard(classRelation);
+				if (s!=null) {
+					relSet = makeRightWildcardRel(ac, classes, classRelation, problem, obj, s);
+					rel = null;
+				} else
+					rel = makeRel(classRelation, problem, obj);
 				if (classRelation.subtasks.size() > 0) {
 					Rel subtaskRel = new Rel();
 
 					for (int l = 0; l < classRelation.subtasks.size(); l++) {
 						ClassRelation subtask = (ClassRelation) classRelation.subtasks.get(l);
-
 						subtaskRel = makeRel(subtask, problem, obj);
-						rel.addSubtask(subtaskRel);
+						if (rel!=null) {
+							rel.addSubtask(subtaskRel);
+						} else {
+							Iterator varsIter = relSet.iterator();
+						    while (varsIter.hasNext()) {
+                                Rel r = (Rel)varsIter.next();
+								r.addSubtask(subtaskRel);
+							}
+						}
 					}
-
 				}
 			}
 
@@ -315,11 +328,28 @@ public class SpecParser {
 				problem.addAxiom(rel);
 			}
 			else {
-				problem.addRel(rel);
+				if (rel!=null)
+					problem.addRel(rel);
+				else
+					problem.addAllRels(relSet);
 			}
 
 		}
 		return problem;
+	}
+
+	private void isRightWildcard(ClassRelation classRelation, AnnotatedClass ac, ClassList classes, String type) {
+		ClassField cf;
+		String s = checkIfRightWildcard(classRelation);
+		//if the right side of the axiom contains a wildcard, we'll rewrite the axiom
+
+	}
+
+	private String checkIfRightWildcard(ClassRelation classRelation) {
+		String s =   ((ClassField)classRelation.outputs.get(0)).name;
+		if(s.startsWith("*."))
+        	return s.substring(2);
+		return null;
 	}
 
 	/**
@@ -328,7 +358,8 @@ public class SpecParser {
 	 @param problem problem to be changed
 	 @param classRelation the goal specification is extracted from it.
 	 @param obj the name of the object where the goal specification was declared.
-	 */ void setTargets(Problem problem, ClassRelation classRelation, String obj) throws UnknownVariableException {
+	 */
+	void setTargets(Problem problem, ClassRelation classRelation, String obj) throws UnknownVariableException {
 		Var var;
 		ClassField cf;
 
@@ -354,6 +385,65 @@ public class SpecParser {
 		}
 
 	}
+
+
+	HashSet makeRightWildcardRel(AnnotatedClass ac, ClassList classes, ClassRelation classRelation, Problem problem, String obj, String wildcardVar) throws UnknownVariableException {
+        ClassField clf;
+		HashSet set = new HashSet();
+		for (int i = 0; i < ac.fields.size(); i++) {
+			clf = (ClassField) ac.fields.get(i);
+			AnnotatedClass anc = classes.getType(clf.type);
+			if (anc != null) {
+				if (anc.hasField(wildcardVar)) {
+
+					Var var;
+					Rel rel = new Rel();
+
+					rel.setMethod(classRelation.method);
+					rel.setFlag(classRelation.inputs.size());
+					rel.setSubtaskFlag(classRelation.subtasks.size());
+					rel.setObj(obj);
+					rel.setType(classRelation.type);
+					ClassField cf;
+
+					for (int k = 0; k < classRelation.inputs.size(); k++) {
+						cf = (ClassField) classRelation.inputs.get(k);
+						if (problem.getAllVars().containsKey(obj + "." + cf.name)) {
+							var = (Var) problem.getAllVars().get(obj + "." + cf.name);
+							var.addRel(rel);
+							rel.addInput(var);
+						}
+						else {
+							throw new UnknownVariableException(cf.name);
+						}
+					}
+					for (int k = 0; k < classRelation.outputs.size(); k++) {
+						if (k==0) {
+							if (problem.getAllVars().containsKey(obj + "." + clf.name+"."+wildcardVar)) {
+								var = (Var) problem.getAllVars().get(obj + "." + clf.name+"."+wildcardVar);
+								rel.addOutput(var);
+							} else {
+								throw new UnknownVariableException(obj + "." + clf.name+"."+wildcardVar);
+							}
+						} else{
+							cf = (ClassField) classRelation.outputs.get(k);
+							if (problem.getAllVars().containsKey(obj + "." + cf.name)) {
+								var = (Var) problem.getAllVars().get(obj + "." + cf.name);
+								rel.addOutput(var);
+							} else {
+								throw new UnknownVariableException(cf.name);
+							}
+						}
+
+					}
+					set.add(rel);
+				}
+			}
+		}
+		return set;
+	}
+
+
 
 	/**
 	 creates a relation that will be included in the problem.

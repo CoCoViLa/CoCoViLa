@@ -15,8 +15,8 @@ import java.awt.BasicStroke;
 public class IconPort implements Cloneable, Serializable {
 
   GObj obj;
-  int width;
-  int height;
+  int width = 6;
+  int height = 6;
   String name;
   String type;
   String dataType;
@@ -33,6 +33,11 @@ public class IconPort implements Cloneable, Serializable {
   boolean known = false;
   boolean target = false;
   boolean watched = false;
+
+  /**
+   * Percentage for resizing, 1 means real size.
+   */
+  private float size = 1;
 
   /**
    * Class constructor. Constructs new port for the Icon Editor.
@@ -77,6 +82,17 @@ public class IconPort implements Cloneable, Serializable {
   public String toText() {
 	return "PORT:"+getX()+":"+getY()+":"+isArea()+":"+isStrict()+":"+getName();
   }
+
+  /**
+   * Set size using zoom multiplication.
+   * @param s float - set size using zoom multiplication.
+   */
+  public void setMultSize(float s1, float s2) {
+	x = (int)(x*s1/s2);
+	y = (int)(y*s1/s2);
+	//width = (int)(width*s1/s2);
+	//height = (int)(height*s1/s2);
+   } // setMultSize
 
   /**
    * Returns center y coordinate of the port.
@@ -366,7 +382,11 @@ public class IconPort implements Cloneable, Serializable {
     this.graphics = g2;
     g2.setColor(Color.black);
 
-    g2.fillRect(xModifier + x, yModifier + y, 6, 6);
+	int a = (int)((xModifier + x)*size);
+    int b = (int)((yModifier + y)*size);
+	int c = (int)(this.height * size);
+	int d = (int)(this.width * size);
+    g2.fillRect(a, b, c, d);
 
     // Draw selection markers if object selected.
     if (selected) {

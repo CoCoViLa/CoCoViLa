@@ -5,7 +5,6 @@ import java.io.*;
 import java.awt.*;
 
 import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
 
 public class Line extends Shape implements Serializable {
 
@@ -40,11 +39,6 @@ public class Line extends Shape implements Serializable {
   Color color;
 
   /**
-   * Line graphics.
-   */
-  Graphics2D g2;
-
-  /**
    * Line transparency.
    */
   float transparency = (float) 1.0;
@@ -61,19 +55,15 @@ public class Line extends Shape implements Serializable {
   private String name;
 
   /**
-   * Percentage for resizing, 1 means real size
-   */
-  private float size = 1;
-
-  /**
    * Indicates if the shape is selected or not.
    */
   private boolean selected = false;
 
   /**
-   * Indicates if the shape should be drawn antialiased or not.
+   * Defines if the shape is resizable or not.
    */
-  private boolean antialiasing = true;
+  private boolean fixed = false;
+
 
   public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp) {
 	startX = x1;
@@ -89,6 +79,14 @@ public class Line extends Shape implements Serializable {
 	this.height = Math.max(y1, y2) - this.y; // endY - startY;
   } // Line
 
+  public void setFixed(boolean b) {
+	this.fixed = b;
+  }
+
+  public boolean isFixed() {
+	return this.fixed;
+  }
+
   public String toString() {
 	return getName();
   } // toString
@@ -97,16 +95,12 @@ public class Line extends Shape implements Serializable {
 	return false;
   } // isFilled
 
-  public float getSize() {
-	return this.size;
-  } // getSize
-
   public int getRealHeight() {
-	return (int) (getHeight() * getSize());
+	return getHeight();
   } // getRealHeight
 
   public int getRealWidth() {
-	return (int) (getWidth() * getSize());
+	return getWidth();
   } // getRealWidth
 
   public void setSelected(boolean b) {
@@ -118,25 +112,30 @@ public class Line extends Shape implements Serializable {
   } // getName
 
   public boolean isInside(int x1, int y1, int x2, int y2) {
-	if (x1 > x && y1 > y && x2 < x + (int) (size * width) && y2 < y + (int) (size * height)) {
+	if (x1 > x && y1 > y && x2 < x + width && y2 < y + height) {
 		return true;
 	}
 	return false;
   } // isInside
 
   public boolean isInsideRect(int x1, int y1, int x2, int y2) {
-	if (x1 < x && y1 < y && x2 > x + (int) (size * width) && y2 > y + (int) (size * height)) {
+	if (x1 < x && y1 < y && x2 > x + width && y2 > y + height) {
 		return true;
 	}
 	return false;
   } // isInsideRect
 
-  public void setAntialiasing(boolean b) {
-	this.antialiasing = b;
-  } // setAntialiasing
-
-  public void setMultSize(float s) {
-	this.size = getSize() * s;
+  /**
+   * Set size using zoom multiplication.
+   * @param s float - set size using zoom multiplication.
+   */
+  public void setMultSize(float s1, float s2) {
+	startX = startX*(int)s1/(int)s2;
+	startY = startY*(int)s1/(int)s2;
+	endX = endX*(int)s1/(int)s2;
+	endY = endY*(int)s1/(int)s2;
+	width = width*(int)s1/(int)s2;
+	height = height*(int)s1/(int)s2;
   } // setMultSize
 
   public boolean isSelected() {
@@ -194,80 +193,73 @@ public class Line extends Shape implements Serializable {
    * @param cornerClicked int - number of the clicked corner.
    */
   public void resize(int deltaW, int deltaH, int cornerClicked) {
-	if (cornerClicked == 1) { // TOP-LEFT
-	  if ( (this.width - deltaW) >= 0 && (this.height - deltaH) >= 0) {
-		if (this.startX < this.endX) {
-		  this.startX += deltaW;
-		}
-		else {
-		  this.endX += deltaW;
-		}
-		if (this.startY < this.endY) {
-		  this.startY += deltaH;
-		}
-		else {
-		  this.endY += deltaH;
-		}
+	if(!isFixed()) {
+	  if (cornerClicked == 1) { // TOP-LEFT
+		if (this.width - deltaW >= 0 && this.height - deltaH >= 0) {
+		  if (this.startX < this.endX) {
+			this.startX += deltaW;
+		  } else {
+			this.endX += deltaW;
+		  }
+		  if (this.startY < this.endY) {
+			this.startY += deltaH;
+		  } else {
+			this.endY += deltaH;
+		  }
 
-		this.width -= deltaW;
-		this.height -= deltaH;
+		  this.width -= deltaW;
+		  this.height -= deltaH;
+		}
 	  }
-	}
-	else if (cornerClicked == 2) { // TOP-RIGHT
-	  if ( (this.width + deltaW) >= 0 && (this.height - deltaH) >= 0) {
-		if (this.startX > this.endX) {
-		  this.startX += deltaW;
-		}
-		else {
-		  this.endX += deltaW;
-		}
-		if (this.startY > this.endY) {
-		  this.endY += deltaH;
-		}
-		else {
-		  this.startY += deltaH;
-		}
+	  else if (cornerClicked == 2) { // TOP-RIGHT
+		if (this.width + deltaW >= 0 && this.height - deltaH >= 0) {
+		  if (this.startX > this.endX) {
+			this.startX += deltaW;
+		  } else {
+			this.endX += deltaW;
+		  }
+		  if (this.startY > this.endY) {
+			this.endY += deltaH;
+		  } else {
+			this.startY += deltaH;
+		  }
 
-		this.width += deltaW;
-		this.height -= deltaH;
+		  this.width += deltaW;
+		  this.height -= deltaH;
+		}
+	  } else if (cornerClicked == 3) { // BOTTOM-LEFT
+
+		if (this.width - deltaW >= 0 && this.height + deltaH >= 0) {
+		  if (this.startX > this.endX) {
+			this.endX += deltaW;
+		  } else {
+			this.startX += deltaW;
+		  }
+		  if (this.startY > this.endY) {
+			this.startY += deltaH;
+		  } else {
+			this.endY += deltaH;
+		  }
+
+		  this.width -= deltaW;
+		  this.height -= deltaH;
+		}
 	  }
-	}
-	else if (cornerClicked == 3) { // BOTTOM-LEFT
-
-	  if ( (this.width - deltaW) >= 0 && (this.height + deltaH) >= 0) {
-		if (this.startX > this.endX) {
-		  this.endX += deltaW;
+	  else if (cornerClicked == 4) { // BOTTOM-RIGHT
+		if (this.width + deltaW >= 0 && this.height + deltaH >= 0) {
+		  if (this.startX < this.endX) {
+			this.endX += deltaW;
+		  } else {
+			this.startX += deltaW;
+		  }
+		  if (this.startY < this.endY) {
+			this.endY += deltaH;
+		  } else {
+			this.startY += deltaH;
+		  }
+		  this.width -= deltaW;
+		  this.height -= deltaH;
 		}
-		else {
-		  this.startX += deltaW;
-		}
-		if (this.startY > this.endY) {
-		  this.startY += deltaH;
-		}
-		else {
-		  this.endY += deltaH;
-		}
-
-		this.width -= deltaW;
-		this.height -= deltaH;
-	  }
-	}
-	else if (cornerClicked == 4) { // BOTTOM-RIGHT
-	  if ( (this.width + deltaW) >= 0 && (this.height + deltaH) >= 0) {
-		if (this.startX < this.endX) {
-		  this.endX += deltaW;
-		}
-		else {
-		  this.startX += deltaW;
-		}
-		if (this.startY < this.endY) {
-		  this.endY += deltaH;
-		}
-		else {
-		  this.startY += deltaH;
-		}
-		this.width -= deltaW;
-		this.height -= deltaH;
 	  }
 	}
   } // resize
@@ -281,27 +273,17 @@ public class Line extends Shape implements Serializable {
    * @return int - corner number the mouse was clicked in.
    */
   public int controlRectContains(int pointX, int pointY) {
-	if ( (pointX >= x) && (pointY >= y)) {
-	  if ( (pointX <= x + 4) && (pointY <= y + 4)) {
+	if (pointX >= x && pointY >= y && pointX <= x + 4 && pointY <= y + 4) {
 		return 1;
-	  }
 	}
-	if ( (pointX >= x + (int) (size * (width)) - 4) && (pointY >= y)) {
-	  if ( (pointX <= x + (int) (size * (width))) && (pointY <= y + 4)) {
+	if (pointX >= x + width - 4 && pointY >= y && pointX <= x + width && pointY <= y + 4) {
 		return 2;
-	  }
 	}
-	if ( (pointX >= x) && (pointY >= y + (int) (size * (height)) - 4)) {
-	  if ( (pointX <= x + 4) && (pointY <= y + (int) (size * (height)))) {
+	if (pointX >= x && pointY >= y + height - 4 && pointX <= x + 4 && pointY <= y + height) {
 		return 3;
-	  }
 	}
-	if ( (pointX >= x + (int) (size * (width)) - 4)
-		&& (pointY >= y + (int) (size * (height)) - 4)) {
-	  if ( (pointX <= x + (int) (size * (width)))
-		  && (pointY <= y + (int) (size * (height)))) {
+	if (pointX >= x + width - 4 && pointY >= y + height - 4 && pointX <= x + width && pointY <= y + height) {
 		return 4;
-	  }
 	}
 	return 0;
   } // controlRectContains
@@ -333,7 +315,6 @@ public class Line extends Shape implements Serializable {
 
   public boolean contains(int pointX, int pointY) {
 	float distance = calcDistance(startX, startY, endX, endY, pointX, pointY);
-
 	if (distance <= 3) {
 	  return true;
 	}
@@ -465,29 +446,25 @@ public class Line extends Shape implements Serializable {
   public String toFile(int boundingboxX, int boundingboxY) {
 	int colorInt = 0;
 
-	if (color != null) {
-	  colorInt = color.getRGB();
-	}
+	if (color != null)  colorInt = color.getRGB();
 
 	return "<line x1=\"" + (startX - boundingboxX) + "\" y1=\""
 		+ (startY - boundingboxY) + "\" x2=\"" + (endX - boundingboxX)
 		+ "\" y2=\"" + (endY - boundingboxY) + "\" colour=\"" + colorInt
-		+ "\"/>";
+		+ "\" fixed=\""+isFixed()+"\"/>\n";
   } // toFile
 
   public String toText() {
 	int colorInt = 0;
-
-	if (color != null) {
-	  colorInt = color.getRGB();
-	}
-   return "LINE:"+startX+":"+startY+":"+endX+":"+endY+":"+colorInt+":"+(int)this.lineWeight+":"+(int)this.transparency;
-  } // toText
+	if (color != null) colorInt = color.getRGB();
+	return "LINE:"+startX+":"+startY+":"+endX+":"+endY+":"+colorInt+":"+(int)this.lineWeight+":"+(int)this.transparency+":"+isFixed();
+ } // toText
 
   /**
    * Draw the selection markers if object selected.
+   * @param g2 Graphics2D - shape graphics.
    */
-  public void drawSelection() {
+  public void drawSelection(Graphics2D g2) {
 	g2.setColor(Color.black);
 	g2.setStroke(new BasicStroke( (float) 1.0));
 	g2.fillRect(startX - 2, startY - 2, 4, 4);
@@ -495,15 +472,16 @@ public class Line extends Shape implements Serializable {
   } // drawSelection
 
   public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics g) {
-	g2 = (Graphics2D) g;
+
+	Graphics2D g2 = (Graphics2D) g;
 
 	g2.setStroke(new BasicStroke(lineWeight));
 
 	alpha = (float) (1 - (this.transparency / 100));
 
-	float red = (float) color.getRed() * 100 / 256 / 100;
-	float green = (float) color.getGreen() * 100 / 256 / 100;
-	float blue = (float) color.getBlue() * 100 / 256 / 100;
+	float red = (float) color.getRed() / 256;
+	float green = (float) color.getGreen() / 256;
+	float blue = (float) color.getBlue() / 256;
 
 	g2.setColor(new Color(red, green, blue, alpha));
 
@@ -512,16 +490,18 @@ public class Line extends Shape implements Serializable {
 						  java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 	}
 
-	g2.drawLine(xModifier + (int) (Xsize * startX),
-				yModifier + (int) (Ysize * startY),
-				xModifier + (int) (Xsize * endX),
-				yModifier + (int) (Ysize * endY));
+	int a = xModifier + (int) (Xsize * startX);
+	int b = yModifier + (int) (Ysize * startY);
+	int c = xModifier + (int) (Xsize * endX);
+	int d = yModifier + (int) (Ysize * endY);
+
+	g2.drawLine(a,b,c,d);
 
 	this.width = Math.abs(getStartX() - getEndX());
 	this.height = Math.abs(getStartY() - getEndY());
 
 	if (selected) {
-	  drawSelection();
+	  drawSelection(g2);
 	}
 
   } // draw

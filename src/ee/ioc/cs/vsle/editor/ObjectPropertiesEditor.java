@@ -40,9 +40,11 @@ public class ObjectPropertiesEditor extends JFrame
 	GObj controlledObject;
 	JTextField nameTextField;
 	JButton clear, ok;
+	Editor editor;
 
-	public ObjectPropertiesEditor(GObj object) {
+	public ObjectPropertiesEditor(GObj object, Editor editor) {
 		super();
+		this.editor = editor;
 		controlledObject = object;
 		JPanel buttonPane = new JPanel();
 		JPanel fullPane = new JPanel();
@@ -97,6 +99,10 @@ public class ObjectPropertiesEditor extends JFrame
 				label = new JLabel("(" + field.type + ")");
 				typePane.add(label);
 
+				watch = new JCheckBox("");
+				watch.setEnabled(false);
+				watchPane.add(watch);
+				watchFields.add(watch);
 
 				textFieldPane.add(comboBox);
 			} else if (field.isPrimitiveOrString()) {
@@ -203,6 +209,7 @@ public class ObjectPropertiesEditor extends JFrame
 			controlledObject.setName(nameTextField.getText());
 			controlledObject = null;
 			this.dispose();
+			editor.repaint();
 		}
 		if (e.getSource() == clear) {
 			// Clears object properties except the object name.

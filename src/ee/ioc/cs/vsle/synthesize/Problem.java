@@ -33,8 +33,11 @@ class Problem {
 
 	void addRel(Rel rel) {
 		allRels.add(rel);
+ 	}
+	void addAllRels(HashSet set) {
+		allRels.addAll(set);
+ 	}
 
-	}
 
 	void addVar(Var var) {
 		allVars.put(var.getObj() + "." + var.getName(), var);

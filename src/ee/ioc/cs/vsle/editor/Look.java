@@ -20,7 +20,7 @@ public class Look {
 	private static IconEditor ied;
 
 	// LAYOUT
-	public static final String LOOK_3D = "3D";
+	public static final String LOOK_CUSTOM = "Custom";
 	public static final String LOOK_METAL = "Metal";
 	public static final String LOOK_MOTIF = "Motif";
 	public static final String LOOK_WINDOWS = "Windows";
@@ -38,27 +38,28 @@ public class Look {
 	 * @param selectedLayout - application layout selected from the menu.
 	 */
 	public static void changeLayout(String selectedLayout) {
-		if (selectedLayout.equals(LOOK_WINDOWS)) {
+		if (selectedLayout.equalsIgnoreCase(LOOK_WINDOWS)) {
 			try {
-				UIManager.setLookAndFeel(
-					"com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
 			} catch (Exception uie) {
 			}
-		} else if (selectedLayout.equals(LOOK_METAL)) {
+		} else if (selectedLayout.equalsIgnoreCase(LOOK_METAL)) {
 			try {
-				UIManager.setLookAndFeel(
-					"javax.swing.plaf.metal.MetalLookAndFeel");
+				UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
 			} catch (Exception uie) {
 			}
-		} else if (selectedLayout.equals(LOOK_MOTIF)) {
+		} else if (selectedLayout.equalsIgnoreCase(LOOK_MOTIF)) {
 			try {
-				UIManager.setLookAndFeel(
-					"com.sun.java.swing.plaf.motif.MotifLookAndFeel");
+				UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
 			} catch (Exception uie) {
 			}
-		} else if (selectedLayout.equals(LOOK_3D)) {
+		} else if (selectedLayout.equalsIgnoreCase(LOOK_CUSTOM)) {
 			try {
-			  UIManager.setLookAndFeel(	new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
+			  if(RuntimeProperties.customLayout!=null && RuntimeProperties.customLayout.trim().length()>0) {
+				UIManager.setLookAndFeel(RuntimeProperties.customLayout);
+			  } else {
+				changeLayout(LOOK_METAL);
+              }
 			} catch (Exception uie) {
 			}
 		}

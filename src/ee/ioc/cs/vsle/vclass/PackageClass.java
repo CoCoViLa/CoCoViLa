@@ -7,11 +7,12 @@ import java.awt.Color;
 
 public class PackageClass implements Serializable {
 	int x, y;
-	public String title, name;
+	public String name;
 	public String icon;
 	public ArrayList fields = new ArrayList();
 	public ClassGraphics graphics;
 	public ArrayList ports = new ArrayList();
+	public String description;
 
 	public PackageClass(String name) {
 		this.name = name;

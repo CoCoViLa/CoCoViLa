@@ -2,8 +2,7 @@ package ee.ioc.cs.vsle.iconeditor;
 
 import ee.ioc.cs.vsle.vclass.Point;
 
-import ee.ioc.cs.vsle.util.PrintUtilities;
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.iconeditor.*;
@@ -45,7 +44,7 @@ class IconMouseOps
   int relCount;
   Point draggedBreakPoint;
   String state = "";
-  float initialSize;
+
   public int startX, startY;
   public boolean fill = false;
   public double strokeWidth = 1.0;
@@ -175,9 +174,9 @@ class IconMouseOps
   private void openShapePopupMenu(int x, int y) {
     if(editor.shapeList!=null && editor.shapeList.size()>0 &&
        editor.shapeList.getSelected().size()>0) {
-      ShapePopupMenu popupMenu = new ShapePopupMenu(editor.mListener);
-      popupMenu.show(editor.getContentPane(), x, y);
       editor.currentShape = editor.checkInside(x, y);
+      ShapePopupMenu popupMenu = new ShapePopupMenu(editor.mListener,editor);
+      popupMenu.show(editor.getContentPane(), x, y);
 
       // Enable or disable grouping menu items.
       if (editor.shapeList.getSelected().size() < 2) {
@@ -336,6 +335,14 @@ class IconMouseOps
               shape.setSelected(true);
             }
           }
+		  // Display selected shape dimensions on the mouse position label under the icon editor's drawing area.
+		  if(editor.shapeList!=null && editor.shapeList.size()>0 && editor.shapeList.getSelected().size()==1) {
+			Shape s = (Shape)editor.shapeList.getSelected().get(0);
+			if(!(s instanceof Text)) {
+			  String text = "W:" + s.width + ", H:" + s.height;
+			  editor.posInfo.setText(text);
+			}
+          }
         } else {
           editor.selectAllObjects(false);
         }
@@ -415,7 +422,6 @@ class IconMouseOps
             cornerClicked = shape.controlRectContains(editor.mouseX, editor.mouseY);
 
             if (cornerClicked != 0) {
-              initialSize = shape.getSize();
               state = State.resize;
               editor.currentShape = shape;
             } else {
@@ -764,6 +770,7 @@ class IconMouseOps
    * @param col Color - color for selected object(s).
    */
   public void changeObjectColors(Color col) {
+	state = State.selection;
     if(editor.shapeList!=null && editor.shapeList.size()>0) {
       for(int i=0;i<editor.shapeList.size();i++) {
         Shape s = (Shape)editor.shapeList.get(i);
@@ -785,62 +792,8 @@ class IconMouseOps
       if (e.getSource().getClass().getName() == "javax.swing.JMenuItem"
           || e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem") {
         if (e.getActionCommand().equals(Menu.SAVE_SCHEME)) {
-
-                JFileChooser fc = new JFileChooser(editor.getLastPath());
-                CustomFileFilter txtFilter = new CustomFileFilter(CustomFileFilter.extensionTxt,CustomFileFilter.descriptionTxt);
-
-
-                fc.setFileFilter(txtFilter);
-                int returnVal = fc.showSaveDialog(null);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                        File file = fc.getSelectedFile();
-
-                        // [Aulo] 11.02.2004
-                        // Check if the file name ends with a required extension. If not,
-                        // append the default extension to the file name.
-                        if(!file.getAbsolutePath().toLowerCase().endsWith(CustomFileFilter.extensionTxt)) {
-                          file = new File(file.getAbsolutePath()+"."+CustomFileFilter.extensionTxt);
-                        }
-
-                        // store the last open directory in system properties.
-                        editor.setLastPath(file.getAbsolutePath());
-                        boolean valid = true;
-
-                        // [Aulo] 04.01.2004
-                        // Check if file with a predefined name already exists.
-                        // If file exists, confirm file overwrite, otherwise leave
-                        // file as it is.
-                        if (file.exists()) {
-                                JOptionPane confirmPane = new JOptionPane();
-
-                                if (confirmPane.showConfirmDialog(null, "File exists.\nOverwrite file?", "Confirm Save", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
-                                        valid = false;
-                                }
-                        }
-                        if (valid) {
-                                // Save scheme.
-                                try {
-								  StringBuffer xml = new StringBuffer();
-
-								  xml.append(editor.getGraphicsToString().toString());
-
-								  FileOutputStream out = new FileOutputStream(new File(file.getAbsolutePath()));
-								  out.write(xml.toString().getBytes());
-								  out.flush();
-								  out.close();
-								  JOptionPane.showMessageDialog(null, "Saved to: " + file.getName(),
-																"Saved",
-																JOptionPane.INFORMATION_MESSAGE);
-
-								}
-                                catch (Exception exc) {
-                                        exc.printStackTrace();
-                                }
-                        }
-                }
+		  editor.saveScheme();
         }
-
         else if (e.getActionCommand().equals(Menu.CLEAR_ALL)) {
           editor.clearObjects();
         }
@@ -853,6 +806,11 @@ class IconMouseOps
           }
           editor.drawingArea.setGridVisible(isGridVisible);
         }
+		else if (e.getActionCommand().equals(Menu.CLASS_PROPERTIES)) {
+		  ClassPropertiesDialog c1 = new ClassPropertiesDialog();
+		  c1.setEmptyValuesValid(true);
+		  c1.setVisible(true);
+		}
         else if(e.getActionCommand().equals(Menu.CLONE)) {
           editor.cloneObject();
         }
@@ -860,32 +818,10 @@ class IconMouseOps
           editor.selectAllObjects(true);
         }
         else if (e.getActionCommand().equals(Menu.LOAD_SCHEME)) {
-                JFileChooser fc = new JFileChooser(editor.getLastPath());
-                CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.extensionTxt,CustomFileFilter.descriptionTxt);
-
-                fc.setFileFilter(filter);
-                int returnVal = fc.showOpenDialog(null);
-
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                        File file = fc.getSelectedFile();
-                        editor.setLastPath(file.getAbsolutePath());
-                        try {
-						  state = State.selection;
-						  editor.shapeCount = 0;
-						  editor.shapeList = new ShapeGroup(new ArrayList());
-						  editor.ports = new ArrayList();
-						  editor.palette.boundingbox.setEnabled(true);
-						  editor.loadGraphicsFromFile(file);
-                        }
-                        catch (Exception exc) {
-                                exc.printStackTrace();
-                        }
-                }
-
+		  editor.loadScheme();
         }
-
         else if (e.getActionCommand().equals(Menu.PRINT)) {
-          PrintUtilities.printComponent(editor.getDrawingArea());
+          editor.print();
         }
         else if (e.getActionCommand().equals(Menu.EXIT)) {
           editor.exitApplication();
@@ -942,6 +878,9 @@ class IconMouseOps
         else if (e.getActionCommand().equals(Menu.GROUP)) {
           editor.groupObjects();
         }
+		else if (e.getActionCommand().equals(Menu.FIXED)) {
+		  editor.fixShape();
+        }
         else if (e.getActionCommand().equals(Menu.UNGROUP)) {
           editor.ungroupObjects();
         }
@@ -953,9 +892,7 @@ class IconMouseOps
         }
         else if (e.getActionCommand().equals(Look.LOOK_WINDOWS)) {
           try {
-            UIManager.setLookAndFeel(
-                "com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-            SwingUtilities.updateComponentTreeUI(editor);
+            Look.changeLayout(Look.LOOK_WINDOWS);
           }
           catch (Exception uie) {
             uie.printStackTrace();
@@ -963,8 +900,7 @@ class IconMouseOps
         }
         else if (e.getActionCommand().equals(Look.LOOK_METAL)) {
           try {
-            UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-            SwingUtilities.updateComponentTreeUI(editor);
+            Look.changeLayout(Look.LOOK_METAL);
           }
           catch (Exception uie) {
             uie.printStackTrace();
@@ -972,25 +908,28 @@ class IconMouseOps
         }
         else if (e.getActionCommand().equals(Look.LOOK_MOTIF)) {
           try {
-            UIManager.setLookAndFeel(
-                "com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-            SwingUtilities.updateComponentTreeUI(editor);
+            Look.changeLayout(Look.LOOK_MOTIF);
           }
           catch (Exception uie) {
             uie.printStackTrace();
           }
         }
-        else if (e.getActionCommand().equals(Look.LOOK_3D)) {
+        else if (e.getActionCommand().equals(Look.LOOK_CUSTOM)) {
           try {
-            UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
-            SwingUtilities.updateComponentTreeUI(editor);
+            Look.changeLayout(Look.LOOK_CUSTOM);
           }
           catch (Exception uie) {
             uie.printStackTrace();
           }
         }
-        else if (e.getActionCommand().equals(Menu.XML)) {
-          editor.exportShapesToXML();
+        else if (e.getActionCommand().equals(Menu.EXPORT_CLASS)) {
+          editor.exportShapesToXML(); // the class is not a relation
+        }
+		else if (e.getActionCommand().equals(Menu.EXPORT_TO_PACKAGE)) {
+		  editor.exportShapesToPackage(); // append the graphics to a package
+		}
+		else if (e.getActionCommand().equals(Menu.CREATE_PACKAGE)) {
+		  editor.createPackage();
         }
 
       }
@@ -1033,7 +972,6 @@ class IconMouseOps
             this.color = col;
           }
           changeObjectColors(col);
-          //editor.repaint();
         }
         else if (e.getActionCommand().equals(State.freehand)) {
           editor.mListener.setState(State.freehand);
@@ -1048,5 +986,6 @@ class IconMouseOps
           editor.mListener.setState(State.addPort);
         }
       }
+	  editor.drawingArea.grabFocus();
     }
 }

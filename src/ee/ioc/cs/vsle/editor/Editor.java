@@ -1,5 +1,4 @@
 package ee.ioc.cs.vsle.editor;
-
 import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.vclass.Point;
 import ee.ioc.cs.vsle.vclass.*;
@@ -7,17 +6,12 @@ import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.synthesize.Synthesizer;
 import ee.ioc.cs.vsle.packageparse.PackageParser;
 
-import java.io.File;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Properties;
-
 import java.awt.*;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.KeyEvent;
-
+import java.awt.event.*;
 import javax.swing.*;
-
 /**
  * Visual Specification Language ee.ioc.cs.editor.editor.Editor main module
  * for combining separate logical units (Built in the
@@ -27,11 +21,9 @@ import javax.swing.*;
  * @version 1.0
  */
 public class Editor extends JFrame {
-
         int objCount;
         int mouseX; // Mouse X coordinate.
         int mouseY; // Mouse Y coordinate.
-
         public MouseOps mListener;
         DrawingArea drawingArea;
         JMenuBar menuBar;
@@ -52,9 +44,8 @@ public class Editor extends JFrame {
         Port currentPort;
         Connection currentCon;
         Dimension drawAreaSize = new Dimension(600, 500);
-
+		KeyOps keyListener;
         public static final String WINDOW_TITLE = "Editor";
-
         /**
          * Class constructor [1].
          */
@@ -63,7 +54,6 @@ public class Editor extends JFrame {
                 initialize();
                 validate();
         } // Editor
-
         /**
          * Class constructor [2].
          * @param fileName - package file name.
@@ -72,10 +62,8 @@ public class Editor extends JFrame {
                 enableEvents(AWTEvent.WINDOW_EVENT_MASK);
                 initialize();
                 File file = new File(fileName);
-
                 loadPackage(file);
         } // Editor
-
         /**
          * Application initializer.
          */
@@ -85,45 +73,138 @@ public class Editor extends JFrame {
                                 System.exit(0);
                         }
                 });
-
                 scheme = new Scheme();
                 objects = scheme.objects;
                 connections = scheme.connections;
                 mListener = new MouseOps(this);
-
+				keyListener = new KeyOps(this);
                 drawingArea = new DrawingArea();
                 drawingArea.setBackground(Color.white);
                     drawingArea.setGridVisible(getGridVisibility());
-
+                drawingArea.setFocusable(true);
                 infoPanel = new JPanel(new GridLayout(1, 2));
                 posInfo = new JLabel();
-
                 drawingArea.addMouseListener(mListener);
-
                 drawingArea.addMouseMotionListener(mListener);
                 drawingArea.setPreferredSize(drawAreaSize);
+
+				// Initializes key listeners, for keyboard shortcuts.
+				drawingArea.addKeyListener(keyListener);
+
                 JScrollPane areaScrollPane = new JScrollPane(drawingArea,
                   JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                   JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
                 mainPanel.setLayout(new BorderLayout());
                 mainPanel.add(areaScrollPane, BorderLayout.CENTER);
-
                 infoPanel.add(posInfo);
-
                 mainPanel.add(infoPanel, BorderLayout.SOUTH);
                 posInfo.setText("-");
                 makeMenu();
-
                 getContentPane().add(mainPanel);
-
                 Look look = new Look();
-
                 look.setGUI(this);
                 look.changeLayout(
                   PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
                   PropertyBox.DEFAULT_LAYOUT));
-        }
+        } // initialize
+
+		public void selectAllObjects() {
+		  GObj obj;
+		  for (int i = 0; i < objects.size(); i++) {
+			obj = (GObj) objects.get(i);
+			obj.setSelected(true);
+		  }
+		  repaint();
+		} // selectAllObjects
+
+		public void print() {
+		  PrintUtilities.printComponent(drawingArea);
+       } // print
+
+	   public void loadScheme() {
+		 JFileChooser fc = new JFileChooser(getLastPath());
+		 CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.extensionSyn,CustomFileFilter.descriptionSyn);
+
+		 fc.setFileFilter(filter);
+		 int returnVal = fc.showOpenDialog(null);
+
+		 if (returnVal == JFileChooser.APPROVE_OPTION) {
+			 File file = fc.getSelectedFile();
+
+			 setLastPath(file.getAbsolutePath());
+			 try {
+				 FileInputStream fis = new FileInputStream(file);
+				 ObjectInputStream ois = new ObjectInputStream(fis);
+
+				 scheme = (Scheme) ois.readObject();
+				 if (vPackage == null || !scheme.packageName.equals(vPackage.name)) {
+					 JOptionPane.showMessageDialog(null, "This scheme was built with package " + scheme.packageName + ", but this package is not currently loaded. \n You should load the package before working with this scheme.", "Warning", JOptionPane.INFORMATION_MESSAGE);
+
+				 }
+				 ois.close();
+				 objects = scheme.objects;
+				 connections = scheme.connections;
+				 objCount = scheme.objCount;
+				 mListener.setState(State.selection);
+				 repaint();
+			 } catch (Exception exc) {
+				 exc.printStackTrace();
+			 }
+		 }
+
+        } // loadScheme
+
+		public void saveScheme() {
+		  JFileChooser fc = new JFileChooser(getLastPath());
+		  CustomFileFilter synFilter = new CustomFileFilter(CustomFileFilter.extensionSyn,CustomFileFilter.descriptionSyn);
+
+		  fc.setFileFilter(synFilter);
+		  int returnVal = fc.showSaveDialog(null);
+
+		  if (returnVal == JFileChooser.APPROVE_OPTION) {
+			  File file = fc.getSelectedFile();
+
+								  // [Aulo] 11.02.2004
+								  // Check if the file name ends with a required extension. If not,
+								  // append the default extension to the file name.
+								  if(!file.getAbsolutePath().toLowerCase().endsWith(".syn")) {
+									file = new File(file.getAbsolutePath()+".syn");
+								  }
+
+
+			  // store the last open directory in system properties.
+			  setLastPath(file.getAbsolutePath());
+			  boolean valid = true;
+
+			  // [Aulo] 04.01.2004
+			  // Check if file with a predefined name already exists.
+			  // If file exists, confirm file overwrite, otherwise leave
+			  // file as it is.
+			  if (file.exists()) {
+				  JOptionPane confirmPane = new JOptionPane();
+
+				  if (confirmPane.showConfirmDialog(null, "File exists.\nOverwrite file?", "Confirm Save", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
+					  valid = false;
+				  }
+			  }
+			  if (valid) {
+				  // Save scheme.
+				  try {
+					  FileOutputStream fos = new FileOutputStream(file);
+					  ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+					  scheme.objCount = objCount;
+					  oos.writeObject(scheme);
+					  oos.close();
+					  JOptionPane.showMessageDialog(null, "Saved to: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+
+				  } catch (Exception exc) {
+					  exc.printStackTrace();
+				  }
+			  }
+		  }
+
+        } // saveScheme
 
         /**
          * Check if the grid should be visible or not.
@@ -141,38 +222,35 @@ public class Editor extends JFrame {
                     }
                     return false;
           } // getGridVisibility
-
         /**
          * Build menu.
          */
         public void makeMenu() {
                 menuBar = new JMenuBar();
                 setJMenuBar(menuBar);
-
                 menu = new JMenu(Menu.MENU_FILE);
                 menu.setMnemonic(KeyEvent.VK_F);
                 menuItem = new JMenuItem(Menu.SAVE_SCHEME, KeyEvent.VK_S);
                 menuItem.addActionListener(mListener);
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.CTRL_MASK));
                 menu.add(menuItem);
-
                 menuItem = new JMenuItem(Menu.LOAD_SCHEME, KeyEvent.VK_O);
                 menuItem.addActionListener(mListener);
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_O, ActionEvent.CTRL_MASK));
                 menu.add(menuItem);
-
                 menu.addSeparator();
-
                 menuItem = new JMenuItem(Menu.PRINT, KeyEvent.VK_P);
                 menuItem.addActionListener(mListener);
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_P, ActionEvent.CTRL_MASK));
                 menu.add(menuItem);
-
                 menu.addSeparator();
-
                 menuItem = new JMenuItem(Menu.EXIT, KeyEvent.VK_X);
                 menuItem.addActionListener(mListener);
                 menu.add(menuItem);
-
                 menuBar.add(menu);
-
                 menu = new JMenu(Menu.MENU_EDIT);
                 menu.setMnemonic(KeyEvent.VK_E);
                 // [Aulo] 06.01.2004 - Commented out the Clone menu item
@@ -186,22 +264,19 @@ public class Editor extends JFrame {
                  */
                 menuItem = new JMenuItem(Menu.SELECT_ALL, KeyEvent.VK_A);
                 menuItem.addActionListener(mListener);
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_A, ActionEvent.CTRL_MASK));
                 menu.add(menuItem);
-
                 menuItem = new JMenuItem(Menu.CLEAR_ALL, KeyEvent.VK_C);
                 menuItem.addActionListener(mListener);
                 menu.add(menuItem);
-
 				menuItem = new JCheckBoxMenuItem(Menu.GRID,getGridVisibility());
 				menuItem.setMnemonic('G');
 				menuItem.addActionListener(mListener);
 				menu.add(menuItem);
-
                 menuBar.add(menu);
-
                 menu = new JMenu(Menu.MENU_PACKAGE);
                 menu.setMnemonic(KeyEvent.VK_P);
-
                 menuItem = new JMenuItem(Menu.LOAD, KeyEvent.VK_L);
                 menuItem.addActionListener(mListener);
                 menu.add(menuItem);
@@ -211,91 +286,67 @@ public class Editor extends JFrame {
                 menuItem = new JMenuItem(Menu.INFO, KeyEvent.VK_I);
                 menuItem.addActionListener(mListener);
                 menu.add(menuItem);
-
                 menuBar.add(menu);
-
                 menu = new JMenu(Menu.MENU_SCHEME);
                 menu.setMnemonic(KeyEvent.VK_S);
-
                 menuItem = new JMenuItem(Menu.SPECIFICATION, KeyEvent.VK_S);
                 menuItem.addActionListener(mListener);
                 menu.add(menuItem);
-
                 /* menuItem = new JMenuItem("Planner");
                  menuItem.addActionListener(mListener);
                  menu.add(menuItem);
-
                  menuItem = new JMenuItem("Plan, compile, run");
                  menuItem.setActionCommand("Run");
                  menuItem.addActionListener(mListener);
                  menu.add(menuItem);*/
-
                 // menu.setMnemonic(KeyEvent.VK_A);
-
                 menuBar.add(menu);
-
                 menu = new JMenu(Menu.MENU_OPTIONS);
                 menu.setMnemonic(KeyEvent.VK_O);
-
                 submenu = new JMenu(Menu.MENU_LAYOUT);
                 submenu.setMnemonic(KeyEvent.VK_L);
-                menuItem = new JMenuItem(Look.LOOK_3D, KeyEvent.VK_3);
+                menuItem = new JMenuItem(Look.LOOK_CUSTOM, KeyEvent.VK_C);
                 menuItem.addActionListener(mListener);
                 submenu.add(menuItem);
-
                 menuItem = new JMenuItem(Look.LOOK_METAL, KeyEvent.VK_M);
                 menuItem.addActionListener(mListener);
                 submenu.add(menuItem);
-
                 menuItem = new JMenuItem(Look.LOOK_MOTIF, KeyEvent.VK_M);
                 menuItem.addActionListener(mListener);
                 submenu.add(menuItem);
-
                 menuItem = new JMenuItem(Look.LOOK_WINDOWS, KeyEvent.VK_W);
                 menuItem.addActionListener(mListener);
                 submenu.add(menuItem);
-
                 menuItem = new JMenuItem(Menu.SETTINGS, KeyEvent.VK_S);
                 menuItem.addActionListener(mListener);
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_J, ActionEvent.CTRL_MASK));
                 menu.add(menuItem);
-
                 menu.add(submenu);
-
                 menuBar.add(menu);
-
                 menu = new JMenu(Menu.MENU_HELP);
                 menu.setMnemonic(KeyEvent.VK_H);
                 menuBar.add(menu);
-
                 menuItem = new JMenuItem(Menu.DOCS, KeyEvent.VK_D);
                 menuItem.addActionListener(mListener);
                 menu.add(menuItem);
-
                 menu.addSeparator();
-
                     menuItem = new JMenuItem(Menu.LICENSE, KeyEvent.VK_L);
                     menuItem.addActionListener(mListener);
                     menu.add(menuItem);
-
                 menuItem = new JMenuItem(Menu.ABOUT, KeyEvent.VK_A);
                 menuItem.addActionListener(mListener);
                 menu.add(menuItem);
-
         }
-
         class DrawingArea extends JPanel {
-
                 private boolean showGrid = false;
-
                 public boolean isGridVisible() {
                         return this.showGrid;
                 }
-
                 public void setGridVisible(boolean b) {
                         this.showGrid = b;
                         repaint();
                 }
-
                 protected void drawGrid(Graphics g) {
                         g.setColor(Color.lightGray);
                         for(int i=0;i<getWidth();i+=RuntimeProperties.gridStep) {
@@ -305,20 +356,16 @@ public class Editor extends JFrame {
                                 g.drawLine(0,i,getWidth(),i);
                         }
                 }
-
                 protected void paintComponent(Graphics g) {
 						Graphics2D g2 = (Graphics2D)g;
                         super.paintComponent(g2);
                         Connection rel;
                         if(this.showGrid) drawGrid(g2);
                         GObj obj;
-
 						if (RuntimeProperties.isAntialiasingOn) {
 						  g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
 											  java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 						}
-
-
                         for (int i = 0; i < objects.size(); i++) {
                                 obj = (GObj) objects.get(i);
                                 obj.drawClassGraphics(g2);
@@ -328,29 +375,24 @@ public class Editor extends JFrame {
                                 rel = (Connection) connections.get(i);
                                 rel.drawRelation(g2);
                         }
-
                         if (firstPort != null && mListener.state.equals(State.addRelation)) {
                                 currentCon.drawRelation(g2);
                                 Point p = (Point) currentCon.breakPoints.get(
                                   currentCon.breakPoints.size() - 1);
-
                                 g2.drawLine(p.x, p.y, mouseX, mouseY);
                         } else if  (firstPort != null && mListener.state.startsWith("??")) {
-                double angle = VMath.calcAngle(firstPort.getRealCenterX(),firstPort.getRealCenterY(), mouseX, mouseY);
+                double angle = VMath.calcAngle(firstPort.getRealX(),firstPort.getRealY(), mouseX, mouseY);
 				currentObj = (RelObj)currentObj;
                 ((RelObj)currentObj).angle = angle;
-				currentObj.Xsize = (float)Math.sqrt(Math.pow((mouseX - firstPort.getRealCenterX()) / (double)currentObj.width, 2.0) + Math.pow((mouseY - firstPort.getRealCenterY()) / (double)currentObj.width, 2.0));
-				currentObj.y = firstPort.getRealCenterY();
-				currentObj.x = firstPort.getRealCenterX();
+				currentObj.Xsize = (float)Math.sqrt(Math.pow((mouseX - firstPort.getRealX()) / (double)currentObj.width, 2.0) + Math.pow((mouseY - firstPort.getRealY()) / (double)currentObj.width, 2.0));
+				currentObj.y = firstPort.getRealY();
+				currentObj.x = firstPort.getRealX();
 				currentObj.drawClassGraphics(g2);
-
-
 			} else if (currentObj != null && !mListener.state.startsWith("??")) {
 				// ee.ioc.cs.editor.vclass.PackageClass pClass = (ee.ioc.cs.editor.vclass.PackageClass)classes.get(currentObj.name);
 				g2.setColor(Color.black);
 				currentObj.drawClassGraphics(g2);
 			}
-
                         if (mListener.state.equals(State.dragBox)) {
                                 g2.setColor(Color.gray);
                                 g2.drawRect(mListener.startX, mListener.startY,
@@ -358,7 +400,6 @@ public class Editor extends JFrame {
                         }
                 }
         }
-
         /**
          * Display information dialog to application user.
          * @param title - information dialog title.
@@ -368,7 +409,6 @@ public class Editor extends JFrame {
                 JOptionPane.showMessageDialog(null, text, title,
                   JOptionPane.INFORMATION_MESSAGE);
         }
-
         /**
          * Overridden so we can exit when window is closed
          * @param e - Window Event.
@@ -379,63 +419,52 @@ public class Editor extends JFrame {
                         exitApplication();
                 }
         }
-
         /**
          * Close application.
          */
         public void exitApplication() {
                 int confirmed = JOptionPane.showConfirmDialog(null, "Exit Application?",
                   Menu.EXIT, JOptionPane.OK_CANCEL_OPTION);
-
                 switch (confirmed) {
                 case JOptionPane.OK_OPTION:
                         System.exit(0);
                         break;
-
                 case JOptionPane.CANCEL_OPTION:
                         break;
                 }
         }
-
         /**
          * Method for cloning objects, currently invoked either
          * from the Edit menu Clone selection or from the Object popup
          * menu Clone selection.
          */
-        public void cloneObjects() {
+        public void cloneObject() {
                 ArrayList selected = objects.getSelected();
                 // objCount = objects.size();
                 ArrayList newObjects = new ArrayList();
                 GObj obj;
-
                 // clone every selected objects
                 for (int i = 0; i < selected.size(); i++) {
                         obj = (GObj) selected.get(i);
                         GObj newObj = (GObj) obj.clone();
-
                         newObj.setPosition(newObj.x + 20, newObj.y + 20);
                         newObjects.add(newObj);
                 }
-
                 // some of these objects might have been groups, so ungroup everything
                 ObjectList objects2 = new ObjectList();
-
                 for (int i = 0; i < newObjects.size(); i++) {
                         obj = (GObj) newObjects.get(i);
                         objects2.addAll(obj.getComponents());
                 }
-
                 // now the hard part - we have to clone all the connections
                 Connection con;
                 GObj beginObj;
                 GObj endObj;
                 ConnectionList newConnections = new ConnectionList();
-
                 for (int i = 0; i < connections.size(); i++) {
                         con = (Connection) connections.get(i);
                         int beginNum = con.beginPort.getNumber();
                         int endNum = con.endPort.getNumber();
-
                         beginObj = null;
                         endObj = null;
                         for (int j = 0; j < objects2.size(); j++) {
@@ -445,13 +474,10 @@ public class Editor extends JFrame {
                                         if (endObj != null) {
                                                 Port beginPort = (Port) beginObj.ports.get(beginNum);
                                                 Port endPort = (Port) endObj.ports.get(endNum);
-
                                                 beginPort.setConnected(true);
                                                 endPort.setConnected(true);
-
                                                 Connection con2 = new Connection(beginPort, endPort);
                                                 Point p;
-
                                                 for (int l = 0; l < con.breakPoints.size(); l++) {
                                                         p = (Point) con.breakPoints.get(l);
                                                         con2.addBreakPoint(new Point(p.x + 20, p.y + 20));
@@ -466,11 +492,9 @@ public class Editor extends JFrame {
                                         if (beginObj != null) {
                                                 Port beginPort = (Port) beginObj.ports.get(beginNum);
                                                 Port endPort = (Port) endObj.ports.get(endNum);
-
                                                 beginPort.setConnected(true);
                                                 endPort.setConnected(true);
                                                 Connection con3 = new Connection(beginPort, endPort);
-
                                                 beginPort.addConnection(con3);
                                                 endPort.addConnection(con3);
                                                 newConnections.add(con3);
@@ -496,45 +520,106 @@ public class Editor extends JFrame {
                 objects.addAll(newObjects);
                 repaint();
         }
-
         /**
          * Draw object connections.
          */
         public void drawConnections() {
                 for (int i = 0; i < connections.size(); i++) {
                         Connection con = (Connection) connections.get(i);
-
                         con.drawRelation(drawingArea.getGraphics());
                 }
         }
-
         /**
          * Method for grouping objects.
          */
         public void groupObjects() {
-                ArrayList selected = objects.getSelected();
-                GObj obj;
+		  ArrayList selected = objects.getSelected();
+		  if(selected.size()>1) {
+			GObj obj;
+			for (int i = 0; i < selected.size(); i++) {
+			  obj = (GObj) selected.get(i);
+			  obj.setSelected(false);
+			}
+			GObjGroup og = new GObjGroup(selected);
+			og.strict = true;
+			og.setAsGroup(true);
+			objects.removeAll(selected);
+			objects.add(og);
+			repaint();
+		  }
+        } // groupObjects
 
-                for (int i = 0; i < selected.size(); i++) {
-                        obj = (GObj) selected.get(i);
-                        obj.setSelected(false);
-                }
-                GObjGroup og = new GObjGroup(selected);
+		/**
+		 * Move object with keys, executed by the KeyOps.
+		 * @param moveX int - object x coordinate change.
+		 * @param moveY int - object y coordinate change.
+		 */
+		public void moveObject(int moveX, int moveY) {
+		  for (int i = 0; i < objects.getSelected().size(); i++) {
+			  GObj obj = (GObj) objects.getSelected().get(i);
+			  if (!(obj instanceof RelObj))
+			  obj.setPosition(obj.getX() + moveX, obj.getY() + moveY);
 
-                og.strict = true;
-                og.setAsGroup(true);
-                objects.removeAll(selected);
-                objects.add(og);
-                repaint();
-                db.p(og);
-        }
+			  // check if a strict port exists on the object
+
+			  if (obj.isStrict()) {
+				  Port port, port2;
+				  GObj obj2;
+				  ArrayList ports = obj.getPorts();
+
+				  for (int j = 0; j < ports.size(); j++) {
+					  port = (Port) ports.get(j);
+					  if (port.isStrict()) {
+						  port2 = port.getStrictConnected();
+						  // if the port is connected to another port, and they are not both selected, we might
+						  // wanna remove the connection
+						  if (port2 != null && !port2.obj.isSelected()) {
+							  // We dont want to remove the connection, if the objects belong to the same group
+							  if (! (obj.isGroup() && obj.includesObject(port2.obj))) {
+								  if (Math.abs(port.getRealCenterX() - port2.getRealCenterX()) > 1 || Math.abs(port.getRealCenterY() - port2.getRealCenterY()) > 1) {
+									  connections.remove(port, port2);
+								  }
+							  }
+						  }
+
+						  obj2 = objects.checkInside(port.obj.getX() + moveX + port.getCenterX(), port.obj.getY() + moveY + port.getCenterY(), obj);
+						  if (obj2 != null && !obj2.isSelected()) {
+							  port2 = obj2.portContains(port.obj.getX() + moveX + port.getCenterX(), port.obj.getY() + moveY + port.getCenterY());
+
+							  if (port2 != null && port2.isStrict()) {
+								  if (!port.isConnected()) {
+									  port.setConnected(true);
+									  port2.setConnected(true);
+									  Connection con = new Connection(port, port2);
+
+									  port2.addConnection(con);
+									  port.addConnection(con);
+									  connections.add(con);
+								  }
+								  obj.setPosition(port2.obj.x + port2.getCenterX() - ( (port.obj.x - obj.x) + port.getCenterX()), port2.obj.y + port2.getCenterY() - ( (port.obj.y - obj.y) + port.getCenterY()));
+							  }
+						  }
+					  }
+				  }
+			  }
+
+			  for (int j = 0; j < connections.size(); j++) {
+				  Connection relation = (Connection) connections.get(j);
+				  if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
+					  relation.calcBreakPoints();
+				  }
+			  }
+
+		  }
+		  objects.updateRelObjs();
+		  repaint();
+		} // moveObject
 
         /**
          * Method for ungrouping objects.
          */
         public void ungroupObjects() {
                 GObj obj;
-
                 for (int i = 0; i < objects.getSelected().size(); i++) {
                         obj = (GObj) objects.getSelected().get(i);
                         if (obj.isGroup()) {
@@ -546,18 +631,12 @@ public class Editor extends JFrame {
                 }
                 repaint();
         }
-
         /**
          * Method for deleting selected objects.
          */
         public void deleteObjects() {
                 GObj obj;
-
-                connections.removeAll(currentObj.getConnections());
-                objects.remove(currentObj);
-                currentObj = null;
                 ArrayList removable = new ArrayList();
-
                 for (int i = 0; i < objects.size(); i++) {
                         obj = (GObj) objects.get(i);
                         if (obj.isSelected()) {
@@ -569,7 +648,6 @@ public class Editor extends JFrame {
                 objects.deleteExcessRels();
                 repaint();
         }
-
         /**
          * Get last file path used for loading or saving schema, package, etc.
          * from / into a file.
@@ -579,7 +657,6 @@ public class Editor extends JFrame {
                 return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
                   PropertyBox.LAST_PATH);
         }
-
         /**
          * Get system documentation URL value.
          * @return String - system documentation URL.
@@ -588,7 +665,6 @@ public class Editor extends JFrame {
                 return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
                   PropertyBox.DOCUMENTATION_URL);
         }
-
         /**
          * Stores the last path used for loading or saving schema, package, etc.
          * into system properties.
@@ -605,7 +681,6 @@ public class Editor extends JFrame {
                 PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
                   PropertyBox.LAST_PATH, path);
         }
-
         /**
          * Upon platform, use OS-specific methods for opening the URL in required browser.
          * @param url - URL to be opened in a browser. Capable of browsing
@@ -618,7 +693,6 @@ public class Editor extends JFrame {
                         if (url != null && url.trim().length() > 0) {
                                 // Get OS type.
                                 String osType = getOsType();
-
                                 // Open URL with OS-specific methods.
                                 if (osType != null && osType.equalsIgnoreCase("Windows")) {
                                         Runtime.getRuntime().exec(
@@ -629,7 +703,6 @@ public class Editor extends JFrame {
                         e.printStackTrace();
                 }
         }
-
         /**
          * Check if Operating System type is Windows.
          * @param osType - Operating System type.
@@ -641,7 +714,6 @@ public class Editor extends JFrame {
                 }
                 return false;
         }
-
         /**
          * Return operating system type. Uses isWin, isMac, isUnix
          * methods for deciding on Os type and returns always the
@@ -650,11 +722,9 @@ public class Editor extends JFrame {
          */
         public static String getOsType() {
                 Properties sysProps = System.getProperties();
-
                 try {
                         if (sysProps != null) {
                                 String osType = sysProps.getProperty("os.name");
-
                                 if (isWin(osType)) {
                                         return "Windows";
                                 } else {
@@ -666,7 +736,6 @@ public class Editor extends JFrame {
                 }
                 return null;
         }
-
         /**
          * Package loader.
          * @param f - package file to be loaded.
@@ -675,7 +744,6 @@ public class Editor extends JFrame {
                 if (f.exists()) {
                         RuntimeProperties.packageDir = f.getParent() + File.separator;
                         PackageParser pp = new PackageParser(f);
-
                         vPackage = pp.getPackage();
                         scheme.packageName = vPackage.name;
                         palette = new Palette(vPackage, mListener, this);
@@ -684,7 +752,18 @@ public class Editor extends JFrame {
                         JOptionPane.showMessageDialog(null, "Cannot read file " + f, "Error",
                           JOptionPane.INFORMATION_MESSAGE);
                 }
-        }
+        } // loadPackage
+
+		/**
+		 * Open the object properties dialog.
+		 */
+		public void openPropertiesDialog() {
+		  if(objects.getSelected().size()==1) {
+			ObjectPropertiesEditor prop = new ObjectPropertiesEditor((GObj)objects.getSelected().get(0), this);
+			prop.pack();
+			prop.setVisible(true);
+		  }
+       } // openPropertiesDialog
 
         /**
          * Open application options dialog.
@@ -694,7 +773,6 @@ public class Editor extends JFrame {
                 o.setVisible(true);
 				repaint();
         }
-
         /**
          * Removes all objects.
          */
@@ -704,7 +782,6 @@ public class Editor extends JFrame {
                 connections.removeAll(connections);
                 repaint();
         }
-
         /**
          * Returns the window width.
          * @return - window height.
@@ -712,7 +789,6 @@ public class Editor extends JFrame {
         private static final int getWinWidth() {
                 return 650;
         }
-
         /**
          * Returns the window height.
          * @return int - window height.
@@ -725,31 +801,28 @@ public class Editor extends JFrame {
          * Hilight ports of the object.
          */
         public void hilightPorts() {
-                ArrayList ps = currentObj.getPorts();
-
-                for (int i = 0; i < ps.size(); i++) {
-                        Port p = (Port) ps.get(i);
-
-                        p.setHilighted(!p.isHilighted());
-                }
-                repaint();
-        }
+		  for(int i=0;i<objects.getSelected().size();i++) {
+			GObj obj = (GObj)objects.getSelected().get(i);
+			ArrayList ps = obj.getPorts();
+			for (int port_index = 0; port_index < ps.size(); port_index++) {
+			  Port p = (Port) ps.get(port_index);
+			  p.setHilighted(!p.isHilighted());
+			}
+		  }
+          repaint();
+        } // hilightPorts
 
         /**
          * Main method for module unit-testing.
          * @param args - command line arguments
          */
         public static void main (String[] args) {
-
                 String directory = System.getProperty("user.dir")
                   + System.getProperty("file.separator");
-
                 RuntimeProperties.debugInfo = Integer.parseInt(
                   PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
                   PropertyBox.DEBUG_INFO));
-
 	             RuntimeProperties.gridStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.GRID_STEP));
-
 				 int aa = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.ANTI_ALIASING));
 				 if(aa==0) {
 				  RuntimeProperties.isAntialiasingOn = false;
@@ -757,8 +830,9 @@ public class Editor extends JFrame {
 				    RuntimeProperties.isAntialiasingOn = true;
                  }
 
-                JFrame window;
+                RuntimeProperties.customLayout = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.CUSTOM_LAYOUT);
 
+                JFrame window;
                 try {
                         if (args.length > 0) {
                                 if (args[0].equals("-p")) {
@@ -769,7 +843,6 @@ public class Editor extends JFrame {
                                                 RuntimeProperties.packageDir = directory;
                                         }
                                         Synthesizer synth = new Synthesizer();
-
                                         synth.parseFromCommandLine(args[1]);
                                 } else {
                                         // Esimeses hoos vaatame, kas moodulite fail on ette antud k�surealt.
@@ -779,14 +852,12 @@ public class Editor extends JFrame {
                                         window.setSize(getWinWidth(), getWinHeight());
                                         window.setVisible(true);
                                 }
-
                         } else {
                                 // Kui k�surealt ei olnud ette antud, v�tame vaikev��rtuse application.properties failist.
                                 db.p(
                                   "No module file name was given as the command line argument, reading the application.properties file.");
                                 String paletteFile = PropertyBox.getProperty(
                                   PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE);
-
                                 if (paletteFile != null && paletteFile.trim().length() > 0) {
                                         // Leidsime vastava kirje.
                                         db.p(
@@ -810,7 +881,6 @@ public class Editor extends JFrame {
                         window.setSize(getWinWidth(), getWinHeight());
                         window.setVisible(true);
                 }
-
                 // log application executions, also making sure that the properties file is
                 // available for writing (required by some of current application modules).
                 RuntimeProperties.genFileDir = PropertyBox.getProperty(
@@ -818,5 +888,4 @@ public class Editor extends JFrame {
                 PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
                   PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
         }
-
 }

@@ -1,8 +1,7 @@
 package ee.ioc.cs.vsle.editor;
 
-import java.awt.event.KeyEvent;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
+import java.awt.event.*;
+import javax.swing.*;
 
 
 /**
@@ -32,28 +31,38 @@ public class ObjectPopupMenu extends JPopupMenu {
 		itemDelete = new JMenuItem(Menu.DELETE, KeyEvent.VK_D);
 		itemDelete.addActionListener(mListener);
 		itemDelete.setActionCommand(Menu.OBJECT_DELETE);
+		itemDelete.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_DELETE, 0));
 		this.add(itemDelete);
 
-		itemProperties = new JMenuItem(Menu.PROPERTIES, KeyEvent.VK_P);
+		itemProperties = new JMenuItem(Menu.PROPERTIES, KeyEvent.VK_R);
 		itemProperties.addActionListener(mListener);
+		itemProperties.setAccelerator(KeyStroke.getKeyStroke(
+        KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemProperties);
 
 		itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
 		itemGroup.addActionListener(mListener);
+		itemGroup.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemGroup);
 
 		itemUngroup = new JMenuItem(Menu.UNGROUP, KeyEvent.VK_U);
 		itemUngroup.addActionListener(mListener);
+		itemUngroup.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_U, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemUngroup);
-
-		this.addSeparator();
 
 		itemHLPorts = new JMenuItem(Menu.HLPORTS, KeyEvent.VK_H);
 		itemHLPorts.addActionListener(mListener);
+		itemHLPorts.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_H, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemHLPorts);
 
 		itemClone = new JMenuItem(Menu.CLONE, KeyEvent.VK_C);
 		itemClone.addActionListener(mListener);
+		itemClone.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemClone);
 	}
 

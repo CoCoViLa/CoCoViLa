@@ -20,22 +20,9 @@ import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.BasicStroke;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.KeyEvent;
+import java.awt.event.*;
 
-import javax.swing.JFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JMenu;
-import javax.swing.JPanel;
-import javax.swing.JMenuItem;
-import javax.swing.JLabel;
-import javax.swing.JScrollPane;
-import javax.swing.UIManager;
-import javax.swing.SwingUtilities;
-import javax.swing.JOptionPane;
-import javax.swing.JFileChooser;
-import javax.swing.JCheckBoxMenuItem;
+import javax.swing.*;
 
 public class IconEditor
     extends JFrame {
@@ -60,8 +47,11 @@ public class IconEditor
   ShapeGroup shapeList = new ShapeGroup(new ArrayList());
   Shape currentShape;
   ArrayList ports = new ArrayList();
+  IconKeyOps keyListener;
 
   public static final String WINDOW_TITLE = "IconEditor";
+  public static boolean classParamsOk = false;
+  public static boolean packageParamsOk = false;
 
   /**
    * Class constructor [1].
@@ -82,7 +72,7 @@ public class IconEditor
         System.exit(0);
       }
     });
-
+	keyListener = new IconKeyOps(this);
     scheme = new Scheme();
     shapeList.addAll(scheme.objects);
     scheme.packageName = "IconEditor";
@@ -91,6 +81,9 @@ public class IconEditor
     drawingArea = new DrawingArea();
     drawingArea.setBackground(Color.white);
     drawingArea.setGridVisible(getGridVisibility());
+
+	// Initializes key listeners, for keyboard shortcuts.
+	drawingArea.addKeyListener(keyListener);
 
     infoPanel = new JPanel(new GridLayout(1, 2));
     posInfo = new JLabel();
@@ -122,49 +115,25 @@ public class IconEditor
   }
 
   /**
-   * Change layout immediately as the layout selection changes.
-   * @param selectedLayout - layout selected from the layouts menu for application layout.
+   * Move object with keys, executed by the KeyOps.
+   * @param moveX int - object x coordinate change.
+   * @param moveY int - object y coordinate change.
    */
-  public void changeLayout(String selectedLayout) {
-    if (selectedLayout.equals(Look.LOOK_WINDOWS)) {
-      try {
-        UIManager.setLookAndFeel(
-            "com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        SwingUtilities.updateComponentTreeUI(this);
-      }
-      catch (Exception uie) {
-        uie.printStackTrace();
-      }
-    }
-    else if (selectedLayout.equals(Look.LOOK_METAL)) {
-      try {
-        UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-        SwingUtilities.updateComponentTreeUI(this);
-      }
-      catch (Exception uie) {
-        uie.printStackTrace();
-      }
-    }
-    else if (selectedLayout.equals(Look.LOOK_MOTIF)) {
-      try {
-        UIManager.setLookAndFeel(
-            "com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-        SwingUtilities.updateComponentTreeUI(this);
-      }
-      catch (Exception uie) {
-        uie.printStackTrace();
-      }
-    }
-    else if (selectedLayout.equals(Look.LOOK_3D)) {
-      try {
-        UIManager.setLookAndFeel(new com.incors.plaf.kunststoff.KunststoffLookAndFeel());
-        SwingUtilities.updateComponentTreeUI(this);
-      }
-      catch (Exception uie) {
-        uie.printStackTrace();
-      }
-    }
-  }
+  public void moveObject(int moveX, int moveY) {
+	moveX = moveX * RuntimeProperties.nudgeStep;
+	moveY = moveY * RuntimeProperties.nudgeStep;
+	for (int i = 0; i < shapeList.getSelected().size(); i++) {
+	  Shape s = (Shape)shapeList.getSelected().get(i);
+	  s.setPosition(s.getX()+moveX,s.getY()+moveY);
+	}
+	for (int i = 0; i < ports.size(); i++) {
+	 IconPort p = (IconPort)ports.get(i);
+	 if(p.isSelected()) {
+	   p.setPosition(p.getX()+moveX,p.getY()+moveY);
+     }
+   }
+	repaint();
+  } // moveObject
 
   public boolean getGridVisibility() {
     String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.SHOW_GRID);
@@ -190,25 +159,39 @@ public class IconEditor
     menu.setMnemonic(KeyEvent.VK_F);
     menuItem = new JMenuItem(Menu.SAVE_SCHEME, KeyEvent.VK_S);
     menuItem.addActionListener(mListener);
+	menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_S, ActionEvent.CTRL_MASK));
     menu.add(menuItem);
 
     menuItem = new JMenuItem(Menu.LOAD_SCHEME, KeyEvent.VK_O);
     menuItem.addActionListener(mListener);
+	menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_O, ActionEvent.CTRL_MASK));
     menu.add(menuItem);
 
     exportmenu = new JMenu(Menu.EXPORT_MENU);
     exportmenu.setMnemonic(KeyEvent.VK_E);
 
-    menuItem = new JMenuItem(Menu.XML, KeyEvent.VK_X);
+    menuItem = new JMenuItem(Menu.EXPORT_CLASS, KeyEvent.VK_C);
     menuItem.addActionListener(mListener);
     exportmenu.add(menuItem);
 
+	menuItem = new JMenuItem(Menu.EXPORT_TO_PACKAGE, KeyEvent.VK_P);
+	menuItem.addActionListener(mListener);
+	exportmenu.add(menuItem);
+
     menu.add(exportmenu);
+
+	menuItem = new JMenuItem(Menu.CREATE_PACKAGE, KeyEvent.VK_C);
+	menuItem.addActionListener(mListener);
+	menu.add(menuItem);
 
     menu.addSeparator();
 
     menuItem = new JMenuItem(Menu.PRINT, KeyEvent.VK_P);
     menuItem.addActionListener(mListener);
+	menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_P, ActionEvent.CTRL_MASK));
     menu.add(menuItem);
 
     menu.addSeparator();
@@ -224,6 +207,8 @@ public class IconEditor
 
     menuItem = new JMenuItem(Menu.SELECT_ALL, KeyEvent.VK_A);
     menuItem.addActionListener(mListener);
+	menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_A, ActionEvent.CTRL_MASK));
     menu.add(menuItem);
 
     menuItem = new JMenuItem(Menu.CLEAR_ALL, KeyEvent.VK_C);
@@ -235,6 +220,12 @@ public class IconEditor
     menuItem.addActionListener(mListener);
     menu.add(menuItem);
 
+    menu.addSeparator();
+
+	menuItem = new JMenuItem(Menu.CLASS_PROPERTIES, KeyEvent.VK_P);
+	menuItem.addActionListener(mListener);
+	menu.add(menuItem);
+
     menuBar.add(menu);
 
     menu = new JMenu(Menu.MENU_OPTIONS);
@@ -242,7 +233,7 @@ public class IconEditor
 
     submenu = new JMenu(Menu.MENU_LAYOUT);
     submenu.setMnemonic(KeyEvent.VK_L);
-    menuItem = new JMenuItem(Look.LOOK_3D, KeyEvent.VK_3);
+    menuItem = new JMenuItem(Look.LOOK_CUSTOM, KeyEvent.VK_C);
     menuItem.addActionListener(mListener);
     submenu.add(menuItem);
 
@@ -260,6 +251,8 @@ public class IconEditor
 
     menuItem = new JMenuItem(Menu.SETTINGS, KeyEvent.VK_S);
     menuItem.addActionListener(mListener);
+	menuItem.setAccelerator(KeyStroke.getKeyStroke(
+                KeyEvent.VK_J, ActionEvent.CTRL_MASK));
     menu.add(menuItem);
 
     menu.add(submenu);
@@ -286,42 +279,109 @@ public class IconEditor
 
   }
 
+  public void fixShape() {
+	for(int i=0;i<shapeList.size();i++) {
+	  Shape shape = (Shape)shapeList.get(i);
+	  if(shape.isSelected()) {
+		shape.setFixed(!shape.isFixed());
+	  }
+	}
+  } // fixShape
+
   /**
    * Returns XML representing shapes on the screen.
+   * @param appendXMLtag - append xml formatting or not.
    * @return StringBuffer - XML representing shapes on the screen.
    */
-  public StringBuffer getShapesInXML() {
+  public StringBuffer getShapesInXML(boolean appendXMLtag) {
 	StringBuffer xmlBuffer = new StringBuffer();
-    xmlBuffer.append("<?xml version='1.0' encoding='utf-8'?>");
-	xmlBuffer.append("\n");
-	xmlBuffer.append("<drawing>");
-
+	if(appendXMLtag) {
+	  xmlBuffer.append("<?xml version='1.0' encoding='utf-8'?>\n");
+	  xmlBuffer.append("\n");
+	}
+	xmlBuffer.append("<class");
+	if(RuntimeProperties.classIsRelation) xmlBuffer.append(" type=\"relation\"");
+	xmlBuffer.append(">\n");
+	xmlBuffer.append("<name>"+RuntimeProperties.className+"</name>\n");
+	xmlBuffer.append("<description>"+RuntimeProperties.classDescription+"</description>\n");
+	String classIcon = RuntimeProperties.classIcon;
+	if(classIcon!=null && classIcon.lastIndexOf("/")>=0) classIcon = classIcon.substring(classIcon.lastIndexOf("/")+1);
+    if(classIcon!=null && classIcon.lastIndexOf("\\")>=0) classIcon = classIcon.substring(classIcon.lastIndexOf("\\")+1);
+	xmlBuffer.append("<icon>"+classIcon+"</icon>\n");
 	xmlBuffer = appendShapes(xmlBuffer);
 	xmlBuffer = appendPorts(xmlBuffer);
-    xmlBuffer.append("</drawing>");
+    xmlBuffer.append("</class>\n");
 
 	return xmlBuffer;
   } // getShapesInXML
+
+  public void createPackage() {
+	PackagePropertiesDialog p = new PackagePropertiesDialog();
+	p.setVisible(true);
+	savePackage();
+  } // createPackage
+
+  private void savePackage() {
+	StringBuffer sb = new StringBuffer();
+	sb.append("<?xml version=\'1.0\' encoding=\'utf-8\'?>\n");
+	sb.append("\n");
+	sb.append("<!DOCTYPE package SYSTEM \""+RuntimeProperties.packageDtd+"\">\n");
+	sb.append("<package>\n");
+	sb.append("<name>"+RuntimeProperties.packageName+"</name>\n");
+	sb.append("<description>"+RuntimeProperties.packageDesc+"</description>\n");
+	sb.append("</package>");
+	if(this.packageParamsOk) {
+	  saveToFile(sb.toString(), "xml");
+	}
+  } // savePackage
 
   /**
    * Save shape to file in XML format.
    */
   public void exportShapesToXML() {
+    classParamsOk = true;
+	validateClassParams();
+	if(classParamsOk) {
+	  StringBuffer xmlBuffer = new StringBuffer();
 
-    StringBuffer xmlBuffer = new StringBuffer();
-
-    if(boundingbox!=null) {
-	  xmlBuffer = getShapesInXML();
-	  saveToFile(xmlBuffer.toString(),"xml");
-    } else {
-      JOptionPane.showMessageDialog(null, "Please define a bounding box.",
-                                    "Bounding box undefined",
-                                    JOptionPane.INFORMATION_MESSAGE);
+	  if(boundingbox!=null) {
+		xmlBuffer = getShapesInXML(true);
+		saveToFile(xmlBuffer.toString(),"xml");
+	  } else {
+		JOptionPane.showMessageDialog(null, "Please define a bounding box.",
+									  "Bounding box undefined",
+									  JOptionPane.INFORMATION_MESSAGE);
+	  }
     }
   }
 
+  public void exportShapesToPackage() {
+	classParamsOk = true;
+	validateClassParams();
+	if(classParamsOk) {
+	  if(boundingbox!=null) {
+		saveToPackage();
+	  } else {
+		JOptionPane.showMessageDialog(null, "Please define a bounding box.", "Bounding box undefined", JOptionPane.INFORMATION_MESSAGE);
+	  }
+	}
+  }
+
+  private void validateClassParams() {
+	if(RuntimeProperties.className==null ||
+	   RuntimeProperties.classDescription==null ||
+	   RuntimeProperties.classIcon==null ||
+	   (RuntimeProperties.className!=null&&RuntimeProperties.className.trim().length()==0) ||
+	   (RuntimeProperties.classDescription!=null&&RuntimeProperties.classDescription.trim().length()==0) ||
+	   (RuntimeProperties.classIcon!=null&&RuntimeProperties.classIcon.trim().length()==0)) {
+	   ClassPropertiesDialog c = new ClassPropertiesDialog();
+	   c.setEmptyValuesValid(false);
+	   c.setVisible(true);
+	}
+  }
+
   private StringBuffer appendShapes(StringBuffer buf) {
-    buf.append("<graphics>");
+    buf.append("<graphics>\n");
     if(boundingbox!=null) buf.append(boundingbox.toFile(0,0));
     for (int i = 0; i < shapeList.size(); i++) {
       Shape shape = (Shape) shapeList.get(i);
@@ -332,13 +392,13 @@ public class IconEditor
         if (shapeXML != null) buf.append(shapeXML);
       }
     }
-    buf.append("</graphics>");
+    buf.append("</graphics>\n");
     return buf;
   }
 
   private StringBuffer appendPorts(StringBuffer buf) {
     if(ports!=null && ports.size()>0) {
-      buf.append("<ports>");
+      buf.append("<ports>\n");
       for (int i = 0; i < ports.size(); i++) {
         IconPort p = (IconPort)ports.get(i);
 
@@ -354,19 +414,21 @@ public class IconEditor
         if(p.isArea()) buf.append("area");
         buf.append("\" strict=\"");
         buf.append(p.isStrict());
-        buf.append("\">");
-
-        buf.append("<open>");
-        buf.append("<graphics>");
-        buf.append("<bounds x=\"-5\" y=\"-5\" width=\"10\" height=\"10\" />");
-        buf.append("</graphics>");
-        buf.append("</open>");
-        buf.append("<closed>");
-        buf.append("<graphics>");
-        buf.append("<rect x=\"-3\" y=\"-3\" width=\"6\" height=\"6\" colour=\"0\" filled=\"true\" />");
-        buf.append("</graphics>");
-        buf.append("</closed>");
-        buf.append("</port>");
+        buf.append("\">\n");
+		if(!RuntimeProperties.classIsRelation) {
+		  buf.append("<open>\n");
+		  buf.append("<graphics>\n");
+		  buf.append(
+			  "<bounds x=\"-5\" y=\"-5\" width=\"10\" height=\"10\" />\n");
+		  buf.append("</graphics>\n");
+		  buf.append("</open>\n");
+		  buf.append("<closed>\n");
+		  buf.append("<graphics>\n");
+		  buf.append("<rect x=\"-3\" y=\"-3\" width=\"6\" height=\"6\" colour=\"0\" filled=\"true\" />\n");
+		  buf.append("</graphics>\n");
+		  buf.append("</closed>\n");
+		}
+        buf.append("</port>\n");
 
       }
       buf.append("</ports>");
@@ -435,7 +497,7 @@ public class IconEditor
         Shape shape = (Shape) shapeList.get(i);
         //2 esimest parameetrit 0,0.0 on offset ehk palju me teda nihutame (oli vajalik kui shape on objekti graafika osa sest
         //siis peame arvestama ka objekti asukohta, antud juhul pole oluline, aga ma ei viitsi meetodeid �mber
-        //kirjutada, tulevikus v�ib seda teha. Kolmas parameeter ehk 1 on suurenduskordaja
+        //kirjutada, tulevikus voib seda teha. Kolmas parameeter ehk 1 on suurenduskordaja
         if(g2!=null) {
           shape.draw(0, 0, 1f, 1f, g2);
         }
@@ -455,9 +517,9 @@ public class IconEditor
           g2.drawRect(mListener.startX, mListener.startY, mouseX-mListener.startX, mouseY-mListener.startY);
         } else {
 
-          float red = (float) mListener.color.getRed() * 100 / 256 / 100;
-          float green = (float) mListener.color.getGreen() * 100 / 256 / 100;
-          float blue = (float) mListener.color.getBlue() * 100 / 256 / 100;
+          float red = (float) mListener.color.getRed() / 256;
+          float green = (float) mListener.color.getGreen() / 256;
+          float blue = (float) mListener.color.getBlue() / 256;
 
           float alpha = (float) (1 - (mListener.getTransparency() / 100));
           g2.setColor(new Color(red,green,blue,alpha));
@@ -545,32 +607,6 @@ public class IconEditor
 
 
   /**
-   * Store application properties.
-   * @param propFile - properties file name (without an extension .properties).
-   * @param propName - property name to be saved.
-   * @param propValue - saved property value.
-   */
-  public static void setProperty(String propFile, String propName,
-                                 String propValue) {
-    // Read properties file.
-    Properties properties = new Properties();
-    try {
-      properties.load(new FileInputStream(propFile + ".properties"));
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
-    properties.put(propName, propValue);
-    // Write properties file.
-    try {
-      properties.store(new FileOutputStream(propFile + ".properties"), null);
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
-  /**
    * Removes all objects.
    */
   public void clearObjects() {
@@ -624,7 +660,7 @@ public class IconEditor
         path = path.substring(0, path.lastIndexOf("\\"));
       }
     }
-    setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_PATH, path);
+    PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_PATH, path);
   }
 
   /**
@@ -697,6 +733,90 @@ public class IconEditor
 	repaint();
   }
 
+  public void saveScheme() {
+
+	JFileChooser fc = new JFileChooser(getLastPath());
+	CustomFileFilter txtFilter = new CustomFileFilter(CustomFileFilter.extensionTxt,CustomFileFilter.descriptionTxt);
+
+	fc.setFileFilter(txtFilter);
+	int returnVal = fc.showSaveDialog(null);
+
+	if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+
+			// [Aulo] 11.02.2004
+			// Check if the file name ends with a required extension. If not,
+			// append the default extension to the file name.
+			if(!file.getAbsolutePath().toLowerCase().endsWith(CustomFileFilter.extensionTxt)) {
+			  file = new File(file.getAbsolutePath()+"."+CustomFileFilter.extensionTxt);
+			}
+
+			// store the last open directory in system properties.
+			setLastPath(file.getAbsolutePath());
+			boolean valid = true;
+
+			// [Aulo] 04.01.2004
+			// Check if file with a predefined name already exists.
+			// If file exists, confirm file overwrite, otherwise leave
+			// file as it is.
+			if (file.exists()) {
+					JOptionPane confirmPane = new JOptionPane();
+
+					if (confirmPane.showConfirmDialog(null, "File exists.\nOverwrite file?", "Confirm Save", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
+							valid = false;
+					}
+			}
+			if (valid) {
+					// Save scheme.
+					try {
+					  StringBuffer xml = new StringBuffer();
+
+					  xml.append(getGraphicsToString().toString());
+
+					  FileOutputStream out = new FileOutputStream(new File(file.getAbsolutePath()));
+					  out.write(xml.toString().getBytes());
+					  out.flush();
+					  out.close();
+					  JOptionPane.showMessageDialog(null, "Saved to: " + file.getName(),
+													"Saved",
+													JOptionPane.INFORMATION_MESSAGE);
+
+					}
+					catch (Exception exc) {
+							exc.printStackTrace();
+					}
+			}
+	}
+
+  } // saveScheme
+
+  public void loadScheme() {
+	JFileChooser fc = new JFileChooser(getLastPath());
+	CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.extensionTxt,CustomFileFilter.descriptionTxt);
+
+	fc.setFileFilter(filter);
+	int returnVal = fc.showOpenDialog(null);
+
+	if (returnVal == JFileChooser.APPROVE_OPTION) {
+	  File file = fc.getSelectedFile();
+	  setLastPath(file.getAbsolutePath());
+	  try {
+		mListener.state = State.selection;
+		shapeCount = 0;
+		shapeList = new ShapeGroup(new ArrayList());
+		ports = new ArrayList();
+		palette.boundingbox.setEnabled(true);
+		loadGraphicsFromFile(file);
+	  } catch (Exception exc) {
+		exc.printStackTrace();
+	  }
+	}
+  } // loadScheme
+
+  public void print() {
+	PrintUtilities.printComponent(getDrawingArea());
+  } // print
+
   /**
    * Method for deleting selected objects.
    */
@@ -715,6 +835,14 @@ public class IconEditor
       }
     }
     shapeList.removeAll(removable);
+
+	for (int i = 0; i < ports.size(); i++) {
+	  IconPort port = (IconPort) ports.get(i);
+	  if (port.isSelected()) {
+		ports.remove(port);
+	  }
+	}
+
     repaint();
   }
 
@@ -753,7 +881,7 @@ public class IconEditor
     repaint();
   }
 
-  public javax.swing.filechooser.FileFilter getFileFilter(final String format) {
+  public static javax.swing.filechooser.FileFilter getFileFilter(final String format) {
     if(format!=null && format.trim().length()>0) {
       javax.swing.filechooser.FileFilter filter = new javax.swing.filechooser.FileFilter() {
         public String getDescription() {
@@ -839,6 +967,65 @@ public class IconEditor
   }
 
   /**
+   * Saves any input string into a file.
+   */
+  public void saveToPackage() {
+
+	try {
+
+      // Package file chooser.
+	  JFileChooser fc = new JFileChooser(getLastPath());
+	  fc.setFileFilter(getFileFilter("xml"));
+	  fc.setDialogTitle("Choose package");
+
+	  int returnVal = fc.showOpenDialog(null);
+	  if (returnVal == JFileChooser.APPROVE_OPTION) {
+		File file = fc.getSelectedFile();
+
+		// Check if the file name ends with a required extension. If not,
+		// append the default extension to the file name.
+		if(!file.getAbsolutePath().toLowerCase().endsWith(".xml")) {
+		  file = new File(file.getAbsolutePath()+".xml");
+		}
+
+		// store the last open directory in system properties.
+		setLastPath(file.getAbsolutePath());
+
+		try {
+		  // Read the contents of the package, escaping the package end that
+		  // will be appended later.
+		  BufferedReader in = new BufferedReader(new FileReader(file));
+		  String str;
+		  StringBuffer content = new StringBuffer();
+		  // Read file contents to be appended to.
+		  while ( (str = in.readLine()) != null) {
+			if (str.equalsIgnoreCase("</package>")) {
+			  break;
+			} else {
+			  content.append(str+"\n");
+			}
+		  }
+
+		  // File read, append the xml of current drawing.
+		  content.append(getShapesInXML(false));
+		  content.append("</package>");
+		  in.close();
+
+          FileOutputStream out = new FileOutputStream(new File(file.getAbsolutePath()));
+		  out.write(content.toString().getBytes());
+		  out.flush();
+		  out.close();
+		  JOptionPane.showMessageDialog(null, "Saved to package: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+	   } catch (IOException e) {
+		 e.printStackTrace();
+	   }
+	 }
+   } catch(Exception exc) {
+	 exc.printStackTrace();
+   }
+ } // saveToPackage
+
+  /**
    * Sets all objects selected.
    * @param b - select or deselect shapes.
    */
@@ -861,6 +1048,7 @@ public class IconEditor
 	 for(int i=0;i<shapeList.size();i++) {
 
 	   Shape shape = (Shape)shapeList.get(i);
+	   boolean isFixed = shape.isFixed();
 	   sl.add(shape);
 
 
@@ -899,6 +1087,7 @@ public class IconEditor
 		   shape.setSelected(true);
 		   shape.x = shape.getX() + 5;
 		   shape.y = shape.getY() + 5;
+		   shape.setFixed(isFixed);
 		   sl.add(shape);
 		 }
 	   }
@@ -963,7 +1152,7 @@ public class IconEditor
   } // getGraphicsToString
 
   public void processShapes(String str) {
-	System.out.println("processShapes("+str+")");
+
 	if(str!=null) {
 	  if(str.startsWith("LINE:")) {
 		str = str.substring(5);
@@ -979,9 +1168,12 @@ public class IconEditor
     	str = str.substring(str.indexOf(":")+1);
 		int strokeW = Integer.parseInt(str.substring(0,str.indexOf(":")));
 		str = str.substring(str.indexOf(":")+1);
-		int transp = Integer.parseInt(str);
+		int transp = Integer.parseInt(str.substring(0,str.indexOf(":")));
+		str = str.substring(str.indexOf(":")+1);
+		boolean fixed = Boolean.valueOf(str).booleanValue();
 
 		Line line = new Line(x1,y1,x2,y2,colorInt,strokeW,transp);
+		line.setFixed(fixed);
 		shapeList.add(line);
 	  } else if (str.startsWith("ARC:")) {
 		str = str.substring(4);
@@ -1003,9 +1195,12 @@ public class IconEditor
 		str = str.substring(str.indexOf(":")+1);
 		int strokeW = Integer.parseInt(str.substring(0,str.indexOf(":")));
 		str = str.substring(str.indexOf(":")+1);
-		int transp = Integer.parseInt(str);
+		int transp = Integer.parseInt(str.substring(0,str.indexOf(":")));
+		str = str.substring(str.indexOf(":")+1);
+		boolean fixed = Boolean.valueOf(str).booleanValue();
 
 		Arc arc = new Arc(x,y,width,height,startAngle,arcAngle,colorInt,fill,strokeW,transp);
+		arc.setFixed(fixed);
 		shapeList.add(arc);
       } else if (str.startsWith("BOUNDS:")) {
 		str = str.substring(7);
@@ -1034,8 +1229,12 @@ public class IconEditor
 		str = str.substring(str.indexOf(":") + 1);
 		int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
 		str = str.substring(str.indexOf(":") + 1);
-		int transp = Integer.parseInt(str);
+		int transp = Integer.parseInt(str.substring(0,str.indexOf(":")));
+		str = str.substring(str.indexOf(":")+1);
+		boolean fixed = Boolean.valueOf(str).booleanValue();
+
 		Dot dot = new Dot(x, y, colorInt, strokeW, transp);
+		dot.setFixed(fixed);
 	    shapeList.add(dot);
       } else if (str.startsWith("OVAL:")) {
 		str = str.substring(5);
@@ -1053,8 +1252,12 @@ public class IconEditor
 		str = str.substring(str.indexOf(":") + 1);
 		int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
 		str = str.substring(str.indexOf(":") + 1);
-		int transp = Integer.parseInt(str);
+		int transp = Integer.parseInt(str.substring(0,str.indexOf(":")));
+		str = str.substring(str.indexOf(":")+1);
+		boolean fixed = Boolean.valueOf(str).booleanValue();
+
 		Oval oval = new Oval(x, y, width, height, colorInt, fill, strokeW,transp);
+		oval.setFixed(fixed);
 	    shapeList.add(oval);
       } else if (str.startsWith("RECT:")) {
 		str = str.substring(5);
@@ -1072,9 +1275,12 @@ public class IconEditor
 		str = str.substring(str.indexOf(":") + 1);
 		int strokeW = Integer.parseInt(str.substring(0, str.indexOf(":")));
 		str = str.substring(str.indexOf(":") + 1);
-		int transp = Integer.parseInt(str);
-		Rect rect = new Rect(x, y, width, height, colorInt, fill, strokeW,
-							 transp);
+		int transp = Integer.parseInt(str.substring(0,str.indexOf(":")));
+		str = str.substring(str.indexOf(":")+1);
+		boolean fixed = Boolean.valueOf(str).booleanValue();
+
+		Rect rect = new Rect(x, y, width, height, colorInt, fill, strokeW, transp);
+		rect.setFixed(fixed);
 	    shapeList.add(rect);
       } else if (str.startsWith("TEXT:")) {
 		str = str.substring(5);
@@ -1121,29 +1327,38 @@ public class IconEditor
 	repaint();
   } // processShapes
 
+  private static void initializeRuntimeProperties() {
+	String directory = System.getProperty("user.dir") + System.getProperty("file.separator");
+
+	PropertyBox.APP_PROPS_FILE_PATH = directory;
+	RuntimeProperties.packageDir = directory;
+	RuntimeProperties.zoomFactor = 100.0;
+	RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
+	RuntimeProperties.gridStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.GRID_STEP));
+	RuntimeProperties.customLayout = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.CUSTOM_LAYOUT);
+	RuntimeProperties.packageDtd = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.PACKAGE_DTD);
+	RuntimeProperties.genFileDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,	PropertyBox.GENERATED_FILES_DIR);
+	RuntimeProperties.nudgeStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.NUDGE_STEP));;
+	int aa = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.ANTI_ALIASING));
+	if(aa==0) {
+	  RuntimeProperties.isAntialiasingOn = false;
+	} else {
+	  RuntimeProperties.isAntialiasingOn = true;
+	}
+  } // initializeRuntimeProperties
+
+
 
   /**
    * Main method for module unit-testing.
    * @param args - command line arguments
    */
   public static void main(String[] args) {
-
-	String directory = System.getProperty("user.dir") + System.getProperty("file.separator");
-	PropertyBox.APP_PROPS_FILE_PATH = directory;
-	RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(PropertyBox.
-		APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
-	RuntimeProperties.gridStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.GRID_STEP));
-
-	int aa = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,PropertyBox.ANTI_ALIASING));
-  if(aa==0) {
-   RuntimeProperties.isAntialiasingOn = false;
-  } else {
-	 RuntimeProperties.isAntialiasingOn = true;
-  }
+	initializeRuntimeProperties();
 
 	JFrame window;
+
 	try {
-	  RuntimeProperties.packageDir = directory;
 	  window = new IconEditor();
 	  window.setTitle(WINDOW_TITLE);
 	  window.setSize(700, 600);
@@ -1156,14 +1371,19 @@ public class IconEditor
 	  window.setVisible(true);
 	}
 
-	// log application executions, also making sure that the properties file is
-	// available for writing (required by some of current application modules).
-	RuntimeProperties.genFileDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
-											   PropertyBox.GENERATED_FILES_DIR);
-	setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_EXECUTED,
+	PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_EXECUTED,
 				new java.util.Date().toString());
-
-
   }
+
+  public void zoom(double newZ, double oldZ) {
+	for(int i=0;i<shapeList.size();i++) {
+	  Shape s = (Shape)shapeList.get(i);
+	  s.setMultSize((float)newZ,(float)oldZ);
+	}
+	for(int i=0;i<ports.size();i++) {
+	  IconPort p = (IconPort)ports.get(i);
+	  p.setMultSize((float)newZ,(float)oldZ);
+    }
+  } // zoom
 
 }

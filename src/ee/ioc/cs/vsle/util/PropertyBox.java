@@ -35,6 +35,9 @@ public class PropertyBox {
 	public static final String ANTI_ALIASING = "antiAliasing";
 	public static final String SHOW_GRID = "showGrid";
 	public static final String GRID_STEP = "gridStep";
+	public static final String CUSTOM_LAYOUT = "customLayout";
+	public static final String PACKAGE_DTD = "packageDtd";
+	public static final String NUDGE_STEP = "nudgeStep";
 
 	/**
 	 * Store application properties.

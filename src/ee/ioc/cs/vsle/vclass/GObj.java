@@ -242,9 +242,9 @@ public class GObj implements Serializable, Cloneable {
 		getGraphics().draw(getX(), getY(), getXsize(), getYsize(), g);
 		int xModifier = getX();
 		int yModifier = getY();
-
+        g.setColor(Color.black);
 		if (getGraphics().showFields == true) {
-			int textOffset = 4;
+			int textOffset = 5;
 			for (int i = 0; i < getFields().size(); i++) {
 				ClassField f = (ClassField) getFields().get(i);
 				if (f.value != null) {

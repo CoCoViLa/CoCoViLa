@@ -64,6 +64,10 @@ class ClassRelation
 
 			cf.name = s;
 			outputs.add(cf);
+		} else if (s.startsWith("*.")) {
+			ClassField cf = new ClassField();
+			cf.name = s;
+			outputs.add(cf);
 		}
 		else {
 			throw new UnknownVariableException(s);
@@ -148,7 +152,11 @@ class ClassRelation
 
 				cf.name = output[i];
 				outputs.add(cf);
-			}
+			} else if (output[i].startsWith("*.")) {
+				ClassField cf = new ClassField();
+				cf.name = output[i];
+				outputs.add(cf);
+		}
 			else {
 				throw new UnknownVariableException(output[i]);
 			}
