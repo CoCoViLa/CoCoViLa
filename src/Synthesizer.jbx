@@ -1,0 +1,12 @@
+[PropertyInfo]
+alias,int,false,false, , ,false,<default>
+assignment,int,false,false, , ,false,<default>
+axiom,int,false,false, , ,false,<default>
+declaration,int,false,false, , ,false,<default>
+equation,int,false,false, , ,false,<default>
+error,int,false,false, , ,false,<default>
+[IconNames]
+
+
+
+

@@ -1,0 +1,26 @@
+[PropertyInfo]
+addport,JButton,false,false, , ,false,<default>
+arc,JButton,false,false, , ,false,<default>
+boundingbox,JButton,false,false, , ,false,<default>
+colors,JButton,false,false, , ,false,<default>
+editor,IconEditor,false,false, , ,false,<default>
+eraser,JButton,false,false, , ,false,<default>
+filledarc,JButton,false,false, , ,false,<default>
+filledoval,JButton,false,false, , ,false,<default>
+filledrectangle,JButton,false,false, , ,false,<default>
+freehand,JButton,false,false, , ,false,<default>
+lblLineWidth,JLabel,false,false, , ,false,<default>
+lblTransparency,JLabel,false,false, , ,false,<default>
+line,JButton,false,false, , ,false,<default>
+oval,JButton,false,false, , ,false,<default>
+rectangle,JButton,false,false, , ,false,<default>
+selection,JButton,false,false, , ,false,<default>
+spinnerLineWidth,Spinner,false,false, , ,false,<default>
+spinnerTransparency,Spinner,false,false, , ,false,<default>
+text,JButton,false,false, , ,false,<default>
+toolBar,JToolBar,false,false, , ,false,<default>
+[IconNames]
+
+
+
+

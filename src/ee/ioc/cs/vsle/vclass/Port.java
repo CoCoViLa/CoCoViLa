@@ -1,0 +1,233 @@
+package ee.ioc.cs.vsle.vclass;
+
+import ee.ioc.cs.vsle.util.db;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+public class Port
+	implements Cloneable, Serializable {
+
+	public GObj obj;
+	int width, height;
+	public String name;
+	String type;
+	String dataType;
+	public int x;
+	public int y;
+	boolean strict, area;
+	public ClassGraphics openGraphics, closedGraphics;
+	public ArrayList connections = new ArrayList();
+	boolean selected = false, connected = false;
+	boolean known = false, target = false;
+	boolean watched = false;
+	boolean hilighted = false;
+
+	public Port(String name, int x, int y, String portConnection, String strict) {
+		this.name = name;
+		this.x = x;
+		db.p("X=" + x);
+		this.y = y;
+		if (portConnection.equals("area")) {
+			area = true;
+		}
+		else {
+			area = false;
+
+		}
+
+		if (strict.equals("true")) {
+			this.strict = true;
+		}
+		else {
+			this.strict = false;
+		}
+	}
+
+	public Port getStrictConnected() {
+		Connection con;
+
+		for (int i = 0; i < connections.size(); i++) {
+			con = (Connection) connections.get(i);
+			// ee.ioc.cs.editor.util.db.p("Mul on pordid " +con.beginPort +" "+con.endPort);
+			if (con.beginPort.isStrict()) {
+				if (con.beginPort == this) {
+					return con.endPort;
+				}
+				else {
+					return con.beginPort;
+				}
+			}
+		}
+		return null;
+	}
+
+	public int getX() {
+		return (int) (obj.getXSize() * x);
+	}
+
+	public int getY() {
+		return (int) (obj.getYSize() * y);
+	}
+
+	public int getCenterX() {
+		return (int) (obj.getXSize() * (x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
+	}
+
+	public int getCenterY() {
+		return (int) (obj.getYSize() * (y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
+	}
+
+	public int getRealCenterX() {
+		return (int) (obj.getXSize() * (obj.getX() + x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
+	}
+
+	public int getRealCenterY() {
+		return (int) (obj.getYSize() * (obj.getY() + y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
+	}
+
+	public int getWidth() {
+		return (int) (obj.getXSize() * openGraphics.boundWidth);
+	}
+
+	public int getHeight() {
+		return (int) (obj.getYSize() * openGraphics.boundHeight);
+	}
+
+	public boolean inBoundsX(int pointX) {
+		if (obj.getX() + obj.getXSize() * (x + openGraphics.boundX) < pointX && (obj.getX() + obj.getXSize() * (x + openGraphics.boundX + openGraphics.boundWidth) > pointX)) {
+			return true;
+		}
+		else {
+			return false;
+		}
+
+	}
+
+	public boolean inBoundsY(int pointY) {
+		if (obj.getY() + (obj.getYSize() * (y + openGraphics.boundY)) < pointY && (obj.getY() + obj.getXSize() * (y + openGraphics.boundY + openGraphics.boundHeight)) > pointY) {
+			return true;
+		}
+		else {
+			return false;
+		}
+
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String toString() {
+		return name;
+	}
+
+	public void setSelected(boolean b) {
+		selected = b;
+	}
+
+	public void setConnected(boolean b) {
+		connected = b;
+	}
+
+	public boolean isSelected() {
+		return selected;
+	}
+
+	public boolean isConnected() {
+		return connected;
+	}
+
+	public void setKnown(boolean b) {
+		known = b;
+	}
+
+	public void setTarget(boolean b) {
+		target = b;
+	}
+
+	public boolean isKnown() {
+		return known;
+	}
+
+	public boolean isTarget() {
+		return target;
+	}
+
+	public boolean isWatched() {
+		return watched;
+	}
+
+	public boolean isStrict() {
+		return strict;
+	}
+
+	public String getType() {
+		for (int i = 0; i < obj.getFields().size(); i++) {
+			if ( ( (ClassField) obj.getFields().get(i)).name.equals(name)) {
+				return ( (ClassField) obj.getFields().get(i)).type;
+			}
+		}
+		return null;
+	}
+
+	public ClassField getField() {
+		for (int i = 0; i < obj.getFields().size(); i++) {
+			if ( ( (ClassField) obj.getFields().get(i)).name.equals(name)) {
+				return ( (ClassField) obj.getFields().get(i));
+			}
+		}
+		return null;
+	}
+
+	public boolean isArea() {
+		return area;
+	}
+
+	public void setWatch(boolean w) {
+		watched = w;
+	}
+
+	public void setObject(GObj obj) {
+		this.obj = obj;
+	}
+
+	public int getNumber() {
+		Port port;
+
+		for (int j = 0; j < obj.getPorts().size(); j++) {
+			port = (Port) obj.getPorts().get(j);
+			if (port == this) {
+				return j;
+			}
+		}
+		return -1;
+	}
+
+	public void addConnection(Connection con) {
+		connections.add(con);
+	}
+
+	public void setHilighted(boolean b) {
+		hilighted = b;
+	}
+
+	public boolean isHilighted() {
+		return hilighted;
+	}
+
+	public ArrayList getConnections() {
+		return connections;
+	}
+
+	public Object clone() {
+		try {
+			return super.clone();
+		}
+		catch (CloneNotSupportedException e) {
+			db.p("Unable to clone.");
+			return null;
+		}
+	}
+
+}
