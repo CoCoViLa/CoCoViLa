@@ -113,14 +113,32 @@ class Rel implements Cloneable,
 			params += "(";
 		Var var;
 		int j = 0;
+        int alias_nr = 0;
 
+		//counting the aliases so i can deduct the needed numbers from ALIASTMP_NR
 		for (int i = 0; i < inputs.size(); i++) {
 			var = (Var) inputs.get(i);
+			if (var.type.equals("alias")) {
+				alias_nr++;
+			}
+		}
+        String paramString = "";
+		for (int i = 0; i < inputs.size(); i++) {
+
+			var = (Var) inputs.get(i);
+
 			if (!var.type.equals("void")) {
-				if (j == 0) {
-					params += var;
+				if (var.type.equals("alias")) {
+					int use_nr = CodeGenerator.ALIASTMP_NR -alias_nr;
+					paramString = CodeGenerator.ALIASTMP+var.name + use_nr;
+					alias_nr--;
 				} else {
-					params += ", " + var;
+					paramString = var.toString();
+				}
+				if (j == 0) {
+					params += paramString;
+				} else {
+					params += ", " + paramString;
 				}
 				j++;
 			}
@@ -366,17 +384,18 @@ class Rel implements Cloneable,
                         assigns = "Object " + input.name + " = null";
                     } else {
 
-                        assigns += ( ( ClassField ) input.field.vars.get( 0 ) ).type + "[] " + input.name +
+                        String alias_tmp = CodeGenerator.ALIASTMP + input.name + CodeGenerator.ALIASTMP_NR++;
+						assigns += ( ( ClassField ) input.field.vars.get( 0 ) ).type + "[] " + alias_tmp +
                                 " = new " +
                                 ( ( ClassField ) input.field.vars.get( 0 ) ).type + "[" +
                                 input.field.vars.size() +
                                 "];\n";
                         for ( int k = 0; k < input.field.vars.size(); k++ ) {
                             String s1 = ( ( ClassField ) input.field.vars.get( k ) ).toString();
-                            assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB + input.name +
+                            assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB + alias_tmp +
                                     "[" +
                                     Integer.toString( k ) + "] = " +
-                                    s1 +
+                                    getObject(object)+s1 +
                                     ";\n";
                         }
                         assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB;

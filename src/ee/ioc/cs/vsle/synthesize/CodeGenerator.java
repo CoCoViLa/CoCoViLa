@@ -27,8 +27,8 @@ public class CodeGenerator {
 
     private static int subCount = 0;
 
-    private static final String ALIASTMP = "alias";
-    private static int ALIASTMP_NR = 0;
+    public static final String ALIASTMP = "alias";
+    public static int ALIASTMP_NR = 0;
 
     private static CodeGenerator s_codeGen = null;
 
