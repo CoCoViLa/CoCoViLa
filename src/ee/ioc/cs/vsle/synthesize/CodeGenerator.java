@@ -12,6 +12,7 @@ public class CodeGenerator {
     public CodeGenerator() {}
 
     public String generate(ArrayList algRelList) {
+        boolean subRelisNeeded = false;
         String algorithm = "";
         StringBuffer alg = new StringBuffer();
         offset += tab;
@@ -19,7 +20,7 @@ public class CodeGenerator {
         for (int i = 0; i < algRelList.size(); i++) {
             Object temp = algRelList.get(i);
             Rel rel = null;
-            if (isRel(temp) && subCount == 0) { // && subCount == 0
+            if (isRel(temp) && subCount == 0) {
                 rel = (Rel) temp;
                 alg.append(addOffset(0,0) + rel.toString() + ";\n");
                 continue;
@@ -39,32 +40,36 @@ public class CodeGenerator {
                     offset += tab;
                     for (int j = 1; j < sub_inputsCount + 1; j++) {
                         Var var = (Var) ( (Rel) algRelList.get(i + 1 + j)).
-                            outputs.get(0);
+                            inputs.get(0);
                         if (var.type.equals("int")) {
                             alg.append(addOffset(0,0) + var + " = " +
                                        intToObj("in[" + (j - 1) + "]") + ";\n");
                         }
                     }
-                    i += sub_inputsCount + 1;
+                    subRelisNeeded = true;
+                    i += sub_inputsCount;
                 }
                 continue;
             }
-            if (isRel(temp)) {
+            if (isRel(temp) && subCount > 0) {
                 db.p( ( (Rel) temp).toString());
                 db.p( ( (Rel) temp).outputs.get(0).toString());
                 rel = (Rel) temp;
+                if(subRelisNeeded)
+                    alg.append(addOffset(0,0) + rel.toString() + ";\n");
                 if (subtask_outputs.contains(rel.outputs.get(0))) {
+                    subRelisNeeded = false;
                     alg.append(addOffset(0,0) + "Object[] out = new Object[1];\n" +
                                addOffset(0,0) + "out[0] = " +
-                               objFromInt(rel.inputs.get(0).toString()) + ";\n" +
+                               objFromInt(rel.outputs.get(0).toString()) + ";\n" +
                                addOffset(0,0) + "return out;\n" +
                                addOffset(2,1) + "}\n" +
                                addOffset(2,1) + "}\n" +
                                addOffset(0,0) + "Subtask_" + subCount + " subtask_" + subCount +
                                " = new Subtask_" + subCount + "();\n"
                                );
-
                 }
+                continue;
             }
             if (isString(temp) && ( (String) temp).equals("</subtask>")) {
                 if (isRel(algRelList.get(i + 1))&&
@@ -72,15 +77,21 @@ public class CodeGenerator {
                     Rel method_subtask = (Rel) algRelList.get(i + 1);
                     if(method_subtask.subtasks.size() > 0)
                     {
+                        String pars = "";
+                        if(method_subtask.inputs.size() > 0)
+                            pars = ", ";
                         alg.append(addOffset(0,0) + (Var) method_subtask.outputs.get(0) +
                                    " = " + method_subtask.getObject(method_subtask.object) + method_subtask.method +
-                                   "(subtask_" + subCount + ");\n"
+                                   "(subtask_" + subCount + pars + method_subtask.getParameters(false) + ");\n"
                                    );
                         subCount--;
                         i++;
                     }
                 }
+                continue;
             }
+
+
         }
         return alg.toString();
     }

@@ -51,8 +51,10 @@ class Rel {
         return "int";
     }
 
-    String getParameters() {
-        String params = "(";
+    String getParameters(boolean useBrackets) {
+        String params = "";
+        if(useBrackets)
+            params += "(";
         Var var;
         int j = 0;
 
@@ -68,7 +70,9 @@ class Rel {
                 j++;
             }
         }
-        return params += ")";
+        if(useBrackets)
+            return params += ")";
+        return params;
 
     }
 
@@ -130,11 +134,11 @@ class Rel {
             Var op = (Var) outputs.get(0);
 
             if (op.type.equals("void")) {
-                return (getObject(object) + method + getParameters());
+                return (getObject(object) + method + getParameters(true));
             }
             else {
                 return ( (Var) outputs.get(0) + " = " + getObject(object) + method +
-                        getParameters());
+                        getParameters(true));
             }
         }
         else if (type == 3) {
