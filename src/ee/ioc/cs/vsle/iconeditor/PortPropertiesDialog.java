@@ -12,11 +12,13 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JCheckBox;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 
 public class PortPropertiesDialog extends JDialog implements ActionListener {
 
 	private String portName;
+	private String portType;
 	private boolean isAreaConn;
 	private boolean isStrict;
 
@@ -27,6 +29,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	private JPanel pnlAttrs = new JPanel();
 
 	private JLabel lblPortName = new JLabel(" Port Name:");
+	private JLabel lblPortType = new JLabel(" Port Type:");
 	private JLabel lblAreaConn = new JLabel(" Area Connected:");
 	private JLabel lblIsStrict = new JLabel(" Strict Port:");
 
@@ -34,6 +37,8 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 
 	private JCheckBox checkAreaConn = new JCheckBox();
 	private JCheckBox checkIsStrict = new JCheckBox();
+
+	private JComboBox cbPortType = new JComboBox();
 
 	private JButton bttnOk = new JButton("OK");
 	private JButton bttnCancel = new JButton("Cancel");
@@ -52,10 +57,16 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		pnlAttrs.setLayout(new GridLayout(0, 2));
 		pnlAttrs.add(lblPortName);
 		pnlAttrs.add(tfPortName);
+		pnlAttrs.add(lblPortType);
+		pnlAttrs.add(cbPortType);
 		pnlAttrs.add(lblAreaConn);
 		pnlAttrs.add(checkAreaConn);
 		pnlAttrs.add(lblIsStrict);
 		pnlAttrs.add(checkIsStrict);
+
+		cbPortType.addItem("int");
+		cbPortType.addItem("Object");
+		cbPortType.addItem("String");
 
 		pnlButtons.add(bttnOk);
 		pnlButtons.add(bttnCancel);
@@ -65,9 +76,9 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		pnlMain.add(pnlButtons, BorderLayout.SOUTH);
 
 		getContentPane().add(pnlMain);
-		setSize(new Dimension(220, 130));
+		setSize(new Dimension(220, 150));
 		setResizable(false);
-//    setModal(true);
+
 		setLocationRelativeTo(editor);
 		setVisible(true);
 
@@ -109,16 +120,21 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		setPortName(portName);
 		setAreaConn(checkAreaConn.isSelected());
 		setStrict(checkIsStrict.isSelected());
-
+		setPortType(cbPortType.getSelectedItem().toString());
 		if (port == null) {
-			if (valid) editor.mListener.drawPort(getPortName(), isAreaConn(), isStrict());
+			if (valid) editor.mListener.drawPort(getPortName(), isAreaConn(), isStrict(), getPortType());
 		} else {
+		    port.type = getPortType();
 			port.setName(getPortName());
 			port.area = isAreaConn();
 			port.strict = isStrict();
 		}
 		setVisible(!valid);
 	} // setPortProperties
+
+	public String getPortType() {
+	  return this.portType;
+	}
 
 	public String getPortName() {
 		return this.portName;
@@ -130,6 +146,13 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 
 	public boolean isStrict() {
 		return this.isStrict;
+	}
+
+	public void setPortType(String s) {
+	  if (s != null) {
+		this.portType = s;
+		cbPortType.setSelectedItem(s);
+	  }
 	}
 
 	public void setPortName(String s) {

@@ -300,7 +300,11 @@ public class IconEditor
 	  xmlBuffer.append("\n");
 	}
 	xmlBuffer.append("<class");
-	if(RuntimeProperties.classIsRelation) xmlBuffer.append(" type=\"relation\"");
+	if(RuntimeProperties.classIsRelation) {
+	  xmlBuffer.append(" type=\"relation\"");
+	} else {
+	  xmlBuffer.append(" type=\"class\"");
+	}
 	xmlBuffer.append(">\n");
 	xmlBuffer.append("<name>"+RuntimeProperties.className+"</name>\n");
 	xmlBuffer.append("<description>"+RuntimeProperties.classDescription+"</description>\n");
@@ -397,29 +401,32 @@ public class IconEditor
   }
 
   private StringBuffer appendPorts(StringBuffer buf) {
-    if(ports!=null && ports.size()>0) {
-      buf.append("<ports>\n");
-      for (int i = 0; i < ports.size(); i++) {
-        IconPort p = (IconPort)ports.get(i);
+	if(ports!=null && ports.size()>0) {
+	  buf.append("<ports>\n");
+	  for (int i = 0; i < ports.size(); i++) {
+		IconPort p = (IconPort)ports.get(i);
 
-        buf.append("<port name=\"");
-        buf.append(p.getName());
-        buf.append("\" x=\"");
-  	     buf.append(p.getX() - boundingbox.x);
+		buf.append("<port name=\"");
+		buf.append(p.getName());
+		buf.append("\" type=\"");
+		buf.append(p.type);
+		buf.append("\" x=\"");
+		buf.append(p.getX() - boundingbox.x);
 
-        buf.append("\" y=\"");
-  	    buf.append(p.getY() - boundingbox.y);
+		buf.append("\" y=\"");
+		buf.append(p.getY() - boundingbox.y);
 
-        buf.append("\" portConnection=\"");
-        if(p.isArea()) buf.append("area");
-        buf.append("\" strict=\"");
-        buf.append(p.isStrict());
-        buf.append("\">\n");
+		buf.append("\" portConnection=\"");
+
+		if(p.isArea()) buf.append("area");
+		buf.append("\" strict=\"");
+		buf.append(p.isStrict());
+		buf.append("\">\n");
+
 		if(!RuntimeProperties.classIsRelation) {
 		  buf.append("<open>\n");
 		  buf.append("<graphics>\n");
-		  buf.append(
-			  "<bounds x=\"-5\" y=\"-5\" width=\"10\" height=\"10\" />\n");
+		  buf.append("<bounds x=\"-5\" y=\"-5\" width=\"10\" height=\"10\" />\n");
 		  buf.append("</graphics>\n");
 		  buf.append("</open>\n");
 		  buf.append("<closed>\n");
@@ -428,13 +435,12 @@ public class IconEditor
 		  buf.append("</graphics>\n");
 		  buf.append("</closed>\n");
 		}
-        buf.append("</port>\n");
-
-      }
-      buf.append("</ports>");
-    }
-      return buf;
-  }
+		buf.append("</port>\n");
+	  }
+	  buf.append("</ports>");
+	}
+	return buf;
+  } // appendPorts
 
   public void selectShapesInsideBox(int x1, int y1, int x2, int y2) {
 	for (int i = 0; i < shapeList.size(); i++) {

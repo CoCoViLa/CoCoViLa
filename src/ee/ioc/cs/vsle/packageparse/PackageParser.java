@@ -276,9 +276,7 @@ public class PackageParser {
 							newGraphics.setBounds( -4, -4, 8, 8);
 							newPort.openGraphics = newGraphics;
 						}
-						db.p(newPort.closedGraphics);
 						if (newPort.closedGraphics == null) {
-							db.p("siin");
 							newGraphics = new ClassGraphics();
 							newGraphics.addShape(new Oval( -4, -4, 8, 8, 0, true, 1.0, 0.0));
 							newGraphics.setBounds( -4, -4, 8, 8);

@@ -144,9 +144,11 @@ class IconMouseOps
    * @param portName - name of the port.
    * @param isAreaConn - port is area connectible or not.
    * @param isStrict - port is strict or not.
+   * @param portType - type of port: Integer, String, Object
    */
-  public void drawPort(String portName, boolean isAreaConn, boolean isStrict) {
+  public void drawPort(String portName, boolean isAreaConn, boolean isStrict, String portType) {
    IconPort p = new IconPort(portName,editor.mouseX,editor.mouseY,isAreaConn,isStrict);
+   p.type = portType;
    editor.ports.add(p);
    editor.repaint();
   } // drawPort
