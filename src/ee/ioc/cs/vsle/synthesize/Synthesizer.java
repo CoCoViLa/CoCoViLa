@@ -194,11 +194,11 @@ public class Synthesizer {
 											declars += "    public " + type + " " + vs[i] + " ;\n";
 										}
 										else if (classes.getType(type) != null) {
-											declars += "    public _" + type + "_ " + vs[i] + ";\n";
+											declars += "    public _" + type + "_ " + vs[i] + " = new _" + type + "_();\n";
 
 										}
 										else {
-											declars += "    public " + type + " " + vs[i] + ";\n";
+											declars += "    public " + type + " " + vs[i] + " = new " + type + "();\n";
 
 										}
 

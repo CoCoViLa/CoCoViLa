@@ -287,11 +287,11 @@ public class SpecParser {
                 // if it is not a "real" relation (type 7), we just set the result as target, and inputs as known variables
                 if ( classRelation.type == 7 ) {
                     setTargets( problem, classRelation, obj );
-                } else if ( classRelation.inputs.isEmpty() && rel.subtaskFlag == 0 ) { // if class relation doesnt have inputs, its an axiom
+                } else if (rel != null && classRelation.inputs.isEmpty() && rel.subtaskFlag == 0 ) { // if class relation doesnt have inputs, its an axiom
                     problem.addAxiom( rel );
                 }
                 //else if (classRelation.inputs.isEmpty() && rel.subtaskFlag > 0) {
-                else if ( rel.subtaskFlag > 0 ) {
+                else if ( rel != null && rel.subtaskFlag > 0 ) {
                     problem.addSubtaskRel( rel );
                 } else {
                     if ( rel != null && rel.getSubtasks().size() == 0 ) {

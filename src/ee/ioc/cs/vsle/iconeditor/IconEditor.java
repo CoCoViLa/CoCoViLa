@@ -571,6 +571,23 @@ public class IconEditor
 				final int width = Math.abs(mouseX - mListener.startX);
 				final int height = Math.abs(mouseY - mListener.startY);
 
+				if (mListener.state.equals(State.drawArc1)) {
+					g.drawRect(mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight);
+					g.drawLine(mListener.startX + mListener.arcWidth / 2,
+						mListener.startY + mListener.arcHeight / 2,
+						mouseX, mouseY);
+				} else if (mListener.state.equals(State.drawArc2)) {
+					if (mListener.fill) {
+						g2.fillArc(mListener.startX, mListener.startY, mListener.arcWidth,
+							mListener.arcHeight, mListener.arcStartAngle,
+							mListener.arcAngle);
+
+					} else {
+						g2.drawArc(mListener.startX, mListener.startY, mListener.arcWidth,
+							mListener.arcHeight, mListener.arcStartAngle,
+							mListener.arcAngle);
+					}
+				}
 				if (!mListener.mouseState.equals("released")) {
 					if (mListener.state.equals(State.drawRect)) {
 						g2.drawRect(Math.min(mListener.startX, mouseX),
@@ -592,22 +609,6 @@ public class IconEditor
 							Math.min(mListener.startY, mouseY), width, height);
 					} else if (mListener.state.equals(State.drawArc)) {
 						g.drawRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
-					} else if (mListener.state.equals(State.drawArc1)) {
-						g.drawRect(mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight);
-						g.drawLine(mListener.startX + mListener.arcWidth / 2,
-							mListener.startY + mListener.arcHeight / 2,
-							mouseX, mouseY);
-					} else if (mListener.state.equals(State.drawArc2)) {
-						if (mListener.fill) {
-							g2.fillArc(mListener.startX, mListener.startY, mListener.arcWidth,
-								mListener.arcHeight, mListener.arcStartAngle,
-								mListener.arcAngle);
-
-						} else {
-							g2.drawArc(mListener.startX, mListener.startY, mListener.arcWidth,
-								mListener.arcHeight, mListener.arcStartAngle,
-								mListener.arcAngle);
-						}
 					} else if (mListener.state.equals(State.drawFilledArc)) {
 						g.drawRect(Math.min(mListener.startX, mouseX), Math.min(mListener.startY, mouseY), width, height);
 					}

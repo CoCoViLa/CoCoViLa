@@ -708,6 +708,7 @@ class IconMouseOps
 		int y = e.getY();
 		Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
 		editor.setCursor(cursor);
+
         mouseState = "released";
 
 		if (SwingUtilities.isLeftMouseButton(e)) {

@@ -88,8 +88,11 @@ class Rel implements Cloneable,
 
     void setType( int t ) {
         type = t;
+		if( type == RelType.alias ) {
+			   aliasNr =   RelType.auxVarCounter++;
+		}
     }
-
+    private int aliasNr = 0;
     String getMaxType( List inputs ) {
         Var var;
 
@@ -227,21 +230,21 @@ class Rel implements Cloneable,
                 if ( op.field.isArray() && ip.field.isAlias() ) {
 
                     assigns += op.field.type + " TEMP" +
-                            Integer.toString( RelType.auxVarCounter ) +
+                            Integer.toString( aliasNr ) +
                             " = new " +
                             op.field.arrayType() + "[" + ip.field.vars.size() +
                             "];\n";
                     for ( int i = 0; i < ip.field.vars.size(); i++ ) {
                         s1 = ( ( ClassField ) ip.field.vars.get( i ) ).toString();
                         assigns += "        " + " TEMP" +
-                                Integer.toString( RelType.auxVarCounter ) + "[" +
+                                Integer.toString( aliasNr ) + "[" +
                                 Integer.toString( i ) + "] = " +
                                 getObject( ip.object ) + s1 +
                                 ";\n";
                     }
                     assigns += "        " + op + " = " + " TEMP" +
-                            Integer.toString( RelType.auxVarCounter );
-                    RelType.auxVarCounter++;
+                            Integer.toString( aliasNr );
+                    //RelType.auxVarCounter++;
                     return assigns;
                 }
             }
