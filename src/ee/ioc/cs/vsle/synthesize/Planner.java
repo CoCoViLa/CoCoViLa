@@ -167,6 +167,9 @@ public class Planner {
                                 if ( isSubtask && problem.getTargetVars().contains( relVar ) ) {
                                     foundSubGoal = true;
                                 }
+                                if ( problem.foundVars.contains( relVar ) ) {
+                                    relIsNeeded = false;
+                                }
                             }
 
                             if ( rel.getOutputs().isEmpty() ) {
@@ -194,7 +197,7 @@ public class Planner {
             newVars.clear();
         }
 
-        if ( !computeAll /*&& !isSubtask*/ ) {
+        if ( !computeAll && !isSubtask ) {
             algorithm = Optimizer.getInstance().optimize( algorithm,
                     allTargetVars );
         }
@@ -204,6 +207,8 @@ public class Planner {
         }
         db.p( "algorithm" + algorithm.toString() + "\n" );
         ProgramRunner.addAllFoundVars(foundVars);
+        problem.foundVars.addAll(foundVars);
+        System.out.println( "---!!!problem.foundVars: " + problem.foundVars);
 
         return ( isSubtask )
                 ? foundSubGoal
@@ -224,6 +229,9 @@ public class Planner {
                 Problem pr = node.getProblem();
 
                 db.p( "Problem: " + pr.toString() );
+                if( pr.getSubGoal().getParentRel().unknownInputs > 0 ) {
+                    continue;
+                }
                 if ( linearForwardSearch( pr, computeAll, true, false ) ) {
                     pr.addToAlgorithm( pr.getSubGoal().getParentRel() );
                     pr.getKnownVars().addAll( pr.getSubGoal().getParentRel().getOutputs() );

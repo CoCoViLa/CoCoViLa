@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import ee.ioc.cs.vsle.util.db;
 
 
 class Problem implements Cloneable, Serializable {
@@ -29,11 +30,16 @@ class Problem implements Cloneable, Serializable {
     private Set subtasks = new HashSet(); //Collections.synchronizedSet(new HashSet());
     private Vector subGoal = null;
 
+    public HashSet foundVars = new HashSet();
+
 
     boolean containsRel( Rel comparableRel ) {
         for ( Iterator iter = allRels.iterator(); iter.hasNext(); ) {
             Rel rel = ( Rel ) iter.next();
-            if ( rel.equals( comparableRel ) ) {
+            String r1 = rel.toString();
+            String r2 = comparableRel.toString();
+            //db.p("This rel " + r2 + " is compared to " + r1);
+            if ( r1.equals( r2 ) ) {
                 return true;
             }
         }

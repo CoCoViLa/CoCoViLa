@@ -49,7 +49,7 @@ public class IconEditor
 	ArrayList ports = new ArrayList();
 	IconKeyOps keyListener;
 
-	public static final String WINDOW_TITLE = "IconEditor";
+	public static final String WINDOW_TITLE = "COCOVILA - Class Editor";
 	public static boolean classParamsOk = false;
 	public static boolean packageParamsOk = false;
 

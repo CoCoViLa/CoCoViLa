@@ -185,7 +185,7 @@ class Rel implements Cloneable,
 		Matcher matcher;
 
                 if ( type == RelType.alias ) {
-                    db.p( "alias inputs " + inputs + " outputs " + outputs );
+                    //db.p( "alias inputs " + inputs + " outputs " + outputs );
                     return "";
                 }
 		if (type == RelType.javamethod ) {

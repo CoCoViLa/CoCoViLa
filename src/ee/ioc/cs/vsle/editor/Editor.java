@@ -37,7 +37,7 @@ public class Editor extends JFrame implements ChangeListener {
 
 	Dimension drawAreaSize = new Dimension(600, 500);
 	KeyOps keyListener;
-	public static final String WINDOW_TITLE = "Editor";
+	public static final String WINDOW_TITLE = "COCOVILA - Scheme Editor";
 
 	/**
 	 * Class constructor [1].

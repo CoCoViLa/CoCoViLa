@@ -300,6 +300,7 @@ public class SpecParser {
 			//else if (classRelation.inputs.isEmpty() && rel.subtaskFlag > 0) {
 			else if (rel != null && rel.subtaskFlag > 0) {
 				problem.addSubtaskRel(rel);
+                                problem.addRel(rel);
 			} else {
 				if (rel != null && rel.getSubtasks().size() == 0) {
 					problem.addRel(rel);
