@@ -218,8 +218,7 @@ public class Planner {
         }
 
         if (!m_computeAll) {
-            Optimizer optimizer = new Optimizer();
-            algorithm = optimizer.optimize(algorithm, allTargetVars);
+            algorithm = (new Optimizer()).optimize(algorithm, allTargetVars);
         }
         db.p("algorithm" + algorithm.toString() + "\n");
 		ProgramRunner.foundVars = m_foundVars;
