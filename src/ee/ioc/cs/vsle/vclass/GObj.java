@@ -11,7 +11,7 @@ public class GObj implements Serializable, Cloneable {
 
 	public float Xsize = 1; // percentage for resizing, 1 means real size
 	public float Ysize = 1;
-	final int CORNER_SIZE = 6;
+	static final int CORNER_SIZE = 6;
 
 	/* difWithMasterX, difWithMasterY variables are for resizeing an object group, we need to know
 	 the intitial difference to make it work correctly*/

@@ -107,15 +107,23 @@ public class Connection implements Serializable {
 		if (breakPoints.size() > 1) {
 			int port1X = beginPort.getX() + beginPort.obj.getX();
 			int port1Y = beginPort.getY() + beginPort.obj.getY();
+			int port2X = endPort.getX() + endPort.obj.getX();
+			int port2Y = endPort.getY() + endPort.obj.getY();
 			Point oldPoint1 = (Point) breakPoints.get(0);
-			int oldx = oldPoint1.x;
-			int oldy = oldPoint1.y;
+			int old1x = oldPoint1.x;
+			int old1y = oldPoint1.y;
 
-			for (int i = 0; i < breakPoints.size(); i++) {
+			Point oldPoint2 = (Point) breakPoints.get(breakPoints.size()-1);
+			int old2x = oldPoint2.x;
+			int old2y = oldPoint2.y;
+
+			calcEndBreakPoints();
+
+			for (int i = 1; i < breakPoints.size()-1; i++) {
 
 				p = (Point) breakPoints.get(i);
-				p.x += (port1X - oldx);
-				p.y += (port1Y - oldy);
+				p.x += ((port1X - old1x) + (port2X - old2x))/2;
+				p.y += ((port1Y - old1y) + (port2Y - old2y))/2;
 
 				/*
 				if (p.x == oldPoint1.x) {

@@ -8,7 +8,7 @@ import java.awt.*;
 public class GObjGroup extends GObj
 	implements Serializable {
 	public ArrayList objects;
-    private int attribute1;
+	private int attribute1;
 
 	public GObjGroup(ArrayList objects) {
 		super();
@@ -169,11 +169,21 @@ public class GObjGroup extends GObj
 			obj.drawClassGraphics(g);
 		}
 		if (isSelected() == true) {
+			g.fillRect(getX() - GObj.CORNER_SIZE - 1, getY() - GObj.CORNER_SIZE - 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
+			g.fillRect(getX() + (int) (getXsize() * getWidth()) + 1,
+				getY() - GObj.CORNER_SIZE - 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
+			g.fillRect(getX()  - GObj.CORNER_SIZE - 1,
+				getY() + (int) (getYsize() * (getHeight())) + 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
+			g.fillRect(getX() + (int) (getXsize() * (getWidth())) + 1,
+				getY() + (int) (getYsize() * (getHeight())) + 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
+
+			/*
+			old code for selection drawinng
 			g.drawRect(getX() - 2, getY() - 2, 4, 4);
 			g.drawRect(getX() + (int) (getXsize() * getWidth()) - 2, getY() - 2, 4, 4);
 			g.drawRect(getX() - 2, getY() + (int) (getYsize() * getHeight()) - 2, 4, 4);
 			g.drawRect(getX() + (int) (getXsize() * getWidth()) - 2,
-				getY() + (int) (getYsize() * getHeight()) - 2, 4, 4);
+				getY() + (int) (getYsize() * getHeight()) - 2, 4, 4);*/
 		}
 	}
 

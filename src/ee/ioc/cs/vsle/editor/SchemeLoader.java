@@ -119,6 +119,7 @@ public class SchemeLoader {
 				relObj = new RelObj();
 				relObj.setName(name);
 				relObj.setClassName(type);
+
 				objects.add(relObj);
 
 			}
@@ -198,6 +199,8 @@ public class SchemeLoader {
 				Port beginPort = objects.getPort(obj1, port1);
 				Port endPort = objects.getPort(obj2, port2);
 				connection = new Connection(beginPort, endPort);
+				beginPort.addConnection(connection);
+				endPort.addConnection(connection);
 				beginPort.setConnected(true);
 				endPort.setConnected(true);
 				connections.add(connection);
@@ -220,11 +223,11 @@ public class SchemeLoader {
 
 						// deep clone each separate field
 						ClassField field;
-                        ClassField objField;
+						ClassField objField;
 						for (int i = 0; i < pClass.fields.size(); i++) {
 							field = (ClassField) pClass.fields.get(i);
-							objField =(ClassField) obj.fields.get(i);
-                            objField.knownGraphics = field.knownGraphics;
+							objField = (ClassField) obj.fields.get(i);
+							objField.knownGraphics = field.knownGraphics;
 							objField.defaultGraphics = field.defaultGraphics;
 
 						}
@@ -280,11 +283,11 @@ public class SchemeLoader {
 
 						// deep clone each separate field
 						ClassField field;
-                        ClassField objField;
+						ClassField objField;
 						for (int i = 0; i < pClass.fields.size(); i++) {
 							field = (ClassField) pClass.fields.get(i);
-							objField =(ClassField) relObj.fields.get(i);
-                            objField.knownGraphics = field.knownGraphics;
+							objField = (ClassField) relObj.fields.get(i);
+							objField.knownGraphics = field.knownGraphics;
 							objField.defaultGraphics = field.defaultGraphics;
 
 						}
@@ -297,19 +300,32 @@ public class SchemeLoader {
 							shape = (Shape) relObj.shapes.get(i);
 							relObj.shapes.set(i, shape.clone());
 						}
-						relObj.startPort = (Port)relObj.ports.get(0);
-						relObj.endPort = (Port)relObj.ports.get(1);
+
+						relObj.startPort = ((Port) relObj.ports.get(0));
+						relObj.endPort = (Port) relObj.ports.get(1);
+
 
 					}
 				}
 			}
 
-			/*	if (qName.equals("connections")) {
 
-					for (int i = 0; i < connections.size(); i++) {
+			if (qName.equals("scheme")) {
+                //create proper references to start and endports in all RelObjects
+				//üsna valus häkk
+				for (int i = 0; i < objects.size(); i++) {
+					obj = (GObj) objects.get(i);
+					if (obj instanceof RelObj) {
+                        Port port = (Port)obj.ports.get(0);
+						Connection con = (Connection)port.connections.get(0);
+						((RelObj)obj).startPort.obj = con.beginPort.obj;
+						port = (Port)obj.ports.get(1);
+						con = (Connection)port.connections.get(0);
+                        ((RelObj)obj).endPort.obj = con.endPort.obj;
 
 					}
-				}*/
+				}
+			}
 		}
 
 		public void characters(char buf[], int offset, int len) throws SAXException {

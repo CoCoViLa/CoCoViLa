@@ -32,6 +32,7 @@ class MouseOps
 		this.canvas = e;
 	}
 
+
 	public void setState(String state) {
 		this.state = state;
 		if (state.equals("selection"))
@@ -392,7 +393,7 @@ class MouseOps
 					if (selectedObjs.contains(relation.endPort.obj) && selectedObjs.contains(relation.beginPort.obj)) {
 						relation.calcAllBreakPoints();
 					} else if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
-						relation.calcEndBreakPoints();
+						relation.calcAllBreakPoints();
 					}
 
 				}
@@ -412,16 +413,18 @@ class MouseOps
 		if (state.equals(State.resize)) {
 			for (int i = 0; i < selectedObjs.size(); i++) {
 				obj = (GObj) selectedObjs.get(i);
+
 				obj.resize(x - canvas.mouseX, y - canvas.mouseY, cornerClicked);
-				canvas.mouseX = x;
-				canvas.mouseY = y;
+
 				for (int j = 0; j < canvas.connections.size(); j++) {
 					relation = (Connection) canvas.connections.get(j);
 					if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
-						relation.calcEndBreakPoints();
+						relation.calcAllBreakPoints();
 					}
 				}
 			}
+			canvas.mouseX = x;
+			canvas.mouseY = y;
 			canvas.repaint();
 
 			canvas.objects.updateRelObjs();

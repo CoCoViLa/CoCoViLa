@@ -14,53 +14,19 @@ public class Text extends Shape implements Serializable {
 	/**
 	 * Text string represented by the shape.
 	 */
+	public int fixedX;
+	public int fixedY;
 	public String stringValue;
-
-	/**
-	 * Font of the text.
-	 */
 	Font font;
-
-	/**
-	 * Color of the shape.
-	 */
 	Color color;
-
-	/**
-	 * Name of the shape.
-	 */
 	public String name;
-
-	/**
-	 * Shape transparency percentage.
-	 */
 	float transparency;
-
-	/**
-	 * Height of the text.
-	 */
-	private int h;
-
-	/**
-	 * Width of the text.
-	 */
-	private int w;
-
-	/**
-	 * Alpha value of a color, used
-	 * for defining the transparency of a filled shape.
-	 */
+	private int h; //* Height of the text.
+	private int w;//	 * Width of the text.
 	private float alpha;
-
-	/**
-	 * Indicates if the shape is selected or not.
-	 */
 	private boolean selected = false;
-
-	/**
-	 * Defines if the shape is resizable or not.
-	 */
 	private boolean fixed = false;
+	boolean fixedsize = false;
 
 	public Text(int x, int y, Font font, Color color, double transp, String s) {
 
@@ -70,6 +36,16 @@ public class Text extends Shape implements Serializable {
 		this.color = color;
 		this.stringValue = s;
 		this.transparency = (float) transp;
+	} // Text
+
+	public Text(int x, int y, Font font, Color color, double transp, String s, boolean fixed) {
+		this.x = x;
+		this.y = y;
+		this.font = font;
+		this.color = color;
+		this.stringValue = s;
+		this.transparency = (float) transp;
+		this.fixedsize = fixed;
 	} // Text
 
 	public void setFixed(boolean b) {
@@ -342,6 +318,7 @@ public class Text extends Shape implements Serializable {
 
 	public void draw(int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2) {
 
+
 		/*
 		java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
 
@@ -385,17 +362,20 @@ public class Text extends Shape implements Serializable {
 
 		this.h = (int) r.getHeight();
 		this.w = (int) r.getWidth();*/
-
-		g2.setFont(font.deriveFont((float) Math.sqrt(Xsize * Ysize) * font.getSize()));
+        if (!fixedsize) {
+			g2.setFont(font.deriveFont((float) Math.sqrt(Xsize * Ysize) * font.getSize()));
+		} else {
+			g2.setFont(font);
+		}
 
 		alpha = (float) (1 - (this.transparency / 100));
 
 		float red = 0;
-	   if(color!=null) red = (float) color.getRed() / 256;
+		if (color != null) red = (float) color.getRed() / 256;
 		float green = 0;
-	   if(color!=null) green = (float) color.getGreen() / 256;
+		if (color != null) green = (float) color.getGreen() / 256;
 		float blue = 0;
-	   if(color!=null) blue = (float) color.getBlue() / 256;
+		if (color != null) blue = (float) color.getBlue() / 256;
 
 		g2.setColor(new Color(red, green, blue, alpha));
 
@@ -403,12 +383,27 @@ public class Text extends Shape implements Serializable {
 		/*g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
 				java.awt.RenderingHints.VALUE_ANTIALIAS_OFF);*/
 
-		int a = xModifier + (int) (Xsize * x * Math.cos(angle));
-		int b = yModifier + (int) (Ysize * y + (Xsize * x * Math.sin(angle)));
 
-		g2.translate(xModifier, yModifier);
-		g2.rotate(-1 * angle);
-		g2.translate(-1 * (xModifier), -1 * (yModifier));
+		//int a = xModifier + (int) (Xsize * x * Math.cos(angle));
+		//int b = yModifier + (int) (Ysize * y + (Xsize * x * Math.sin(angle)));
+		int a = 0, b = 0;
+		if (fixedX == 0)
+			a = xModifier + (int) (Xsize * x* Math.cos(angle));
+		else if (fixedX == -1)
+			a = xModifier + (int) (x* Math.cos(angle));
+		else
+			a = xModifier + (int) (Xsize * x* Math.cos(angle)) - fixedX;
+
+		if (fixedY == 0)
+			b = yModifier + (int) (Ysize * y+ (Xsize * x * Math.sin(angle)));
+		else if (fixedY == -1)
+			b = yModifier + (int)(y+ (Xsize * x * Math.sin(angle)));
+		else
+			b = yModifier + (int) (Ysize * y+ (Xsize * x * Math.sin(angle))) - fixedY;
+
+		//	g2.translate(xModifier, yModifier);
+//		g2.rotate(-1*angle);
+//		g2.translate(-1 * (xModifier), -1 * (yModifier));
 
 		if (stringValue.equals("*self"))
 			g2.drawString(value, a, b);
@@ -421,11 +416,12 @@ public class Text extends Shape implements Serializable {
 			drawSelection();
 		}
 
-		g2.translate(xModifier, yModifier);
-		g2.rotate(angle);
-		g2.translate(-1 * (xModifier), -1 * (yModifier));
+//		g2.translate(xModifier, yModifier);
+//		g2.rotate(angle);
+//		g2.translate(-1 * (xModifier), -1 * (yModifier));
 
 	}
+
 	public Object clone() {
 		return super.clone();
 	} // clone

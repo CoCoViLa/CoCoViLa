@@ -30,20 +30,20 @@ public class RelObj extends GObj {
 		return false;
 	}
 
-		void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
+	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
 		Shape s;
 
 		g2.translate(xPos, yPos);
 		g2.rotate(angle);
-		g2.translate(-1*(xPos), -1*(yPos));
+		g2.translate(-1 * (xPos), -1 * (yPos));
 
 		for (int i = 0; i < shapes.size(); i++) {
 			s = (Shape) shapes.get(i);
 			s.draw(xPos, yPos, Xsize, Ysize, g2);
 		}
 		g2.translate(xPos, yPos);
-		g2.rotate(-1*angle);
-		g2.translate(-1*(xPos), -1*(yPos));
+		g2.rotate(-1 * angle);
+		g2.translate(-1 * (xPos), -1 * (yPos));
 	} // draw
 
 
@@ -68,23 +68,24 @@ public class RelObj extends GObj {
 			}
 		}
 	}
+
 	public Object clone() {
 		RelObj obj = (RelObj) super.clone();
-		obj.startPort = (Port)startPort.clone();
-		obj.endPort = (Port)endPort.clone();
+		obj.startPort = (Port) startPort.clone();
+		obj.endPort = (Port) endPort.clone();
 		return obj;
 	}
 
 	public String toXML() {
-		String xml = "<relobject name=\""+name+"\" type=\""+className+"\" >\n";
-        xml += "  <relproperties x=\""+ x+"\" y=\""+y+"\" endX=\""+endX+"\" endY=\""+endY+"\" angle=\""+angle+"\" width=\""+ width+"\" height=\""+height+"\" xsize=\""+Xsize+"\" ysize=\""+Ysize+"\" strict=\""+strict+"\" />\n";
+		String xml = "<relobject name=\"" + name + "\" type=\"" + className + "\" >\n";
+		xml += "  <relproperties x=\"" + x + "\" y=\"" + y + "\" endX=\"" + endX + "\" endY=\"" + endY + "\" angle=\"" + angle + "\" width=\"" + width + "\" height=\"" + height + "\" xsize=\"" + Xsize + "\" ysize=\"" + Ysize + "\" strict=\"" + strict + "\" />\n";
 		xml += "  <fields>\n";
 		for (int i = 0; i < fields.size(); i++) {
-			ClassField field = (ClassField)fields.get(i);
-            xml += StringUtil.indent(4) + field.toXML();
+			ClassField field = (ClassField) fields.get(i);
+			xml += StringUtil.indent(4) + field.toXML();
 		}
 		xml += "  </fields>\n";
-        xml += "</relobject>\n";
+		xml += "</relobject>\n";
 		return xml;
 
 	}

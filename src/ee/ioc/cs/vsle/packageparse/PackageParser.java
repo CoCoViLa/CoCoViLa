@@ -198,19 +198,9 @@ public class PackageParser {
 				classFields.add(newField);
 			}
 			if (element.equals("text")) {
-				String str = attrs.getValue("string");
-				int colorInt = Integer.parseInt(attrs.getValue("colour"));
-				int x = Integer.parseInt(attrs.getValue("x"));
-				int y = Integer.parseInt(attrs.getValue("y"));
-				String fontName = attrs.getValue("fontname");
-				int fontStyle = Integer.parseInt(attrs.getValue("fontstyle"));
-				int fontSize = Integer.parseInt(attrs.getValue("fontsize"));
+				Text newText = makeText(attrs, newGraphics);
 
 
-				Font font = new Font(fontName, fontStyle, fontSize);
-
-				Text newText = new Text(x, y, font, new Color(colorInt), 0.0,
-					str);
 				/*if (str.equals("*self"))
 					newText.name = "self";
 				else if (str.equals("*selfWithName"))
@@ -329,6 +319,50 @@ public class PackageParser {
 					Integer.parseInt(width), Integer.parseInt(height));
 			}
 
+		}
+
+		private Text makeText(Attributes attrs, ClassGraphics newGraphics) {
+			String str = attrs.getValue("string");
+			int colorInt = Integer.parseInt(attrs.getValue("colour"));
+			//parse the coordinates and check if they are fixed or reverse fixed
+			String val = attrs.getValue("x");
+			int x, y, fixedX = 0, fixedY = 0;
+			if (val.endsWith("rf")) {
+				x = newGraphics.boundWidth;
+				fixedX = x - Integer.parseInt(val.substring(0, val.length() - 2));
+			} else if (val.endsWith("f")) {
+				x = Integer.parseInt(val.substring(0, val.length() - 1));
+				fixedX = -1;
+			} else {
+				x = Integer.parseInt(val);
+			}
+			val = attrs.getValue("y");
+			if (val.endsWith("rf")) {
+				y = newGraphics.boundWidth;
+				fixedY = y - Integer.parseInt(val.substring(0, val.length() - 2));
+			} else if (val.endsWith("f")) {
+				y = Integer.parseInt(val.substring(0, val.length() - 1));
+				fixedY = -1;
+			} else {
+				y = Integer.parseInt(val);
+			}
+
+			String fontName = attrs.getValue("fontname");
+			int fontStyle = Integer.parseInt(attrs.getValue("fontstyle"));
+			int fontSize = Integer.parseInt(attrs.getValue("fontsize"));
+
+
+			Font font = new Font(fontName, fontStyle, fontSize);
+			String s = attrs.getValue("fixedsize");
+			boolean fixed = false;
+			fixed = Boolean.valueOf(s).booleanValue();
+
+			Text newText = new Text(x, y, font, new Color(colorInt), 0.0,
+				str, fixed);
+			newText.fixedX = fixedX;
+
+			newText.fixedY = fixedY;
+			return newText;
 		}
 
 		private void makeInitialPolygon(Attributes attrs) {

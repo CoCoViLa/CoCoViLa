@@ -374,6 +374,7 @@ public class Line extends Shape implements Serializable {
 	 * @param g2 Graphics2D - shape graphics.
 	 */
 	public void drawSelection(Graphics2D g2) {
+		g2.setStroke(new BasicStroke(2));
 		g2.setColor(Color.black);
 		g2.setStroke(new BasicStroke((float) 1.0));
 		g2.fillRect(startX - 2, startY - 2, 4, 4);
