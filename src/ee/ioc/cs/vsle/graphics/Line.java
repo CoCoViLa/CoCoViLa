@@ -1,7 +1,9 @@
 package ee.ioc.cs.vsle.graphics;
 
 import java.io.*;
+
 import ee.ioc.cs.vsle.util.*;
+
 import java.awt.*;
 
 import ee.ioc.cs.vsle.editor.*;
@@ -66,6 +68,19 @@ public class Line extends Shape implements Serializable {
 	 */
 	private boolean fixed = false;
 
+	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp) {
+		startX = x1;
+		startY = y1;
+		endX = x2;
+		endY = y2;
+		this.color = new Color(colorInt);
+		this.lineWeight = (float) strokeWidth;
+		this.transparency = (float) transp;
+		this.x = Math.min(x1, x2);
+		this.y = Math.min(y1, y2);
+		this.width = Math.max(x1, x2) - this.x; // endX - startX;
+		this.height = Math.max(y1, y2) - this.y; // endY - startY;
+	}
 
 	public Line(int x1, int y1, int x2, int y2, int colorInt, double strokeWidth, double transp, int lineType) {
 		startX = x1;
@@ -172,7 +187,7 @@ public class Line extends Shape implements Serializable {
 	 * @param lineType int
 	 */
 	public void setLineType(int lineType) {
-	  this.lineType = lineType;
+		this.lineType = lineType;
 	} // setLineType
 
 	/**
@@ -180,7 +195,7 @@ public class Line extends Shape implements Serializable {
 	 * @return int - line type of the shape.
 	 */
 	public int getLineType() {
-	  return this.lineType;
+		return this.lineType;
 	} // getLineType
 
 	/**
@@ -228,7 +243,7 @@ public class Line extends Shape implements Serializable {
 				this.startY += deltaH;
 			} else if (cornerClicked == 2) { // TOP-RIGHT
 				endX += deltaW;
-				endY +=deltaH;
+				endY += deltaH;
 			}
 		}
 	} // resize
@@ -242,20 +257,20 @@ public class Line extends Shape implements Serializable {
 	 * @return int - corner number the mouse was clicked in.
 	 */
 	public int controlRectContains(int pointX, int pointY) {
-		db.p(pointX+" "+ pointY+" "+ endX+" "+ endY+ " " + startX+" "+ startY +" " );
-		if (pointX >= startX-2 && pointY >= startY-2 && pointX <= startX + 2 && pointY <= startY + 2) {
+		db.p(pointX + " " + pointY + " " + endX + " " + endY + " " + startX + " " + startY + " ");
+		if (pointX >= startX - 2 && pointY >= startY - 2 && pointX <= startX + 2 && pointY <= startY + 2) {
 			return 1;
 		}
-		if (pointX >= endX - 2 && pointY >= endY -2 && pointX <= endX+2 && pointY <= endY + 2) {
+		if (pointX >= endX - 2 && pointY >= endY - 2 && pointX <= endX + 2 && pointY <= endY + 2) {
 			return 2;
 		}
 		return 0;
 	} // controlRectContains
 
 	public void setPosition(int x, int y) {
-		endX =  endX + x;
+		endX = endX + x;
 		startX = startX + x;
-		endY =  endY + y;
+		endY = endY + y;
 		startY = startY + y;
 	} // setPosition
 
@@ -394,7 +409,7 @@ public class Line extends Shape implements Serializable {
 		return "<line x1=\"" + (startX - boundingboxX) + "\" y1=\""
 			+ (startY - boundingboxY) + "\" x2=\"" + (endX - boundingboxX)
 			+ "\" y2=\"" + (endY - boundingboxY) + "\" colour=\"" + colorInt
-			+ "\" fixed=\"" + isFixed() + "\" stroke=\""+(int)this.lineWeight+"\" lineType=\""+this.lineType+"\" transparency=\""+(int)this.transparency+"\"/>\n";
+			+ "\" fixed=\"" + isFixed() + "\" stroke=\"" + (int) this.lineWeight + "\" lineType=\"" + this.lineType + "\" transparency=\"" + (int) this.transparency + "\"/>\n";
 	} // toFile
 
 	public String toText() {
@@ -418,13 +433,13 @@ public class Line extends Shape implements Serializable {
 
 		Graphics2D g2 = (Graphics2D) g;
 
-		if(getLineType()>0) {
-		  g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
-									   BasicStroke.JOIN_ROUND, 50,
-									   new float[] {getLineType(),getLineType()}
-									   , 0));
+		if (getLineType() > 0) {
+			g2.setStroke(new BasicStroke(this.lineWeight, BasicStroke.CAP_BUTT,
+				BasicStroke.JOIN_ROUND, 50,
+				new float[]{getLineType(), getLineType()}
+				, 0));
 		} else {
-		  g2.setStroke(new BasicStroke(lineWeight));
+			g2.setStroke(new BasicStroke(lineWeight));
 		}
 
 		alpha = (float) (1 - (this.transparency / 100));

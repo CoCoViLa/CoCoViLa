@@ -20,8 +20,7 @@ public class ShapeList
 					if (!theShape.getName().equals(BoundingBox.name)) {
 						this.remove(theShape);
 					}
-				}
-				else {
+				} else {
 					this.remove(theShape);
 				}
 			}
@@ -30,7 +29,7 @@ public class ShapeList
 
 	boolean isLocatedAtPoint(int x, int y) {
 		for (int i = this.size() - 1; i >= 0; i--) {
-			Shape shape = (Shape)this.get(i);
+			Shape shape = (Shape) this.get(i);
 
 			if (shape.contains(x, y)) {
 				return true;
@@ -43,7 +42,7 @@ public class ShapeList
 		Shape shape;
 
 		for (int i = this.size() - 1; i >= 0; i--) {
-			shape = (Shape)this.get(i);
+			shape = (Shape) this.get(i);
 			if (shape.contains(x, y)) {
 				return shape;
 			}
@@ -55,7 +54,7 @@ public class ShapeList
 		Shape shape;
 
 		for (int i = 0; i < this.size(); i++) {
-			shape = (Shape)this.get(i);
+			shape = (Shape) this.get(i);
 			if (shape.contains(x, y) && shape != asker) {
 				return shape;
 			}
@@ -67,7 +66,7 @@ public class ShapeList
 		Shape shape;
 
 		for (int i = 0; i < this.size(); i++) {
-			shape = (Shape)this.get(i);
+			shape = (Shape) this.get(i);
 			if (shape.isInside(x1, y1, x2, y2)) {
 				shape.setSelected(true);
 			}
@@ -106,7 +105,7 @@ public class ShapeList
 		Shape shape;
 
 		for (int i = 0; i < this.size(); i++) {
-			shape = (Shape)this.get(i);
+			shape = (Shape) this.get(i);
 			shape.setSelected(false);
 		}
 	}
@@ -116,7 +115,7 @@ public class ShapeList
 		Shape shape;
 
 		for (int i = 0; i < this.size(); i++) {
-			shape = (Shape)this.get(i);
+			shape = (Shape) this.get(i);
 			if (shape.isSelected()) {
 				a.add(shape);
 			}
