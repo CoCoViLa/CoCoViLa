@@ -116,4 +116,4 @@ public class SplashWindow extends Window {
 
 		return f;
 	}
-}
+} // end of class

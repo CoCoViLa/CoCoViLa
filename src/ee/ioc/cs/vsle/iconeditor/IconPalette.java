@@ -10,10 +10,9 @@ import javax.swing.event.*;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Aulo
+ * Author: Aulo Aasmaa
  * Date: 14.10.2003
  * Time: 9:19:17
- * To change this template use Options | File Templates.
  */
 public class IconPalette {
 	public JToolBar toolBar;

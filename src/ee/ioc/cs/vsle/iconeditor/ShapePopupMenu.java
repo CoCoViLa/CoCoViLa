@@ -120,4 +120,4 @@ public class ShapePopupMenu extends JPopupMenu {
 	} // enableDisableMenuItem
 
 
-}
+} // end of class

@@ -161,4 +161,4 @@ public class PackagePropertiesDialog extends JDialog {
    return valid;
   } // valuesValid
 
-}
+} // end of class

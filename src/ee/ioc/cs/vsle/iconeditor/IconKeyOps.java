@@ -88,4 +88,4 @@ public class IconKeyOps implements KeyListener {
 
   } // keyReleased
 
-}
+} // end of class

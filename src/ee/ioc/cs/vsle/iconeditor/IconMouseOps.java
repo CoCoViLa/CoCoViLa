@@ -23,10 +23,9 @@ import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Administrator
+ * Author: Aulo Aasmaa
  * Date: 6.1.2004
  * Time: 23:18:00
- * To change this template use Options | File Templates.
  */
 
 class IconMouseOps

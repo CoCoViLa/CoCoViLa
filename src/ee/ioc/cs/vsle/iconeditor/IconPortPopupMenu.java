@@ -10,10 +10,9 @@ import javax.swing.JMenuItem;
 
 /**
  * Created by IntelliJ IDEA.
- * User: Aulo
+ * Author: Aulo Aasmaa
  * Date: 14.10.2003
  * Time: 9:15:36
- * To change this template use Options | File Templates.
  */
 public class IconPortPopupMenu
 	extends JPopupMenu

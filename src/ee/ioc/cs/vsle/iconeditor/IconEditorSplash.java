@@ -6,7 +6,7 @@ import java.net.URL;
 
 public class IconEditorSplash {
 	public static void main(String[] args) {
-		// Read the image data and display the splash screen
+		// Read the image data and display the splash screen.
 
 		// -------------------------------------------------
 		Frame splashFrame = null;
@@ -18,7 +18,7 @@ public class IconEditorSplash {
 			System.err.println("Splash image " + splashImageUrl + " not found");
 		}
 
-		// Call the main method of the application using Reflection
+		// Call the main method of the application using Reflection.
 		// --------------------------------------------------------
 		try {
 			Class.forName("ee.ioc.cs.vsle.iconeditor.IconEditor").getMethod("main", new Class[]{String[].class}).invoke(null, new Object[]{args});
@@ -28,7 +28,7 @@ public class IconEditorSplash {
 			System.exit(10);
 		}
 
-		// Dispose the splash screen
+		// Dispose the splash screen.
 		// -------------------------
 		if (splashFrame != null) splashFrame.dispose();
 	}

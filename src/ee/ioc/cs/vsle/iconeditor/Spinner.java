@@ -74,4 +74,4 @@ public class Spinner extends JSpinner {
 		return elements;
 	}
 
-}
+} // end of class

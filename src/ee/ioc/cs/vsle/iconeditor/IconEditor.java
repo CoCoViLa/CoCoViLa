@@ -39,7 +39,7 @@ public class IconEditor
   JMenuItem menuItem;
   JPanel infoPanel; // Panel for runtime information, mouse coordinates, selected objects etc.
   public JPanel mainPanel = new JPanel();
-  JLabel posInfo; // Mouse position.
+  JLabel posInfo; // Label for displaying mouse position information.
   VPackage vPackage;
   IconPalette palette;
   Scheme scheme;

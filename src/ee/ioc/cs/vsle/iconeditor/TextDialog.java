@@ -383,4 +383,4 @@ public class TextDialog extends JDialog implements ActionListener {
 		TextDialog text = new TextDialog(new IconEditor());
 	} // main
 
-}
+} // end of class
