@@ -72,6 +72,12 @@ public class CodeGenerator {
             ArrayList subOutputs = ( ArrayList ) subtask.getOutputs();
             ArrayList subAlg = ( ArrayList ) subtask.getAlgorithm();
             cOT( OT_INC, 1 );
+            //apend subtask inputs to algorithm
+            for ( int i = 0; i < subInputs.size(); i++ ) {
+                Var in = ( Var ) subInputs.get( i );
+                alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubtask( in, i, true ) );
+            }
+            boolean isSubOutputInAlgorithm = false;
             for ( int i = 0; i < subAlg.size(); i++ ) {
                 Rel trel = ( Rel ) subAlg.get( i );
 
@@ -83,17 +89,18 @@ public class CodeGenerator {
                     if ( trel.getInputs().size() == 1 && trel.getOutputs().size() == 1 ) {
                         Var in = ( Var ) trel.getInputs().get( 0 );
                         Var out = ( Var ) trel.getOutputs().get( 0 );
-                        boolean isRelInAlgorithm = false;
+                        boolean isSubInputInAlgorithm = false;
                         if ( subInputs.contains( in ) ) {
-                            alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubInput( in, true ) );
+                            //alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubtask( in, 0, true ) );
                             appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
-                            isRelInAlgorithm = true;
+                            isSubInputInAlgorithm = true;
                         } //else
                         if ( subOutputs.contains( out ) ) {
-                            if ( !isRelInAlgorithm ) {
+                            if ( !isSubInputInAlgorithm ) {
                                 appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
                             }
-                            alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubInput( out, false ) );
+                            alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubtask( out, 0, false ) );
+                            isSubOutputInAlgorithm = true;
                             break; //there should be no axioms after return statement.
                         }
                     } else
@@ -102,6 +109,10 @@ public class CodeGenerator {
                     appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
                 }
 
+            }
+            if( !isSubOutputInAlgorithm ) {
+                Var out = ( Var ) subOutputs.get( 0 );
+                alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubtask( out, 0, false ) );
             }
             alg.append( cOT( OT_DEC, 1 ) + "}\n"
                         + cOT( OT_DEC, 1 ) + "}\n" );
@@ -175,7 +186,7 @@ public class CodeGenerator {
         return buf.toString();
     }
 
-    private String getObjectFromSubInput( Var var, boolean isInput ) {
+    private String getObjectFromSubtask( Var var, int num, boolean isInput ) {
 
         String varType = var.type;
         TypeToken token = null;
@@ -204,10 +215,10 @@ public class CodeGenerator {
 
         if ( isInput ) {
             if ( token == TOKEN_OBJECT ) {
-                s = var.toString() + " = (" + var.type + ")in[0];\n";
+                s = var.toString() + " = (" + var.type + ")in[" + num + "];\n";
             } else {
                 s = var.toString()
-                    + " = ((" + token.getObjType() + ")in[0])."
+                    + " = ((" + token.getObjType() + ")in[" + num + "])."
                     + token.getMethod() + "();\n";
             }
         } else {
