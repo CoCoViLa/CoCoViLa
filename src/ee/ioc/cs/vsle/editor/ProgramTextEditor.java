@@ -1,17 +1,9 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.VPackage;
-import ee.ioc.cs.vsle.vclass.ObjectList;
-import ee.ioc.cs.vsle.vclass.GroupUnfolder;
-import ee.ioc.cs.vsle.vclass.ClassField;
-import ee.ioc.cs.vsle.vclass.Connection;
-import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.synthesize.ClassList;
-import ee.ioc.cs.vsle.synthesize.Synthesizer;
-import ee.ioc.cs.vsle.synthesize.SpecParseException;
-import ee.ioc.cs.vsle.synthesize.LineErrorException;
-import ee.ioc.cs.vsle.synthesize.MutualDeclarationException;
+import ee.ioc.cs.vsle.synthesize.*;
+import ee.ioc.cs.vsle.ccl.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;

@@ -17,13 +17,7 @@ class Rel {
 	String method;
     boolean inAlgorithm = false;
 
-	int type;
-
-    /** @link dependency */
-    /*# Var lnkVar; */
-
- /* 1 - equals, 2 - method*/
-
+	int type; /* 1 - equals, 2 - method*/
 
 	void setFlag(int f) {
 		flag = f;
@@ -139,7 +133,11 @@ class Rel {
 				db.p("siin ja " + op.field);
 				if (op.field.isPrimOrStringArray()) {
 					String[] split = method.split("=");
-					assign = op.field.type + " " + " TEMP =" + split[1] + ";\n";
+                    if (Synthesizer.tempIsDone == false) {
+						assign = op.field.type + " " + " TEMP =" + split[1] + ";\n";
+						Synthesizer.tempIsDone =true;
+					} else
+						assign =  "TEMP =" + split[1] + ";\n";
 					assign += op.object + "." + op.name + " = TEMP;\n";
 					return assign;
 

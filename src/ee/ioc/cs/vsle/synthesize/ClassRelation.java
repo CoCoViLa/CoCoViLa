@@ -53,7 +53,7 @@ class ClassRelation
 	 * @param vars ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void setOutput(String s, ArrayList vars){
+	void setOutput(String s, ArrayList vars) throws UnknownVariableException {
 		ClassField f = getVar(s, vars);
 
 		if (f != null) {
@@ -80,7 +80,7 @@ class ClassRelation
 	 * @param vars ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void setInput(String s, ArrayList vars){
+	void setInput(String s, ArrayList vars) throws UnknownVariableException {
 		if (!s.equals("")) {
 			ClassField f = getVar(s, vars);
 
@@ -113,7 +113,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addInputs(String[] input, ArrayList varList){
+	void addInputs(String[] input, ArrayList varList) throws UnknownVariableException {
 		for (int i = 0; i < input.length; i++) {
 			if (!input[i].equals("#")) {
 				ClassField var = getVar(input[i], varList);
@@ -140,7 +140,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addOutputs(String[] output, ArrayList varList){
+	void addOutputs(String[] output, ArrayList varList) throws UnknownVariableException {
 		for (int i = 0; i < output.length; i++) {
 			ClassField var = getVar(output[i], varList);
 
@@ -169,7 +169,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addSubtasks(ArrayList subtaskList, ArrayList varList){
+	void addSubtasks(ArrayList subtaskList, ArrayList varList) throws UnknownVariableException {
 		ClassRelation subtask;
 		String subtaskString;
 		Pattern pattern;
@@ -198,7 +198,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addAll(String[] input, ArrayList varList){
+	void addAll(String[] input, ArrayList varList) throws UnknownVariableException {
 		for (int i = 0; i < input.length; i++) {
 			ClassField var = getVar(input[i], varList);
 

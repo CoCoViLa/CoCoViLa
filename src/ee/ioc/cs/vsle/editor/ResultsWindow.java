@@ -4,6 +4,7 @@ import ee.ioc.cs.vsle.vclass.GroupUnfolder;
 import ee.ioc.cs.vsle.vclass.ObjectList;
 import ee.ioc.cs.vsle.vclass.Port;
 import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.util.db;
 
 import java.lang.reflect.Method;

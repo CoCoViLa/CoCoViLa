@@ -47,6 +47,4 @@ public class SynFilter
 	public String getDescription() {
 		return "Java ee.ioc.cs.editor.synthesize.Synthesizer Schemes";
 	}
-
-	public static final String selection = "?selection";
 }

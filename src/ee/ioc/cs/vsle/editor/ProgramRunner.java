@@ -3,6 +3,8 @@ package ee.ioc.cs.vsle.editor;
 import ee.ioc.cs.vsle.vclass.ObjectList;
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.ClassField;
+import ee.ioc.cs.vsle.ccl.CompileException;
+import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.util.db;
 
 import java.lang.reflect.Field;
@@ -82,7 +84,7 @@ public class ProgramRunner {
 	}
 
 	Object compileAndRun(String programName, ArrayList watchFields,
-						 JTextArea runResultArea){
+						 JTextArea runResultArea) throws CompileException {
 		genObject = makeGeneratedObject(programName);
 		run(watchFields, runResultArea);
 		return genObject;
@@ -151,7 +153,7 @@ public class ProgramRunner {
 		}
 	}
 
-	Object makeGeneratedObject(String programName){
+	Object makeGeneratedObject(String programName) throws CompileException {
 		CCL classLoader = new CCL();
 
 		try {
