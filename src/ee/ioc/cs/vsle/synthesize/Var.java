@@ -78,9 +78,9 @@ class Var {
 	 * <UNCOMMENTED>
 	 * @return String
 	 */ public String toString() {
-//         if(object.equals("this"))
-//             return (name);
-//         else
+         if(object.equals("this"))
+             return (name);
+         else
              return (object + "." + name);
 	} // toString
 

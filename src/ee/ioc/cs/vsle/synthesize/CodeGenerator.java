@@ -41,7 +41,7 @@ public class CodeGenerator {
                         Var var = (Var) ( (Rel) algRelList.get(i + 1 + j)).
                             outputs.get(0);
                         if (var.type.equals("int")) {
-                            alg.append(addOffset(0,0) + var.name + " = " +
+                            alg.append(addOffset(0,0) + var + " = " +
                                        intToObj("in[" + (j - 1) + "]") + ";\n");
                         }
                     }
