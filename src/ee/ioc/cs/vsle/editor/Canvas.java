@@ -441,7 +441,11 @@ public class Canvas extends JPanel implements ActionListener {
 				cloneObject();
 			} else if (e.getActionCommand().equals(Menu.HLPORTS)) {
 				hilightPorts();
+			} else if (e.getActionCommand().equals(Menu.GRID)) {
+			    this.setGridVisible(!this.isGridVisible());
 			}
+
+
 		 else if (e.getActionCommand().equals(Menu.BACKWARD)) {
 				// MOVE OBJECT BACKWARD IN THE LIST
 				// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
