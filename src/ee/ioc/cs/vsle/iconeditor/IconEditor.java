@@ -1063,7 +1063,7 @@ public class IconEditor
 					JOptionPane.showMessageDialog(null, "Saved to package: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
 					FileFuncs ff = new FileFuncs();
 					String className = RuntimeProperties.className;
-					String fileText = "public class " + className + " {";
+					String fileText = "class " + className + " {";
 					fileText += "\n    /*@ specification " + className + " {\n";
 
 					for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {

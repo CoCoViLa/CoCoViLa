@@ -41,7 +41,7 @@ public class ResultsWindow extends JFrame
 		// ee.ioc.cs.editor.synthesize.Synthesizer synth = new ee.ioc.cs.editor.synthesize.Synthesizer();
 		// synth.makeProgram(objects, connections, classes);
 		textArea = new JTextArea();
-		textArea.setFont(new Font("Courier", Font.PLAIN, 12));
+		textArea.setFont(RuntimeProperties.font);
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 
 		areaScrollPane.setVerticalScrollBarPolicy(

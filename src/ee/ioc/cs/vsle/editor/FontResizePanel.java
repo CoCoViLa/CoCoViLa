@@ -6,68 +6,54 @@ import java.awt.event.*;
 import javax.swing.event.*;
 
 public class FontResizePanel extends JPanel {
-    private JTextArea m_area;
-    private JSpinner m_spinner = new JSpinner();
-    public FontResizePanel(JTextArea area) {
-        m_area = area;
-        try {
-            jbInit();
-        } catch ( Exception ex ) {
-            ex.printStackTrace();
-        }
-    }
+	private JTextArea m_area;
+	private JSpinner m_spinner = new JSpinner();
 
-    private void jbInit() throws Exception {
-        this.setLayout(new FlowLayout(FlowLayout.LEFT));
-        JPanel panel = new JPanel(new GridLayout(1,3));
-        panel.add(new JLabel("Font Size: "));
-        m_spinner.setPreferredSize( new Dimension( 50, 20 ) );
-        final SpinnerNumberModel model = new SpinnerNumberModel(m_area.getFont().getSize(), 5, 100, 1);
-        m_spinner.setModel(model);
-        panel.add( m_spinner );
-        JCheckBox checkb = new JCheckBox( "Bold", ( m_area.getFont().isBold() ) ? true : false );
-        checkb.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                JCheckBox c = (JCheckBox)e.getSource();
-                Font font = m_area.getFont();
-                    m_area.setFont(new Font(font.getName(),
-                                            (c.isSelected())? Font.BOLD: Font.PLAIN,
-                                            ((Integer)m_spinner.getValue()).intValue()));
-            }
-        });
+	public FontResizePanel(JTextArea area) {
+		m_area = area;
+		try {
+			jbInit();
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
 
-        panel.add( checkb );
-        this.add( panel );
+	private void jbInit() throws Exception {
+		this.setLayout(new FlowLayout(FlowLayout.LEFT));
+		JPanel panel = new JPanel(new GridLayout(1, 3));
+		panel.add(new JLabel("Font Size: "));
+		m_spinner.setPreferredSize(new Dimension(50, 20));
+		final SpinnerNumberModel model = new SpinnerNumberModel(m_area.getFont().getSize(), 5, 100, 1);
+		m_spinner.setModel(model);
+		panel.add(m_spinner);
+		JCheckBox checkb = new JCheckBox("Bold", (m_area.getFont().isBold()) ? true : false);
+		checkb.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JCheckBox c = (JCheckBox) e.getSource();
+				Font font = m_area.getFont();
+				m_area.setFont(new Font(font.getName(),
+					(c.isSelected()) ? Font.BOLD : Font.PLAIN,
+					((Integer) m_spinner.getValue()).intValue()));
+				RuntimeProperties.font = m_area.getFont();
+			}
+		});
 
-        this.addComponentListener( new ComponentAdapter() {
-            public void componentShown( ComponentEvent e ) {
-                model.setValue( new Integer( m_area.getFont().getSize() ) );
-            }
-        } );
+		panel.add(checkb);
+		this.add(panel);
 
-        m_spinner.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                JSpinner spin = (JSpinner)e.getSource();
-                Font font = m_area.getFont();
-                m_area.setFont(new Font(font.getName(), font.getStyle(), ((Integer)spin.getValue()).intValue()));
-            }
-        });
-    }
+		this.addComponentListener(new ComponentAdapter() {
+			public void componentShown(ComponentEvent e) {
+				model.setValue(new Integer(m_area.getFont().getSize()));
+			}
+		});
 
-
-
-    public static void main(String[] args) {
-        JFrame frame = new JFrame();
-        frame.setSize(300, 250);
-
-        JTextArea area = new JTextArea("gjdkfbndkjsfbndsfbnldsfbndsf");
-        area.setFont(new Font("Courier New", Font.PLAIN, 12));
-
-        frame.getContentPane().setLayout(new BorderLayout());
-
-        frame.getContentPane().add(area, BorderLayout.CENTER);
-        frame.getContentPane().add(new FontResizePanel(area), BorderLayout.NORTH);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.show();
-    }
+		m_spinner.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				JSpinner spin = (JSpinner) e.getSource();
+				Font font = m_area.getFont();
+				m_area.setFont(new Font(font.getName(), font.getStyle(), ((Integer) spin.getValue()).intValue()));
+				RuntimeProperties.font = m_area.getFont();
+			}
+		});
+	}
 }

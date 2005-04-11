@@ -59,7 +59,7 @@ public class ClassSaveDialog extends JFrame implements ActionListener {
 		if (e.getSource() == ok) {
 			FileFuncs ff = new FileFuncs();
 			String className = textField.getText();
-		    String fileText = "public class "+className+" {";
+		    String fileText = "class "+className+" {";
 		    fileText += "\n    /*@ specification "+className+" {\n";
 			fileText += text;
 			fileText += "    }@*/\n \n}";

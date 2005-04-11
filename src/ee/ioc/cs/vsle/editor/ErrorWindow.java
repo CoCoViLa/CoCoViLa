@@ -17,7 +17,7 @@ public class ErrorWindow extends JFrame implements ActionListener {
 	ErrorWindow(String s) {
 		super();
 		textArea = new JTextArea();
-		textArea.setFont(new Font("Courier New", Font.PLAIN, 12));
+		textArea.setFont(RuntimeProperties.font);
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 
 		areaScrollPane.setVerticalScrollBarPolicy(

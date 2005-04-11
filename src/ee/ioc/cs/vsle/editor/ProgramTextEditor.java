@@ -50,7 +50,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		tabbedPane = new JTabbedPane();
 
 		textArea = new JTextArea();
-		textArea.setFont(new Font("Courier New", Font.PLAIN, 12));
+		textArea.setFont(RuntimeProperties.font);
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 
 		areaScrollPane.setVerticalScrollBarPolicy(
@@ -72,7 +72,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		tabbedPane.addTab("Specification", specText);
 
 		programTextArea = new JTextArea();
-		programTextArea.setFont(new Font("Courier New", Font.PLAIN, 12));
+		programTextArea.setFont(RuntimeProperties.font);
 		JToolBar toolBar = new JToolBar();
 
 		runProg = new JButton("Compile & Run");
@@ -92,7 +92,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		tabbedPane.addTab("Program", progText);
 
 		runResultArea = new JTextArea();
-		runResultArea.setFont(new Font("Courier New", Font.PLAIN, 12));
+		runResultArea.setFont(RuntimeProperties.font);
 		JToolBar resultToolBar = new JToolBar();
 
 		propagate = new JButton("Propagate values");

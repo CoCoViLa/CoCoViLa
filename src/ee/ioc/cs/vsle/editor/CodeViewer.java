@@ -32,7 +32,7 @@ public class CodeViewer extends JFrame implements ActionListener{
 		String fileText = ff.getFileContents(RuntimeProperties.packageDir + obj.className + ".java");
 
 		textArea = new JTextArea();
-		textArea.setFont(new Font("Courier New", Font.PLAIN, 12));
+		textArea.setFont(RuntimeProperties.font);
 		textArea.append(fileText);
 
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
