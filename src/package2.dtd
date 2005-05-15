@@ -75,7 +75,8 @@
 	filled 		(true|false) #IMPLIED
 	fixed           (true|false) #IMPLIED
         stroke		CDATA	#IMPLIED
-        transparency	CDATA	#IMPLIED>
+        transparency	CDATA	#IMPLIED
+	linetype	CDATA	#IMPLIED>
 <!ATTLIST bounds
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED
