@@ -24,6 +24,12 @@ public class Var implements Cloneable,
     public String type;
     public String object;
     public String name;
+    private int varNumber;
+
+    Var() {
+        varNumber = RelType.varCounter++;
+    }
+
 
     Set getRels() {
         return rels;
@@ -107,29 +113,11 @@ public class Var implements Cloneable,
         }
     }
 
-//	 public Object clone()
-//	 {
-//	     try {
-//	            Var var = (Var) super.clone();
-//
-//	            var.rels = new HashSet(rels.size());
-//	            for(Iterator iter = rels.iterator(); iter.hasNext();) {
-//	                Rel rel = (Rel) iter.next();
-//	                rel = (Rel) rel.clone();
-//	                var.addRel(rel);
-//	            }
-//
-//	            var.field = (ClassField) field.clone();
-//
-//	        } catch (CloneNotSupportedException e) {
-//	        }
-//	     Var var = new Var();
-//	     var.rels = CloneSupport.cloneHashSet(rels);
-//	     var.field = this.field;
-//	     var.type = this.type;
-//	     var.object = this.object;
-//	     var.name = this.name;
-//
-//	 	return var;
-//	 }
+    public boolean equals( Object e ) {
+        return this.varNumber == ( ( Var ) e ).varNumber;
+    }
+
+    public int hashCode() {
+        return RelType.VAR_HASH + varNumber;
+    }
 }

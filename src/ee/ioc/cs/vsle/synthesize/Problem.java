@@ -46,10 +46,10 @@ class Problem implements Cloneable, Serializable {
 //        return false;
 //    }
 
-    Rel getSubtaskByString( String s ) {
+    Rel getSubtask( Rel subt ) {
         for ( Iterator iter = subtasks.iterator(); iter.hasNext(); ) {
             Rel subtask = ( Rel ) iter.next();
-            if ( subtask.toString().equals( s ) )
+            if ( subtask.equals( subt ) )
                 return subtask;
         }
         return null;

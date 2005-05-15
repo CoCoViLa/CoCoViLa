@@ -16,6 +16,8 @@ public class RelType {
 //    * 6 - method with subtask
 //    * 7 - unimplemented
     static int auxVarCounter = 0;
+    static int relCounter = 0;
+    static int varCounter = 0;
 
     final static String TAG_SUBTASK = "<<subtask>>";
 

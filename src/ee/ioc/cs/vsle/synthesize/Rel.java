@@ -28,7 +28,7 @@ class Rel implements Cloneable,
 	int type; /* 1 - equals, 2 - method*/
 
 	Rel() {
-		relNumber = RelType.auxVarCounter++;
+		relNumber = RelType.relCounter++;
 	}
 
 	void setParentRel(Rel rel) {
