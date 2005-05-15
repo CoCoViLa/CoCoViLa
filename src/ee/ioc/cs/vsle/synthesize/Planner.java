@@ -45,7 +45,9 @@ public class Planner {
         }
 
         //invoke linear planning
-		 if ( RuntimeProperties.isDebugEnabled() ) db.p(m_problem.toString());
+        if ( RuntimeProperties.isDebugEnabled() )
+            db.p( m_problem.toString() );
+
         if ( linearForwardSearch( m_problem, m_algorithm, computeAll, false, false ) &&
              !computeAll ) {
 
@@ -54,7 +56,9 @@ public class Planner {
         //invoke planning with subtasks
         } else if ( !m_problem.getSubtaskRels().isEmpty() ) {
             boolean solved = subgoalBackwardSearch( m_problem, computeAll );
-            if ( RuntimeProperties.isDebugEnabled() ) db.p( "Subtasks solved: " + solved );
+
+            if ( RuntimeProperties.isDebugEnabled() )
+                db.p( "Subtasks solved: " + solved );
 
             if ( !m_problem.getTargetVars().isEmpty() ) {
                 linearForwardSearch( m_problem, m_algorithm, computeAll, false, false );
@@ -121,15 +125,20 @@ public class Planner {
         boolean changed = true;
         boolean foundSubGoal = false;
 
-        if ( RuntimeProperties.isDebugEnabled() ) db.p( "------Starting linear planning"
-              + ((isSubtask)? " with subgoal " + problem.getSubGoal(): "")
-              + "--------" );
+        if ( RuntimeProperties.isDebugEnabled() )
+            db.p( "------Starting linear planning"
+                  + ( ( isSubtask ) ? " with subgoal " + problem.getSubGoal() : "" )
+                  + "--------" );
+
         int counter = 1;
 
         while ( ( ( !computeAll && changed && !problem.getTargetVars().isEmpty() )
                   || ( changed && computeAll ) )
                 && ( !foundSubGoal ) ) {
-            if ( RuntimeProperties.isDebugEnabled() ) db.p( "----Iteration " + counter + " ----" );
+
+            if ( RuntimeProperties.isDebugEnabled() )
+                db.p( "----Iteration " + counter + " ----" );
+
             counter++;
             changed = false;
             //remove targets if they're already known
@@ -142,27 +151,39 @@ public class Planner {
                 }
             }
             //iterate through all knownvars
-            if ( RuntimeProperties.isDebugEnabled() ) db.p( "Known:" + problem.getKnownVars() );
+            if ( RuntimeProperties.isDebugEnabled() )
+                db.p( "Known:" + problem.getKnownVars() );
             for ( Iterator knownVarsIter = problem.getKnownVars().iterator();
                                            knownVarsIter.hasNext(); ) {
                 Var var = ( Var ) knownVarsIter.next();
-                if ( RuntimeProperties.isDebugEnabled() ) db.p( "Current Known: " + var );
+                if ( RuntimeProperties.isDebugEnabled() )
+                    db.p( "Current Known: " + var );
                 // Check the relations of all components
                 for ( Iterator relIter = var.getRels().iterator(); relIter
                                          .hasNext(); ) {
                     Rel rel = ( Rel ) relIter.next();
-                    if ( RuntimeProperties.isDebugEnabled() ) db.p( "And its rel: " + rel );
-                    if ( problem.containsRel( rel ) ) {
+                    if ( RuntimeProperties.isDebugEnabled() )
+                        db.p( "And its rel: " + rel );
+                    if ( problem.getAllRels().contains( rel ) ) {
                         rel.unknownInputs--;
-                        if ( RuntimeProperties.isDebugEnabled() ) db.p( "problem contains it " + rel + " unknownInputs: " + rel.unknownInputs );
+
+                        if ( RuntimeProperties.isDebugEnabled() )
+                            db.p( "problem contains it " + rel + " unknownInputs: " + rel.unknownInputs );
+
                         removableVars.add( var );
+
                         if ( rel.unknownInputs == 0 && rel.type != RelType.method_with_subtask ) {
-                            if ( RuntimeProperties.isDebugEnabled() ) db.p( "rel is ready to be used " + rel );
+
+                            if ( RuntimeProperties.isDebugEnabled() )
+                                db.p( "rel is ready to be used " + rel );
 
                             boolean relIsNeeded = false;
 
                             for ( int i = 0; i < rel.getOutputs().size(); i++ ) {
-                                if ( RuntimeProperties.isDebugEnabled() ) db.p( "tema outputsid " + rel.getOutputs() );
+
+                                if ( RuntimeProperties.isDebugEnabled() )
+                                    db.p( "tema outputsid " + rel.getOutputs() );
+
                                 Var relVar = ( Var ) rel.getOutputs().get( i );
                                 if ( !foundVars.contains( relVar ) ) {
                                     relIsNeeded = true;
@@ -179,7 +200,10 @@ public class Planner {
                                 relIsNeeded = true;
                             }
                             if ( relIsNeeded ) {
-                                if ( RuntimeProperties.isDebugEnabled() ) db.p( "ja vajati " + rel );
+
+                                if ( RuntimeProperties.isDebugEnabled() )
+                                    db.p( "ja vajati " + rel );
+
                                 if ( !rel.getOutputs().isEmpty() ) {
                                     newVars.addAll( rel.getOutputs() );
                                     foundVars.addAll( rel.getOutputs() );
@@ -194,11 +218,15 @@ public class Planner {
                 }
             }
 
-            if ( RuntimeProperties.isDebugEnabled() ) db.p( "foundvars " + foundVars );
+            if ( RuntimeProperties.isDebugEnabled() )
+                db.p( "foundvars " + foundVars );
+
             problem.getKnownVars().addAll( newVars );
             problem.getKnownVars().removeAll( removableVars );
             newVars.clear();
         }
+        if ( RuntimeProperties.isDebugEnabled() )
+                db.p( "algorithm " + algorithm );
 
         if ( !computeAll && !isSubtask ) {
             algorithm = Optimizer.getInstance().optimize( algorithm,
@@ -208,7 +236,10 @@ public class Planner {
         if( isSubtask ) {
             problem.getTargetVars().addAll( allTargetVarsBackup );
         }
-        if ( RuntimeProperties.isDebugEnabled() ) db.p( "algorithm" + algorithm.toString() + "\n" );
+
+        if ( RuntimeProperties.isDebugEnabled() )
+            db.p( "algorithm" + algorithm.toString() + "\n" );
+
         ProgramRunner.addAllFoundVars(foundVars);
         problem.foundVars.addAll(foundVars);
 
@@ -222,16 +253,20 @@ public class Planner {
         int counter = 1;
         boolean isSolved = false;
         ProblemTree tree = new ProblemTree( problem );
-        if ( RuntimeProperties.isDebugEnabled() ) db.p( "tree: " + tree );
+
+        if ( RuntimeProperties.isDebugEnabled() )
+            db.p( "tree: " + tree );
         //start:
                 do {
             HashSet nodeSet = tree.breadthWalkthrough( tree.currentDepth );
             for ( Iterator iter = nodeSet.iterator(); iter.hasNext(); ) {
-                if ( RuntimeProperties.isDebugEnabled() ) db.p( "!!!--------Subplanning-------!!! " + counter++ );
+                if ( RuntimeProperties.isDebugEnabled() )
+                    db.p( "!!!--------Subplanning-------!!! " + counter++ );
                 ProblemTreeNode node = (ProblemTreeNode) iter.next();
                 Problem pr = node.getProblem();
 
-                if ( RuntimeProperties.isDebugEnabled() ) db.p( "Problem: " + pr.toString() );
+                if ( RuntimeProperties.isDebugEnabled() )
+                    db.p( "Problem: " + pr.toString() );
                 if( pr.getSubGoal().getParentRel().unknownInputs > 0 ) {
                     continue;
                 }
@@ -332,7 +367,8 @@ public class Planner {
 
         //do not use this directly
         boolean increaseDepth( ProblemTreeNode top, int depth ) {
-            if ( RuntimeProperties.isDebugEnabled() ) db.p( "increaseDepth " + depth );
+            if ( RuntimeProperties.isDebugEnabled() )
+                db.p( "increaseDepth " + depth );
             if ( depth > size || currentDepth == size )
                 return false;
             if ( top.getDepth() < currentDepth ) {

@@ -19,6 +19,9 @@ public class RelType {
 
     final static String TAG_SUBTASK = "<<subtask>>";
 
+    public final static int REL_HASH = "rel".hashCode();
+    public final static int VAR_HASH = "var".hashCode();
+
     private RelType() {
     }
 }

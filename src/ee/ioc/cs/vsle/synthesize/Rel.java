@@ -391,8 +391,13 @@ class Rel implements Cloneable,
 	}
 
 	public boolean equals(Object e) {
-		return this.toString().equals(((Rel) e).toString());
+		return this.relNumber == ((Rel) e).relNumber;
 	}
+
+        public int hashCode()
+        {
+            return RelType.REL_HASH + relNumber;
+        }
 
 	public Object clone() {
 		try {

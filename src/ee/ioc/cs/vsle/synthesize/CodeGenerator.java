@@ -86,7 +86,7 @@ public class CodeGenerator {
             boolean isSubOutputInAlgorithm = false;
             for ( int i = 0; i < subAlg.size(); i++ ) {
                 Rel trel = ( Rel ) subAlg.get( i );
-
+                System.out.println( "rel " + trel);
                 if ( trel.type == RelType.method_with_subtask ) {
                     //recursion
                     genSubTasks( trel, alg, true );
@@ -96,10 +96,12 @@ public class CodeGenerator {
                         Var in = ( Var ) trel.getInputs().get( 0 );
                         Var out = ( Var ) trel.getOutputs().get( 0 );
                         boolean isSubInputInAlgorithm = false;
+                        boolean isRelAdded = false;
                         if ( subInputs.contains( in ) ) {
                             //alg.append( cOT( OT_NOC, 0 ) + getObjectFromSubtask( in, 0, true ) );
                             appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
                             isSubInputInAlgorithm = true;
+                            isRelAdded = true;
                         } //else
                         if ( subOutputs.contains( out ) ) {
                             if ( !isSubInputInAlgorithm ) {
@@ -107,7 +109,12 @@ public class CodeGenerator {
                             }
                             alg.append( getObjectFromSubtask( out, cOT( OT_NOC, 0 ), 0, false ) );
                             isSubOutputInAlgorithm = true;
+                            isRelAdded = true;
                             break; //there should be no axioms after return statement.
+                        }
+
+                        if( ! isRelAdded ) {
+                            appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
                         }
                     } else
                         appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );

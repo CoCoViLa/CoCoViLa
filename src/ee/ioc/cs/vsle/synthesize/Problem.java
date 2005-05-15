@@ -33,18 +33,18 @@ class Problem implements Cloneable, Serializable {
     public HashSet foundVars = new HashSet();
 
 
-    boolean containsRel( Rel comparableRel ) {
-        for ( Iterator iter = allRels.iterator(); iter.hasNext(); ) {
-            Rel rel = ( Rel ) iter.next();
-            String r1 = rel.toString();
-            String r2 = comparableRel.toString();
-            //db.p("This rel " + r2 + " is compared to " + r1);
-            if ( r1.equals( r2 ) ) {
-                return true;
-            }
-        }
-        return false;
-    }
+//    boolean containsRel( Rel comparableRel ) {
+//        for ( Iterator iter = allRels.iterator(); iter.hasNext(); ) {
+//            Rel rel = ( Rel ) iter.next();
+//            String r1 = rel.toString();
+//            String r2 = comparableRel.toString();
+//            //db.p("This rel " + r2 + " is compared to " + r1);
+//            if ( r1.equals( r2 ) ) {
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     Rel getSubtaskByString( String s ) {
         for ( Iterator iter = subtasks.iterator(); iter.hasNext(); ) {
