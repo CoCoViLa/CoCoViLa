@@ -16,7 +16,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 
 /**
- * Visual Specification Language ee.ioc.cs.editor.editor.Editor main module
+ * Visual Specification Language Editor main module
  * for combining separate logical units (Built in the
  * IconEditor) into a structured schema.
  * @author Ando Saabas, Aulo Aasma
@@ -83,7 +83,7 @@ public class Editor extends JFrame implements ChangeListener {
 		getContentPane().add(mainPanel);
 		Look look = new Look();
 		look.setGUI(this);
-		look.changeLayout(
+		Look.changeLayout(
 			PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
 				PropertyBox.DEFAULT_LAYOUT));
 	} // initialize

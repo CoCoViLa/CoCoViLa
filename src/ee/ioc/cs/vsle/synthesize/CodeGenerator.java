@@ -1,7 +1,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
 import java.util.*;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.ClassField;
 
