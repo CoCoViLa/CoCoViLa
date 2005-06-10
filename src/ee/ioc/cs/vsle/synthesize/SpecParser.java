@@ -217,7 +217,7 @@ public class SpecParser {
 
 			/* If we have a relation alias = alias, we rewrite it into new relations, ie we create
 			 a relation for each component of the alias structure*/
-			if (classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1) {
+			if (classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1 && classRelation.type !=2) {
 				ClassField cf1 = (ClassField) classRelation.inputs.get(0);
 				ClassField cf2 = (ClassField) classRelation.outputs.get(0);
 
@@ -236,8 +236,8 @@ public class SpecParser {
 					Var v2 = (Var) problem.getAllVars().get(obj + "." + cf2.name);
 
 					if (v1.field.isAlias() && v2.field.isAlias()) {
-						if ( RuntimeProperties.isDebugEnabled() ) db.p(((Alias) v1.field).getAliasType() + " " +
-							((Alias) v2.field).getAliasType());
+						if ( RuntimeProperties.isDebugEnabled() ) 
+							db.p(((Alias) v1.field).getAliasType() + " " +	((Alias) v2.field).getAliasType());
 						if (!((Alias) v1.field).getAliasType().equals(((Alias) v2.field).
 							getAliasType())) {
 							throw new AliasException("Differently typed aliases connected: " + obj +
