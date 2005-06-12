@@ -10,27 +10,20 @@ import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
 class Rel implements Cloneable, Serializable {
 
-	List outputs = new ArrayList(); //Collections.synchronizedList(new
+	List outputs = new ArrayList();
 
-	// ArrayList());
+	List inputs = new ArrayList();
 
-	List inputs = new ArrayList(); //Collections.synchronizedList(new
-
-	// ArrayList());
-
-	List subtasks = new ArrayList(); //Collections.synchronizedList(new
-
-	// ArrayList());
+	List subtasks = new ArrayList();
 
 	ArrayList exceptions = new ArrayList();
 
-	//	static int auxVarCounter = 0;
-	List algorithm = new ArrayList(); //Collections.synchronizedList(new
+	List algorithm = new ArrayList();
 
-	// ArrayList()); //only for subtasks
+        //only for subtasks
+	Rel parentRel = null;
 
-	Rel parentRel = null; //parent axiom containing this subtask
-
+        //parent axiom containing this subtask
 	private int relNumber = 0;
 
 	int unknownInputs;
@@ -140,7 +133,7 @@ class Rel implements Cloneable, Serializable {
 		return outputString;
 
 	}
-	
+
 	String getParameters(boolean useBrackets) {
 		String params = "";
 		if (useBrackets)
@@ -225,7 +218,7 @@ class Rel implements Cloneable, Serializable {
 			Var op = (Var) outputs.get(0);
 
 			if (op.type.equals("void")) {
-				return (getObject(object) + method + getParameters(true));
+				return (checkAliasInputs() + getObject(object) + method + getParameters(true));
 			} else {
 				return checkAliasInputs() + outputAliasDeclar()
 						+ ( getOutput() + " = " + getObject(object)
@@ -341,12 +334,11 @@ class Rel implements Cloneable, Serializable {
 
 		} else if (type == RelType.method_with_subtask) {
 			if (!outputs.isEmpty()) {
-				return (checkAliasInputs() + (Var) outputs.get(0) + " = "
-						+ getObject(object) + method + getSubtaskParameters()); // +
-				// getParameters()
+				return (checkAliasInputs() + outputAliasDeclar() + (Var) outputs.get(0) + " = "
+						+ getObject(object) + method + getSubtaskParameters())
+                                                + ";\n" +checkAliasOutputs();
 			} else {
-				return (checkAliasInputs() + getObject(object) + method + getSubtaskParameters()); // +
-				// getParameters()
+				return (checkAliasInputs() + getObject(object) + method + getSubtaskParameters());
 			}
 		} else {
 			if (RuntimeProperties.isDebugEnabled())
@@ -392,7 +384,7 @@ class Rel implements Cloneable, Serializable {
 	 * @return
 	 */
 	private String outputAliasDeclar() {
-		String declar ="";	
+		String declar ="";
 		Var output = (Var) outputs.get(0);
 		if (output.field.isAlias()) {
 			String alias_tmp = CodeGenerator.ALIASTMP + output.name
@@ -437,12 +429,11 @@ class Rel implements Cloneable, Serializable {
 	}
 
 	String checkAliasOutputs() {
-		Var input;
 		String assigns = "";
 		Var output = ((Var) outputs.get(0));
 		if (output.field.isAlias()) {
 			String alias_tmp = CodeGenerator.ALIASTMP + output.name
-			+ relNumber;			
+			+ relNumber;
 			if (output.field.vars.size() == 0) {
 				assigns = "Object " + output.name + " = null";
 			} else {
