@@ -127,7 +127,7 @@ class Rel implements Cloneable, Serializable {
                 if ( var.field.isAlias() ) {
                     String alias_tmp = CodeGenerator.ALIASTMP + var.name + relNumber;
                     outputString = ( ( ClassField ) var.field.vars.get( 0 ) ).type
-                         + "[] " + alias_tmp + " = ";/*new "
+                         + "[] " + alias_tmp + " ";/*new "
                          + ( ( ClassField ) var.field.vars.get( 0 ) ).type + "["
                          + var.field.vars.size() + "];\n" +
                          CodeGenerator.OT_TAB + CodeGenerator.OT_TAB;*/
