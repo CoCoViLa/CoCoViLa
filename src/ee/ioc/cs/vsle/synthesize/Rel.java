@@ -118,21 +118,28 @@ class Rel implements Cloneable, Serializable {
 		return "int";
 	}
 
-	String getOutput() {
+        String getOutput() {
 
-		String outputString = "";
-		Var var = (Var)outputs.get(0);
-		if (!var.type.equals("void")) {
-				if (var.type.equals("alias")) {
-					outputString = CodeGenerator.ALIASTMP + var.name + relNumber;
-				} else {
-					outputString = var.toString();
-				}
+            String outputString = "";
+            Var var = ( Var ) outputs.get( 0 );
 
-		}
-		return outputString;
+            if ( !var.type.equals( "void" ) ) {
+                if ( var.field.isAlias() ) {
+                    String alias_tmp = CodeGenerator.ALIASTMP + var.name + relNumber;
+                    outputString = ( ( ClassField ) var.field.vars.get( 0 ) ).type
+                         + "[] " + alias_tmp + " = ";/*new "
+                         + ( ( ClassField ) var.field.vars.get( 0 ) ).type + "["
+                         + var.field.vars.size() + "];\n" +
+                         CodeGenerator.OT_TAB + CodeGenerator.OT_TAB;*/
 
-	}
+                } else {
+                    outputString = var.toString();
+                }
+
+            }
+            return outputString;
+
+        }
 
 	String getParameters(boolean useBrackets) {
 		String params = "";
@@ -220,7 +227,7 @@ class Rel implements Cloneable, Serializable {
 			if (op.type.equals("void")) {
 				return (checkAliasInputs() + getObject(object) + method + getParameters(true));
 			} else {
-				return checkAliasInputs() + outputAliasDeclar()
+				return checkAliasInputs() /*+ outputAliasDeclar()*/
 						+ ( getOutput() + " = " + getObject(object)
 								+ method + getParameters(true)) +
 								";\n" +checkAliasOutputs();
@@ -334,7 +341,7 @@ class Rel implements Cloneable, Serializable {
 
 		} else if (type == RelType.method_with_subtask) {
 			if (!outputs.isEmpty()) {
-				return (checkAliasInputs() + outputAliasDeclar() + (Var) outputs.get(0) + " = "
+				return (checkAliasInputs() /*+ outputAliasDeclar()*/ + getOutput() + " = "
 						+ getObject(object) + method + getSubtaskParameters())
                                                 + ";\n" +checkAliasOutputs();
 			} else {
@@ -383,20 +390,20 @@ class Rel implements Cloneable, Serializable {
 	/**
 	 * @return
 	 */
-	private String outputAliasDeclar() {
-		String declar ="";
-		Var output = (Var) outputs.get(0);
-		if (output.field.isAlias()) {
-			String alias_tmp = CodeGenerator.ALIASTMP + output.name
-			+ relNumber;
-			declar  = ((ClassField) output.field.vars.get(0)).type
-			+ "[] " + alias_tmp + " = new "
-			+ ((ClassField) output.field.vars.get(0)).type + "["
-			+ output.field.vars.size() + "];\n" +
-			CodeGenerator.OT_TAB + CodeGenerator.OT_TAB;;
-		}
-		return declar;
-	}
+        private String outputAliasDeclar() {
+            String declar = "";
+            Var output = ( Var ) outputs.get( 0 );
+            if ( output.field.isAlias() ) {
+                String alias_tmp = CodeGenerator.ALIASTMP + output.name
+                                   + relNumber;
+                declar = ( ( ClassField ) output.field.vars.get( 0 ) ).type
+                         + "[] " + alias_tmp + " = new "
+                         + ( ( ClassField ) output.field.vars.get( 0 ) ).type + "["
+                         + output.field.vars.size() + "];\n" +
+                         CodeGenerator.OT_TAB + CodeGenerator.OT_TAB; ;
+            }
+            return declar;
+        }
 
 	String checkAliasInputs() {
 		Var input;
