@@ -217,7 +217,7 @@ public class SpecParser {
 
 			/* If we have a relation alias = alias, we rewrite it into new relations, ie we create
 			 a relation for each component of the alias structure*/
-			if (classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1 && classRelation.type !=2) {
+			if (classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1 && classRelation.type ==4) {
 				ClassField cf1 = (ClassField) classRelation.inputs.get(0);
 				ClassField cf2 = (ClassField) classRelation.outputs.get(0);
 
