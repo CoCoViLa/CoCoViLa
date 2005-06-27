@@ -217,7 +217,7 @@ public class SpecParser {
 
 			/* If we have a relation alias = alias, we rewrite it into new relations, ie we create
 			 a relation for each component of the alias structure*/
-			if (classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1 && classRelation.type ==4) {
+			if (classRelation.inputs.size() == 1 && classRelation.outputs.size() == 1 && (classRelation.type ==4 || classRelation.type ==3)) {
 				ClassField cf1 = (ClassField) classRelation.inputs.get(0);
 				ClassField cf2 = (ClassField) classRelation.outputs.get(0);
 
@@ -225,8 +225,8 @@ public class SpecParser {
 				if (cf1.name.startsWith("*.")) {
 					String s = checkIfAliasWildcard(classRelation);
 					if (s != null) {
-						rel = makeAliasWildcard(ac, classes, classRelation, problem, obj, s);
-						problem.addRel(rel);
+						relSet = makeAliasWildcard(ac, classes, classRelation, problem, obj, s);
+						rel = null;
 						isAliasRel = true;
 					}
 				}
@@ -310,6 +310,7 @@ public class SpecParser {
 			}
 
 		}
+		System.out.println(problem);
 		return problem;
 	}
 
@@ -446,9 +447,9 @@ public class SpecParser {
 	}
 
 
-	Rel makeAliasWildcard(AnnotatedClass ac, ClassList classes, ClassRelation classRelation, Problem problem, String obj, String wildcardVar) throws UnknownVariableException {
+	HashSet makeAliasWildcard(AnnotatedClass ac, ClassList classes, ClassRelation classRelation, Problem problem, String obj, String wildcardVar) throws UnknownVariableException {
 		ClassField clf;
-
+		HashSet relset = new HashSet();
 		Rel rel = new Rel();
 		rel.setMethod(classRelation.method);
 		rel.setObj(obj);
@@ -478,7 +479,40 @@ public class SpecParser {
 		}
 
 		rel.setUnknownInputs(rel.inputs.size());
-		return rel;
+		
+		relset.add(rel);
+
+		rel = new Rel();
+		rel.setMethod(classRelation.method);
+		rel.setObj(obj);
+		rel.setType(classRelation.type);
+		for (int i = 0; i < ac.fields.size(); i++) {
+			clf = (ClassField) ac.fields.get(i);
+			AnnotatedClass anc = classes.getType(clf.type);
+			if (anc != null) {
+				if (anc.hasField(wildcardVar)) {
+					Var var;
+					if (problem.getAllVars().containsKey(obj + "." + clf.name + "." + wildcardVar)) {
+						var = (Var) problem.getAllVars().get(obj + "." + clf.name + "." + wildcardVar);
+						var.addRel(rel);
+						rel.addOutput(var);
+					} else {
+						throw new UnknownVariableException(obj + "." + clf.name + "." + wildcardVar);
+					}
+
+
+				}
+			}
+		}
+		cf = (ClassField) classRelation.outputs.get(0);
+		if (problem.getAllVars().containsKey(obj + "." + cf.name)) {
+			rel.addInput((Var) problem.getAllVars().get(obj + "." + cf.name));
+		}
+
+		rel.setUnknownInputs(rel.inputs.size());
+
+		relset.add(rel);
+		return relset;
 	}
 
 
