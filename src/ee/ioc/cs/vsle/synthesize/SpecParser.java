@@ -82,7 +82,7 @@ public class SpecParser {
 		Matcher matcher2;
 		Pattern pattern;
 
-		while ((a.get(0)).equals("")) {
+		while ((a.get(0)).equals("") || ((String)a.get(0)).trim().startsWith("//") ) {
 			a.remove(0);
 			if (a.isEmpty()) {
 				return null;
@@ -236,7 +236,7 @@ public class SpecParser {
 					Var v2 = (Var) problem.getAllVars().get(obj + "." + cf2.name);
 
 					if (v1.field.isAlias() && v2.field.isAlias()) {
-						if ( RuntimeProperties.isDebugEnabled() ) 
+						if ( RuntimeProperties.isDebugEnabled() )
 							db.p(((Alias) v1.field).getAliasType() + " " +	((Alias) v2.field).getAliasType());
 						if (!((Alias) v1.field).getAliasType().equals(((Alias) v2.field).
 							getAliasType())) {
@@ -479,7 +479,7 @@ public class SpecParser {
 		}
 
 		rel.setUnknownInputs(rel.inputs.size());
-		
+
 		relset.add(rel);
 
 		rel = new Rel();
