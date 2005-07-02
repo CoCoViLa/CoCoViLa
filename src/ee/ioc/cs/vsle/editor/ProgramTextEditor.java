@@ -5,24 +5,15 @@ import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.ccl.*;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.util.*;
+import java.util.regex.*;
 
-import java.awt.Font;
-import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.awt.*;
+import java.awt.event.*;
 
-import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.JTabbedPane;
-import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
+import javax.swing.*;
+
+import javax.swing.text.*;
 
 /**
  */
@@ -50,6 +41,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		tabbedPane = new JTabbedPane();
 
 		textArea = new JTextArea();
+                textArea.addKeyListener( new CommentKeyListener() );
 		textArea.setFont(RuntimeProperties.font);
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 
@@ -72,6 +64,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		tabbedPane.addTab("Specification", specText);
 
 		programTextArea = new JTextArea();
+                programTextArea.addKeyListener( new CommentKeyListener() );
 		programTextArea.setFont(RuntimeProperties.font);
 		JToolBar toolBar = new JToolBar();
 
@@ -316,5 +309,46 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		}
 		return watchFields;
 	}
+
+        private class CommentKeyListener implements KeyListener {
+
+            public void keyTyped( KeyEvent e ) {
+            }
+
+
+            public void keyPressed( KeyEvent e ) {
+            }
+
+
+            public void keyReleased( KeyEvent e ) {
+                if ( e.getKeyChar() == '/'
+                     && ( ( e.getModifiers() & KeyEvent.CTRL_MASK ) > 0 )
+                     && ( e.getSource() instanceof JTextArea ) ) {
+
+                    JTextArea area = ( JTextArea ) e.getSource();
+
+                    try {
+                        int line = area.getLineOfOffset( area.getCaretPosition() );
+                        int start = area.getLineStartOffset( line );
+                        int end = area.getLineEndOffset( line );
+                        int length = end - start;
+                        String text = area.getText( start, length );
+
+                        if ( text.trim().startsWith( "//" ) ) {
+                            int ind = text.indexOf( "//" );
+                            area.replaceRange( "", start + ind, start + ind + 2 );
+                        } else {
+                            area.insert( "//", start );
+                        }
+
+                        area.setCaretPosition( area.getLineEndOffset(
+                                area.getLineOfOffset( area.getCaretPosition() ) ) );
+
+                    } catch ( BadLocationException ex ) {
+                    }
+                }
+            }
+
+        }
 
 }
