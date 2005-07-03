@@ -33,88 +33,89 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 	Editor editor;
 
 	public ProgramTextEditor(ArrayList relations, ObjectList objs, VPackage vPackage, Editor ed) {
-		super("Specification");
-		editor = ed;
-		this.vPackage = vPackage;
-		objects = GroupUnfolder.unfold(objs);
+            super( "Specification" );
+            editor = ed;
+            this.vPackage = vPackage;
+            objects = GroupUnfolder.unfold( objs );
 
-		tabbedPane = new JTabbedPane();
+            tabbedPane = new JTabbedPane();
 
-		textArea = new JTextArea();
-                textArea.addKeyListener( new CommentKeyListener() );
-		textArea.setFont(RuntimeProperties.font);
-		JScrollPane areaScrollPane = new JScrollPane(textArea);
+            textArea = new JTextArea();
+            textArea.addKeyListener( new CommentKeyListener() );
+            textArea.setFont( RuntimeProperties.font );
+            JScrollPane areaScrollPane = new JScrollPane( textArea );
 
-		areaScrollPane.setVerticalScrollBarPolicy(
-			JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            areaScrollPane.setVerticalScrollBarPolicy(
+                    JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
 
-		specText = new JPanel();
-		specText.setLayout(new BorderLayout());
-		specText.add(areaScrollPane, BorderLayout.CENTER);
-		JToolBar progToolBar = new JToolBar();
+            specText = new JPanel();
+            specText.setLayout( new BorderLayout() );
+            specText.add( areaScrollPane, BorderLayout.CENTER );
+            JToolBar progToolBar = new JToolBar();
+            progToolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
+            parseSpec = new JButton( "Parse spec" );
+            parseSpec.addActionListener( this );
+            progToolBar.add( parseSpec );
+            computeAll = new JButton( "Compute all" );
+            computeAll.addActionListener( this );
+            progToolBar.add( computeAll );
+            progToolBar.add( new UndoRedoDocumentPanel( textArea.getDocument() ) );
+            progToolBar.add( new FontResizePanel( textArea ) );
 
-		parseSpec = new JButton("Parse spec");
-		parseSpec.addActionListener(this);
-		progToolBar.add(parseSpec);
-		computeAll = new JButton("Compute all");
-		computeAll.addActionListener(this);
-		progToolBar.add(computeAll);
-                progToolBar.add(new FontResizePanel(textArea));
-		specText.add(progToolBar, BorderLayout.NORTH);
-		tabbedPane.addTab("Specification", specText);
+            specText.add( progToolBar, BorderLayout.NORTH );
+            tabbedPane.addTab( "Specification", specText );
 
-		programTextArea = new JTextArea();
-                programTextArea.addKeyListener( new CommentKeyListener() );
-		programTextArea.setFont(RuntimeProperties.font);
-		JToolBar toolBar = new JToolBar();
+            programTextArea = new JTextArea();
+            programTextArea.addKeyListener( new CommentKeyListener() );
+            programTextArea.setFont( RuntimeProperties.font );
+            JToolBar toolBar = new JToolBar();
+            toolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
+            runProg = new JButton( "Compile & Run" );
+            runProg.addActionListener( this );
+            toolBar.add( runProg );
+            toolBar.add( new UndoRedoDocumentPanel( programTextArea.getDocument() ) );
+            toolBar.add( new FontResizePanel( programTextArea ) );
+            JScrollPane programAreaScrollPane = new JScrollPane( programTextArea );
 
-		runProg = new JButton("Compile & Run");
-		runProg.addActionListener(this);
-		toolBar.add(runProg);
-                toolBar.add(new FontResizePanel(programTextArea));
-		JScrollPane programAreaScrollPane = new JScrollPane(programTextArea);
+            programAreaScrollPane.setVerticalScrollBarPolicy(
+                    JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
 
-		programAreaScrollPane.setVerticalScrollBarPolicy(
-			JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            progText = new JPanel();
+            progText.setLayout( new BorderLayout() );
+            progText.add( programAreaScrollPane, BorderLayout.CENTER );
+            progText.add( toolBar, BorderLayout.NORTH );
 
-		progText = new JPanel();
-		progText.setLayout(new BorderLayout());
-		progText.add(programAreaScrollPane, BorderLayout.CENTER);
-		progText.add(toolBar, BorderLayout.NORTH);
+            tabbedPane.addTab( "Program", progText );
 
-		tabbedPane.addTab("Program", progText);
+            runResultArea = new JTextArea();
+            runResultArea.setFont( RuntimeProperties.font );
+            JToolBar resultToolBar = new JToolBar();
 
-		runResultArea = new JTextArea();
-		runResultArea.setFont(RuntimeProperties.font);
-		JToolBar resultToolBar = new JToolBar();
+            propagate = new JButton( "Propagate values" );
+            propagate.addActionListener( this );
+            resultToolBar.add( propagate );
+            invoke = new JButton( "Invoke" );
+            invoke.addActionListener( this );
+            resultToolBar.add( invoke );
+            invokeField = new JTextField( 4 );
+            resultToolBar.add( invokeField );
+            JScrollPane runResultAreaScrollPane = new JScrollPane( runResultArea );
 
-		propagate = new JButton("Propagate values");
-		propagate.addActionListener(this);
-		resultToolBar.add(propagate);
-		invoke = new JButton("Invoke");
-		invoke.addActionListener(this);
-		resultToolBar.add(invoke);
-		invokeField = new JTextField(4);
-		resultToolBar.add(invokeField);
-//                resultToolBar.add(new FontResizePanel(runResultArea));
-		JScrollPane runResultAreaScrollPane = new JScrollPane(runResultArea);
+            runResultAreaScrollPane.setVerticalScrollBarPolicy(
+                    JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
 
-		runResultAreaScrollPane.setVerticalScrollBarPolicy(
-			JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+            runResult = new JPanel();
+            runResult.setLayout( new BorderLayout() );
+            runResult.add( runResultAreaScrollPane, BorderLayout.CENTER );
+            runResult.add( resultToolBar, BorderLayout.NORTH );
 
-		runResult = new JPanel();
-		runResult.setLayout(new BorderLayout());
-		runResult.add(runResultAreaScrollPane, BorderLayout.CENTER);
-		runResult.add(resultToolBar, BorderLayout.NORTH);
+            tabbedPane.addTab( "Run results", runResult );
 
-		tabbedPane.addTab("Run results", runResult);
+            SpecGenerator sgen = new SpecGenerator();
+            textArea.append( sgen.generateSpec( objects, relations, vPackage.name ) );
 
-		SpecGenerator sgen = new SpecGenerator();
-		textArea.append(sgen.generateSpec(objects, relations, vPackage.name));
-
-
-		getContentPane().add(tabbedPane);
-		validate();
+            getContentPane().add( tabbedPane );
+            validate();
 	}
 
 
