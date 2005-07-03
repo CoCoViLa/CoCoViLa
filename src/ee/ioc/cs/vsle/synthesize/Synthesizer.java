@@ -251,7 +251,7 @@ public class Synthesizer {
 	boolean isArray(String type) {
 		int length = type.length();
 
-		if (type.substring(length - 2, length).equals("[]")) {
+		if ( type.length() >= 2 &&  type.substring(length - 2, length).equals("[]")) {
 			return true;
 		} else {
 			return false;
