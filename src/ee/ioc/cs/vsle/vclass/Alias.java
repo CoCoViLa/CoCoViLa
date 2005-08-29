@@ -44,6 +44,9 @@ public class Alias extends ClassField {
 			} else if (input[i].indexOf(".") >= 1 && !input[i].startsWith("*.")) {
 				String[] split = input[i].trim().split("\\.", -1);
 				ClassField thisVar = getVar(split[0], varList);
+                                if( thisVar == null ) {
+                                    throw new UnknownVariableException(split[0]);
+                                }
 				AnnotatedClass ac = classList.getType(thisVar.type);
 				String newType = "";
 				for (int k = 1; k < split.length; k++) {

@@ -50,7 +50,7 @@ public class SpecGenerator {
 		StringBuffer s = new StringBuffer();
 		s.append("public class GeneratedClass {");
 		s.append("\n    /*@ specification  GeneratedClass {\n");
-		s.append(spec);
+
 		for (int i = 0; i < objects.size(); i++) {
 			obj = (GObj) objects.get(i);
 			s.append(
@@ -119,6 +119,7 @@ public class SpecGenerator {
 			}
 
 		}
+                s.append(spec);
 		s.append("    }@*/\n");
 		s.append("\t"+method);
 		s.append("\n}");

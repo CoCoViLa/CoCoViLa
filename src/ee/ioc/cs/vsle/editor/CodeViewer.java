@@ -26,7 +26,7 @@ public class CodeViewer extends JFrame implements ActionListener{
 	GObj obj;
 	public CodeViewer(GObj obj) {
 		super(obj.className + ".java");
-        this.obj = obj;
+                this.obj = obj;
 		FileFuncs ff = new FileFuncs();
 
 		String fileText = ff.getFileContents(RuntimeProperties.packageDir + obj.className + ".java");
@@ -44,11 +44,12 @@ public class CodeViewer extends JFrame implements ActionListener{
 		specText.setLayout(new BorderLayout());
 		specText.add(areaScrollPane, BorderLayout.CENTER);
 		JToolBar toolBar = new JToolBar();
-
+                toolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
 		saveBtn = new JButton("Save");
 		saveBtn.addActionListener(this);
 		toolBar.add(saveBtn);
                 toolBar.add(new FontResizePanel(textArea));
+                toolBar.add(new UndoRedoDocumentPanel(textArea.getDocument()) );
 
 
 		specText.setLayout(new BorderLayout());

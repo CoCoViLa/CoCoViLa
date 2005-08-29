@@ -159,13 +159,15 @@ public class ObjectPropertiesEditor extends JFrame
 			JTextField jtf = (JTextField) (e.getSource());
 			JComboBox thisComboBox = getComboBox(jtf);
 			//String newSelection = (String)thisComboBox.getSelectedItem();
-			thisComboBox.addItem(jtf.getText());
-
+                        if( thisComboBox != null ) {
+                            thisComboBox.addItem( jtf.getText() );
+                        }
 		} else if (e.getKeyChar() == KeyEvent.VK_DELETE) {
 			JTextField jtf = (JTextField) (e.getSource());
 			JComboBox thisComboBox = getComboBox(jtf);
-			thisComboBox.removeItem(thisComboBox.getSelectedItem());
-
+                        if( thisComboBox != null ) {
+                            thisComboBox.removeItem( thisComboBox.getSelectedItem() );
+                        }
 		}
 	}
 
