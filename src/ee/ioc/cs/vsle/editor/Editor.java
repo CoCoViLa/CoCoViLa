@@ -14,6 +14,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.*;
 
 /**
  * Visual Specification Language Editor main module
@@ -28,9 +29,7 @@ public class Editor extends JFrame implements ChangeListener {
 	JTabbedPane tabbedPane = new JTabbedPane();
 	EditorActionListener aListener;
 	JMenuBar menuBar;
-	JMenu menu;
-	JMenu submenu;
-	JMenuItem menuItem;
+
 	JPanel infoPanel; // Panel for runtime information, mouse coordinates, selected objects etc.
 	public JPanel mainPanel = new JPanel();
 	JLabel posInfo; // Mouse position.
@@ -110,6 +109,11 @@ public class Editor extends JFrame implements ChangeListener {
 	 * Build menu.
 	 */
 	public void makeMenu() {
+            JMenuItem menuItem;
+
+        JMenu menu;
+        JMenu submenu;
+
 		menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
 		menu = new JMenu(Menu.MENU_FILE);
@@ -166,11 +170,11 @@ public class Editor extends JFrame implements ChangeListener {
 		menu.add(menuItem);
 
 		menuBar.add(menu);
-		menu = new JMenu(Menu.MENU_PACKAGE);
-		menu.setMnemonic(KeyEvent.VK_P);
-		menuItem = new JMenuItem(Menu.LOAD, KeyEvent.VK_L);
-		menuItem.addActionListener(aListener);
-		menu.add(menuItem);
+                menu = new JMenu( Menu.MENU_PACKAGE );
+                menu.setMnemonic( KeyEvent.VK_P );
+                menuItem = new JMenuItem( Menu.LOAD, KeyEvent.VK_L );
+                menuItem.addActionListener( aListener );
+                menu.add(menuItem);
 		menuItem = new JMenuItem(Menu.CLOSE, KeyEvent.VK_C);
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
@@ -178,6 +182,37 @@ public class Editor extends JFrame implements ChangeListener {
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
 		menuBar.add(menu);
+                menu.add( new JSeparator() );
+                final JMenu submenuRecent = new JMenu( Menu.RECENT );
+                submenuRecent.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
+
+                    final JMenuItem empty = new JMenuItem("Empty");
+
+                    public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
+
+                        makeRecentSubMenu( submenuRecent );
+
+                        if ( submenuRecent.getMenuComponentCount() == 0 ) {
+
+                            submenuRecent.add( empty );
+                            empty.setEnabled( false );
+
+                        } else {
+                            if ( !( ( submenuRecent.getMenuComponentCount() == 1 )
+                                    &&
+                                    ( submenuRecent.getPopupMenu().getComponentIndex( empty ) >= -1 ) ) ) {
+                                submenuRecent.remove( empty );
+                            }
+                        }
+
+                    }
+
+                    public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {}
+
+                    public void popupMenuCanceled( PopupMenuEvent e ) {}
+
+                } );
+                menu.add(submenuRecent);
 		menu = new JMenu(Menu.MENU_SCHEME);
 		menu.setMnemonic(KeyEvent.VK_S);
 		menuItem = new JMenuItem(Menu.SPECIFICATION, KeyEvent.VK_S);
@@ -303,6 +338,48 @@ public class Editor extends JFrame implements ChangeListener {
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 			PropertyBox.LAST_PATH, path);
 	}
+
+        public static void setRecentPackage( String path ) {
+            String recentPackages = PropertyBox.getProperty(
+                    PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.RECENT_PACKAGES );
+
+            if( recentPackages == null ) {
+                recentPackages = "";
+            }
+            //int index = recentPackages.indexOf( path );
+            if ( recentPackages.indexOf( path ) == -1 ) {
+                recentPackages = recentPackages + ";" + path;
+                PropertyBox.setProperty( PropertyBox.APP_PROPS_FILE_NAME,
+                                     PropertyBox.RECENT_PACKAGES, recentPackages );
+            }
+        }
+
+        void makeRecentSubMenu( JMenu menu ) {
+            String recentPackages = PropertyBox.getProperty(
+                    PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.RECENT_PACKAGES );
+            if( recentPackages == null ) {
+                return;
+            }
+            String[] packages = recentPackages.split( ";" );
+
+            menu.removeAll();
+
+            for ( int i = 0; i < packages.length; i++ ) {
+                final File f = new File( packages[ i ] );
+                if ( f.exists() ) {
+                    String packageName = f.getName().substring( 0, f.getName().indexOf( "." ) );
+
+                    JMenuItem menuItem = new JMenuItem( packageName );
+
+                    menuItem.addActionListener( new ActionListener() {
+                        public void actionPerformed(ActionEvent e) {
+                            loadPackage( f );
+                        }
+                    });
+                    menu.add( menuItem );
+                }
+            }
+        }
 
 	/**
 	 * Upon platform, use OS-specific methods for opening the URL in required browser.

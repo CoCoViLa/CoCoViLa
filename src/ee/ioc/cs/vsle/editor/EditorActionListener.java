@@ -82,9 +82,10 @@ public class EditorActionListener implements ActionListener {
                     File pack = fc.getSelectedFile();
 
                     editor.setLastPath( pack.getAbsolutePath() );
+                    editor.setRecentPackage( pack.getAbsolutePath() );
                     db.p( "Loading package: " + pack.getName() );
                     editor.loadPackage( pack );
-                    editor.validate();
+                    //editor.validate();
                 }
             } else if ( e.getActionCommand().equals( Menu.CLOSE ) ) {
                 editor.clearPane();

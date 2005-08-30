@@ -39,6 +39,7 @@ public class PropertyBox {
 	public static final String PACKAGE_DTD = "packageDtd";
 	public static final String NUDGE_STEP = "nudgeStep";
 	public static final String SNAP_TO_GRID = "snapToGrid";
+        public static final String RECENT_PACKAGES = "recentPackages";
 
 	/**
 	 * Store application properties.
