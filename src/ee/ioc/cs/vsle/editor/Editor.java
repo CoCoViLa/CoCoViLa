@@ -213,20 +213,34 @@ public class Editor extends JFrame implements ChangeListener {
 
                 } );
                 menu.add(submenuRecent);
-		menu = new JMenu(Menu.MENU_SCHEME);
-		menu.setMnemonic(KeyEvent.VK_S);
-		menuItem = new JMenuItem(Menu.SPECIFICATION, KeyEvent.VK_S);
-		menuItem.addActionListener(aListener);
-		menu.add(menuItem);
+                final JMenu menuScheme = new JMenu( Menu.MENU_SCHEME );
+		menuScheme.setMnemonic(KeyEvent.VK_S);
+
+                menuScheme.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
+
+                    final JMenuItem empty = new JMenuItem("Empty");
+
+                    public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
+
+                        makeSchemeMenu( menuScheme );
+
+                    }
+
+                    public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {}
+
+                    public void popupMenuCanceled( PopupMenuEvent e ) {}
+
+                } );
+
 		/* menuItem = new JMenuItem("Planner");
 		 menuItem.addActionListener(aListener);
-		 menu.add(menuItem);
+		 menuScheme.add(menuItem);
 		 menuItem = new JMenuItem("Plan, compile, run");
 		 menuItem.setActionCommand("Run");
 		 menuItem.addActionListener(aListener);
-		 menu.add(menuItem);*/
-		// menu.setMnemonic(KeyEvent.VK_A);
-		menuBar.add(menu);
+		 menuScheme.add(menuItem);*/
+		// menuScheme.setMnemonic(KeyEvent.VK_A);
+		menuBar.add(menuScheme);
 		menu = new JMenu(Menu.MENU_OPTIONS);
 		menu.setMnemonic(KeyEvent.VK_O);
 		submenu = new JMenu(Menu.MENU_LAYOUT);
@@ -381,6 +395,42 @@ public class Editor extends JFrame implements ChangeListener {
             }
         }
 
+        void makeSchemeMenu( JMenu menu ) {
+            menu.removeAll();
+
+            //Specification...
+            JMenuItem menuItem = new JMenuItem( Menu.SPECIFICATION, KeyEvent.VK_S );
+            menuItem.addActionListener( aListener );
+            menu.add( menuItem );
+
+            if( getCurrentPackage() != null ) {
+                menu.add( new JSeparator() );
+
+                final String packageName = getCurrentPackage().name;
+                //<package>.meth
+                menuItem = new JMenuItem( packageName + ".meth", KeyEvent.VK_M );
+                menuItem.addActionListener( new ActionListener() {
+                    public void actionPerformed( ActionEvent e ) {
+                        CodeViewer cv = new CodeViewer( packageName, ".meth" );
+                        cv.setSize( 550, 450 );
+                        cv.setVisible( true );
+                    }
+                } );
+                menu.add( menuItem );
+
+                //<package>.spec
+                menuItem = new JMenuItem( packageName + ".spec", KeyEvent.VK_C );
+                menuItem.addActionListener( new ActionListener() {
+                    public void actionPerformed( ActionEvent e ) {
+                        CodeViewer cv = new CodeViewer( packageName, ".spec" );
+                        cv.setSize( 550, 450 );
+                        cv.setVisible( true );
+                    }
+                } );
+
+                menu.add( menuItem );
+            }
+        }
 	/**
 	 * Upon platform, use OS-specific methods for opening the URL in required browser.
 	 * @param url - URL to be opened in a browser. Capable of browsing
@@ -565,7 +615,10 @@ public class Editor extends JFrame implements ChangeListener {
 	}
 
 	public VPackage getCurrentPackage() {
-		return getCurrentCanvas().getCurrentPackage();
+            if( getCurrentCanvas() != null ) {
+                return getCurrentCanvas().getCurrentPackage();
+            }
+            return null;
 	}
 
 	public Canvas getCurrentCanvas() {

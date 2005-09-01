@@ -6,6 +6,8 @@ import java.awt.*;
 
 public class RuntimeProperties {
 
+    public final static String SCHEME_DTD = "scheme.dtd";
+    public final static String PACKAGE_DTD = "package2.dtd";
 	// Names of the class field table as well as the dbresult columns.
 	public static String[] classDbrFields = {"FIELD", "TYPE", "VALUE"};
 	public static String[] classTblFields = {"Field Name", "Field Type", "Field Value"};

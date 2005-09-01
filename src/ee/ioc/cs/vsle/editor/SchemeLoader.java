@@ -68,7 +68,7 @@ public class SchemeLoader {
 			InputSource is = null;
 			// order the DTD to be specified externally.
 			if (systemId != null && systemId.endsWith("dtd")) {
-				is = new InputSource("scheme.dtd");
+				is = new InputSource(RuntimeProperties.SCHEME_DTD);
 			}
 			return is;
 		}

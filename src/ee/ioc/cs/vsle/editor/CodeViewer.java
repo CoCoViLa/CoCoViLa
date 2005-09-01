@@ -1,16 +1,10 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.ObjectList;
-import ee.ioc.cs.vsle.vclass.VPackage;
-import ee.ioc.cs.vsle.vclass.GroupUnfolder;
-import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.util.FileFuncs;
 
 import javax.swing.*;
-import java.util.ArrayList;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,47 +17,53 @@ public class CodeViewer extends JFrame implements ActionListener{
 	JTextArea textArea;
 	JPanel specText;
 	JButton saveBtn;
-	GObj obj;
-	public CodeViewer(GObj obj) {
-		super(obj.className + ".java");
-                this.obj = obj;
-		FileFuncs ff = new FileFuncs();
+        String fileName;
 
-		String fileText = ff.getFileContents(RuntimeProperties.packageDir + obj.className + ".java");
+        public CodeViewer(String name, String extension) {
+            super(name + extension);
+                this.fileName = name + extension;
+                FileFuncs ff = new FileFuncs();
 
-		textArea = new JTextArea();
-		textArea.setFont(RuntimeProperties.font);
-		textArea.append(fileText);
+                String fileText = ff.getFileContents(RuntimeProperties.packageDir + fileName);
 
-		JScrollPane areaScrollPane = new JScrollPane(textArea);
+                textArea = new JTextArea();
+                textArea.addKeyListener( new ProgramTextEditor.CommentKeyListener() );
+                textArea.setFont(RuntimeProperties.font);
+                textArea.append(fileText);
 
-		areaScrollPane.setVerticalScrollBarPolicy(
-			JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+                JScrollPane areaScrollPane = new JScrollPane(textArea);
 
-		specText = new JPanel();
-		specText.setLayout(new BorderLayout());
-		specText.add(areaScrollPane, BorderLayout.CENTER);
-		JToolBar toolBar = new JToolBar();
+                areaScrollPane.setVerticalScrollBarPolicy(
+                        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+
+                specText = new JPanel();
+                specText.setLayout(new BorderLayout());
+                specText.add(areaScrollPane, BorderLayout.CENTER);
+                JToolBar toolBar = new JToolBar();
                 toolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
-		saveBtn = new JButton("Save");
-		saveBtn.addActionListener(this);
-		toolBar.add(saveBtn);
+                saveBtn = new JButton("Save");
+                saveBtn.addActionListener(this);
+                toolBar.add(saveBtn);
                 toolBar.add(new FontResizePanel(textArea));
                 toolBar.add(new UndoRedoDocumentPanel(textArea.getDocument()) );
 
 
-		specText.setLayout(new BorderLayout());
-		specText.add(areaScrollPane, BorderLayout.CENTER);
-		specText.add(toolBar, BorderLayout.NORTH);
+                specText.setLayout(new BorderLayout());
+                specText.add(areaScrollPane, BorderLayout.CENTER);
+                specText.add(toolBar, BorderLayout.NORTH);
 
-		getContentPane().add(specText);
-		validate();
+                getContentPane().add(specText);
+                validate();
+        }
+
+	public CodeViewer(String name) {
+		this( name, ".java" );
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == saveBtn) {
 			FileFuncs ff = new FileFuncs();
-			ff.writeFile(RuntimeProperties.packageDir + obj.className + ".java", textArea.getText());
+			ff.writeFile(RuntimeProperties.packageDir + fileName, textArea.getText());
 		}
 	}
 

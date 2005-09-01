@@ -311,7 +311,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 		return watchFields;
 	}
 
-        private class CommentKeyListener implements KeyListener {
+        static class CommentKeyListener implements KeyListener {
 
             public void keyTyped( KeyEvent e ) {
             }

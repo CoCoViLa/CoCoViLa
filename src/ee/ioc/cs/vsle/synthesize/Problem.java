@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 
 class Problem implements Cloneable, Serializable {
@@ -32,19 +33,18 @@ class Problem implements Cloneable, Serializable {
 
     public HashSet foundVars = new HashSet();
 
+    protected Var getVarByField( ClassField field ) {
+        System.err.println( "getVarByField: " + field );
+        for( Iterator it = allVars.values().iterator(); it.hasNext(); ) {
+            Var var = (Var)it.next();
+            System.err.println( "var: " + var );
 
-//    boolean containsRel( Rel comparableRel ) {
-//        for ( Iterator iter = allRels.iterator(); iter.hasNext(); ) {
-//            Rel rel = ( Rel ) iter.next();
-//            String r1 = rel.toString();
-//            String r2 = comparableRel.toString();
-//            //db.p("This rel " + r2 + " is compared to " + r1);
-//            if ( r1.equals( r2 ) ) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
+            if( var.toString().equals( field.toString() ) ) {
+                return var;
+            }
+        }
+        return null;
+    }
 
     Rel getSubtask( Rel subt ) {
         for ( Iterator iter = subtasks.iterator(); iter.hasNext(); ) {

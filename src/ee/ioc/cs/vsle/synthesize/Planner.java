@@ -6,6 +6,7 @@ import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.editor.ProgramRunner;
 import java.util.ArrayList;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**
  *
@@ -87,7 +88,21 @@ public class Planner {
             algorithm = ( ArrayList ) problem.getSubGoal().getAlgorithm();
 
             if ( !goingBackward ) {
-                problem.getKnownVars().addAll( problem.getSubGoal().getInputs() );
+                for( Iterator it = problem.getSubGoal().getInputs().iterator(); it.hasNext(); ) {
+                    Var input = (Var)it.next();
+
+                    problem.getKnownVars().add( input );
+                    if ( input.field.isAlias() ) {
+                        for( int i = 0; i < input.field.vars.size(); i++ ) {
+
+                            Var var = problem.getVarByField((ClassField)input.field.vars.get(i));
+                            if( var != null ) {
+                                problem.getKnownVars().add( var );
+                            }
+                            System.err.println( "alias " + var);
+                        }
+                    }
+                }
             }
 
             allTargetVarsBackup = new HashSet( problem.getTargetVars() );

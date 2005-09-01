@@ -17,6 +17,7 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.awt.Font;
 import java.awt.Color;
 import java.util.ArrayList;
+import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
 
 public class PackageParser {
@@ -83,7 +84,7 @@ public class PackageParser {
 		public InputSource resolveEntity(java.lang.String publicId, java.lang.String systemId) throws SAXException {
 			InputSource is = null;
 			if (systemId != null && systemId.endsWith("dtd"))
-				is = new InputSource("package2.dtd");
+				is = new InputSource(RuntimeProperties.PACKAGE_DTD);
 			return is;
 		}
 

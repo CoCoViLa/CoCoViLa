@@ -419,7 +419,7 @@ public class Canvas extends JPanel implements ActionListener {
 				new BufferedWriter(new FileWriter(file)));
 			out.println("<?xml version='1.0' encoding='utf-8'?>");
 
-			out.println("<!DOCTYPE scheme SYSTEM \"scheme.dtd\">");
+			out.println("<!DOCTYPE scheme SYSTEM \"" + RuntimeProperties.SCHEME_DTD + "\">");
             out.println("<scheme package=\""+vPackage.name+"\">");
 			for (int i = 0; i < objects.size(); i++) {
 				GObj obj = (GObj) objects.get(i);
@@ -515,7 +515,7 @@ public class Canvas extends JPanel implements ActionListener {
 			csd.setVisible(true);
 
 		} else if (e.getActionCommand().equals(Menu.VIEWCODE)) {
-            CodeViewer cv = new CodeViewer(currentObj);
+            CodeViewer cv = new CodeViewer(currentObj.getClassName());
 			cv.setSize(550, 450);
 			cv.setVisible(true);
 		}
