@@ -4,26 +4,15 @@ import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.HashSet;
-//import java.util.Iterator;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.io.*;
+import java.util.*;
+import java.util.regex.*;
 
 /**
  This class is responsible for managing the planning and code generation process.
  @author Ando Saabas
  */
 public class Synthesizer {
-	final int declaration = 1, assignment = 2, axiom = 3, equation = 4, alias = 5, error = 10;
-
 
 	/**
 	 This method makes a compilable class from problem specification, calling createProblem,
@@ -95,15 +84,15 @@ public class Synthesizer {
 		for (int i = 0; i < ac.fields.size(); i++) {
 
 			field = (ClassField) ac.fields.get(i);
-			if (!(field.type.equals("alias") || field.type.equals("void"))) {
+			if (!(field.getType().equals("alias") || field.getType().equals("void"))) {
 				if (field.isSpecField()) {
-					prog += "    public _" + field.type + "_ " + field.name + " = new _" + field.type + "_();\n";
-				} else if (isPrimitive(field.type)) {
-					prog += "    public " + field.type + " " + field.name + ";\n";
-				} else if (isArray(field.type)) {
-					prog += "    public " + field.type + " " + field.name + " ;\n";
+					prog += "    public _" + field.getType() + "_ " + field.getName() + " = new _" + field.getType() + "_();\n";
+				} else if (isPrimitive(field.getType())) {
+					prog += "    public " + field.getType() + " " + field.getName() + ";\n";
+				} else if (isArray(field.getType())) {
+					prog += "    public " + field.getType() + " " + field.getName() + " ;\n";
 				} else {
-					prog += "    public " + field.type + " " + field.name + " = new " + field.type + "();\n";
+					prog += "    public " + field.getType() + " " + field.getName() + " = new " + field.getType() + "();\n";
 				}
 			}
 		}
@@ -179,8 +168,8 @@ public class Synthesizer {
 						LineType lt = specParser.getLine(specLines);
 
 						//if (! (specLines.get(0)).equals("")) {
-						if (lt.type == declaration) {
-							String[] split = lt.specLine.split(":", -1);
+						if (lt.getType() == LineType.TYPE_DECLARATION) {
+							String[] split = lt.getSpecLine().split(":", -1);
 							String[] vs = split[1].trim().split(" *, *", -1);
 							String type = split[0].trim();
 

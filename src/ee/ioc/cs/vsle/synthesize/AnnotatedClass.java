@@ -72,7 +72,7 @@ public class AnnotatedClass {
 		ClassField f;
 		for (int j = 0; j < fields.size(); j++){
             f = (ClassField)fields.get(j);
-			if (f.name.equals(fieldName))
+			if (f.getName().equals(fieldName))
 				return true;
 		}
 		return false;
@@ -82,7 +82,7 @@ public class AnnotatedClass {
 		ClassField f;
 		for (int j = 0; j < fields.size(); j++){
             f = (ClassField)fields.get(j);
-			if (f.name.equals(fieldName))
+			if (f.getName().equals(fieldName))
 				return f;
 		}
 		return null;

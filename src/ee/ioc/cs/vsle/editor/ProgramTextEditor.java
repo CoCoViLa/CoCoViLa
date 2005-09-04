@@ -304,7 +304,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 			for (int j = 0; j < obj.fields.size(); j++) {
 				field = (ClassField) obj.fields.get(j);
 				if (field.isWatched()) {
-					watchFields.add(obj.name + "." + field.name);
+					watchFields.add(obj.name + "." + field.getName());
 				}
 			}
 		}

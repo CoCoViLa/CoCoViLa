@@ -50,11 +50,11 @@ public class CodeGenerator {
         for ( int i = 0; i < algRelList.size(); i++ ) {
             Rel rel = ( Rel ) algRelList.get( i );
 
-            if ( rel.type != RelType.method_with_subtask ) {
+            if ( rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) {
                 appendRelToAlg( cOT( OT_NOC, 0 ), rel, alg );
             }
 
-            else if ( rel.type == RelType.method_with_subtask ) {
+            else if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                 genSubTasks( rel, alg, false );
             }
 
@@ -85,12 +85,12 @@ public class CodeGenerator {
             boolean isSubOutputInAlgorithm = false;
             for ( int i = 0; i < subAlg.size(); i++ ) {
                 Rel trel = ( Rel ) subAlg.get( i );
-                System.out.println( "rel " + trel);
-                if ( trel.type == RelType.method_with_subtask ) {
+                System.out.println( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs());
+                if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                     //recursion
                     genSubTasks( trel, alg, true );
 
-                } else if ( trel.type == RelType.equation ) {
+                } else if ( trel.getType() == RelType.TYPE_EQUATION ) {
                     if ( trel.getInputs().size() == 1 && trel.getOutputs().size() == 1 ) {
                         Var in = ( Var ) trel.getInputs().get( 0 );
                         Var out = ( Var ) trel.getOutputs().get( 0 );
@@ -158,7 +158,7 @@ public class CodeGenerator {
     private void appendRelToAlg( String offset, Rel rel, StringBuffer buf ) {
         String s = rel.toString();
         if ( !s.equals( "" ) ) {
-            if(rel.exceptions.size() == 0 ) {
+            if(rel.getExceptions().size() == 0 ) {
                 buf.append( offset + s + ";\n" );
             }
             else {
@@ -173,7 +173,7 @@ public class CodeGenerator {
         for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
             relString = relString.replaceFirst( RelType.TAG_SUBTASK, "subtask_" + ( startInd + i ) );
         }
-        if(rel.exceptions.size() == 0 || isNestedSubtask ) {
+        if(rel.getExceptions().size() == 0 || isNestedSubtask ) {
             buf.append(cOT( OT_NOC, 0 ) + relString + ";\n" );
         }
         else {
@@ -186,8 +186,8 @@ public class CodeGenerator {
         buf.append( cOT( OT_NOC, 0 ) + "try {\n" +
                     cOT( OT_INC, 1 ) + s + ";\n" +
                     cOT( OT_DEC, 1 ) + "}\n" );
-        for ( int i = 0; i < rel.exceptions.size(); i++ ) {
-            String excp = ( ( Var ) rel.exceptions.get( i ) ).name;
+        for ( int i = 0; i < rel.getExceptions().size(); i++ ) {
+            String excp = ( ( Var ) rel.getExceptions().get( i ) ).getName();
             String instanceName = "ex" + i;
             buf.append( cOT( OT_NOC, 0 ) + "catch( " + excp + " " + instanceName + " ) {\n" +
                         cOT( OT_INC, 1 ) + instanceName + ".printStackTrace();\n" +
@@ -200,7 +200,7 @@ public class CodeGenerator {
 
     private String getObjectFromSubtask( Var var, String offset, int num, boolean isInput ) {
 
-        if ( var.field.isAlias() ) {
+        if ( var.getField().isAlias() ) {
             if ( isInput ) {
                 return getAliasSubtaskInput( var, offset, num);
             } else {
@@ -208,7 +208,7 @@ public class CodeGenerator {
             }
         }
 
-        String varType = var.type;
+        String varType = var.getType();
         TypeToken token = null;
 
         if ( varType.equals( TOKEN_INT.getType() ) ) {
@@ -254,38 +254,38 @@ public class CodeGenerator {
     }
 
     private String getAliasSubtaskInput( Var input, String offset, int num ) {
-        Alias alias = (Alias)input.field;
+        Alias alias = (Alias)input.getField();
         String aliasType = alias.getRealType();
-        String aliasTmp = ALIASTMP + "_" + alias.name + "_" + ALIASTMP_NR++;
+        String aliasTmp = ALIASTMP + "_" + alias.getName() + "_" + ALIASTMP_NR++;
         String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType
                      + ")in[" + num + "];\n";
 
         ClassField var;
 
-        for ( int i = 0; i < alias.vars.size(); i++ ) {
-            var = ( ClassField ) alias.vars.get( i );
-            out += offset + Rel.getObject(input.object) + var.name + " = " + aliasTmp + "[" + i + "];\n";
+        for ( int i = 0; i < alias.getVars().size(); i++ ) {
+            var = ( ClassField ) alias.getVars().get( i );
+            out += offset + Rel.getObject(input.getObject()) + var.getName() + " = " + aliasTmp + "[" + i + "];\n";
         }
         return out;
     }
 
     String getAliasSubtaskOutput( Var input, String offset ) {
-		Alias alias = (Alias)input.field;
-        if(alias.vars.size() == 0) {
+		Alias alias = (Alias)input.getField();
+        if(alias.getVars().size() == 0) {
             return offset + "return new Object[]{ }";
         }
 
-        String aliasTmp = ALIASTMP + "_" + alias.name + "_" + ALIASTMP_NR++;
+        String aliasTmp = ALIASTMP + "_" + alias.getName() + "_" + ALIASTMP_NR++;
         String aliasType = alias.getRealType();
         String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
 
         ClassField var;
-        for ( int i = 0; i < alias.vars.size(); i++ ) {
-            var = ( ClassField ) alias.vars.get( i );
+        for ( int i = 0; i < alias.getVars().size(); i++ ) {
+            var = ( ClassField ) alias.getVars().get( i );
             if ( i == 0 ) {
-                out += Rel.getObject(input.object) + var.name;
+                out += Rel.getObject(input.getObject()) + var.getName();
             } else {
-                out += ", " + Rel.getObject(input.object) + var.name;
+                out += ", " + Rel.getObject(input.getObject()) + var.getName();
             }
         }
         out += " };\n"

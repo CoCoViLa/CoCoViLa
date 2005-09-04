@@ -57,15 +57,15 @@ public class SpecGenerator {
 				"    " + obj.getClassName() + " " + obj.getName() + ";\n");
 			for (int j = 0; j < obj.fields.size(); j++) {
 				field = (ClassField) obj.fields.get(j);
-				if (field.value != null) {
-					if (field.type.equals("String")) {
-						s.append("        " + obj.getName() + "." + field.name
-							+ " = \"" + field.value + "\";\n");
+				if (field.getValue() != null) {
+					if (field.getType().equals("String")) {
+						s.append("        " + obj.getName() + "." + field.getName()
+							+ " = \"" + field.getValue() + "\";\n");
 					} else if (field.isPrimitiveArray()) {
 						s.append(
-							"        " + obj.getName() + "." + field.name
+							"        " + obj.getName() + "." + field.getName()
 							+ " = {");
-						String[] split = field.value.split("%%");
+						String[] split = field.getValue().split("%%");
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append(split[k]);
@@ -76,9 +76,9 @@ public class SpecGenerator {
 
 					} else if (field.isPrimOrStringArray()) {
 						s.append(
-							"        " + obj.getName() + "." + field.name
+							"        " + obj.getName() + "." + field.getName()
 							+ " = {");
-						String[] split = field.value.split("%%");
+						String[] split = field.getValue().split("%%");
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append("\"" + split[k] + "\"");
@@ -88,8 +88,8 @@ public class SpecGenerator {
 						s.append("};\n");
 					} else {
 						s.append(
-							"        " + obj.getName() + "." + field.name + " = "
-							+ field.value + ";\n");
+							"        " + obj.getName() + "." + field.getName() + " = "
+							+ field.getValue() + ";\n");
 					}
 				}
 			}

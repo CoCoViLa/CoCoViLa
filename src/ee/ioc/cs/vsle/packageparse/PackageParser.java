@@ -500,11 +500,11 @@ public class PackageParser {
 				for (int i = 0; i < classFields.size(); i++) {
 					cf = ((ClassField) classFields.get(i));
 
-					if (cf.type == null) {
+					if (cf.getType() == null) {
 						for (int j = 0; j < a.size(); j++) {
-							if (((ClassField) a.get(j)).name == cf.name) {
-								cf.type = ((ClassField) a.get(j)).type;
-								cf.value = ((ClassField) a.get(j)).value;
+							if (((ClassField) a.get(j)).getName() == cf.getName()) {
+								cf.setType( ((ClassField) a.get(j)).getType() );
+								cf.setValue( ((ClassField) a.get(j)).getValue() );
 							}
 						}
 					}
@@ -553,9 +553,9 @@ public class PackageParser {
 			if (qName.equals("graphics")) {
 
 				if (status == FIELD) {
-					newField.defaultGraphics = newGraphics;
+					newField.setDefaultGraphics( newGraphics );
 				} else if (status == FIELD_KNOWN) {
-					newField.knownGraphics = newGraphics;
+					newField.setKnownGraphics( newGraphics );
 				} else if (status == PORT_OPEN) {
 					newPort.openGraphics = newGraphics;
 				} else if (status == PORT_CLOSED) {

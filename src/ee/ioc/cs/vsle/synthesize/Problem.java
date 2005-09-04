@@ -15,12 +15,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.vclass.ClassField;
 
 
 class Problem implements Cloneable, Serializable {
-
-//    ArrayList algorithm = new ArrayList();
 
     private Set axioms = new HashSet(); //Collections.synchronizedSet(new HashSet());
     private Set knownVars = new HashSet(); //Collections.synchronizedSet(new HashSet());
@@ -31,15 +28,15 @@ class Problem implements Cloneable, Serializable {
     private Set subtasks = new HashSet(); //Collections.synchronizedSet(new HashSet());
     private Vector subGoal = null;
 
-    public HashSet foundVars = new HashSet();
+    private HashSet foundVars = new HashSet();
 
-    protected Var getVarByField( ClassField field ) {
-        System.err.println( "getVarByField: " + field );
+    Var getVarByFullName( String field ) {
+       // System.err.println( "getVarByField: " + field.toString() );
         for( Iterator it = allVars.values().iterator(); it.hasNext(); ) {
             Var var = (Var)it.next();
-            System.err.println( "var: " + var );
+            //System.err.println( "var: " + var );
 
-            if( var.toString().equals( field.toString() ) ) {
+            if( var.toString().equals( field ) ) {
                 return var;
             }
         }
@@ -74,6 +71,11 @@ class Problem implements Cloneable, Serializable {
     protected Set getKnownVars() {
         return knownVars;
     }
+
+    protected Set getFoundVars() {
+        return foundVars;
+    }
+
 
     protected Set getTargetVars() {
         return targetVars;
@@ -116,7 +118,7 @@ class Problem implements Cloneable, Serializable {
     }
 
     protected void addVar( Var var ) {
-        allVars.put( var.getObj() + "." + var.getName(), var );
+        allVars.put( var.getObject() + "." + var.getName(), var );
     }
 
     protected Problem getCopy() {

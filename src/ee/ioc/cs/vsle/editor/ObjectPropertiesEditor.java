@@ -70,8 +70,8 @@ public class ObjectPropertiesEditor extends JFrame
 				comboBox.setEditable(true);
 				comboBox.addActionListener(this);
 
-				if (field.value != "" && field.value != null) {
-					String[] split = field.value.split("%%");
+				if (field.getValue() != "" && field.getValue() != null) {
+					String[] split = field.getValue().split("%%");
 					for (int j = 0; j < split.length; j++) {
 						comboBox.addItem(split[j]);
 					}
@@ -81,11 +81,11 @@ public class ObjectPropertiesEditor extends JFrame
 
 
 				comboBoxes.add(comboBox);
-				label = new JLabel(field.name, SwingConstants.CENTER);
-				label.setToolTipText(field.description);
+				label = new JLabel(field.getName(), SwingConstants.CENTER);
+				label.setToolTipText(field.getDescription());
 				arrayNameList.add(field);
 				labelPane.add(label);
-				label = new JLabel("(" + field.type + ")");
+				label = new JLabel("(" + field.getType() + ")");
 				typePane.add(label);
 
 				watch = new JCheckBox("");
@@ -97,17 +97,17 @@ public class ObjectPropertiesEditor extends JFrame
 			} else if (field.isPrimitiveOrString()) {
 				textField = new JTextField();
 				textField.addKeyListener(this);
-				textField.setName(field.name);
+				textField.setName(field.getName());
 				primitiveNameList.add(field);
-				textField.setText(field.value);
+				textField.setText(field.getValue());
 				textFields.add(textField);
-				label = new JLabel(field.name, SwingConstants.CENTER);
-				label.setToolTipText(field.description);
+				label = new JLabel(field.getName(), SwingConstants.CENTER);
+				label.setToolTipText(field.getDescription());
 				labelPane.add(label);
 				textFieldPane.add(textField);
-				label = new JLabel("(" + field.type + ")");
+				label = new JLabel("(" + field.getType() + ")");
 				typePane.add(label);
-				boolean b = field.watched;
+				boolean b = field.isWatched();
 
 				watch = new JCheckBox("", b);
 				watchPane.add(watch);
@@ -181,12 +181,12 @@ public class ObjectPropertiesEditor extends JFrame
 				textField = (JTextField) textFields.get(i);
 				field = (ClassField) primitiveNameList.get(i);
 				b = ((JCheckBox) watchFields.get(i)).isSelected();
-				field.watched = b;
+				field.setWatched( b );
 				if (!textField.getText().equals("")) {
-					field.value = textField.getText();
+					field.setValue( textField.getText() );
 					//field.updateGraphics();
 				} else {
-					field.value = null;
+					field.setValue( null );
 				}
 			}
 			for (int i = 0; i < comboBoxes.size(); i++) {
@@ -197,10 +197,10 @@ public class ObjectPropertiesEditor extends JFrame
 					s += (String) comboBox.getItemAt(j) + "%%";
 				}
 				if (!s.equals("")) {
-					field.value = s;
+					field.setValue( s );
 
 				} else {
-					field.value = null;
+					field.setValue( null );
 				}
 			}
 			controlledObject.setName(nameTextField.getText());
@@ -214,8 +214,8 @@ public class ObjectPropertiesEditor extends JFrame
 				textField = (JTextField) textFields.get(i);
 				field = (ClassField) controlledObject.fields.get(i);
 				((JCheckBox) watchFields.get(i)).setSelected(false);
-				field.watched = false;
-				field.value = null;
+				field.setWatched( false );
+				field.setValue( null );
 				textField.setText("");
 			}
 		}

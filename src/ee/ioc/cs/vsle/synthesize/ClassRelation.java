@@ -18,10 +18,10 @@ import java.util.regex.Matcher;
 class ClassRelation
 	implements Serializable {
 
-	ArrayList inputs = new ArrayList();
-	ArrayList subtasks = new ArrayList();
-	ArrayList outputs = new ArrayList();
-        ArrayList exceptions = new ArrayList();
+	private ArrayList inputs = new ArrayList();
+	private ArrayList subtasks = new ArrayList();
+	private ArrayList outputs = new ArrayList();
+        private ArrayList exceptions = new ArrayList();
 
 	/**
 	 * Type of the relation.
@@ -31,20 +31,51 @@ class ClassRelation
 	 * 5 - subtask
 	 * 6 - method with subtask
 	 * 7 - unimplemented
-	 */int type;
-	String method;
+	 */
+        private int type;
+	private String method;
 
 	/**
 	 * Class constructor.
 	 * @param i int - relation type.
-	 */ClassRelation(int i) {
+	 */
+        ClassRelation(int i) {
 		type = i;
 	} // ee.ioc.cs.editor.synthesize.ClassRelation
+
+        int getType() {
+            return type;
+        }
+
+        void setType( int value ) {
+            type = value;
+        }
+
+        String getMethod() {
+            return method;
+        }
+
+        ArrayList getInputs() {
+            return inputs;
+        }
+
+        ArrayList getOutputs() {
+            return outputs;
+        }
+
+        ArrayList getSubtasks() {
+            return subtasks;
+        }
+
+        ArrayList getExceptions() {
+            return exceptions;
+        }
 
 	/**
 	 * Adds a new input to the list of inputs.
 	 * @param field ClassField - a new input to be added to the list of inputs.
-	 */ void addInput(ClassField field) {
+	 */
+        void addInput(ClassField field) {
 		inputs.add(field);
 	} // addInput
 
@@ -61,13 +92,12 @@ class ClassRelation
 			outputs.add(f);
 		}
 		else if (s.indexOf(".") >= 1) {
-			ClassField cf = new ClassField();
+			ClassField cf = new ClassField( s );
 
-			cf.name = s;
 			outputs.add(cf);
 		} else if (s.startsWith("*.")) {
-			ClassField cf = new ClassField();
-			cf.name = s;
+			ClassField cf = new ClassField( s );
+
 			outputs.add(cf);
 		}
 		else {
@@ -89,9 +119,8 @@ class ClassRelation
 				inputs.add(f);
 			}
 			else if (s.indexOf(".") >= 1) {
-				ClassField cf = new ClassField();
+				ClassField cf = new ClassField( s );
 
-				cf.name = s;
 				inputs.add(cf);
 			}
 			else {
@@ -123,9 +152,8 @@ class ClassRelation
 					inputs.add(var);
 				}
 				else if (input[i].indexOf(".") >= 1) {
-					ClassField cf = new ClassField();
+					ClassField cf = new ClassField( input[i] );
 
-					cf.name = input[i];
 					inputs.add(cf);
 				}
 				else {
@@ -148,9 +176,8 @@ class ClassRelation
                 Pattern pattern = Pattern.compile( ".*\\([ .A-Za-z0-9]+\\).*" );
                 Matcher matcher = pattern.matcher( s );
                 if ( matcher.find() ) {
-                    ClassField cf = new ClassField();
-                    cf.name = "exception";
-                    cf.type = s.replaceAll( "[ ()]+", "" );
+                    ClassField cf = new ClassField( "exception", s.replaceAll( "[ ()]+", "" ) );
+
                     exceptions.add( cf );
 
                 } else {
@@ -160,13 +187,12 @@ class ClassRelation
                     if ( var != null ) {
                         outputs.add( var );
                     } else if ( output[ i ].indexOf( "." ) >= 1 ) {
-                        ClassField cf = new ClassField();
+                        ClassField cf = new ClassField( output[ i ] );
 
-                        cf.name = output[ i ];
                         outputs.add( cf );
                     } else if ( output[ i ].startsWith( "*." ) ) {
-                        ClassField cf = new ClassField();
-                        cf.name = output[ i ];
+                        ClassField cf = new ClassField( output[ i ] );
+
                         outputs.add( cf );
                     } else {
                         throw new UnknownVariableException( output[ i ] );
@@ -192,7 +218,7 @@ class ClassRelation
 			pattern = Pattern.compile("\\[(.*) *-> ?(.*)\\]");
 			matcher2 = pattern.matcher(subtaskString);
 			if (matcher2.find()) {
-				subtask = new ClassRelation(5);
+				subtask = new ClassRelation(RelType.TYPE_SUBTASK);
 				subtask.setOutput(matcher2.group(2).trim(), varList);
 				String[] inputs = matcher2.group(1).trim().split(" *, *", -1);
 
@@ -234,7 +260,7 @@ class ClassRelation
 
 		for (int i = 0; i < varList.size(); i++) {
 			var = (ClassField) varList.get(i);
-			if (var.name.equals(varName)) {
+			if (var.getName().equals(varName)) {
 				return var;
 			}
 		}
@@ -245,7 +271,7 @@ class ClassRelation
 	 * <UNCOMMENTED>
 	 * @return String
 	 */ public String toString() {
-		if (type == 6) {
+		if (type == RelType.TYPE_METHOD_WITH_SUBTASK) {
 			return "[Subtasks: " + subtasks + "][Inputs: " + inputs + "][Output: " + outputs + "][Method: " + method + "][Type: " + type + "]";
 		}
 		return "[Inputs: " + inputs + "][Output: " + outputs + "][Method: " + method + "][Type: " + type + "]";

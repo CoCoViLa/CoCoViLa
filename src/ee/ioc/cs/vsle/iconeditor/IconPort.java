@@ -297,8 +297,8 @@ public class IconPort implements Cloneable, Serializable {
 	 */
 	String getType() {
 		for (int i = 0; i < obj.fields.size(); i++) {
-			if (((ClassField) obj.fields.get(i)).name.equals(name)) {
-				return ((ClassField) obj.fields.get(i)).type;
+			if (((ClassField) obj.fields.get(i)).getName().equals(name)) {
+				return ((ClassField) obj.fields.get(i)).getType();
 			}
 		}
 		return null;
@@ -310,7 +310,7 @@ public class IconPort implements Cloneable, Serializable {
 	 */
 	ClassField getField() {
 		for (int i = 0; i < obj.fields.size(); i++) {
-			if (((ClassField) obj.fields.get(i)).name.equals(name)) {
+			if (((ClassField) obj.fields.get(i)).getName().equals(name)) {
 				return ((ClassField) obj.fields.get(i));
 			}
 		}

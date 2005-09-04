@@ -10,40 +10,58 @@ import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
 class Rel implements Cloneable, Serializable {
 
-	List outputs = new ArrayList();
+	private List outputs = new ArrayList();
 
-	List inputs = new ArrayList();
+	private List inputs = new ArrayList();
 
-	List subtasks = new ArrayList();
+	private List subtasks = new ArrayList();
 
-	ArrayList exceptions = new ArrayList();
+	private ArrayList exceptions = new ArrayList();
 
-	List algorithm = new ArrayList();
+	private List algorithm = new ArrayList();
 
         //only for subtasks
-	Rel parentRel = null;
+	private Rel parentRel = null;
 
         //parent axiom containing this subtask
 	private int relNumber = 0;
 
-	int unknownInputs;
+	private int unknownInputs;
 
-	int subtaskFlag;
+	private int subtaskCounter;
 
-	String object;
+	private String object;
 
-	String method;
+	private String method;
 
-	boolean inAlgorithm = false;
-
-	int type; /* 1 - equals, 2 - method */
+	private int type; /* 1 - equals, 2 - method */
 
 	Rel() {
 		relNumber = RelType.relCounter++;
 	}
 
+        int getType() {
+            return type;
+        }
+
+        int getUnknownInputs() {
+            return unknownInputs;
+        }
+
+        int getSubtaskCounter() {
+                return subtaskCounter;
+        }
+
+        void setSubtaskCounter( int value ) {
+            subtaskCounter = value;
+        }
+
+        List getExceptions() {
+            return exceptions;
+        }
+
 	void setParentRel(Rel rel) {
-		if (type != RelType.subtask)
+		if (type != RelType.TYPE_SUBTASK)
 			throw new IllegalStateException(
 					"Only subtasks can contain parent rels");
 
@@ -51,7 +69,7 @@ class Rel implements Cloneable, Serializable {
 	}
 
 	Rel getParentRel() {
-		if (type != RelType.subtask)
+		if (type != RelType.TYPE_SUBTASK)
 			throw new IllegalStateException(
 					"Only subtasks can contain parent rels");
 
@@ -59,7 +77,7 @@ class Rel implements Cloneable, Serializable {
 	}
 
 	void addRelToAlgorithm(Rel rel) {
-		if (type != RelType.subtask)
+		if (type != RelType.TYPE_SUBTASK)
 			throw new IllegalStateException(
 					"Only subtasks can contain algorithms");
 
@@ -67,7 +85,7 @@ class Rel implements Cloneable, Serializable {
 	}
 
 	List getAlgorithm() {
-		if (type != RelType.subtask)
+		if (type != RelType.TYPE_SUBTASK)
 			throw new IllegalStateException(
 					"Only subtasks can contain algorithms");
 
@@ -91,7 +109,7 @@ class Rel implements Cloneable, Serializable {
 	}
 
 	void setSubtaskFlag(int f) {
-		subtaskFlag = f;
+		subtaskCounter = f;
 	}
 
 	void setObj(String s) {
@@ -111,7 +129,7 @@ class Rel implements Cloneable, Serializable {
 
 		for (int i = 0; i < inputs.size(); i++) {
 			var = (Var) inputs.get(i);
-			if (!var.type.equals("int")) {
+			if (!var.getType().equals("int")) {
 				return "double";
 			}
 		}
@@ -123,10 +141,10 @@ class Rel implements Cloneable, Serializable {
             String outputString = "";
             Var var = ( Var ) outputs.get( 0 );
 
-            if ( !var.type.equals( "void" ) ) {
-                if ( var.field.isAlias() ) {
-                    String alias_tmp = CodeGenerator.ALIASTMP + var.name + relNumber;
-                    outputString = ( ( ClassField ) var.field.vars.get( 0 ) ).type
+            if ( !var.getType().equals( "void" ) ) {
+                if ( var.getField().isAlias() ) {
+                    String alias_tmp = CodeGenerator.ALIASTMP + var.getName() + relNumber;
+                    outputString = ( ( ClassField ) var.getField().getVars().get( 0 ) ).getType()
                          + "[] " + alias_tmp + " ";/*new "
                          + ( ( ClassField ) var.field.vars.get( 0 ) ).type + "["
                          + var.field.vars.size() + "];\n" +
@@ -153,9 +171,9 @@ class Rel implements Cloneable, Serializable {
 
 			var = (Var) inputs.get(i);
 
-			if (!var.type.equals("void")) {
-				if (var.type.equals("alias")) {
-					paramString = CodeGenerator.ALIASTMP + var.name + relNumber;
+			if (!var.getType().equals("void")) {
+				if (var.getType().equals("alias")) {
+					paramString = CodeGenerator.ALIASTMP + var.getName() + relNumber;
 				} else {
 					paramString = var.toString();
 				}
@@ -217,14 +235,14 @@ class Rel implements Cloneable, Serializable {
 		Pattern pattern;
 		Matcher matcher;
 
-		if (type == RelType.alias) {
+		if (type == RelType.TYPE_ALIAS) {
 			//db.p( "alias inputs " + inputs + " outputs " + outputs );
 			return "";
 		}
-		if (type == RelType.javamethod) {
+		if (type == RelType.TYPE_JAVAMETHOD) {
 			Var op = (Var) outputs.get(0);
 
-			if (op.type.equals("void")) {
+			if (op.getType().equals("void")) {
 				return (checkAliasInputs() + getObject(object) + method + getParameters(true));
 			} else {
 				return checkAliasInputs() /*+ outputAliasDeclar()*/
@@ -232,19 +250,19 @@ class Rel implements Cloneable, Serializable {
 								+ method + getParameters(true)) +
 								";\n" +checkAliasOutputs();
 			}
-		} else if (type == RelType.equation) {
+		} else if (type == RelType.TYPE_EQUATION) {
 			// if its an array assingment
 			if (inputs.size() == 0 && outputs.size() == 1) {
 				String assign;
 				Var op = (Var) outputs.get(0);
 
-				if (op.field.isPrimOrStringArray()) {
+				if (op.getField().isPrimOrStringArray()) {
 					String[] split = method.split("=");
-					assign = op.field.type + " " + " TEMP"
+					assign = op.getField().getType() + " " + " TEMP"
 							+ Integer.toString(RelType.auxVarCounter) + "="
 							+ split[1] + ";\n";
 					assign += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
-							+ getObject(op.object) + op.name + " = TEMP"
+							+ getObject(op.getObject()) + op.getName() + " = TEMP"
 							+ Integer.toString(RelType.auxVarCounter) + ";\n";
 					RelType.auxVarCounter++;
 					return assign;
@@ -257,28 +275,28 @@ class Rel implements Cloneable, Serializable {
 				Var ip = (Var) inputs.get(0);
 				Var op = (Var) outputs.get(0);
 
-				if (ip.field.isArray() && op.field.isAlias()) {
+				if (ip.getField().isArray() && op.getField().isAlias()) {
 
-					for (int i = 0; i < ((Var) outputs.get(0)).field.vars
+					for (int i = 0; i < ((Var) outputs.get(0)).getField().getVars()
 							.size(); i++) {
-						s1 = ((ClassField) op.field.vars.get(i)).toString();
-						assigns += getObject(op.object) + s1 + " = " + ip + "["
+						s1 = ((ClassField) op.getField().getVars().get(i)).toString();
+						assigns += getObject(op.getObject()) + s1 + " = " + ip + "["
 								+ Integer.toString(i) + "];\n";
 					}
 					return assigns;
 				}
-				if (op.field.isArray() && ip.field.isAlias()) {
+				if (op.getField().isArray() && ip.getField().isAlias()) {
 
-					assigns += op.field.type + " TEMP"
+					assigns += op.getField().getType() + " TEMP"
 							+ Integer.toString(relNumber) + " = new "
-							+ op.field.arrayType() + "[" + ip.field.vars.size()
+							+ op.getField().arrayType() + "[" + ip.getField().getVars().size()
 							+ "];\n";
-					for (int i = 0; i < ip.field.vars.size(); i++) {
-						s1 = ((ClassField) ip.field.vars.get(i)).toString();
+					for (int i = 0; i < ip.getField().getVars().size(); i++) {
+						s1 = ((ClassField) ip.getField().getVars().get(i)).toString();
 						assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
 								+ " TEMP" + Integer.toString(relNumber) + "["
 								+ Integer.toString(i) + "] = "
-								+ getObject(ip.object) + s1 + ";\n";
+								+ getObject(ip.getObject()) + s1 + ";\n";
 					}
 					assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB + op
 							+ " = " + " TEMP" + Integer.toString(relNumber);
@@ -296,16 +314,16 @@ class Rel implements Cloneable, Serializable {
 			for (int i = 0; i < inputs.size(); i++) {
 				var = (Var) inputs.get(i);
 				pattern = Pattern.compile("([^a-zA-Z_])(([a-zA-Z_0-9]+\\.)*)"
-						+ var.name + "([^a-zA-Z0-9_])");
+						+ var.getName() + "([^a-zA-Z0-9_])");
 				matcher = pattern.matcher(m);
 				if (matcher.find()) {
 					left = matcher.group(1);
 					left2 = matcher.group(2);
 					right = matcher.group(4);
 				}
-				ajut.add(new AjutHack(var.name, "#" + Integer.toString(i)));
-				m = m.replaceFirst("([^a-zA-Z_]" + left2 + var.name
-						+ "[^a-zA-Z0-9_])", left + getObject(var.object) + "#"
+				ajut.add(new AjutHack(var.getName(), "#" + Integer.toString(i)));
+				m = m.replaceFirst("([^a-zA-Z_]" + left2 + var.getName()
+						+ "[^a-zA-Z0-9_])", left + getObject(var.getObject()) + "#"
 						+ Integer.toString(i) + right);
 			}
 
@@ -317,7 +335,7 @@ class Rel implements Cloneable, Serializable {
 			left2 = "";
 			var = (Var) outputs.get(0);
 			pattern = Pattern.compile("([^a-zA-Z_]?)(([a-zA-Z_0-9]+\\.)*)"
-					+ var.name + "([^a-zA-Z0-9_])");
+					+ var.getName() + "([^a-zA-Z0-9_])");
 			matcher = pattern.matcher(m);
 			if (matcher.find()) {
 				left = matcher.group(1);
@@ -325,21 +343,21 @@ class Rel implements Cloneable, Serializable {
 				right = matcher.group(4);
 			}
 
-			m = m.replaceFirst("([^a-zA-Z_]?" + left2 + var.name
-					+ "[^a-zA-Z0-9_])", left + getObject(var.object) + var.name
+			m = m.replaceFirst("([^a-zA-Z_]?" + left2 + var.getName()
+					+ "[^a-zA-Z0-9_])", left + getObject(var.getObject()) + var.getName()
 					+ right);
 
-			if (((Var) outputs.get(0)).type.equals("int")
+			if (((Var) outputs.get(0)).getType().equals("int")
 					&& (!getMaxType(inputs).equals("int") || method
 							.indexOf(".") >= 0)) {
 				m = m.replaceFirst("=", "= (int)(") + ")";
 
 			}
 			return m;
-		} else if (type == RelType.subtask) {
+		} else if (type == RelType.TYPE_SUBTASK) {
 			return (Var) outputs.get(0) + " = " + (Var) inputs.get(0);
 
-		} else if (type == RelType.method_with_subtask) {
+		} else if (type == RelType.TYPE_METHOD_WITH_SUBTASK) {
 			if (!outputs.isEmpty()) {
 				return (checkAliasInputs() /*+ outputAliasDeclar()*/ + getOutput() + " = "
 						+ getObject(object) + method + getSubtaskParameters())
@@ -354,31 +372,31 @@ class Rel implements Cloneable, Serializable {
 			Var ip = (Var) inputs.get(0);
 			Var op = (Var) outputs.get(0);
 
-			if (ip.field.isArray() && op.field.isAlias()) {
+			if (ip.getField().isArray() && op.getField().isAlias()) {
 
-				for (int i = 0; i < ((Var) outputs.get(0)).field.vars.size(); i++) {
-					s1 = (String) ((Var) outputs.get(0)).field.vars.get(i);
-					assigns += "        " + getObject(op.object) + s1 + " = "
+				for (int i = 0; i < ((Var) outputs.get(0)).getField().getVars().size(); i++) {
+					s1 = (String) ((Var) outputs.get(0)).getField().getVars().get(i);
+					assigns += "        " + getObject(op.getObject()) + s1 + " = "
 							+ ip + "[" + Integer.toString(i) + "];\n";
 				}
 				return assigns;
 			}
-			if (op.field.isArray() && ip.field.isAlias()) {
-				for (int i = 0; i < ip.field.vars.size(); i++) {
-					s1 = (String) ip.field.vars.get(i);
+			if (op.getField().isArray() && ip.getField().isAlias()) {
+				for (int i = 0; i < ip.getField().getVars().size(); i++) {
+					s1 = (String) ip.getField().getVars().get(i);
 					assigns += CodeGenerator.OT_TAB + op + "["
 							+ Integer.toString(i) + "] = "
-							+ getObject(ip.object) + s1 + ";\n";
+							+ getObject(ip.getObject()) + s1 + ";\n";
 				}
 				return assigns;
 			}
-			if (op.field.isAlias() && ip.field.isAlias()) {
-				for (int i = 0; i < ip.field.vars.size(); i++) {
-					s1 = (String) ip.field.vars.get(i);
-					s2 = (String) op.field.vars.get(i);
+			if (op.getField().isAlias() && ip.getField().isAlias()) {
+				for (int i = 0; i < ip.getField().getVars().size(); i++) {
+					s1 = (String) ip.getField().getVars().get(i);
+					s2 = (String) op.getField().getVars().get(i);
 
-					assigns += CodeGenerator.OT_TAB + getObject(op.object) + s2
-							+ " = " + getObject(ip.object) + s1 + ";\n";
+					assigns += CodeGenerator.OT_TAB + getObject(op.getObject()) + s2
+							+ " = " + getObject(ip.getObject()) + s1 + ";\n";
 				}
 				return assigns;
 			}
@@ -393,13 +411,12 @@ class Rel implements Cloneable, Serializable {
         private String outputAliasDeclar() {
             String declar = "";
             Var output = ( Var ) outputs.get( 0 );
-            if ( output.field.isAlias() ) {
-                String alias_tmp = CodeGenerator.ALIASTMP + output.name
-                                   + relNumber;
-                declar = ( ( ClassField ) output.field.vars.get( 0 ) ).type
+            if ( output.getField().isAlias() ) {
+                String alias_tmp = CodeGenerator.ALIASTMP + output.getName() + relNumber;
+                declar = ( ( ClassField ) output.getField().getVars().get( 0 ) ).getType()
                          + "[] " + alias_tmp + " = new "
-                         + ( ( ClassField ) output.field.vars.get( 0 ) ).type + "["
-                         + output.field.vars.size() + "];\n" +
+                         + ( ( ClassField ) output.getField().getVars().get( 0 ) ).getType() + "["
+                         + output.getField().getVars().size() + "];\n" +
                          CodeGenerator.OT_TAB + CodeGenerator.OT_TAB; ;
             }
             return declar;
@@ -410,19 +427,18 @@ class Rel implements Cloneable, Serializable {
 		String assigns = "";
 		for (int i = 0; i < inputs.size(); i++) {
 			input = (Var) inputs.get(i);
-			if (input.field.isAlias()) {
-				if (input.field.vars.size() == 0) {
-					assigns = "Object " + input.name + " = null";
+			if (input.getField().isAlias()) {
+				if (input.getField().getVars().size() == 0) {
+					assigns = "Object " + input.getName() + " = null";
 				} else {
 
-					String alias_tmp = CodeGenerator.ALIASTMP + input.name
-							+ relNumber;
-					assigns += ((ClassField) input.field.vars.get(0)).type
+					String alias_tmp = CodeGenerator.ALIASTMP + input.getName() + relNumber;
+					assigns += ((ClassField) input.getField().getVars().get(0)).getType()
 							+ "[] " + alias_tmp + " = new "
-							+ ((ClassField) input.field.vars.get(0)).type + "["
-							+ input.field.vars.size() + "];\n";
-					for (int k = 0; k < input.field.vars.size(); k++) {
-						String s1 = ((ClassField) input.field.vars.get(k))
+							+ ((ClassField) input.getField().getVars().get(0)).getType() + "["
+							+ input.getField().getVars().size() + "];\n";
+					for (int k = 0; k < input.getField().getVars().size(); k++) {
+						String s1 = ((ClassField) input.getField().getVars().get(k))
 								.toString();
 						assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
 								+ alias_tmp + "[" + Integer.toString(k)
@@ -438,14 +454,14 @@ class Rel implements Cloneable, Serializable {
 	String checkAliasOutputs() {
 		String assigns = "";
 		Var output = ((Var) outputs.get(0));
-		if (output.field.isAlias()) {
-			String alias_tmp = CodeGenerator.ALIASTMP + output.name
+		if (output.getField().isAlias()) {
+			String alias_tmp = CodeGenerator.ALIASTMP + output.getName()
 			+ relNumber;
-			if (output.field.vars.size() == 0) {
-				assigns = "Object " + output.name + " = null";
+			if (output.getField().getVars().size() == 0) {
+				assigns = "Object " + output.getName() + " = null";
 			} else {
-				for (int k = 0; k < output.field.vars.size(); k++) {
-					String s1 = ((ClassField) output.field.vars.get(k))
+				for (int k = 0; k < output.getField().getVars().size(); k++) {
+					String s1 = ((ClassField) output.getField().getVars().get(k))
 							.toString();
 					assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
 							+  getObject(object) + s1 +"= "

@@ -92,14 +92,24 @@ public class Planner {
                     Var input = (Var)it.next();
 
                     problem.getKnownVars().add( input );
-                    if ( input.field.isAlias() ) {
-                        for( int i = 0; i < input.field.vars.size(); i++ ) {
+                    if ( input.getField().isAlias() ) {
+                        for( int i = 0; i < input.getField().getVars().size(); i++ ) {
+                            /*System.err.println( "from alias: "
+                                                + "\n\tinput.getName()      " + input.getName()
+                                                + "\n\tinput.getObj()       " + input.getObject()
+                                                + "\n\tinput.type           " + input.getType()
+                                                + "\n\tinput.toString()     " + input.toString()
+                                                + "\n\tinput.field.name     " + input.getField().getName()
+                                                + "\n\tinput.field.toString " + input.getField().toString()
+                                                + "\n\tinput.field.vars     " + input.getField().getVars() );
+                            System.err.println( "Parent Var: " + ((ClassField)input.getField().getVars().get(i)).getParentVar());*/
+                            String object = ( input.getObject().equals("this") ) ? "" : input.getObject().substring(5) + ".";
+                            Var var = problem.getVarByFullName(object + input.getField().getVars().get(i).toString());
 
-                            Var var = problem.getVarByField((ClassField)input.field.vars.get(i));
                             if( var != null ) {
                                 problem.getKnownVars().add( var );
                             }
-                            System.err.println( "alias " + var);
+                            //System.err.println( "alias var " + var + "\n\n");
                         }
                     }
                 }
@@ -124,7 +134,7 @@ public class Planner {
                 Var subtaskOutput = ( Var ) problem.getSubGoal().getOutputs().get( i );
                 for ( Iterator iter = problem.getAllRels().iterator(); iter.hasNext(); ) {
                     Rel rel = ( Rel ) iter.next();
-                    if ( rel.type == RelType.equation && rel.getInputs().get( 0 ) == subtaskOutput ) {
+                    if ( rel.getType() == RelType.TYPE_EQUATION && rel.getInputs().get( 0 ) == subtaskOutput ) {
                         iter.remove();
                     }
                 }
@@ -180,14 +190,14 @@ public class Planner {
                     if ( RuntimeProperties.isDebugEnabled() )
                         db.p( "And its rel: " + rel );
                     if ( problem.getAllRels().contains( rel ) ) {
-                        rel.unknownInputs--;
+                        rel.setUnknownInputs( rel.getUnknownInputs() - 1 );
 
                         if ( RuntimeProperties.isDebugEnabled() )
-                            db.p( "problem contains it " + rel + " unknownInputs: " + rel.unknownInputs );
+                            db.p( "problem contains it " + rel + " unknownInputs: " + rel.getUnknownInputs() );
 
                         removableVars.add( var );
 
-                        if ( rel.unknownInputs == 0 && rel.type != RelType.method_with_subtask ) {
+                        if ( rel.getUnknownInputs() == 0 && rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) {
 
                             if ( RuntimeProperties.isDebugEnabled() )
                                 db.p( "rel is ready to be used " + rel );
@@ -206,7 +216,7 @@ public class Planner {
                                 if ( isSubtask && problem.getTargetVars().contains( relVar ) ) {
                                     foundSubGoal = true;
                                 }
-                                if ( problem.foundVars.contains( relVar ) ) {
+                                if ( problem.getFoundVars().contains( relVar ) ) {
                                     relIsNeeded = false;
                                 }
                             }
@@ -256,7 +266,7 @@ public class Planner {
             db.p( "algorithm" + algorithm.toString() + "\n" );
 
         ProgramRunner.addAllFoundVars(foundVars);
-        problem.foundVars.addAll(foundVars);
+        problem.getFoundVars().addAll(foundVars);
 
         return ( isSubtask )
                 ? foundSubGoal
@@ -282,7 +292,7 @@ public class Planner {
 
                 if ( RuntimeProperties.isDebugEnabled() )
                     db.p( "Problem: " + pr.toString() );
-                if( pr.getSubGoal().getParentRel().unknownInputs > 0 ) {
+                if( pr.getSubGoal().getParentRel().getUnknownInputs() > 0 ) {
                     continue;
                 }
                 if ( linearForwardSearch( pr, null, computeAll, true, false ) ) {

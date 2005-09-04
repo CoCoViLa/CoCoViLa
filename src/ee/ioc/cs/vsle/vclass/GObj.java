@@ -307,24 +307,24 @@ public class GObj implements Serializable, Cloneable {
 			ClassField field = (ClassField)fields.get(i);
 			if (field.defaultGraphics != null) {
 				if (!TypeUtil.isArray(field.type)) {
-					field.defaultGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.name, field.value);
+					field.defaultGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value);
 				} else {
 					String[] split = field.value.split("%%");
 					int textOffset = 0;
 					for (int j = 0; j < split.length; j++) {
-						field.defaultGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.name, split[j]);
+						field.defaultGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.getName(), split[j]);
 						textOffset += 12;
 					}
 				}
 			}
 			if (field.isKnown() && field.knownGraphics !=null) {
 				if (!TypeUtil.isArray(field.type)) {
-					field.knownGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.name, field.value);
+					field.knownGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value);
 				} else  {
 					String[] split = field.value.split("%%");
 					int textOffset = 0;
 					for (int j = 0; j < split.length; j++) {
-						field.knownGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.name, split[j]);
+						field.knownGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.getName(), split[j]);
 						textOffset += 12;
 					}
 				}

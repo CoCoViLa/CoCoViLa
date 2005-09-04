@@ -19,11 +19,11 @@ import java.util.Set;
 public class Var implements Cloneable,
         Serializable {
 
-    private Set rels = new HashSet();//Collections.synchronizedSet( new HashSet() );
-    public ClassField field;
-    public String type;
-    public String object;
-    public String name;
+    private Set rels = new HashSet();
+    private ClassField field;
+    private String type;
+    private String object;
+    private String name;
     private int varNumber;
 
     Var() {
@@ -35,6 +35,9 @@ public class Var implements Cloneable,
         return rels;
     }
 
+    public String getType() {
+        return type;
+    }
     /**
      * <UNCOMMENTED>
      * @param obj String
@@ -65,7 +68,13 @@ public class Var implements Cloneable,
      */
     void setField( ClassField field ) {
         this.field = field;
+
+        field.setParentVar(this);
     } // setField
+
+    public ClassField getField() {
+        return field;
+    }
 
     /**
      * <UNCOMMENTED>
@@ -79,7 +88,7 @@ public class Var implements Cloneable,
      * <UNCOMMENTED>
      * @return String
      */
-    String getName() {
+    public String getName() {
         return name;
     } // getName
 
@@ -87,7 +96,7 @@ public class Var implements Cloneable,
      * <UNCOMMENTED>
      * @return String
      */
-    String getObj() {
+    public String getObject() {
         return object;
     } // getObj
 
@@ -97,9 +106,6 @@ public class Var implements Cloneable,
      public
      */
     public String toString() {
-//         if(object.equals("this"))
-        //            return (name);
-        //        else
         return ( object + "." + name ).substring( 5 );
     } // toString
 

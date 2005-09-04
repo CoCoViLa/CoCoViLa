@@ -6,6 +6,7 @@ import ee.ioc.cs.vsle.util.StringUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import ee.ioc.cs.vsle.synthesize.Var;
 
 /**
  * <p>Title: ee.ioc.cs.editor.vclass.ClassField</p>
@@ -17,21 +18,23 @@ import java.util.ArrayList;
  */
 public class ClassField implements Cloneable, Serializable {
 
-	public String name;
-	public String type;
-	public String value;
-	public String description;
-	public boolean specField = false;
-	public boolean alias = false;
-	public boolean watched = false;
-	public ArrayList vars;
-	public ClassGraphics knownGraphics;
-	public ClassGraphics defaultGraphics;
+	protected String name;
+	protected String type;
+	protected String value;
+	protected String description;
+        private Var m_parentVar;
+	protected boolean specField = false;
+	protected boolean alias = false;
+	protected boolean watched = false;
+	protected ArrayList vars;
+	protected ClassGraphics knownGraphics;
+	protected ClassGraphics defaultGraphics;
 
 	/**
 	 * Class constructor.
 	 */
-	public ClassField() {
+	public ClassField( String name ) {
+            this.name = name;
 	} // ee.ioc.cs.editor.vclass.ClassField
 
 	/**
@@ -198,5 +201,61 @@ public class ClassField implements Cloneable, Serializable {
 		xml += "/>\n";
 		return xml;
 	}
+
+        public void setParentVar( Var var ) {
+            m_parentVar = var;
+        }
+
+        public Var getParentVar() {
+            return m_parentVar;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getType() {
+            return type;
+        }
+
+        public void setType( String type ) {
+            this.type = type;
+        }
+
+        public String getValue() {
+            return value;
+        }
+
+        public void setValue( String value ) {
+            this.value = value;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public ArrayList getVars() {
+            return vars;
+        }
+
+        public void setWatched( boolean value ) {
+            this.watched = value;
+        }
+
+        public void setKnownGraphics( ClassGraphics gr ) {
+            knownGraphics = gr;
+        }
+
+        public ClassGraphics getKnownGraphics() {
+            return knownGraphics;
+        }
+
+        public void setDefaultGraphics( ClassGraphics gr ) {
+            defaultGraphics = gr;
+        }
+
+        public ClassGraphics getDefaultGraphics() {
+            return defaultGraphics;
+        }
 
 }

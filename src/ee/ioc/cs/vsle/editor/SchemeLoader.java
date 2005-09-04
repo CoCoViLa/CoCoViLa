@@ -182,12 +182,8 @@ public class SchemeLoader {
 				String type = new String(attrs.getValue("type"));
 				String value = attrs.getValue("value");
 
-				ClassField cf = new ClassField();
-				cf.name = name;
-				cf.type = type;
-				if (value != null) {
-					cf.value = value;
-				}
+				ClassField cf = new ClassField( name, type, value );
+
 				obj.fields.add(cf);
 			}
 
@@ -227,8 +223,8 @@ public class SchemeLoader {
 						for (int i = 0; i < pClass.fields.size(); i++) {
 							field = (ClassField) pClass.fields.get(i);
 							objField = (ClassField) obj.fields.get(i);
-							objField.knownGraphics = field.knownGraphics;
-							objField.defaultGraphics = field.defaultGraphics;
+							objField.setKnownGraphics( field.getKnownGraphics() );
+							objField.setDefaultGraphics( field.getDefaultGraphics() );
 
 						}
 
@@ -287,8 +283,8 @@ public class SchemeLoader {
 						for (int i = 0; i < pClass.fields.size(); i++) {
 							field = (ClassField) pClass.fields.get(i);
 							objField = (ClassField) relObj.fields.get(i);
-							objField.knownGraphics = field.knownGraphics;
-							objField.defaultGraphics = field.defaultGraphics;
+							objField.setKnownGraphics( field.getKnownGraphics() );
+							objField.setDefaultGraphics( field.getDefaultGraphics() );
 
 						}
 

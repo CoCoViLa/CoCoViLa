@@ -188,7 +188,7 @@ public class Port implements Cloneable, Serializable {
 
 	public String getType() {
 		for (int i = 0; i < obj.getFields().size(); i++) {
-			if (((ClassField) obj.getFields().get(i)).name.equals(name)) {
+			if (((ClassField) obj.getFields().get(i)).getName().equals(name)) {
 				return ((ClassField) obj.getFields().get(i)).type;
 			}
 		}
@@ -197,7 +197,7 @@ public class Port implements Cloneable, Serializable {
 
 	public ClassField getField() {
 		for (int i = 0; i < obj.getFields().size(); i++) {
-			if (((ClassField) obj.getFields().get(i)).name.equals(name)) {
+			if (((ClassField) obj.getFields().get(i)).getName().equals(name)) {
 				return ((ClassField) obj.getFields().get(i));
 			}
 		}

@@ -15,11 +15,11 @@ public class Alias extends ClassField {
 	 * Class constructor.
 	 * @param name String - alias name.
 	 */
-	public Alias(String name) {
-		vars = new ArrayList();
-		this.name = name;
-		type = ALIAS;
-	} // ee.ioc.cs.editor.vclass.Alias
+        public Alias( String name ) {
+            super( name );
+            vars = new ArrayList();
+            type = ALIAS;
+        } // ee.ioc.cs.editor.vclass.Alias
 
 	/**
 	 * Adds a variable to the variables ArrayList.
@@ -58,13 +58,12 @@ public class Alias extends ClassField {
 				}
 
 
-				ClassField cfNew = new ClassField();
-				cfNew.type = newType;
-				cfNew.name = input[i];
+				ClassField cfNew = new ClassField( input[i], newType);
+
 				vars.add(cfNew);
 			} else if (input[i].startsWith("*.")) {
-				ClassField cf = new ClassField();
-				cf.name = input[i];
+				ClassField cf = new ClassField( input[i] );
+
 				vars.add(cf);
 			} else {
 				throw new UnknownVariableException(input[i]);

@@ -59,12 +59,12 @@ public class RelObj extends GObj {
 			if (field.defaultGraphics != null) {
 				field.defaultGraphics.angle = angle;
 				field.defaultGraphics.drawSpecial(xModifier,
-					yModifier, getXsize(), getYsize(), g, field.name, field.value);
+					yModifier, getXsize(), getYsize(), g, field.getName(), field.value);
 			}
 			if (field.isKnown() && field.knownGraphics != null) {
 				field.knownGraphics.angle = angle;
 				field.knownGraphics.drawSpecial(xModifier,
-					yModifier, getXsize(), getYsize(), g, field.name, field.value);
+					yModifier, getXsize(), getYsize(), g, field.getName(), field.value);
 			}
 		}
 	}

@@ -76,18 +76,18 @@ public class ProgramRunner {
 				lastObj = f.get(genObject);
 				for (int j = 0; j < obj.fields.size(); j++) {
 					field = (ClassField) obj.fields.get(j);
-					if (!field.type.equals("alias")) {
+					if (!field.getType().equals("alias")) {
 						clasType = f.getType();
-						f2 = clasType.getDeclaredField(field.name);
+						f2 = clasType.getDeclaredField(field.getName());
 						Class c = f2.getType();
-						fullName = obj.name + "." + field.name;
+						fullName = obj.name + "." + field.getName();
 						varIsComputed = false;
 						if (foundVars != null) {
 							Iterator allVarsIter = foundVars.iterator();
 							while (allVarsIter.hasNext()) {
 								var = (Var) allVarsIter.next();
 
-								if (fullName.equals(var.object.toString().substring(5) + "." + var.field)) {
+								if (fullName.equals(var.getObject().toString().substring(5) + "." + var.getField())) {
 									varIsComputed = true;
 								}
 							}
@@ -95,22 +95,22 @@ public class ProgramRunner {
 						if (varIsComputed) {
 							if (c.toString().equals("int")) {
 								in = f2.getInt(lastObj);
-								field.value = Integer.toString(in);
+								field.setValue( Integer.toString(in) );
 							} else if (c.toString().equals("double")) {
 								d = f2.getDouble(lastObj);
-								field.value = Double.toString(d);
+								field.setValue( Double.toString(d) );
 							} else if (c.toString().equals("boolean")) {
 								b = f2.getBoolean(lastObj);
-								field.value = Boolean.toString(b);
+								field.setValue( Boolean.toString(b) );
 							} else if (c.toString().equals("char")) {
 								char ch = f2.getChar(lastObj);
-								field.value = Character.toString(ch);
+								field.setValue( Character.toString(ch) );
 							} else if (c.toString().equals("float")) {
 								fl = f2.getFloat(lastObj);
-								field.value = Float.toString(fl);
+								field.setValue( Float.toString(fl) );
 							} else {// it is type object
 								Object o = f2.get(lastObj);
-								field.value = o.toString();
+								field.setValue( o.toString() );
 							}
 						}
 						//field.updateGraphics();
