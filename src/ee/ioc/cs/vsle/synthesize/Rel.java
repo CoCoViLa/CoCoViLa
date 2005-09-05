@@ -120,6 +120,10 @@ class Rel implements Cloneable, Serializable {
 		method = m;
 	}
 
+        String getMethod() {
+            return method;
+        }
+
 	void setType(int t) {
 		type = t;
 	}

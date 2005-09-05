@@ -87,7 +87,7 @@ public class ProgramRunner {
 							while (allVarsIter.hasNext()) {
 								var = (Var) allVarsIter.next();
 
-								if (fullName.equals(var.getObject().toString().substring(5) + "." + var.getField())) {
+								if (fullName.equals( ((String)var.getObject().toString() + "." + var.getField()).substring(5) ) ) {
 									varIsComputed = true;
 								}
 							}
