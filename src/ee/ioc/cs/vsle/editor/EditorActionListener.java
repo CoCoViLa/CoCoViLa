@@ -61,6 +61,7 @@ public class EditorActionListener implements ActionListener {
                 int returnVal = fc.showOpenDialog( null );
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File file = fc.getSelectedFile();
+                    editor.setLastPath( file.getAbsolutePath() );
                     db.p( "Loading scheme: " + file.getName() );
                     try {
                         editor.getCurrentCanvas().loadScheme( file );

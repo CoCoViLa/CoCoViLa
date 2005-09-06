@@ -36,6 +36,11 @@ public class Planner {
         ProgramRunner.clearFoundVars();
         m_algorithm.clear();
 
+//        for( Iterator it = m_problem.getAllVars().values().iterator(); it.hasNext(); ) {
+//            Var var = (Var)it.next();
+//            System.err.println( "Var: " + var + "\n\tRels: " + var.getRels().size() + "\n" + var.getRels() + "\n");
+//        }
+
         //manage axioms
         for ( Iterator axiomIter = m_problem.getAxioms().iterator(); axiomIter
                                    .hasNext(); ) {
@@ -46,8 +51,8 @@ public class Planner {
         }
 
         //invoke linear planning
-        if ( RuntimeProperties.isDebugEnabled() )
-            db.p( m_problem.toString() );
+        //if ( RuntimeProperties.isDebugEnabled() )
+        //    db.p( m_problem.toString() );
 
         if ( linearForwardSearch( m_problem, m_algorithm, computeAll, false, false ) &&
              !computeAll ) {
@@ -65,7 +70,7 @@ public class Planner {
                 linearForwardSearch( m_problem, m_algorithm, computeAll, false, false );
             }
         }
-
+        //ProgramRunner.printFoundVars();
         return m_algorithm;
     }
 
@@ -94,22 +99,12 @@ public class Planner {
                     problem.getKnownVars().add( input );
                     if ( input.getField().isAlias() ) {
                         for( int i = 0; i < input.getField().getVars().size(); i++ ) {
-                            /*System.err.println( "from alias: "
-                                                + "\n\tinput.getName()      " + input.getName()
-                                                + "\n\tinput.getObj()       " + input.getObject()
-                                                + "\n\tinput.type           " + input.getType()
-                                                + "\n\tinput.toString()     " + input.toString()
-                                                + "\n\tinput.field.name     " + input.getField().getName()
-                                                + "\n\tinput.field.toString " + input.getField().toString()
-                                                + "\n\tinput.field.vars     " + input.getField().getVars() );
-                            System.err.println( "Parent Var: " + ((ClassField)input.getField().getVars().get(i)).getParentVar());*/
                             String object = ( input.getObject().equals("this") ) ? "" : input.getObject().substring(5) + ".";
                             Var var = problem.getVarByFullName(object + input.getField().getVars().get(i).toString());
 
                             if( var != null ) {
                                 problem.getKnownVars().add( var );
                             }
-                            //System.err.println( "alias var " + var + "\n\n");
                         }
                     }
                 }
@@ -140,9 +135,6 @@ public class Planner {
                 }
             }
         }
-//        else {
-//            algorithm = problem.algorithm;
-//        }
 
         allTargetVars = new HashSet( problem.getTargetVars() );
         HashSet foundVars = new HashSet(problem.getKnownVars());
@@ -204,10 +196,10 @@ public class Planner {
 
                             boolean relIsNeeded = false;
 
-                            for ( int i = 0; i < rel.getOutputs().size(); i++ ) {
-
-                                if ( RuntimeProperties.isDebugEnabled() )
+                            if ( RuntimeProperties.isDebugEnabled() )
                                     db.p( "tema outputsid " + rel.getOutputs() );
+
+                            for ( int i = 0; i < rel.getOutputs().size(); i++ ) {
 
                                 Var relVar = ( Var ) rel.getOutputs().get( i );
                                 if ( !foundVars.contains( relVar ) ) {
@@ -224,6 +216,9 @@ public class Planner {
                             if ( rel.getOutputs().isEmpty() ) {
                                 relIsNeeded = true;
                             }
+                            if ( RuntimeProperties.isDebugEnabled() )
+                                db.p( "relIsNeeded " + relIsNeeded + " foundSubGoal " + foundSubGoal);
+
                             if ( relIsNeeded ) {
 
                                 if ( RuntimeProperties.isDebugEnabled() )
@@ -258,15 +253,19 @@ public class Planner {
                     allTargetVars );
         }
 
-        if( isSubtask ) {
-            problem.getTargetVars().addAll( allTargetVarsBackup );
-        }
-
         if ( RuntimeProperties.isDebugEnabled() )
             db.p( "algorithm" + algorithm.toString() + "\n" );
 
         ProgramRunner.addAllFoundVars(foundVars);
         problem.getFoundVars().addAll(foundVars);
+
+        if( isSubtask ) {
+            problem.getTargetVars().addAll( allTargetVarsBackup );
+
+            if( !foundSubGoal ) {
+                foundSubGoal = problem.getFoundVars().containsAll(problem.getSubGoal().getOutputs());
+            }
+        }
 
         return ( isSubtask )
                 ? foundSubGoal

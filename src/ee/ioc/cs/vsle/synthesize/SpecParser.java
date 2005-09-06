@@ -507,7 +507,7 @@ public class SpecParser {
                             wildcardVar ) ) {
                         var = ( Var ) problem.getAllVars().get( obj + "." + clf.getName() + "." +
                                 wildcardVar );
-                        var.addRel( rel );
+                        //var.addRel( rel );//
                         rel.addOutput( var );
                     } else {
                         throw new UnknownVariableException( obj + "." + clf.getName() + "." +
@@ -519,7 +519,9 @@ public class SpecParser {
         }
         cf = ( ClassField ) classRelation.getOutputs().get( 0 );
         if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-            rel.addInput( ( Var ) problem.getAllVars().get( obj + "." + cf.getName() ) );
+            Var varWithWildcard = ( Var ) problem.getAllVars().get( obj + "." + cf.getName() );
+            rel.addInput( varWithWildcard );
+            varWithWildcard.addRel( rel );
         }
 
         rel.setUnknownInputs( rel.getInputs().size() );

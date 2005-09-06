@@ -49,6 +49,11 @@ public class ProgramRunner {
             return false;
         }
 
+        public static void printFoundVars() {
+            if ( RuntimeProperties.isDebugEnabled() )
+                System.err.println( "foundVars: " + foundVars );
+        }
+
 	void runPropagate(Object genObject, ObjectList objects) {
 		try {
 			Class clasType;
