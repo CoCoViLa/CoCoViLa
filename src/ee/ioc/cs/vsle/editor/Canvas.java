@@ -53,7 +53,7 @@ public class Canvas extends JPanel implements ActionListener {
 			palette = new Palette(vPackage, mListener, this);
 			validate();
 		} else {
-			JOptionPane.showMessageDialog(null, "Cannot read file " + f, "Error",
+			JOptionPane.showMessageDialog(this, "Cannot read file " + f, "Error",
 				JOptionPane.INFORMATION_MESSAGE);
 		}
 	}

@@ -32,8 +32,12 @@ public class EditorActionListener implements ActionListener {
              e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem" ) {
 
             if ( e.getActionCommand().equals( Menu.SAVE_SCHEME ) ) {
+                if( editor.getCurrentPackage() == null ) {
+                    JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                    return;
+                }
 
-                JFileChooser fc = new JFileChooser( editor.getLastPath() );
+                JFileChooser fc = new JFileChooser( editor.getCurrentPackage().getPath() );
                 CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.extensionSyn,
                         CustomFileFilter.descriptionSyn );
                 fc.setFileFilter( synFilter );
@@ -53,7 +57,11 @@ public class EditorActionListener implements ActionListener {
                     editor.getCurrentCanvas().saveScheme( file );
                 }
             } else if ( e.getActionCommand().equals( Menu.LOAD_SCHEME ) ) {
-                JFileChooser fc = new JFileChooser( editor.getLastPath() );
+                if( editor.getCurrentPackage() == null ) {
+                    JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                    return;
+                }
+                JFileChooser fc = new JFileChooser( editor.getCurrentPackage().getPath() );
                 CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.extensionSyn,
                         CustomFileFilter.descriptionSyn );
                 fc.setFileFilter( synFilter );
@@ -97,22 +105,34 @@ public class EditorActionListener implements ActionListener {
                 } else {
                     message = "No packages loaded";
                 }
-                JOptionPane.showMessageDialog( null, message );
+                JOptionPane.showMessageDialog( editor, message );
             } else if ( e.getActionCommand().equals( Menu.PRINT ) ) {
-                editor.getCurrentCanvas().print();
+                if( editor.getCurrentCanvas() != null ) {
+                    editor.getCurrentCanvas().print();
+                }
             } else if ( e.getActionCommand().equals( Menu.EXIT ) ) {
                 editor.exitApplication();
             } else if ( e.getActionCommand().equals( Menu.GRID ) ) {
-                editor.getCurrentCanvas().setGridVisible( !editor.getCurrentCanvas().isGridVisible() );
+                if( editor.getCurrentCanvas() != null ) {
+                    editor.getCurrentCanvas().setGridVisible(
+                            !editor.getCurrentCanvas().isGridVisible() );
+                }
             } else if ( e.getActionCommand().equals( Menu.CLEAR_ALL ) ) {
-                editor.getCurrentCanvas().clearObjects();
+                if( editor.getCurrentCanvas() != null ) {
+                    editor.getCurrentCanvas().clearObjects();
+                }
             } else if ( e.getActionCommand().equals( Menu.SPECIFICATION ) ) {
-                ProgramTextEditor programEditor = new ProgramTextEditor( editor.getCurrentCanvas().
-                        connections, editor.getCurrentCanvas().objects,
-                                                  editor.getCurrentCanvas().vPackage, editor );
+                if( editor.getCurrentCanvas() != null ) {
+                    ProgramTextEditor programEditor = new ProgramTextEditor( editor.
+                            getCurrentCanvas().
+                            connections, editor.getCurrentCanvas().objects,
+                            editor.getCurrentCanvas().vPackage, editor );
 
-                programEditor.setSize( 550, 450 );
-                programEditor.setVisible( true );
+                    programEditor.setSize( 550, 450 );
+                    programEditor.setVisible( true );
+                } else {
+                    JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                }
             }
             /* else if (e.getActionCommand().equals("Planner")) {
               PlannerEditor plannerEditor = new PlannerEditor(objects, connections);
@@ -121,7 +141,9 @@ public class EditorActionListener implements ActionListener {
 
               } */
             else if ( e.getActionCommand().equals( Menu.SELECT_ALL ) ) {
-                editor.getCurrentCanvas().selectAllObjects();
+                if( editor.getCurrentCanvas() != null ) {
+                    editor.getCurrentCanvas().selectAllObjects();
+                }
             }
             /* else if (e.getActionCommand().equals("Run")) {
               ee.ioc.cs.editor.editor.ResultsWindow resultsWindow= new ee.ioc.cs.editor.editor.ResultsWindow(objects, connections, classes);

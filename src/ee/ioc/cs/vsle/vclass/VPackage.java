@@ -16,7 +16,12 @@ public class VPackage {
 
 	public String name;
 	public String description;
+        private String path;
 	public ArrayList classes = new ArrayList();
+
+        public VPackage( String path ) {
+            this.path = path;
+        }
 
 	/**
 	 * Detects whether a package includes a specified class or not.
@@ -68,5 +73,9 @@ public class VPackage {
             }
 
             return packClassName;
+        }
+
+        public String getPath() {
+            return path;
         }
 }

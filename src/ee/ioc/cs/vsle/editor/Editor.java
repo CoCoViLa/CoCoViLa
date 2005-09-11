@@ -288,7 +288,7 @@ public class Editor extends JFrame implements ChangeListener {
 	 * @param text - text displayed in the information dialog.
 	 */
 	public void showInfoDialog(String title, String text) {
-		JOptionPane.showMessageDialog(null, text, title,
+		JOptionPane.showMessageDialog(this, text, title,
 			JOptionPane.INFORMATION_MESSAGE);
 	}
 
@@ -307,7 +307,7 @@ public class Editor extends JFrame implements ChangeListener {
 	 * Close application.
 	 */
 	public void exitApplication() {
-		int confirmed = JOptionPane.showConfirmDialog(null, "Exit Application?",
+		int confirmed = JOptionPane.showConfirmDialog(this, "Exit Application?",
 			Menu.EXIT, JOptionPane.OK_CANCEL_OPTION);
 		switch (confirmed) {
 			case JOptionPane.OK_OPTION:
