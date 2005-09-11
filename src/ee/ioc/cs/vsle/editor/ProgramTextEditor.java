@@ -53,7 +53,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
             specText.add( areaScrollPane, BorderLayout.CENTER );
             JToolBar progToolBar = new JToolBar();
             progToolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
-            parseSpec = new JButton( "Parse spec" );
+            parseSpec = new JButton( "Compute goal" );
             parseSpec.addActionListener( this );
             progToolBar.add( parseSpec );
             computeAll = new JButton( "Compute all" );
@@ -112,7 +112,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
             tabbedPane.addTab( "Run results", runResult );
 
             SpecGenerator sgen = new SpecGenerator();
-            textArea.append( sgen.generateSpec( objects, relations, vPackage.name ) );
+            textArea.append( sgen.generateSpec( objects, relations, vPackage ) );
 
             getContentPane().add( tabbedPane );
             validate();

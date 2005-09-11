@@ -30,8 +30,8 @@ import javax.swing.ImageIcon;
  * commented out in the ee.ioc.cs.editor.synthesize.Synthesizer class)
  */
 public class ResultsWindow extends JFrame
-	implements ActionListener {
-	JTextArea textArea;
+	/*implements ActionListener*/ {
+	/*JTextArea textArea;
 	Object genObject;
 	ArrayList watchPorts;
 	JButton run;
@@ -138,5 +138,5 @@ public class ResultsWindow extends JFrame
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
-	}
+	}*/
 }

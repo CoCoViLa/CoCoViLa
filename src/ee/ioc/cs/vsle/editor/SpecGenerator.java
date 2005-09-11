@@ -16,11 +16,11 @@ import ee.ioc.cs.vsle.util.db;
  * To change this template use Options | File Templates.
  */
 public class SpecGenerator {
-	public String generateSpec(ObjectList objects, ArrayList relations, String packname) {
+	public String generateSpec(ObjectList objects, ArrayList relations, VPackage pack) {
 		GObj obj;
 		ClassField field;
-		String methName = RuntimeProperties.packageDir + packname + ".meth";
-		String specName = RuntimeProperties.packageDir + packname + ".spec";
+		String methName = RuntimeProperties.packageDir + pack.name + ".meth";
+		String specName = RuntimeProperties.packageDir + pack.name + ".spec";
 		String method = "";
 		String spec  ="";
 		try {
@@ -48,8 +48,8 @@ public class SpecGenerator {
 
 
 		StringBuffer s = new StringBuffer();
-		s.append("public class GeneratedClass {");
-		s.append("\n    /*@ specification  GeneratedClass {\n");
+		s.append("public class " + pack.getPackageClassName() + " {");
+		s.append("\n    /*@ specification  " + pack.getPackageClassName() + " {\n");
 
 		for (int i = 0; i < objects.size(); i++) {
 			obj = (GObj) objects.get(i);

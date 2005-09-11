@@ -56,6 +56,7 @@ public class Editor extends JFrame implements ChangeListener {
 		initialize();
 		File file = new File(fileName);
 		loadPackage(file);
+                validate();
 	} // Editor
 
 	/**
@@ -80,6 +81,7 @@ public class Editor extends JFrame implements ChangeListener {
 		posInfo.setText("-");
 		makeMenu();
 		getContentPane().add(mainPanel);
+                getContentPane().add(tabbedPane);
 		Look look = new Look();
 		look.setGUI(this);
 		Look.changeLayout(
@@ -499,8 +501,6 @@ public class Editor extends JFrame implements ChangeListener {
 			String packageName = f.getName().substring(0, f.getName().indexOf("."));
 			tabbedPane.addTab(packageName, canvas);
 			tabbedPane.setSelectedComponent(canvas);
-			getContentPane().add(tabbedPane);
-			validate();
 		}
 	} // loadPackage
 

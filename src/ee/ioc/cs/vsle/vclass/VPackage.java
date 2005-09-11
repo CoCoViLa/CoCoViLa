@@ -1,6 +1,8 @@
 package ee.ioc.cs.vsle.vclass;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 /**
  * <p>Title: ee.ioc.cs.editor.vclass.VPackage</p>
@@ -51,4 +53,20 @@ public class VPackage {
 		return null;
 	} // getClass
 
+        public String getPackageClassName() {
+            String packClassName = name.substring( 0, 1 ).toUpperCase()
+                                   .concat( name.substring( 1, name.length() ) );
+
+            Pattern pattern = Pattern.compile( "[ \t]+" );
+            Matcher matcher = pattern.matcher( packClassName );
+            packClassName = matcher.replaceAll( "" );
+
+            int i = 0;
+
+            while( hasClass( packClassName ) ) {
+                packClassName = packClassName + "_" + i++;
+            }
+
+            return packClassName;
+        }
 }
