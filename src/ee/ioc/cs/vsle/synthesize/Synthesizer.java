@@ -79,8 +79,8 @@ public class Synthesizer {
             field = ( ClassField ) ac.fields.get( i );
             if ( !( field.getType().equals( "alias" ) || field.getType().equals( "void" ) ) ) {
                 if ( field.isSpecField() ) {
-                    prog += "    public _" + field.getType() + "_ " + field.getName() + " = new _" +
-                            field.getType() + "_();\n";
+                    prog += "    public " + field.getType() + " " + field.getName() + " = new " +
+                            field.getType() + "();\n";
                 } else if ( isPrimitive( field.getType() ) ) {
                     prog += "    public " + field.getType() + " " + field.getName() + ";\n";
                 } else if ( isArray( field.getType() ) ) {
@@ -103,7 +103,7 @@ public class Synthesizer {
         matcher = pattern.matcher( fileString );
 
         if ( matcher.find() ) {
-            fileString = matcher.replaceAll( "public class _" + mainClassName + "_ implements " +
+            fileString = matcher.replaceAll( "public class " + mainClassName + " implements " +
                                              GENERATED_INTERFACE_NAME );
         }
 
@@ -157,9 +157,9 @@ public class Synthesizer {
                 matcher = pattern.matcher( fileString );
 
                 // replace it with _classname_
-                if ( matcher.find() ) {
-                    fileString = matcher.replaceAll( "public class _" + pClass.name + "_" );
-                }
+//                if ( matcher.find() ) {
+//                    fileString = matcher.replaceAll( "public class _" + pClass.name + "_" );
+//                }
                 SpecParser specParser = new SpecParser();
                 String declars = "";
 
@@ -182,8 +182,8 @@ public class Synthesizer {
                                     } else if ( isArray( type ) ) {
                                         declars += "    public " + type + " " + vs[ i ] + " ;\n";
                                     } else if ( classes.getType( type ) != null ) {
-                                        declars += "    public _" + type + "_ " + vs[ i ] +
-                                                " = new _" + type + "_();\n";
+                                        declars += "    public " + type + " " + vs[ i ] +
+                                                " = new " + type + "();\n";
 
                                     } else {
                                         declars += "    public " + type + " " + vs[ i ] + " = new " +
@@ -208,16 +208,17 @@ public class Synthesizer {
                     fileString = matcher.replaceAll( "\n    " + declars );
                 }
 
-                try {
+                writeFile( fileString, pClass.name );
+                /*try {
                     PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter(
                             RuntimeProperties.genFileDir + System.getProperty( "file.separator" ) +
-                            "_" + pClass.name + "_.java" ) ) );
+                            "" + pClass.name + ".java" ) ) );
 
                     out.println( fileString );
                     out.close();
                 } catch ( Exception e ) {
                     db.p( e );
-                }
+                }*/
             }
         }
     }
@@ -229,8 +230,8 @@ public class Synthesizer {
     void writeFile( String prog, String mainClassName ) {
         try {
             PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter(
-                    RuntimeProperties.genFileDir + System.getProperty( "file.separator" ) + "_" +
-                    mainClassName + "_" + ".java" ) ) );
+                    RuntimeProperties.genFileDir + System.getProperty( "file.separator" ) +
+                    mainClassName + ".java" ) ) );
 
             out.println( prog );
             out.close();

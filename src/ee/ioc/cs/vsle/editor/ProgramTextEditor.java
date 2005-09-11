@@ -232,7 +232,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
             ArrayList watchFields = watchableFields( objects );
 
             try {
-                runnableObject = runner.compileAndRun( "_" + mainClassName + "_",
+                runnableObject = runner.compileAndRun( mainClassName,
                         watchFields, runResultArea );
                 if ( runnableObject != null ) {
                     tabbedPane.setSelectedComponent( runResult );

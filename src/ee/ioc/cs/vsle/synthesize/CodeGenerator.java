@@ -69,7 +69,8 @@ public class CodeGenerator {
         for ( Iterator iter = rel.getSubtasks().iterator(); iter.hasNext(); ) {
             subNum = subCount++;
 
-            alg.append( cOT( OT_NOC, 0 ) + "class Subtask_" + subNum + " implements Subtask {\n" );
+            alg.append( cOT( OT_NOC, 0 ) + "class " + Synthesizer.SUBTASK_INTERFACE_NAME + "_" + subNum
+                        + " implements " + Synthesizer.SUBTASK_INTERFACE_NAME + " {\n" );
             alg.append( cOT( OT_INC, 1 ) + "public Object[] run(Object[] in) throws Exception {\n" );
 
             Rel subtask = ( Rel ) iter.next();
