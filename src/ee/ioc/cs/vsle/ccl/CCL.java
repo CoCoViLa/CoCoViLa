@@ -9,6 +9,7 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import javax.swing.JOptionPane;
 
 /**
  * <p>Title: ee.ioc.cs.editor.ccl.CCL - Compiling Class Loader</p>
@@ -75,7 +76,15 @@ public class CCL
 			throw new CompileException("File " + javaFile + " does not exist.");
 		}
 
-		Process p = Runtime.getRuntime().exec("javac  -classpath " + RuntimeProperties.genFileDir + " " + javaFile);
+                Process p = null;
+                try {
+                    p = Runtime.getRuntime().exec( "javac  -classpath " +
+                                                   RuntimeProperties.genFileDir + " " + javaFile );
+                } catch ( IOException ex ) {
+                    JOptionPane.showMessageDialog( null, ex.getMessage(),
+                                                   "Compilation error", JOptionPane.ERROR_MESSAGE );
+                    return false;
+                }
 
 		db.p("javac  -classpath " + RuntimeProperties.genFileDir + " " + javaFile);
 

@@ -12,6 +12,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import javax.swing.JTextArea;
+import java.io.*;
 
 /**
  */
@@ -130,7 +131,9 @@ public class ProgramRunner {
 	Object compileAndRun(String programName, ArrayList watchFields,
 						 JTextArea runResultArea) throws CompileException {
 		genObject = makeGeneratedObject(programName);
-		run(watchFields, runResultArea);
+                if( genObject != null ) {
+                    run( watchFields, runResultArea );
+                }
 		return genObject;
 	}
 
@@ -196,19 +199,20 @@ public class ProgramRunner {
 		}
 	}
 
-	Object makeGeneratedObject(String programName) throws CompileException {
-		CCL classLoader = new CCL();
+        Object makeGeneratedObject( String programName ) throws CompileException {
+            CCL classLoader = new CCL();
 
-		try {
-			classLoader.compile(programName);
-			Class clas = classLoader.loadClass(programName);
-			Object o = clas.newInstance();
+            Object inst = null;
+            try {
+                if ( classLoader.compile( programName ) ) {
+                    Class clas = classLoader.loadClass( programName );
+                    inst = clas.newInstance();
+                }
 
-			return o;
-		} catch (Exception e) {
-			e.printStackTrace(System.err);
-			return null;
-		}
-	}
-
+            } catch ( Exception e ) {
+                e.printStackTrace( System.err );
+                return null;
+            }
+            return inst;
+        }
 }
