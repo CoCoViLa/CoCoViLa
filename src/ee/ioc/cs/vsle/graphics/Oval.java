@@ -4,8 +4,6 @@ import java.io.*;
 
 import java.awt.*;
 
-import ee.ioc.cs.vsle.editor.*;
-
 public class Oval extends Shape implements Serializable {
 
 	Color color;

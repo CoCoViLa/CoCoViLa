@@ -1,10 +1,8 @@
 package ee.ioc.cs.vsle.vclass;
 
+import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
-import ee.ioc.cs.vsle.util.*;
-
-import java.awt.*;
 
 public class GObjGroup extends GObj
 	implements Serializable {

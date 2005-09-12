@@ -1,11 +1,10 @@
 package ee.ioc.cs.vsle.vclass;
 
-import ee.ioc.cs.vsle.graphics.Shape;
-import ee.ioc.cs.vsle.graphics.Text;
-import ee.ioc.cs.vsle.util.*;
+import java.awt.Graphics2D;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.awt.*;
+
+import ee.ioc.cs.vsle.graphics.*;
 
 public class ClassGraphics implements Serializable {
 

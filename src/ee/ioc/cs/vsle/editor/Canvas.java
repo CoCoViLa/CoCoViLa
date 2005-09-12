@@ -6,8 +6,6 @@ import ee.ioc.cs.vsle.packageparse.PackageParser;
 import ee.ioc.cs.vsle.util.PropertyBox;
 import ee.ioc.cs.vsle.util.VMath;
 import ee.ioc.cs.vsle.util.PrintUtilities;
-import ee.ioc.cs.vsle.util.db;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -97,11 +95,7 @@ public class Canvas extends JPanel implements ActionListener {
 		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
 		if (vis != null) {
 			int v = Integer.parseInt(vis);
-			if (v < 1) {
-				return false;
-			} else {
-				return true;
-			}
+			return v >= 1;
 		}
 		return false;
 	} // getGridVisibility

@@ -1,17 +1,11 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.vclass.ClassField;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.util.FileFuncs;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
 import java.awt.*;
-import java.util.ArrayList;
 
 /**
  * Created by IntelliJ IDEA.

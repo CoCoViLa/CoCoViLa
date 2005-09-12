@@ -5,7 +5,6 @@ import java.util.*;
 
 import java.awt.*;
 
-import ee.ioc.cs.vsle.vclass.*;
 
 public abstract class Shape implements Serializable, Cloneable {
 

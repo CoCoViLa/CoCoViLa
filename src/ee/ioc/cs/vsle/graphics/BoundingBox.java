@@ -60,7 +60,7 @@ public class BoundingBox extends Shape implements Serializable {
 	} // setName
 
 	public String getName() {
-		return this.name;
+		return name;
 	} // getName
 
 	public void setSelected(boolean b) {

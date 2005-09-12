@@ -109,8 +109,7 @@ public class SplashWindow extends Window {
 		}
 
 		try {
-			Thread t = new Thread();
-			t.sleep(2000);
+			Thread.sleep(2000);
 		} catch (InterruptedException ie) {
 		}
 

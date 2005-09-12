@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**

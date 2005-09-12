@@ -12,7 +12,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 import javax.swing.JTextArea;
-import java.io.*;
 
 /**
  */
@@ -93,7 +92,7 @@ public class ProgramRunner {
 							while (allVarsIter.hasNext()) {
 								var = (Var) allVarsIter.next();
 
-								if (fullName.equals( ((String)var.getObject().toString() + "." + var.getField()).substring(5) ) ) {
+								if (fullName.equals( (var.getObject().toString() + "." + var.getField()).substring(5) ) ) {
 									varIsComputed = true;
 								}
 							}

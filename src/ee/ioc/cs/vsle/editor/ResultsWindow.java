@@ -1,29 +1,6 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.GroupUnfolder;
-import ee.ioc.cs.vsle.vclass.ObjectList;
-import ee.ioc.cs.vsle.vclass.Port;
-import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.ccl.CCL;
-import ee.ioc.cs.vsle.util.db;
-
-import java.lang.reflect.Method;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-
-import java.awt.Font;
-import java.awt.Dimension;
-import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-
 import javax.swing.JFrame;
-import javax.swing.JButton;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
-import javax.swing.ImageIcon;
 
 /**
  * Class currently not in use. Fix reference to ee.ioc.cs.editor.synthesize.Synthesizer.makeProgram method (method

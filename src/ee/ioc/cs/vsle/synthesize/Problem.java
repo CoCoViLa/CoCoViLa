@@ -1,20 +1,7 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.Vector;
-import ee.ioc.cs.vsle.util.db;
+import java.io.*;
+import java.util.*;
 
 
 class Problem implements Cloneable, Serializable {

@@ -1,9 +1,8 @@
 package ee.ioc.cs.vsle.editor;
 
 import java.awt.Color;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
+
+import javax.swing.*;
 
 class GraphicalResult extends JFrame {
 
@@ -15,9 +14,9 @@ class GraphicalResult extends JFrame {
 
 //		drawingArea.addMouseMotionListener(mListener);
 //		drawingArea.setPreferredSize(drawAreaSize);
-		JScrollPane areaScrollPane = new JScrollPane(drawingArea,
-			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+//		JScrollPane areaScrollPane = new JScrollPane(drawingArea,
+//			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+//			JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 /*		mainPanel.setLayout(new BorderLayout());
                 mainPanel.add(areaScrollPane, BorderLayout.CENTER);

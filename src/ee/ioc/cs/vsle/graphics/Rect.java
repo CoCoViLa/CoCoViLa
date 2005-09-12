@@ -2,8 +2,6 @@ package ee.ioc.cs.vsle.graphics;
 
 import java.io.*;
 import java.util.*;
-import ee.ioc.cs.vsle.editor.Canvas;
-import ee.ioc.cs.vsle.util.db;
 
 import java.awt.*;
 
@@ -287,7 +285,7 @@ public class Rect extends Shape implements Serializable {
 	}
 
 	public void setTransparency(int d) {
-		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)d);
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), d);
 	}
 
 	public void setLineType(int lineType) {

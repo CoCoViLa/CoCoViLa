@@ -1,7 +1,5 @@
 package ee.ioc.cs.vsle.graphics;
 
-import ee.ioc.cs.vsle.util.db;
-
 import java.awt.*;
 
 /**

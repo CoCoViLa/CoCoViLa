@@ -1,10 +1,9 @@
 package ee.ioc.cs.vsle.vclass;
 
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.graphics.Shape;
+import java.awt.Graphics2D;
 
-import java.awt.*;
-import java.util.ArrayList;
+import ee.ioc.cs.vsle.graphics.Shape;
+import ee.ioc.cs.vsle.util.*;
 
 /**
 

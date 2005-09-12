@@ -1,7 +1,5 @@
 package ee.ioc.cs.vsle.vclass;
 
-import ee.ioc.cs.vsle.util.db;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 

@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.editor;
 
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.iconeditor.AboutDialog;
 import ee.ioc.cs.vsle.iconeditor.LicenseDialog;
@@ -7,9 +8,7 @@ import ee.ioc.cs.vsle.iconeditor.LicenseDialog;
 import javax.swing.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
-import java.awt.*;
 import java.io.File;
-import java.io.FileInputStream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -52,7 +51,7 @@ public class EditorActionListener implements ActionListener {
                                          CustomFileFilter.extensionSyn );
                     }
 
-                    editor.setLastPath( file.getAbsolutePath() );
+                    Editor.setLastPath( file.getAbsolutePath() );
                     db.p( "Saving scheme: " + file.getName() );
                     editor.getCurrentCanvas().saveScheme( file );
                 }
@@ -69,7 +68,7 @@ public class EditorActionListener implements ActionListener {
                 int returnVal = fc.showOpenDialog( null );
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File file = fc.getSelectedFile();
-                    editor.setLastPath( file.getAbsolutePath() );
+                    Editor.setLastPath( file.getAbsolutePath() );
                     db.p( "Loading scheme: " + file.getName() );
                     try {
                         editor.getCurrentCanvas().loadScheme( file );
@@ -79,7 +78,7 @@ public class EditorActionListener implements ActionListener {
                 }
 
             } else if ( e.getActionCommand().equals( Menu.LOAD ) ) {
-                JFileChooser fc = new JFileChooser( editor.getLastPath() );
+                JFileChooser fc = new JFileChooser( Editor.getLastPath() );
                 CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.extensionXML,
                         CustomFileFilter.descriptionXML );
 
@@ -90,14 +89,18 @@ public class EditorActionListener implements ActionListener {
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File pack = fc.getSelectedFile();
 
-                    editor.setLastPath( pack.getAbsolutePath() );
-                    editor.setRecentPackage( pack.getAbsolutePath() );
+                    Editor.setLastPath( pack.getAbsolutePath() );
+                    Editor.setMultyProperty( PropertyBox.RECENT_PACKAGES, pack.getAbsolutePath(), true );
+                    Editor.setMultyProperty( PropertyBox.PALETTE_FILE, pack.getAbsolutePath(), true );
                     db.p( "Loading package: " + pack.getName() );
                     editor.loadPackage( pack );
                     //editor.validate();
                 }
             } else if ( e.getActionCommand().equals( Menu.CLOSE ) ) {
-                editor.clearPane();
+                if ( editor.getCurrentPackage() != null ) {
+                    Editor.setMultyProperty( PropertyBox.PALETTE_FILE, editor.getCurrentPackage().getPath(), false );
+                    editor.clearPane();
+                }
             } else if ( e.getActionCommand().equals( Menu.INFO ) ) {
                 String message;
                 if ( editor.getCurrentPackage() != null ) {
@@ -151,10 +154,10 @@ public class EditorActionListener implements ActionListener {
               resultsWindow.setVisible(true);
               }*/
             else if ( e.getActionCommand().equals( Menu.DOCS ) ) {
-                String documentationUrl = editor.getSystemDocUrl();
+                String documentationUrl = Editor.getSystemDocUrl();
 
                 if ( documentationUrl != null && documentationUrl.trim().length() > 0 ) {
-                    editor.openInBrowser( documentationUrl );
+                    Editor.openInBrowser( documentationUrl );
                 } else {
                     editor.showInfoDialog( "Missing information",
                                            "No documentation URL defined in properties." );

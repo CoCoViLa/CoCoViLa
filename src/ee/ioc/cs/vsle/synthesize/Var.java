@@ -1,12 +1,9 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import ee.ioc.cs.vsle.vclass.ClassField;
-
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
-//import java.util.Iterator;
-import java.util.Set;
+import java.util.*;
+
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**
  * <p>Title: ee.ioc.cs.editor.synthesize.Var</p>

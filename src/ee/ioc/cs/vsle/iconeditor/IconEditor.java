@@ -1,28 +1,18 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import ee.ioc.cs.vsle.iconeditor.IconMouseOps;
-import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.graphics.*;
-import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
-
-import java.io.*;
-import java.util.ArrayList;
-import java.util.Properties;
-
-import java.awt.Graphics;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.AWTEvent;
-import java.awt.Color;
-import java.awt.GridLayout;
-import java.awt.BorderLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.BasicStroke;
+import java.awt.*;
 import java.awt.event.*;
+import java.io.*;
+import java.util.*;
 
 import javax.swing.*;
+
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.editor.Menu;
+import ee.ioc.cs.vsle.graphics.*;
+import ee.ioc.cs.vsle.graphics.Shape;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 public class IconEditor
 	extends JFrame {
@@ -110,7 +100,7 @@ public class IconEditor
 
 		Look look = new Look();
 		look.setGUI(this);
-		look.changeLayout(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+		Look.changeLayout(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
 			PropertyBox.DEFAULT_LAYOUT));
 	}
 
@@ -335,7 +325,7 @@ public class IconEditor
 		sb.append("<name>" + RuntimeProperties.packageName + "</name>\n");
 		sb.append("<description>" + RuntimeProperties.packageDesc + "</description>\n");
 		sb.append("</package>");
-		if (this.packageParamsOk) {
+		if (packageParamsOk) {
 			saveToFile(sb.toString(), "xml");
 		}
 	} // savePackage
@@ -791,9 +781,8 @@ public class IconEditor
 			// If file exists, confirm file overwrite, otherwise leave
 			// file as it is.
 			if (file.exists()) {
-				JOptionPane confirmPane = new JOptionPane();
 
-				if (confirmPane.showConfirmDialog(null, "File exists.\nOverwrite file?", "Confirm Save", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
+				if (JOptionPane.showConfirmDialog(null, "File exists.\nOverwrite file?", "Confirm Save", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.CANCEL_OPTION) {
 					valid = false;
 				}
 			}
@@ -978,8 +967,7 @@ public class IconEditor
 				// If file exists, confirm file overwrite, otherwise leave
 				// file as it is.
 				if (file.exists()) {
-					JOptionPane confirmPane = new JOptionPane();
-					if (confirmPane.showConfirmDialog(null,
+					if (JOptionPane.showConfirmDialog(null,
 						"File exists.\nOverwrite file?",
 						"Confirm Save",
 						JOptionPane.OK_CANCEL_OPTION) ==

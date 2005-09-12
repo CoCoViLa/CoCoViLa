@@ -1,13 +1,6 @@
 package ee.ioc.cs.vsle.editor;
 
 import java.awt.event.*;
-import java.awt.*;
-import javax.swing.AbstractAction;
-import javax.swing.*;
-
-
-import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
 
 public class KeyOps implements KeyListener {
 

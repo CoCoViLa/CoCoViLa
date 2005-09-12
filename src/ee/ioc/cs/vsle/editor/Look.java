@@ -26,11 +26,11 @@ public class Look {
 	public static final String LOOK_WINDOWS = "Windows";
 
 	public void setGUI(Editor e) {
-		this.ed = e;
+		ed = e;
 	}
 
 	public void setGUI(IconEditor e) {
-		this.ied = e;
+		ied = e;
 	}
 
 	/**

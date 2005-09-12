@@ -40,11 +40,7 @@ public class CustomFileFilter extends FileFilter {
 		String extension = getExtension(f);
 
 		if (extension != null) {
-			if (extension.equalsIgnoreCase(this.getExtension())) {
-				return true;
-			} else {
-				return false;
-			}
+		    return extension.equalsIgnoreCase(this.getExtension());
 		}
 
 		return false;

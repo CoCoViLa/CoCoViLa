@@ -1,7 +1,5 @@
 package ee.ioc.cs.vsle.util;
 
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
-
 import java.io.*;
 
 /**

@@ -1,12 +1,9 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import java.util.Iterator;
-import java.util.HashSet;
+import java.util.*;
+
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.editor.ProgramRunner;
-import java.util.ArrayList;
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
-import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**
  *

@@ -1,26 +1,18 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import ee.ioc.cs.vsle.vclass.Point;
-
-import ee.ioc.cs.vsle.graphics.*;
-import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.iconeditor.*;
-
-import javax.swing.event.MouseInputAdapter;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.MouseEvent;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Cursor;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-
-import javax.swing.SwingUtilities;
-import javax.swing.JColorChooser;
-
+import java.awt.*;
+import java.awt.event.*;
 import java.util.ArrayList;
+
+import javax.swing.*;
+import javax.swing.event.MouseInputAdapter;
+
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.editor.Menu;
+import ee.ioc.cs.vsle.graphics.*;
+import ee.ioc.cs.vsle.graphics.Shape;
+import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.Point;
 
 /**
  * Created by IntelliJ IDEA.

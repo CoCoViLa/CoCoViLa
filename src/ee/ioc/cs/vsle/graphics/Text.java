@@ -2,12 +2,8 @@ package ee.ioc.cs.vsle.graphics;
 
 import java.io.*;
 
-import ee.ioc.cs.vsle.util.db;
-
 import java.awt.*;
 import java.awt.geom.*;
-
-import ee.ioc.cs.vsle.editor.*;
 
 public class Text extends Shape implements Serializable {
 
@@ -271,7 +267,7 @@ public class Text extends Shape implements Serializable {
 	} // drawSelection
 
 	public void setTransparency(int d) {
-		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), (int)d);
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), d);
 	}
 
 	/**

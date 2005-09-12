@@ -2,7 +2,6 @@ package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.vclass.VPackage;
 import ee.ioc.cs.vsle.vclass.PackageClass;
-import ee.ioc.cs.vsle.util.*;
 
 import java.io.File;
 import java.awt.BorderLayout;

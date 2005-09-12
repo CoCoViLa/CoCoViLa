@@ -97,11 +97,7 @@ public class Editor extends JFrame implements ChangeListener {
 		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
 		if (vis != null) {
 			int v = Integer.parseInt(vis);
-			if (v < 1) {
-				return false;
-			} else {
-				return true;
-			}
+			return v >= 1;
 		}
 		return false;
 	} // getGridVisibility
@@ -355,18 +351,28 @@ public class Editor extends JFrame implements ChangeListener {
 			PropertyBox.LAST_PATH, path);
 	}
 
-        public static void setRecentPackage( String path ) {
-            String recentPackages = PropertyBox.getProperty(
-                    PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.RECENT_PACKAGES );
+        public static void setMultyProperty( String propertyName, String path, boolean add ) {
+            String propertyValue = PropertyBox.getProperty(
+                    PropertyBox.APP_PROPS_FILE_NAME, propertyName );
 
-            if( recentPackages == null ) {
-                recentPackages = "";
+            if( propertyValue == null ) {
+                propertyValue = "";
             }
-            //int index = recentPackages.indexOf( path );
-            if ( recentPackages.indexOf( path ) == -1 ) {
-                recentPackages = recentPackages + ";" + path;
+            
+            int index = propertyValue.indexOf( path );
+            if ( index == -1 && add ) {
+
+                propertyValue = propertyValue + ";" + path;
+
                 PropertyBox.setProperty( PropertyBox.APP_PROPS_FILE_NAME,
-                                     PropertyBox.RECENT_PACKAGES, recentPackages );
+                        propertyName, propertyValue );
+            }
+            else if( index != -1 && !add ) {
+                propertyValue = propertyValue.substring(0, index - 1)
+                	.concat(propertyValue.substring(index + path.length(), propertyValue.length()));
+            
+                PropertyBox.setProperty( PropertyBox.APP_PROPS_FILE_NAME,
+                    propertyName, propertyValue );
             }
         }
 
@@ -383,12 +389,14 @@ public class Editor extends JFrame implements ChangeListener {
             for ( int i = 0; i < packages.length; i++ ) {
                 final File f = new File( packages[ i ] );
                 if ( f.exists() ) {
+                    
                     String packageName = f.getName().substring( 0, f.getName().indexOf( "." ) );
 
                     JMenuItem menuItem = new JMenuItem( packageName );
 
                     menuItem.addActionListener( new ActionListener() {
                         public void actionPerformed(ActionEvent e) {
+                            Editor.setMultyProperty( PropertyBox.PALETTE_FILE, f.getAbsolutePath(), true );
                             loadPackage( f );
                         }
                     });
@@ -481,9 +489,8 @@ public class Editor extends JFrame implements ChangeListener {
 				String osType = sysProps.getProperty("os.name");
 				if (isWin(osType)) {
 					return "Windows";
-				} else {
-					return "NotWindows";
-				}
+				} 
+				return "NotWindows";
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -542,7 +549,7 @@ public class Editor extends JFrame implements ChangeListener {
 		RuntimeProperties.customLayout = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.CUSTOM_LAYOUT);
         RuntimeProperties.snapToGrid = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SNAP_TO_GRID));
 
-		JFrame window;
+        Editor window;
 		try {
 			if (args.length > 0) {
 				if (args[0].equals("-p")) {
@@ -566,14 +573,24 @@ public class Editor extends JFrame implements ChangeListener {
 				// Kui k�surealt ei olnud ette antud, v�tame vaikev��rtuse application.properties failist.
 				db.p(
 					"No module file name was given as the command line argument, reading the application.properties file.");
-				String paletteFile = PropertyBox.getProperty(
+				String paletteFiles = PropertyBox.getProperty(
 					PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE);
-				if (paletteFile != null && paletteFile.trim().length() > 0) {
+				if (paletteFiles != null && paletteFiles.trim().length() > 0) {
+				    
+		            String[] paletteFile = paletteFiles.split( ";" );
+		            
+		            window = new Editor();
 					// Leidsime vastava kirje.
-					db.p(
-						"Found module file name " + paletteFile + " from the "
-						+ PropertyBox.APP_PROPS_FILE_NAME + ".properties file.");
-					window = new Editor(directory + paletteFile);
+		            for( int i = 0; i < paletteFile.length; i++ ) {
+		                db.p(
+								"Found module file name " + paletteFile[i] + " from the "
+								+ PropertyBox.APP_PROPS_FILE_NAME + ".properties file.");
+		                File f = new File(paletteFile[i]);
+		                if( f.exists() ) {
+		                    window.loadPackage(f);
+		                }							
+		            }
+					
 				} else {
 					// application.properties failis polnud vastavat kirjet vaikimisi laetava faili kohta.
 					db.p(
