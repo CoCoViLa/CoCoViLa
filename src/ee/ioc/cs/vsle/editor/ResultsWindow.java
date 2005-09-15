@@ -1,7 +1,7 @@
 package ee.ioc.cs.vsle.editor;
 
 import javax.swing.JFrame;
-
+import java.awt.*;
 /**
  * Class currently not in use. Fix reference to ee.ioc.cs.editor.synthesize.Synthesizer.makeProgram method (method
  * commented out in the ee.ioc.cs.editor.synthesize.Synthesizer class)
