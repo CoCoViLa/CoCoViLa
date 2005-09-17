@@ -17,50 +17,53 @@ import javax.swing.JTextArea;
  */
 public class ProgramRunner {
 	Object genObject;
+
 	private static HashSet foundVars = new HashSet();
 
-        public static void clearFoundVars() {
-            foundVars.clear();
-        }
+	public static void clearFoundVars() {
+		foundVars.clear();
+	}
 
-        public static void addFoundVar( Var var ) {
-            if ( isFoundVar( var ) ) {
-                return;
-            }
-            foundVars.add( var );
-        }
+	public static void addFoundVar(Var var) {
+		if (isFoundVar(var)) {
+			return;
+		}
+		foundVars.add(var);
+	}
 
-        public static void addAllFoundVars( Collection col ) {
-            for ( Iterator iter = col.iterator(); iter.hasNext(); ) {
-                Var var = ( Var ) iter.next();
-                if ( !isFoundVar( var ) ) {
-                    foundVars.add( var );
-                }
-            }
-        }
+	public static void addAllFoundVars(Collection col) {
+		for (Iterator iter = col.iterator(); iter.hasNext();) {
+			Var var = (Var) iter.next();
+			if (!isFoundVar(var)) {
+				foundVars.add(var);
+			}
+		}
+	}
 
-        public static boolean isFoundVar( Var var ) {
-            for ( Iterator iter = foundVars.iterator(); iter.hasNext(); ) {
-                Var in = ( Var ) iter.next();
-                if ( in.toString().equals( var.toString() ) ) {
-                    return true;
-                }
-            }
-            return false;
-        }
+	public static boolean isFoundVar(Var var) {
+		for (Iterator iter = foundVars.iterator(); iter.hasNext();) {
+			Var in = (Var) iter.next();
+			if (in.toString().equals(var.toString())) {
+				return true;
+			}
+		}
+		return false;
+	}
 
-        public static void printFoundVars() {
-            if ( RuntimeProperties.isDebugEnabled() )
-                System.err.println( "foundVars: " + foundVars );
-        }
+	public static void printFoundVars() {
+		if (RuntimeProperties.isDebugEnabled())
+			System.err.println("foundVars: " + foundVars);
+	}
 
 	void runPropagate(Object genObject, ObjectList objects) {
 		try {
 			Class clasType;
 			Class clas = genObject.getClass();
 
-			/* Method method = clas.getMethod("compute", null);
-			 method.invoke(genObject, null);*/
+			/*
+			 * Method method = clas.getMethod("compute", null);
+			 * method.invoke(genObject, null);
+			 */
 			Field f, f2;
 			Object lastObj;
 			GObj obj;
@@ -73,7 +76,7 @@ public class ProgramRunner {
 			String fullName;
 			Var var;
 			boolean varIsComputed;
-                        db.p("runPropagate() foundVars: " + foundVars);
+			db.p("runPropagate() foundVars: " + foundVars);
 			// ee.ioc.cs.editor.util.db.p(genClass.getClass().getFields()[0]);
 			for (int i = 0; i < objects.size(); i++) {
 				obj = (GObj) objects.get(i);
@@ -92,33 +95,35 @@ public class ProgramRunner {
 							while (allVarsIter.hasNext()) {
 								var = (Var) allVarsIter.next();
 
-								if (fullName.equals( (var.getObject().toString() + "." + var.getField()).substring(5) ) ) {
+								if (fullName.equals((var.getObject().toString()
+										+ "." + var.getField()).substring(5))) {
 									varIsComputed = true;
+									break;
 								}
 							}
 						}
 						if (varIsComputed) {
 							if (c.toString().equals("int")) {
 								in = f2.getInt(lastObj);
-								field.setValue( Integer.toString(in) );
+								field.setValue(Integer.toString(in));
 							} else if (c.toString().equals("double")) {
 								d = f2.getDouble(lastObj);
-								field.setValue( Double.toString(d) );
+								field.setValue(Double.toString(d));
 							} else if (c.toString().equals("boolean")) {
 								b = f2.getBoolean(lastObj);
-								field.setValue( Boolean.toString(b) );
+								field.setValue(Boolean.toString(b));
 							} else if (c.toString().equals("char")) {
 								char ch = f2.getChar(lastObj);
-								field.setValue( Character.toString(ch) );
+								field.setValue(Character.toString(ch));
 							} else if (c.toString().equals("float")) {
 								fl = f2.getFloat(lastObj);
-								field.setValue( Float.toString(fl) );
+								field.setValue(Float.toString(fl));
 							} else {// it is type object
 								Object o = f2.get(lastObj);
-								field.setValue( o.toString() );
+								field.setValue(o.toString());
 							}
 						}
-						//field.updateGraphics();
+						// field.updateGraphics();
 					}
 				}
 			}
@@ -128,11 +133,11 @@ public class ProgramRunner {
 	}
 
 	Object compileAndRun(String programName, ArrayList watchFields,
-						 JTextArea runResultArea) throws CompileException {
+			JTextArea runResultArea) throws CompileException {
 		genObject = makeGeneratedObject(programName);
-                if( genObject != null ) {
-                    run( watchFields, runResultArea );
-                }
+		if (genObject != null) {
+			run(watchFields, runResultArea);
+		}
 		return genObject;
 	}
 
@@ -162,30 +167,25 @@ public class ProgramRunner {
 						Class c = f.getType();
 
 						if (c.toString().equals("int")) {
-							// textArea.append((String)watchFields.get(i) +": "+f.getInt(lastObj)+"\n");
-							runResultArea.append(
-									(String) watchFields.get(i) + ": "
-									+ f.getInt(lastObj) + "\n");
+							// textArea.append((String)watchFields.get(i) +":
+							// "+f.getInt(lastObj)+"\n");
+							runResultArea.append((String) watchFields.get(i)
+									+ ": " + f.getInt(lastObj) + "\n");
 						} else if (c.toString().equals("double")) {
-							runResultArea.append(
-									(String) watchFields.get(i) + ": "
-									+ f.getDouble(lastObj) + "\n");
+							runResultArea.append((String) watchFields.get(i)
+									+ ": " + f.getDouble(lastObj) + "\n");
 						} else if (c.toString().equals("boolean")) {
-							runResultArea.append(
-									(String) watchFields.get(i) + ": "
-									+ f.getBoolean(lastObj) + "\n");
+							runResultArea.append((String) watchFields.get(i)
+									+ ": " + f.getBoolean(lastObj) + "\n");
 						} else if (c.toString().equals("char")) {
-							runResultArea.append(
-									(String) watchFields.get(i) + ": "
-									+ f.getChar(lastObj) + "\n");
+							runResultArea.append((String) watchFields.get(i)
+									+ ": " + f.getChar(lastObj) + "\n");
 						} else if (c.toString().equals("float")) {
-							runResultArea.append(
-									(String) watchFields.get(i) + ": "
-									+ f.getFloat(lastObj) + "\n");
+							runResultArea.append((String) watchFields.get(i)
+									+ ": " + f.getFloat(lastObj) + "\n");
 						} else {
-							runResultArea.append(
-									(String) watchFields.get(i) + ": "
-									+ f.get(lastObj) + "\n");
+							runResultArea.append((String) watchFields.get(i)
+									+ ": " + f.get(lastObj) + "\n");
 						}
 					}
 
@@ -198,20 +198,20 @@ public class ProgramRunner {
 		}
 	}
 
-        Object makeGeneratedObject( String programName ) throws CompileException {
-            CCL classLoader = new CCL();
+	Object makeGeneratedObject(String programName) throws CompileException {
+		CCL classLoader = new CCL();
 
-            Object inst = null;
-            try {
-                if ( classLoader.compile( programName ) ) {
-                    Class clas = classLoader.loadClass( programName );
-                    inst = clas.newInstance();
-                }
+		Object inst = null;
+		try {
+			if (classLoader.compile(programName)) {
+				Class clas = classLoader.loadClass(programName);
+				inst = clas.newInstance();
+			}
 
-            } catch ( Exception e ) {
-                e.printStackTrace( System.err );
-                return null;
-            }
-            return inst;
-        }
+		} catch (Exception e) {
+			e.printStackTrace(System.err);
+			return null;
+		}
+		return inst;
+	}
 }

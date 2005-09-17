@@ -17,9 +17,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.*;
 
 /**
- * Visual Specification Language Editor main module
- * for combining separate logical units (Built in the
- * IconEditor) into a structured schema.
+ * Visual Specification Language Editor main module for combining separate
+ * logical units (Built in the IconEditor) into a structured schema.
+ * 
  * @author Ando Saabas, Aulo Aasma
  * @link http://vsledit.sourceforge.net
  * @version 1.0
@@ -27,15 +27,22 @@ import javax.swing.event.*;
 public class Editor extends JFrame implements ChangeListener {
 
 	JTabbedPane tabbedPane = new JTabbedPane();
+
 	EditorActionListener aListener;
+
 	JMenuBar menuBar;
 
-	JPanel infoPanel; // Panel for runtime information, mouse coordinates, selected objects etc.
+	JPanel infoPanel; // Panel for runtime information, mouse coordinates,
+						// selected objects etc.
+
 	public JPanel mainPanel = new JPanel();
+
 	JLabel posInfo; // Mouse position.
 
 	Dimension drawAreaSize = new Dimension(600, 500);
+
 	KeyOps keyListener;
+
 	public static final String WINDOW_TITLE = "COCOVILA - Scheme Editor";
 
 	/**
@@ -49,14 +56,16 @@ public class Editor extends JFrame implements ChangeListener {
 
 	/**
 	 * Class constructor [2].
-	 * @param fileName - package file name.
+	 * 
+	 * @param fileName -
+	 *            package file name.
 	 */
 	public Editor(String fileName) {
 		enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 		initialize();
 		File file = new File(fileName);
 		loadPackage(file);
-                validate();
+		validate();
 	} // Editor
 
 	/**
@@ -71,30 +80,31 @@ public class Editor extends JFrame implements ChangeListener {
 		tabbedPane.addChangeListener(this);
 		infoPanel = new JPanel(new GridLayout(1, 2));
 		posInfo = new JLabel();
-		//keyListener = new KeyOps(this);
+		// keyListener = new KeyOps(this);
 		aListener = new EditorActionListener(this);
 
 		mainPanel.setLayout(new BorderLayout());
-//		mainPanel.add(areaScrollPane, BorderLayout.CENTER);
+		// mainPanel.add(areaScrollPane, BorderLayout.CENTER);
 		infoPanel.add(posInfo);
 		mainPanel.add(infoPanel, BorderLayout.SOUTH);
 		posInfo.setText("-");
 		makeMenu();
 		getContentPane().add(mainPanel);
-                getContentPane().add(tabbedPane);
+		getContentPane().add(tabbedPane);
 		Look look = new Look();
 		look.setGUI(this);
-		Look.changeLayout(
-			PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
-				PropertyBox.DEFAULT_LAYOUT));
+		Look.changeLayout(PropertyBox.getProperty(
+				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT));
 	} // initialize
 
 	/**
 	 * Check if the grid should be visible or not.
+	 * 
 	 * @return boolean - grid visibility from the properties file.
 	 */
 	public boolean getGridVisibility() {
-		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
+		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+				PropertyBox.SHOW_GRID);
 		if (vis != null) {
 			int v = Integer.parseInt(vis);
 			return v >= 1;
@@ -102,15 +112,14 @@ public class Editor extends JFrame implements ChangeListener {
 		return false;
 	} // getGridVisibility
 
-
 	/**
 	 * Build menu.
 	 */
 	public void makeMenu() {
-            JMenuItem menuItem;
+		JMenuItem menuItem;
 
-        JMenu menu;
-        JMenu submenu;
+		JMenu menu;
+		JMenu submenu;
 
 		menuBar = new JMenuBar();
 		setJMenuBar(menuBar);
@@ -118,19 +127,19 @@ public class Editor extends JFrame implements ChangeListener {
 		menu.setMnemonic(KeyEvent.VK_F);
 		menuItem = new JMenuItem(Menu.SAVE_SCHEME, KeyEvent.VK_S);
 		menuItem.addActionListener(aListener);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(
-			KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+				ActionEvent.CTRL_MASK));
 		menu.add(menuItem);
 		menuItem = new JMenuItem(Menu.LOAD_SCHEME, KeyEvent.VK_O);
 		menuItem.addActionListener(aListener);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(
-			KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+				ActionEvent.CTRL_MASK));
 		menu.add(menuItem);
 		menu.addSeparator();
 		menuItem = new JMenuItem(Menu.PRINT, KeyEvent.VK_P);
 		menuItem.addActionListener(aListener);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(
-			KeyEvent.VK_P, ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_P,
+				ActionEvent.CTRL_MASK));
 		menu.add(menuItem);
 		menu.addSeparator();
 		menuItem = new JMenuItem(Menu.EXIT, KeyEvent.VK_X);
@@ -144,21 +153,21 @@ public class Editor extends JFrame implements ChangeListener {
 		// otherwise would require implementing all the object
 		// popup items in the current menu as well.
 		/*
-		 menuItem = new JMenuItem("Clone", KeyEvent.VK_C);
-		 menuItem.addActionListener(aListener);
-		 menu.add(menuItem);
+		 * menuItem = new JMenuItem("Clone", KeyEvent.VK_C);
+		 * menuItem.addActionListener(aListener); menu.add(menuItem);
 		 */
 		menuItem = new JMenuItem(Menu.SELECT_ALL, KeyEvent.VK_A);
 		menuItem.addActionListener(aListener);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(
-			KeyEvent.VK_A, ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_A,
+				ActionEvent.CTRL_MASK));
 		menu.add(menuItem);
 		menuItem = new JMenuItem(Menu.CLEAR_ALL, KeyEvent.VK_C);
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
 
 		boolean showGrid = false;
-		String sShowGrid = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
+		String sShowGrid = PropertyBox.getProperty(
+				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
 		if (sShowGrid != null) {
 			showGrid = Boolean.valueOf(sShowGrid).booleanValue();
 		}
@@ -168,11 +177,11 @@ public class Editor extends JFrame implements ChangeListener {
 		menu.add(menuItem);
 
 		menuBar.add(menu);
-                menu = new JMenu( Menu.MENU_PACKAGE );
-                menu.setMnemonic( KeyEvent.VK_P );
-                menuItem = new JMenuItem( Menu.LOAD, KeyEvent.VK_L );
-                menuItem.addActionListener( aListener );
-                menu.add(menuItem);
+		menu = new JMenu(Menu.MENU_PACKAGE);
+		menu.setMnemonic(KeyEvent.VK_P);
+		menuItem = new JMenuItem(Menu.LOAD, KeyEvent.VK_L);
+		menuItem.addActionListener(aListener);
+		menu.add(menuItem);
 		menuItem = new JMenuItem(Menu.CLOSE, KeyEvent.VK_C);
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
@@ -180,63 +189,65 @@ public class Editor extends JFrame implements ChangeListener {
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
 		menuBar.add(menu);
-                menu.add( new JSeparator() );
-                final JMenu submenuRecent = new JMenu( Menu.RECENT );
-                submenuRecent.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
+		menu.add(new JSeparator());
+		final JMenu submenuRecent = new JMenu(Menu.RECENT);
+		submenuRecent.getPopupMenu().addPopupMenuListener(
+				new PopupMenuListener() {
 
-                    final JMenuItem empty = new JMenuItem("Empty");
+					final JMenuItem empty = new JMenuItem("Empty");
 
-                    public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
+					public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 
-                        makeRecentSubMenu( submenuRecent );
+						makeRecentSubMenu(submenuRecent);
 
-                        if ( submenuRecent.getMenuComponentCount() == 0 ) {
+						if (submenuRecent.getMenuComponentCount() == 0) {
 
-                            submenuRecent.add( empty );
-                            empty.setEnabled( false );
+							submenuRecent.add(empty);
+							empty.setEnabled(false);
 
-                        } else {
-                            if ( !( ( submenuRecent.getMenuComponentCount() == 1 )
-                                    &&
-                                    ( submenuRecent.getPopupMenu().getComponentIndex( empty ) >= -1 ) ) ) {
-                                submenuRecent.remove( empty );
-                            }
-                        }
+						} else {
+							if (!((submenuRecent.getMenuComponentCount() == 1) && (submenuRecent
+									.getPopupMenu().getComponentIndex(empty) >= -1))) {
+								submenuRecent.remove(empty);
+							}
+						}
 
-                    }
+					}
 
-                    public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {}
+					public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+					}
 
-                    public void popupMenuCanceled( PopupMenuEvent e ) {}
+					public void popupMenuCanceled(PopupMenuEvent e) {
+					}
 
-                } );
-                menu.add(submenuRecent);
-                final JMenu menuScheme = new JMenu( Menu.MENU_SCHEME );
+				});
+		menu.add(submenuRecent);
+		final JMenu menuScheme = new JMenu(Menu.MENU_SCHEME);
 		menuScheme.setMnemonic(KeyEvent.VK_S);
 
-                menuScheme.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
+		menuScheme.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
 
-                    final JMenuItem empty = new JMenuItem("Empty");
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
 
-                    public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
+				makeSchemeMenu(menuScheme);
 
-                        makeSchemeMenu( menuScheme );
+			}
 
-                    }
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+			}
 
-                    public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {}
+			public void popupMenuCanceled(PopupMenuEvent e) {
+			}
 
-                    public void popupMenuCanceled( PopupMenuEvent e ) {}
+		});
 
-                } );
-
-		/* menuItem = new JMenuItem("Planner");
-		 menuItem.addActionListener(aListener);
-		 menuScheme.add(menuItem);
-		 menuItem = new JMenuItem("Plan, compile, run");
-		 menuItem.setActionCommand("Run");
-		 menuItem.addActionListener(aListener);
-		 menuScheme.add(menuItem);*/
+		/*
+		 * menuItem = new JMenuItem("Planner");
+		 * menuItem.addActionListener(aListener); menuScheme.add(menuItem);
+		 * menuItem = new JMenuItem("Plan, compile, run");
+		 * menuItem.setActionCommand("Run");
+		 * menuItem.addActionListener(aListener); menuScheme.add(menuItem);
+		 */
 		// menuScheme.setMnemonic(KeyEvent.VK_A);
 		menuBar.add(menuScheme);
 		menu = new JMenu(Menu.MENU_OPTIONS);
@@ -257,8 +268,8 @@ public class Editor extends JFrame implements ChangeListener {
 		submenu.add(menuItem);
 		menuItem = new JMenuItem(Menu.SETTINGS, KeyEvent.VK_S);
 		menuItem.addActionListener(aListener);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(
-			KeyEvent.VK_J, ActionEvent.CTRL_MASK));
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J,
+				ActionEvent.CTRL_MASK));
 		menu.add(menuItem);
 		menu.add(submenu);
 		menuBar.add(menu);
@@ -277,23 +288,28 @@ public class Editor extends JFrame implements ChangeListener {
 		menu.add(menuItem);
 	}
 
-
 	/**
 	 * Display information dialog to application user.
-	 * @param title - information dialog title.
-	 * @param text - text displayed in the information dialog.
+	 * 
+	 * @param title -
+	 *            information dialog title.
+	 * @param text -
+	 *            text displayed in the information dialog.
 	 */
 	public void showInfoDialog(String title, String text) {
 		JOptionPane.showMessageDialog(this, text, title,
-			JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	/**
 	 * Overridden so we can exit when window is closed
-	 * @param e - Window Event.
+	 * 
+	 * @param e -
+	 *            Window Event.
 	 */
 	protected void processWindowEvent(WindowEvent e) {
-		// super.processWindowEvent(e); // automatic closing disabled, confirmation asked instead.
+		// super.processWindowEvent(e); // automatic closing disabled,
+		// confirmation asked instead.
 		if (e.getID() == WindowEvent.WINDOW_CLOSING) {
 			exitApplication();
 		}
@@ -303,41 +319,44 @@ public class Editor extends JFrame implements ChangeListener {
 	 * Close application.
 	 */
 	public void exitApplication() {
-		int confirmed = JOptionPane.showConfirmDialog(this, "Exit Application?",
-			Menu.EXIT, JOptionPane.OK_CANCEL_OPTION);
+		int confirmed = JOptionPane.showConfirmDialog(this,
+				"Exit Application?", Menu.EXIT, JOptionPane.OK_CANCEL_OPTION);
 		switch (confirmed) {
-			case JOptionPane.OK_OPTION:
-				System.exit(0);
-				break;
-			case JOptionPane.CANCEL_OPTION:
-				break;
+		case JOptionPane.OK_OPTION:
+			System.exit(0);
+			break;
+		case JOptionPane.CANCEL_OPTION:
+			break;
 		}
 	}
 
-
 	/**
-	 * Get last file path used for loading or saving schema, package, etc.
-	 * from / into a file.
+	 * Get last file path used for loading or saving schema, package, etc. from /
+	 * into a file.
+	 * 
 	 * @return String - last used path from system properties.
 	 */
 	public static String getLastPath() {
 		return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
-			PropertyBox.LAST_PATH);
+				PropertyBox.LAST_PATH);
 	}
 
 	/**
 	 * Get system documentation URL value.
+	 * 
 	 * @return String - system documentation URL.
 	 */
 	public static String getSystemDocUrl() {
 		return PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
-			PropertyBox.DOCUMENTATION_URL);
+				PropertyBox.DOCUMENTATION_URL);
 	}
 
 	/**
 	 * Stores the last path used for loading or saving schema, package, etc.
 	 * into system properties.
-	 * @param path - last path used for loading or saving schema, package, etc.
+	 * 
+	 * @param path -
+	 *            last path used for loading or saving schema, package, etc.
 	 */
 	public static void setLastPath(String path) {
 		if (path != null) {
@@ -348,103 +367,110 @@ public class Editor extends JFrame implements ChangeListener {
 			}
 		}
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
-			PropertyBox.LAST_PATH, path);
+				PropertyBox.LAST_PATH, path);
 	}
 
-        public static void setMultyProperty( String propertyName, String path, boolean add ) {
-            String propertyValue = PropertyBox.getProperty(
-                    PropertyBox.APP_PROPS_FILE_NAME, propertyName );
+	public static void setMultyProperty(String propertyName, String path,
+			boolean add) {
+		String propertyValue = PropertyBox.getProperty(
+				PropertyBox.APP_PROPS_FILE_NAME, propertyName);
 
-            if( propertyValue == null ) {
-                propertyValue = "";
-            }
-            
-            int index = propertyValue.indexOf( path );
-            if ( index == -1 && add ) {
+		if (propertyValue == null) {
+			propertyValue = "";
+		}
 
-                propertyValue = propertyValue + ";" + path;
+		int index = propertyValue.indexOf(path);
+		if (index == -1 && add) {
 
-                PropertyBox.setProperty( PropertyBox.APP_PROPS_FILE_NAME,
-                        propertyName, propertyValue );
-            }
-            else if( index != -1 && !add ) {
-                propertyValue = propertyValue.substring(0, index - 1)
-                	.concat(propertyValue.substring(index + path.length(), propertyValue.length()));
-            
-                PropertyBox.setProperty( PropertyBox.APP_PROPS_FILE_NAME,
-                    propertyName, propertyValue );
-            }
-        }
+			propertyValue = propertyValue + ";" + path;
 
-        void makeRecentSubMenu( JMenu menu ) {
-            String recentPackages = PropertyBox.getProperty(
-                    PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.RECENT_PACKAGES );
-            if( recentPackages == null ) {
-                return;
-            }
-            String[] packages = recentPackages.split( ";" );
+			PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+					propertyName, propertyValue);
+		} else if (index != -1 && !add) {
+			propertyValue = propertyValue.substring(0, index - 1).concat(
+					propertyValue.substring(index + path.length(),
+							propertyValue.length()));
 
-            menu.removeAll();
+			PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
+					propertyName, propertyValue);
+		}
+	}
 
-            for ( int i = 0; i < packages.length; i++ ) {
-                final File f = new File( packages[ i ] );
-                if ( f.exists() ) {
-                    
-                    String packageName = f.getName().substring( 0, f.getName().indexOf( "." ) );
+	void makeRecentSubMenu(JMenu menu) {
+		String recentPackages = PropertyBox.getProperty(
+				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.RECENT_PACKAGES);
+		if (recentPackages == null) {
+			return;
+		}
+		String[] packages = recentPackages.split(";");
 
-                    JMenuItem menuItem = new JMenuItem( packageName );
+		menu.removeAll();
 
-                    menuItem.addActionListener( new ActionListener() {
-                        public void actionPerformed(ActionEvent e) {
-                            Editor.setMultyProperty( PropertyBox.PALETTE_FILE, f.getAbsolutePath(), true );
-                            loadPackage( f );
-                        }
-                    });
-                    menu.add( menuItem );
-                }
-            }
-        }
+		for (int i = 0; i < packages.length; i++) {
+			final File f = new File(packages[i]);
+			if (f.exists()) {
 
-        void makeSchemeMenu( JMenu menu ) {
-            menu.removeAll();
+				String packageName = f.getName().substring(0,
+						f.getName().indexOf("."));
 
-            //Specification...
-            JMenuItem menuItem = new JMenuItem( Menu.SPECIFICATION, KeyEvent.VK_S );
-            menuItem.addActionListener( aListener );
-            menu.add( menuItem );
+				JMenuItem menuItem = new JMenuItem(packageName);
 
-            if( getCurrentPackage() != null ) {
-                menu.add( new JSeparator() );
+				menuItem.addActionListener(new ActionListener() {
+					public void actionPerformed(ActionEvent e) {
+						Editor.setMultyProperty(PropertyBox.PALETTE_FILE, f
+								.getAbsolutePath(), true);
+						loadPackage(f);
+					}
+				});
+				menu.add(menuItem);
+			}
+		}
+	}
 
-                final String packageName = getCurrentPackage().name;
-                //<package>.meth
-                menuItem = new JMenuItem( packageName + ".meth", KeyEvent.VK_M );
-                menuItem.addActionListener( new ActionListener() {
-                    public void actionPerformed( ActionEvent e ) {
-                        CodeViewer cv = new CodeViewer( packageName, ".meth" );
-                        cv.setSize( 550, 450 );
-                        cv.setVisible( true );
-                    }
-                } );
-                menu.add( menuItem );
+	void makeSchemeMenu(JMenu menu) {
+		menu.removeAll();
 
-                //<package>.spec
-                menuItem = new JMenuItem( packageName + ".spec", KeyEvent.VK_C );
-                menuItem.addActionListener( new ActionListener() {
-                    public void actionPerformed( ActionEvent e ) {
-                        CodeViewer cv = new CodeViewer( packageName, ".spec" );
-                        cv.setSize( 550, 450 );
-                        cv.setVisible( true );
-                    }
-                } );
+		// Specification...
+		JMenuItem menuItem = new JMenuItem(Menu.SPECIFICATION, KeyEvent.VK_S);
+		menuItem.addActionListener(aListener);
+		menu.add(menuItem);
 
-                menu.add( menuItem );
-            }
-        }
+		if (getCurrentPackage() != null) {
+			menu.add(new JSeparator());
+
+			final String packageName = getCurrentPackage().name;
+			// <package>.meth
+			menuItem = new JMenuItem(packageName + ".meth", KeyEvent.VK_M);
+			menuItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					CodeViewer cv = new CodeViewer(packageName, ".meth");
+					cv.setSize(550, 450);
+					cv.setVisible(true);
+				}
+			});
+			menu.add(menuItem);
+
+			// <package>.spec
+			menuItem = new JMenuItem(packageName + ".spec", KeyEvent.VK_C);
+			menuItem.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					CodeViewer cv = new CodeViewer(packageName, ".spec");
+					cv.setSize(550, 450);
+					cv.setVisible(true);
+				}
+			});
+
+			menu.add(menuItem);
+		}
+	}
+
 	/**
-	 * Upon platform, use OS-specific methods for opening the URL in required browser.
-	 * @param url - URL to be opened in a browser. Capable of browsing
-	 *              local documentation as well if path is given with file://
+	 * Upon platform, use OS-specific methods for opening the URL in required
+	 * browser.
+	 * 
+	 * @param url -
+	 *            URL to be opened in a browser. Capable of browsing local
+	 *            documentation as well if path is given with file://
 	 */
 	public static void openInBrowser(String url) {
 		try {
@@ -456,7 +482,7 @@ public class Editor extends JFrame implements ChangeListener {
 				// Open URL with OS-specific methods.
 				if (osType != null && osType.equalsIgnoreCase("Windows")) {
 					Runtime.getRuntime().exec(
-						"rundll32 url.dll,FileProtocolHandler " + url);
+							"rundll32 url.dll,FileProtocolHandler " + url);
 				}
 			}
 		} catch (Exception e) {
@@ -466,7 +492,9 @@ public class Editor extends JFrame implements ChangeListener {
 
 	/**
 	 * Check if Operating System type is Windows.
-	 * @param osType - Operating System type.
+	 * 
+	 * @param osType -
+	 *            Operating System type.
 	 * @return boolean - Operating System belongs to the Windows family or not.
 	 */
 	public static boolean isWin(String osType) {
@@ -477,9 +505,10 @@ public class Editor extends JFrame implements ChangeListener {
 	}
 
 	/**
-	 * Return operating system type. Uses isWin, isMac, isUnix
-	 * methods for deciding on Os type and returns always the
-	 * internally defined Os Type (WIN,MAC or UNIX).
+	 * Return operating system type. Uses isWin, isMac, isUnix methods for
+	 * deciding on Os type and returns always the internally defined Os Type
+	 * (WIN,MAC or UNIX).
+	 * 
 	 * @return String - internally defined OS TYPE.
 	 */
 	public static String getOsType() {
@@ -489,7 +518,7 @@ public class Editor extends JFrame implements ChangeListener {
 				String osType = sysProps.getProperty("os.name");
 				if (isWin(osType)) {
 					return "Windows";
-				} 
+				}
 				return "NotWindows";
 			}
 		} catch (Exception e) {
@@ -500,20 +529,23 @@ public class Editor extends JFrame implements ChangeListener {
 
 	/**
 	 * Package loader.
-	 * @param f - package file to be loaded.
+	 * 
+	 * @param f -
+	 *            package file to be loaded.
 	 */
 	void loadPackage(File f) {
 		if (f != null) {
 			Canvas canvas = new Canvas(f);
-			String packageName = f.getName().substring(0, f.getName().indexOf("."));
+			String packageName = f.getName().substring(0,
+					f.getName().indexOf("."));
 			tabbedPane.addTab(packageName, canvas);
 			tabbedPane.setSelectedComponent(canvas);
 		}
 	} // loadPackage
 
-
 	/**
 	 * Returns the window width.
+	 * 
 	 * @return - window height.
 	 */
 	private static final int getWinWidth() {
@@ -522,47 +554,55 @@ public class Editor extends JFrame implements ChangeListener {
 
 	/**
 	 * Returns the window height.
+	 * 
 	 * @return int - window height.
 	 */
 	private static final int getWinHeight() {
 		return 600;
 	}
 
-
 	/**
 	 * Main method for module unit-testing.
-	 * @param args - command line arguments
+	 * 
+	 * @param args -
+	 *            command line arguments
 	 */
 	public static void main(String[] args) {
-		String directory = System.getProperty("user.dir") + System.getProperty("file.separator");
-		RuntimeProperties.debugInfo = Integer.parseInt(
-			PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
-				PropertyBox.DEBUG_INFO));
-		RuntimeProperties.gridStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP));
-		int aa = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.ANTI_ALIASING));
+		String directory = System.getProperty("user.dir")
+				+ System.getProperty("file.separator");
+		RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(
+				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
+		RuntimeProperties.gridStep = Integer.parseInt(PropertyBox.getProperty(
+				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP));
+		int aa = Integer.parseInt(PropertyBox.getProperty(
+				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.ANTI_ALIASING));
 		if (aa == 0) {
 			RuntimeProperties.isAntialiasingOn = false;
 		} else {
 			RuntimeProperties.isAntialiasingOn = true;
 		}
 
-		RuntimeProperties.customLayout = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.CUSTOM_LAYOUT);
-        RuntimeProperties.snapToGrid = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SNAP_TO_GRID));
+		RuntimeProperties.customLayout = PropertyBox.getProperty(
+				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.CUSTOM_LAYOUT);
+		RuntimeProperties.snapToGrid = Integer.parseInt(PropertyBox
+				.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+						PropertyBox.SNAP_TO_GRID));
 
-        Editor window;
+		Editor window;
 		try {
 			if (args.length > 0) {
 				if (args[0].equals("-p")) {
 					if (args.length == 3) {
 						RuntimeProperties.packageDir = directory + args[2]
-							+ System.getProperty("file.separator");
+								+ System.getProperty("file.separator");
 					} else {
 						RuntimeProperties.packageDir = directory;
 					}
 					Synthesizer synth = new Synthesizer();
 					synth.parseFromCommandLine(args[1]);
 				} else {
-					// Esimeses hoos vaatame, kas moodulite fail on ette antud k�surealt.
+					// Esimeses hoos vaatame, kas moodulite fail on ette antud
+					// k�surealt.
 					db.p(args[0] + " read from command line.");
 					window = new Editor(directory + args[0]);
 					window.setTitle(WINDOW_TITLE);
@@ -570,31 +610,35 @@ public class Editor extends JFrame implements ChangeListener {
 					window.setVisible(true);
 				}
 			} else {
-				// Kui k�surealt ei olnud ette antud, v�tame vaikev��rtuse application.properties failist.
-				db.p(
-					"No module file name was given as the command line argument, reading the application.properties file.");
+				// Kui k�surealt ei olnud ette antud, v�tame
+				// vaikev��rtuse application.properties failist.
+				db
+						.p("No module file name was given as the command line argument, reading the application.properties file.");
 				String paletteFiles = PropertyBox.getProperty(
-					PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE);
+						PropertyBox.APP_PROPS_FILE_NAME,
+						PropertyBox.PALETTE_FILE);
 				if (paletteFiles != null && paletteFiles.trim().length() > 0) {
-				    
-		            String[] paletteFile = paletteFiles.split( ";" );
-		            
-		            window = new Editor();
+
+					String[] paletteFile = paletteFiles.split(";");
+
+					window = new Editor();
 					// Leidsime vastava kirje.
-		            for( int i = 0; i < paletteFile.length; i++ ) {
-		                db.p(
-								"Found module file name " + paletteFile[i] + " from the "
-								+ PropertyBox.APP_PROPS_FILE_NAME + ".properties file.");
-		                File f = new File(paletteFile[i]);
-		                if( f.exists() ) {
-		                    window.loadPackage(f);
-		                }							
-		            }
-					
+					for (int i = 0; i < paletteFile.length; i++) {
+						db.p("Found module file name " + paletteFile[i]
+								+ " from the "
+								+ PropertyBox.APP_PROPS_FILE_NAME
+								+ ".properties file.");
+						File f = new File(paletteFile[i]);
+						if (f.exists()) {
+							window.loadPackage(f);
+						}
+					}
+
 				} else {
-					// application.properties failis polnud vastavat kirjet vaikimisi laetava faili kohta.
-					db.p(
-						"Module file name was not specified in command line nor in the application.properties file. Starting without.");
+					// application.properties failis polnud vastavat kirjet
+					// vaikimisi laetava faili kohta.
+					db
+							.p("Module file name was not specified in command line nor in the application.properties file. Starting without.");
 					RuntimeProperties.packageDir = directory;
 					window = new Editor();
 				}
@@ -608,12 +652,21 @@ public class Editor extends JFrame implements ChangeListener {
 			window.setSize(getWinWidth(), getWinHeight());
 			window.setVisible(true);
 		}
-		// log application executions, also making sure that the properties file is
-		// available for writing (required by some of current application modules).
+		// log application executions, also making sure that the properties file
+		// is
+		// available for writing (required by some of current application
+		// modules).
 		RuntimeProperties.genFileDir = PropertyBox.getProperty(
-			PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
+				PropertyBox.APP_PROPS_FILE_NAME,
+				PropertyBox.GENERATED_FILES_DIR);
+		
+		File file = new File(RuntimeProperties.genFileDir);
+		if( !file.exists() ) {
+			file.mkdirs();
+		}
+		
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
-			PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
+				PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
 	}
 
 	public void clearPane() {
@@ -632,10 +685,10 @@ public class Editor extends JFrame implements ChangeListener {
 	}
 
 	public VPackage getCurrentPackage() {
-            if( getCurrentCanvas() != null ) {
-                return getCurrentCanvas().getCurrentPackage();
-            }
-            return null;
+		if (getCurrentCanvas() != null) {
+			return getCurrentCanvas().getCurrentPackage();
+		}
+		return null;
 	}
 
 	public Canvas getCurrentCanvas() {
@@ -645,12 +698,12 @@ public class Editor extends JFrame implements ChangeListener {
 
 	public void stateChanged(ChangeEvent e) {
 		if (getCurrentCanvas() != null) {
-			JCheckBoxMenuItem cb = (JCheckBoxMenuItem) menuBar.getMenu(1).getMenuComponent(2);
+			JCheckBoxMenuItem cb = (JCheckBoxMenuItem) menuBar.getMenu(1)
+					.getMenuComponent(2);
 			cb.setSelected(getCurrentCanvas().isGridVisible());
 			getCurrentCanvas().drawingArea.grabFocus();
 			RuntimeProperties.packageDir = getCurrentCanvas().workDir;
 		}
 	}
-
 
 }
