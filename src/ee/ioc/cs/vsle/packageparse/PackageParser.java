@@ -86,7 +86,9 @@ public class PackageParser {
                 SAXException {
             InputSource is = null;
             if ( systemId != null && systemId.endsWith( "dtd" ) )
-                is = new InputSource( RuntimeProperties.PACKAGE_DTD );
+                is = new InputSource( System.getProperty("user.dir") 
+                		+ System.getProperty("file.separator")
+                		+ RuntimeProperties.PACKAGE_DTD );
             return is;
         }
 

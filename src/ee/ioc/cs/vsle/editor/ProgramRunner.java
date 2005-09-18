@@ -68,10 +68,6 @@ public class ProgramRunner {
 			Object lastObj;
 			GObj obj;
 			ClassField field;
-			int in;
-			double d;
-			float fl;
-			boolean b;
 
 			String fullName;
 			Var var;
@@ -103,24 +99,39 @@ public class ProgramRunner {
 							}
 						}
 						if (varIsComputed) {
+							
 							if (c.toString().equals("int")) {
-								in = f2.getInt(lastObj);
-								field.setValue(Integer.toString(in));
+								
+								field.setValue(Integer.toString(f2.getInt(lastObj)));
+								
 							} else if (c.toString().equals("double")) {
-								d = f2.getDouble(lastObj);
-								field.setValue(Double.toString(d));
+								
+								field.setValue(Double.toString(f2.getDouble(lastObj)));
+								
 							} else if (c.toString().equals("boolean")) {
-								b = f2.getBoolean(lastObj);
-								field.setValue(Boolean.toString(b));
+								
+								field.setValue(Boolean.toString(f2.getBoolean(lastObj)));
+								
 							} else if (c.toString().equals("char")) {
-								char ch = f2.getChar(lastObj);
-								field.setValue(Character.toString(ch));
+								
+								field.setValue(Character.toString(f2.getChar(lastObj)));
+								
 							} else if (c.toString().equals("float")) {
-								fl = f2.getFloat(lastObj);
-								field.setValue(Float.toString(fl));
+								
+								field.setValue(Float.toString(f2.getFloat(lastObj)));
+								
 							} else {// it is type object
 								Object o = f2.get(lastObj);
-								field.setValue(o.toString());
+								if( o instanceof String[] ) {
+									String[] sar = (String[])o;
+									String result = "";
+									for(int k = 0; k < sar.length; k++ ) {
+										result += sar[k] + "%%";
+									}
+									field.setValue(result);
+								} else {
+									field.setValue(o.toString());
+								}
 							}
 						}
 						// field.updateGraphics();

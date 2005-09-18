@@ -153,13 +153,14 @@ public class Synthesizer {
                     db.p( io );
                 }
                 // find the class declaration
-                pattern = Pattern.compile( "class +" + pClass.name );
+                pattern = Pattern.compile( "class[ \t\n]+" + pClass.name 
+                		+ "|" + "public class[ \t\n]+" + pClass.name);
                 matcher = pattern.matcher( fileString );
 
-                // replace it with _classname_
-//                if ( matcher.find() ) {
-//                    fileString = matcher.replaceAll( "public class _" + pClass.name + "_" );
-//                }
+                // be sure class is public
+                if ( matcher.find() ) {
+                    fileString = matcher.replaceAll( "public class " + pClass.name );
+                }
                 SpecParser specParser = new SpecParser();
                 String declars = "";
 
