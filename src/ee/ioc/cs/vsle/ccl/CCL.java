@@ -34,15 +34,23 @@ public class CCL extends URLClassLoader {
 		super(createClasspath());
 	}
 	
+	/**
+	 * Creates URL array with paths (dirs and jars) required for class loading
+	 * @return URL[]
+	 */
 	private static URL[] createClasspath() {
-		String paths[] = RuntimeProperties.compilationClasspath.split(";");
+		
 		ArrayList urls = new ArrayList();
+		
 		try {
 			urls.add( new File( RuntimeProperties.genFileDir ).toURL() );
 		} catch (MalformedURLException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		String[] paths = prepareClasspath( RuntimeProperties.compilationClasspath );
+		
 		for( int i = 0; i < paths.length; i++ ) {
 			File file = new File(paths[i]);
 			if(file.exists()) {
@@ -55,45 +63,33 @@ public class CCL extends URLClassLoader {
 				}
 			}
 		}
+		
 		return (URL[])urls.toArray(new URL[urls.size()]);
 	}
-	/**
-	 * Given a file name, reads the entirety of that file from disk and return
-	 * it as a byte array.
-	 * 
-	 * @param filename
-	 *            String - name of the file to be read.
-	 * @return byte[] - byte stream of the file read.
-	 * @throws java.io.IOException -
-	 *             Input/Output Exception thrown at reading the file.
-	 */
-//	private byte[] getBytes(String filename) throws IOException {
-//
-//		File file = new File(filename);
-//
-//		// Find out the length of the file.
-//		long len = file.length();
-//
-//		// Create an array that's just the right size for the file's contents.
-//		byte raw[] = new byte[(int) len];
-//
-//		// Open the file for reading.
-//		FileInputStream fin = new FileInputStream(file);
-//
-//		// Read all of it into the array; if we don't get all, then it's an
-//		// error.
-//		int r = fin.read(raw);
-//
-//		if (r != len) {
-//			throw new IOException("Can't read all, " + r + " != " + len);
-//		}
-//
-//		// Close the file.
-//		fin.close();
-//
-//		return raw;
-//	} // getBytes
 
+	private static String[] prepareClasspath( String path ) {
+	
+		if( path.indexOf(";") != -1 ) {
+			return path.split(";");
+			
+		} else if( path.indexOf(":") != -1 ) {
+			return path.split(":");
+		}
+		
+		return new String[]{ path };
+	}
+	
+	private static String prepareClasspathOS( String path ) {
+		String[] paths = prepareClasspath( path );
+		String classpath = System.getProperty("path.separator");
+		
+		for( int i= 0; i < paths.length; i++ ) {
+			classpath += paths[i] + System.getProperty("path.separator");
+		}
+		
+		return classpath;
+	}
+	
 	/**
 	 * Spawns a process to compile the java source code file specified in the
 	 * 'javaFile' parameter. Return a true if the compilation worked, false
@@ -120,9 +116,9 @@ public class CCL extends URLClassLoader {
 			throw new CompileException("File " + javaFile + " does not exist.");
 		}
 		
-		String execCMD = "javac  -classpath "
+		String execCMD = "javac -classpath "
 			+ RuntimeProperties.genFileDir
-			+ RuntimeProperties.compilationClasspath
+			+ prepareClasspathOS( RuntimeProperties.compilationClasspath )
 			+ " " + javaFile;
 		
 		Process p = null;
@@ -136,10 +132,6 @@ public class CCL extends URLClassLoader {
 		}
 
 		db.p(execCMD);
-
-		// InputStreamReader inputReader = new
-		// InputStreamReader(p.getInputStream());
-		// BufferedReader pOut= new BufferedReader(inputReader);
 
 		int ret = 1;
 
@@ -256,4 +248,42 @@ public class CCL extends URLClassLoader {
 //		// Otherwise, return the class.
 //		return c;
 //	} // loadClass
+	
+	/**
+	 * Given a file name, reads the entirety of that file from disk and return
+	 * it as a byte array.
+	 * 
+	 * @param filename
+	 *            String - name of the file to be read.
+	 * @return byte[] - byte stream of the file read.
+	 * @throws java.io.IOException -
+	 *             Input/Output Exception thrown at reading the file.
+	 */
+//	private byte[] getBytes(String filename) throws IOException {
+//
+//		File file = new File(filename);
+//
+//		// Find out the length of the file.
+//		long len = file.length();
+//
+//		// Create an array that's just the right size for the file's contents.
+//		byte raw[] = new byte[(int) len];
+//
+//		// Open the file for reading.
+//		FileInputStream fin = new FileInputStream(file);
+//
+//		// Read all of it into the array; if we don't get all, then it's an
+//		// error.
+//		int r = fin.read(raw);
+//
+//		if (r != len) {
+//			throw new IOException("Can't read all, " + r + " != " + len);
+//		}
+//
+//		// Close the file.
+//		fin.close();
+//
+//		return raw;
+//	} // getBytes
+	
 }
