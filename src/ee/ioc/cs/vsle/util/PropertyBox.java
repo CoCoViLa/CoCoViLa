@@ -39,8 +39,9 @@ public class PropertyBox {
 	public static final String PACKAGE_DTD = "packageDtd";
 	public static final String NUDGE_STEP = "nudgeStep";
 	public static final String SNAP_TO_GRID = "snapToGrid";
-        public static final String RECENT_PACKAGES = "recentPackages";
-
+    public static final String RECENT_PACKAGES = "recentPackages";
+    public static final String COMPILATION_CLASSPATH = "compilationClasspath";
+    
 	/**
 	 * Store application properties.
 	 * @param propFile - properties file name (without an extension .properties).

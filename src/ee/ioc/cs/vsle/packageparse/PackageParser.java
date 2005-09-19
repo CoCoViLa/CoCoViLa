@@ -1,23 +1,20 @@
 package ee.ioc.cs.vsle.packageparse;
 
-import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.graphics.*;
+import java.awt.*;
+import java.io.*;
+import java.util.ArrayList;
 
-import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.synthesize.SpecParser;
+import javax.xml.parsers.*;
 
 import org.xml.sax.*;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.io.File;
-import java.io.IOException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.awt.Font;
-import java.awt.Color;
-import java.util.ArrayList;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
+import ee.ioc.cs.vsle.graphics.*;
+import ee.ioc.cs.vsle.graphics.Polygon;
+import ee.ioc.cs.vsle.synthesize.SpecParser;
+import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.*;
 
 
 public class PackageParser {

@@ -24,6 +24,7 @@ public class OptionsDialog extends JDialog {
 
 	// Labels.
 	private static final JLabel lblGenFilesDir = new JLabel("Generated files:");
+	private static final JLabel lblCompClasspath = new JLabel("Compilation classpath:");
 	private static final JLabel lblPaletteFile = new JLabel("Palette file:");
 	private static final JLabel lblDebugInfo = new JLabel("Debug info:");
 	private static final JLabel lblDfltLayout = new JLabel("Default layout:");
@@ -34,6 +35,7 @@ public class OptionsDialog extends JDialog {
 
 	// Text Fields.
 	private static final JTextField tfGenFilesDir = new JTextField();
+	private static final JTextField tfCompClasspath = new JTextField();
 	private static final JTextField tfPaletteFile = new JTextField();
 
 	// Checkboxes.
@@ -57,6 +59,7 @@ public class OptionsDialog extends JDialog {
 	 * Class constructor.
 	 */
 	public OptionsDialog() {
+		super((JFrame)null, "Settings");
 		initialize();
 	}
 
@@ -87,13 +90,14 @@ public class OptionsDialog extends JDialog {
 		pnlLayout.add(bttnCustomLook, BorderLayout.EAST);
 
 		// Set field labels' panel size.
-		pnlLabels.setPreferredSize(new Dimension(100, 180));
+		//pnlLabels.setPreferredSize(new Dimension(100, 180));
 		pnlLabels.setMaximumSize(pnlLabels.getPreferredSize());
 		pnlLabels.setMinimumSize(pnlLabels.getPreferredSize());
 
 		// Set field labels on their panel.
-		pnlLabels.setLayout(new GridLayout(8, 0));
+		pnlLabels.setLayout(new GridLayout(9, 0));
 		pnlLabels.add(lblGenFilesDir);
+		pnlLabels.add(lblCompClasspath);
 		pnlLabels.add(lblPaletteFile);
 		pnlLabels.add(lblDfltLayout);
 		pnlLabels.add(lblDebugInfo);
@@ -103,7 +107,7 @@ public class OptionsDialog extends JDialog {
 		pnlLabels.add(lblNudgeStep);
 
 		// Set fields' panel size.
-		pnlFields.setPreferredSize(new Dimension(200, 180));
+		//pnlFields.setPreferredSize(new Dimension(200, 180));
 		pnlFields.setMaximumSize(pnlFields.getPreferredSize());
 		pnlFields.setMinimumSize(pnlFields.getPreferredSize());
 
@@ -127,8 +131,9 @@ public class OptionsDialog extends JDialog {
 		pnlNudgeSpinner.add(spinnerNudgeStep);
 
 		// Set fields to their panel.
-		pnlFields.setLayout(new GridLayout(8, 0));
+		pnlFields.setLayout(new GridLayout(9, 0));
 		pnlFields.add(tfGenFilesDir);
+		pnlFields.add(tfCompClasspath);
 		pnlFields.add(tfPaletteFile);
 		pnlFields.add(pnlLayout);
 		pnlFields.add(chbDebugInfo);
@@ -138,14 +143,14 @@ public class OptionsDialog extends JDialog {
 		pnlFields.add(pnlNudgeSpinner);
 
 		// Set settings panel size.
-		pnlSettings.setPreferredSize(new Dimension(300, 180));
+		//pnlSettings.setPreferredSize(new Dimension(300, 180));
 		pnlSettings.setMaximumSize(pnlSettings.getPreferredSize());
 		pnlSettings.setMinimumSize(pnlSettings.getPreferredSize());
 
 		// Add labels and fields to the main panel.
 		pnlSettings.setLayout(new BorderLayout());
 		pnlSettings.add(pnlLabels, BorderLayout.WEST);
-		pnlSettings.add(pnlFields, BorderLayout.EAST);
+		pnlSettings.add(pnlFields, BorderLayout.CENTER);
 
 		// Add items to the layout choices combobox.
 		if (cbDfltLayout.getItemCount() == 0) {
@@ -165,15 +170,15 @@ public class OptionsDialog extends JDialog {
 
 		// Add all panels to the main panel.
 		pnlMain.setLayout(new BorderLayout());
-		pnlMain.add(pnlSettings, BorderLayout.NORTH);
+		pnlMain.add(pnlSettings, BorderLayout.CENTER);
 		pnlMain.add(pnlBttns, BorderLayout.SOUTH);
 
 		getContentPane().add(pnlMain);
 
-		setSize(new Dimension(320, 280));
+		setSize(new Dimension(500, 300));
 		setResizable(false);
 		setModal(true);
-
+		//pack();
 		initializeSettings();
 
 		/*
@@ -239,6 +244,7 @@ public class OptionsDialog extends JDialog {
 	 */
 	private void initializeSettings() {
 		String sGenFilesDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
+		String sCompClpath = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.COMPILATION_CLASSPATH);
 		String sPaletteFile = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE);
 		String sDfltLayout = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT);
 		int iDebugOutput = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
@@ -249,6 +255,7 @@ public class OptionsDialog extends JDialog {
 		String sNudgeStep = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.NUDGE_STEP);
 
 		tfGenFilesDir.setText(sGenFilesDir);
+		tfCompClasspath.setText(sCompClpath);
 		tfPaletteFile.setText(sPaletteFile);
 		cbDfltLayout.setSelectedItem(sDfltLayout);
 		spinnerGridStep.getModel().setValue(sGridStep);
@@ -281,6 +288,7 @@ public class OptionsDialog extends JDialog {
 	 */
 	private void saveSettings() {
 		String sGenFilesDir = tfGenFilesDir.getText();
+		String sCompClpath = tfCompClasspath.getText();
 		String sPaletteFile = tfPaletteFile.getText();
 		String sDfltLayout = String.valueOf(cbDfltLayout.getSelectedItem());
 		String sDebugOutput = "0";
@@ -299,6 +307,8 @@ public class OptionsDialog extends JDialog {
 
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 			PropertyBox.GENERATED_FILES_DIR, sGenFilesDir);
+		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, 
+				PropertyBox.COMPILATION_CLASSPATH, sCompClpath );
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 			PropertyBox.PALETTE_FILE, sPaletteFile);
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
@@ -319,6 +329,7 @@ public class OptionsDialog extends JDialog {
 		RuntimeProperties.debugInfo = Integer.parseInt(sDebugOutput);
 		RuntimeProperties.nudgeStep = Integer.parseInt(spinnerNudgeStep.getModel().getValue().toString());
 		RuntimeProperties.genFileDir = sGenFilesDir;
+		RuntimeProperties.compilationClasspath = sCompClpath;
 		closeDialog();
 	} // saveSettings
 

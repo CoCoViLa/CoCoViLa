@@ -11,6 +11,8 @@ import ee.ioc.cs.vsle.synthesize.Var;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
+
+import javax.swing.*;
 import javax.swing.JTextArea;
 
 /**
@@ -214,11 +216,15 @@ public class ProgramRunner {
 
 		Object inst = null;
 		try {
-			if (classLoader.compile(programName)) {
+			if (classLoader.compile(programName)) {				
 				Class clas = classLoader.loadClass(programName);
 				inst = clas.newInstance();
 			}
 
+		} catch (NoClassDefFoundError e) { 
+			JOptionPane.showMessageDialog(null, "Class not found:\n" + e.getMessage(),
+					"Execution error", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace(System.err);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 			return null;

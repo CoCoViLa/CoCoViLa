@@ -15,6 +15,7 @@ public class RuntimeProperties {
 	// Application properties
 	public static String packageDir = "";
 	public static String genFileDir;
+	public static String compilationClasspath;
 	public static String customLayout;
 	public static int debugInfo;
 	public static int gridStep;
