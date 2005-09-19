@@ -665,6 +665,14 @@ public class Editor extends JFrame implements ChangeListener {
 			file.mkdirs();
 		}
 		
+		RuntimeProperties.compilationClasspath = PropertyBox.getProperty(
+				PropertyBox.APP_PROPS_FILE_NAME,
+				PropertyBox.COMPILATION_CLASSPATH );
+		
+		if( RuntimeProperties.compilationClasspath == null ) {
+			RuntimeProperties.compilationClasspath = "";
+		}
+		
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 				PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
 	}
