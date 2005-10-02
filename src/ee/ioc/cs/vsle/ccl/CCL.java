@@ -90,6 +90,47 @@ public class CCL extends URLClassLoader {
 		return classpath;
 	}
 	
+	
+	/**
+	 * Another implementation which uses internal compiler.
+	 * 
+	 * @param javaFile
+	 * @return
+	 * @throws IOException
+	 * @throws CompileException
+	 */
+	public boolean compile2(String javaFile) throws IOException, CompileException {
+		
+		javaFile = RuntimeProperties.genFileDir
+			+ System.getProperty("file.separator") + javaFile + ".java";
+		
+		db.p("Compiling " + javaFile + "...");
+		
+		File file = new File(javaFile);
+		
+		//Check if the file exists.
+		if (!file.exists()) {
+			throw new CompileException("File " + javaFile + " does not exist.");
+		}
+				
+		StringWriter sw = new StringWriter();		
+		PrintWriter pw = new PrintWriter(sw);
+		
+		String classpath = RuntimeProperties.genFileDir + prepareClasspathOS( RuntimeProperties.compilationClasspath );
+		
+		int status = com.sun.tools.javac.Main.compile( 
+				new String[]{ "-classpath", classpath, javaFile }, pw );
+			
+		if (status != 0) {
+
+			throw new CompileException( sw.getBuffer().toString() );
+
+		}
+		
+		db.p("Compilation successful!");
+		
+		return status == 0;
+	}
 	/**
 	 * Spawns a process to compile the java source code file specified in the
 	 * 'javaFile' parameter. Return a true if the compilation worked, false

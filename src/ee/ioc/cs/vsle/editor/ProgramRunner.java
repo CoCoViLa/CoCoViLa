@@ -216,7 +216,7 @@ public class ProgramRunner {
 
 		Object inst = null;
 		try {
-			if (classLoader.compile(programName)) {				
+			if (classLoader.compile2(programName)) {				
 				Class clas = classLoader.loadClass(programName);
 				inst = clas.newInstance();
 			}
