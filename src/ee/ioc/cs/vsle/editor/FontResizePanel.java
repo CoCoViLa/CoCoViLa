@@ -6,10 +6,10 @@ import java.awt.event.*;
 import javax.swing.event.*;
 
 public class FontResizePanel extends JPanel {
-	private JTextArea m_area;
+	private JComponent m_area;
 	private JSpinner m_spinner = new JSpinner();
 
-	public FontResizePanel(JTextArea area) {
+	public FontResizePanel(JComponent area) {
 		m_area = area;
 		try {
 			jbInit();

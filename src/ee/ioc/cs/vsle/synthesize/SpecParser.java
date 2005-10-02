@@ -151,7 +151,7 @@ public class SpecParser {
         Pattern pattern;
 
         // remove unneeded whitespace
-        pattern = Pattern.compile( "[ \t\n]+" );
+        pattern = Pattern.compile( "[ \r\t\n]+" );
         matcher = pattern.matcher( fileString );
         fileString = matcher.replaceAll( " " );
 

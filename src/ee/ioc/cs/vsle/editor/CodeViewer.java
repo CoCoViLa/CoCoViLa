@@ -14,7 +14,7 @@ import java.awt.event.*;
  * To change this template use Options | File Templates.
  */
 public class CodeViewer extends JFrame implements ActionListener{
-	JTextArea textArea;
+	JavaColoredTextPane textArea;
 	JPanel specText;
 	JButton saveBtn;
         String fileName;
@@ -26,7 +26,7 @@ public class CodeViewer extends JFrame implements ActionListener{
 
                 String fileText = ff.getFileContents(RuntimeProperties.packageDir + fileName);
 
-                textArea = new JTextArea();
+                textArea = new JavaColoredTextPane();
                 textArea.addKeyListener( new ProgramTextEditor.CommentKeyListener() );
                 textArea.setFont(RuntimeProperties.font);
                 textArea.append(fileText);

@@ -67,8 +67,12 @@ public class UndoRedoDocumentPanel extends JPanel {
     }
 
     private class MyUndoableEditListener implements UndoableEditListener {
+    	private int hack = 0;
+    	
         public void undoableEditHappened( UndoableEditEvent e ) {
-            undo.addEdit( e.getEdit() );
+        	if( hack++ != 0 )
+        		undo.addEdit( e.getEdit() );
+            
             updateRedoState();
             updateUndoState();
         }

@@ -20,7 +20,9 @@ import javax.swing.text.*;
 public class ProgramTextEditor extends JFrame implements ActionListener {
 
     JButton parseSpec, runProg, computeAll, propagate, invoke;
-    JTextArea textArea, programTextArea, runResultArea;
+    JTextArea runResultArea;
+    JavaColoredTextPane textArea, programTextArea;
+    
     JPanel progText, specText, runResult;
     JTextField invokeField;
     VPackage vPackage;
@@ -40,7 +42,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
         tabbedPane = new JTabbedPane();
 
-        textArea = new JTextArea();
+        textArea = new JavaColoredTextPane();
         textArea.addKeyListener( new CommentKeyListener() );
         textArea.setFont( RuntimeProperties.font );
         JScrollPane areaScrollPane = new JScrollPane( textArea );
@@ -65,7 +67,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         specText.add( progToolBar, BorderLayout.NORTH );
         tabbedPane.addTab( "Specification", specText );
 
-        programTextArea = new JTextArea();
+        programTextArea = new JavaColoredTextPane();
         programTextArea.addKeyListener( new CommentKeyListener() );
         programTextArea.setFont( RuntimeProperties.font );
         JToolBar toolBar = new JToolBar();
@@ -112,6 +114,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         tabbedPane.addTab( "Run results", runResult );
 
         SpecGenerator sgen = new SpecGenerator();
+
         textArea.append( sgen.generateSpec( objects, relations, vPackage ) );
 
         getContentPane().add( tabbedPane );
@@ -326,6 +329,59 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
                 } catch ( BadLocationException ex ) {
                 }
+            }
+            else if(e.getKeyChar() == '/'
+                && ( ( e.getModifiers() & KeyEvent.CTRL_MASK ) > 0 )
+                && ( e.getSource() instanceof JTextComponent )) {
+            	            	
+            	try {
+            		JTextComponent comp = (JTextComponent)e.getSource();
+                	Document doc = comp.getDocument();
+                	
+                	Element map = doc.getDefaultRootElement();
+                	
+                	int line = map.getElementIndex(comp.getCaretPosition());
+                	
+                	int lineCount = map.getElementCount();
+                	
+                	Element lineElem = map.getElement(line);
+                	int start = lineElem.getStartOffset();
+                	
+                	int endOffset = lineElem.getEndOffset();
+                	int end = ((line == lineCount - 1) ? (endOffset - 1) : endOffset);
+                	int length = end - start;
+                	
+					String text = doc.getText( start, length );
+					
+					if ( text.trim().startsWith( "//" ) ) {
+                        int ind = text.indexOf( "//" );
+                        
+                        int ss = start + ind;
+                        int ee = start + ind + 2;
+                        
+                        if (doc instanceof AbstractDocument) {
+                            ((AbstractDocument)doc).replace(ss, ee - ss, "",
+                                                            null);
+                        }
+                        else {
+                            doc.remove(ss, ee - ss);
+                            doc.insertString(ss, "", null);
+                        }
+
+                    } else {
+                    	doc.insertString(start, "//", null);
+                    }
+					
+					int l = map.getElementIndex(comp.getCaretPosition());
+					Element le = map.getElement(l);
+		            int eo = le.getEndOffset();
+
+		            
+					comp.setCaretPosition(((l == lineCount - 1) ? (eo - 1) : eo));
+					
+				} catch (BadLocationException e1) {
+					e1.printStackTrace();
+				}
             }
         }
 
