@@ -15,7 +15,7 @@ import ee.ioc.cs.vsle.util.db;
  * Time: 17:53:32
  * To change this template use Options | File Templates.
  */
-public class SpecGenerator {
+public class SpecGenerator implements ISpecGenerator {
 	public String generateSpec(ObjectList objects, ArrayList relations, VPackage pack) {
 		GObj obj;
 		ClassField field;

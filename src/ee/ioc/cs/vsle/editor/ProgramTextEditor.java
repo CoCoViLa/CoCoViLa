@@ -113,7 +113,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
         tabbedPane.addTab( "Run results", runResult );
 
-        SpecGenerator sgen = new SpecGenerator();
+        ISpecGenerator sgen = new SpecGenerator();
 
         textArea.append( sgen.generateSpec( objects, relations, vPackage ) );
 
