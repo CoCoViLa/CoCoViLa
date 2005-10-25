@@ -5,20 +5,18 @@ package ee.ioc.cs.vsle.editor;
 
 import java.util.ArrayList;
 
-import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.vclass.ClassField;
-import ee.ioc.cs.vsle.vclass.Connection;
-import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.vclass.ObjectList;
-import ee.ioc.cs.vsle.vclass.VPackage;
+import ee.ioc.cs.vsle.factoryStorage.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 public class XMLSpecGenerator implements ISpecGenerator {
 
+	private XMLSpecGenerator() {}
+	
     public String generateSpec(ObjectList objects, ArrayList relations,
             VPackage pack) {
         GObj obj;
         ClassField field;
-        String method = "";
+//        String method = "";
         String spec = "";
 
         StringBuffer s = new StringBuffer();
@@ -70,4 +68,27 @@ public class XMLSpecGenerator implements ISpecGenerator {
         return s.toString();
     }
 
+    public static void init() {
+		FactoryStorage.register( new Factory() );
+	}
+    
+    static class Factory implements IFactory {
+
+    	private static ISpecGenerator instance;
+    	
+		public String getInterfaceInstance() {
+			return "\\SPECGEN\\XML";
+		}
+
+		public Object getInstance() {
+			if( instance == null ) {
+				instance = new XMLSpecGenerator();
+			}
+			return instance;
+		}
+		
+		public String getDescription() {
+			return "XML specification";
+		}	
+	}
 }

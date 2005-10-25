@@ -45,8 +45,8 @@ public class Canvas extends JPanel implements ActionListener {
 			RuntimeProperties.packageDir = workDir;
 			PackageParser pp = new PackageParser(f);
 			vPackage = pp.getPackage();
-			Scheme scheme = new Scheme();
-			scheme.packageName = vPackage.name;
+//			Scheme scheme = new Scheme();
+//			scheme.packageName = vPackage.name;
 			initialize();
 			palette = new Palette(vPackage, mListener, this);
 			validate();
@@ -58,6 +58,7 @@ public class Canvas extends JPanel implements ActionListener {
 
 	void initialize() {
 		scheme = new Scheme();
+		scheme.packageName = vPackage.name;
 		objects = scheme.objects;
 		connections = scheme.connections;
 		mListener = new MouseOps(this);

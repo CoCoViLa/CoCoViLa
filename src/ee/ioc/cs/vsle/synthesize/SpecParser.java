@@ -17,8 +17,16 @@ import ee.ioc.cs.vsle.equations.EquationSolver;
  */
 public class SpecParser {
 
+	private final static SpecParser s_instance = new SpecParser();
+	
+	private SpecParser() {}
+	
+	public static SpecParser getInstance() {
+		return s_instance;
+	}
+	
     public static void main( String[] args ) {
-        SpecParser p = new SpecParser();
+        SpecParser p = getInstance();
 
         try {
             String s = new String( p.getStringFromFile( args[ 0 ] ) );
@@ -165,6 +173,9 @@ public class SpecParser {
         return fileString;
     }
 
+    Problem makeProblem( ClassList classes ) throws SpecParseException{
+    	return makeProblemImpl( classes, "this", "this", new Problem() );
+    }
     /**
      Creates the problem - a graph-like data structure on which planning can be applied. The method is recursively
      applied to dig through the class tree.
@@ -174,7 +185,7 @@ public class SpecParser {
      @param caller caller, or the "parent" of the current object. The objects name will be caller + . + obj.name
      @param problem the problem itself (needed because of recursion).
      */
-    Problem makeProblem( ClassList classes, String type, String caller, Problem problem ) throws
+    private Problem makeProblemImpl( ClassList classes, String type, String caller, Problem problem ) throws
             SpecParseException {
         // ee.ioc.cs.editor.util.db.p("CLASSES: "+classes);
         // ee.ioc.cs.editor.util.db.p("TYPE: "+type);
@@ -188,7 +199,7 @@ public class SpecParser {
         for ( int j = 0; j < ac.fields.size(); j++ ) {
             cf = ( ClassField ) ac.fields.get( j );
             if ( classes.getType( cf.getType() ) != null ) {
-                problem = makeProblem( classes, cf.getType(), caller + "." + cf.getName(), problem );
+                problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
             }
             if ( cf.getType().equals( "alias" ) ) {
                 cf = rewriteWildcardAlias( cf, ac, classes );
@@ -579,6 +590,12 @@ public class SpecParser {
         return rel;
     }
 
+    public ClassList parseSpecification( String spec ) throws IOException,
+    										SpecParseException, EquationException {
+    	HashSet hs = new HashSet();
+    	return parseSpecificationImpl( spec, "this", null, hs );
+    }
+    
     /**
      A recrusve method that does the actual parsing. It creates a list of annotated classes that
      carry infomation about the fields and relations in a class specification.
@@ -589,7 +606,7 @@ public class SpecParser {
      @param	checkedClasses the list of classes that parser has started to check. Needed to prevent infinite loop
      in case of mutual declarations.
      */
-    public ClassList parseSpecification( String spec, String className, AnnotatedClass parent,
+    private ClassList parseSpecificationImpl( String spec, String className, AnnotatedClass parent,
                                          HashSet checkedClasses ) throws IOException,
             SpecParseException, EquationException {
         Matcher matcher2;
@@ -638,7 +655,7 @@ public class SpecParser {
                                 String s = new String( getStringFromFile( RuntimeProperties.
                                         packageDir + type + ".java" ) );
 
-                                classList.addAll( parseSpecification( refineSpec( s ), type,
+                                classList.addAll( parseSpecificationImpl( refineSpec( s ), type,
                                         annClass, checkedClasses ) );
                                 checkedClasses.remove( type );
                                 specClass = true;

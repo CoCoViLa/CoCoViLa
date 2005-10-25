@@ -1,20 +1,17 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.editor.Menu;
-
-import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.synthesize.Synthesizer;
-
-import java.io.*;
-
-import java.util.Properties;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
+import java.net.*;
+import java.util.Properties;
+
 import javax.swing.*;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.ChangeEvent;
 import javax.swing.event.*;
+
+import ee.ioc.cs.vsle.synthesize.Synthesizer;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.VPackage;
 
 /**
  * Visual Specification Language Editor main module for combining separate
@@ -570,6 +567,15 @@ public class Editor extends JFrame implements ChangeListener {
 	public static void main(String[] args) {
 		String directory = System.getProperty("user.dir")
 				+ System.getProperty("file.separator");
+		
+		String version = System.getProperty("java.version");
+		
+		if( version.compareTo( "1.5.0" ) < 0 ) {
+			
+			System.err.println( "CoCoViLa requires at least Java 1.5.0 to run!");
+			System.exit( 1 );
+		}	
+		
 		RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(
 				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
 		RuntimeProperties.gridStep = Integer.parseInt(PropertyBox.getProperty(
@@ -675,6 +681,10 @@ public class Editor extends JFrame implements ChangeListener {
 		
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 				PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
+		
+		/* ******************** Init Factories ******************** */
+		SpecGenerator.init();
+		XMLSpecGenerator.init();
 	}
 
 	public void clearPane() {

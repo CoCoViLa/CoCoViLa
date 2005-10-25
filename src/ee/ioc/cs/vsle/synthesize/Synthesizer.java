@@ -53,14 +53,15 @@ public class Synthesizer {
      */
     public String makeProgramText( String fileString, boolean computeAll, ClassList classList,
                                    String mainClassName ) throws SpecParseException {
-        SpecParser sp = new SpecParser();
-        Problem problem = new Problem();
 
+        Problem problem = null;
         // call the packageParser to create a problem from the specification
         try {
-            problem = sp.makeProblem( classList, "this", "this", problem );
+            problem = SpecParser.getInstance().makeProblem( classList );
         } catch ( Exception e ) {
             e.printStackTrace();
+            
+            problem = new Problem();
         }
 
         // run the planner on the obtained problem
@@ -161,7 +162,7 @@ public class Synthesizer {
                 if ( matcher.find() ) {
                     fileString = matcher.replaceAll( "public class " + pClass.name );
                 }
-                SpecParser specParser = new SpecParser();
+                SpecParser specParser = SpecParser.getInstance();
                 String declars = "";
 
                 try {
@@ -266,8 +267,8 @@ public class Synthesizer {
      */
     public void parseFromCommandLine( String fileName ) {
         try {
-            SpecParser sp = new SpecParser();
-            HashSet hs = new HashSet();
+            SpecParser sp = SpecParser.getInstance();
+            
             String mainClassName = new String();
             String file = sp.getStringFromFile( RuntimeProperties.packageDir + fileName );
             Pattern pattern = Pattern.compile( "class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+" );
@@ -277,7 +278,7 @@ public class Synthesizer {
                 mainClassName = matcher.group( 1 );
             }
             String spec = sp.refineSpec( file );
-            ClassList classList = sp.parseSpecification( spec, "this", null, hs );
+            ClassList classList = sp.parseSpecification( spec );
             String prog = makeProgramText( file, true, classList, mainClassName ); //changed to true
 
             makeProgram( prog, classList, mainClassName );

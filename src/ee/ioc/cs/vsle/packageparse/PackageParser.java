@@ -482,10 +482,9 @@ public class PackageParser {
             }
             if ( qName.equals( "fields" ) ) {
                 newClass.fields = classFields;
-                SpecParser sp = new SpecParser();
                 ArrayList a = new ArrayList();
                 try {
-                    a = sp.getFields( path + File.separator + newClass.name + ".java" );
+                    a = SpecParser.getInstance().getFields( path + File.separator + newClass.name + ".java" );
                 } catch ( IOException e ) {
                     db.p( "Warning: class " + newClass.name +
                           " specified in package does not exist." );

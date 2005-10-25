@@ -1,12 +1,11 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.*;
+import java.io.*;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.factoryStorage.*;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -16,6 +15,9 @@ import ee.ioc.cs.vsle.util.db;
  * To change this template use Options | File Templates.
  */
 public class SpecGenerator implements ISpecGenerator {
+	
+	private SpecGenerator() {}
+	
 	public String generateSpec(ObjectList objects, ArrayList relations, VPackage pack) {
 		GObj obj;
 		ClassField field;
@@ -126,5 +128,30 @@ public class SpecGenerator implements ISpecGenerator {
 
 		return s.toString();
 	}
+	
+	public static void init() {
+		FactoryStorage.register( new Factory() );
+	}
+	
+	static class Factory implements IFactory {
+		
+		private static ISpecGenerator instance;
+		
+		public String getInterfaceInstance() {
+			return SpecGenFactory.s_prefix + "\\SSP";
+		}
+
+		public Object getInstance() {
+			if( instance == null ) {
+				instance = new SpecGenerator();
+			}
+			return instance;
+		}
+		
+		public String getDescription() {
+			return "SSP specification";
+		}		
+	}
+	
 }
 

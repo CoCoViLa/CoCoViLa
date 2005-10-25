@@ -19,7 +19,7 @@ import javax.swing.text.*;
  */
 public class ProgramTextEditor extends JFrame implements ActionListener {
 
-    JButton parseSpec, runProg, computeAll, propagate, invoke;
+    JButton computeGoal, runProg, computeAll, propagate, invoke;
     JTextArea runResultArea;
     JavaColoredTextPane textArea, programTextArea;
     
@@ -55,9 +55,9 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         specText.add( areaScrollPane, BorderLayout.CENTER );
         JToolBar progToolBar = new JToolBar();
         progToolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
-        parseSpec = new JButton( "Compute goal" );
-        parseSpec.addActionListener( this );
-        progToolBar.add( parseSpec );
+        computeGoal = new JButton( "Compute goal" );
+        computeGoal.addActionListener( this );
+        progToolBar.add( computeGoal );
         computeAll = new JButton( "Compute all" );
         computeAll.addActionListener( this );
         progToolBar.add( computeAll );
@@ -113,7 +113,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
         tabbedPane.addTab( "Run results", runResult );
 
-        ISpecGenerator sgen = new SpecGenerator();
+        ISpecGenerator sgen = SpecGenFactory.getInstance().getCurrentSpecGen();
 
         textArea.append( sgen.generateSpec( objects, relations, vPackage ) );
 
@@ -123,110 +123,13 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
 
     public void actionPerformed( ActionEvent e ) {
-        if ( e.getSource() == parseSpec ) {
-            Synthesizer synth = new Synthesizer();
-            SpecParser sp = new SpecParser();
-            HashSet hs = new HashSet();
-
-            try {
-                String fullSpec = textArea.getText();
-                Pattern pattern = Pattern.compile(
-                        "class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+" );
-                Matcher matcher = pattern.matcher( fullSpec );
-
-                if ( matcher.find() ) {
-                    mainClassName = matcher.group( 1 );
-                }
-                String spec = sp.refineSpec( fullSpec );
-
-                classList = sp.parseSpecification( spec, "this", null, hs );
-                programTextArea.setText( "" );
-                programTextArea.append(
-                        synth.makeProgramText( fullSpec, false, classList,
-                                               mainClassName ) );
-                tabbedPane.setSelectedComponent( progText );
-            } catch ( UnknownVariableException uve ) {
-                db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
-                ErrorWindow.showErrorMessage(
-                        "Fatal error: variable " + uve.excDesc + " not declared" );
-            } catch ( LineErrorException lee ) {
-                db.p( "Fatal error on line " + lee.excDesc );
-                ErrorWindow.showErrorMessage(
-                        "Syntax error on line '" + lee.excDesc + "'" );
-
-            } catch ( MutualDeclarationException lee ) {
-                db.p(
-                        "Mutual recursion in specifications, between classes "
-                        + lee.excDesc );
-                ErrorWindow.showErrorMessage(
-                        "Mutual recursion in specifications, classes " + lee.excDesc );
-
-            } catch ( EquationException ee ) {
-                ErrorWindow.showErrorMessage( ee.excDesc );
-
-            } catch ( SpecParseException spe ) {
-                db.p( spe.excDesc );
-                ErrorWindow.showErrorMessage( spe.excDesc );
-
-            } catch ( Exception ex ) {
-                ex.printStackTrace();
-            }
-            validate();
+        if ( e.getSource() == computeGoal ) {            
+        	compute( false );
         }
-        if ( e.getSource() == computeAll ) {
-            Synthesizer synth = new Synthesizer();
-            SpecParser sp = new SpecParser();
-            HashSet hs = new HashSet();
-
-            try {
-                String fullSpec = textArea.getText();
-                Pattern pattern = Pattern.compile(
-                        "class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+" );
-                Matcher matcher = pattern.matcher( fullSpec );
-
-                if ( matcher.find() ) {
-                    mainClassName = matcher.group( 1 );
-                }
-                String spec = sp.refineSpec( fullSpec );
-
-                classList = sp.parseSpecification( spec, "this", null, hs );
-                programTextArea.setText( "" );
-                programTextArea.append(
-                        synth.makeProgramText( fullSpec, true, classList, mainClassName ) );
-                tabbedPane.setSelectedComponent( progText );
-            } catch ( UnknownVariableException uve ) {
-
-                db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
-                ErrorWindow.showErrorMessage(
-                        "Fatal error: variable " + uve.excDesc + " not declared" );
-
-            } catch ( LineErrorException lee ) {
-                db.p( "Fatal error on line " + lee.excDesc );
-                ErrorWindow.showErrorMessage(
-                        "Syntax error on line '" + lee.excDesc + "'" );
-
-            } catch ( EquationException ee ) {
-                ErrorWindow.showErrorMessage( ee.excDesc );
-
-            } catch ( MutualDeclarationException lee ) {
-                db.p(
-                        "Mutual recursion in specifications, between classes "
-                        + lee.excDesc );
-                ErrorWindow.showErrorMessage(
-                        "Mutual recursion in specifications, classes " + lee.excDesc );
-
-            } catch ( SpecParseException spe ) {
-                db.p( spe.excDesc );
-                ErrorWindow.showErrorMessage( spe.excDesc );
-
-            } catch ( Exception ex ) {
-                ex.printStackTrace();
-            }
-
-            validate();
+        else if ( e.getSource() == computeAll ) {
+        	compute( true );            
         }
-
-        if ( e.getSource() == runProg ) {
+        else if ( e.getSource() == runProg ) {
             Synthesizer synth = new Synthesizer();
 
             synth.makeProgram( programTextArea.getText(), classList,
@@ -243,19 +146,16 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
             } catch ( CompileException ce ) {
                 ErrorWindow.showErrorMessage(
                         "Compilation failed:\n " + ce.excDesc );
-
             }
-
         }
-
-        if ( e.getSource() == propagate ) {
+        else if ( e.getSource() == propagate ) {
             db.p( "propageerin" );
             if ( runnableObject != null ) {
                 runner.runPropagate( runnableObject, objects );
             }
             editor.repaint();
         }
-        if ( e.getSource() == invoke ) {
+        else if ( e.getSource() == invoke ) {
             ArrayList watchFields = watchableFields( objects );
 
             if ( runnableObject != null ) {
@@ -274,6 +174,59 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         }
     }
 
+    private void compute( boolean computeAll ) {
+    	
+    	Synthesizer synth = new Synthesizer();
+        SpecParser sp = SpecParser.getInstance();
+
+        try {
+            String fullSpec = textArea.getText();
+            Pattern pattern = Pattern.compile(
+                    "class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+" );
+            Matcher matcher = pattern.matcher( fullSpec );
+
+            if ( matcher.find() ) {
+                mainClassName = matcher.group( 1 );
+            }
+            String spec = sp.refineSpec( fullSpec );
+
+            classList = sp.parseSpecification( spec );
+            programTextArea.setText( "" );
+            programTextArea.append(
+                    synth.makeProgramText( fullSpec, computeAll, classList, mainClassName ) );
+            tabbedPane.setSelectedComponent( progText );
+        } catch ( UnknownVariableException uve ) {
+
+            db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
+            ErrorWindow.showErrorMessage(
+                    "Fatal error: variable " + uve.excDesc + " not declared" );
+
+        } catch ( LineErrorException lee ) {
+            db.p( "Fatal error on line " + lee.excDesc );
+            ErrorWindow.showErrorMessage(
+                    "Syntax error on line '" + lee.excDesc + "'" );
+
+        } catch ( EquationException ee ) {
+            ErrorWindow.showErrorMessage( ee.excDesc );
+
+        } catch ( MutualDeclarationException lee ) {
+            db.p(
+                    "Mutual recursion in specifications, between classes "
+                    + lee.excDesc );
+            ErrorWindow.showErrorMessage(
+                    "Mutual recursion in specifications, classes " + lee.excDesc );
+
+        } catch ( SpecParseException spe ) {
+            db.p( spe.excDesc );
+            ErrorWindow.showErrorMessage( spe.excDesc );
+
+        } catch ( Exception ex ) {
+            ex.printStackTrace();
+        }
+        
+        validate();
+    }
+    
     ArrayList watchableFields( ObjectList objects ) {
         ClassField field;
         GObj obj;
