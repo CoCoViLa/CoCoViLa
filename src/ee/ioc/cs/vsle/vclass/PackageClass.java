@@ -10,7 +10,7 @@ public class PackageClass implements Serializable {
 	public String icon;
 	public ArrayList fields = new ArrayList();
 	public ClassGraphics graphics;
-	public ArrayList ports = new ArrayList();
+	public ArrayList<Port> ports = new ArrayList<Port>();
 	public String description;
 	public boolean relation = false;
 
@@ -37,7 +37,7 @@ public class PackageClass implements Serializable {
 	void drawClassGraphics(int x, int y, Graphics2D g) {
 		graphics.draw(x, y, 1, 1, g);
 		for (int i = 0; i < ports.size(); i++) {
-			Port port = (Port) ports.get(i);
+			Port port = ports.get(i);
 
 			if (port.type.equals("in")) {
 				g.setColor(Color.blue);
