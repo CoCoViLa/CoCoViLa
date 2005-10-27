@@ -5,7 +5,8 @@ import java.io.Serializable;
 import java.awt.*;
 
 public class PackageClass implements Serializable {
-	int x, y;
+    private static final long serialVersionUID = 1L;
+    int x, y;
 	public String name;
 	public String icon;
 	public ArrayList fields = new ArrayList();
