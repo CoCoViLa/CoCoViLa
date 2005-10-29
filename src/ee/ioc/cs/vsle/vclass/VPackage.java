@@ -17,7 +17,7 @@ public class VPackage {
 	public String name;
 	public String description;
         private String path;
-	public ArrayList classes = new ArrayList();
+	public ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
 
         public VPackage( String path ) {
             this.path = path;
@@ -33,7 +33,7 @@ public class VPackage {
 		PackageClass pClass;
 
 		for (int i = 0; i < classes.size(); i++) {
-			pClass = (PackageClass) classes.get(i);
+			pClass = classes.get(i);
 			if (pClass.name.equals(className)) {
 				return true;
 			}
@@ -50,7 +50,7 @@ public class VPackage {
 		PackageClass pClass;
 
 		for (int i = 0; i < classes.size(); i++) {
-			pClass = (PackageClass) classes.get(i);
+			pClass = classes.get(i);
 			if (pClass.name.equals(className)) {
 				return pClass;
 			}

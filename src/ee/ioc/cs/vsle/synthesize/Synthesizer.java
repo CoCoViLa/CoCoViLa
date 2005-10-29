@@ -77,7 +77,7 @@ public class Synthesizer {
         // check all the fields and make declarations accordingly
         for ( int i = 0; i < ac.fields.size(); i++ ) {
 
-            field = ( ClassField ) ac.fields.get( i );
+            field = ac.fields.get( i );
             if ( !( field.getType().equals( "alias" ) || field.getType().equals( "void" ) ) ) {
                 if ( field.isSpecField() ) {
                     prog += "    public " + field.getType() + " " + field.getName() + " = new " +
@@ -243,23 +243,15 @@ public class Synthesizer {
     }
 
     boolean isPrimitive( String type ) {
-        if ( type.equals( "int" ) || type.equals( "double" ) || type.equals( "float" ) ||
+        return ( type.equals( "int" ) || type.equals( "double" ) || type.equals( "float" ) ||
              type.equals( "long" ) || type.equals( "short" ) || type.equals( "boolean" ) ||
-             type.equals( "char" ) ) {
-            return true;
-        } else {
-            return false;
-        }
+             type.equals( "char" ) );
     }
 
     boolean isArray( String type ) {
         int length = type.length();
 
-        if ( type.length() >= 2 && type.substring( length - 2, length ).equals( "[]" ) ) {
-            return true;
-        } else {
-            return false;
-        }
+        return ( type.length() >= 2 && type.substring( length - 2, length ).equals( "[]" ) );
     }
 
     /**

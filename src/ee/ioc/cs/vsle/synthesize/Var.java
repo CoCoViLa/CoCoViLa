@@ -16,7 +16,7 @@ import ee.ioc.cs.vsle.vclass.ClassField;
 public class Var implements Cloneable,
         Serializable {
 
-    private Set rels = new HashSet();
+    private Set<Rel> rels = new HashSet<Rel>();
     private ClassField field;
     private String type;
     private String object;
@@ -28,7 +28,7 @@ public class Var implements Cloneable,
     }
 
 
-    Set getRels() {
+    Set<Rel> getRels() {
         return rels;
     }
 

@@ -18,8 +18,8 @@ public class AnnotatedClass {
 	String name;
 	AnnotatedClass parent;
 	ArrayList subClasses = new ArrayList();
-	ArrayList classRelations = new ArrayList();
-	ArrayList fields = new ArrayList();
+	ArrayList<ClassRelation> classRelations = new ArrayList<ClassRelation>();
+	ArrayList<ClassField> fields = new ArrayList<ClassField>();
 
 	/**
 	 * Class constructor.
@@ -48,7 +48,7 @@ public class AnnotatedClass {
 	 * Adds a list of variables to the ArrayList of fields.
 	 * @param v ArrayList - list of variables to be appended to the list of fields.
 	 */
-	void addVars(ArrayList v) {
+	void addVars(ArrayList<ClassField> v) {
 		fields.addAll(v);
 	} // addVars
 
@@ -71,7 +71,7 @@ public class AnnotatedClass {
 	boolean hasField(String fieldName) {
 		ClassField f;
 		for (int j = 0; j < fields.size(); j++){
-            f = (ClassField)fields.get(j);
+            f = fields.get(j);
 			if (f.getName().equals(fieldName))
 				return true;
 		}
@@ -81,7 +81,7 @@ public class AnnotatedClass {
 	public ClassField getFieldByName(String fieldName) {
 		ClassField f;
 		for (int j = 0; j < fields.size(); j++){
-            f = (ClassField)fields.get(j);
+            f = fields.get(j);
 			if (f.getName().equals(fieldName))
 				return f;
 		}
@@ -89,4 +89,3 @@ public class AnnotatedClass {
 	}
 }
 
-;

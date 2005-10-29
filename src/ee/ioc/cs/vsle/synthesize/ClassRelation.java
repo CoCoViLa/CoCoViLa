@@ -18,10 +18,10 @@ import java.util.regex.Matcher;
 class ClassRelation
 	implements Serializable {
 
-	private ArrayList inputs = new ArrayList();
-	private ArrayList subtasks = new ArrayList();
-	private ArrayList outputs = new ArrayList();
-        private ArrayList exceptions = new ArrayList();
+	private ArrayList<ClassField> inputs = new ArrayList<ClassField>();
+	private ArrayList<ClassRelation> subtasks = new ArrayList<ClassRelation>();
+	private ArrayList<ClassField> outputs = new ArrayList<ClassField>();
+        private ArrayList<ClassField> exceptions = new ArrayList<ClassField>();
 
 	/**
 	 * Type of the relation.
@@ -55,19 +55,19 @@ class ClassRelation
             return method;
         }
 
-        ArrayList getInputs() {
+        ArrayList<ClassField> getInputs() {
             return inputs;
         }
 
-        ArrayList getOutputs() {
+        ArrayList<ClassField> getOutputs() {
             return outputs;
         }
 
-        ArrayList getSubtasks() {
+        ArrayList<ClassRelation> getSubtasks() {
             return subtasks;
         }
 
-        ArrayList getExceptions() {
+        ArrayList<ClassField> getExceptions() {
             return exceptions;
         }
 
@@ -85,7 +85,7 @@ class ClassRelation
 	 * @param vars ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void setOutput(String s, ArrayList vars) throws UnknownVariableException {
+	void setOutput(String s, ArrayList<ClassField> vars) throws UnknownVariableException {
 		ClassField f = getVar(s, vars);
 
 		if (f != null) {
@@ -111,7 +111,7 @@ class ClassRelation
 	 * @param vars ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void setInput(String s, ArrayList vars) throws UnknownVariableException {
+	void setInput(String s, ArrayList<ClassField> vars) throws UnknownVariableException {
 		if (!s.equals("")) {
 			ClassField f = getVar(s, vars);
 
@@ -143,7 +143,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addInputs(String[] input, ArrayList varList) throws UnknownVariableException {
+	void addInputs(String[] input, ArrayList<ClassField> varList) throws UnknownVariableException {
 		for (int i = 0; i < input.length; i++) {
 			if (!input[i].equals("#")) {
 				ClassField var = getVar(input[i], varList);
@@ -169,7 +169,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-        void addOutputs( String[] output, ArrayList varList ) throws UnknownVariableException {
+        void addOutputs( String[] output, ArrayList<ClassField> varList ) throws UnknownVariableException {
             for ( int i = 0; i < output.length; i++ ) {
                 //we must have at least one output, others will be considered as exceptions
                 String s = output[ i ];
@@ -207,14 +207,14 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addSubtasks(ArrayList subtaskList, ArrayList varList) throws UnknownVariableException {
+	void addSubtasks(ArrayList<String> subtaskList, ArrayList<ClassField> varList) throws UnknownVariableException {
 		ClassRelation subtask;
 		String subtaskString;
 		Pattern pattern;
 		Matcher matcher2;
 
 		for (int i = 0; i < subtaskList.size(); i++) {
-			subtaskString = (String) subtaskList.get(i);
+			subtaskString = subtaskList.get(i);
 			pattern = Pattern.compile("\\[(.*) *-> ?(.*)\\]");
 			matcher2 = pattern.matcher(subtaskString);
 			if (matcher2.find()) {
@@ -236,7 +236,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addAll(String[] input, ArrayList varList) throws UnknownVariableException {
+	void addAll(String[] input, ArrayList<ClassField> varList) throws UnknownVariableException {
 		for (int i = 0; i < input.length; i++) {
 			ClassField var = getVar(input[i], varList);
 
@@ -255,11 +255,11 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @return ClassField
 	 */
-	ClassField getVar(String varName, ArrayList varList) {
+	ClassField getVar(String varName, ArrayList<ClassField> varList) {
 		ClassField var;
 
 		for (int i = 0; i < varList.size(); i++) {
-			var = (ClassField) varList.get(i);
+			var = varList.get(i);
 			if (var.getName().equals(varName)) {
 				return var;
 			}

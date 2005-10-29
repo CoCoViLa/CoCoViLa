@@ -98,7 +98,7 @@ public class JavaColoredTextPane extends JTextPane {
          * and we need to be able to retrieve ranges from it, it is stored in a
          * balanced tree.
          */
-        private TreeSet iniPositions = new TreeSet(new DocPositionComparator());
+        private TreeSet<DocPosition> iniPositions = new TreeSet<DocPosition>(new DocPositionComparator());
 
         /**
          * As we go through and remove invalid positions we will also be finding
@@ -107,7 +107,7 @@ public class JavaColoredTextPane extends JTextPane {
          * time, we will keep a list of the new positions and simply add it to the
          * list of positions once all the old positions have been removed.
          */
-    	private HashSet newPositions = new HashSet();
+    	private HashSet<DocPosition> newPositions = new HashSet<DocPosition>();
 
         /**
          * A simple wrapper representing something that needs to be colored.
@@ -125,7 +125,7 @@ public class JavaColoredTextPane extends JTextPane {
         /**
          * Vector that stores the communication between the two threads.
          */
-        private volatile Vector v = new Vector();
+        private volatile Vector<RecolorEvent> v = new Vector<RecolorEvent>();
 
         /**
          * The amount of change that has occurred before the place in the
@@ -186,7 +186,7 @@ public class JavaColoredTextPane extends JTextPane {
             for (;;){  // forever
                 synchronized(lock){
                     if (v.size() > 0){
-                        RecolorEvent re = (RecolorEvent)(v.elementAt(0));
+                        RecolorEvent re = v.elementAt(0);
                         v.removeElementAt(0);
                         position = re.position;
                         adjustment = re.adjustment;
@@ -197,8 +197,8 @@ public class JavaColoredTextPane extends JTextPane {
                     }
                 }
                 if (position != -1){
-                    SortedSet workingSet;
-                    Iterator workingIt;
+                    SortedSet<DocPosition> workingSet;
+                    Iterator<DocPosition> workingIt;
                     DocPosition startRequest = new DocPosition(position);
                     DocPosition endRequest = new DocPosition(position + ((adjustment>=0)?adjustment:-adjustment));
                     DocPosition  dp;
@@ -211,7 +211,7 @@ public class JavaColoredTextPane extends JTextPane {
                         // all the good positions before
                         workingSet = iniPositions.headSet(startRequest);
                         // the last of the stuff before
-                        dpStart = ((DocPosition)workingSet.last());
+                        dpStart = workingSet.last();
                     } catch (NoSuchElementException x){
                         // if there were no good positions before the requested start,
                         // we can always start at the very beginning.
@@ -232,7 +232,7 @@ public class JavaColoredTextPane extends JTextPane {
                     workingSet = iniPositions.tailSet(startRequest);
                     workingIt = workingSet.iterator();
                     while (workingIt.hasNext()){
-                        ((DocPosition)workingIt.next()).adjustPosition(adjustment);
+                        workingIt.next().adjustPosition(adjustment);
                     }
 
                     // now go through and highlight as much as needed
@@ -240,7 +240,7 @@ public class JavaColoredTextPane extends JTextPane {
                     workingIt = workingSet.iterator();
                     dp = null;
                     if (workingIt.hasNext()){
-                        dp = (DocPosition)workingIt.next();
+                        dp = workingIt.next();
                     }
                     try {
                         Token t;
@@ -300,7 +300,7 @@ public class JavaColoredTextPane extends JTextPane {
                                         dp = null;
                                     } else if (workingIt.hasNext()){
                                         // didn't find it, try again.
-                                        dp = (DocPosition)workingIt.next();
+                                        dp = workingIt.next();
                                     } else {
                                         // didn't find it, and there is no more info from last
                                         // time.  This means that we will just continue
@@ -391,7 +391,7 @@ public class JavaColoredTextPane extends JTextPane {
      * A hash table containing the text styles.
      * Simple attribute sets are hashed by name (String)
      */
-    private Hashtable styles = new Hashtable();
+    private Hashtable<String, SimpleAttributeSet> styles = new Hashtable<String, SimpleAttributeSet>();
 
     /**
      * retrieve the style for the given type of text.
@@ -401,7 +401,7 @@ public class JavaColoredTextPane extends JTextPane {
      * @return the style
      */
     private SimpleAttributeSet getStyles(String styleName){
-        return ((SimpleAttributeSet)styles.get(styleName));
+        return styles.get(styleName);
     }
 
     /**

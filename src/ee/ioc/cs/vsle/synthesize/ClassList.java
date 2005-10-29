@@ -10,8 +10,8 @@ import java.util.ArrayList;
  * @author Ando Saabas
  * @version 1.0
  */
-public class ClassList
-	extends ArrayList {
+public class ClassList<E>
+	extends ArrayList<E> {
 
 	/**
 	 * Class constructor.

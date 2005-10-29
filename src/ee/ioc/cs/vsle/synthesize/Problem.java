@@ -6,16 +6,16 @@ import java.util.*;
 
 class Problem implements Cloneable, Serializable {
 
-    private Set axioms = new HashSet(); //Collections.synchronizedSet(new HashSet());
-    private Set knownVars = new HashSet(); //Collections.synchronizedSet(new HashSet());
-    private Set targetVars = new HashSet(); //Collections.synchronizedSet(new HashSet());
-    private Map allVars = new HashMap(); //Collections.synchronizedMap(new HashMap());
-    private Set allRels = new HashSet(); //Collections.synchronizedSet(new HashSet());
-    private Set subtaskRels = new HashSet(); //Collections.synchronizedSet(new HashSet());
-    private Set subtasks = new HashSet(); //Collections.synchronizedSet(new HashSet());
-    private Vector subGoal = null;
+    private Set<Rel> axioms = new HashSet<Rel>(); 
+    private Set<Var> knownVars = new HashSet<Var>(); 
+    private Set<Var> targetVars = new HashSet<Var>(); 
+    private Map<String, Var> allVars = new HashMap<String, Var>();
+    private Set<Rel> allRels = new HashSet<Rel>(); 
+    private Set<Rel> subtaskRels = new HashSet<Rel>(); 
+    private Set<Rel> subtasks = new HashSet<Rel>(); 
+    private Vector<Rel> subGoal = null;
 
-    private HashSet foundVars = new HashSet();
+    private HashSet<Var> foundVars = new HashSet<Var>();
 
     Var getVarByFullName( String field ) {
        // System.err.println( "getVarByField: " + field.toString() );
@@ -31,15 +31,15 @@ class Problem implements Cloneable, Serializable {
     }
 
     Rel getSubtask( Rel subt ) {
-        for ( Iterator iter = subtasks.iterator(); iter.hasNext(); ) {
-            Rel subtask = ( Rel ) iter.next();
+        for ( Iterator<Rel> iter = subtasks.iterator(); iter.hasNext(); ) {
+            Rel subtask = iter.next();
             if ( subtask.equals( subt ) )
                 return subtask;
         }
         return null;
     }
 
-    protected Set getSubtasks() {
+    protected Set<Rel> getSubtasks() {
         return subtasks;
     }
 
@@ -47,32 +47,32 @@ class Problem implements Cloneable, Serializable {
         subtasks.add( rel );
     }
 
-    protected Map getAllVars() {
+    protected Map<String, Var> getAllVars() {
         return allVars;
     }
 
-    protected Set getAxioms() {
+    protected Set<Rel> getAxioms() {
         return axioms;
     }
 
-    protected Set getKnownVars() {
+    protected Set<Var> getKnownVars() {
         return knownVars;
     }
 
-    protected Set getFoundVars() {
+    protected Set<Var> getFoundVars() {
         return foundVars;
     }
 
 
-    protected Set getTargetVars() {
+    protected Set<Var> getTargetVars() {
         return targetVars;
     }
 
-    protected Set getAllRels() {
+    protected Set<Rel> getAllRels() {
         return allRels;
     }
 
-    protected Set getSubtaskRels() {
+    protected Set<Rel> getSubtaskRels() {
         return subtaskRels;
     }
 
@@ -84,7 +84,7 @@ class Problem implements Cloneable, Serializable {
         knownVars.add( var );
     }
 
-    protected void addKnown( List vars ) {
+    protected void addKnown( List<Var> vars ) {
         knownVars.addAll( vars );
     }
 
@@ -96,7 +96,7 @@ class Problem implements Cloneable, Serializable {
         allRels.add( rel );
     }
 
-    protected void addAllRels( HashSet set ) {
+    protected void addAllRels( HashSet<Rel> set ) {
         allRels.addAll( set );
     }
 
@@ -136,19 +136,19 @@ class Problem implements Cloneable, Serializable {
         try {
             Problem problem = ( Problem )super.clone();
 
-            HashMap cloneRels = new HashMap();
-            HashMap cloneVars = new HashMap();
-
-            for ( Iterator iter = allRels.iterator(); iter.hasNext(); ) {
-                Rel rel = ( Rel ) iter.next();
-                cloneRels.put( rel, rel.clone() );
-            }
-
-            for ( Iterator iter = allVars.keySet().iterator(); iter.hasNext(); ) {
-                String varObj = ( String ) iter.next();
-                Var var = ( Var ) allVars.get( varObj );
-                cloneVars.put( var, var.clone() );
-            }
+//            HashMap cloneRels = new HashMap();
+//            HashMap cloneVars = new HashMap();
+//
+//            for ( Iterator iter = allRels.iterator(); iter.hasNext(); ) {
+//                Rel rel = ( Rel ) iter.next();
+//                cloneRels.put( rel, rel.clone() );
+//            }
+//
+//            for ( Iterator iter = allVars.keySet().iterator(); iter.hasNext(); ) {
+//                String varObj = ( String ) iter.next();
+//                Var var = ( Var ) allVars.get( varObj );
+//                cloneVars.put( var, var.clone() );
+//            }
 
             return problem;
         } catch ( CloneNotSupportedException e ) {
@@ -174,7 +174,7 @@ class Problem implements Cloneable, Serializable {
 
             for ( int i = 0; i < subGoal.size(); i++ ) {
 
-                Rel rel = ( Rel ) subGoal.get(i);
+                Rel rel = subGoal.get(i);
 
                 if ( rel.equals( comparableRel ) ) {
 
@@ -190,7 +190,7 @@ class Problem implements Cloneable, Serializable {
 
     public void addToAlgorithm( Rel rel ) {
         if ( currentDepth > 1 ) {
-            ( ( Rel ) subGoal.get( currentDepth - 2 ) ).getAlgorithm().add( rel );
+            subGoal.get( currentDepth - 2 ).getAlgorithm().add( rel );
         } else {
 //            algorithm.add( rel );
             throw new IllegalStateException(
@@ -210,11 +210,11 @@ class Problem implements Cloneable, Serializable {
 //    }
 
     public Rel getSubGoal( int depth ) {
-        return ( Rel ) subGoal.get( depth - 1 );
+        return subGoal.get( depth - 1 );
     }
 
     public Rel getSubGoal() {
-        return ( Rel ) subGoal.get(currentDepth-1);
+        return subGoal.get(currentDepth-1);
     }
 
     public void setSubGoal( Rel goal, int depth ) {
@@ -225,7 +225,7 @@ class Problem implements Cloneable, Serializable {
         currentDepth = depth;
 
         if ( subGoal == null )
-            subGoal = new Vector( ( subtasks.size() == 0 ) ? 5 : subtasks.size() );
+            subGoal = new Vector<Rel>( ( subtasks.size() == 0 ) ? 5 : subtasks.size() );
 //        System.err.println("Vector size: " + subGoal.size() + " goal " + subGoal);
         if ( depth - 1 >= subGoal.size() )
             subGoal.add( depth - 1, goal );

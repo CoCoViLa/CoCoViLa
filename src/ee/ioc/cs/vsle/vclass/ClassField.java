@@ -23,7 +23,7 @@ public class ClassField implements Cloneable, Serializable {
 	protected boolean specField = false;
 	protected boolean alias = false;
 	protected boolean watched = false;
-	protected ArrayList vars;
+	protected ArrayList<ClassField> vars;
 	protected ClassGraphics knownGraphics;
 	protected ClassGraphics defaultGraphics;
 
@@ -76,9 +76,8 @@ public class ClassField implements Cloneable, Serializable {
 	public boolean isAlias() {
 		if (type.equals("alias")) {
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	} // isAlias
 
 	/**
@@ -90,9 +89,8 @@ public class ClassField implements Cloneable, Serializable {
 
 		if (type.substring(length - 2, length).equals("[]")) {
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	} // isArray
 
 	public String arrayType() {
@@ -100,9 +98,8 @@ public class ClassField implements Cloneable, Serializable {
 
 		if (type.substring(length - 2, length).equals("[]")) {
 			return type.substring(0, length - 2);
-		} else {
-			return "notArray";
 		}
+		return "notArray";
 	}
 
 	public boolean isPrimitiveArray() {
@@ -124,9 +121,8 @@ public class ClassField implements Cloneable, Serializable {
 			|| s.equals("long") || s.equals("short")
 			|| s.equals("boolean") || s.equals("char")) {
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	public boolean isPrimitive() {
@@ -134,9 +130,8 @@ public class ClassField implements Cloneable, Serializable {
 			|| type.equals("long") || type.equals("short")
 			|| type.equals("boolean") || type.equals("char")) {
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	}
 
 	public boolean isPrimitiveOrString(String s) {
@@ -231,7 +226,7 @@ public class ClassField implements Cloneable, Serializable {
             return description;
         }
 
-        public ArrayList getVars() {
+        public ArrayList<ClassField> getVars() {
             return vars;
         }
 

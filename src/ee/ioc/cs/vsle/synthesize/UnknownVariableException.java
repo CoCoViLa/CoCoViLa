@@ -20,5 +20,3 @@ public class UnknownVariableException
 	} // ee.ioc.cs.editor.synthesize.UnknownVariableException
 
 }
-
-;

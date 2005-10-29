@@ -25,20 +25,20 @@ public class Optimizer {
 	 @param algorithm an unoptimized algorithm
 	 @param targets the variables which the algorithm has to calculate (other branches are removed)
 	 */
-	public ArrayList optimize(ArrayList algorithm, HashSet targets) {
-		HashSet stuff = targets;
+	public ArrayList<Rel> optimize(ArrayList<Rel> algorithm, HashSet<Var> targets) {
+		HashSet<Var> stuff = targets;
 		Rel rel;
 		Var relVar;
-		ArrayList removeThese = new ArrayList();
+		ArrayList<Rel> removeThese = new ArrayList<Rel>();
 
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
-            if((algorithm.get(i) instanceof String))
-                continue;
-            rel = (Rel) algorithm.get(i);
+//            if((algorithm.get(i) instanceof String))
+//                continue;
+            rel = algorithm.get(i);
 			boolean relIsNeeded = false;
 
 			for (int j = 0; j < rel.getOutputs().size(); j++) {
-				relVar = (Var) rel.getOutputs().get(j);
+				relVar = rel.getOutputs().get(j);
 				if (stuff.contains(relVar)) {
 					relIsNeeded = true;
 				}

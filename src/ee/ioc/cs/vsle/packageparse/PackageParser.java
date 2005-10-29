@@ -26,10 +26,10 @@ public class PackageParser {
     ClassGraphics newGraphics;
     String element;
     String path;
-    ArrayList classFields;
+    ArrayList<ClassField> classFields;
     Polygon polygon;
-    ArrayList polyXs = new ArrayList();
-    ArrayList polyYs = new ArrayList();
+    ArrayList<String> polyXs = new ArrayList<String>();
+    ArrayList<String> polyYs = new ArrayList<String>();
     final int CLASS = 1, PORT_OPEN = 2, PORT_CLOSED = 3, PACKAGE = 4, FIELD = 5, FIELD_KNOWN = 6;
 
     int status;
@@ -171,7 +171,7 @@ public class PackageParser {
             }
 
             if ( element.equals( "fields" ) ) {
-                classFields = new ArrayList();
+                classFields = new ArrayList<ClassField>();
 
             }
 
@@ -363,8 +363,8 @@ public class PackageParser {
         }
 
         private void makeInitialPolygon( Attributes attrs ) {
-            polyXs = new ArrayList();
-            polyYs = new ArrayList();
+            polyXs = new ArrayList<String>();
+            polyYs = new ArrayList<String>();
             String colour = attrs.getValue( "colour" );
             String filled = attrs.getValue( "filled" );
             String stroke = attrs.getValue( "stroke" );
@@ -495,7 +495,7 @@ public class PackageParser {
 
                 ClassField cf;
                 for ( int i = 0; i < classFields.size(); i++ ) {
-                    cf = ( ( ClassField ) classFields.get( i ) );
+                    cf = classFields.get( i );
 
                     if ( cf.getType() == null ) {
                         for ( int j = 0; j < a.size(); j++ ) {
@@ -518,7 +518,7 @@ public class PackageParser {
                 int[] fys = new int[polyYs.size() ];
 
                 for ( int i = 0; i < polyXs.size(); i++ ) {
-                    String s = ( String ) polyXs.get( i );
+                    String s = polyXs.get( i );
                     //parse the coordinates and check if they are fixed or reverse fixed
                     if ( s.endsWith( "rf" ) ) {
                         xs[ i ] = newGraphics.boundWidth;
@@ -531,7 +531,7 @@ public class PackageParser {
                         xs[ i ] = Integer.parseInt( s );
                         fxs[ i ] = 0;
                     }
-                    s = ( String ) polyYs.get( i );
+                    s = polyYs.get( i );
                     if ( s.endsWith( "rf" ) ) {
                         ys[ i ] = newGraphics.boundHeight;
                         fys[ i ] = newGraphics.boundHeight -

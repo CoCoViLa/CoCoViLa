@@ -66,9 +66,9 @@ public class SpecParser {
      @return ArrayList of lines in specification
      @param	text	Secification text as String
      */
-    public ArrayList getSpec( String text ) {
+    public ArrayList<String> getSpec( String text ) {
         String[] s = text.trim().split( ";", -1 );
-        ArrayList a = new ArrayList();
+        ArrayList<String> a = new ArrayList<String>();
 
         for ( int i = 0; i < s.length; i++ ) {
             a.add( s[ i ].trim() );
@@ -103,49 +103,41 @@ public class SpecParser {
                 String returnLine = matcher2.group( 1 ) + ":" + matcher2.group( 2 );
 
                 return new LineType( LineType.TYPE_ALIAS, returnLine );
-            } else {
-                return new LineType( LineType.TYPE_ERROR, line );
             }
+			return new LineType( LineType.TYPE_ERROR, line );
         } else if ( line.indexOf( "=" ) >= 0 ) { // Extract on solve equations
             pattern = Pattern.compile( " *([^= ]+) *= *((\".*\")|(new .*\\(.*\\))|(\\{.*\\})) *$" );
             matcher2 = pattern.matcher( line );
             if ( matcher2.find() ) {
                 return new LineType( LineType.TYPE_ASSIGNMENT, matcher2.group( 1 ) + ":" + matcher2.group( 2 ) );
-            } else {
-
-                pattern = Pattern.compile( " *([^=]+) *= *([-_0-9a-zA-Z.()\\+\\*/^ ]+) *$" );
-                matcher2 = pattern.matcher( line );
-                if ( matcher2.find() ) {
-                    return new LineType( LineType.TYPE_EQUATION, line );
-                } else {
-                    return new LineType( LineType.TYPE_ERROR, line );
-                }
-
             }
+			pattern = Pattern.compile( " *([^=]+) *= *([-_0-9a-zA-Z.()\\+\\*/^ ]+) *$" );
+			matcher2 = pattern.matcher( line );
+			if ( matcher2.find() ) {
+			    return new LineType( LineType.TYPE_EQUATION, line );
+			}
+			return new LineType( LineType.TYPE_ERROR, line );
 
         } else if ( line.indexOf( "->" ) >= 0 ) {
             pattern = Pattern.compile( "(.*) *-> *(.+) *\\{(.+)\\}" );
             matcher2 = pattern.matcher( line );
             if ( matcher2.find() ) {
                 return new LineType( LineType.TYPE_AXIOM, line );
-            } else { // check if its an axiom without method specification
-                pattern = Pattern.compile( "(.*) *-> *([ -_a-zA-Z0-9.,]+) *$" );
-                matcher2 = pattern.matcher( line );
-                if ( matcher2.find() ) {
-                    return new LineType( LineType.TYPE_SPECAXIOM, line );
-
-                } else {
-                    return new LineType( LineType.TYPE_ERROR, line );
-                }
             }
+			pattern = Pattern.compile( "(.*) *-> *([ -_a-zA-Z0-9.,]+) *$" );
+			matcher2 = pattern.matcher( line );
+			if ( matcher2.find() ) {
+			    return new LineType( LineType.TYPE_SPECAXIOM, line );
+
+			}
+			return new LineType( LineType.TYPE_ERROR, line );
         } else {
             pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])?) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)" );
             matcher2 = pattern.matcher( line );
             if ( matcher2.find() ) {
                 return new LineType( LineType.TYPE_DECLARATION, matcher2.group( 1 ) + ":" + matcher2.group( 3 ) );
-            } else {
-                return new LineType( LineType.TYPE_ERROR, line );
             }
+			return new LineType( LineType.TYPE_ERROR, line );
         }
     }
 
@@ -194,10 +186,10 @@ public class SpecParser {
         ClassRelation classRelation;
         Var var, var1, var2;
         Rel rel;
-        HashSet relSet = new HashSet();
+        HashSet<Rel> relSet = new HashSet<Rel>();
 
         for ( int j = 0; j < ac.fields.size(); j++ ) {
-            cf = ( ClassField ) ac.fields.get( j );
+            cf = ac.fields.get( j );
             if ( classes.getType( cf.getType() ) != null ) {
                 problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
             }
@@ -213,7 +205,7 @@ public class SpecParser {
         }
 
         for ( int j = 0; j < ac.classRelations.size(); j++ ) {
-            classRelation = ( ClassRelation ) ac.classRelations.get( j );
+            classRelation = ac.classRelations.get( j );
             cf = null;
             String obj = caller;
 
@@ -224,8 +216,8 @@ public class SpecParser {
              a relation for each component of the alias structure*/
             if ( classRelation.getInputs().size() == 1 && classRelation.getOutputs().size() == 1 &&
                  ( classRelation.getType() == 4 || classRelation.getType() == 3 ) ) {
-                ClassField cf1 = ( ClassField ) classRelation.getInputs().get( 0 );
-                ClassField cf2 = ( ClassField ) classRelation.getOutputs().get( 0 );
+                ClassField cf1 = classRelation.getInputs().get( 0 );
+                ClassField cf2 = classRelation.getOutputs().get( 0 );
 
                 //if we have a relation alias = *.sth, we need to find out what it actually is
                 if ( cf1.getName().startsWith( "*." ) ) {
@@ -238,8 +230,8 @@ public class SpecParser {
                 }
 
                 if ( problem.getAllVars().containsKey( obj + "." + cf1.getName() ) ) {
-                    Var v1 = ( Var ) problem.getAllVars().get( obj + "." + cf1.getName() );
-                    Var v2 = ( Var ) problem.getAllVars().get( obj + "." + cf2.getName() );
+                    Var v1 = problem.getAllVars().get( obj + "." + cf1.getName() );
+                    Var v2 = problem.getAllVars().get( obj + "." + cf2.getName() );
 
                     if ( v1.getField().isAlias() && v2.getField().isAlias() ) {
                         if ( RuntimeProperties.isDebugEnabled() )
@@ -253,11 +245,11 @@ public class SpecParser {
                         }
                         isAliasRel = true;
                         for ( int i = 0; i < v1.getField().getVars().size(); i++ ) {
-                            String s1 = ( ( ClassField ) v1.getField().getVars().get( i ) ).getName();
-                            String s2 = ( ( ClassField ) v2.getField().getVars().get( i ) ).getName();
+                            String s1 = v1.getField().getVars().get( i ).getName();
+                            String s2 = v2.getField().getVars().get( i ).getName();
 
-                            var1 = ( Var ) problem.getAllVars().get( v1.getObject() + "." + s1 );
-                            var2 = ( Var ) problem.getAllVars().get( v2.getObject() + "." + s2 );
+                            var1 = problem.getAllVars().get( v1.getObject() + "." + s1 );
+                            var2 = problem.getAllVars().get( v2.getObject() + "." + s2 );
                             rel = new Rel();
                             rel.setUnknownInputs( classRelation.getInputs().size() );
                             rel.setSubtaskFlag( classRelation.getSubtasks().size() );
@@ -284,7 +276,7 @@ public class SpecParser {
                     Rel subtaskRel = new Rel();
 
                     for ( int l = 0; l < classRelation.getSubtasks().size(); l++ ) {
-                        ClassRelation subtask = ( ClassRelation ) classRelation.getSubtasks().get( l );
+                        ClassRelation subtask = classRelation.getSubtasks().get( l );
                         subtaskRel = makeRel( subtask, problem, obj );
                         if ( rel != null ) {
                             rel.addSubtask( subtaskRel );
@@ -325,12 +317,12 @@ public class SpecParser {
 
     private ClassField rewriteWildcardAlias( ClassField cf, AnnotatedClass ac, ClassList classes ) {
         if ( cf.getVars().size() == 1 &&
-             ( ( ClassField ) cf.getVars().get( 0 ) ).getName().startsWith( "*." ) ) {
-            String wildcardVar = ( ( ClassField ) cf.getVars().get( 0 ) ).getName().substring( 2 );
+             cf.getVars().get( 0 ).getName().startsWith( "*." ) ) {
+            String wildcardVar = cf.getVars().get( 0 ).getName().substring( 2 );
             cf.getVars().clear();
             ClassField clf;
             for ( int i = 0; i < ac.fields.size(); i++ ) {
-                clf = ( ClassField ) ac.fields.get( i );
+                clf = ac.fields.get( i );
                 AnnotatedClass anc = classes.getType( clf.getType() );
                 if ( anc != null ) {
                     if ( anc.hasField( wildcardVar ) ) {
@@ -343,9 +335,8 @@ public class SpecParser {
                 }
             }
             return cf;
-        } else {
-            return cf;
         }
+		return cf;
     }
 
     private void isRightWildcard( ClassRelation classRelation, AnnotatedClass ac, ClassList classes,
@@ -357,14 +348,14 @@ public class SpecParser {
     }
 
     private String checkIfRightWildcard( ClassRelation classRelation ) {
-        String s = ( ( ClassField ) classRelation.getOutputs().get( 0 ) ).getName();
+        String s = classRelation.getOutputs().get( 0 ).getName();
         if ( s.startsWith( "*." ) )
             return s.substring( 2 );
         return null;
     }
 
     private String checkIfAliasWildcard( ClassRelation classRelation ) {
-        String s = ( ( ClassField ) classRelation.getInputs().get( 0 ) ).getName();
+        String s = classRelation.getInputs().get( 0 ).getName();
         if ( s.startsWith( "*." ) )
             return s.substring( 2 );
         return null;
@@ -383,18 +374,18 @@ public class SpecParser {
         ClassField cf;
 
         for ( int k = 0; k < classRelation.getInputs().size(); k++ ) {
-            cf = ( ClassField ) classRelation.getInputs().get( k );
+            cf = classRelation.getInputs().get( k );
             if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-                var = ( Var ) problem.getAllVars().get( obj + "." + cf.getName() );
+                var = problem.getAllVars().get( obj + "." + cf.getName() );
                 problem.addKnown( var );
             } else {
                 throw new UnknownVariableException( cf.getName() );
             }
         }
         for ( int k = 0; k < classRelation.getOutputs().size(); k++ ) {
-            cf = ( ClassField ) classRelation.getOutputs().get( k );
+            cf = classRelation.getOutputs().get( k );
             if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-                var = ( Var ) problem.getAllVars().get( obj + "." + cf.getName() );
+                var = problem.getAllVars().get( obj + "." + cf.getName() );
                 problem.addTarget( var );
             } else {
                 throw new UnknownVariableException( cf.getName() );
@@ -404,13 +395,13 @@ public class SpecParser {
     }
 
 
-    HashSet makeRightWildcardRel( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
+    HashSet<Rel> makeRightWildcardRel( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
                                   Problem problem, String obj, String wildcardVar ) throws
             UnknownVariableException {
         ClassField clf;
-        HashSet set = new HashSet();
+        HashSet<Rel> set = new HashSet<Rel>();
         for ( int i = 0; i < ac.fields.size(); i++ ) {
-            clf = ( ClassField ) ac.fields.get( i );
+            clf = ac.fields.get( i );
             AnnotatedClass anc = classes.getType( clf.getType() );
             if ( anc != null ) {
                 if ( anc.hasField( wildcardVar ) ) {
@@ -426,9 +417,9 @@ public class SpecParser {
                     ClassField cf;
 
                     for ( int k = 0; k < classRelation.getInputs().size(); k++ ) {
-                        cf = ( ClassField ) classRelation.getInputs().get( k );
+                        cf = classRelation.getInputs().get( k );
                         if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-                            var = ( Var ) problem.getAllVars().get( obj + "." + cf.getName() );
+                            var = problem.getAllVars().get( obj + "." + cf.getName() );
                             var.addRel( rel );
                             rel.addInput( var );
                         } else {
@@ -439,7 +430,7 @@ public class SpecParser {
                         if ( k == 0 ) {
                             if ( problem.getAllVars().containsKey( obj + "." + clf.getName() + "." +
                                     wildcardVar ) ) {
-                                var = ( Var ) problem.getAllVars().get( obj + "." + clf.getName() +
+                                var = problem.getAllVars().get( obj + "." + clf.getName() +
                                         "." + wildcardVar );
                                 rel.addOutput( var );
                             } else {
@@ -447,9 +438,9 @@ public class SpecParser {
                                         wildcardVar );
                             }
                         } else {
-                            cf = ( ClassField ) classRelation.getOutputs().get( k );
+                            cf = classRelation.getOutputs().get( k );
                             if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-                                var = ( Var ) problem.getAllVars().get( obj + "." + cf.getName() );
+                                var = problem.getAllVars().get( obj + "." + cf.getName() );
                                 rel.addOutput( var );
                             } else {
                                 throw new UnknownVariableException( cf.getName() );
@@ -465,25 +456,25 @@ public class SpecParser {
     }
 
 
-    HashSet makeAliasWildcard( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
+    HashSet<Rel> makeAliasWildcard( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
                                Problem problem, String obj, String wildcardVar ) throws
             UnknownVariableException {
         ClassField clf;
-        HashSet relset = new HashSet();
+        HashSet<Rel> relset = new HashSet<Rel>();
         Rel rel = new Rel();
         rel.setMethod( classRelation.getMethod() );
         rel.setObj( obj );
         rel.setType( classRelation.getType() );
         for ( int i = 0; i < ac.fields.size(); i++ ) {
-            clf = ( ClassField ) ac.fields.get( i );
+            clf = ac.fields.get( i );
             AnnotatedClass anc = classes.getType( clf.getType() );
             if ( anc != null ) {
                 if ( anc.hasField( wildcardVar ) ) {
                     Var var;
-                    ClassField cf;
+//                    ClassField cf;
                     if ( problem.getAllVars().containsKey( obj + "." + clf.getName() + "." +
                             wildcardVar ) ) {
-                        var = ( Var ) problem.getAllVars().get( obj + "." + clf.getName() + "." +
+                        var = problem.getAllVars().get( obj + "." + clf.getName() + "." +
                                 wildcardVar );
                         var.addRel( rel );
                         rel.addInput( var );
@@ -495,9 +486,9 @@ public class SpecParser {
                 }
             }
         }
-        ClassField cf = ( ClassField ) classRelation.getOutputs().get( 0 );
+        ClassField cf = classRelation.getOutputs().get( 0 );
         if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-            rel.addOutput( ( Var ) problem.getAllVars().get( obj + "." + cf.getName() ) );
+            rel.addOutput( problem.getAllVars().get( obj + "." + cf.getName() ) );
         }
 
         rel.setUnknownInputs( rel.getInputs().size() );
@@ -509,14 +500,14 @@ public class SpecParser {
         rel.setObj( obj );
         rel.setType( classRelation.getType() );
         for ( int i = 0; i < ac.fields.size(); i++ ) {
-            clf = ( ClassField ) ac.fields.get( i );
+            clf = ac.fields.get( i );
             AnnotatedClass anc = classes.getType( clf.getType() );
             if ( anc != null ) {
                 if ( anc.hasField( wildcardVar ) ) {
                     Var var;
                     if ( problem.getAllVars().containsKey( obj + "." + clf.getName() + "." +
                             wildcardVar ) ) {
-                        var = ( Var ) problem.getAllVars().get( obj + "." + clf.getName() + "." +
+                        var = problem.getAllVars().get( obj + "." + clf.getName() + "." +
                                 wildcardVar );
                         //var.addRel( rel );//
                         rel.addOutput( var );
@@ -528,9 +519,9 @@ public class SpecParser {
                 }
             }
         }
-        cf = ( ClassField ) classRelation.getOutputs().get( 0 );
+        cf = classRelation.getOutputs().get( 0 );
         if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-            Var varWithWildcard = ( Var ) problem.getAllVars().get( obj + "." + cf.getName() );
+            Var varWithWildcard = problem.getAllVars().get( obj + "." + cf.getName() );
             rel.addInput( varWithWildcard );
             varWithWildcard.addRel( rel );
         }
@@ -562,9 +553,9 @@ public class SpecParser {
         ClassField cf;
 
         for ( int k = 0; k < classRelation.getInputs().size(); k++ ) {
-            cf = ( ClassField ) classRelation.getInputs().get( k );
+            cf = classRelation.getInputs().get( k );
             if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-                var = ( Var ) problem.getAllVars().get( obj + "." + cf.getName() );
+                var = problem.getAllVars().get( obj + "." + cf.getName() );
                 var.addRel( rel );
                 rel.addInput( var );
             } else {
@@ -572,16 +563,16 @@ public class SpecParser {
             }
         }
         for ( int k = 0; k < classRelation.getOutputs().size(); k++ ) {
-            cf = ( ClassField ) classRelation.getOutputs().get( k );
+            cf = classRelation.getOutputs().get( k );
             if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-                var = ( Var ) problem.getAllVars().get( obj + "." + cf.getName() );
+                var = problem.getAllVars().get( obj + "." + cf.getName() );
                 rel.addOutput( var );
             } else {
                 throw new UnknownVariableException( cf.getName() );
             }
         }
         for ( int k = 0; k < classRelation.getExceptions().size(); k++ ) {
-            cf = ( ClassField ) classRelation.getExceptions().get( k );
+            cf = classRelation.getExceptions().get( k );
             Var ex = new Var();
             ex.setName( cf.getType() );
             rel.getExceptions().add( ex );
@@ -592,7 +583,7 @@ public class SpecParser {
 
     public ClassList parseSpecification( String spec ) throws IOException,
     										SpecParseException, EquationException {
-    	HashSet hs = new HashSet();
+    	HashSet<String> hs = new HashSet<String>();
     	return parseSpecificationImpl( spec, "this", null, hs );
     }
     
@@ -606,16 +597,16 @@ public class SpecParser {
      @param	checkedClasses the list of classes that parser has started to check. Needed to prevent infinite loop
      in case of mutual declarations.
      */
-    private ClassList parseSpecificationImpl( String spec, String className, AnnotatedClass parent,
-                                         HashSet checkedClasses ) throws IOException,
+    private ClassList<AnnotatedClass> parseSpecificationImpl( String spec, String className, AnnotatedClass parent,
+                                         HashSet<String> checkedClasses ) throws IOException,
             SpecParseException, EquationException {
         Matcher matcher2;
         Pattern pattern;
         String[] split;
-        ArrayList vars = new ArrayList();
-        ArrayList subtasks = new ArrayList();
+        ArrayList<ClassField> vars = new ArrayList<ClassField>();
+        ArrayList<String> subtasks = new ArrayList<String>();
         AnnotatedClass annClass = new AnnotatedClass( className, parent );
-        ClassList classList = new ClassList();
+        ClassList<AnnotatedClass> classList = new ClassList<AnnotatedClass>();
 
         ArrayList specLines = getSpec( spec );
 
@@ -822,7 +813,7 @@ public class SpecParser {
      @return list of fields declared in a specification.
      */
     public ArrayList getFields( String fileName ) throws IOException {
-        ArrayList vars = new ArrayList();
+        ArrayList<ClassField> vars = new ArrayList<ClassField>();
         String s = new String( getStringFromFile( fileName ) );
         ArrayList specLines = getSpec( refineSpec( s ) );
         String[] split;
@@ -834,8 +825,8 @@ public class SpecParser {
                 if ( lt.getType() == LineType.TYPE_ASSIGNMENT ) {
                     split = lt.getSpecLine().split( ":", -1 );
                     for ( int i = 0; i < vars.size(); i++ ) {
-                        if ( ( ( ClassField ) vars.get( i ) ).getName().equals( split[ 0 ] ) ) {
-                            ( ( ClassField ) vars.get( i ) ).setValue( split[ 1 ] );
+                        if ( vars.get( i ).getName().equals( split[ 0 ] ) ) {
+                            vars.get( i ).setValue( split[ 1 ] );
                         }
                     }
                 } else if ( lt.getType() == LineType.TYPE_DECLARATION ) {

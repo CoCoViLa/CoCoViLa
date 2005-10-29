@@ -17,7 +17,7 @@ public class Alias extends ClassField {
 	 */
         public Alias( String name ) {
             super( name );
-            vars = new ArrayList();
+            vars = new ArrayList<ClassField>();
             type = ALIAS;
         } // ee.ioc.cs.editor.vclass.Alias
 
@@ -35,7 +35,7 @@ public class Alias extends ClassField {
 	 * @param varList ArrayList - list of added variables.
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException - exception thrown if the variable added is null.
 	 */
-	public void addAll(String[] input, ArrayList varList, ClassList classList) throws UnknownVariableException {
+	public void addAll(String[] input, ArrayList<ClassField> varList, ClassList classList) throws UnknownVariableException {
 		for (int i = 0; i < input.length; i++) {
 			ClassField var = getVar(input[i], varList);
 
@@ -89,7 +89,7 @@ public class Alias extends ClassField {
 		ClassField cf;
 
 		for (int i = 0; i < vars.size(); i++) {
-			cf = (ClassField) vars.get(i);
+			cf = vars.get(i);
 			type += cf.type;
 		}
 		return type;
@@ -100,11 +100,11 @@ public class Alias extends ClassField {
 
 		ClassField cf1 = null, cf2;
                 if( vars.size() == 1 ) {
-                    cf1 = (ClassField) vars.get(0);
+                    cf1 = vars.get(0);
                 }
                 for ( int i = 1; i < vars.size(); i++ ) {
-                    cf1 = ( ClassField ) vars.get( i - 1 );
-                    cf2 = ( ClassField ) vars.get( i );
+                    cf1 = vars.get( i - 1 );
+                    cf2 = vars.get( i );
                     if ( !cf1.type.equals( cf2.type ) ) {
                         return getAliasType();
                     }
@@ -120,11 +120,11 @@ public class Alias extends ClassField {
 	 * @param varList ArrayList - list of variables to be checked through.
 	 * @return ClassField - ClassField variable found from the varList by the name "varName".
 	 */
-	ClassField getVar(String varName, ArrayList varList) {
+	ClassField getVar(String varName, ArrayList<ClassField> varList) {
 		ClassField var;
 
 		for (int i = 0; i < varList.size(); i++) {
-			var = (ClassField) varList.get(i);
+			var = varList.get(i);
 			if (var.name.equals(varName)) {
 				return var;
 			}

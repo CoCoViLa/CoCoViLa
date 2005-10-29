@@ -15,7 +15,7 @@ public class Planner {
     private static Planner s_planner = null;
 
     private Problem m_problem = null;
-    private ArrayList m_algorithm = new ArrayList();
+    private ArrayList<Rel> m_algorithm = new ArrayList<Rel>();
 
     private Planner() {
     }
@@ -72,7 +72,7 @@ public class Planner {
     }
 
 
-    private boolean linearForwardSearch( Problem problem, ArrayList alg, boolean computeAll,
+    private boolean linearForwardSearch( Problem problem, ArrayList<Rel> alg, boolean computeAll,
                                          boolean isSubtask, boolean goingBackward ) {
 
         /*
@@ -80,14 +80,14 @@ public class Planner {
          * that set. Theyre collected into these sets and added/removedall
          * together after iteration is finished
          */
-        ArrayList algorithm = alg;
-        HashSet allTargetVarsBackup = null;
-        HashSet allTargetVars;
-        HashSet newVars = new HashSet();
-        HashSet removableVars = new HashSet();
+        ArrayList<Rel> algorithm = alg;
+        HashSet<Var> allTargetVarsBackup = null;
+        HashSet<Var> allTargetVars;
+        HashSet<Var> newVars = new HashSet<Var>();
+        HashSet<Var> removableVars = new HashSet<Var>();
 
         if ( isSubtask ) {
-            algorithm = ( ArrayList ) problem.getSubGoal().getAlgorithm();
+            algorithm = ( ArrayList<Rel> ) problem.getSubGoal().getAlgorithm();
 
             if ( !goingBackward ) {
                 for( Iterator it = problem.getSubGoal().getInputs().iterator(); it.hasNext(); ) {
@@ -107,14 +107,14 @@ public class Planner {
                 }
             }
 
-            allTargetVarsBackup = new HashSet( problem.getTargetVars() );
+            allTargetVarsBackup = new HashSet<Var>( problem.getTargetVars() );
 
             problem.getTargetVars().clear();
 
             problem.getTargetVars().addAll( problem.getSubGoal().getOutputs() );
 
             for ( int i = 0; i < problem.getSubGoal().getInputs().size(); i++ ) {
-                Var subtaskInput = ( Var ) problem.getSubGoal().getInputs().get( i );
+                Var subtaskInput = problem.getSubGoal().getInputs().get( i );
                 for ( Iterator iter = problem.getAllRels().iterator(); iter.hasNext(); ) {
                     Rel rel = ( Rel ) iter.next();
                     if ( rel.getOutputs().get( 0 ) == subtaskInput ) {
@@ -123,7 +123,7 @@ public class Planner {
                 }
             }
             for ( int i = 0; i < problem.getSubGoal().getOutputs().size(); i++ ) {
-                Var subtaskOutput = ( Var ) problem.getSubGoal().getOutputs().get( i );
+                Var subtaskOutput = problem.getSubGoal().getOutputs().get( i );
                 for ( Iterator iter = problem.getAllRels().iterator(); iter.hasNext(); ) {
                     Rel rel = ( Rel ) iter.next();
                     if ( rel.getType() == RelType.TYPE_EQUATION && rel.getInputs().get( 0 ) == subtaskOutput ) {
@@ -133,8 +133,8 @@ public class Planner {
             }
         }
 
-        allTargetVars = new HashSet( problem.getTargetVars() );
-        HashSet foundVars = new HashSet(problem.getKnownVars());
+        allTargetVars = new HashSet<Var>( problem.getTargetVars() );
+        HashSet<Var> foundVars = new HashSet<Var>(problem.getKnownVars());
 
         boolean changed = true;
         boolean foundSubGoal = false;
@@ -198,7 +198,7 @@ public class Planner {
 
                             for ( int i = 0; i < rel.getOutputs().size(); i++ ) {
 
-                                Var relVar = ( Var ) rel.getOutputs().get( i );
+                                Var relVar = rel.getOutputs().get( i );
                                 if ( !foundVars.contains( relVar ) ) {
                                     relIsNeeded = true;
                                 }
@@ -337,18 +337,18 @@ public class Planner {
 
         private int currentDepth = 0;
 
-        private HashSet subtasks = new HashSet();
+        private HashSet<Rel> subtasks = new HashSet<Rel>();
 
         private ProblemTree( Problem rootProblem ) {
             root = new ProblemTreeNode( null, rootProblem, null, currentDepth );
             currentDepth++;
 
-            for ( Iterator iter = rootProblem.getSubtaskRels().iterator(); iter
+            for ( Iterator<Rel> iter = rootProblem.getSubtaskRels().iterator(); iter
                                   .hasNext(); ) {
-                Rel relWithSubtask = ( Rel ) iter.next();
-                for ( Iterator subtaskIter = relWithSubtask.getSubtasks()
+                Rel relWithSubtask = iter.next();
+                for ( Iterator<Rel> subtaskIter = relWithSubtask.getSubtasks()
                                              .iterator(); subtaskIter.hasNext(); ) {
-                    Rel subtask = ( Rel ) subtaskIter.next();
+                    Rel subtask = subtaskIter.next();
 
                     rootProblem.addSubtask( subtask );
                     subtask.setParentRel( relWithSubtask );
@@ -391,7 +391,7 @@ public class Planner {
                 return false;
             if ( top.getDepth() < currentDepth ) {
                 while ( top.hasNextChild() ) {
-                    increaseDepth( ( ProblemTreeNode ) top.getNextChild(),
+                    increaseDepth( top.getNextChild(),
                                    depth ); //recursion
                 }
             } else {
@@ -414,20 +414,20 @@ public class Planner {
         }
 
         HashSet breadthWalkthrough( int depth ) {
-            HashSet nodeSet = new HashSet();
+            HashSet<ProblemTreeNode> nodeSet = new HashSet<ProblemTreeNode>();
             if ( size != 0 )
                 breadthWalkthrough( root, depth, nodeSet );
             return nodeSet; //.iterator();
         }
 
         //      do not use this directly
-        void breadthWalkthrough( ProblemTreeNode top, int depth, HashSet set ) {
+        void breadthWalkthrough( ProblemTreeNode top, int depth, HashSet<ProblemTreeNode> set ) {
             if ( depth > size )
                 throw new IllegalStateException(
                         "Depth exceeds size of the tree" );
             if ( top.getDepth() < depth ) {
                 while ( top.hasNextChild() ) {
-                    breadthWalkthrough( ( ProblemTreeNode ) top.getNextChild(),
+                    breadthWalkthrough( top.getNextChild(),
                                         depth, set ); //recursion
                 }
             } else {
@@ -450,11 +450,11 @@ public class Planner {
 
         final int depth;
 
-        HashSet children = new HashSet();
+        HashSet<ProblemTreeNode> children = new HashSet<ProblemTreeNode>();
 
-        HashSet subtasksInPath = new HashSet();
+        HashSet<Rel> subtasksInPath = new HashSet<Rel>();
 
-        Iterator childIterator = null;
+        Iterator<ProblemTreeNode> childIterator = null;
 
         private ProblemTreeNode( ProblemTreeNode parent, Problem problem,
                                  Rel subtask, int depth ) {
@@ -476,7 +476,7 @@ public class Planner {
         }
 
         private ProblemTreeNode getNextChild() {
-            return ( ProblemTreeNode ) childIterator.next();
+            return childIterator.next();
         }
 
         private boolean hasNextChild() {
@@ -485,10 +485,9 @@ public class Planner {
 
             if ( childIterator.hasNext() ) {
                 return true;
-            } else {
-                childIterator = null;
-                return false;
             }
+			childIterator = null;
+			return false;
         }
 
         private void addChild( ProblemTreeNode node ) {

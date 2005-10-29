@@ -40,7 +40,7 @@ public class CCL extends URLClassLoader {
 	 */
 	private static URL[] createClasspath() {
 		
-		ArrayList urls = new ArrayList();
+		ArrayList<URL> urls = new ArrayList<URL>();
 		
 		try {
 			urls.add( new File( RuntimeProperties.genFileDir ).toURL() );
@@ -64,7 +64,7 @@ public class CCL extends URLClassLoader {
 			}
 		}
 		
-		return (URL[])urls.toArray(new URL[urls.size()]);
+		return urls.toArray(new URL[urls.size()]);
 	}
 
 	private static String[] prepareClasspath( String path ) {

@@ -93,8 +93,8 @@ public class CodeGenerator {
 
                 } else if ( trel.getType() == RelType.TYPE_EQUATION ) {
                     if ( trel.getInputs().size() == 1 && trel.getOutputs().size() == 1 ) {
-                        Var in = ( Var ) trel.getInputs().get( 0 );
-                        Var out = ( Var ) trel.getOutputs().get( 0 );
+                        Var in = trel.getInputs().get( 0 );
+                        Var out = trel.getOutputs().get( 0 );
                         boolean isSubInputInAlgorithm = false;
                         boolean isRelAdded = false;
                         if ( subInputs.contains( in ) ) {
@@ -204,9 +204,8 @@ public class CodeGenerator {
         if ( var.getField().isAlias() ) {
             if ( isInput ) {
                 return getAliasSubtaskInput( var, offset, num);
-            } else {
-                return getAliasSubtaskOutput( var, offset );
             }
+			return getAliasSubtaskOutput( var, offset );
         }
 
         String varType = var.getType();
@@ -264,7 +263,7 @@ public class CodeGenerator {
         ClassField var;
 
         for ( int i = 0; i < alias.getVars().size(); i++ ) {
-            var = ( ClassField ) alias.getVars().get( i );
+            var = alias.getVars().get( i );
             out += offset + Rel.getObject(input.getObject()) + var.getName() + " = " + aliasTmp + "[" + i + "];\n";
         }
         return out;
@@ -282,7 +281,7 @@ public class CodeGenerator {
 
         ClassField var;
         for ( int i = 0; i < alias.getVars().size(); i++ ) {
-            var = ( ClassField ) alias.getVars().get( i );
+            var = alias.getVars().get( i );
             if ( i == 0 ) {
                 out += Rel.getObject(input.getObject()) + var.getName();
             } else {
