@@ -343,4 +343,11 @@ public class Oval extends Shape implements Serializable {
 	public Object clone() {
 		return super.clone();
 	} // clone
+
+	
+	public void shift(int offsetX, int offsetY) {
+		x += offsetX;
+		y += offsetY;
+		
+	}
 }

@@ -463,4 +463,17 @@ public class ShapeGroup extends Shape implements Serializable {
 		return g;
 	} // clone
 
+	//public void shift(int offsetX, int offsetY) {
+		//x += offsetX;
+	//	y += offsetY;
+	//}
+	public void shift(int offsetX, int offsetY) {
+		Shape shape;
+		for (int i = 0; i < this.size(); i++) {
+			shape = (Shape) this.get(i);
+			shape.shift(offsetX, offsetY);
+
+		}
+	}
+
 }

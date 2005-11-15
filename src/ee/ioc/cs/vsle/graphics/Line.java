@@ -462,4 +462,11 @@ public class Line extends Shape implements Serializable {
         return super.clone();
     } // clone
 
+	public void shift(int offsetX, int offsetY) {
+		  startX += offsetX;
+		  startY += offsetY;
+		  endX	 += offsetX;
+		  endY   += offsetY;
+	}
+
 }

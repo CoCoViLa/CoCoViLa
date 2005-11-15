@@ -44,7 +44,7 @@ public class BoundingBox extends Shape implements Serializable {
 		this.width = width;
 		this.height = height;
 		this.color = Color.lightGray;
-		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 70);
+		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 200);
 		this.filled = true;
 	} // BoundingBox
 
@@ -150,7 +150,7 @@ public class BoundingBox extends Shape implements Serializable {
 	 * @return double - the transparency of the shape.
 	 */
 	public int getTransparency() {
-		return 0;
+		return 255;
 	} // getTransparency
 
 	/**
@@ -349,5 +349,12 @@ public class BoundingBox extends Shape implements Serializable {
 		}
 
 	} // draw
+
+	public void shift(int offsetX, int offsetY) {
+	
+		x += offsetX;
+		y += offsetY;
+		
+	}
 
 }
