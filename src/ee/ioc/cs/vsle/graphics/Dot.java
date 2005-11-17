@@ -425,10 +425,4 @@ public class Dot extends Shape implements Serializable {
         return super.clone();
     } // clone
 
-	public void shift(int offsetX, int offsetY) {
-		x += offsetX;
-		y += offsetY;
-		
-	}
-
 }

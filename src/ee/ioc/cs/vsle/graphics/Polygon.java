@@ -334,10 +334,4 @@ public class Polygon extends Shape {
 		return super.clone();
 	} // clone
 
-	public void shift(int offsetX, int offsetY) {
-		x += offsetX;
-		y += offsetY;
-	}
-
-
 }

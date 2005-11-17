@@ -541,10 +541,4 @@ public class Arc extends Shape implements Serializable, Cloneable {
         }
     } // clone
 
-	
-	public void shift(int offsetX, int offsetY) {
-		x += offsetX;
-		y += offsetY;
-		
-	}
 } // end of class

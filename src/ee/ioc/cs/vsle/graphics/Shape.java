@@ -141,8 +141,9 @@ public abstract class Shape implements Serializable, Cloneable {
 
 	public abstract BasicStroke getStroke();
 
-	public abstract void shift(int offsetX, int offsetY);
-
-
+	public void shift(int offsetX, int offsetY) {
+		x += offsetX;
+		y += offsetY;
+	}
 
 }

@@ -350,11 +350,4 @@ public class BoundingBox extends Shape implements Serializable {
 
 	} // draw
 
-	public void shift(int offsetX, int offsetY) {
-	
-		x += offsetX;
-		y += offsetY;
-		
-	}
-
 }
