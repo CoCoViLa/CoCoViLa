@@ -26,6 +26,7 @@ public class IconEditor
 	JMenu menu;
 	JMenu submenu;
 	JMenu exportmenu;
+	JMenu importmenu;
 	JMenuItem menuItem;
 	JPanel infoPanel; // Panel for runtime information, mouse coordinates, selected objects etc.
 	public JPanel mainPanel = new JPanel();
@@ -35,9 +36,16 @@ public class IconEditor
 	Scheme scheme;
 	Dimension drawAreaSize = new Dimension(700, 500);
 	ShapeGroup shapeList = new ShapeGroup(new ArrayList());
+	ArrayList <IconClass> icons = new ArrayList<IconClass>();
 	Shape currentShape;
 	ArrayList ports = new ArrayList();
 	IconKeyOps keyListener;
+	ArrayList <String> packageClasses = new ArrayList <String>();
+	
+	ChooseClassDialog ccd = new ChooseClassDialog(packageClasses);;
+	ClassImport ci;
+	int classX, classY;
+	
 
 	public static final String WINDOW_TITLE = "COCOVILA - Class Editor";
 	public static boolean classParamsOk = false;
@@ -161,7 +169,7 @@ public class IconEditor
 
 		exportmenu = new JMenu(Menu.EXPORT_MENU);
 		exportmenu.setMnemonic(KeyEvent.VK_E);
-
+		
 		menuItem = new JMenuItem(Menu.EXPORT_CLASS, KeyEvent.VK_C);
 		menuItem.addActionListener(mListener);
 		exportmenu.add(menuItem);
@@ -171,6 +179,16 @@ public class IconEditor
 		exportmenu.add(menuItem);
 
 		menu.add(exportmenu);
+		
+		importmenu = new JMenu(Menu.IMPORT_MENU);
+		importmenu.setMnemonic(KeyEvent.VK_I);
+
+		menuItem = new JMenuItem(Menu.IMPORT_FROM_PACKAGE);
+		menuItem.addActionListener(mListener);
+		importmenu.add(menuItem);
+
+		menu.add(importmenu);
+
 
 		menuItem = new JMenuItem(Menu.CREATE_PACKAGE, KeyEvent.VK_C);
 		menuItem.addActionListener(mListener);
@@ -296,12 +314,12 @@ public class IconEditor
 			xmlBuffer.append(" type=\"class\"");
 		}
 		xmlBuffer.append(">\n");
-		xmlBuffer.append("<name>" + RuntimeProperties.className + "</name>\n");
-		xmlBuffer.append("<description>" + RuntimeProperties.classDescription + "</description>\n");
+		xmlBuffer.append("	<name>" + RuntimeProperties.className + "</name>\n");
+		xmlBuffer.append("	<description>" + RuntimeProperties.classDescription + "</description>\n");
 		String classIcon = RuntimeProperties.classIcon;
 		if (classIcon != null && classIcon.lastIndexOf("/") >= 0) classIcon = classIcon.substring(classIcon.lastIndexOf("/") + 1);
 		if (classIcon != null && classIcon.lastIndexOf("\\") >= 0) classIcon = classIcon.substring(classIcon.lastIndexOf("\\") + 1);
-		xmlBuffer.append("<icon>" + classIcon + "</icon>\n");
+		xmlBuffer.append("	<icon>" + classIcon + "</icon>\n");
 		xmlBuffer = appendShapes(xmlBuffer);
 		xmlBuffer = appendPorts(xmlBuffer);
 		xmlBuffer = appendClassFields(xmlBuffer);
@@ -361,6 +379,8 @@ public class IconEditor
 			}
 		}
 	} // exportShapesToPackage
+	
+	
 
 	private void validateClassParams() {
 		if (RuntimeProperties.className == null ||
@@ -391,7 +411,7 @@ public class IconEditor
 
 	private StringBuffer appendPorts(StringBuffer buf) {
 		if (ports != null && ports.size() > 0) {
-			buf.append("<ports>\n");
+			buf.append("	<ports>\n");
 			for (int i = 0; i < ports.size(); i++) {
 				IconPort p = (IconPort) ports.get(i);
 
@@ -486,7 +506,7 @@ public class IconEditor
 	class DrawingArea extends JPanel {
 
 		private boolean showGrid = false;
-
+		
 		public boolean isGridVisible() {
 			return this.showGrid;
 		}
@@ -509,7 +529,10 @@ public class IconEditor
 		protected void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
 			super.paintComponent(g2);
+			
+					
 
+			
 			if (this.showGrid) drawGrid(g2);
 
 			if (RuntimeProperties.isAntialiasingOn) {
@@ -527,6 +550,8 @@ public class IconEditor
 				}
 			}
 
+
+			
 			IconPort port;
 			for (int i = 0; i < ports.size(); i++) {
 				port = (IconPort) ports.get(i);
@@ -632,6 +657,7 @@ public class IconEditor
 	 * Close application.
 	 */
 	public void exitApplication() {
+		
 		int confirmed = JOptionPane.showConfirmDialog(null,
 			"Exit Application?",
 			Menu.EXIT,
@@ -835,6 +861,9 @@ public class IconEditor
 			}
 		}
 	} // loadScheme
+	
+	
+	
 
 	// Print the drawing canvas.
 	public void print() {
@@ -1001,7 +1030,9 @@ public class IconEditor
 	 * Saves any input string into a file.
 	 */
 	public void saveToPackage() {
-
+		Boolean inPackage = false;
+		String className = RuntimeProperties.className;
+		
 		try {
 
 			// Package file chooser.
@@ -1023,34 +1054,58 @@ public class IconEditor
 
 				// store the last open directory in system properties.
 				setLastPath(file.getAbsolutePath());
-
+				// See if class allready exists in package
+				ci = new ClassImport(file, packageClasses, icons);
+				for (int i = 0; i< icons.size();i++){
+					// class exists, move changed class to the end
+					if (RuntimeProperties.className.equalsIgnoreCase(icons.get(i).getName())){
+						inPackage = true;
+						icons.add(icons.get(i));
+						icons.remove(i);
+					}
+				}
 				try {
 					// Read the contents of the package, escaping the package end that
 					// will be appended later.
 					BufferedReader in = new BufferedReader(new FileReader(file));
 					String str;
 					StringBuffer content = new StringBuffer();
+					
+					
 					// Read file contents to be appended to.
-					while ((str = in.readLine()) != null) {
-						if (str.equalsIgnoreCase("</package>")) {
+					while ((str = in.readLine()) != null) {	
+						if (inPackage && str.equalsIgnoreCase("<class type=\"class\">")) {
 							break;
+						} else if (str.equalsIgnoreCase("</package>")) {
+							break;
+						// class is not in package, just write everything to file
 						} else {
 							content.append(str + "\n");
 						}
+						
 					}
 
-					// File read, append the xml of current drawing.
-					content.append(getShapesInXML(false));
+					// if class is not in package, append the xml of current drawing.
+					if (!inPackage) {
+						content.append(getShapesInXML(false));
+					}else {
+						// write all classes
+						for (int i = 0; i< icons.size(); i++) {
+							makeClass(icons.get(i));
+							content.append(getShapesInXML(false));
+						}
+					}
 					content.append("</package>");
+					
 					in.close();
-
+							
+					
 					FileOutputStream out = new FileOutputStream(new File(file.getAbsolutePath()));
 					out.write(content.toString().getBytes());
 					out.flush();
 					out.close();
 					JOptionPane.showMessageDialog(null, "Saved to package: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
 					FileFuncs ff = new FileFuncs();
-					String className = RuntimeProperties.className;
 					String fileText = "class " + className + " {";
 					fileText += "\n    /*@ specification " + className + " {\n";
 
@@ -1073,6 +1128,7 @@ public class IconEditor
 		} catch (Exception exc) {
 			exc.printStackTrace();
 		}
+		
 	} // saveToPackage
 
 	/**
@@ -1194,7 +1250,7 @@ public class IconEditor
 			e.printStackTrace();
 		}
 	} // loadGraphicsFromFile
-
+	
 	/**
 	 * Empty the class fields DBResult.
 	 */
@@ -1531,5 +1587,66 @@ public class IconEditor
 			p.setMultSize((float) newZ, (float) oldZ);
 		}
 	} // zoom
+	
+	public void loadClass() {
+		JFileChooser fc = new JFileChooser(getLastPath());
+		CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.extensionXML, CustomFileFilter.descriptionXML);
+
+		fc.setFileFilter(filter);
+		int returnVal = fc.showOpenDialog(null);
+
+		if (returnVal == JFileChooser.APPROVE_OPTION) {
+			File file = fc.getSelectedFile();
+			setLastPath(file.getAbsolutePath());
+			try {
+				mListener.state = State.selection;
+				shapeCount = 0;
+				shapeList = new ShapeGroup(new ArrayList());
+				ports = new ArrayList();
+				palette.boundingbox.setEnabled(true);
+				importClassFromPackage(file);
+			} catch (Exception exc) {
+				exc.printStackTrace();
+			}
+		}
+	}
+	
+	/*
+	 * Show a list of classes that can be imported from package
+	 */
+	public void importClassFromPackage(File f) {
+		
+		ci = new ClassImport(f, packageClasses, icons);
+		// opens dialog with list of class names
+		ccd.newJList(packageClasses);
+		ccd.setLocationRelativeTo(rootPane);
+		ccd.setVisible(true);
+		ccd.repaint();
+		String selection = ccd.getSelectedValue();
+		for (int i = 0; i < icons.size(); i++){
+			if ((icons.get(i)).getName().equals(selection)) {
+				makeClass( icons.get(i));
+			}
+		}
+		
+		repaint();
+	} 
+	/*
+	 * Make class
+	 */
+	public void makeClass(IconClass icon){
+		// find coordinates for the class
+		classX = (drawingArea.getWidth() / 2) - icon.getMaxWidth() / 2;
+		classY = (drawingArea.getHeight() / 2) - icon.getMaxHeight() / 2;
+		shapeList = icon.getShapeList();
+		shapeList.shift(classX,classY);
+		ports = icon.getPorts();
+		RuntimeProperties.className = icon.getName();
+		RuntimeProperties.classDescription = icon.getDescription();
+		RuntimeProperties.classIcon = icon.getIconName();
+		RuntimeProperties.classIsRelation = icon.getIsRelation();
+		palette.boundingbox.setEnabled(false);
+		boundingbox = icon.getBoundingbox();
+	}
 
 } // end of class
