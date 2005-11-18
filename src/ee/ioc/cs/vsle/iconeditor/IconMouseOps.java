@@ -922,7 +922,9 @@ class IconMouseOps
 				editor.exportShapesToXML(); // the class is not a relation
 			} else if (e.getActionCommand().equals(Menu.EXPORT_TO_PACKAGE)) {
 				editor.exportShapesToPackage(); // append the graphics to a package
-			} else if (e.getActionCommand().equals(Menu.CREATE_PACKAGE)) {
+			}else if (e.getActionCommand().equals(Menu.IMPORT_FROM_PACKAGE)) {
+				editor.loadClass(); // append the graphics to a package
+			}else if (e.getActionCommand().equals(Menu.CREATE_PACKAGE)) {
 				editor.createPackage();
 			}
 
