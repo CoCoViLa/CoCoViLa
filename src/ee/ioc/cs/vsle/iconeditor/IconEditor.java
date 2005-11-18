@@ -103,6 +103,9 @@ public class IconEditor
 		mainPanel.add(infoPanel, BorderLayout.SOUTH);
 		posInfo.setText("-");
 		makeMenu();
+		
+		classX = 0;
+		classY = 0;
 
 		getContentPane().add(mainPanel);
 
@@ -1058,10 +1061,26 @@ public class IconEditor
 				ci = new ClassImport(file, packageClasses, icons);
 				for (int i = 0; i< icons.size();i++){
 					// class exists, move changed class to the end
+					
 					if (RuntimeProperties.className.equalsIgnoreCase(icons.get(i).getName())){
 						inPackage = true;
+						classX = 0 - classX;
+						classY = 0 - classY;
+						// shift everything back to where it was when first loaded
+						shapeList.shift(classX, classY);
+						// set values to those on screen
+						icons.get(i).setBoundingbox(boundingbox);
+						icons.get(i).setDescription(RuntimeProperties.classDescription);
+						icons.get(i).setIconName(RuntimeProperties.classIcon);
+						icons.get(i).setIsRelation(RuntimeProperties.classIsRelation);
+						icons.get(i).setName(RuntimeProperties.className);
+						icons.get(i).setPorts(ports);
+						icons.get(i).setShapeList(shapeList);
+											
 						icons.add(icons.get(i));
 						icons.remove(i);
+						// assume that we only have one class with that name
+						break;
 					}
 				}
 				try {
@@ -1091,6 +1110,8 @@ public class IconEditor
 					}else {
 						// write all classes
 						for (int i = 0; i< icons.size(); i++) {
+							classX = 0;
+							classY = 0;
 							makeClass(icons.get(i));
 							content.append(getShapesInXML(false));
 						}
@@ -1648,5 +1669,5 @@ public class IconEditor
 		palette.boundingbox.setEnabled(false);
 		boundingbox = icon.getBoundingbox();
 	}
-
+		
 } // end of class
