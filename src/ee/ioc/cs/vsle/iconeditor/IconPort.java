@@ -419,6 +419,9 @@ public class IconPort implements Cloneable, Serializable {
 		}
 
 	} // draw
-
+	public void shift(int offsetX, int offsetY) {
+		x += offsetX;
+		y += offsetY;
+	}
 
 } // end of class
