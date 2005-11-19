@@ -1075,6 +1075,7 @@ public class IconEditor
 						icons.get(i).setIsRelation(RuntimeProperties.classIsRelation);
 						icons.get(i).setName(RuntimeProperties.className);
 						icons.get(i).setPorts(ports);
+						icons.get(i).shiftPorts(classX,classY);
 						icons.get(i).setShapeList(shapeList);
 											
 						icons.add(icons.get(i));
@@ -1092,16 +1093,20 @@ public class IconEditor
 					
 					
 					// Read file contents to be appended to.
-					while ((str = in.readLine()) != null) {	
-						if (inPackage && str.equalsIgnoreCase("<class type=\"class\">")) {
-							break;
-						} else if (str.equalsIgnoreCase("</package>")) {
-							break;
-						// class is not in package, just write everything to file
-						} else {
-							content.append(str + "\n");
-						}
+					while ((str = in.readLine()) != null) {
 						
+						
+						if (inPackage && str.trim().startsWith("<class")) {
+							break;
+							
+					//class is not in package, just write everything to file
+						}else if (!inPackage){
+							if(str.equalsIgnoreCase("</package>"))
+								break;
+							content.append(str + "\n");
+							
+						}else if(inPackage)
+							content.append(str + "\n");
 					}
 
 					// if class is not in package, append the xml of current drawing.
@@ -1660,6 +1665,7 @@ public class IconEditor
 		classX = (drawingArea.getWidth() / 2) - icon.getMaxWidth() / 2;
 		classY = (drawingArea.getHeight() / 2) - icon.getMaxHeight() / 2;
 		shapeList = icon.getShapeList();
+		icon.shiftPorts(classX, classY);
 		shapeList.shift(classX,classY);
 		ports = icon.getPorts();
 		RuntimeProperties.className = icon.getName();
