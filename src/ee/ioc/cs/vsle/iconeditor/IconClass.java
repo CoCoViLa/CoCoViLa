@@ -165,4 +165,10 @@ public class IconClass {
 			maxHeight = h;
 		
 	}
+	
+	public void shiftPorts(int offsetX, int offsetY) {
+		for (int i = 0; i < ports.size(); i++){
+			((IconPort)ports.get(i)).shift(offsetX, offsetY);
+		}
+	}
 }
