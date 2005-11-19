@@ -53,8 +53,13 @@ public class ChooseClassDialog extends JDialog {
 		
 		bttnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				selectedValue = jl.getSelectedValue().toString();
+				try {
+					selectedValue = jl.getSelectedValue().toString();
+				} catch (NullPointerException e) {
+					selectedValue = null;
+				}
 				setVisible(false);
+				
 			}
 		});
 		
