@@ -137,6 +137,24 @@ public class EditorActionListener implements ActionListener {
                 } else {
                     JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
                 }
+            } else if ( e.getActionCommand().equals( Menu.RUN ) ) {
+            	ProgramTextEditor programEditor = new ProgramTextEditor( editor.
+                        getCurrentCanvas().
+                        connections, editor.getCurrentCanvas().objects,
+                        editor.getCurrentCanvas().vPackage, editor );
+            	
+            	programEditor.compute();
+            	programEditor.compileAndRun();
+            	programEditor.dispose();
+            } else if ( e.getActionCommand().equals( Menu.RUNPROPAGATE ) ) {
+            	ProgramTextEditor programEditor = new ProgramTextEditor( editor.
+                        getCurrentCanvas().
+                        connections, editor.getCurrentCanvas().objects,
+                        editor.getCurrentCanvas().vPackage, editor );
+            	programEditor.compute();
+            	programEditor.compileAndRun();
+            	programEditor.propagate();
+            	programEditor.dispose();
             }
             /* else if (e.getActionCommand().equals("Planner")) {
               PlannerEditor plannerEditor = new PlannerEditor(objects, connections);

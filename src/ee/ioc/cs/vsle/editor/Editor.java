@@ -431,6 +431,16 @@ public class Editor extends JFrame implements ChangeListener {
 		JMenuItem menuItem = new JMenuItem(Menu.SPECIFICATION, KeyEvent.VK_S);
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
+		menu.add(new JSeparator());
+		// Run
+		menuItem = new JMenuItem(Menu.RUN, KeyEvent.VK_R);
+		menuItem.addActionListener(aListener);
+		menu.add(menuItem);
+		
+		// Run & Propagate
+		menuItem = new JMenuItem(Menu.RUNPROPAGATE, KeyEvent.VK_P);
+		menuItem.addActionListener(aListener);
+		menu.add(menuItem);
 
 		if (getCurrentPackage() != null) {
 			menu.add(new JSeparator());

@@ -130,50 +130,70 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         	compute( true );            
         }
         else if ( e.getSource() == runProg ) {
-            Synthesizer synth = new Synthesizer();
-
-            synth.makeProgram( programTextArea.getText(), classList,
-                               mainClassName );
-            runner = new ProgramRunner();
-            ArrayList watchFields = watchableFields( objects );
-
-            try {
-                runnableObject = runner.compileAndRun( mainClassName,
-                        watchFields, runResultArea );
-                if ( runnableObject != null ) {
-                    tabbedPane.setSelectedComponent( runResult );
-                }
-            } catch ( CompileException ce ) {
-                ErrorWindow.showErrorMessage(
-                        "Compilation failed:\n " + ce.excDesc );
-            }
+        	compileAndRun();
         }
         else if ( e.getSource() == propagate ) {
-            db.p( "propageerin" );
-            if ( runnableObject != null ) {
-                runner.runPropagate( runnableObject, objects );
-            }
-            editor.repaint();
+        	propagate();
         }
         else if ( e.getSource() == invoke ) {
-            ArrayList watchFields = watchableFields( objects );
-
-            if ( runnableObject != null ) {
-                if ( !invokeField.getText().equals( "" ) ) {
-                    int k = Integer.parseInt( invokeField.getText() );
-
-                    for ( int i = 0; i < k; i++ ) {
-                        runner.run( watchFields, runResultArea );
-                    }
-                } else {
-                    runner.run( watchFields, runResultArea );
-                }
-                runner.runPropagate( runnableObject, objects );
-            }
-            editor.repaint();
+        	invoke();
         }
     }
 
+    void compileAndRun()
+    {
+    	Synthesizer synth = new Synthesizer();
+
+        synth.makeProgram( programTextArea.getText(), classList,
+                           mainClassName );
+        runner = new ProgramRunner();
+        ArrayList watchFields = watchableFields( objects );
+
+        try {
+            runnableObject = runner.compileAndRun( mainClassName,
+                    watchFields, runResultArea );
+            if ( runnableObject != null ) {
+                tabbedPane.setSelectedComponent( runResult );
+            }
+        } catch ( CompileException ce ) {
+            ErrorWindow.showErrorMessage(
+                    "Compilation failed:\n " + ce.excDesc );
+        }
+    }
+    
+    void invoke()
+    {
+    	ArrayList watchFields = watchableFields( objects );
+
+        if ( runnableObject != null ) {
+            if ( !invokeField.getText().equals( "" ) ) {
+                int k = Integer.parseInt( invokeField.getText() );
+
+                for ( int i = 0; i < k; i++ ) {
+                    runner.run( watchFields, runResultArea );
+                }
+            } else {
+                runner.run( watchFields, runResultArea );
+            }
+            
+            propagate();
+        }
+    }
+    
+    void propagate()
+    {
+    	db.p( "propageerin" );
+        if ( runnableObject != null ) {
+            runner.runPropagate( runnableObject, objects );
+        }
+        editor.repaint();
+    }
+    
+    void compute()
+    {
+    	compute( true );
+    }
+    
     private void compute( boolean computeAll ) {
     	
     	Synthesizer synth = new Synthesizer();
