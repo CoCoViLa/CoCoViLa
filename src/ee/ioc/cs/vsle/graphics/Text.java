@@ -10,8 +10,6 @@ public class Text extends Shape implements Serializable {
 	/**
 	 * Text string represented by the shape.
 	 */
-	int x;
-	int y;
 	public int fixedX;
 	public int fixedY;
 	public String stringValue;
@@ -295,7 +293,7 @@ public class Text extends Shape implements Serializable {
 		return "<text string=\"" + stringValue + "\" colour=\"" + colorInt + "\" x=\""
 			+ (x - boundingboxX) + "\" y=\"" + (y - boundingboxY)
 			+ "\" fontname=\"" + font.getName() + "\" fontstyle=\""
-			+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\" transparency=\"" + color.getTransparency() + "\"/>\n";
+			+ font.getStyle() + "\" fontsize=\"" + font.getSize() + "\" transparency=\"" + getTransparency() + "\"/>\n";
 	} // toFile
 
 	public String toText() {
