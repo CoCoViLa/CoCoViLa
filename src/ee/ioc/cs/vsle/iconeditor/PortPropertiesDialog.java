@@ -17,7 +17,8 @@ import javax.swing.JOptionPane;
 
 public class PortPropertiesDialog extends JDialog implements ActionListener {
 
-	private String portName;
+    private static final long serialVersionUID = 1L;
+    private String portName;
 	private String portType;
 	private boolean isAreaConn;
 	private boolean isStrict;
@@ -118,8 +119,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			portName = portName.trim();
 		} else {
 			// display information dialog to application user
-			JOptionPane info_pane = new JOptionPane();
-			info_pane.showMessageDialog(null, "Please define port name.");
+			JOptionPane.showMessageDialog(null, "Please define port name.");
 			tfPortName.requestFocus();
 			valid = false;
 		}
@@ -133,8 +133,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			setPortType(cbPortType.getSelectedItem().toString().trim());
 		  }
 		  else {
-			JOptionPane info_pane = new JOptionPane();
-			info_pane.showMessageDialog(null, "Please define port type.");
+			JOptionPane.showMessageDialog(null, "Please define port type.");
 			cbPortType.requestFocus();
 			valid = false;
 		  }
