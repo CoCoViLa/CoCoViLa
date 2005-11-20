@@ -5,7 +5,6 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
 
 /**
  * Dialog for specifying package properties.
@@ -16,6 +15,8 @@ import ee.ioc.cs.vsle.util.*;
  */
 
 public class PackagePropertiesDialog extends JDialog {
+
+    private static final long serialVersionUID = 1L;
 
   ////////////////////////////
   // Dialog layout components.
@@ -148,11 +149,13 @@ public class PackagePropertiesDialog extends JDialog {
   private boolean valuesValid() {
 	boolean valid = true;
 
-	if(this.fldName.getText()==null || (this.fldName!=null && this.fldName.getText().trim().length()==0)) {
+	if (PackagePropertiesDialog.fldName.getText() == null 
+            || (PackagePropertiesDialog.fldName != null && PackagePropertiesDialog.fldName.getText().trim().length() == 0)) {
 	  valid = false;
 	  JOptionPane.showMessageDialog(null, "Please define package name.", "Missing Property", JOptionPane.INFORMATION_MESSAGE);
 	  fldName.requestFocus();
-	} else if(this.fldDesc.getText()==null || (this.fldDesc!=null && this.fldDesc.getText().trim().length()==0)) {
+	} else if (PackagePropertiesDialog.fldDesc.getText() == null 
+            || (PackagePropertiesDialog.fldDesc != null && PackagePropertiesDialog.fldDesc.getText().trim().length() == 0)) {
 	  valid = false;
 	  JOptionPane.showMessageDialog(null, "Please define package description.", "Missing Property", JOptionPane.INFORMATION_MESSAGE);
 	  fldDesc.requestFocus();
