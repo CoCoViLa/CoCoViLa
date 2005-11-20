@@ -671,18 +671,18 @@ class IconMouseOps
 				Rectangle rect = new Rectangle(x - 10, y - 10,
 					editor.currentShape.getRealWidth() + 10,
 					editor.currentShape.getRealHeight() + 10);
-				editor.drawingArea.scrollRectToVisible(rect);
+				IconEditor.drawingArea.scrollRectToVisible(rect);
 				if (x + editor.currentShape.getRealWidth() > editor.drawAreaSize.width) {
 					editor.drawAreaSize.width = x + editor.currentShape.getRealWidth();
-					editor.drawingArea.setPreferredSize(editor.drawAreaSize);
-					editor.drawingArea.setPreferredSize(editor.drawAreaSize);
+					IconEditor.drawingArea.setPreferredSize(editor.drawAreaSize);
+					IconEditor.drawingArea.setPreferredSize(editor.drawAreaSize);
 				}
 
 				if (y + editor.currentShape.getRealHeight() >
 					editor.drawAreaSize.height) {
 					editor.drawAreaSize.height = y + editor.currentShape.getRealHeight();
-					editor.drawingArea.setPreferredSize(editor.drawAreaSize);
-					editor.drawingArea.revalidate();
+					IconEditor.drawingArea.setPreferredSize(editor.drawAreaSize);
+					IconEditor.drawingArea.revalidate();
 				}
 				editor.repaint();
 			}
@@ -825,13 +825,13 @@ class IconMouseOps
 			} else if (e.getActionCommand().equals(Menu.CLEAR_ALL)) {
 				editor.clearObjects();
 			} else if (e.getActionCommand().equals(Menu.GRID)) {
-				boolean isGridVisible = editor.drawingArea.isGridVisible();
+				boolean isGridVisible = IconEditor.drawingArea.isGridVisible();
 				if (isGridVisible) {
 					isGridVisible = false;
 				} else {
 					isGridVisible = true;
 				}
-				editor.drawingArea.setGridVisible(isGridVisible);
+				IconEditor.drawingArea.setGridVisible(isGridVisible);
 			} else if (e.getActionCommand().equals(Menu.CLASS_PROPERTIES)) {
 				new ClassPropertiesDialog(true);
 			} else if (e.getActionCommand().equals(Menu.CLONE)) {
@@ -846,9 +846,9 @@ class IconMouseOps
 			} else if (e.getActionCommand().equals(Menu.EXIT)) {
 				editor.exitApplication();
 			} else if (e.getActionCommand().equals(Menu.DOCS)) {
-				String documentationUrl = editor.getSystemDocUrl();
+				String documentationUrl = IconEditor.getSystemDocUrl();
 				if (documentationUrl != null && documentationUrl.trim().length() > 0) {
-					editor.openInBrowser(documentationUrl);
+					IconEditor.openInBrowser(documentationUrl);
 				} else {
 					editor.showInfoDialog("Missing information",
 						"No documentation URL defined in properties.");
@@ -968,6 +968,6 @@ class IconMouseOps
 				editor.mListener.setState(State.addPort);
 			}
 		}
-		editor.drawingArea.grabFocus();
+		IconEditor.drawingArea.grabFocus();
 	}
 } // end of class
