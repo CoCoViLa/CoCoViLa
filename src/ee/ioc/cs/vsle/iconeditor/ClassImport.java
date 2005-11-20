@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.iconeditor;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -84,6 +86,9 @@ public class ClassImport {
 			int startAngle, arcAngle;
 			boolean filled, fixed, strict;
 			String name;
+			String fontName = null;
+			String fontStyle = null;
+			int fontSize = 10;
 							
 			if(element.equals("class")){
 				inClass = true;
@@ -213,6 +218,31 @@ public class ClassImport {
 				Dot dot = new Dot(x, y, col, st, tr);
 				dot.setFixed(fixed);
 				shapeList.add(dot);
+			}else if(element.equals("text")){
+				x = Integer.parseInt(attrs.getValue("x"));
+				y = Integer.parseInt(attrs.getValue("y"));
+				col = Integer.parseInt(attrs.getValue("colour"));
+				fontSize = Integer.parseInt(attrs.getValue("fontsize"));
+				fontName = attrs.getValue("fontname");
+				fontStyle = attrs.getValue("fontstyle");
+				
+				strVal = attrs.getValue("transparency");
+				if (strVal != null)
+					tr = Integer.parseInt(strVal);
+				String textStr = attrs.getValue("string");
+				
+				Font font = null;
+
+				if (fontStyle.equalsIgnoreCase("0"))
+					font = new Font(fontName, Font.PLAIN, fontSize);
+				else if (fontStyle.equalsIgnoreCase("1"))
+					font = new Font(fontName, Font.BOLD, fontSize);
+				else if (fontStyle.equalsIgnoreCase("2")) font = new Font(fontName, Font.ITALIC, fontSize);
+				if (font != null) {
+					Text text = new Text(x, y, font, new Color(col), tr, textStr);
+					shapeList.add(text);
+				}
+				
 			}else if(element.equals("port")){
 				x = Integer.parseInt(attrs.getValue("x"));
 				y = Integer.parseInt(attrs.getValue("y"));
