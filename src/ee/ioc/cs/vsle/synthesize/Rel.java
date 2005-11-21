@@ -435,10 +435,9 @@ class Rel implements Serializable {
 				} else {
 
 					String alias_tmp = CodeGenerator.ALIASTMP + input.getName() + relNumber;
-					assigns += input.getField().getVars().get(0).getType()
-							+ "[] " + alias_tmp + " = new "
-							+ input.getField().getVars().get(0).getType() + "["
-							+ input.getField().getVars().size() + "];\n";
+					assigns += checkObjectArrayDimension( alias_tmp, 
+							input.getField().getVars().get(0).getType(),
+							input.getField().getVars().size());
 					for (int k = 0; k < input.getField().getVars().size(); k++) {
 						String s1 = input.getField().getVars().get(k)
 								.toString();
@@ -453,6 +452,17 @@ class Rel implements Serializable {
 		return assigns;
 	}
 
+	String checkObjectArrayDimension( String name, String type, int size ) {
+		/*
+		 * if we have alias as a set of arrays, we should change the declaration as follows:
+		 * from double[][] tmp = new double[][2];
+		 * to   double[][] tmp = new double[2][];
+		 */
+		if( type.endsWith("[]") ) {
+			return type + "[] " + name + " = new " + type.substring(0, type.length() - 2) + "[" + size + "][];\n";
+		}
+		return type + "[] " + name + " = new " + type + "[" + size + "];\n";
+	}
 	String checkAliasOutputs() {
 		String assigns = "";
 		Var output = outputs.get(0);
