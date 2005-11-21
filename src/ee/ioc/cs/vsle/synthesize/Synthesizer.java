@@ -65,7 +65,8 @@ public class Synthesizer {
         }
 
         // run the planner on the obtained problem
-        ArrayList algorithmList = Planner.getInstance().invokePlaning( problem, computeAll );
+        //ArrayList algorithmList = Planner.getInstance().invokePlaning( problem, computeAll );
+        ArrayList algorithmList = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
         String algorithm = CodeGenerator.getInstance().generate( algorithmList );
 
         String prog = "";

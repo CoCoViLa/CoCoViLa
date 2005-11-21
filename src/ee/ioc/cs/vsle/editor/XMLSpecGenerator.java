@@ -80,7 +80,7 @@ public class XMLSpecGenerator implements ISpecGenerator {
 			return "\\SPECGEN\\XML";
 		}
 
-		public Object getInstance() {
+		public ISpecGenerator getInstance() {
 			if( instance == null ) {
 				instance = new XMLSpecGenerator();
 			}

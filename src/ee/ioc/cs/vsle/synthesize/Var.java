@@ -13,7 +13,7 @@ import ee.ioc.cs.vsle.vclass.ClassField;
  * @author  Ando Saabas
  * @version 1.0
  */
-public class Var implements Cloneable,
+public class Var implements //Cloneable,
         Serializable {
 
     private Set<Rel> rels = new HashSet<Rel>();
@@ -105,16 +105,6 @@ public class Var implements Cloneable,
     public String toString() {
         return ( object + "." + name ).substring( 5 );
     } // toString
-
-    public Object clone() {
-        try {
-            Var var = ( Var )super.clone();
-
-            return var;
-        } catch ( CloneNotSupportedException e ) {
-            return null;
-        }
-    }
 
     public boolean equals( Object e ) {
         return this.varNumber == ( ( Var ) e ).varNumber;

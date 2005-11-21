@@ -1,11 +1,11 @@
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.iconeditor.AboutDialog;
 import ee.ioc.cs.vsle.iconeditor.LicenseDialog;
 
 import javax.swing.*;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -155,6 +155,8 @@ public class EditorActionListener implements ActionListener {
             	programEditor.compileAndRun();
             	programEditor.propagate();
             	programEditor.dispose();
+            } else if ( e.getActionCommand().equals( Menu.SCHEMEOPTIONS ) ) {
+            	SchemeSettingsDialog dialog = new SchemeSettingsDialog(editor);
             }
             /* else if (e.getActionCommand().equals("Planner")) {
               PlannerEditor plannerEditor = new PlannerEditor(objects, connections);

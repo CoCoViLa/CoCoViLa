@@ -7,7 +7,7 @@ import java.util.*;
 import java.util.regex.*;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
-class Rel implements Cloneable, Serializable {
+class Rel implements Serializable {
 
 	private List<Var> outputs = new ArrayList<Var>();
 
@@ -484,53 +484,6 @@ class Rel implements Cloneable, Serializable {
 		return RelType.REL_HASH + relNumber;
 	}
 
-	public Object clone() {
-		try {
-			Rel rel = (Rel) super.clone();
-
-			return rel;
-		} catch (CloneNotSupportedException e) {
-			return null;
-		}
-	}
-
-	//	public Object clone()
-	//	{
-	//	    try {
-	//            Rel rel = (Rel) super.clone();
-	//
-	//            rel.outputs = (ArrayList)outputs.clone();
-	//            for (int i = 0; i < rel.outputs.size(); i++) {
-	//                Var var = (Var)rel.outputs.get(i);
-	//                var = (Var)var.clone();
-	//                rel.outputs.set(i, var);
-	//            }
-	//
-	//            rel.inputs = (ArrayList)inputs.clone();
-	//            for (int i = 0; i < rel.inputs.size(); i++) {
-	//                Var var = (Var)rel.inputs.get(i);
-	//                var = (Var)var.clone();
-	//                rel.inputs.set(i, var);
-	//            }
-	//
-	//            rel.subtasks = (ArrayList)subtasks.clone();
-	//            for (int i = 0; i < rel.subtasks.size(); i++) {
-	//                Var var = (Var)rel.subtasks.get(i);
-	//                var = (Var)var.clone();
-	//                rel.subtasks.set(i, var);
-	//            }
-	//
-	//            rel.unknownInputs = rel.inputs.size();
-	//    		rel.subtaskFlag = rel.subtasks.size();
-	//
-	//    		rel.inAlgorithm = false;
-	//
-	//    		return rel;
-	//
-	//        } catch (CloneNotSupportedException e) {
-	//            return null;
-	//        }
-	//	}
 }
 
 class AjutHack {

@@ -141,7 +141,7 @@ public class SpecGenerator implements ISpecGenerator {
 			return SpecGenFactory.s_prefix + "\\SSP";
 		}
 
-		public Object getInstance() {
+		public ISpecGenerator getInstance() {
 			if( instance == null ) {
 				instance = new SpecGenerator();
 			}

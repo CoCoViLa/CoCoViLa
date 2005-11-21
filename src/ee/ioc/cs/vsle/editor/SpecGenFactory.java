@@ -14,7 +14,7 @@ public final class SpecGenFactory extends FactoryStorage {
 	public final static String s_prefix = "\\SPECGEN";
 	
 	//by default
-	private ISpecGenerator m_currentInstance = (ISpecGenerator)new SpecGenerator.Factory().getInstance();
+	private ISpecGenerator m_currentInstance = new SpecGenerator.Factory().getInstance();
 	
 	private final static SpecGenFactory s_instance = new SpecGenFactory();
 
@@ -24,7 +24,7 @@ public final class SpecGenFactory extends FactoryStorage {
 		return s_instance;
 	}
 	
-	public static List<IFactory> getAllInstances() {
+	public List<IFactory> getAllInstances() {
 		return getAllInstances( s_prefix );
 	}
 	

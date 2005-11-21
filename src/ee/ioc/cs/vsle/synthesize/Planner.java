@@ -10,7 +10,7 @@ import ee.ioc.cs.vsle.util.db;
  * @author Pavel Grigorenko
  * @version 1.0
  */
-public class Planner {
+public class Planner implements IPlanner {
 
     private static Planner s_planner = null;
 
@@ -27,6 +27,10 @@ public class Planner {
         return s_planner;
     }
 
+    public String getDescription() {
+    	return "Breadth First Exhaustive";
+    }
+    
     public ArrayList invokePlaning( Problem problem, boolean computeAll ) {
 
         m_problem = problem;
@@ -57,7 +61,7 @@ public class Planner {
             return m_algorithm;
 
         //invoke planning with subtasks
-        } else if ( !m_problem.getSubtaskRels().isEmpty() ) {
+        } else if ( !m_problem.getRelsWithSubtasks().isEmpty() ) {
             boolean solved = subgoalBackwardSearch( m_problem, computeAll );
 
             if ( RuntimeProperties.isDebugEnabled() )
@@ -72,7 +76,7 @@ public class Planner {
     }
 
 
-    private boolean linearForwardSearch( Problem problem, ArrayList<Rel> alg, boolean computeAll,
+    private boolean linearForwardSearch( Problem problem, List<Rel> alg, boolean computeAll,
                                          boolean isSubtask, boolean goingBackward ) {
 
         /*
@@ -80,7 +84,7 @@ public class Planner {
          * that set. Theyre collected into these sets and added/removedall
          * together after iteration is finished
          */
-        ArrayList<Rel> algorithm = alg;
+        List<Rel> algorithm = alg;
         HashSet<Var> allTargetVarsBackup = null;
         HashSet<Var> allTargetVars;
         HashSet<Var> newVars = new HashSet<Var>();
@@ -343,7 +347,7 @@ public class Planner {
             root = new ProblemTreeNode( null, rootProblem, null, currentDepth );
             currentDepth++;
 
-            for ( Iterator<Rel> iter = rootProblem.getSubtaskRels().iterator(); iter
+            for ( Iterator<Rel> iter = rootProblem.getRelsWithSubtasks().iterator(); iter
                                   .hasNext(); ) {
                 Rel relWithSubtask = iter.next();
                 for ( Iterator<Rel> subtaskIter = relWithSubtask.getSubtasks()

@@ -1,7 +1,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.*;
 
 /**
  */
@@ -25,8 +24,8 @@ public class Optimizer {
 	 @param algorithm an unoptimized algorithm
 	 @param targets the variables which the algorithm has to calculate (other branches are removed)
 	 */
-	public ArrayList<Rel> optimize(ArrayList<Rel> algorithm, HashSet<Var> targets) {
-		HashSet<Var> stuff = targets;
+	public List<Rel> optimize(List<Rel> algorithm, Set<Var> targets) {
+		Set<Var> stuff = targets;
 		Rel rel;
 		Var relVar;
 		ArrayList<Rel> removeThese = new ArrayList<Rel>();
