@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
+import java.awt.Component;
 import java.util.*;
 
 import ee.ioc.cs.vsle.editor.*;
@@ -514,5 +515,9 @@ public class Planner implements IPlanner {
         }
 
     }
+    
+    public Component getCustomOptionComponent() {
+    	return null;
+    }    
 }
 

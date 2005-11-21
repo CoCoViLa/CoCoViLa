@@ -3,8 +3,12 @@
  */
 package ee.ioc.cs.vsle.synthesize;
 
+import java.awt.Component;
 import java.text.*;
 import java.util.*;
+
+import javax.swing.*;
+import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
@@ -197,7 +201,7 @@ public class DepthFirstPlanner implements IPlanner {
 		return targetVars.isEmpty();
 	}
 
-	static int maxDepth = 1;//0..2, i.e. 3
+	private static int maxDepth = 2;//0..2, i.e. 3
 	
 	private void subtaskPlanning(Problem problem, ArrayList<Rel> algorithm ) {
 		
@@ -301,4 +305,24 @@ public class DepthFirstPlanner implements IPlanner {
 		problem.getAllRels().removeAll(removableRels);
 		removableRels.clear();
 	}
+	
+	public Component getCustomOptionComponent() {
+		final JSpinner spinner = new JSpinner( new SpinnerNumberModel( maxDepth + 1, 1, 3, 1 ) );
+		spinner.addChangeListener(new ChangeListener(){
+
+			public void stateChanged(ChangeEvent e) {
+				Integer value = (Integer)((JSpinner)e.getSource()).getValue();
+				maxDepth = value - 1;
+			}});
+		JPanel panel = new JPanel()
+		{
+			public void setEnabled( boolean b ) {
+				super.setEnabled( b );
+				spinner.setEnabled( b );
+			}
+		};
+		panel.add( new JLabel("Max Depth: ") );
+		panel.add( spinner );
+    	return panel;
+    }  
 }
