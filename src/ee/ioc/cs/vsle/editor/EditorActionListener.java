@@ -138,25 +138,33 @@ public class EditorActionListener implements ActionListener {
                     JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
                 }
             } else if ( e.getActionCommand().equals( Menu.RUN ) ) {
-            	ProgramTextEditor programEditor = new ProgramTextEditor( editor.
-                        getCurrentCanvas().
-                        connections, editor.getCurrentCanvas().objects,
-                        editor.getCurrentCanvas().vPackage, editor );
-            	
-            	programEditor.compute();
-            	programEditor.compileAndRun();
-            	programEditor.dispose();
+            	if( editor.getCurrentCanvas() != null ) {
+            		ProgramTextEditor programEditor = new ProgramTextEditor( editor.
+            				getCurrentCanvas().
+            				connections, editor.getCurrentCanvas().objects,
+            				editor.getCurrentCanvas().vPackage, editor );
+            		
+            		programEditor.compute();
+            		programEditor.compileAndRun();
+            		programEditor.dispose();
+            	} else {
+            		JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+            	}
             } else if ( e.getActionCommand().equals( Menu.RUNPROPAGATE ) ) {
-            	ProgramTextEditor programEditor = new ProgramTextEditor( editor.
-                        getCurrentCanvas().
-                        connections, editor.getCurrentCanvas().objects,
-                        editor.getCurrentCanvas().vPackage, editor );
-            	programEditor.compute();
-            	programEditor.compileAndRun();
-            	programEditor.propagate();
-            	programEditor.dispose();
+            	if( editor.getCurrentCanvas() != null ) {
+            		ProgramTextEditor programEditor = new ProgramTextEditor( editor.
+            				getCurrentCanvas().
+            				connections, editor.getCurrentCanvas().objects,
+            				editor.getCurrentCanvas().vPackage, editor );
+            		programEditor.compute();
+            		programEditor.compileAndRun();
+            		programEditor.propagate();
+            		programEditor.dispose();
+            	} else {
+            		JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+            	}
             } else if ( e.getActionCommand().equals( Menu.SCHEMEOPTIONS ) ) {
-            	SchemeSettingsDialog dialog = new SchemeSettingsDialog(editor);
+            	new SchemeSettingsDialog(editor);
             }
             /* else if (e.getActionCommand().equals("Planner")) {
               PlannerEditor plannerEditor = new PlannerEditor(objects, connections);
