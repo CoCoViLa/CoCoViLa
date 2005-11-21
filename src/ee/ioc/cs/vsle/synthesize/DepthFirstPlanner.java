@@ -55,14 +55,14 @@ public class DepthFirstPlanner implements IPlanner {
         //if ( RuntimeProperties.isDebugEnabled() )
         //    db.p( m_problem.toString() );
 
-        if ( linearForwardSearch( problem, algorithm, problem.getTargetVars(), new HashSet<Var>(), computeAll ) &&
+        if ( linearForwardSearch( problem, algorithm, problem.getTargetVars(), problem.getFoundVars(), computeAll ) &&
              !computeAll ) {
 
             return algorithm;
         }
         
 		subtaskPlanning( problem, algorithm );
-		linearForwardSearch( problem, algorithm, problem.getTargetVars(), new HashSet<Var>(), computeAll );
+		linearForwardSearch( problem, algorithm, problem.getTargetVars(), problem.getFoundVars(), computeAll );
         
 		if ( RuntimeProperties.isDebugEnabled() )
 			db.p( "Planning time: " + ( System.currentTimeMillis() - startTime ) + "ms.");
@@ -146,9 +146,9 @@ public class DepthFirstPlanner implements IPlanner {
 									relIsNeeded = true;
 								}
 
-								if (problem.getFoundVars().contains(relVar)) {
-									relIsNeeded = false;
-								}
+//								if (problem.getFoundVars().contains(relVar)) {
+//									relIsNeeded = false;
+//								}
 							}
 
 							if (rel.getOutputs().isEmpty()) {
@@ -189,14 +189,13 @@ public class DepthFirstPlanner implements IPlanner {
 		if (!computeAll) {
 			algorithm = Optimizer.getInstance().optimize(algorithm,
 					allTargetVars);
+			if (RuntimeProperties.isDebugEnabled())
+				db.p("Optimized algorithm" + algorithm.toString() + "\n");
 		}
-
-		if (RuntimeProperties.isDebugEnabled())
-			db.p("algorithm" + algorithm.toString() + "\n");
 
 		ProgramRunner.addAllFoundVars(foundVars);
 
-		problem.getFoundVars().addAll(foundVars);
+		//problem.getFoundVars().addAll(foundVars);
 
 		return targetVars.isEmpty();
 	}
@@ -204,6 +203,11 @@ public class DepthFirstPlanner implements IPlanner {
 	private static int maxDepth = 2;//0..2, i.e. 3
 	
 	private void subtaskPlanning(Problem problem, ArrayList<Rel> algorithm ) {
+		
+		if (RuntimeProperties.isDebugEnabled()) {
+			db.p( "!!!--------- Starting Planning With Subtasks ---------!!!" );
+			db.p( "maxDepth: " + ( maxDepth + 1 ) );
+		}
 		
 		for ( Rel relWithSubtask : problem.getRelsWithSubtasks() ) {
 			for ( Rel subtask : relWithSubtask.getSubtasks() ) {
@@ -221,10 +225,14 @@ public class DepthFirstPlanner implements IPlanner {
 
 		// or
 		OR: for (Rel subtaskRel : problem.getRelsWithSubtasks()) {
+			if (RuntimeProperties.isDebugEnabled())
+				db.p( "OR: rel with subtasks - " + subtaskRel + " depth: " + ( depth + 1 ) );
 			// this is true if all subtasks are solvable
 			boolean allSolved = true;
 			// and
 			AND: for (Rel subtask : subtaskRel.getSubtasks()) {
+				if (RuntimeProperties.isDebugEnabled())
+					db.p( "AND: subtask - " + subtask );
 				// lets clone the environment
 				Problem problemNew = problem.getCopy();
 				// we need fresh cloned subtask instance
@@ -234,19 +242,31 @@ public class DepthFirstPlanner implements IPlanner {
 				
 				boolean solved = 
 					linearForwardSearch( problemNew, subtask.getAlgorithm(), //note that we use algorithm of old subtask
-							new HashSet<Var>(subtaskNew.getOutputs()), new HashSet<Var>(), true );
+							new HashSet<Var>(subtaskNew.getOutputs()), problemNew.getFoundVars(), true );
 				
 				if( solved ) {
+					if (RuntimeProperties.isDebugEnabled())
+						db.p( "Subtask: " + subtask + " solved" );
 					continue AND;
 				} else if( !solved && ( depth == maxDepth ) ) {
 					continue OR;
 				}
 				
+				if (RuntimeProperties.isDebugEnabled())
+					db.p( "Recursing deeper" );
+				
 				subtaskPlanningImpl( problemNew, subtask.getAlgorithm(), subgoals, depth + 1 );
 				
-				allSolved &= linearForwardSearch( problemNew, subtask.getAlgorithm(), //note that we use algorithm of old subtask
-						new HashSet<Var>(), new HashSet<Var>(), true );
-				//allSolved &= solved;
+				if (RuntimeProperties.isDebugEnabled())
+					db.p( "Back to depth " + ( depth + 1 ) );
+				
+				solved = linearForwardSearch( problemNew, subtask.getAlgorithm(), //note that we use algorithm of old subtask
+						new HashSet<Var>(subtaskNew.getOutputs()), problemNew.getFoundVars(), true );
+				
+				if (RuntimeProperties.isDebugEnabled())
+					db.p( "Subtask: " + subtask + " solved: " + solved );
+				
+				allSolved &= solved;
 				if( !allSolved ) {
 					continue OR;
 				}
@@ -255,6 +275,7 @@ public class DepthFirstPlanner implements IPlanner {
 			if( allSolved ) {
 				algorithm.add( subtaskRel );
 				problem.addKnown( subtaskRel.getOutputs() );
+				problem.getFoundVars().addAll(subtaskRel.getOutputs());
 			}
 		}
 		return false;
