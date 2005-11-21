@@ -4,7 +4,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
 import java.awt.Component;
-import java.text.*;
 import java.util.*;
 
 import javax.swing.*;
@@ -51,18 +50,20 @@ public class DepthFirstPlanner implements IPlanner {
             axiomIter.remove();
         }
 
+        problem.getFoundVars().addAll(problem.getKnownVars());
+        
         //invoke linear planning
         //if ( RuntimeProperties.isDebugEnabled() )
         //    db.p( m_problem.toString() );
 
-        if ( linearForwardSearch( problem, algorithm, problem.getTargetVars(), problem.getFoundVars(), computeAll ) &&
+        if ( linearForwardSearch( problem, algorithm, problem.getTargetVars(), computeAll ) &&
              !computeAll ) {
 
             return algorithm;
         }
         
 		subtaskPlanning( problem, algorithm );
-		linearForwardSearch( problem, algorithm, problem.getTargetVars(), problem.getFoundVars(), computeAll );
+		linearForwardSearch( problem, algorithm, problem.getTargetVars(), computeAll );
         
 		if ( RuntimeProperties.isDebugEnabled() )
 			db.p( "Planning time: " + ( System.currentTimeMillis() - startTime ) + "ms.");
@@ -70,9 +71,10 @@ public class DepthFirstPlanner implements IPlanner {
     }
     
 	private boolean linearForwardSearch(Problem problem, List<Rel> algorithm, 
-			Set<Var> targetVars, Set<Var> foundVars,
+			Set<Var> targetVars,
 			boolean computeAll) {
 
+		Set<Var> foundVars = problem.getFoundVars();
 		/*
 		 * while iterating through hashset, items cant be removed from/added to
 		 * that set. Theyre collected into these sets and added/removedall
@@ -200,7 +202,7 @@ public class DepthFirstPlanner implements IPlanner {
 		return targetVars.isEmpty();
 	}
 
-	private static int maxDepth = 2;//0..2, i.e. 3
+	private static int maxDepth = 1;//0..2, i.e. 3
 	
 	private void subtaskPlanning(Problem problem, ArrayList<Rel> algorithm ) {
 		
@@ -223,6 +225,7 @@ public class DepthFirstPlanner implements IPlanner {
 	private boolean subtaskPlanningImpl(Problem problem, List<Rel> algorithm,
 			ArrayList subgoals, int depth) {
 
+		List<Var> newVars = new ArrayList<Var>();
 		// or
 		OR: for (Rel subtaskRel : problem.getRelsWithSubtasks()) {
 			if (RuntimeProperties.isDebugEnabled())
@@ -242,7 +245,7 @@ public class DepthFirstPlanner implements IPlanner {
 				
 				boolean solved = 
 					linearForwardSearch( problemNew, subtask.getAlgorithm(), //note that we use algorithm of old subtask
-							new HashSet<Var>(subtaskNew.getOutputs()), problemNew.getFoundVars(), true );
+							new HashSet<Var>(subtaskNew.getOutputs()), true );
 				
 				if( solved ) {
 					if (RuntimeProperties.isDebugEnabled())
@@ -261,7 +264,7 @@ public class DepthFirstPlanner implements IPlanner {
 					db.p( "Back to depth " + ( depth + 1 ) );
 				
 				solved = linearForwardSearch( problemNew, subtask.getAlgorithm(), //note that we use algorithm of old subtask
-						new HashSet<Var>(subtaskNew.getOutputs()), problemNew.getFoundVars(), true );
+						new HashSet<Var>(subtaskNew.getOutputs()), true );
 				
 				if (RuntimeProperties.isDebugEnabled())
 					db.p( "Subtask: " + subtask + " solved: " + solved );
@@ -274,10 +277,12 @@ public class DepthFirstPlanner implements IPlanner {
 			
 			if( allSolved ) {
 				algorithm.add( subtaskRel );
-				problem.addKnown( subtaskRel.getOutputs() );
-				problem.getFoundVars().addAll(subtaskRel.getOutputs());
+				newVars.addAll( subtaskRel.getOutputs() );
 			}
 		}
+		
+		problem.addKnown( newVars );
+		problem.getFoundVars().addAll( newVars );
 		return false;
 	}
 

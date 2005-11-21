@@ -2,6 +2,9 @@ package ee.ioc.cs.vsle.synthesize;
 
 import java.util.*;
 
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
+
 /**
  */
 public class Optimizer {
@@ -29,11 +32,14 @@ public class Optimizer {
 		Rel rel;
 		Var relVar;
 		ArrayList<Rel> removeThese = new ArrayList<Rel>();
-
+		
+		if (RuntimeProperties.isDebugEnabled())
+			db.p("!!!--------- Starting Optimization with targets: " + targets + " ---------!!!");
+		
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
-//            if((algorithm.get(i) instanceof String))
-//                continue;
             rel = algorithm.get(i);
+            if (RuntimeProperties.isDebugEnabled())
+    			db.p("Rel from algorithm: " + rel );
 			boolean relIsNeeded = false;
 
 			for (int j = 0; j < rel.getOutputs().size(); j++) {
@@ -46,6 +52,8 @@ public class Optimizer {
 			if (relIsNeeded) {
 				stuff.addAll(rel.getInputs());
 			} else {
+				if (RuntimeProperties.isDebugEnabled())
+	    			db.p("Removed");
 				removeThese.add(rel);
 			}
 		}
