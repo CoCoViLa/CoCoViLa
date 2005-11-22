@@ -20,7 +20,7 @@ import javax.swing.JTextArea;
 public class ProgramRunner {
 	Object genObject;
 
-	private static HashSet foundVars = new HashSet();
+	private static HashSet<Var> foundVars = new HashSet<Var>();
 
 	public static void clearFoundVars() {
 		foundVars.clear();
@@ -33,12 +33,14 @@ public class ProgramRunner {
 		foundVars.add(var);
 	}
 
-	public static void addAllFoundVars(Collection col) {
-		for (Iterator iter = col.iterator(); iter.hasNext();) {
-			Var var = (Var) iter.next();
-			if (!isFoundVar(var)) {
+	public static void addAllFoundVars(Collection<Var> col) {
+		for (Var var : col ) {
+			if( !foundVars.contains(var) ) {
 				foundVars.add(var);
 			}
+//			if (!isFoundVar(var)) {
+//				foundVars.add(var);
+//			}
 		}
 	}
 

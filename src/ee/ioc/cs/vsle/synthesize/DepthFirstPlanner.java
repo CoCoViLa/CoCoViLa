@@ -53,18 +53,14 @@ public class DepthFirstPlanner implements IPlanner {
         problem.getFoundVars().addAll(problem.getKnownVars());
         
         //invoke linear planning
-        //if ( RuntimeProperties.isDebugEnabled() )
-        //    db.p( m_problem.toString() );
-
         if ( linearForwardSearch( problem, algorithm, problem.getTargetVars(), computeAll ) &&
              !computeAll ) {
-
-            return algorithm;
+        	if ( RuntimeProperties.isDebugEnabled() )
+    			db.p( "Problem solved without subtasks");
+        } else {
+        	subtaskPlanning( problem, algorithm );
+        	linearForwardSearch( problem, algorithm, problem.getTargetVars(), computeAll );
         }
-        
-		subtaskPlanning( problem, algorithm );
-		linearForwardSearch( problem, algorithm, problem.getTargetVars(), computeAll );
-        
 		if ( RuntimeProperties.isDebugEnabled() )
 			db.p( "Planning time: " + ( System.currentTimeMillis() - startTime ) + "ms.");
         return algorithm;
@@ -147,10 +143,6 @@ public class DepthFirstPlanner implements IPlanner {
 								if (!foundVars.contains(relVar)) {
 									relIsNeeded = true;
 								}
-
-//								if (problem.getFoundVars().contains(relVar)) {
-//									relIsNeeded = false;
-//								}
 							}
 
 							if (rel.getOutputs().isEmpty()) {
@@ -196,8 +188,6 @@ public class DepthFirstPlanner implements IPlanner {
 		}
 
 		ProgramRunner.addAllFoundVars(foundVars);
-
-		//problem.getFoundVars().addAll(foundVars);
 
 		return targetVars.isEmpty();
 	}
@@ -252,6 +242,8 @@ public class DepthFirstPlanner implements IPlanner {
 						db.p( "Subtask: " + subtask + " solved" );
 					continue AND;
 				} else if( !solved && ( depth == maxDepth ) ) {
+					if (RuntimeProperties.isDebugEnabled())
+						db.p( "Subtask: " + subtask + " not solved and cannot go any deeper" );
 					continue OR;
 				}
 				
