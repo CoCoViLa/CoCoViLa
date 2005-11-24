@@ -27,7 +27,12 @@ public class Optimizer {
 	 @param algorithm an unoptimized algorithm
 	 @param targets the variables which the algorithm has to calculate (other branches are removed)
 	 */
-	public List<Rel> optimize(List<Rel> algorithm, Set<Var> targets) {
+    
+//    public void optimize(List<Rel> algorithm, Set<Var> targets) {
+//    	
+//    }
+    
+	public void optimize(List<Rel> algorithm, Set<Var> targets) {
 		Set<Var> stuff = targets;
 		Rel rel;
 		Var relVar;
@@ -37,6 +42,8 @@ public class Optimizer {
 			db.p("!!!--------- Starting Optimization with targets: " + targets + " ---------!!!");
 		
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
+			if (RuntimeProperties.isDebugEnabled())
+				db.p( "Reguired vars: " + stuff );
             rel = algorithm.get(i);
             if (RuntimeProperties.isDebugEnabled())
     			db.p("Rel from algorithm: " + rel );
@@ -49,8 +56,27 @@ public class Optimizer {
 				}
 			}
 
-			if (relIsNeeded) {
+			if (relIsNeeded && ( rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) ) {
+				if (RuntimeProperties.isDebugEnabled())
+	    			db.p("Required");
 				stuff.addAll(rel.getInputs());
+			} else if( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
+				boolean need = true;
+				HashSet<Var> tmpSbtInputs = new HashSet<Var>();
+				for (Rel subtask : rel.getSubtasks() ) {
+					if (RuntimeProperties.isDebugEnabled())
+		    			db.p("Optimizing subtask: " + subtask );
+					HashSet<Var> tmpSbtOutputs = new HashSet<Var>( subtask.getOutputs() );
+					optimize( subtask.getAlgorithm(), tmpSbtOutputs );
+					need &= subtask.getAlgorithm().isEmpty();
+					if( !need && !relIsNeeded ) {
+						removeThese.add(rel);
+						break;
+					}
+					tmpSbtInputs.addAll(tmpSbtOutputs);
+				}
+				stuff.addAll(rel.getInputs());
+				stuff.addAll(tmpSbtInputs);
 			} else {
 				if (RuntimeProperties.isDebugEnabled())
 	    			db.p("Removed");
@@ -58,6 +84,5 @@ public class Optimizer {
 			}
 		}
 		algorithm.removeAll(removeThese);
-		return algorithm;
 	}
 }

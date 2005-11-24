@@ -53,8 +53,10 @@ public class DepthFirstPlanner implements IPlanner {
         problem.getFoundVars().addAll(problem.getKnownVars());
         
         //invoke linear planning
-        if ( linearForwardSearch( problem, algorithm, problem.getTargetVars(), computeAll ) &&
-             !computeAll ) {
+        if ( linearForwardSearch( problem, algorithm, problem.getTargetVars(), 
+        		// do not optimize yet if subtasks exist
+        		( computeAll || !problem.getRelsWithSubtasks().isEmpty() ) ) 
+        		&& !computeAll ) {
         	if ( RuntimeProperties.isDebugEnabled() )
     			db.p( "Problem solved without subtasks");
         } else {
@@ -181,8 +183,8 @@ public class DepthFirstPlanner implements IPlanner {
 			db.p("algorithm " + algorithm);
 
 		if (!computeAll) {
-			algorithm = Optimizer.getInstance().optimize(algorithm,
-					allTargetVars);
+			Optimizer.getInstance().optimize( algorithm, allTargetVars );
+			
 			if (RuntimeProperties.isDebugEnabled())
 				db.p("Optimized algorithm" + algorithm.toString() + "\n");
 		}
@@ -234,7 +236,9 @@ public class DepthFirstPlanner implements IPlanner {
 				prepareSubtask( problemNew, subtaskNew );
 				
 				boolean solved = 
-					linearForwardSearch( problemNew, subtask.getAlgorithm(), //note that we use algorithm of old subtask
+					// note that we use algorithm of old subtask
+					linearForwardSearch( problemNew, subtask.getAlgorithm(), 
+							// never optimize here
 							new HashSet<Var>(subtaskNew.getOutputs()), true );
 				
 				if( solved ) {
@@ -255,8 +259,10 @@ public class DepthFirstPlanner implements IPlanner {
 				if (RuntimeProperties.isDebugEnabled())
 					db.p( "Back to depth " + ( depth + 1 ) );
 				
-				solved = linearForwardSearch( problemNew, subtask.getAlgorithm(), //note that we use algorithm of old subtask
-						new HashSet<Var>(subtaskNew.getOutputs()), true );
+				// note that we use algorithm of old subtask
+				solved = linearForwardSearch( problemNew, subtask.getAlgorithm(), 
+						// always optimize here in order to get rid of unnecessary subtask instances
+						new HashSet<Var>(subtaskNew.getOutputs()), false );
 				
 				if (RuntimeProperties.isDebugEnabled())
 					db.p( "Subtask: " + subtask + " solved: " + solved );

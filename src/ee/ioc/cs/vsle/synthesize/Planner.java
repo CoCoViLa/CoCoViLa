@@ -251,12 +251,11 @@ public class Planner implements IPlanner {
                 db.p( "algorithm " + algorithm );
 
         if ( !computeAll && !isSubtask ) {
-            algorithm = Optimizer.getInstance().optimize( algorithm,
-                    allTargetVars );
+        	Optimizer.getInstance().optimize( algorithm, allTargetVars );
+			
+			if (RuntimeProperties.isDebugEnabled())
+				db.p("Optimized algorithm" + algorithm.toString() + "\n");
         }
-
-        if ( RuntimeProperties.isDebugEnabled() )
-            db.p( "algorithm" + algorithm.toString() + "\n" );
 
         ProgramRunner.addAllFoundVars(foundVars);
         problem.getFoundVars().addAll(foundVars);
