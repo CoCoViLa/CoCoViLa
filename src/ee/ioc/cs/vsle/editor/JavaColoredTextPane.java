@@ -5,7 +5,7 @@ import java.io.*;
 import java.util.*;
 
 import javax.swing.JTextPane;
-import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.*;
 import javax.swing.text.*;
 
 import com.Ostermiller.Syntax.Lexer.*;
@@ -59,6 +59,23 @@ public class JavaColoredTextPane extends JTextPane {
         documentReader = new DocumentReader(document);
 
         syntaxLexer = new JavaLexer(documentReader);
+        
+        document.addDocumentListener(new DocumentListener() {
+
+			public void changedUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			public void insertUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				colorer.resumeColoring();
+			}
+
+			public void removeUpdate(DocumentEvent e) {
+				// TODO Auto-generated method stub
+				colorer.resumeColoring();
+			}});
 	}
 
 	public void append( String s ) {
@@ -152,7 +169,7 @@ public class JavaColoredTextPane extends JTextPane {
          * section of the document.  It will process this as a FIFO.
          * This method should be done inside a doclock.
          */
-        public void color(int position, int adjustment){
+        public synchronized void color(int position, int adjustment){
             // figure out if this adjustment effects the current run.
             // if it does, then adjust the place in the document
             // that gets highlighted.
@@ -166,7 +183,8 @@ public class JavaColoredTextPane extends JTextPane {
             synchronized(lock){
                 v.add(new RecolorEvent(position, adjustment));
                 if (asleep){
-                    this.interrupt();
+                	notifyAll();
+                    //this.interrupt();
                 }
             }
         }
@@ -177,6 +195,9 @@ public class JavaColoredTextPane extends JTextPane {
          * time there is something for it to do.
          */
         public void run(){
+        	
+        	Thread.currentThread().setName( "Colorer" );
+        	
             int position = -1;
             int adjustment = 0;
             // if we just finish, we can't go to sleep until we
@@ -355,14 +376,23 @@ public class JavaColoredTextPane extends JTextPane {
                 }                
                 asleep = true;
                 if (!tryAgain){
-                    try {
-                        sleep (0xffffff);
-                    } catch (InterruptedException x){
-                    }
+                	synchronized ( this ){
+                		try {
+                			
+                			wait();
+                			
+                			//sleep (0xffffff);
+                		} catch (InterruptedException x){
+                		}
+                	}
                     
                 }
                 asleep = false;
             }
+        }
+        
+        synchronized void resumeColoring() {
+        		notify();
         }
     }
 
