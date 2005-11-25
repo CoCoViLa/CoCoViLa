@@ -309,7 +309,8 @@ public class DepthFirstPlanner implements IPlanner {
 		for (Var subtaskInput : subtask.getInputs()) {
 
 			for (Rel rel : problem.getAllRels()) {
-				if (rel.getOutputs().get(0) == subtaskInput) {
+				if ( ( rel.getOutputs().size() > 0 ) 
+						&& ( rel.getOutputs().get(0) == subtaskInput ) ) {
 					removableRels.add( rel );
 //					problem.getAllRels().remove(rel);// rel??? iter.remove();
 				}

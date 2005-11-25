@@ -122,7 +122,8 @@ public class Planner implements IPlanner {
                 Var subtaskInput = problem.getSubGoal().getInputs().get( i );
                 for ( Iterator iter = problem.getAllRels().iterator(); iter.hasNext(); ) {
                     Rel rel = ( Rel ) iter.next();
-                    if ( rel.getOutputs().get( 0 ) == subtaskInput ) {
+                    if ( ( rel.getOutputs().size() > 0 ) 
+                    		&& ( rel.getOutputs().get( 0 ) == subtaskInput ) ) {
                         iter.remove();
                     }
                 }
