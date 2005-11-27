@@ -219,9 +219,13 @@ class ClassRelation
 			matcher2 = pattern.matcher(subtaskString);
 			if (matcher2.find()) {
 				subtask = new ClassRelation(RelType.TYPE_SUBTASK);
-				subtask.setOutput(matcher2.group(2).trim(), varList);
+				
 				String[] inputs = matcher2.group(1).trim().split(" *, *", -1);
-
+				String[] outputs = matcher2.group(2).trim().split(" *, *", -1);
+				for (int j = 0; j < outputs.length; j++) {
+					subtask.setOutput(outputs[j], varList);
+				}
+				
 				if (!inputs[0].equals("")) {
 					subtask.addInputs(inputs, varList);
 				}
