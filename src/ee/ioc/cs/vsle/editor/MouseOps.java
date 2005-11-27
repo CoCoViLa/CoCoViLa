@@ -323,6 +323,9 @@ class MouseOps
 
 	public void mouseDragged(MouseEvent e) {
 
+		if( !SwingUtilities.isLeftMouseButton(e) ) {
+			return;
+		}
 		int x = e.getX();
 		int y = e.getY();
 		GObj obj;
