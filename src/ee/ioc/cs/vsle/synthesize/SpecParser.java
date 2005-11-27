@@ -150,6 +150,15 @@ public class SpecParser {
         Matcher matcher;
         Pattern pattern;
 
+        //remove comments before removing line brake \n
+        String[] s = fileString.split( "\n" );
+        fileString = "";
+        for (int i = 0; i < s.length; i++) {
+			if( !s[i].trim().startsWith("//") ) {
+				fileString += s[i];
+			}
+		}
+			
         // remove unneeded whitespace
         pattern = Pattern.compile( "[ \r\t\n]+" );
         matcher = pattern.matcher( fileString );
@@ -666,6 +675,10 @@ public class SpecParser {
                         split = lt.getSpecLine().split( ":", -1 );
                         String[] list = split[ 1 ].trim().split( " *, *", -1 );
                         String name = split[ 0 ];
+                        if ( varListIncludes( vars, name ) ) {
+                            throw new SpecParseException( "Variable " + name +
+                                    " declared more than once in class " + className );
+                        }
                         Alias a = new Alias( name );
 
                         a.addAll( list, vars, classList );
