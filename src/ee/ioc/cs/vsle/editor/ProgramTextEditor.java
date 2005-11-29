@@ -6,7 +6,6 @@ import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.ccl.*;
 
 import java.util.*;
-import java.util.regex.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -142,12 +141,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
     void compileAndRun()
     {
-    	Synthesizer synth = new Synthesizer();
-
-        synth.makeProgram( programTextArea.getText(), classList,
+    	Synthesizer.getInstance().makeProgram( programTextArea.getText(), classList,
                            mainClassName );
         runner = new ProgramRunner();
-        ArrayList watchFields = watchableFields( objects );
+        ArrayList<String> watchFields = watchableFields( objects );
 
         try {
             runnableObject = runner.compileAndRun( mainClassName,
@@ -163,7 +160,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     
     void invoke()
     {
-    	ArrayList watchFields = watchableFields( objects );
+    	ArrayList<String> watchFields = watchableFields( objects );
 
         if ( runnableObject != null ) {
             if ( !invokeField.getText().equals( "" ) ) {
@@ -196,24 +193,15 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     
     private void compute( boolean computeAll ) {
     	
-    	Synthesizer synth = new Synthesizer();
-        SpecParser sp = SpecParser.getInstance();
-
         try {
             String fullSpec = textArea.getText();
-            Pattern pattern = Pattern.compile(
-                    "class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+" );
-            Matcher matcher = pattern.matcher( fullSpec );
 
-            if ( matcher.find() ) {
-                mainClassName = matcher.group( 1 );
-            }
-            String spec = sp.refineSpec( fullSpec );
-
-            classList = sp.parseSpecification( spec );
+            mainClassName = SpecParser.getInstance().getClassName( fullSpec );
+            
+            classList = SpecParser.getInstance().parseSpecification( fullSpec );
             programTextArea.setText( "" );
             programTextArea.append(
-                    synth.makeProgramText( fullSpec, computeAll, classList, mainClassName ) );
+            		Synthesizer.getInstance().makeProgramText( fullSpec, computeAll, classList, mainClassName ) );
             tabbedPane.setSelectedComponent( progText );
         } catch ( UnknownVariableException uve ) {
 
@@ -247,12 +235,12 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         validate();
     }
     
-    ArrayList watchableFields( ObjectList objects ) {
+    private ArrayList<String> watchableFields( ObjectList objects ) {
         ClassField field;
         GObj obj;
 
         objects = GroupUnfolder.unfold( objects );
-        ArrayList watchFields = new ArrayList();
+        ArrayList<String> watchFields = new ArrayList<String>();
 
         for ( int i = 0; i < objects.size(); i++ ) {
             obj = ( GObj ) objects.get( i );

@@ -2,16 +2,15 @@ package ee.ioc.cs.vsle.editor;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.net.*;
-import java.util.Properties;
+import java.io.*;
+import java.util.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
 
-import ee.ioc.cs.vsle.synthesize.Synthesizer;
+import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.vclass.VPackage;
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * Visual Specification Language Editor main module for combining separate
@@ -620,8 +619,8 @@ public class Editor extends JFrame implements ChangeListener {
 					} else {
 						RuntimeProperties.packageDir = directory;
 					}
-					Synthesizer synth = new Synthesizer();
-					synth.parseFromCommandLine(args[1]);
+					
+					Synthesizer.getInstance().parseFromCommandLine(args[1]);
 				} else {
 					// Esimeses hoos vaatame, kas moodulite fail on ette antud
 					// k�surealt.

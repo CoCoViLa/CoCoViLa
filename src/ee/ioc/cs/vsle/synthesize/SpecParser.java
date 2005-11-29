@@ -30,7 +30,7 @@ public class SpecParser {
 
         try {
             String s = new String( p.getStringFromFile( args[ 0 ] ) );
-            ArrayList a = p.getSpec( p.refineSpec( s ) );
+            ArrayList a = p.getSpec( s, false );
 
             while ( !a.isEmpty() ) {
                 if ( !( a.get( 0 ) ).equals( "" ) ) {
@@ -45,11 +45,21 @@ public class SpecParser {
         }
     }
 
+    public String getClassName( String spec ) {
+    	Pattern pattern = Pattern.compile( "class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+" );
+        Matcher matcher = pattern.matcher( spec );
+
+        if ( matcher.find() ) {
+            return matcher.group( 1 );
+        }
+        
+        return "";
+    }
     /**
      Return the contents of a file as a String object.
      @param	fileName	name of the file name
      */
-    public String getStringFromFile( String fileName ) throws IOException {
+    String getStringFromFile( String fileName ) throws IOException {
         db.p( "Retrieving " + fileName );
 
         BufferedReader in = new BufferedReader( new FileReader( fileName ) );
@@ -66,7 +76,10 @@ public class SpecParser {
      @return ArrayList of lines in specification
      @param	text	Secification text as String
      */
-    public ArrayList<String> getSpec( String text ) {
+    ArrayList<String> getSpec( String text, boolean isRefinedSpec ) throws IOException {
+    	if( !isRefinedSpec ) {
+    		text = refineSpec( text );
+    	}
         String[] s = text.trim().split( ";", -1 );
         ArrayList<String> a = new ArrayList<String>();
 
@@ -83,7 +96,7 @@ public class SpecParser {
      @return	a specification line with its type information
      @param	a	arraylist of specification lines
      */
-    public LineType getLine( ArrayList a ) {
+    LineType getLine( ArrayList a ) {
         Matcher matcher2;
         Pattern pattern;
 
@@ -146,7 +159,7 @@ public class SpecParser {
      @return	specification text
      @param fileString	a (Java) file containing the specification
      */
-    public String refineSpec( String fileString ) throws IOException {
+    private String refineSpec( String fileString ) throws IOException {
         Matcher matcher;
         Pattern pattern;
 
@@ -165,7 +178,7 @@ public class SpecParser {
         fileString = matcher.replaceAll( " " );
 
         // find spec
-        pattern = Pattern.compile(
+        pattern = Pattern.compile( //"[ ]+(super [ a-zA-Z_0-9-,]+ )? "
                 ".*/\\*@.*specification [a-zA-Z_0-9-.]+ ?\\{ ?(.+) ?\\} ?@\\*/ ?" );
         matcher = pattern.matcher( fileString );
         if ( matcher.find() ) {
@@ -377,7 +390,7 @@ public class SpecParser {
      @param classRelation the goal specification is extracted from it.
      @param obj the name of the object where the goal specification was declared.
      */
-    void setTargets( Problem problem, ClassRelation classRelation, String obj ) throws
+    private void setTargets( Problem problem, ClassRelation classRelation, String obj ) throws
             UnknownVariableException {
         Var var;
         ClassField cf;
@@ -404,7 +417,7 @@ public class SpecParser {
     }
 
 
-    HashSet<Rel> makeRightWildcardRel( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
+    private HashSet<Rel> makeRightWildcardRel( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
                                   Problem problem, String obj, String wildcardVar ) throws
             UnknownVariableException {
         ClassField clf;
@@ -465,7 +478,7 @@ public class SpecParser {
     }
 
 
-    HashSet<Rel> makeAliasWildcard( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
+    private HashSet<Rel> makeAliasWildcard( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
                                Problem problem, String obj, String wildcardVar ) throws
             UnknownVariableException {
         ClassField clf;
@@ -549,7 +562,7 @@ public class SpecParser {
      @param obj the name of the object where the goal specification was declared.
      */
 
-    Rel makeRel( ClassRelation classRelation, Problem problem, String obj ) throws
+    private Rel makeRel( ClassRelation classRelation, Problem problem, String obj ) throws
             UnknownVariableException {
         Var var;
         Rel rel = new Rel();
@@ -590,10 +603,10 @@ public class SpecParser {
         return rel;
     }
 
-    public ClassList parseSpecification( String spec ) throws IOException,
+    public ClassList parseSpecification( String fullSpec ) throws IOException,
     										SpecParseException, EquationException {
     	HashSet<String> hs = new HashSet<String>();
-    	return parseSpecificationImpl( spec, "this", null, hs );
+    	return parseSpecificationImpl( refineSpec( fullSpec ), "this", null, hs );
     }
     
     /**
@@ -617,7 +630,7 @@ public class SpecParser {
         AnnotatedClass annClass = new AnnotatedClass( className, parent );
         ClassList<AnnotatedClass> classList = new ClassList<AnnotatedClass>();
 
-        ArrayList specLines = getSpec( spec );
+        ArrayList specLines = getSpec( spec, true );
 
         try {
 
@@ -828,7 +841,7 @@ public class SpecParser {
     public ArrayList getFields( String fileName ) throws IOException {
         ArrayList<ClassField> vars = new ArrayList<ClassField>();
         String s = new String( getStringFromFile( fileName ) );
-        ArrayList specLines = getSpec( refineSpec( s ) );
+        ArrayList specLines = getSpec( s, false );
         String[] split;
 
         while ( !specLines.isEmpty() ) {
@@ -858,7 +871,7 @@ public class SpecParser {
         return vars;
     }
 
-    boolean isSpecClass( String file ) {
+    private boolean isSpecClass( String file ) {
         try {
             BufferedReader in = new BufferedReader( new FileReader( RuntimeProperties.packageDir +
                     file + ".java" ) );
@@ -878,7 +891,7 @@ public class SpecParser {
         return false;
     }
 
-    boolean varListIncludes( ArrayList vars, String varName ) {
+    private boolean varListIncludes( ArrayList vars, String varName ) {
         ClassField cf;
 
         for ( int i = 0; i < vars.size(); i++ ) {

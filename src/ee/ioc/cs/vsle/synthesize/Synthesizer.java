@@ -30,6 +30,16 @@ public class Synthesizer {
      }
      */
 
+    private static Synthesizer s_instance;
+    
+    private Synthesizer() {}
+    
+    public static Synthesizer getInstance() {
+    	if( s_instance == null ) {
+    		s_instance = new Synthesizer();
+    	}
+    	return s_instance;
+    }
     /**
      * @param progText -
      * @param classes -
@@ -129,7 +139,7 @@ public class Synthesizer {
      Generates compilable java classes from the annotated classes that have been used in the specification.
      @param classes List of classes obtained from the ee.ioc.cs.editor.synthesize.SpecParser
      */
-    void generateSubclasses( ClassList classes ) {
+    private void generateSubclasses( ClassList classes ) {
 
         AnnotatedClass pClass;
         String lineString = "", fileString;
@@ -167,7 +177,7 @@ public class Synthesizer {
                 String declars = "";
 
                 try {
-                    ArrayList specLines = specParser.getSpec( specParser.refineSpec( fileString ) );
+                    ArrayList specLines = specParser.getSpec( fileString, false );
 
                     while ( !specLines.isEmpty() ) {
                         LineType lt = specParser.getLine( specLines );
@@ -226,11 +236,11 @@ public class Synthesizer {
         }
     }
 
-    String getTypeWithoutArray( String type ) {
+    private String getTypeWithoutArray( String type ) {
         return type.substring( 0, type.length() - 2 );
     }
 
-    void writeFile( String prog, String mainClassName ) {
+    private void writeFile( String prog, String mainClassName ) {
         try {
             PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter(
                     RuntimeProperties.genFileDir + System.getProperty( "file.separator" ) +
@@ -243,13 +253,13 @@ public class Synthesizer {
         }
     }
 
-    boolean isPrimitive( String type ) {
+    private boolean isPrimitive( String type ) {
         return ( type.equals( "int" ) || type.equals( "double" ) || type.equals( "float" ) ||
              type.equals( "long" ) || type.equals( "short" ) || type.equals( "boolean" ) ||
              type.equals( "char" ) );
     }
 
-    boolean isArray( String type ) {
+    private boolean isArray( String type ) {
         int length = type.length();
 
         return ( type.length() >= 2 && type.substring( length - 2, length ).equals( "[]" ) );
@@ -262,16 +272,11 @@ public class Synthesizer {
         try {
             SpecParser sp = SpecParser.getInstance();
             
-            String mainClassName = new String();
             String file = sp.getStringFromFile( RuntimeProperties.packageDir + fileName );
-            Pattern pattern = Pattern.compile( "class[ \t\n]+([a-zA-Z_0-9-]+)[ \t\n]+" );
-            Matcher matcher = pattern.matcher( file );
 
-            if ( matcher.find() ) {
-                mainClassName = matcher.group( 1 );
-            }
-            String spec = sp.refineSpec( file );
-            ClassList classList = sp.parseSpecification( spec );
+            String mainClassName = sp.getClassName( file );
+            
+            ClassList classList = sp.parseSpecification( file );
             String prog = makeProgramText( file, true, classList, mainClassName ); //changed to true
 
             makeProgram( prog, classList, mainClassName );
@@ -290,7 +295,7 @@ public class Synthesizer {
         }
     }
 
-    public static void createSubtaskInterface() {
+    private static void createSubtaskInterface() {
         File file = new File( RuntimeProperties.genFileDir
                               + System.getProperty( "file.separator" )
                               + SUBTASK_INTERFACE_NAME + ".java" );
@@ -308,7 +313,7 @@ public class Synthesizer {
         }
     }
 
-    public static void createGeneratedInterface() {
+    private static void createGeneratedInterface() {
         File file = new File( RuntimeProperties.genFileDir
                               + System.getProperty( "file.separator" )
                               + GENERATED_INTERFACE_NAME + ".java" );

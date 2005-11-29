@@ -147,7 +147,7 @@ public class ProgramRunner {
 		}
 	}
 
-	Object compileAndRun(String programName, ArrayList watchFields,
+	Object compileAndRun(String programName, ArrayList<String> watchFields,
 			JTextArea runResultArea) throws CompileException {
 		genObject = makeGeneratedObject(programName);
 		if (genObject != null) {
@@ -156,12 +156,12 @@ public class ProgramRunner {
 		return genObject;
 	}
 
-	void run(ArrayList watchFields, JTextArea runResultArea) {
+	void run(ArrayList<String> watchFields, JTextArea runResultArea) {
 		try {
 			Class clas = genObject.getClass();
-			Method method = clas.getMethod("compute", null);
+			Method method = clas.getMethod("compute", (Class[])null);
 
-			method.invoke(genObject, null);
+			method.invoke(genObject, (Object[])null);
 			Field f;
 			StringTokenizer st;
 			Object lastObj;
@@ -170,7 +170,7 @@ public class ProgramRunner {
 			for (int i = 0; i < watchFields.size(); i++) {
 				lastObj = genObject;
 				clas = genObject.getClass();
-				st = new StringTokenizer((String) watchFields.get(i), ".");
+				st = new StringTokenizer( watchFields.get(i), ".");
 				while (st.hasMoreElements()) {
 					String s = st.nextToken();
 
@@ -184,22 +184,22 @@ public class ProgramRunner {
 						if (c.toString().equals("int")) {
 							// textArea.append((String)watchFields.get(i) +":
 							// "+f.getInt(lastObj)+"\n");
-							runResultArea.append((String) watchFields.get(i)
+							runResultArea.append(watchFields.get(i)
 									+ ": " + f.getInt(lastObj) + "\n");
 						} else if (c.toString().equals("double")) {
-							runResultArea.append((String) watchFields.get(i)
+							runResultArea.append(watchFields.get(i)
 									+ ": " + f.getDouble(lastObj) + "\n");
 						} else if (c.toString().equals("boolean")) {
-							runResultArea.append((String) watchFields.get(i)
+							runResultArea.append(watchFields.get(i)
 									+ ": " + f.getBoolean(lastObj) + "\n");
 						} else if (c.toString().equals("char")) {
-							runResultArea.append((String) watchFields.get(i)
+							runResultArea.append(watchFields.get(i)
 									+ ": " + f.getChar(lastObj) + "\n");
 						} else if (c.toString().equals("float")) {
-							runResultArea.append((String) watchFields.get(i)
+							runResultArea.append(watchFields.get(i)
 									+ ": " + f.getFloat(lastObj) + "\n");
 						} else {
-							runResultArea.append((String) watchFields.get(i)
+							runResultArea.append(watchFields.get(i)
 									+ ": " + f.get(lastObj) + "\n");
 						}
 					}

@@ -18,21 +18,21 @@ import ee.ioc.cs.vsle.vclass.*;
 
 
 public class PackageParser {
-    VPackage pack;
+    private VPackage pack;
 
-    PackageClass newClass;
-    Port newPort;
-    ClassField newField;
-    ClassGraphics newGraphics;
-    String element;
-    String path;
-    ArrayList<ClassField> classFields;
-    Polygon polygon;
-    ArrayList<String> polyXs = new ArrayList<String>();
-    ArrayList<String> polyYs = new ArrayList<String>();
-    final int CLASS = 1, PORT_OPEN = 2, PORT_CLOSED = 3, PACKAGE = 4, FIELD = 5, FIELD_KNOWN = 6;
+    private PackageClass newClass;
+    private Port newPort;
+    private ClassField newField;
+    private ClassGraphics newGraphics;
+    private String element;
+    private String path;
+    private ArrayList<ClassField> classFields;
+    private Polygon polygon;
+    private ArrayList<String> polyXs = new ArrayList<String>();
+    private ArrayList<String> polyYs = new ArrayList<String>();
+    private final int CLASS = 1, PORT_OPEN = 2, PORT_CLOSED = 3, PACKAGE = 4, FIELD = 5, FIELD_KNOWN = 6;
 
-    int status;
+    private int status;
 
     /**
      * Class constructor.
