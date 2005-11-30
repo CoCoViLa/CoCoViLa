@@ -358,6 +358,9 @@ class Rel implements Serializable {
 			}
 			return m;
 		} else if (type == RelType.TYPE_SUBTASK) {
+			if( ( outputs.size() == 1 ) && ( inputs.size() == 1 ) ) {
+				return outputs.get(0) + " = " + inputs.get(0);
+			}
 			//this should not be used in code generation
 			return inputs + " -> " + outputs;
 
