@@ -3,7 +3,8 @@
  */
 package ee.ioc.cs.vsle.synthesize;
 
-import java.awt.Component;
+import java.awt.*;
+import java.util.List;
 import java.util.*;
 
 import javax.swing.*;
@@ -194,13 +195,13 @@ public class DepthFirstPlanner implements IPlanner {
 		return targetVars.isEmpty();
 	}
 
-	private static int maxDepth = 1;//0..2, i.e. 3
+	private static int maxDepth = 2;//0..2, i.e. 3
+	private static boolean m_isSubtaskRepetitionAllowed = false;
 	
 	private void subtaskPlanning(Problem problem, ArrayList<Rel> algorithm ) {
 		
 		if (RuntimeProperties.isDebugEnabled()) {
 			db.p( "!!!--------- Starting Planning With Subtasks ---------!!!" );
-			db.p( "maxDepth: " + ( maxDepth + 1 ) );
 		}
 		
 		for ( Rel relWithSubtask : problem.getRelsWithSubtasks() ) {
@@ -211,17 +212,44 @@ public class DepthFirstPlanner implements IPlanner {
 			}
 		}
 		
-		subtaskPlanningImpl( problem, algorithm, new ArrayList(), 0 );
+		int maxDepthBackup = maxDepth;
+		
+		if( !m_isSubtaskRepetitionAllowed ) {
+			maxDepth = problem.getRelsWithSubtasks().size() - 1;
+		}
+		
+		if (RuntimeProperties.isDebugEnabled()) {
+			db.p( "maxDepth: " + ( maxDepth + 1 ) );
+		}
+		
+		subtaskPlanningImpl( problem, algorithm, new ArrayList(), new HashSet<Rel>(), 0 );
+		
+		maxDepth = maxDepthBackup;
 	}
 	
 	private boolean subtaskPlanningImpl(Problem problem, List<Rel> algorithm,
-			ArrayList subgoals, int depth) {
+			ArrayList subgoals, HashSet<Rel> subtaskRelsInPath, int depth) {
 
 		List<Var> newVars = new ArrayList<Var>();
+		
 		// or
 		OR: for (Rel subtaskRel : problem.getRelsWithSubtasks()) {
 			if (RuntimeProperties.isDebugEnabled())
 				db.p( "OR: rel with subtasks - " + subtaskRel + " depth: " + ( depth + 1 ) );
+			
+			HashSet<Rel> newPath = new HashSet<Rel>();
+			
+			if( !m_isSubtaskRepetitionAllowed && subtaskRelsInPath.contains(subtaskRel) ) {
+				if (RuntimeProperties.isDebugEnabled())
+					db.p( "This rel with subtasks is already in use, path: " + newPath );
+				continue;
+			} else if( !m_isSubtaskRepetitionAllowed ) {
+				if (RuntimeProperties.isDebugEnabled())
+					db.p( "This rel with subtasks can be used, path: " + newPath );
+				newPath.addAll( subtaskRelsInPath );
+				newPath.add( subtaskRel );
+			}
+			
 			// this is true if all subtasks are solvable
 			boolean allSolved = true;
 			// and
@@ -254,7 +282,7 @@ public class DepthFirstPlanner implements IPlanner {
 				if (RuntimeProperties.isDebugEnabled())
 					db.p( "Recursing deeper" );
 				
-				subtaskPlanningImpl( problemNew, subtask.getAlgorithm(), subgoals, depth + 1 );
+				subtaskPlanningImpl( problemNew, subtask.getAlgorithm(), subgoals, newPath, depth + 1 );
 				
 				if (RuntimeProperties.isDebugEnabled())
 					db.p( "Back to depth " + ( depth + 1 ) );
@@ -276,6 +304,10 @@ public class DepthFirstPlanner implements IPlanner {
 			if( allSolved ) {
 				algorithm.add( subtaskRel );
 				newVars.addAll( subtaskRel.getOutputs() );
+			} else if( !m_isSubtaskRepetitionAllowed ) {
+				if (RuntimeProperties.isDebugEnabled())
+					db.p( "Subtasks not solved, removing rel from path " + subtaskRel );
+				newPath.remove( subtaskRel );
 			}
 		}
 		
@@ -338,8 +370,11 @@ public class DepthFirstPlanner implements IPlanner {
 			public void stateChanged(ChangeEvent e) {
 				Integer value = (Integer)((JSpinner)e.getSource()).getValue();
 				maxDepth = value - 1;
+				
+				if (RuntimeProperties.isDebugEnabled())
+					db.p( "maxDepth " + ( maxDepth + 1 ) );
 			}});
-		JPanel panel = new JPanel()
+		final JPanel panel = new JPanel()
 		{
 			public void setEnabled( boolean b ) {
 				super.setEnabled( b );
@@ -348,6 +383,26 @@ public class DepthFirstPlanner implements IPlanner {
 		};
 		panel.add( new JLabel("Max Depth: ") );
 		panel.add( spinner );
-    	return panel;
+		
+		panel.setEnabled( m_isSubtaskRepetitionAllowed );
+		
+		final JCheckBox chbox = new JCheckBox( "Allow subtask recursive repetition", m_isSubtaskRepetitionAllowed );
+		
+		chbox.addChangeListener( new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				m_isSubtaskRepetitionAllowed = chbox.isSelected();
+				panel.setEnabled( m_isSubtaskRepetitionAllowed );
+				
+				if (RuntimeProperties.isDebugEnabled())
+					db.p( "m_isSubtaskRepetitionAllowed " + m_isSubtaskRepetitionAllowed );
+			}} );
+		
+		JPanel container = new JPanel( new GridLayout( 2, 0 ) );
+		
+		container.add( chbox );
+		container.add( panel );
+		
+    	return container;
     }  
 }

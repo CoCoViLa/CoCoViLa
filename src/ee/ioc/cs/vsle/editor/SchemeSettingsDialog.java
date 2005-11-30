@@ -73,15 +73,30 @@ public class SchemeSettingsDialog extends JDialog {
 				JPanel tmp = new JPanel();
 				tmp.setLayout(new BoxLayout(tmp, BoxLayout.X_AXIS));
 				tmp.add( button );
-				tmp.add( opt );
+				final JButton advanced = new JButton( "Advanced" );
+				advanced.addActionListener( new ActionListener(){
+
+					public void actionPerformed(ActionEvent e) {
+						new JDialog( SchemeSettingsDialog.this, "Advanced Options", true ) {
+							public void setVisible( boolean b ) {
+								if( b ) {
+									setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
+									getContentPane().add( opt );
+									pack();
+								}
+								super.setVisible( b );
+							}
+						}.setVisible( true );
+					}});
+				tmp.add( advanced );//
 				plan.add( tmp );
 				button.addChangeListener(new ChangeListener() {
 					public void stateChanged(ChangeEvent e) {
 						if( e.getSource() == button ) {
-							opt.setEnabled( button.isSelected() );
+							advanced.setEnabled( button.isSelected() );
 						}
 					}});
-				opt.setEnabled( button.isSelected() );
+				advanced.setEnabled( button.isSelected() );
 			} else {
 				plan.add( button );
 			}		
