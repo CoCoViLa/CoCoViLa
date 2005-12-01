@@ -558,7 +558,11 @@ class MouseOps
 			state = State.selection;
 		}
 		if (state.equals(State.dragBox)) {
-			canvas.objects.selectObjectsInsideBox(startX, startY, canvas.mouseX, canvas.mouseY);
+            int x1 = Math.min(startX, canvas.mouseX);
+            int x2 = Math.max(startX, canvas.mouseX);
+            int y1 = Math.min(startY, canvas.mouseY);
+            int y2 = Math.max(startY, canvas.mouseY);
+            canvas.objects.selectObjectsInsideBox(x1, y1, x2, y2);
 			state = State.selection;
 			canvas.repaint();
 		}
