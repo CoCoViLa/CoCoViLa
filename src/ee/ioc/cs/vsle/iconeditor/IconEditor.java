@@ -1125,29 +1125,44 @@ public class IconEditor
 					content.append("</package>");
 					
 					in.close();
-							
 					
-					FileOutputStream out = new FileOutputStream(new File(file.getAbsolutePath()));
-					out.write(content.toString().getBytes());
-					out.flush();
-					out.close();
-					JOptionPane.showMessageDialog(null, "Saved to package: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
-					FileFuncs ff = new FileFuncs();
-					String fileText = "class " + className + " {";
-					fileText += "\n    /*@ specification " + className + " {\n";
-
-					for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
-						String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], i);
-						String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], i);
-						String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], i);
-
-						if (fieldType != null) {
-							fileText += "    "+fieldType+" "+fieldName+";\n";
-						}
+					/* See if .java file exists */
+					File javaFile = new File(file.getParent() +System.getProperty("file.separator")+className + ".java");
+					
+					/* If file exists show conformation dialog */ 
+					int overWriteFile = JOptionPane.YES_OPTION;
+					if (javaFile.exists()) {
+					
+						overWriteFile = JOptionPane.showConfirmDialog(null,"Java class already exists. Overwrite?");
 					}
-					fileText += "    }@*/\n \n}";
-					ff.writeFile(file.getParent() +System.getProperty("file.separator")+className + ".java", fileText);
+					
+					if (overWriteFile != JOptionPane.CANCEL_OPTION) {
+						
+						FileOutputStream out = new FileOutputStream(new File(file.getAbsolutePath()));
+						out.write(content.toString().getBytes());
+						out.flush();
+						out.close();
+						
+						if (overWriteFile == JOptionPane.YES_OPTION) {
+							FileFuncs ff = new FileFuncs();
+							String fileText = "class " + className + " {";
+							fileText += "\n    /*@ specification " + className + " {\n";
 
+							for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
+								String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], i);
+								String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], i);
+								String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], i);
+								
+								if (fieldType != null) {
+									fileText += "    "+fieldType+" "+fieldName+";\n";
+								}
+							}
+							fileText += "    }@*/\n \n}";
+							ff.writeFile(file.getParent() +System.getProperty("file.separator")+className + ".java", fileText);
+						}
+						
+						JOptionPane.showMessageDialog(null, "Saved to package: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -1157,7 +1172,8 @@ public class IconEditor
 		}
 		
 	} // saveToPackage
-
+	
+	
 	/**
 	 * Sets all objects selected or unselected, depending on the method parameter value.
 	 * @param b - select or unselect shapes.
