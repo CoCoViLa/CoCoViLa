@@ -80,6 +80,7 @@ public class CodeGenerator {
             List<Var> subOutputs = subtask.getOutputs();
             List<Rel> subAlg = subtask.getAlgorithm();
             cOT( OT_INC, 1 );
+            alg.append( cOT( OT_NOC, 0 ) + "//Subtask: " + subtask + "\n" );
             // apend subtask inputs to algorithm
             alg.append( getSubtaskInputs( subInputs, cOT( OT_NOC, 0 ) ) );
             for ( int i = 0; i < subAlg.size(); i++ ) {
@@ -98,7 +99,7 @@ public class CodeGenerator {
             // apend subtask outputs to algorithm
             alg.append( getSubtaskOutputs( subOutputs, cOT( OT_NOC, 0 ) ) );
             alg.append( cOT( OT_DEC, 1 ) + "}\n"
-                        + cOT( OT_DEC, 1 ) + "}\n" );
+                        + cOT( OT_DEC, 1 ) + "} //End of subtask: " + subtask + "\n" );
 
             alg.append( cOT( OT_NOC, 0 ) + "Subtask_" + subNum + " subtask_" + subNum +
                         " = new Subtask_" + subNum + "();\n" );
@@ -313,4 +314,8 @@ public class CodeGenerator {
             return m_method;
         }
     }
+
+	public static String getOffset() {
+		return offset;
+	}
 }

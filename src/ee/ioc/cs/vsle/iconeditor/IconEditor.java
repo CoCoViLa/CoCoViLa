@@ -65,6 +65,7 @@ public class IconEditor
 	 * Application initializer.
 	 */
 	public void initialize() {
+		setLocationByPlatform( true );
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(final WindowEvent e) {
 				System.exit(0);
@@ -778,7 +779,7 @@ public class IconEditor
 	 * Open application options dialog.
 	 */
 	public void openOptionsDialog() {
-		OptionsDialog o = new OptionsDialog();
+		OptionsDialog o = new OptionsDialog( IconEditor.this );
 		o.setVisible(true);
 		repaint();
 	} // openOptionsDialog

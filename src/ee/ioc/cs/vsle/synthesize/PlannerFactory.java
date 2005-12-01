@@ -5,7 +5,7 @@ import java.util.*;
 //temporary
 public class PlannerFactory {
 
-	private IPlanner m_currentPanner = Planner.getInstance();
+	private IPlanner m_currentPanner = DepthFirstPlanner.getInstance();
 	
 	private static PlannerFactory s_instance = new PlannerFactory();
 	

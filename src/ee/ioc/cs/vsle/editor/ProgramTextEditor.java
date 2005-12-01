@@ -18,33 +18,36 @@ import javax.swing.text.*;
  */
 public class ProgramTextEditor extends JFrame implements ActionListener {
 
-    JButton computeGoal, runProg, computeAll, propagate, invoke;
-    JTextArea runResultArea;
-    JavaColoredTextPane textArea, programTextArea;
+    private JButton computeGoal, runProg, computeAll, propagate, invoke;
+    private JTextArea jta_runResult;
+    private JavaColoredTextPane jta_spec, jta_generatedCode;
     
-    JPanel progText, specText, runResult;
-    JTextField invokeField;
-    VPackage vPackage;
-    JTabbedPane tabbedPane;
-    ObjectList objects;
-    Object runnableObject;
-    ProgramRunner runner;
-    ClassList classList;
-    String mainClassName = new String();
-    Editor editor;
+    private JPanel progText, specText, runResult;
+    private JTextField invokeField;
+    private VPackage vPackage;
+    private JTabbedPane tabbedPane;
+    private ObjectList objects;
+    private Object runnableObject;
+    private ProgramRunner runner;
+    private ClassList classList;
+    private String mainClassName = new String();
+    private Editor editor;
 
     public ProgramTextEditor( ArrayList relations, ObjectList objs, VPackage vPackage, Editor ed ) {
         super( "Specification" );
+        
+        setDefaultCloseOperation( DISPOSE_ON_CLOSE );
+        
         editor = ed;
         this.vPackage = vPackage;
         objects = GroupUnfolder.unfold( objs );
 
         tabbedPane = new JTabbedPane();
 
-        textArea = new JavaColoredTextPane();
-        textArea.addKeyListener( new CommentKeyListener() );
-        textArea.setFont( RuntimeProperties.font );
-        JScrollPane areaScrollPane = new JScrollPane( textArea );
+        jta_spec = new JavaColoredTextPane();
+        jta_spec.addKeyListener( new CommentKeyListener() );
+        jta_spec.setFont( RuntimeProperties.font );
+        JScrollPane areaScrollPane = new JScrollPane( jta_spec );
 
         areaScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
@@ -60,26 +63,29 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         computeAll = new JButton( "Compute all" );
         computeAll.addActionListener( this );
         progToolBar.add( computeAll );
-        progToolBar.add( new UndoRedoDocumentPanel( textArea.getDocument() ) );
-        progToolBar.add( new FontResizePanel( textArea ) );
+        progToolBar.add( new UndoRedoDocumentPanel( jta_spec.getDocument() ) );
+        progToolBar.add( new FontResizePanel( jta_spec ) );
 
         specText.add( progToolBar, BorderLayout.NORTH );
         tabbedPane.addTab( "Specification", specText );
 
-        programTextArea = new JavaColoredTextPane();
-        programTextArea.addKeyListener( new CommentKeyListener() );
-        programTextArea.setFont( RuntimeProperties.font );
+        jta_generatedCode = new JavaColoredTextPane();
+        jta_generatedCode.addKeyListener( new CommentKeyListener() );
+        jta_generatedCode.setFont( RuntimeProperties.font );
         JToolBar toolBar = new JToolBar();
         toolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
         runProg = new JButton( "Compile & Run" );
         runProg.addActionListener( this );
         toolBar.add( runProg );
-        toolBar.add( new UndoRedoDocumentPanel( programTextArea.getDocument() ) );
-        toolBar.add( new FontResizePanel( programTextArea ) );
-        JScrollPane programAreaScrollPane = new JScrollPane( programTextArea );
+        toolBar.add( new UndoRedoDocumentPanel( jta_generatedCode.getDocument() ) );
+        toolBar.add( new FontResizePanel( jta_generatedCode ) );
+        JScrollPane programAreaScrollPane = new JScrollPane( jta_generatedCode );
 
         programAreaScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
+        
+        programAreaScrollPane.setHorizontalScrollBarPolicy(
+                JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
 
         progText = new JPanel();
         progText.setLayout( new BorderLayout() );
@@ -88,8 +94,8 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
         tabbedPane.addTab( "Program", progText );
 
-        runResultArea = new JTextArea();
-        runResultArea.setFont( RuntimeProperties.font );
+        jta_runResult = new JTextArea();
+        jta_runResult.setFont( RuntimeProperties.font );
         JToolBar resultToolBar = new JToolBar();
 
         propagate = new JButton( "Propagate values" );
@@ -100,7 +106,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         resultToolBar.add( invoke );
         invokeField = new JTextField( 4 );
         resultToolBar.add( invokeField );
-        JScrollPane runResultAreaScrollPane = new JScrollPane( runResultArea );
+        JScrollPane runResultAreaScrollPane = new JScrollPane( jta_runResult );
 
         runResultAreaScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
@@ -114,13 +120,26 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
         ISpecGenerator sgen = SpecGenFactory.getInstance().getCurrentSpecGen();
 
-        textArea.append( sgen.generateSpec( objects, relations, vPackage ) );
+        jta_spec.append( sgen.generateSpec( objects, relations, vPackage ) );
 
         getContentPane().add( tabbedPane );
         validate();
     }
 
-
+    public void dispose() {
+    	super.dispose();
+    	
+    	if( jta_spec != null) {
+    		jta_spec.destroy();
+    		jta_spec = null;
+    	}
+    	
+    	if( jta_generatedCode != null) {
+    		jta_generatedCode.destroy();
+    		jta_generatedCode = null;
+    	}
+    	
+    }
     public void actionPerformed( ActionEvent e ) {
         if ( e.getSource() == computeGoal ) {            
         	compute( false );
@@ -141,14 +160,14 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
     void compileAndRun()
     {
-    	Synthesizer.getInstance().makeProgram( programTextArea.getText(), classList,
+    	Synthesizer.getInstance().makeProgram( jta_generatedCode.getText(), classList,
                            mainClassName );
         runner = new ProgramRunner();
         ArrayList<String> watchFields = watchableFields( objects );
 
         try {
             runnableObject = runner.compileAndRun( mainClassName,
-                    watchFields, runResultArea );
+                    watchFields, jta_runResult );
             if ( runnableObject != null ) {
                 tabbedPane.setSelectedComponent( runResult );
             }
@@ -167,10 +186,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
                 int k = Integer.parseInt( invokeField.getText() );
 
                 for ( int i = 0; i < k; i++ ) {
-                    runner.run( watchFields, runResultArea );
+                    runner.run( watchFields, jta_runResult );
                 }
             } else {
-                runner.run( watchFields, runResultArea );
+                runner.run( watchFields, jta_runResult );
             }
             
             propagate();
@@ -194,13 +213,13 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     private void compute( boolean computeAll ) {
     	
         try {
-            String fullSpec = textArea.getText();
+            String fullSpec = jta_spec.getText();
 
             mainClassName = SpecParser.getInstance().getClassName( fullSpec );
             
             classList = SpecParser.getInstance().parseSpecification( fullSpec );
-            programTextArea.setText( "" );
-            programTextArea.append(
+            jta_generatedCode.setText( "" );
+            jta_generatedCode.append(
             		Synthesizer.getInstance().makeProgramText( fullSpec, computeAll, classList, mainClassName ) );
             tabbedPane.setSelectedComponent( progText );
         } catch ( UnknownVariableException uve ) {

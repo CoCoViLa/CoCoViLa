@@ -290,7 +290,8 @@ public class DepthFirstPlanner implements IPlanner {
 				// note that we use algorithm of old subtask
 				solved = linearForwardSearch( problemNew, subtask.getAlgorithm(), 
 						// always optimize here in order to get rid of unnecessary subtask instances
-						new HashSet<Var>(subtaskNew.getOutputs()), false );
+						// temporary true while optimization does not work correctly
+						new HashSet<Var>(subtaskNew.getOutputs()), true );
 				
 				if (RuntimeProperties.isDebugEnabled())
 					db.p( "Subtask: " + subtask + " solved: " + solved );
@@ -303,7 +304,26 @@ public class DepthFirstPlanner implements IPlanner {
 			
 			if( allSolved ) {
 				algorithm.add( subtaskRel );
-				newVars.addAll( subtaskRel.getOutputs() );
+				//newVars.addAll( subtaskRel.getOutputs() );
+				
+				for (Var output : subtaskRel.getOutputs() ) {
+
+					newVars.add(output);
+					// if output var is alias then all its vars should be found as well
+					if (output.getField().isAlias()) {
+						for (ClassField field : output.getField().getVars()) {
+							String object = (output.getObject().equals("this")) ? ""
+									: output.getObject().substring(5) + ".";
+							Var var = problem.getVarByFullName(object
+									+ field.toString());
+
+							if (var != null) {
+								newVars.add(var);
+							}
+						}
+					}
+				}
+				
 			} else if( !m_isSubtaskRepetitionAllowed ) {
 				if (RuntimeProperties.isDebugEnabled())
 					db.p( "Subtasks not solved, removing rel from path " + subtaskRel );

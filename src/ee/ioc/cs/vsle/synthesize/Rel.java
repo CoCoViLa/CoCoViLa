@@ -146,7 +146,7 @@ class Rel implements Serializable {
 
             if ( !var.getType().equals( "void" ) ) {
                 if ( var.getField().isAlias() ) {
-                    String alias_tmp = CodeGenerator.ALIASTMP + var.getName() + relNumber;
+                    String alias_tmp = getAliasTmpName( var.getName() );
 
                     if( var.getField().getVars().size() > 0 ) {
 
@@ -163,6 +163,9 @@ class Rel implements Serializable {
 
         }
 
+        private String getAliasTmpName( String varName ) {
+        	return  CodeGenerator.ALIASTMP + "_" + varName + "_" + relNumber;
+        }
 	String getParameters(boolean useBrackets) {
 		String params = "";
 		if (useBrackets)
@@ -177,7 +180,7 @@ class Rel implements Serializable {
 
 			if (!var.getType().equals("void")) {
 				if (var.getType().equals("alias")) {
-					paramString = CodeGenerator.ALIASTMP + var.getName() + relNumber;
+					paramString = getAliasTmpName( var.getName() );
 				} else {
 					paramString = var.toString();
 				}
@@ -418,7 +421,7 @@ class Rel implements Serializable {
             String declar = "";
             Var output = outputs.get( 0 );
             if ( output.getField().isAlias() ) {
-                String alias_tmp = CodeGenerator.ALIASTMP + output.getName() + relNumber;
+                String alias_tmp = getAliasTmpName( output.getName() );
                 declar = output.getField().getVars().get( 0 ).getType()
                          + "[] " + alias_tmp + " = new "
                          + output.getField().getVars().get( 0 ).getType() + "["
@@ -428,7 +431,7 @@ class Rel implements Serializable {
             return declar;
         }
 
-	String checkAliasInputs() {
+        private String checkAliasInputs() {
 		Var input;
 		String assigns = "";
 		for (int i = 0; i < inputs.size(); i++) {
@@ -438,25 +441,25 @@ class Rel implements Serializable {
 					assigns = "Object " + input.getName() + " = null";
 				} else {
 
-					String alias_tmp = CodeGenerator.ALIASTMP + input.getName() + relNumber;
+					String alias_tmp = getAliasTmpName( input.getName() );
 					assigns += checkObjectArrayDimension( alias_tmp, 
 							input.getField().getVars().get(0).getType(),
 							input.getField().getVars().size());
 					for (int k = 0; k < input.getField().getVars().size(); k++) {
 						String s1 = input.getField().getVars().get(k)
 								.toString();
-						assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
+						assigns += CodeGenerator.getOffset()
 								+ alias_tmp + "[" + Integer.toString(k)
 								+ "] = " + getObject(object) + s1 + ";\n";
 					}
-					assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB;
+					assigns += CodeGenerator.getOffset();
 				}
 			}
 		}
 		return assigns;
 	}
 
-	String checkObjectArrayDimension( String name, String type, int size ) {
+	private String checkObjectArrayDimension( String name, String type, int size ) {
 		/*
 		 * if we have alias as a set of arrays, we should change the declaration as follows:
 		 * from double[][] tmp = new double[][2];
@@ -467,23 +470,24 @@ class Rel implements Serializable {
 		}
 		return type + "[] " + name + " = new " + type + "[" + size + "];\n";
 	}
-	String checkAliasOutputs() {
+	
+	private String checkAliasOutputs() {
 		String assigns = "";
 		Var output = outputs.get(0);
 		if (output.getField().isAlias()) {
-			String alias_tmp = CodeGenerator.ALIASTMP + output.getName()
-			+ relNumber;
+			String alias_tmp = CodeGenerator.ALIASTMP + "_" + output.getName()
+			+ "_" + relNumber;
 			if (output.getField().getVars().size() == 0) {
 				assigns = "Object " + output.getName() + " = null";
 			} else {
 				for (int k = 0; k < output.getField().getVars().size(); k++) {
 					String s1 = output.getField().getVars().get(k)
 							.toString();
-					assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
+					assigns += CodeGenerator.getOffset()
 							+  getObject(object) + s1 +"= "
 							+ alias_tmp + "[" + Integer.toString(k) + "];\n";
 				}
-				assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB;
+				assigns += CodeGenerator.getOffset();
 			}
 		}
 
@@ -498,15 +502,16 @@ class Rel implements Serializable {
 		return RelType.REL_HASH + relNumber;
 	}
 
-}
+	private class AjutHack {
+		String var;
 
-class AjutHack {
-	String var;
+		String repl;
 
-	String repl;
-
-	public AjutHack(String name, String s) {
-		var = name;
-		repl = s;
+		private AjutHack(String name, String s) {
+			var = name;
+			repl = s;
+		}
 	}
+
 }
+

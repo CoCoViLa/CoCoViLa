@@ -77,7 +77,13 @@ public class FontResizePanel extends JPanel {
 						if( m_isAjusting ) {
 							m_isAjusting = false;
 							update( ((Integer) m_spinner.getValue()).intValue() );
-							m_isAjusting = true;
+							SwingUtilities.invokeLater(new Runnable(){
+								
+								public void run() {
+									m_isAjusting = true;
+								}
+							});
+							
 						}
 					}
 					
@@ -107,14 +113,11 @@ public class FontResizePanel extends JPanel {
 	
 	private void update( final int value ) {
 		
-		final boolean isAjusting = m_isAjusting;
-		
 		SwingUtilities.invokeLater(new Runnable(){
 			
 			public void run() {
 				Font font = m_area.getFont();
-				
-				if( !isAjusting ) {
+				if( !m_isAjusting ) {
 					m_area.setFont(new Font(font.getName(), font.getStyle(), value ) );
 				}
 				RuntimeProperties.font = m_area.getFont();

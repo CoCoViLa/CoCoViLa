@@ -108,6 +108,7 @@ public class JavaColoredTextPane extends JTextPane {
      */
     private class Colorer extends Thread {
 
+    	private boolean isRunning = true;
         /**
          * Keep a list of places in the file that it is safe to restart the
          * highlighting.  This happens whenever the lexer reports that it has
@@ -183,8 +184,8 @@ public class JavaColoredTextPane extends JTextPane {
             synchronized(lock){
                 v.add(new RecolorEvent(position, adjustment));
                 if (asleep){
-                	notifyAll();
-                    //this.interrupt();
+                	//notifyAll();
+                    this.interrupt();
                 }
             }
         }
@@ -204,7 +205,7 @@ public class JavaColoredTextPane extends JTextPane {
             // ensure there is nothing else for us to do.
             // use try again to keep track of this.
             boolean tryAgain = false;
-            for (;;){  // forever
+            while ( isRunning ){
                 synchronized(lock){
                     if (v.size() > 0){
                         RecolorEvent re = v.elementAt(0);
@@ -389,11 +390,25 @@ public class JavaColoredTextPane extends JTextPane {
                 }
                 asleep = false;
             }
+            
         }
         
         synchronized void resumeColoring() {
         		notify();
         }
+
+		public boolean isRunning() {
+			return isRunning;
+		}
+
+		public void setRunning(boolean isRunning) {
+			this.isRunning = isRunning;
+			synchronized(lock){
+                if (asleep){
+                    this.interrupt();
+                }
+            }
+		}
     }
 
     /**
@@ -629,6 +644,24 @@ public class JavaColoredTextPane extends JTextPane {
         }
     }
 
+    public void destroy() {
+    	if( colorer != null && colorer.isRunning() ) {
+    		colorer.setRunning( false );
+    		colorer = null;
+    	}
+    	
+    	if( document != null ) {
+    		document = null;
+    	}
+    	
+    	if( documentReader != null ) {
+    		documentReader = null;
+    	}
+    	
+    	if( syntaxLexer != null ) {
+    		syntaxLexer = null;
+    	}
+    }
 }
 
 /**

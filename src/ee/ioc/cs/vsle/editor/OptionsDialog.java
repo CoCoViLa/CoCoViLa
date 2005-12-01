@@ -58,8 +58,8 @@ public class OptionsDialog extends JDialog {
 	/**
 	 * Class constructor.
 	 */
-	public OptionsDialog() {
-		super((JFrame)null, "Settings");
+	public OptionsDialog( JFrame parent ) {
+		super( parent, "Settings");
 		initialize();
 	}
 
@@ -345,7 +345,7 @@ public class OptionsDialog extends JDialog {
 	 * @param args - command line arguments.
 	 */
 	public static void main(String[] args) {
-		OptionsDialog o = new OptionsDialog();
+		OptionsDialog o = new OptionsDialog( null );
 
 		o.setVisible(true);
 	}

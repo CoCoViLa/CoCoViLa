@@ -45,7 +45,7 @@ public class Editor extends JFrame implements ChangeListener {
 	 * Class constructor [1].
 	 */
 	public Editor() {
-		enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+		//enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 		initialize();
 		validate();
 	} // Editor
@@ -57,7 +57,7 @@ public class Editor extends JFrame implements ChangeListener {
 	 *            package file name.
 	 */
 	public Editor(String fileName) {
-		enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+		//enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 		initialize();
 		File file = new File(fileName);
 		loadPackage(file);
@@ -67,7 +67,9 @@ public class Editor extends JFrame implements ChangeListener {
 	/**
 	 * Application initializer.
 	 */
-	public void initialize() {
+	private void initialize() {
+		setLocationByPlatform( true );
+		
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(final WindowEvent e) {
 				System.exit(0);
@@ -308,6 +310,8 @@ public class Editor extends JFrame implements ChangeListener {
 		// confirmation asked instead.
 		if (e.getID() == WindowEvent.WINDOW_CLOSING) {
 			exitApplication();
+		} else {
+			super.processWindowEvent(e);
 		}
 	}
 
@@ -712,7 +716,7 @@ public class Editor extends JFrame implements ChangeListener {
 	}
 
 	public void openOptionsDialog() {
-		OptionsDialog o = new OptionsDialog();
+		OptionsDialog o = new OptionsDialog( Editor.this );
 		o.setVisible(true);
 		repaint();
 	}

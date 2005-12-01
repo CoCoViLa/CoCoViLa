@@ -13,11 +13,10 @@ import ee.ioc.cs.vsle.synthesize.*;
 public class SchemeSettingsDialog extends JDialog {
 
 	public SchemeSettingsDialog( JFrame owner ) {
-		super( owner, "Scheme Options" );
+		super( owner, "Scheme Options", true );
 		
 		init();
 		
-		setModal( true );
     	pack();
     	setResizable( false );
     	setVisible( true );
