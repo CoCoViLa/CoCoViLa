@@ -926,7 +926,10 @@ class IconMouseOps
 				editor.loadClass(); // append the graphics to a package
 			}else if (e.getActionCommand().equals(Menu.CREATE_PACKAGE)) {
 				editor.createPackage();
+			}else if (e.getActionCommand().equals(Menu.DELETE_FROM_PACKAGE)) {
+			      editor.deleteClass();
 			}
+
 
 		}
 
