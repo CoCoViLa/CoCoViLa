@@ -46,7 +46,7 @@ public class ChooseClassDialog extends JDialog {
 
 		getContentPane().add(bttnPanel,BorderLayout.SOUTH);
 		
-		setSize(new Dimension(200,200));
+		setSize(new Dimension(250,250));
 		
 		setResizable(false);
 		setModal(true);
