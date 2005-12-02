@@ -42,7 +42,8 @@ public class IconEditor
 	IconKeyOps keyListener;
 	ArrayList <String> packageClasses = new ArrayList <String>();
 	
-	ChooseClassDialog ccd = new ChooseClassDialog(packageClasses);;
+	ChooseClassDialog ccd = new ChooseClassDialog(packageClasses);
+	DeleteClassDialog dcd = new DeleteClassDialog(packageClasses);
 	ClassImport ci;
 	int classX, classY;
 	
@@ -192,6 +193,11 @@ public class IconEditor
 		importmenu.add(menuItem);
 
 		menu.add(importmenu);
+		
+		menuItem = new JMenuItem(Menu.DELETE_FROM_PACKAGE, KeyEvent.VK_D);
+	    menuItem.addActionListener(mListener);
+	    menu.add(menuItem);
+
 
 
 		menuItem = new JMenuItem(Menu.CREATE_PACKAGE, KeyEvent.VK_C);
@@ -1040,15 +1046,10 @@ public class IconEditor
 		try {
 
 			// Package file chooser.
-			JFileChooser fc = new JFileChooser(getLastPath());
-			fc.setFileFilter(getFileFilter("xml"));
-			fc.setDialogTitle("Choose package");
+			
+			File file = selectFile();
 
-			int returnVal = fc.showOpenDialog(null);
-			if (returnVal == JFileChooser.APPROVE_OPTION) {
-				File file = fc.getSelectedFile();
-
-
+			if (file != null) {
 				// Check if the file name ends with a required extension. If not,
 				// append the default extension to the file name.
 				if (!file.getAbsolutePath().toLowerCase().endsWith(".xml")) {
@@ -1692,5 +1693,92 @@ public class IconEditor
 		palette.boundingbox.setEnabled(false);
 		boundingbox = icon.getBoundingbox();
 	}
+	
+	public File selectFile(){
+        JFileChooser fc = new JFileChooser(getLastPath());
+        fc.setFileFilter(getFileFilter("xml"));
+        fc.setDialogTitle("Choose package");
+
+        int returnVal = fc.showOpenDialog(null);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = fc.getSelectedFile();
+
+
+            // Check if the file name ends with a required extension. If not,
+            // append the default extension to the file name.
+            if (!file.getAbsolutePath().toLowerCase().endsWith(".xml")) {
+                file = new File(file.getAbsolutePath() + ".xml");
+            }
+            setLastPath(file.getAbsolutePath());
+            return file;
+        }
+        return null;
+    }
+
+    public void deleteClass(){
+        File f = selectFile();
+        if (f != null)
+        	deleteClassFromPackage(f);
+
+    }
+    
+    public void deleteClassFromPackage(File f){
+        BufferedReader in;
+        String str;
+        StringBuffer content = new StringBuffer();
+        String currentClass = RuntimeProperties.className;
+        try {
+            in = new BufferedReader(new FileReader(f));
+
+            ci = new ClassImport(f, packageClasses, icons);
+            dcd.newJList(packageClasses);
+            dcd.setLocationRelativeTo(rootPane);
+            dcd.setVisible(true);
+            dcd.repaint();
+            String selection = dcd.getSelectedValue();
+            if (selection == null)
+            	return;
+            boolean deleteJavaClass = dcd.deleteClass();
+
+            while ((str = in.readLine()) != null) {
+                if (str.trim().startsWith("<class")) {
+                    break;
+                }else {
+                	content.append(str + "\n");
+                }
+            }
+            for (int i = 0; i< icons.size(); i++) {
+            	
+            	if (!((icons.get(i)).getName().equals(selection))) {
+            	    classX = 0;
+                    classY = 0;
+                    makeClass(icons.get(i));
+                    content.append(getShapesInXML(false));
+                }
+            }
+            content.append("</package>");
+            
+            if ((currentClass == null) || (currentClass.equals(selection))){
+            	clearObjects();
+            }
+            in.close();
+            FileOutputStream out = new FileOutputStream(new File(f.getAbsolutePath()));
+            out.write(content.toString().getBytes());
+            out.flush();
+            out.close();
+            if (deleteJavaClass){
+            	File javaFile = new File(f.getParent() +System.getProperty("file.separator")+selection + ".java");
+				javaFile.delete();				
+            }
+            if (selection != null)
+            	JOptionPane.showMessageDialog(null, "Deleted " + selection + " from package: " + f.getName(), "Deleted", JOptionPane.INFORMATION_MESSAGE);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 		
 } // end of class
