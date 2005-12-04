@@ -573,7 +573,11 @@ public class IconEditor
 			if (mListener.state.equals(State.dragBox)) {
 				g2.setColor(Color.gray);
 				g2.setStroke(new BasicStroke((float) 1.0));
-				g2.drawRect(mListener.startX, mListener.startY, mouseX - mListener.startX, mouseY - mListener.startY);
+                int rectX = Math.min(mListener.startX, mouseX);
+                int rectY = Math.min(mListener.startY, mouseY);
+                int width = Math.abs(mouseX - mListener.startX);
+                int height = Math.abs(mouseY - mListener.startY);
+                g2.drawRect(rectX, rectY, width, height);
 			} else {
 
 				int red = mListener.color.getRed();

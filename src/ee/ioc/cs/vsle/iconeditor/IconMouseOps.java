@@ -708,7 +708,11 @@ class IconMouseOps
 				state = State.selection;
 			}
 			if (state.equals(State.dragBox) || state.equals(State.selection)) {
-				editor.selectShapesInsideBox(startX, startY, editor.mouseX, editor.mouseY);
+                int x1 = Math.min(startX, editor.mouseX);
+                int x2 = Math.max(startX, editor.mouseX);
+                int y1 = Math.min(startY, editor.mouseY);
+                int y2 = Math.max(startY, editor.mouseY);
+				editor.selectShapesInsideBox(x1, y1, x2, y2);
 				state = State.selection;
 				editor.repaint();
 			}
