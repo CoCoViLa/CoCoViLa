@@ -72,7 +72,7 @@ public class DepthFirstPlanner implements IPlanner {
 	private boolean linearForwardSearch(Problem problem, List<Rel> algorithm, 
 			Set<Var> targetVars,
 			boolean computeAll) {
-
+		
 		Set<Var> foundVars = problem.getFoundVars();
 		/*
 		 * while iterating through hashset, items cant be removed from/added to
@@ -90,6 +90,9 @@ public class DepthFirstPlanner implements IPlanner {
 			db.p("------Starting linear planning with (sub)goals: "
 					+ targetVars + "--------");
 
+		if (RuntimeProperties.isDebugEnabled())
+			db.p("Algorithm " + algorithm);
+		
 		int counter = 1;
 
 		while ((!computeAll && changed && !targetVars.isEmpty())
@@ -164,6 +167,8 @@ public class DepthFirstPlanner implements IPlanner {
 									foundVars.addAll(rel.getOutputs());
 								}
 								algorithm.add(rel);
+								if (RuntimeProperties.isDebugEnabled())
+									db.p("algorithm " + algorithm);
 							}
 
 							problem.getAllRels().remove(rel);
@@ -184,15 +189,12 @@ public class DepthFirstPlanner implements IPlanner {
 			db.p("algorithm " + algorithm);
 
 		if (!computeAll) {
-			Optimizer.getInstance().optimize( algorithm, allTargetVars );
-			
-			if (RuntimeProperties.isDebugEnabled())
-				db.p("Optimized algorithm" + algorithm.toString() + "\n");
+			Optimizer.getInstance().optimize( algorithm, new HashSet<Var>( allTargetVars ) );
 		}
 
 		ProgramRunner.addAllFoundVars(foundVars);
 
-		return targetVars.isEmpty();
+		return targetVars.isEmpty() || problem.getFoundVars().containsAll( allTargetVars );
 	}
 
 	private static int maxDepth = 2;//0..2, i.e. 3
@@ -265,41 +267,44 @@ public class DepthFirstPlanner implements IPlanner {
 				
 				boolean solved = 
 					// note that we use algorithm of old subtask
-					linearForwardSearch( problemNew, subtask.getAlgorithm(), 
+					linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
 							// never optimize here
 							new HashSet<Var>(subtaskNew.getOutputs()), true );
 				
 				if( solved ) {
 					if (RuntimeProperties.isDebugEnabled())
-						db.p( "Subtask: " + subtask + " solved" );
+						db.p( "Subtask: " + subtaskNew + " solved" );
+					subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
 					continue AND;
 				} else if( !solved && ( depth == maxDepth ) ) {
 					if (RuntimeProperties.isDebugEnabled())
-						db.p( "Subtask: " + subtask + " not solved and cannot go any deeper" );
+						db.p( "Subtask: " + subtaskNew + " not solved and cannot go any deeper" );
 					continue OR;
 				}
 				
 				if (RuntimeProperties.isDebugEnabled())
 					db.p( "Recursing deeper" );
 				
-				subtaskPlanningImpl( problemNew, subtask.getAlgorithm(), subgoals, newPath, depth + 1 );
+				subtaskPlanningImpl( problemNew, subtaskNew.getAlgorithm(), subgoals, newPath, depth + 1 );
 				
 				if (RuntimeProperties.isDebugEnabled())
 					db.p( "Back to depth " + ( depth + 1 ) );
 				
 				// note that we use algorithm of old subtask
-				solved = linearForwardSearch( problemNew, subtask.getAlgorithm(), 
+				solved = linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
 						// always optimize here in order to get rid of unnecessary subtask instances
 						// temporary true while optimization does not work correctly
-						new HashSet<Var>(subtaskNew.getOutputs()), true );
+						new HashSet<Var>(subtaskNew.getOutputs()), false );
 				
 				if (RuntimeProperties.isDebugEnabled())
-					db.p( "Subtask: " + subtask + " solved: " + solved );
+					db.p( "Subtask: " + subtaskNew + " solved: " + solved );
 				
 				allSolved &= solved;
 				if( !allSolved ) {
 					continue OR;
 				}
+				
+				subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
 			}
 			
 			if( allSolved ) {

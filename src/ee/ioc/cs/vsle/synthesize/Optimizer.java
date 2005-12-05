@@ -26,63 +26,80 @@ public class Optimizer {
 	 @return an algorithm for calculating the target variables
 	 @param algorithm an unoptimized algorithm
 	 @param targets the variables which the algorithm has to calculate (other branches are removed)
-	 */
+	 */   
+    public void optimize(List<Rel> algorithm, Set<Var> targets) {
+    	optimize( algorithm, targets, "" );
+    }
     
-//    public void optimize(List<Rel> algorithm, Set<Var> targets) {
-//    	
-//    }
-    
-	public void optimize(List<Rel> algorithm, Set<Var> targets) {
+	private void optimize(List<Rel> algorithm, Set<Var> targets, String p ) {
 		Set<Var> stuff = targets;
 		Rel rel;
 		Var relVar;
 		ArrayList<Rel> removeThese = new ArrayList<Rel>();
 		
 		if (RuntimeProperties.isDebugEnabled())
-			db.p("!!!--------- Starting Optimization with targets: " + targets + " ---------!!!");
+			db.p( p + "!!!--------- Starting Optimization with targets: " + targets + " ---------!!!");
 		
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
 			if (RuntimeProperties.isDebugEnabled())
-				db.p( "Reguired vars: " + stuff );
+				db.p( p + "Reguired vars: " + stuff );
             rel = algorithm.get(i);
             if (RuntimeProperties.isDebugEnabled())
-    			db.p("Rel from algorithm: " + rel );
+    			db.p( p + "Rel from algorithm: " + rel );
 			boolean relIsNeeded = false;
 
 			for (int j = 0; j < rel.getOutputs().size(); j++) {
 				relVar = rel.getOutputs().get(j);
 				if (stuff.contains(relVar)) {
 					relIsNeeded = true;
+					stuff.remove( relVar );
 				}
 			}
 
-			if (relIsNeeded && ( rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) ) {
+			if ( relIsNeeded ) {
 				if (RuntimeProperties.isDebugEnabled())
-	    			db.p("Required");
-				stuff.addAll(rel.getInputs());
-			} else if( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
-				boolean need = true;
-				HashSet<Var> tmpSbtInputs = new HashSet<Var>();
-				for (Rel subtask : rel.getSubtasks() ) {
-					if (RuntimeProperties.isDebugEnabled())
-		    			db.p("Optimizing subtask: " + subtask );
-					HashSet<Var> tmpSbtOutputs = new HashSet<Var>( subtask.getOutputs() );
-					optimize( subtask.getAlgorithm(), tmpSbtOutputs );
-					need &= subtask.getAlgorithm().isEmpty();
-					if( !need && !relIsNeeded ) {
-						removeThese.add(rel);
-						break;
+					db.p( p + "Required");
+				
+				if( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
+					HashSet<Var> tmpSbtInputs = new HashSet<Var>();
+					for (Rel subtask : rel.getSubtasks() ) {
+						if (RuntimeProperties.isDebugEnabled())
+							db.p( p + "Optimizing subtask: " + subtask );
+						HashSet<Var> subGoals = new HashSet<Var>( subtask.getOutputs() );
+						optimize( subtask.getAlgorithm(), subGoals, incPrefix( p ) );
+						if (RuntimeProperties.isDebugEnabled()) {
+							db.p( p + "Finished optimizing subtask: " + subtask );
+							db.p( p + "Required inputs from upper level: " + subGoals );
+						}
+
+						tmpSbtInputs.addAll(subGoals);
 					}
-					tmpSbtInputs.addAll(tmpSbtOutputs);
-				}
+					stuff.addAll(tmpSbtInputs);
+				} 
 				stuff.addAll(rel.getInputs());
-				stuff.addAll(tmpSbtInputs);
 			} else {
 				if (RuntimeProperties.isDebugEnabled())
-	    			db.p("Removed");
+					db.p( p + "Removed");
 				removeThese.add(rel);
 			}
 		}
-		algorithm.removeAll(removeThese);
+		if (RuntimeProperties.isDebugEnabled()) {
+			db.p( p + "Initial algorithm: " + algorithm + "\nRels to remove: " + removeThese );
+		}
+		//algorithm.removeAll(removeThese);
+		for (Rel relToRemove : removeThese) {
+			if( algorithm.indexOf( relToRemove ) > -1 ) {
+				algorithm.remove( relToRemove);
+			}
+		}
+		if (RuntimeProperties.isDebugEnabled())
+			db.p( p + "Optimized Algorithm: " + algorithm );
+	}
+	
+	private String incPrefix( String p ) {
+		if( p == null || p.length() == 0 ) {
+			return ">";
+		}
+		return p + p.substring( 0, 1 );
 	}
 }
