@@ -54,6 +54,7 @@ public class EditorActionListener implements ActionListener {
                     Editor.setLastPath( file.getAbsolutePath() );
                     db.p( "Saving scheme: " + file.getName() );
                     editor.getCurrentCanvas().saveScheme( file );
+                    editor.getCurrentPackage().setLastScheme( file.getAbsolutePath() );
                 }
             } else if ( e.getActionCommand().equals( Menu.LOAD_SCHEME ) ) {
                 if( editor.getCurrentPackage() == null ) {
@@ -72,11 +73,29 @@ public class EditorActionListener implements ActionListener {
                     db.p( "Loading scheme: " + file.getName() );
                     try {
                         editor.getCurrentCanvas().loadScheme( file );
+                        editor.getCurrentPackage().setLastScheme( file.getAbsolutePath() );
                     } catch ( Exception exc ) {
                         exc.printStackTrace();
                     }
                 }
 
+            } else if ( e.getActionCommand().equals( Menu.RELOAD_SCHEME ) ) {
+            	if( editor.getCurrentPackage() == null ) {
+                    JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                    return;
+                } else if( editor.getCurrentPackage().getLastScheme() == null ) {
+                    JOptionPane.showMessageDialog( editor, "No scheme has been recently saved or loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                    return;
+                }
+            	File file = new File( editor.getCurrentPackage().getLastScheme() );
+            	if( file.exists() ) {
+            		db.p( "Reloading scheme: " + file.getName() );
+            		try {
+            			editor.getCurrentCanvas().loadScheme( file );
+            		} catch ( Exception exc ) {
+            			exc.printStackTrace();
+            		}
+            	}
             } else if ( e.getActionCommand().equals( Menu.LOAD ) ) {
                 JFileChooser fc = new JFileChooser( new File(Editor.getLastPath()).exists() 
                 		? Editor.getLastPath() : System.getProperty("user.dir") );
@@ -101,6 +120,15 @@ public class EditorActionListener implements ActionListener {
                 if ( editor.getCurrentPackage() != null ) {
                     Editor.setMultyProperty( PropertyBox.PALETTE_FILE, editor.getCurrentPackage().getPath(), false );
                     editor.clearPane();
+                }
+            } else if ( e.getActionCommand().equals( Menu.RELOAD ) ) {
+                if ( editor.getCurrentPackage() != null ) {
+                	File pack = new File(editor.getCurrentPackage().getPath());
+                	if( pack.exists() ) {
+                		editor.clearPane();
+                		Editor.setLastPath( pack.getAbsolutePath() );
+                		editor.loadPackage( pack );
+                	}
                 }
             } else if ( e.getActionCommand().equals( Menu.INFO ) ) {
                 String message;

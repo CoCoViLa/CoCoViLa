@@ -17,6 +17,7 @@ public class VPackage {
 	public String name;
 	public String description;
         private String path;
+        private String lastScheme;
 	public ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
 
         public VPackage( String path ) {
@@ -78,4 +79,12 @@ public class VPackage {
         public String getPath() {
             return path;
         }
+
+		public String getLastScheme() {
+			return lastScheme;
+		}
+
+		public void setLastScheme(String lastScheme) {
+			this.lastScheme = lastScheme;
+		}
 }

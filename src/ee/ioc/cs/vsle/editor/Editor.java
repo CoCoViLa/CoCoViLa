@@ -133,6 +133,11 @@ public class Editor extends JFrame implements ChangeListener {
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
 				ActionEvent.CTRL_MASK));
 		menu.add(menuItem);
+		menuItem = new JMenuItem(Menu.RELOAD_SCHEME, KeyEvent.VK_R);
+		menuItem.addActionListener(aListener);
+		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+				ActionEvent.CTRL_MASK));
+		menu.add(menuItem);
 		menu.addSeparator();
 		menuItem = new JMenuItem(Menu.PRINT, KeyEvent.VK_P);
 		menuItem.addActionListener(aListener);
@@ -181,6 +186,9 @@ public class Editor extends JFrame implements ChangeListener {
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
 		menuItem = new JMenuItem(Menu.CLOSE, KeyEvent.VK_C);
+		menuItem.addActionListener(aListener);
+		menu.add(menuItem);
+		menuItem = new JMenuItem(Menu.RELOAD, KeyEvent.VK_R);
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
 		menuItem = new JMenuItem(Menu.INFO, KeyEvent.VK_I);
