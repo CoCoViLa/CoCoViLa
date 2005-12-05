@@ -375,7 +375,7 @@ class Rel implements Serializable {
 			}
 			return (checkAliasInputs() + getObject(object) + method + getSubtaskParameters());
 		} else {
-			if (RuntimeProperties.isDebugEnabled())
+			if (RuntimeProperties.isLogDebugEnabled())
 				db.p(method);
 			String s1, s2, assigns = "";
 			Var ip = inputs.get(0);

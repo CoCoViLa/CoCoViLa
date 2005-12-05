@@ -37,14 +37,14 @@ public class Optimizer {
 		Var relVar;
 		ArrayList<Rel> removeThese = new ArrayList<Rel>();
 		
-		if (RuntimeProperties.isDebugEnabled())
+		if (RuntimeProperties.isLogDebugEnabled())
 			db.p( p + "!!!--------- Starting Optimization with targets: " + targets + " ---------!!!");
 		
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
-			if (RuntimeProperties.isDebugEnabled())
+			if (RuntimeProperties.isLogDebugEnabled())
 				db.p( p + "Reguired vars: " + stuff );
             rel = algorithm.get(i);
-            if (RuntimeProperties.isDebugEnabled())
+            if (RuntimeProperties.isLogDebugEnabled())
     			db.p( p + "Rel from algorithm: " + rel );
 			boolean relIsNeeded = false;
 
@@ -57,17 +57,17 @@ public class Optimizer {
 			}
 
 			if ( relIsNeeded ) {
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( p + "Required");
 				
 				if( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
 					HashSet<Var> tmpSbtInputs = new HashSet<Var>();
 					for (Rel subtask : rel.getSubtasks() ) {
-						if (RuntimeProperties.isDebugEnabled())
+						if (RuntimeProperties.isLogDebugEnabled())
 							db.p( p + "Optimizing subtask: " + subtask );
 						HashSet<Var> subGoals = new HashSet<Var>( subtask.getOutputs() );
 						optimize( subtask.getAlgorithm(), subGoals, incPrefix( p ) );
-						if (RuntimeProperties.isDebugEnabled()) {
+						if (RuntimeProperties.isLogDebugEnabled()) {
 							db.p( p + "Finished optimizing subtask: " + subtask );
 							db.p( p + "Required inputs from upper level: " + subGoals );
 						}
@@ -78,12 +78,12 @@ public class Optimizer {
 				} 
 				stuff.addAll(rel.getInputs());
 			} else {
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( p + "Removed");
 				removeThese.add(rel);
 			}
 		}
-		if (RuntimeProperties.isDebugEnabled()) {
+		if (RuntimeProperties.isLogDebugEnabled()) {
 			db.p( p + "Initial algorithm: " + algorithm + "\nRels to remove: " + removeThese );
 		}
 		//algorithm.removeAll(removeThese);
@@ -92,7 +92,7 @@ public class Optimizer {
 				algorithm.remove( relToRemove);
 			}
 		}
-		if (RuntimeProperties.isDebugEnabled())
+		if (RuntimeProperties.isLogDebugEnabled())
 			db.p( p + "Optimized Algorithm: " + algorithm );
 	}
 	

@@ -217,6 +217,9 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
             mainClassName = SpecParser.getInstance().getClassName( fullSpec );
             
+            if ( RuntimeProperties.isLogInfoEnabled() )
+    			db.p( "Computing " + mainClassName );
+            
             classList = SpecParser.getInstance().parseSpecification( fullSpec );
             jta_generatedCode.setText( "" );
             jta_generatedCode.append(

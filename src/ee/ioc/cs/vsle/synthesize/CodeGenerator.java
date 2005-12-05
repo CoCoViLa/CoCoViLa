@@ -85,7 +85,7 @@ public class CodeGenerator {
             alg.append( getSubtaskInputs( subInputs, cOT( OT_NOC, 0 ) ) );
             for ( int i = 0; i < subAlg.size(); i++ ) {
                 Rel trel = subAlg.get( i );
-                if (RuntimeProperties.isDebugEnabled())
+                if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs());
                 if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                     //recursion

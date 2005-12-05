@@ -256,7 +256,7 @@ public class SpecParser {
                     Var v2 = problem.getAllVars().get( obj + "." + cf2.getName() );
 
                     if ( v1.getField().isAlias() && v2.getField().isAlias() ) {
-                        if ( RuntimeProperties.isDebugEnabled() )
+                        if ( RuntimeProperties.isLogDebugEnabled() )
                             db.p( ( ( Alias ) v1.getField() ).getAliasType() + " " +
                                   ( ( Alias ) v2.getField() ).getAliasType() );
                         if ( !( ( Alias ) v1.getField() ).getAliasType().equals( ( ( Alias ) v2.
@@ -645,14 +645,14 @@ public class SpecParser {
                         classRelation.setOutput( split[ 0 ], vars );
                         classRelation.setMethod( split[ 0 ] + " = " + split[ 1 ] );
                         annClass.addClassRelation( classRelation );
-                        if ( RuntimeProperties.isDebugEnabled() ) db.p( classRelation );
+                        if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
 
                     } else if ( lt.getType() == LineType.TYPE_DECLARATION ) {
                         split = lt.getSpecLine().split( ":", -1 );
                         String[] vs = split[ 1 ].trim().split( " *, *", -1 );
                         String type = split[ 0 ].trim();
 
-                        if ( RuntimeProperties.isDebugEnabled() ) db.p( "Checking existence of " +
+                        if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "Checking existence of " +
                                 RuntimeProperties.packageDir + type + ".java" );
                         if ( checkedClasses.contains( type ) ) {
                             throw new MutualDeclarationException( className + " <-> " + type );
@@ -702,14 +702,14 @@ public class SpecParser {
                         classRelation.setMethod( "alias" );
                         classRelation.setOutput( name, vars );
                         annClass.addClassRelation( classRelation );
-                        if ( RuntimeProperties.isDebugEnabled() ) db.p( classRelation );
+                        if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
                         if ( !list[ 0 ].startsWith( "*" ) ) {
                             classRelation = new ClassRelation( RelType.TYPE_ALIAS );
                             classRelation.addOutputs( list, vars );
                             classRelation.setMethod( "alias" );
                             classRelation.setInput( name, vars );
                             annClass.addClassRelation( classRelation );
-                            if ( RuntimeProperties.isDebugEnabled() ) db.p( classRelation );
+                            if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
                         }
 
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {
@@ -737,7 +737,7 @@ public class SpecParser {
                             }
                             classRelation.setMethod( pieces[ 0 ] );
                             annClass.addClassRelation( classRelation );
-                            if ( RuntimeProperties.isDebugEnabled() ) db.p( "Equation: " +
+                            if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "Equation: " +
                                     classRelation );
 
                         }
@@ -747,7 +747,7 @@ public class SpecParser {
 
                         subtasks.clear();
                         while ( matcher2.find() ) {
-                            if ( RuntimeProperties.isDebugEnabled() ) db.p( "matching " +
+                            if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "matching " +
                                     matcher2.group( 0 ) );
                             subtasks.add( matcher2.group( 0 ) );
                         }
@@ -789,7 +789,7 @@ public class SpecParser {
                                 classRelation.setType( RelType.TYPE_METHOD_WITH_SUBTASK );
                             }
                             classRelation.setMethod( matcher2.group( 3 ).trim() );
-                            if ( RuntimeProperties.isDebugEnabled() ) db.p( classRelation );
+                            if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
                             annClass.addClassRelation( classRelation );
                         }
 
@@ -809,7 +809,7 @@ public class SpecParser {
                             if ( !inputs[ 0 ].equals( "" ) ) {
                                 classRelation.addInputs( inputs, vars );
                             }
-                            if ( RuntimeProperties.isDebugEnabled() ) db.p( classRelation );
+                            if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
                             annClass.addClassRelation( classRelation );
                         }
                     } else if ( lt.getType() == LineType.TYPE_ERROR ) {
@@ -830,7 +830,7 @@ public class SpecParser {
     private void getWildCards( ClassList classList, String output ) {
         String list[] = output.split( "\\." );
         for ( int i = 0; i < list.length; i++ ) {
-            if ( RuntimeProperties.isDebugEnabled() ) db.p( list[ i ] );
+            if ( RuntimeProperties.isLogDebugEnabled() ) db.p( list[ i ] );
         }
 
     }

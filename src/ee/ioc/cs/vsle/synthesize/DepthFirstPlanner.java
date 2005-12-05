@@ -58,13 +58,13 @@ public class DepthFirstPlanner implements IPlanner {
         		// do not optimize yet if subtasks exist
         		( computeAll || !problem.getRelsWithSubtasks().isEmpty() ) ) 
         		&& !computeAll ) {
-        	if ( RuntimeProperties.isDebugEnabled() )
+        	if ( RuntimeProperties.isLogInfoEnabled() )
     			db.p( "Problem solved without subtasks");
         } else {
         	subtaskPlanning( problem, algorithm );
         	linearForwardSearch( problem, algorithm, problem.getTargetVars(), computeAll );
         }
-		if ( RuntimeProperties.isDebugEnabled() )
+		if ( RuntimeProperties.isLogInfoEnabled() )
 			db.p( "Planning time: " + ( System.currentTimeMillis() - startTime ) + "ms.");
         return algorithm;
     }
@@ -86,11 +86,11 @@ public class DepthFirstPlanner implements IPlanner {
 		
 		boolean changed = true;
 
-		if (RuntimeProperties.isDebugEnabled())
+		if (RuntimeProperties.isLogDebugEnabled())
 			db.p("------Starting linear planning with (sub)goals: "
 					+ targetVars + "--------");
 
-		if (RuntimeProperties.isDebugEnabled())
+		if (RuntimeProperties.isLogDebugEnabled())
 			db.p("Algorithm " + algorithm);
 		
 		int counter = 1;
@@ -98,7 +98,7 @@ public class DepthFirstPlanner implements IPlanner {
 		while ((!computeAll && changed && !targetVars.isEmpty())
 				|| (changed && computeAll)) {
 
-			if (RuntimeProperties.isDebugEnabled())
+			if (RuntimeProperties.isLogDebugEnabled())
 				db.p("----Iteration " + counter + " ----");
 
 			counter++;
@@ -112,21 +112,21 @@ public class DepthFirstPlanner implements IPlanner {
 				}
 			}
 			// iterate through all knownvars
-			if (RuntimeProperties.isDebugEnabled())
+			if (RuntimeProperties.isLogDebugEnabled())
 				db.p("Known:" + problem.getKnownVars());
 			
 			for (Var var : problem.getKnownVars() ) {
 				
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p("Current Known: " + var);
 				// Check the relations of all components
 				for (Rel rel : var.getRels() ) {
-					if (RuntimeProperties.isDebugEnabled())
+					if (RuntimeProperties.isLogDebugEnabled())
 						db.p("And its rel: " + rel);
 					if (problem.getAllRels().contains(rel)) {
 						rel.setUnknownInputs(rel.getUnknownInputs() - 1);
 
-						if (RuntimeProperties.isDebugEnabled())
+						if (RuntimeProperties.isLogDebugEnabled())
 							db.p("problem contains it " + rel
 									+ " unknownInputs: "
 									+ rel.getUnknownInputs());
@@ -136,12 +136,12 @@ public class DepthFirstPlanner implements IPlanner {
 						if (rel.getUnknownInputs() == 0
 								&& rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK) {
 
-							if (RuntimeProperties.isDebugEnabled())
+							if (RuntimeProperties.isLogDebugEnabled())
 								db.p("rel is ready to be used " + rel);
 
 							boolean relIsNeeded = false;
 
-							if (RuntimeProperties.isDebugEnabled())
+							if (RuntimeProperties.isLogDebugEnabled())
 								db.p("tema outputsid " + rel.getOutputs());
 
 							for (Var relVar : rel.getOutputs() ) {
@@ -154,12 +154,12 @@ public class DepthFirstPlanner implements IPlanner {
 							if (rel.getOutputs().isEmpty()) {
 								relIsNeeded = true;
 							}
-							if (RuntimeProperties.isDebugEnabled())
+							if (RuntimeProperties.isLogDebugEnabled())
 								db.p("relIsNeeded " + relIsNeeded);
 
 							if (relIsNeeded) {
 
-								if (RuntimeProperties.isDebugEnabled())
+								if (RuntimeProperties.isLogDebugEnabled())
 									db.p("ja vajati " + rel);
 
 								if (!rel.getOutputs().isEmpty()) {
@@ -167,7 +167,7 @@ public class DepthFirstPlanner implements IPlanner {
 									foundVars.addAll(rel.getOutputs());
 								}
 								algorithm.add(rel);
-								if (RuntimeProperties.isDebugEnabled())
+								if (RuntimeProperties.isLogDebugEnabled())
 									db.p("algorithm " + algorithm);
 							}
 
@@ -178,14 +178,14 @@ public class DepthFirstPlanner implements IPlanner {
 				}
 			}
 
-			if (RuntimeProperties.isDebugEnabled())
+			if (RuntimeProperties.isLogDebugEnabled())
 				db.p("foundvars " + foundVars);
 
 			problem.getKnownVars().addAll(newVars);
 			problem.getKnownVars().removeAll(removableVars);
 			newVars.clear();
 		}
-		if (RuntimeProperties.isDebugEnabled())
+		if (RuntimeProperties.isLogDebugEnabled())
 			db.p("algorithm " + algorithm);
 
 		if (!computeAll) {
@@ -202,7 +202,7 @@ public class DepthFirstPlanner implements IPlanner {
 	
 	private void subtaskPlanning(Problem problem, ArrayList<Rel> algorithm ) {
 		
-		if (RuntimeProperties.isDebugEnabled()) {
+		if (RuntimeProperties.isLogDebugEnabled()) {
 			db.p( "!!!--------- Starting Planning With Subtasks ---------!!!" );
 		}
 		
@@ -220,7 +220,7 @@ public class DepthFirstPlanner implements IPlanner {
 			maxDepth = problem.getRelsWithSubtasks().size() - 1;
 		}
 		
-		if (RuntimeProperties.isDebugEnabled()) {
+		if (RuntimeProperties.isLogDebugEnabled()) {
 			db.p( "maxDepth: " + ( maxDepth + 1 ) );
 		}
 		
@@ -236,17 +236,17 @@ public class DepthFirstPlanner implements IPlanner {
 		
 		// or
 		OR: for (Rel subtaskRel : problem.getRelsWithSubtasks()) {
-			if (RuntimeProperties.isDebugEnabled())
+			if (RuntimeProperties.isLogDebugEnabled())
 				db.p( "OR: rel with subtasks - " + subtaskRel + " depth: " + ( depth + 1 ) );
 			
 			HashSet<Rel> newPath = new HashSet<Rel>();
 			
 			if( !m_isSubtaskRepetitionAllowed && subtaskRelsInPath.contains(subtaskRel) ) {
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "This rel with subtasks is already in use, path: " + newPath );
 				continue;
 			} else if( !m_isSubtaskRepetitionAllowed ) {
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "This rel with subtasks can be used, path: " + newPath );
 				newPath.addAll( subtaskRelsInPath );
 				newPath.add( subtaskRel );
@@ -256,7 +256,7 @@ public class DepthFirstPlanner implements IPlanner {
 			boolean allSolved = true;
 			// and
 			AND: for (Rel subtask : subtaskRel.getSubtasks()) {
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "AND: subtask - " + subtask );
 				// lets clone the environment
 				Problem problemNew = problem.getCopy();
@@ -272,22 +272,22 @@ public class DepthFirstPlanner implements IPlanner {
 							new HashSet<Var>(subtaskNew.getOutputs()), true );
 				
 				if( solved ) {
-					if (RuntimeProperties.isDebugEnabled())
+					if (RuntimeProperties.isLogDebugEnabled())
 						db.p( "Subtask: " + subtaskNew + " solved" );
 					subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
 					continue AND;
 				} else if( !solved && ( depth == maxDepth ) ) {
-					if (RuntimeProperties.isDebugEnabled())
+					if (RuntimeProperties.isLogDebugEnabled())
 						db.p( "Subtask: " + subtaskNew + " not solved and cannot go any deeper" );
 					continue OR;
 				}
 				
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "Recursing deeper" );
 				
 				subtaskPlanningImpl( problemNew, subtaskNew.getAlgorithm(), subgoals, newPath, depth + 1 );
 				
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "Back to depth " + ( depth + 1 ) );
 				
 				// note that we use algorithm of old subtask
@@ -296,7 +296,7 @@ public class DepthFirstPlanner implements IPlanner {
 						// temporary true while optimization does not work correctly
 						new HashSet<Var>(subtaskNew.getOutputs()), false );
 				
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "Subtask: " + subtaskNew + " solved: " + solved );
 				
 				allSolved &= solved;
@@ -330,7 +330,7 @@ public class DepthFirstPlanner implements IPlanner {
 				}
 				
 			} else if( !m_isSubtaskRepetitionAllowed ) {
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "Subtasks not solved, removing rel from path " + subtaskRel );
 				newPath.remove( subtaskRel );
 			}
@@ -396,7 +396,7 @@ public class DepthFirstPlanner implements IPlanner {
 				Integer value = (Integer)((JSpinner)e.getSource()).getValue();
 				maxDepth = value - 1;
 				
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "maxDepth " + ( maxDepth + 1 ) );
 			}});
 		final JPanel panel = new JPanel()
@@ -419,7 +419,7 @@ public class DepthFirstPlanner implements IPlanner {
 				m_isSubtaskRepetitionAllowed = chbox.isSelected();
 				panel.setEnabled( m_isSubtaskRepetitionAllowed );
 				
-				if (RuntimeProperties.isDebugEnabled())
+				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "m_isSubtaskRepetitionAllowed " + m_isSubtaskRepetitionAllowed );
 			}} );
 		

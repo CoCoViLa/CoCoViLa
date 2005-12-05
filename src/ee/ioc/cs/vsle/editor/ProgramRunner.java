@@ -55,7 +55,7 @@ public class ProgramRunner {
 	}
 
 	public static void printFoundVars() {
-		if (RuntimeProperties.isDebugEnabled())
+		if (RuntimeProperties.isLogDebugEnabled())
 			System.err.println("foundVars: " + foundVars);
 	}
 
