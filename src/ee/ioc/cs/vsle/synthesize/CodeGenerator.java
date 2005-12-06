@@ -13,15 +13,15 @@ public class CodeGenerator {
 
     public static final String OT_TAB = "        ";
 
-    private static final TypeToken TOKEN_INT = new TypeToken( "int", "Integer", "intValue" );
-    private static final TypeToken TOKEN_DOUBLE = new TypeToken( "double", "Double", "doubleValue" );
-    private static final TypeToken TOKEN_FLOAT = new TypeToken( "float", "Float", "floatValue" );
-    private static final TypeToken TOKEN_CHAR = new TypeToken( "char", "Character", "charValue" );
-    private static final TypeToken TOKEN_BYTE = new TypeToken( "byte", "Byte", "byteValue" );
-    private static final TypeToken TOKEN_SHORT = new TypeToken( "short", "Short", "shortValue" );
-    private static final TypeToken TOKEN_LONG = new TypeToken( "long", "Long", "longValue" );
-    private static final TypeToken TOKEN_BOOLEAN = new TypeToken( "boolean", "Boolean", "booleanValue" );
-    private static final TypeToken TOKEN_OBJECT = new TypeToken( null, "", "" );
+    private static final TypeToken TOKEN_INT = new TypeToken( "int", Integer.class, "intValue" );
+    private static final TypeToken TOKEN_DOUBLE = new TypeToken( "double", Double.class, "doubleValue" );
+    private static final TypeToken TOKEN_FLOAT = new TypeToken( "float", Float.class, "floatValue" );
+    private static final TypeToken TOKEN_CHAR = new TypeToken( "char", Character.class, "charValue" );
+    private static final TypeToken TOKEN_BYTE = new TypeToken( "byte", Byte.class, "byteValue" );
+    private static final TypeToken TOKEN_SHORT = new TypeToken( "short", Short.class, "shortValue" );
+    private static final TypeToken TOKEN_LONG = new TypeToken( "long", Long.class, "longValue" );
+    private static final TypeToken TOKEN_BOOLEAN = new TypeToken( "boolean", Boolean.class, "booleanValue" );
+    private static final TypeToken TOKEN_OBJECT = new TypeToken( null, null, "" );
 
     private final static int OT_NOC = 0;
     private final static int OT_INC = 1;
@@ -46,10 +46,12 @@ public class CodeGenerator {
         return s_codeGen;
     }
 
-    public String generate( ArrayList algRelList ) {
+    public String generate( ArrayList algRelList, List<Var> assumptions ) {
         StringBuffer alg = new StringBuffer();
         cOT( OT_INC, 2 );
 
+        genAssumptions( alg, assumptions );
+        
         for ( int i = 0; i < algRelList.size(); i++ ) {
             Rel rel = ( Rel ) algRelList.get( i );
 
@@ -65,6 +67,32 @@ public class CodeGenerator {
         return alg.toString();
     }
 
+    private void genAssumptions( StringBuffer alg, List<Var> assumptions ) {
+    	if( assumptions.isEmpty() ) {
+    		return;
+    	}
+    	
+    	String result = "";
+    	int i = 0;
+    	for (Var var : assumptions) {
+    		
+    		String varType = var.getType();
+    		TypeToken token = getTypeToken( varType );
+    		
+    		result += offset;
+    		
+    		if ( token == TOKEN_OBJECT ) {
+    			result += var.toString() + " = (" + varType + ")args[" + i++ + "];\n";
+    		} else {
+    			result += var.toString()
+    			+ " = ((" + token.getObjType() + ")args[" + i++ + "])."
+    			+ token.getMethod() + "();\n";
+    		}
+		}
+    	
+    	alg.append( result );
+    }
+    
     private void genSubTasks( Rel rel, StringBuffer alg, boolean isNestedSubtask ) {
         int subNum;
         int start = subCount;
@@ -247,7 +275,7 @@ public class CodeGenerator {
     	return declarations + result + varList + " };\n";
     }
 
-    private TypeToken getTypeToken( String varType ) {
+    public static TypeToken getTypeToken( String varType ) {
     	
     	TypeToken token;
     	
@@ -290,28 +318,34 @@ public class CodeGenerator {
         return out;
     }
 
-    private static class TypeToken {
+    public static class TypeToken {
 
         String m_type;
         String m_objType;
         String m_method;
+        Class  m_class;
 
-        private TypeToken( String type, String objType, String method ) {
+        private TypeToken( String type, Class clas, String method ) {
             m_type = type;
-            m_objType = objType;
+            m_objType = clas != null ? clas.getName() : "";
             m_method = method;
+            m_class = clas;
         }
 
-        String getType() {
+        public String getType() {
             return m_type;
         }
 
-        String getObjType() {
+        public String getObjType() {
             return m_objType;
         }
 
-        String getMethod() {
+        public String getMethod() {
             return m_method;
+        }
+        
+        public Class getTokenClass() {
+        	return m_class;
         }
     }
 

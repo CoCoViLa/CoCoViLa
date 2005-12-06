@@ -1,75 +1,64 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.vclass.ClassField;
-import ee.ioc.cs.vsle.util.db;
-
-import java.util.ArrayList;
 import java.awt.*;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
+import java.lang.reflect.*;
+import java.util.List;
+import java.util.*;
 
 import javax.swing.*;
 
+import ee.ioc.cs.vsle.synthesize.*;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 
-/**
- */
-public class ObjectPropertiesEditor extends JFrame
-	implements ActionListener, KeyListener {
-	ArrayList textFields = new ArrayList(), watchFields = new ArrayList();
-	ArrayList comboBoxes = new ArrayList();
-	ArrayList primitiveNameList = new ArrayList();
-	ArrayList arrayNameList = new ArrayList();
-
-	GObj controlledObject;
-	JTextField nameTextField;
+public class ProgramAssumptionsDialog extends JDialog 
+implements ActionListener, KeyListener {
+	
+	Object[] args;
+	
+	List<JTextField> textFields = new ArrayList<JTextField>();
+	List<JComboBox> comboBoxes = new ArrayList<JComboBox>();
+	List<ClassField> primitiveNameList = new ArrayList<ClassField>();
+	List<ClassField> arrayNameList = new ArrayList<ClassField>();
+	List<Var> asumptions;
 	JButton clear, ok;
-	Canvas canvas;
-
-	public ObjectPropertiesEditor(GObj object, Canvas canvas) {
-		super( object.getName() );
-		this.canvas = canvas;
-		controlledObject = object;
+	
+	public ProgramAssumptionsDialog( JFrame owner, String progName, List<Var> assmps ) {
+		
+		super( owner, progName, true );
+		
+		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
+		
+		args = new Object[assmps.size()];
+		asumptions = assmps;
+		
 		JPanel buttonPane = new JPanel();
 		JPanel fullPane = new JPanel();
-
+		
 		JPanel labelPane = new JPanel();
-		JPanel watchPane = new JPanel();
 		JPanel textFieldPane = new JPanel();
 		JPanel typePane = new JPanel();
-
-
+		
+		
 		labelPane.setLayout(new GridLayout(0, 1));
-		watchPane.setLayout(new GridLayout(0, 1));
 		typePane.setLayout(new GridLayout(0, 1));
 		textFieldPane.setLayout(new GridLayout(0, 1));
-
-		JLabel label = new JLabel("Object name");
-
-		nameTextField = new JTextField(object.getName(), 6);
-		labelPane.add(label);
-		textFieldPane.add(nameTextField);
-		label = new JLabel("(String)");
-		typePane.add(label);
-
-		label = new JLabel("Watch");
-		watchPane.add(label);
-
+		
+		JLabel label;
 		ClassField field;
 		JTextField textField;
 		JComboBox comboBox;
-		JCheckBox watch;
-
-		for (int i = 0; i < object.fields.size(); i++) {
-			field = (ClassField) object.fields.get(i);
-
+		
+		for (Var var : assmps) {
+			field = var.getField();
+			
+			
 			if (field.isArray()) {
 				comboBox = new JComboBox();
 				comboBox.setEditable(true);
 				comboBox.addActionListener(this);
-
+				
 				if (field.getValue() != "" && field.getValue() != null) {
 					String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
 					for (int j = 0; j < split.length; j++) {
@@ -78,8 +67,8 @@ public class ObjectPropertiesEditor extends JFrame
 				}
 				JTextField jtf = (JTextField) (comboBox.getEditor().getEditorComponent());
 				jtf.addKeyListener(this);
-
-
+				
+				
 				comboBoxes.add(comboBox);
 				label = new JLabel(field.getName(), SwingConstants.CENTER);
 				label.setToolTipText(field.getDescription());
@@ -87,12 +76,7 @@ public class ObjectPropertiesEditor extends JFrame
 				labelPane.add(label);
 				label = new JLabel("(" + field.getType() + ")");
 				typePane.add(label);
-
-				watch = new JCheckBox("");
-				watch.setEnabled(false);
-				watchPane.add(watch);
-				watchFields.add(watch);
-
+				
 				textFieldPane.add(comboBox);
 			} else if (field.isPrimitiveOrString()) {
 				textField = new JTextField();
@@ -107,123 +91,117 @@ public class ObjectPropertiesEditor extends JFrame
 				textFieldPane.add(textField);
 				label = new JLabel("(" + field.getType() + ")");
 				typePane.add(label);
-				boolean b = field.isWatched();
-
-				watch = new JCheckBox("", b);
-				watchPane.add(watch);
-				watchFields.add(watch);
 			}
-
-
 		}
+		
 		JPanel contentPane = new JPanel();
 		JScrollPane areaScrollPane = new JScrollPane(contentPane,
-			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		
 		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		fullPane.setLayout(new BorderLayout());
 		contentPane.setLayout(new GridLayout(0, 4));
 		contentPane.add(labelPane);
 		contentPane.add(textFieldPane);
 		contentPane.add(typePane);
-		contentPane.add(watchPane);
 		ok = new JButton("OK");
 		ok.addActionListener(this);
 		buttonPane.add(ok);
 		clear = new JButton("Clear all");
 		clear.addActionListener(this);
-		if (object.fields.size() == 0) {
-			clear.setEnabled(false);
-		} else {
-			clear.setEnabled(true);
-		}
 		buttonPane.add(clear);
-        //contentPane.setPreferredSize(new Dimension(300,200));
 		fullPane.add(areaScrollPane, BorderLayout.CENTER);
 		fullPane.add(buttonPane, BorderLayout.SOUTH);
 		setContentPane(fullPane);
-		validate();
+//		validate();
+		
+		setResizable( false );
+		pack();
+		setVisible( true );
 	}
-
+	
 	public void keyTyped(KeyEvent e) {
-
+		
 	}
-
+	
 	public void keyReleased(KeyEvent e) {
-
+		
 	}
-
+	
 	public void keyPressed(KeyEvent e) {
 		if (e.getKeyChar() == KeyEvent.VK_ENTER) {
 			JTextField jtf = (JTextField) (e.getSource());
 			JComboBox thisComboBox = getComboBox(jtf);
-			//String newSelection = (String)thisComboBox.getSelectedItem();
-                        if( thisComboBox != null ) {
-                            thisComboBox.addItem( jtf.getText() );
-                        }
+			if( thisComboBox != null ) {
+				thisComboBox.addItem( jtf.getText() );
+			}
 		} else if (e.getKeyChar() == KeyEvent.VK_DELETE) {
 			JTextField jtf = (JTextField) (e.getSource());
 			JComboBox thisComboBox = getComboBox(jtf);
-                        if( thisComboBox != null ) {
-                            thisComboBox.removeItem( thisComboBox.getSelectedItem() );
-                        }
+			if( thisComboBox != null ) {
+				thisComboBox.removeItem( thisComboBox.getSelectedItem() );
+			}
 		}
 	}
-
+	
 	public void actionPerformed(ActionEvent e) {
 		JTextField textField;
 		ClassField field;
-		boolean b;
 		db.p(e);
 		if (e.getSource() == ok) {
 			for (int i = 0; i < textFields.size(); i++) {
-				textField = (JTextField) textFields.get(i);
-				field = (ClassField) primitiveNameList.get(i);
-				b = ((JCheckBox) watchFields.get(i)).isSelected();
-				field.setWatched( b );
-				if (!textField.getText().equals("")) {
-					field.setValue( textField.getText() );
-					//field.updateGraphics();
-				} else {
-					field.setValue( null );
-				}
+				textField = textFields.get(i);
+				field = primitiveNameList.get(i);
+				
+				String text = textField.getText();
+				
+				args[asumptions.indexOf( field.getParentVar() )] = createObject( field, text );
 			}
 			for (int i = 0; i < comboBoxes.size(); i++) {
-				JComboBox comboBox = (JComboBox) comboBoxes.get(i);
-				field = (ClassField) arrayNameList.get(i);
+				JComboBox comboBox = comboBoxes.get(i);
+				field = arrayNameList.get(i);
 				String s = "";
 				for (int j = 0; j < comboBox.getItemCount(); j++) {
 					s += (String) comboBox.getItemAt(j) + ClassField.ARRAY_TOKEN;
 				}
-				if (!s.equals("")) {
-					field.setValue( s );
-
-				} else {
-					field.setValue( null );
-				}
+				args[asumptions.indexOf( field.getParentVar() )] = createObject( field, s );
 			}
-			controlledObject.setName(nameTextField.getText());
-			controlledObject = null;
 			this.dispose();
-			canvas.repaint();
 		}
 		if (e.getSource() == clear) {
 			// Clears object properties except the object name.
 			for (int i = 0; i < textFields.size(); i++) {
-				textField = (JTextField) textFields.get(i);
-				field = (ClassField) controlledObject.fields.get(i);
-				((JCheckBox) watchFields.get(i)).setSelected(false);
-				field.setWatched( false );
-				field.setValue( null );
+				textField = textFields.get(i);
 				textField.setText("");
 			}
 		}
 	}
-
+	
+	private Object createObject( ClassField field, String value ) {
+		
+		Class clazz = CodeGenerator.getTypeToken( field.getType() ).getTokenClass();
+		
+		if( clazz != null ) {
+			try {
+				Method meth = clazz.getMethod( "valueOf", new Class[]{ String.class });
+				Object o = meth.invoke( null, new Object[]{ value });
+				db.p( "createObject " + o.getClass().getName() + " " + o );
+				return o;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else if ( field.getType().equals( "String" ) ) {
+			return value;
+		}
+		
+		
+		return null;
+	}
+	
 	JComboBox getComboBox(JTextField jtf) {
 		for (int i = 0; i < comboBoxes.size(); i++) {
-			JComboBox jcb = (JComboBox) comboBoxes.get(i);
+			JComboBox jcb = comboBoxes.get(i);
 			if (jtf == jcb.getEditor().getEditorComponent()) {
 				return jcb;
 			}
@@ -231,4 +209,7 @@ public class ObjectPropertiesEditor extends JFrame
 		return null;
 	}
 
+	public Object[] getArgs() {
+		return args;
+	}
 }

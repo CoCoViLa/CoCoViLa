@@ -237,7 +237,7 @@ public class SpecParser {
             /* If we have a relation alias = alias, we rewrite it into new relations, ie we create
              a relation for each component of the alias structure*/
             if ( classRelation.getInputs().size() == 1 && classRelation.getOutputs().size() == 1 &&
-                 ( classRelation.getType() == 4 || classRelation.getType() == 3 ) ) {
+                 ( classRelation.getType() == RelType.TYPE_ALIAS || classRelation.getType() == RelType.TYPE_EQUATION ) ) {
                 ClassField cf1 = classRelation.getInputs().get( 0 );
                 ClassField cf2 = classRelation.getOutputs().get( 0 );
 
@@ -276,7 +276,7 @@ public class SpecParser {
                             rel.setUnknownInputs( classRelation.getInputs().size() );
                             rel.setSubtaskFlag( classRelation.getSubtasks().size() );
                             rel.setObj( obj );
-                            rel.setType( 5 );
+                            rel.setType( RelType.TYPE_SUBTASK );
 
                             rel.addInput( var2 );
                             rel.addOutput( var1 );
@@ -314,7 +314,7 @@ public class SpecParser {
             }
 
             // if it is not a "real" relation (type 7), we just set the result as target, and inputs as known variables
-            if ( classRelation.getType() == 7 ) {
+            if ( classRelation.getType() == RelType.TYPE_UNIMPLEMENTED ) {
                 setTargets( problem, classRelation, obj );
             } else if ( rel != null && classRelation.getInputs().isEmpty() &&
                         rel.getSubtaskCounter() == 0 ) { // if class relation doesnt have inputs, its an axiom
@@ -400,6 +400,8 @@ public class SpecParser {
             if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
                 var = problem.getAllVars().get( obj + "." + cf.getName() );
                 problem.addKnown( var );
+                problem.getFoundVars().add( var );
+                problem.getAssumptions().add( var );
             } else {
                 throw new UnknownVariableException( cf.getName() );
             }

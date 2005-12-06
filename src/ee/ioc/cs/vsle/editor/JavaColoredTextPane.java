@@ -393,8 +393,10 @@ public class JavaColoredTextPane extends JTextPane {
             
         }
         
-        synchronized void resumeColoring() {
-        		notify();
+        void resumeColoring() {
+        	synchronized (doclock){
+        		doclock.notifyAll();
+        	}
         }
 
 		public boolean isRunning() {

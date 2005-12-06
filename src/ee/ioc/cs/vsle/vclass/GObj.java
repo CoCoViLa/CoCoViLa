@@ -309,7 +309,7 @@ public class GObj implements Serializable, Cloneable {
 				if (!TypeUtil.isArray(field.type)) {
 					field.defaultGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value);
 				} else {
-					String[] split = field.value.split("%%");
+					String[] split = field.value.split( ClassField.ARRAY_TOKEN );
 					int textOffset = 0;
 					for (int j = 0; j < split.length; j++) {
 						field.defaultGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.getName(), split[j]);
@@ -321,7 +321,7 @@ public class GObj implements Serializable, Cloneable {
 				if (!TypeUtil.isArray(field.type)) {
 					field.knownGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value);
 				} else  {
-					String[] split = field.value.split("%%");
+					String[] split = field.value.split( ClassField.ARRAY_TOKEN );
 					int textOffset = 0;
 					for (int j = 0; j < split.length; j++) {
 						field.knownGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.getName(), split[j]);

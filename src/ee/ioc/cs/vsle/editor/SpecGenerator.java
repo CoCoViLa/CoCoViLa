@@ -67,7 +67,7 @@ public class SpecGenerator implements ISpecGenerator {
 						s.append(
 							"        " + obj.getName() + "." + field.getName()
 							+ " = {");
-						String[] split = field.getValue().split("%%");
+						String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append(split[k]);
@@ -80,7 +80,7 @@ public class SpecGenerator implements ISpecGenerator {
 						s.append(
 							"        " + obj.getName() + "." + field.getName()
 							+ " = {");
-						String[] split = field.getValue().split("%%");
+						String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append("\"" + split[k] + "\"");

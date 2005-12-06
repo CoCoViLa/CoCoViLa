@@ -62,7 +62,7 @@ public class Synthesizer {
      * @throws SpecParseException -
      */
     public String makeProgramText( String fileString, boolean computeAll, ClassList classList,
-                                   String mainClassName ) throws SpecParseException {
+                                   String mainClassName, List<Var> assumptions ) throws SpecParseException {
 
         Problem problem = null;
         // call the packageParser to create a problem from the specification
@@ -75,10 +75,13 @@ public class Synthesizer {
         }
 
         // run the planner on the obtained problem
-        //ArrayList algorithmList = Planner.getInstance().invokePlaning( problem, computeAll );
         ArrayList algorithmList = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
-        String algorithm = CodeGenerator.getInstance().generate( algorithmList );
+        String algorithm = CodeGenerator.getInstance().generate( algorithmList, problem.getAssumptions() );
 
+        if( assumptions != null ) {
+        	assumptions.addAll( problem.getAssumptions() );
+        }
+        
         String prog = "";
 
         ClassField field;
@@ -104,7 +107,7 @@ public class Synthesizer {
             }
         }
 
-        prog += "    public void compute() {\n";
+        prog += "    " + getComputeMethodSignature() + " {\n";
         prog += algorithm;
         prog += "    }";
         Pattern pattern;
@@ -277,7 +280,7 @@ public class Synthesizer {
             String mainClassName = sp.getClassName( file );
             
             ClassList classList = sp.parseSpecification( file );
-            String prog = makeProgramText( file, true, classList, mainClassName ); //changed to true
+            String prog = makeProgramText( file, true, classList, mainClassName, null ); //changed to true
 
             makeProgram( prog, classList, mainClassName );
         } catch ( UnknownVariableException uve ) {
@@ -322,12 +325,16 @@ public class Synthesizer {
             try {
                 FileWriter fw = new FileWriter( file );
                 String in = "public interface IComputable {\n"
-                            + "\tpublic void compute();\n}\n";
+                            + "\t" + getComputeMethodSignature() + ";\n}\n";
                 fw.write( in );
                 fw.close();
             } catch ( IOException ex ) {
                 System.err.println( "Unable to create " + file.getAbsolutePath() );
             }
         }
+    }
+    
+    private static String getComputeMethodSignature() {
+    	return "public void compute( Object... args )";
     }
 }

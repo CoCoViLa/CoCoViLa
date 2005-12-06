@@ -8,6 +8,7 @@ class Problem implements Serializable {
 
     private Set<Rel> axioms = new HashSet<Rel>(); 
     private Set<Var> knownVars = new HashSet<Var>(); 
+    private List<Var> assumptions = new ArrayList<Var>(); 
     private Set<Var> targetVars = new HashSet<Var>(); 
     private Map<String, Var> allVars = new HashMap<String, Var>();
     private Set<Rel> allRels = new HashSet<Rel>(); 
@@ -206,4 +207,8 @@ class Problem implements Serializable {
         }
         return null;
     }
+
+	public List<Var> getAssumptions() {
+		return assumptions;
+	}
 }

@@ -130,7 +130,7 @@ public class ProgramRunner {
 									String[] sar = (String[])o;
 									String result = "";
 									for(int k = 0; k < sar.length; k++ ) {
-										result += sar[k] + "%%";
+										result += sar[k] + ClassField.ARRAY_TOKEN;
 									}
 									field.setValue(result);
 								} else {
@@ -148,20 +148,23 @@ public class ProgramRunner {
 	}
 
 	Object compileAndRun(String programName, ArrayList<String> watchFields,
-			JTextArea runResultArea) throws CompileException {
+			JTextArea runResultArea, Object[] args ) throws CompileException {
 		genObject = makeGeneratedObject(programName);
 		if (genObject != null) {
-			run(watchFields, runResultArea);
+			run(watchFields, runResultArea, args );
 		}
 		return genObject;
 	}
 
-	void run(ArrayList<String> watchFields, JTextArea runResultArea) {
+	void run(ArrayList<String> watchFields, JTextArea runResultArea, Object[] args ) {
 		try {
 			Class clas = genObject.getClass();
-			Method method = clas.getMethod("compute", (Class[])null);
-
-			method.invoke(genObject, (Object[])null);
+			Method method = clas.getMethod("compute", Object[].class);
+			db.p( "Running" );
+			for (int i = 0; i < args.length; i++) {
+				db.p( args[i].getClass() + " " + args[i] );
+			}
+			method.invoke(genObject, new Object[]{ args } );
 			Field f;
 			StringTokenizer st;
 			Object lastObj;

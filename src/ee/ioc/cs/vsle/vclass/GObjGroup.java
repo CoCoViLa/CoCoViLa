@@ -293,7 +293,7 @@ public class GObjGroup extends GObj
 						s.append(
 							"        " + obj.getName() + "." + field.name
 							+ " = {");
-						String[] split = field.value.split("%%");
+						String[] split = field.value.split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append(split[k]);
@@ -306,7 +306,7 @@ public class GObjGroup extends GObj
 						s.append(
 							"        " + obj.getName() + "." + field.name
 							+ " = {");
-						String[] split = field.value.split("%%");
+						String[] split = field.value.split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append("\"" + split[k] + "\"");

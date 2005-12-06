@@ -6,6 +6,7 @@ import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.ccl.*;
 
 import java.util.*;
+import java.util.List;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -30,6 +31,8 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     private Object runnableObject;
     private ProgramRunner runner;
     private ClassList classList;
+    private List<Var> assumptions = new ArrayList<Var>(); 
+    private Object[] arguments;
     private String mainClassName = new String();
     private Editor editor;
 
@@ -164,10 +167,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
                            mainClassName );
         runner = new ProgramRunner();
         ArrayList<String> watchFields = watchableFields( objects );
-
+        
         try {
             runnableObject = runner.compileAndRun( mainClassName,
-                    watchFields, jta_runResult );
+                    watchFields, jta_runResult, getArguments() );
             if ( runnableObject != null ) {
                 tabbedPane.setSelectedComponent( runResult );
             }
@@ -175,6 +178,19 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
             ErrorWindow.showErrorMessage(
                     "Compilation failed:\n " + ce.excDesc );
         }
+    }
+    
+    private Object[] getArguments() {
+    	if( assumptions.isEmpty() ) {
+    		return new Object[0];
+    	}
+    	
+    	if( arguments == null ) {
+    		ProgramAssumptionsDialog ass = new ProgramAssumptionsDialog( this, mainClassName, assumptions );
+    		arguments = ass.getArgs();
+    	}
+    	
+    	return arguments;
     }
     
     void invoke()
@@ -186,10 +202,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
                 int k = Integer.parseInt( invokeField.getText() );
 
                 for ( int i = 0; i < k; i++ ) {
-                    runner.run( watchFields, jta_runResult );
+                    runner.run( watchFields, jta_runResult, getArguments() );
                 }
             } else {
-                runner.run( watchFields, jta_runResult );
+                runner.run( watchFields, jta_runResult, getArguments() );
             }
             
             propagate();
@@ -222,8 +238,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
             
             classList = SpecParser.getInstance().parseSpecification( fullSpec );
             jta_generatedCode.setText( "" );
+            assumptions.clear();
+            arguments = null;
             jta_generatedCode.append(
-            		Synthesizer.getInstance().makeProgramText( fullSpec, computeAll, classList, mainClassName ) );
+            		Synthesizer.getInstance().makeProgramText( fullSpec, computeAll, classList, mainClassName, assumptions ) );
             tabbedPane.setSelectedComponent( progText );
         } catch ( UnknownVariableException uve ) {
 

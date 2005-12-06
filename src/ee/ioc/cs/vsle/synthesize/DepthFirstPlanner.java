@@ -60,7 +60,7 @@ public class DepthFirstPlanner implements IPlanner {
         		&& !computeAll ) {
         	if ( RuntimeProperties.isLogInfoEnabled() )
     			db.p( "Problem solved without subtasks");
-        } else {
+        } else if ( !problem.getRelsWithSubtasks().isEmpty() ) {
         	subtaskPlanning( problem, algorithm );
         	linearForwardSearch( problem, algorithm, problem.getTargetVars(), computeAll );
         }
@@ -266,7 +266,6 @@ public class DepthFirstPlanner implements IPlanner {
 				prepareSubtask( problemNew, subtaskNew );
 				
 				boolean solved = 
-					// note that we use algorithm of old subtask
 					linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
 							// never optimize here
 							new HashSet<Var>(subtaskNew.getOutputs()), true );
@@ -290,11 +289,10 @@ public class DepthFirstPlanner implements IPlanner {
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "Back to depth " + ( depth + 1 ) );
 				
-				// note that we use algorithm of old subtask
 				solved = linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
 						// always optimize here in order to get rid of unnecessary subtask instances
 						// temporary true while optimization does not work correctly
-						new HashSet<Var>(subtaskNew.getOutputs()), false );
+						new HashSet<Var>(subtaskNew.getOutputs()), true );
 				
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "Subtask: " + subtaskNew + " solved: " + solved );
@@ -303,7 +301,7 @@ public class DepthFirstPlanner implements IPlanner {
 				if( !allSolved ) {
 					continue OR;
 				}
-				
+				// copy algorithm from cloned subtask to old
 				subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
 			}
 			

@@ -15,6 +15,8 @@ import ee.ioc.cs.vsle.synthesize.Var;
  */
 public class ClassField implements Cloneable, Serializable {
 
+	public final static String ARRAY_TOKEN = "%%";
+	
 	protected String name;
 	protected String type;
 	protected String value;
