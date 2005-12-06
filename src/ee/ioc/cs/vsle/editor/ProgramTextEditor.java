@@ -177,17 +177,25 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         } catch ( CompileException ce ) {
             ErrorWindow.showErrorMessage(
                     "Compilation failed:\n " + ce.excDesc );
+        } catch ( Exception ce ) {
+            ErrorWindow.showErrorMessage( ce.getMessage() );
         }
     }
     
-    private Object[] getArguments() {
+    private Object[] getArguments() throws Exception {
     	if( assumptions.isEmpty() ) {
     		return new Object[0];
     	}
     	
     	if( arguments == null ) {
     		ProgramAssumptionsDialog ass = new ProgramAssumptionsDialog( this, mainClassName, assumptions );
-    		arguments = ass.getArgs();
+    		
+    		if( ass.isOK )
+    		{
+    			arguments = ass.getArgs();
+    		} else {
+    			throw new Exception( "Assumptions undefined" );
+    		}
     	}
     	
     	return arguments;
@@ -202,10 +210,18 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
                 int k = Integer.parseInt( invokeField.getText() );
 
                 for ( int i = 0; i < k; i++ ) {
-                    runner.run( watchFields, jta_runResult, getArguments() );
+                    try {
+						runner.run( watchFields, jta_runResult, getArguments() );
+					} catch (Exception e) {
+						ErrorWindow.showErrorMessage( e.getMessage() );
+					}
                 }
             } else {
-                runner.run( watchFields, jta_runResult, getArguments() );
+                try {
+					runner.run( watchFields, jta_runResult, getArguments() );
+				} catch (Exception e) {
+					ErrorWindow.showErrorMessage( e.getMessage() );
+				}
             }
             
             propagate();

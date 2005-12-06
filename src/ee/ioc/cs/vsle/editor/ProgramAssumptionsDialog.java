@@ -23,12 +23,13 @@ implements ActionListener, KeyListener {
 	List<ClassField> arrayNameList = new ArrayList<ClassField>();
 	List<Var> asumptions;
 	JButton clear, ok;
+	boolean isOK = false;
 	
 	public ProgramAssumptionsDialog( JFrame owner, String progName, List<Var> assmps ) {
 		
 		super( owner, progName, true );
 		
-		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
+		setDefaultCloseOperation( DISPOSE_ON_CLOSE );
 		
 		args = new Object[assmps.size()];
 		asumptions = assmps;
@@ -167,6 +168,7 @@ implements ActionListener, KeyListener {
 				}
 				args[asumptions.indexOf( field.getParentVar() )] = createObject( field, s );
 			}
+			isOK = true;
 			this.dispose();
 		}
 		if (e.getSource() == clear) {
@@ -211,5 +213,9 @@ implements ActionListener, KeyListener {
 
 	public Object[] getArgs() {
 		return args;
+	}
+
+	public boolean isOK() {
+		return isOK;
 	}
 }
