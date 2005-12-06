@@ -13,15 +13,15 @@ public class CodeGenerator {
 
     public static final String OT_TAB = "        ";
 
-    private static final TypeToken TOKEN_INT = new TypeToken( "int", Integer.class, "intValue" );
-    private static final TypeToken TOKEN_DOUBLE = new TypeToken( "double", Double.class, "doubleValue" );
-    private static final TypeToken TOKEN_FLOAT = new TypeToken( "float", Float.class, "floatValue" );
-    private static final TypeToken TOKEN_CHAR = new TypeToken( "char", Character.class, "charValue" );
-    private static final TypeToken TOKEN_BYTE = new TypeToken( "byte", Byte.class, "byteValue" );
-    private static final TypeToken TOKEN_SHORT = new TypeToken( "short", Short.class, "shortValue" );
-    private static final TypeToken TOKEN_LONG = new TypeToken( "long", Long.class, "longValue" );
-    private static final TypeToken TOKEN_BOOLEAN = new TypeToken( "boolean", Boolean.class, "booleanValue" );
-    private static final TypeToken TOKEN_OBJECT = new TypeToken( null, null, "" );
+    private static final TypeToken TOKEN_INT = new TypeToken( "int", Integer.class, int.class, "intValue" );
+    private static final TypeToken TOKEN_DOUBLE = new TypeToken( "double", Double.class, double.class, "doubleValue" );
+    private static final TypeToken TOKEN_FLOAT = new TypeToken( "float", Float.class, float.class, "floatValue" );
+    private static final TypeToken TOKEN_CHAR = new TypeToken( "char", Character.class, char.class, "charValue" );
+    private static final TypeToken TOKEN_BYTE = new TypeToken( "byte", Byte.class, byte.class, "byteValue" );
+    private static final TypeToken TOKEN_SHORT = new TypeToken( "short", Short.class, short.class, "shortValue" );
+    private static final TypeToken TOKEN_LONG = new TypeToken( "long", Long.class, long.class, "longValue" );
+    private static final TypeToken TOKEN_BOOLEAN = new TypeToken( "boolean", Boolean.class, boolean.class, "booleanValue" );
+    private static final TypeToken TOKEN_OBJECT = new TypeToken( null, null, null, "" );
 
     private final static int OT_NOC = 0;
     private final static int OT_INC = 1;
@@ -285,9 +285,9 @@ public class CodeGenerator {
 			token = TOKEN_DOUBLE;
 		} else if ( varType.equals( TOKEN_FLOAT.getType() ) ) {
 			token = TOKEN_FLOAT;
-		} else if ( varType.equals( TOKEN_CHAR.getType() ) ) {
+		} /*else if ( varType.equals( TOKEN_CHAR.getType() ) ) {
 			token = TOKEN_CHAR;
-		} else if ( varType.equals( TOKEN_BYTE.getType() ) ) {
+		} */else if ( varType.equals( TOKEN_BYTE.getType() ) ) {
 			token = TOKEN_BYTE;
 		} else if ( varType.equals( TOKEN_SHORT.getType() ) ) {
 			token = TOKEN_SHORT;
@@ -323,13 +323,15 @@ public class CodeGenerator {
         String m_type;
         String m_objType;
         String m_method;
-        Class  m_class;
+        Class  m_wclass;
+        Class  m_pclass;
 
-        private TypeToken( String type, Class clas, String method ) {
+        private TypeToken( String type, Class wrapperClass, Class primeClass, String method ) {
             m_type = type;
-            m_objType = clas != null ? clas.getName() : "";
+            m_objType = wrapperClass != null ? wrapperClass.getName() : "";
             m_method = method;
-            m_class = clas;
+            m_wclass = wrapperClass;
+            m_pclass = primeClass;
         }
 
         public String getType() {
@@ -344,8 +346,12 @@ public class CodeGenerator {
             return m_method;
         }
         
-        public Class getTokenClass() {
-        	return m_class;
+        public Class getWrapperClass() {
+        	return m_wclass;
+        }
+        
+        public Class getPrimeClass() {
+        	return m_pclass;
         }
     }
 

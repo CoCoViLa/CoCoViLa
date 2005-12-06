@@ -171,6 +171,8 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
     void compileAndRun()
     {
+    	arguments = null;
+    	
     	Synthesizer.getInstance().makeProgram( jta_generatedCode.getText(), classList,
                            mainClassName );
         runner = new ProgramRunner();
@@ -263,7 +265,6 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
             classList = SpecParser.getInstance().parseSpecification( fullSpec );
             jta_generatedCode.setText( "" );
             assumptions.clear();
-            arguments = null;
             jta_generatedCode.append(
             		Synthesizer.getInstance().makeProgramText( fullSpec, computeAll, classList, mainClassName, assumptions ) );
             tabbedPane.setSelectedComponent( progText );

@@ -96,10 +96,10 @@ public class Synthesizer {
                 if ( field.isSpecField() ) {
                     prog += "    public " + field.getType() + " " + field.getName() + " = new " +
                             field.getType() + "();\n";
-                } else if ( isPrimitive( field.getType() ) ) {
+                } else if ( field.isPrimitive() ) {
                     prog += "    public " + field.getType() + " " + field.getName() + ";\n";
-                } else if ( isArray( field.getType() ) ) {
-                    prog += "    public " + field.getType() + " " + field.getName() + " ;\n";
+                } else if ( field.isArray() ) {
+                    prog += "    public " + field.getType() + " " + field.getName() + ";\n";
                 } else {
                     prog += "    public " + field.getType() + " " + field.getName() + " = new " +
                             field.getType() + "();\n";

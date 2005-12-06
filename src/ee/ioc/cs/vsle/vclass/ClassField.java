@@ -120,7 +120,7 @@ public class ClassField implements Cloneable, Serializable {
 
 	public boolean isPrimitive(String s) {
 		if (s.equals("int") || s.equals("double") || s.equals("float")
-			|| s.equals("long") || s.equals("short")
+			|| s.equals("long") || s.equals("short") || s.equals("byte")
 			|| s.equals("boolean") || s.equals("char")) {
 			return true;
 		}
@@ -129,7 +129,7 @@ public class ClassField implements Cloneable, Serializable {
 
 	public boolean isPrimitive() {
 		if (type.equals("int") || type.equals("double") || type.equals("float")
-			|| type.equals("long") || type.equals("short")
+			|| type.equals("long") || type.equals("short") || type.equals("byte")
 			|| type.equals("boolean") || type.equals("char")) {
 			return true;
 		}

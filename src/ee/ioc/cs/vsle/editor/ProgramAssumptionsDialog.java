@@ -1,14 +1,16 @@
 package ee.ioc.cs.vsle.editor;
 
-import java.awt.*;
-import java.awt.event.*;
 import java.lang.reflect.*;
 import java.util.List;
 import java.util.*;
+import java.awt.*;
+import java.awt.event.*;
+
 
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.synthesize.*;
+import ee.ioc.cs.vsle.synthesize.CodeGenerator.TypeToken;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
@@ -157,7 +159,12 @@ implements ActionListener, KeyListener {
 				
 				String text = textField.getText();
 				
-				args[asumptions.indexOf( field.getParentVar() )] = createObject( field, text );
+				try {
+					args[asumptions.indexOf( field.getParentVar() )] = createObject( field, text );
+				} catch (Exception e1) {
+					showError( field.getName(), e1 );
+					return;
+				}
 			}
 			for (int i = 0; i < comboBoxes.size(); i++) {
 				JComboBox comboBox = comboBoxes.get(i);
@@ -166,7 +173,12 @@ implements ActionListener, KeyListener {
 				for (int j = 0; j < comboBox.getItemCount(); j++) {
 					s += (String) comboBox.getItemAt(j) + ClassField.ARRAY_TOKEN;
 				}
-				args[asumptions.indexOf( field.getParentVar() )] = createObject( field, s );
+				try {
+					args[asumptions.indexOf( field.getParentVar() )] = createObject( field, s );
+				} catch (Exception e1) {
+					showError( field.getName(), e1 );					
+					return;
+				}
 			}
 			isOK = true;
 			this.dispose();
@@ -180,23 +192,51 @@ implements ActionListener, KeyListener {
 		}
 	}
 	
-	private Object createObject( ClassField field, String value ) {
+	private void showError( String var, Throwable th ) {
+		String s = ( ( th != null ) && ( th.getCause() != null ) ) ? "\n" + th.getCause().getMessage() : "";
 		
-		Class clazz = CodeGenerator.getTypeToken( field.getType() ).getTokenClass();
+		JOptionPane.showMessageDialog( ProgramAssumptionsDialog.this, 
+				"Unable to read assumption \"" + var + "\"" + s,
+				"Error", JOptionPane.ERROR_MESSAGE );
+	}
+	
+	private Object createObject( ClassField field, String value ) throws Exception {
+		TypeToken token = CodeGenerator.getTypeToken( field.getType() );
+		db.p( "var: " + field.getName() + " type " + field.getType() + " value " + value);
+		
+		Class clazz = token.getWrapperClass();
 		
 		if( clazz != null ) {
-			try {
 				Method meth = clazz.getMethod( "valueOf", new Class[]{ String.class });
 				Object o = meth.invoke( null, new Object[]{ value });
 				db.p( "createObject " + o.getClass().getName() + " " + o );
 				return o;
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
 		} else if ( field.getType().equals( "String" ) ) {
 			return value;
+		} else if( field.isPrimOrStringArray() ) {
+			String type = field.arrayType();
+			
+			token = CodeGenerator.getTypeToken( type );
+			clazz = token.getWrapperClass();
+			
+			
+			if( clazz != null ) {
+				
+				String[] split = value.split( ClassField.ARRAY_TOKEN );
+				Object primeArray = Array.newInstance( token.getPrimeClass(), split.length );
+				
+				for (int j = 0; j < split.length; j++) {
+					Method meth = clazz.getMethod( "valueOf", new Class[]{ String.class });
+					Object val = meth.invoke( null, new Object[]{ split[j] });
+					Array.set( primeArray, j, val );
+					
+					db.p( "createObject[] " + val.getClass().getName() + " " + val );
+				}
+				return primeArray;
+			} else /* equals String[] */ {
+				return value.split( ClassField.ARRAY_TOKEN );
+			}
 		}
-		
 		
 		return null;
 	}
