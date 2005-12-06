@@ -19,7 +19,7 @@ import javax.swing.text.*;
  */
 public class ProgramTextEditor extends JFrame implements ActionListener {
 
-    private JButton computeGoal, runProg, computeAll, propagate, invoke;
+    private JButton computeGoal, runProg, computeAll, propagate, invoke, invokeNew;
     private JTextArea jta_runResult;
     private JavaColoredTextPane jta_spec, jta_generatedCode;
     
@@ -100,15 +100,19 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         jta_runResult = new JTextArea();
         jta_runResult.setFont( RuntimeProperties.font );
         JToolBar resultToolBar = new JToolBar();
-
         propagate = new JButton( "Propagate values" );
         propagate.addActionListener( this );
         resultToolBar.add( propagate );
+        invokeNew = new JButton( "Invoke New" );
+        invokeNew.addActionListener( this );
+        resultToolBar.add( invokeNew );
         invoke = new JButton( "Invoke" );
         invoke.addActionListener( this );
         resultToolBar.add( invoke );
+        resultToolBar.add( new JLabel( " Count: " ) );
         invokeField = new JTextField( 4 );
         resultToolBar.add( invokeField );
+        resultToolBar.add( Box.createGlue() );
         JScrollPane runResultAreaScrollPane = new JScrollPane( jta_runResult );
 
         runResultAreaScrollPane.setVerticalScrollBarPolicy(
@@ -157,6 +161,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         	propagate();
         }
         else if ( e.getSource() == invoke ) {
+        	invoke();
+        }
+        else if ( e.getSource() == invokeNew ) {
+        	arguments = null;
         	invoke();
         }
     }
