@@ -482,7 +482,7 @@ public class PackageParser {
             }
             if ( qName.equals( "fields" ) ) {
                 newClass.fields = classFields;
-                ArrayList a = new ArrayList();
+                ArrayList<ClassField> a = new ArrayList<ClassField>();
                 try {
                     a = SpecParser.getInstance().getFields( path + File.separator + newClass.name + ".java" );
                 } catch ( IOException e ) {
@@ -499,9 +499,9 @@ public class PackageParser {
 
                     if ( cf.getType() == null ) {
                         for ( int j = 0; j < a.size(); j++ ) {
-                            if ( ( ( ClassField ) a.get( j ) ).getName() == cf.getName() ) {
-                                cf.setType( ( ( ClassField ) a.get( j ) ).getType() );
-                                cf.setValue( ( ( ClassField ) a.get( j ) ).getValue() );
+                            if ( a.get( j ).getName() == cf.getName() ) {
+                                cf.setType( a.get( j ).getType() );
+                                cf.setValue( a.get( j ).getValue() );
                             }
                         }
                     }

@@ -66,7 +66,7 @@ public class SpecParser {
         String lineString, fileString = new String();
 
         while ( ( lineString = in.readLine() ) != null ) {
-            fileString += lineString;
+            fileString += lineString + "\n";
         }
         in.close();
         return fileString;
@@ -96,17 +96,17 @@ public class SpecParser {
      @return	a specification line with its type information
      @param	a	arraylist of specification lines
      */
-    LineType getLine( ArrayList a ) {
+    LineType getLine( ArrayList<String> a ) {
         Matcher matcher2;
         Pattern pattern;
 
-        while ( ( a.get( 0 ) ).equals( "" ) || ( ( String ) a.get( 0 ) ).trim().startsWith( "//" ) ) {
+        while ( ( a.get( 0 ) ).equals( "" ) || a.get( 0 ).trim().startsWith( "//" ) ) {
             a.remove( 0 );
             if ( a.isEmpty() ) {
                 return null;
             }
         }
-        String line = ( String ) a.get( 0 );
+        String line = a.get( 0 );
 
         a.remove( 0 );
         if ( line.indexOf( "alias " ) >= 0 ) {
@@ -361,13 +361,13 @@ public class SpecParser {
 		return cf;
     }
 
-    private void isRightWildcard( ClassRelation classRelation, AnnotatedClass ac, ClassList classes,
-                                  String type ) {
-        ClassField cf;
-        String s = checkIfRightWildcard( classRelation );
-        //if the right side of the axiom contains a wildcard, we'll rewrite the axiom
-
-    }
+//    private void isRightWildcard( ClassRelation classRelation, AnnotatedClass ac, ClassList classes,
+//                                  String type ) {
+//        ClassField cf;
+//        String s = checkIfRightWildcard( classRelation );
+//        //if the right side of the axiom contains a wildcard, we'll rewrite the axiom
+//
+//    }
 
     private String checkIfRightWildcard( ClassRelation classRelation ) {
         String s = classRelation.getOutputs().get( 0 ).getName();
@@ -632,7 +632,7 @@ public class SpecParser {
         AnnotatedClass annClass = new AnnotatedClass( className, parent );
         ClassList<AnnotatedClass> classList = new ClassList<AnnotatedClass>();
 
-        ArrayList specLines = getSpec( spec, true );
+        ArrayList<String> specLines = getSpec( spec, true );
 
         try {
 
@@ -640,6 +640,7 @@ public class SpecParser {
                 LineType lt = getLine( specLines );
 
                 if ( lt != null ) {
+                	db.p( "Parsing: Class " + className + " Line " + lt.getSpecLine() );
                     if ( lt.getType() == LineType.TYPE_ASSIGNMENT ) {
                         split = lt.getSpecLine().split( ":", -1 );
                         ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION );
@@ -820,7 +821,8 @@ public class SpecParser {
                 }
             }
         } catch ( UnknownVariableException uve ) {
-            uve.printStackTrace();
+        	
+            //uve.printStackTrace( System.out );
             throw new UnknownVariableException( className + "." + uve.excDesc );
 
         }
@@ -840,10 +842,10 @@ public class SpecParser {
     /**
      @return list of fields declared in a specification.
      */
-    public ArrayList getFields( String fileName ) throws IOException {
+    public ArrayList<ClassField> getFields( String fileName ) throws IOException {
         ArrayList<ClassField> vars = new ArrayList<ClassField>();
         String s = new String( getStringFromFile( fileName ) );
-        ArrayList specLines = getSpec( s, false );
+        ArrayList<String> specLines = getSpec( s, false );
         String[] split;
 
         while ( !specLines.isEmpty() ) {
