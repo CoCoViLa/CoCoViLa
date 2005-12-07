@@ -160,7 +160,8 @@ public class IconEditor
 
 		menu = new JMenu(Menu.MENU_FILE);
 		menu.setMnemonic(KeyEvent.VK_F);
-		menuItem = new JMenuItem(Menu.SAVE_SCHEME, KeyEvent.VK_S);
+/*
+        menuItem = new JMenuItem(Menu.SAVE_SCHEME, KeyEvent.VK_S);
 		menuItem.addActionListener(mListener);
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(
 			KeyEvent.VK_S, ActionEvent.CTRL_MASK));
@@ -171,7 +172,7 @@ public class IconEditor
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(
 			KeyEvent.VK_O, ActionEvent.CTRL_MASK));
 		menu.add(menuItem);
-
+*/
 		exportmenu = new JMenu(Menu.EXPORT_MENU);
 		exportmenu.setMnemonic(KeyEvent.VK_E);
 		

@@ -145,7 +145,7 @@ public class SpecParser {
 			}
 			return new LineType( LineType.TYPE_ERROR, line );
         } else {
-            pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])?) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)" );
+            pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])*) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)" );
             matcher2 = pattern.matcher( line );
             if ( matcher2.find() ) {
                 return new LineType( LineType.TYPE_DECLARATION, matcher2.group( 1 ) + ":" + matcher2.group( 3 ) );
