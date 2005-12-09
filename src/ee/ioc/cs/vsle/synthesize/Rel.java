@@ -319,23 +319,24 @@ class Rel implements Serializable {
 			ArrayList<AjutHack> ajut = new ArrayList<AjutHack>();
 			for (int i = 0; i < inputs.size(); i++) {
 				var = inputs.get(i);
-				pattern = Pattern.compile("([^a-zA-Z_])(([a-zA-Z_0-9]+\\.)*)"
+				pattern = Pattern.compile("([^a-zA-Z_])(([a-zA-Z_0-9]+\\.)*)?"
 						+ var.getName() + "([^a-zA-Z0-9_])");
 				matcher = pattern.matcher(m);
-				if (matcher.find()) {
+				while (matcher.find()) {
 					left = matcher.group(1);
 					left2 = matcher.group(2);
 					right = matcher.group(4);
-				}
-				ajut.add(new AjutHack(var.getName(), "#" + Integer.toString(i)));
-				m = m.replaceFirst("([^a-zA-Z_]" + left2 + var.getName()
-						+ "[^a-zA-Z0-9_])", left + getObject(var.getObject()) + "#"
-						+ Integer.toString(i) + right);
+                    ajut.add(new AjutHack(var.getName(), "#" + Integer.toString(i)));
+                    m = m.replaceFirst("([^a-zA-Z_]" + left2 + var.getName()
+                            + "[^a-zA-Z0-9_])", left + getObject(var.getObject()) + "#"
+                            + Integer.toString(i) + right);
+                }
+
 			}
 
 			for (int i = 0; i < inputs.size(); i++) {
 				AjutHack paar = ajut.get(i);
-				m = m.replaceFirst(paar.repl, paar.var);
+				m = m.replaceAll(paar.repl, paar.var);
 			}
 
 			left2 = "";
