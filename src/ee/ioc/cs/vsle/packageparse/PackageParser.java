@@ -63,15 +63,16 @@ public class PackageParser {
             if ( sxe.getException() != null ) {
                 x = sxe.getException();
             }
-            x.printStackTrace();
+            
+            db.p( "Parsing error: " + x.getMessage() );
         } catch ( ParserConfigurationException pce ) {
             // Parser with specified options can't be built
-            pce.printStackTrace();
+        	 db.p( "Parser Configuration error: " + pce.getMessage() );
         } catch ( IOException ioe ) {
             // I/O error
-            ioe.printStackTrace();
+        	 db.p( "IO error: " + ioe.getMessage() );
         }
-        db.p( "doneparsing" );
+        db.p( "doneparsing\n" );
     } // PackageParser
 
     // ===========================================================
@@ -95,7 +96,6 @@ public class PackageParser {
             db.p(
                     "\n** Parsing error, line " + spe.getLineNumber() + ", uri "
                     + spe.getSystemId() );
-            //db.p("   " + spe.getMessage());
 
             // Use the contained exception, if any
             Exception x = spe;
@@ -103,7 +103,8 @@ public class PackageParser {
             if ( spe.getException() != null ) {
                 x = spe.getException();
             }
-            x.printStackTrace();
+            
+            db.p( "** " + x.getMessage() );
         }
 
         public void setDocumentLocator( Locator l ) { // Save this to resolve relative URIs or to give diagnostics.
