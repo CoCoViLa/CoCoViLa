@@ -83,7 +83,7 @@ public class Synthesizer {
         }
         
         String prog = "";
-
+        
         ClassField field;
         // start building the main source file.
         AnnotatedClass ac = classList.getType( "this" );
@@ -94,22 +94,22 @@ public class Synthesizer {
             field = ac.fields.get( i );
             if ( !( field.getType().equals( "alias" ) || field.getType().equals( "void" ) ) ) {
                 if ( field.isSpecField() ) {
-                    prog += "    public " + field.getType() + " " + field.getName() + " = new " +
+                    prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + " = new " +
                             field.getType() + "();\n";
                 } else if ( field.isPrimitive() ) {
-                    prog += "    public " + field.getType() + " " + field.getName() + ";\n";
+                    prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + ";\n";
                 } else if ( field.isArray() ) {
-                    prog += "    public " + field.getType() + " " + field.getName() + ";\n";
+                    prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + ";\n";
                 } else {
-                    prog += "    public " + field.getType() + " " + field.getName() + " = new " +
+                    prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + " = new " +
                             field.getType() + "();\n";
                 }
             }
         }
 
-        prog += "    " + getComputeMethodSignature() + " {\n";
+        prog += CodeGenerator.OT_TAB + getComputeMethodSignature() + " {\n";
         prog += algorithm;
-        prog += "    }";
+        prog += CodeGenerator.OT_TAB + "}";
         Pattern pattern;
         Matcher matcher;
 
@@ -128,12 +128,14 @@ public class Synthesizer {
         matcher = pattern.matcher( fileString );
 
         if ( matcher.find() ) {
-            fileString = matcher.replaceAll( "\n    " + prog );
+            fileString = matcher.replaceAll( "\n" + CodeGenerator.OT_TAB + prog );
         }
 
         createGeneratedInterface();
         createSubtaskInterface();
 
+        CodeGenerator.reset();
+        
         return fileString;
 
     }
@@ -155,15 +157,11 @@ public class Synthesizer {
             pClass = ( AnnotatedClass ) classes.get( h );
             if ( !pClass.name.equals( "this" ) ) {
                 fileString = "";
+                SpecParser specParser = SpecParser.getInstance();
                 try {
-                    BufferedReader in = new BufferedReader( new FileReader( RuntimeProperties.
-                            packageDir + File.separator + pClass.name + ".java" ) );
-
-                    while ( ( lineString = in.readLine() ) != null ) {
-                        fileString += lineString + "\n";
-                    }
-                    in.close();
-
+                	fileString = specParser.getStringFromFile( RuntimeProperties.
+                            packageDir + File.separator + pClass.name + ".java" );
+                	
                 } catch ( IOException io ) {
                     db.p( io );
                 }
@@ -176,11 +174,11 @@ public class Synthesizer {
                 if ( matcher.find() ) {
                     fileString = matcher.replaceAll( "public class " + pClass.name );
                 }
-                SpecParser specParser = SpecParser.getInstance();
+                
                 String declars = "";
 
                 try {
-                    ArrayList specLines = specParser.getSpec( fileString, false );
+                    ArrayList<String> specLines = specParser.getSpec( fileString, false );
 
                     while ( !specLines.isEmpty() ) {
                         LineType lt = specParser.getLine( specLines );

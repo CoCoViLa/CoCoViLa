@@ -40,12 +40,16 @@ public class CodeGenerator {
         if ( s_codeGen == null ) {
             s_codeGen = new CodeGenerator();
         }
-        offset = "";
-        subCount = 0;
-        ALIASTMP_NR = 0;
+        
         return s_codeGen;
     }
 
+    public static void reset() {
+    	offset = "";
+        subCount = 0;
+        ALIASTMP_NR = 0;
+    }
+    
     public String generate( ArrayList algRelList, List<Var> assumptions ) {
         StringBuffer alg = new StringBuffer();
         cOT( OT_INC, 2 );
