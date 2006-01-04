@@ -124,7 +124,9 @@ public class DepthFirstPlanner implements IPlanner {
 					if (RuntimeProperties.isLogDebugEnabled())
 						db.p("And its rel: " + rel);
 					if (problem.getAllRels().contains(rel)) {
-						rel.setUnknownInputs(rel.getUnknownInputs() - 1);
+						if( !var.getField().isConstant() ) {
+							rel.setUnknownInputs(rel.getUnknownInputs() - 1);
+						}
 
 						if (RuntimeProperties.isLogDebugEnabled())
 							db.p("problem contains it " + rel

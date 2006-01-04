@@ -10,6 +10,7 @@ public class LineType {
             TYPE_EQUATION = 4,
             TYPE_ALIAS = 5,
             TYPE_SPECAXIOM = 6,
+            TYPE_CONST = 7,
             TYPE_ERROR = 10;
 
 	private int type;

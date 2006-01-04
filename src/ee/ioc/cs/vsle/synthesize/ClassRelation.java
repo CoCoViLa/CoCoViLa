@@ -259,7 +259,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @return ClassField
 	 */
-	ClassField getVar(String varName, ArrayList<ClassField> varList) {
+	static ClassField getVar(String varName, ArrayList<ClassField> varList) {
 		ClassField var;
 
 		for (int i = 0; i < varList.size(); i++) {

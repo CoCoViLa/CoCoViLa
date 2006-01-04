@@ -23,6 +23,7 @@ public class ClassField implements Cloneable, Serializable {
 	protected String description;
         private Var m_parentVar;
 	protected boolean specField = false;
+	protected boolean isConstant = false;
 	protected boolean alias = false;
 	protected boolean watched = false;
 	protected ArrayList<ClassField> vars;
@@ -52,6 +53,13 @@ public class ClassField implements Cloneable, Serializable {
 		this.type = type;
 	}
 
+	public ClassField(String name, String type, String value, boolean isConstant ) {
+		this.value = value;
+		this.name = name;
+		this.type = type;
+		this.isConstant = isConstant;
+	}
+	
 	/**
 	 * Class constructor.
 	 * @param name String
@@ -251,5 +259,9 @@ public class ClassField implements Cloneable, Serializable {
         public ClassGraphics getDefaultGraphics() {
             return defaultGraphics;
         }
+
+		public boolean isConstant() {
+			return isConstant;
+		}
 
 }

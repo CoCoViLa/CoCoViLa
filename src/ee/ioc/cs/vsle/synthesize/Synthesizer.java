@@ -17,19 +17,6 @@ public class Synthesizer {
     public static final String GENERATED_INTERFACE_NAME = "IComputable";
     public static final String SUBTASK_INTERFACE_NAME = "Subtask";
 
-    /**
-     This method makes a compilable class from problem specification, calling createProblem,
-     planner, generates needed classes(_Class_ notation), putting it all together and writing into
-     a file.
-
-     void makeProgram(ObjectList objects, ee.ioc.cs.editor.vclass.ConnectionList connections, Hashtable classes) {
-     objects = ee.ioc.cs.editor.vclass.GroupUnfolder.unfold(objects);
-     String prog = makeProgramText(objects, connections, true);
-     generateSubclasses(classes);
-     writeFile(prog);
-     }
-     */
-
     private static Synthesizer s_instance;
     
     private Synthesizer() {}
@@ -40,11 +27,12 @@ public class Synthesizer {
     	}
     	return s_instance;
     }
+    
     /**
-     * @param progText -
-     * @param classes -
-     * @param mainClassName -
-     */
+    This method makes a compilable class from problem specification, calling createProblem,
+    planner, generates needed classes(_Class_ notation), putting it all together and writing into
+    a file.
+    */
     public void makeProgram( String progText, ClassList classes, String mainClassName ) {
         generateSubclasses( classes );
         writeFile( progText, mainClassName );
@@ -96,6 +84,9 @@ public class Synthesizer {
                 if ( field.isSpecField() ) {
                     prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + " = new " +
                             field.getType() + "();\n";
+                } else if ( field.isConstant() ) { 
+                	prog += CodeGenerator.OT_TAB + "final public " + field.getType() 
+                		 + " " + field.getName() + " = " + field.getValue() + ";\n";
                 } else if ( field.isPrimitive() ) {
                     prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + ";\n";
                 } else if ( field.isArray() ) {

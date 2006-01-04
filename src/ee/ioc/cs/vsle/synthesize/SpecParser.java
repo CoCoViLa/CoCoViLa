@@ -118,6 +118,13 @@ public class SpecParser {
                 return new LineType( LineType.TYPE_ALIAS, returnLine );
             }
 			return new LineType( LineType.TYPE_ERROR, line );
+        } else if ( line.indexOf( ":=" ) >= 0 ) {
+        	pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*[\\[\\]]*) +([a-zA-Z_$][0-9a-zA-Z_$]*) *:= *([a-zA-Z0-9.{}\"]+|new [a-zA-Z0-9.{}\\[\\]]+) *$" );
+            matcher2 = pattern.matcher( line );
+            if ( matcher2.find() ) {
+                return new LineType( LineType.TYPE_CONST, matcher2.group( 1 ) + ":" + matcher2.group( 2 ) + ":" + matcher2.group( 3 ) );
+            }
+			return new LineType( LineType.TYPE_ERROR, line );
         } else if ( line.indexOf( "=" ) >= 0 ) { // Extract on solve equations
             pattern = Pattern.compile( " *([^= ]+) *= *((\".*\")|(new .*\\(.*\\))|(\\{.*\\})) *$" );
             matcher2 = pattern.matcher( line );
@@ -144,7 +151,7 @@ public class SpecParser {
 
 			}
 			return new LineType( LineType.TYPE_ERROR, line );
-        } else {
+        }  else {
             pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])*) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)" );
             matcher2 = pattern.matcher( line );
             if ( matcher2.find() ) {
@@ -224,6 +231,10 @@ public class SpecParser {
             var.setName( cf.getName() );
             var.setType( cf.getType() );
             problem.addVar( var );
+            if( cf.isConstant() ) {
+            	problem.addKnown( var );
+            	problem.getFoundVars().add( var );
+            }
         }
 
         for ( int j = 0; j < ac.classRelations.size(); j++ ) {
@@ -360,14 +371,6 @@ public class SpecParser {
         }
 		return cf;
     }
-
-//    private void isRightWildcard( ClassRelation classRelation, AnnotatedClass ac, ClassList classes,
-//                                  String type ) {
-//        ClassField cf;
-//        String s = checkIfRightWildcard( classRelation );
-//        //if the right side of the axiom contains a wildcard, we'll rewrite the axiom
-//
-//    }
 
     private String checkIfRightWildcard( ClassRelation classRelation ) {
         String s = classRelation.getOutputs().get( 0 ).getName();
@@ -570,7 +573,14 @@ public class SpecParser {
         Rel rel = new Rel();
 
         rel.setMethod( classRelation.getMethod() );
-        rel.setUnknownInputs( classRelation.getInputs().size() );
+        int constants = 0;
+        for (ClassField field : classRelation.getInputs() ) {
+			if( field.isConstant() ) {
+				constants++;
+			}
+		}
+        
+        rel.setUnknownInputs( classRelation.getInputs().size() - constants );
         rel.setSubtaskFlag( classRelation.getSubtasks().size() );
         rel.setObj( obj );
         rel.setType( classRelation.getType() );
@@ -649,7 +659,29 @@ public class SpecParser {
                         classRelation.setMethod( split[ 0 ] + " = " + split[ 1 ] );
                         annClass.addClassRelation( classRelation );
                         if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
+                        
+                    } else if ( lt.getType() == LineType.TYPE_CONST ) {
+                    	split = lt.getSpecLine().split( ":", -1 );
+                    	String type  = split[ 0 ].trim();
+                    	String name  = split[ 1 ].trim();
+                    	String value = split[ 2 ].trim();
+                    	
+                    	if ( varListIncludes( vars, name ) ) {
+                            throw new SpecParseException( "Variable " + name +
+                                    " declared more than once in class " + className );
+                        }
+                    	
+                    	File file = new File( RuntimeProperties.packageDir + type + ".java" );
+                    	if( file.exists() && isSpecClass( type ) ) {
+                    		throw new SpecParseException( "Constant " + name +
+                                    " cannot be of type " + type );
+                    	}
+                    	db.p( "---===!!! " + type + " " + name + " = " + value );
+                    	
+                    	ClassField var = new ClassField( name, type, value, true );
 
+                        vars.add( var );
+                    	
                     } else if ( lt.getType() == LineType.TYPE_DECLARATION ) {
                         split = lt.getSpecLine().split( ":", -1 );
                         String[] vs = split[ 1 ].trim().split( " *, *", -1 );
@@ -720,15 +752,14 @@ public class SpecParser {
                         for ( int i = 0; i < EquationSolver.relations.size(); i++ ) {
                             String result = ( String ) EquationSolver.relations.get( i );
                             String[] pieces = result.split( ":" );
-                            // if its actually alias
-                            /* if (getVar(pieces[2].trim(), vars).isAlias()) {
-                             String[] inputs = pieces[1].trim().split(" ");
-                             if (geVar(inputs[0].trim(), vars).isAlias()) {
-                             if () {
-                             }
-                             }
-                             } else {*/
 
+                            //cannot assign new values for constants
+                            ClassField tmp = ClassRelation.getVar( pieces[ 2 ].trim(), vars );
+                            if( tmp != null && tmp.isConstant() ) {
+                            	db.p( "Ignoring constant and equation output: " + tmp );
+                            	continue;
+                            }
+                            
                             ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION );
 
                             classRelation.setOutput( pieces[ 2 ].trim(), vars );
@@ -784,6 +815,34 @@ public class SpecParser {
 
                             String[] inputs = matcher2.group( 1 ).trim().split( " *, *", -1 );
 
+                            //check if inputs contain <alias>.lenth variable
+                            for( int i = 0; i < inputs.length; i++ ) {
+                            	String input = inputs[i];
+                            	if( input.endsWith( ".length" ) ) {
+                            		int index = input.lastIndexOf( ".length" );
+                            		String aliasName = input.substring( 0, index );
+                            		ClassField field = ClassRelation.getVar( aliasName, vars );
+                            		if( field != null && field.isAlias() ) {
+                            			String aliasLengthName = ( aliasName + "_length" ).toUpperCase();
+                            			if( varListIncludes( vars, aliasLengthName ) ) {
+                            				inputs[i] = aliasLengthName;
+                            				continue;
+                            			}
+                            			Alias alias = (Alias)field;
+                            			int length = alias.getVars().size();
+                            			
+                            			ClassField var = new ClassField( aliasLengthName, "int", "" + length, true );
+
+                                        vars.add( var );
+                                        
+                                        inputs[i] = aliasLengthName;
+                                        
+                            		} else {
+                            			throw new UnknownVariableException( "Alias " + aliasName +
+                                                " not found in " + className );
+                            		}
+                            	}
+                            }
                             if ( !inputs[ 0 ].equals( "" ) ) {
                                 classRelation.addInputs( inputs, vars );
                             }
