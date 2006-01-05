@@ -632,7 +632,7 @@ public class Editor extends JFrame implements ChangeListener {
 						RuntimeProperties.packageDir = directory;
 					}
 					
-					Synthesizer.getInstance().parseFromCommandLine(args[1]);
+					Synthesizer.parseFromCommandLine(args[1]);
 				} else {
 					// Esimeses hoos vaatame, kas moodulite fail on ette antud
 					// k�surealt.

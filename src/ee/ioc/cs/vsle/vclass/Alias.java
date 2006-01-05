@@ -11,6 +11,7 @@ public class Alias extends ClassField {
 
 	private static final String ALIAS = "alias";
 
+	private boolean isWildcard = false;
 	/**
 	 * Class constructor.
 	 * @param name String - alias name.
@@ -131,5 +132,13 @@ public class Alias extends ClassField {
 		}
 		return null;
 	} // getVar
+
+	public boolean isWildcard() {
+		return isWildcard;
+	}
+
+	public void setWildcard(boolean isWildcard) {
+		this.isWildcard = isWildcard;
+	}
 
 }

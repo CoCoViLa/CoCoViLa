@@ -17,23 +17,14 @@ public class Synthesizer {
     public static final String GENERATED_INTERFACE_NAME = "IComputable";
     public static final String SUBTASK_INTERFACE_NAME = "Subtask";
 
-    private static Synthesizer s_instance;
-    
     private Synthesizer() {}
-    
-    public static Synthesizer getInstance() {
-    	if( s_instance == null ) {
-    		s_instance = new Synthesizer();
-    	}
-    	return s_instance;
-    }
-    
+      
     /**
     This method makes a compilable class from problem specification, calling createProblem,
     planner, generates needed classes(_Class_ notation), putting it all together and writing into
     a file.
     */
-    public void makeProgram( String progText, ClassList classes, String mainClassName ) {
+    public static void makeProgram( String progText, ClassList classes, String mainClassName ) {
         generateSubclasses( classes );
         writeFile( progText, mainClassName );
     }
@@ -49,13 +40,13 @@ public class Synthesizer {
      * @return String -
      * @throws SpecParseException -
      */
-    public String makeProgramText( String fileString, boolean computeAll, ClassList classList,
+    public static String makeProgramText( String fileString, boolean computeAll, ClassList classList,
                                    String mainClassName, List<Var> assumptions ) throws SpecParseException {
 
         Problem problem = null;
         // call the packageParser to create a problem from the specification
         try {
-            problem = SpecParser.getInstance().makeProblem( classList );
+            problem = ProblemCreator.makeProblem( classList );
         } catch ( Exception e ) {
             e.printStackTrace();
             
@@ -135,7 +126,7 @@ public class Synthesizer {
      Generates compilable java classes from the annotated classes that have been used in the specification.
      @param classes List of classes obtained from the ee.ioc.cs.editor.synthesize.SpecParser
      */
-    private void generateSubclasses( ClassList classes ) {
+    private static void generateSubclasses( ClassList classes ) {
 
         AnnotatedClass pClass;
         String lineString = "", fileString;
@@ -148,9 +139,8 @@ public class Synthesizer {
             pClass = ( AnnotatedClass ) classes.get( h );
             if ( !pClass.name.equals( "this" ) ) {
                 fileString = "";
-                SpecParser specParser = SpecParser.getInstance();
                 try {
-                	fileString = specParser.getStringFromFile( RuntimeProperties.
+                	fileString = SpecParser.getStringFromFile( RuntimeProperties.
                             packageDir + File.separator + pClass.name + ".java" );
                 	
                 } catch ( IOException io ) {
@@ -169,10 +159,10 @@ public class Synthesizer {
                 String declars = "";
 
                 try {
-                    ArrayList<String> specLines = specParser.getSpec( fileString, false );
+                    ArrayList<String> specLines = SpecParser.getSpec( fileString, false );
 
                     while ( !specLines.isEmpty() ) {
-                        LineType lt = specParser.getLine( specLines );
+                        LineType lt = SpecParser.getLine( specLines );
 
                         //if (! (specLines.get(0)).equals("")) {
                         if ( lt.getType() == LineType.TYPE_DECLARATION ) {
@@ -228,11 +218,11 @@ public class Synthesizer {
         }
     }
 
-    private String getTypeWithoutArray( String type ) {
+    private static String getTypeWithoutArray( String type ) {
         return type.substring( 0, type.length() - 2 );
     }
 
-    private void writeFile( String prog, String mainClassName ) {
+    private static void writeFile( String prog, String mainClassName ) {
         try {
             PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter(
                     RuntimeProperties.genFileDir + System.getProperty( "file.separator" ) +
@@ -245,13 +235,13 @@ public class Synthesizer {
         }
     }
 
-    private boolean isPrimitive( String type ) {
+    private static boolean isPrimitive( String type ) {
         return ( type.equals( "int" ) || type.equals( "double" ) || type.equals( "float" ) ||
              type.equals( "long" ) || type.equals( "short" ) || type.equals( "boolean" ) ||
              type.equals( "char" ) );
     }
 
-    private boolean isArray( String type ) {
+    private static boolean isArray( String type ) {
         int length = type.length();
 
         return ( type.length() >= 2 && type.substring( length - 2, length ).equals( "[]" ) );
@@ -260,15 +250,14 @@ public class Synthesizer {
     /**
      * @param fileName -
      */
-    public void parseFromCommandLine( String fileName ) {
+    public static void parseFromCommandLine( String fileName ) {
         try {
-            SpecParser sp = SpecParser.getInstance();
             
-            String file = sp.getStringFromFile( RuntimeProperties.packageDir + fileName );
+            String file = SpecParser.getStringFromFile( RuntimeProperties.packageDir + fileName );
 
-            String mainClassName = sp.getClassName( file );
+            String mainClassName = SpecParser.getClassName( file );
             
-            ClassList classList = sp.parseSpecification( file );
+            ClassList classList = SpecParser.parseSpecification( file );
             String prog = makeProgramText( file, true, classList, mainClassName, null ); //changed to true
 
             makeProgram( prog, classList, mainClassName );

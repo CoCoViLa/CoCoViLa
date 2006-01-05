@@ -173,7 +173,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     {
     	arguments = null;
     	
-    	Synthesizer.getInstance().makeProgram( jta_generatedCode.getText(), classList,
+    	Synthesizer.makeProgram( jta_generatedCode.getText(), classList,
                            mainClassName );
         runner = new ProgramRunner();
         ArrayList<String> watchFields = watchableFields( objects );
@@ -257,16 +257,16 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         try {
             String fullSpec = jta_spec.getText();
 
-            mainClassName = SpecParser.getInstance().getClassName( fullSpec );
+            mainClassName = SpecParser.getClassName( fullSpec );
             
             if ( RuntimeProperties.isLogInfoEnabled() )
     			db.p( "Computing " + mainClassName );
             
-            classList = SpecParser.getInstance().parseSpecification( fullSpec );
+            classList = SpecParser.parseSpecification( fullSpec );
             jta_generatedCode.setText( "" );
             assumptions.clear();
             jta_generatedCode.append(
-            		Synthesizer.getInstance().makeProgramText( fullSpec, computeAll, classList, mainClassName, assumptions ) );
+            		Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, assumptions ) );
             tabbedPane.setSelectedComponent( progText );
         } catch ( UnknownVariableException uve ) {
 

@@ -485,7 +485,7 @@ public class PackageParser {
                 newClass.fields = classFields;
                 ArrayList<ClassField> a = new ArrayList<ClassField>();
                 try {
-                    a = SpecParser.getInstance().getFields( path + File.separator + newClass.name + ".java" );
+                    a = SpecParser.getFields( path + File.separator + newClass.name + ".java" );
                 } catch ( IOException e ) {
                     db.p( "Warning: class " + newClass.name +
                           " specified in package does not exist." );

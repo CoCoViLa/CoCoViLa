@@ -17,7 +17,7 @@ public class PlannerFactory {
 
 	public List<IPlanner> getAllInstances() {
 		List<IPlanner> list = new ArrayList<IPlanner>();
-		list.add(Planner.getInstance());
+		//list.add(Planner.getInstance());
 		list.add(DepthFirstPlanner.getInstance());
 		return list;
 	}

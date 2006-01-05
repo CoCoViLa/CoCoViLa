@@ -264,4 +264,8 @@ public class ClassField implements Cloneable, Serializable {
 			return isConstant;
 		}
 
+		public void setName(String name) {
+			this.name = name;
+		}
+
 }
