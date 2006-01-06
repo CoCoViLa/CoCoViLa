@@ -13,12 +13,10 @@ import ee.ioc.cs.vsle.equations.EquationSolver;
 
 /**
  * This class takes care of parsing the specification and translating it into a graph on which planning can be run.
- * @author Ando Saabas
+ * @author Ando Saabas, Pavel Grigorenko
  */
 public class SpecParser {
 
-	private final static SpecParser s_instance = new SpecParser();
-	
 	private SpecParser() {}
 	
     public static void main( String[] args ) {
@@ -342,6 +340,8 @@ public class SpecParser {
 
                             String[] inputs = pieces[ 1 ].trim().split( " " );
 
+                            //checkAliasLength( inputs, vars, className );
+                            
                             if ( !inputs[ 0 ].equals( "" ) ) {
                                 classRelation.addInputs( inputs, vars );
                             }
@@ -391,36 +391,8 @@ public class SpecParser {
 
                             String[] inputs = matcher2.group( 1 ).trim().split( " *, *", -1 );
 
-                            //check if inputs contain <alias>.lenth variable
-                            for( int i = 0; i < inputs.length; i++ ) {
-                            	String input = inputs[i];
-                            	if( input.endsWith( ".length" ) ) {
-                            		int index = input.lastIndexOf( ".length" );
-                            		String aliasName = input.substring( 0, index );
-                            		ClassField field = ClassRelation.getVar( aliasName, vars );
-                            		if( field != null && field.isAlias() ) {
-                            			Alias alias = (Alias)field;
-                            			String aliasLengthName = 
-                            				( (alias.isWildcard() ? "*" : "" ) + aliasName + "_LENGTH" );
-                            			if( varListIncludes( vars, aliasLengthName ) ) {
-                            				inputs[i] = aliasLengthName;
-                            				continue;
-                            			}
-                            			
-                            			int length = alias.getVars().size();
-                            			
-                            			ClassField var = new ClassField( aliasLengthName, "int", "" + length, true );
-
-                                        vars.add( var );
-                                        
-                                        inputs[i] = aliasLengthName;
-                                        
-                            		} else {
-                            			throw new UnknownVariableException( "Alias " + aliasName +
-                                                " not found in " + className );
-                            		}
-                            	}
-                            }
+                            checkAliasLength( inputs, vars, className );
+                            
                             if ( !inputs[ 0 ].equals( "" ) ) {
                                 classRelation.addInputs( inputs, vars );
                             }
@@ -468,12 +440,48 @@ public class SpecParser {
         return classList;
     }
 
+    private static void checkAliasLength( String inputs[], ArrayList<ClassField> vars, String className ) 
+    				throws UnknownVariableException {
+    	for( int i = 0; i < inputs.length; i++ ) {
+        	inputs[i] = checkAliasLength( inputs[i], vars, className ) ;
+    	}
+    }
+    
+    private static String checkAliasLength( String input, ArrayList<ClassField> vars, String className ) 
+    				throws UnknownVariableException {
+    	//check if inputs contain <alias>.lenth variable
+    	if( input.endsWith( ".length" ) ) {
+    		int index = input.lastIndexOf( ".length" );
+    		String aliasName = input.substring( 0, index );
+    		ClassField field = ClassRelation.getVar( aliasName, vars );
+    		if( field != null && field.isAlias() ) {
+    			Alias alias = (Alias)field;
+    			String aliasLengthName = 
+    				( (alias.isWildcard() ? "*" : "" ) + aliasName + "_LENGTH" );
+    			if( varListIncludes( vars, aliasLengthName ) ) {
+    				return aliasLengthName;
+    			}
+    			
+    			int length = alias.getVars().size();
+    			
+    			ClassField var = new ClassField( aliasLengthName, "int", "" + length, true );
+    			
+    			vars.add( var );
+    			
+    			return aliasLengthName;
+    			
+    		}
+			throw new UnknownVariableException( "Alias " + aliasName +
+					" not found in " + className );
+    	}
+    	return input;
+    }
+
     private static void getWildCards( ClassList classList, String output ) {
         String list[] = output.split( "\\." );
         for ( int i = 0; i < list.length; i++ ) {
             if ( RuntimeProperties.isLogDebugEnabled() ) db.p( list[ i ] );
         }
-
     }
 
     /**
@@ -532,11 +540,11 @@ public class SpecParser {
         return false;
     }
 
-    private static boolean varListIncludes( ArrayList vars, String varName ) {
+    private static boolean varListIncludes( ArrayList<ClassField> vars, String varName ) {
         ClassField cf;
 
         for ( int i = 0; i < vars.size(); i++ ) {
-            cf = ( ClassField ) vars.get( i );
+            cf = vars.get( i );
             if ( cf.getName().equals( varName ) ) {
                 return true;
             }
