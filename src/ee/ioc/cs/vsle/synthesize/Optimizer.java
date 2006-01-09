@@ -9,29 +9,19 @@ import ee.ioc.cs.vsle.util.*;
  */
 public class Optimizer {
     
-    private static Optimizer s_optimizer = null;
-    
     private Optimizer() {}
     
-    public static Optimizer getInstance()
-    {
-        if(s_optimizer == null)
-        {
-            s_optimizer = new Optimizer();
-        }
-        return s_optimizer;
-    }
 	/**
 	 Takes an algorithm and optimizes it to only calculate the variables that are targets.
 	 @return an algorithm for calculating the target variables
 	 @param algorithm an unoptimized algorithm
 	 @param targets the variables which the algorithm has to calculate (other branches are removed)
 	 */   
-    public void optimize(List<Rel> algorithm, Set<Var> targets) {
+    public static void optimize(List<Rel> algorithm, Set<Var> targets) {
     	optimize( algorithm, targets, "" );
     }
     
-	private void optimize(List<Rel> algorithm, Set<Var> targets, String p ) {
+	private static void optimize(List<Rel> algorithm, Set<Var> targets, String p ) {
 		Set<Var> stuff = targets;
 		Rel rel;
 		Var relVar;
@@ -96,7 +86,7 @@ public class Optimizer {
 			db.p( p + "Optimized Algorithm: " + algorithm );
 	}
 	
-	private String incPrefix( String p ) {
+	private static String incPrefix( String p ) {
 		if( p == null || p.length() == 0 ) {
 			return ">";
 		}

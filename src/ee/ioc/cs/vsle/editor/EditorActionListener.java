@@ -10,13 +10,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
 
-/**
- * Created by IntelliJ IDEA.
- * User: Ando
- * Date: 9.06.2004
- * Time: 22:12:14
- * To change this template use Options | File Templates.
- */
 public class EditorActionListener implements ActionListener {
     Editor editor;
 
@@ -155,11 +148,14 @@ public class EditorActionListener implements ActionListener {
                 }
             } else if ( e.getActionCommand().equals( Menu.SPECIFICATION ) ) {
                 if( editor.getCurrentCanvas() != null ) {
-                    ProgramTextEditor programEditor = new ProgramTextEditor( editor.
-                            getCurrentCanvas().
-                            connections, editor.getCurrentCanvas().objects,
-                            editor.getCurrentCanvas().vPackage, editor );
-
+                	
+                	ProgramRunner runner = new ProgramRunner( 
+                			editor.getCurrentCanvas().connections, 
+            				editor.getCurrentCanvas().objects,
+            				editor.getCurrentCanvas().vPackage );
+                	
+            		ProgramTextEditor programEditor = new ProgramTextEditor( editor, runner );
+            		
                     programEditor.setSize( 550, 450 );
                     programEditor.setVisible( true );
                 } else {
@@ -167,27 +163,23 @@ public class EditorActionListener implements ActionListener {
                 }
             } else if ( e.getActionCommand().equals( Menu.RUN ) ) {
             	if( editor.getCurrentCanvas() != null ) {
-            		ProgramTextEditor programEditor = new ProgramTextEditor( editor.
-            				getCurrentCanvas().
-            				connections, editor.getCurrentCanvas().objects,
-            				editor.getCurrentCanvas().vPackage, editor );
+            		ProgramRunner runner = new ProgramRunner( editor.
+            				getCurrentCanvas().connections, editor.getCurrentCanvas().objects,
+            				editor.getCurrentCanvas().vPackage );
             		
-            		programEditor.compute();
-            		programEditor.compileAndRun();
-            		programEditor.dispose();
+            		runner.compileAndRun( runner.compute() );
             	} else {
             		JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
             	}
             } else if ( e.getActionCommand().equals( Menu.RUNPROPAGATE ) ) {
             	if( editor.getCurrentCanvas() != null ) {
-            		ProgramTextEditor programEditor = new ProgramTextEditor( editor.
-            				getCurrentCanvas().
-            				connections, editor.getCurrentCanvas().objects,
-            				editor.getCurrentCanvas().vPackage, editor );
-            		programEditor.compute();
-            		programEditor.compileAndRun();
-            		programEditor.propagate();
-            		programEditor.dispose();
+            		ProgramRunner runner = new ProgramRunner( editor.
+            				getCurrentCanvas().connections, editor.getCurrentCanvas().objects,
+            				editor.getCurrentCanvas().vPackage );
+            		
+            		runner.compileAndRun( runner.compute() );
+            		runner.runPropagate();
+            		editor.repaint();
             	} else {
             		JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
             	}

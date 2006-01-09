@@ -3,212 +3,150 @@ package ee.ioc.cs.vsle.synthesize;
 import java.io.*;
 import java.util.*;
 
-
 class Problem implements Serializable {
 
-    private Set<Rel> axioms = new HashSet<Rel>(); 
-    private Set<Var> knownVars = new HashSet<Var>(); 
-    private List<Var> assumptions = new ArrayList<Var>(); 
-    private Set<Var> targetVars = new HashSet<Var>(); 
-    private Map<String, Var> allVars = new HashMap<String, Var>();
-    private Set<Rel> allRels = new HashSet<Rel>(); 
-    private Set<Rel> relWithSubtasks = new HashSet<Rel>(); 
-    private Set<Rel> subtasks = new HashSet<Rel>(); 
-    private Vector<Rel> subGoal = null;
+	private Set<Rel> axioms = new HashSet<Rel>();
 
-    private HashSet<Var> foundVars = new HashSet<Var>();
+	private Set<Var> knownVars = new HashSet<Var>();
 
-    Var getVarByFullName( String field ) {
-        for( Iterator it = allVars.values().iterator(); it.hasNext(); ) {
-            Var var = (Var)it.next();
+	private List<Var> assumptions = new ArrayList<Var>();
 
-            if( var.toString().equals( field ) ) {
-                return var;
-            }
-        }
-        return null;
-    }
+	private Set<Var> targetVars = new HashSet<Var>();
 
-    Set<Rel> getSubtasks() {
-        return subtasks;
-    }
+	private Map<String, Var> allVars = new HashMap<String, Var>();
 
-    void addSubtask( Rel rel ) {
-        subtasks.add( rel );
-    }
+	private Set<Rel> allRels = new HashSet<Rel>();
 
-    Map<String, Var> getAllVars() {
-        return allVars;
-    }
+	private Set<Rel> relWithSubtasks = new HashSet<Rel>();
 
-    Set<Rel> getAxioms() {
-        return axioms;
-    }
+	private Set<Rel> subtasks = new HashSet<Rel>();
 
-    Set<Var> getKnownVars() {
-        return knownVars;
-    }
+	private Vector<Rel> subGoal = null;
 
-    Set<Var> getFoundVars() {
-        return foundVars;
-    }
+	private HashSet<Var> foundVars = new HashSet<Var>();
 
+	Var getVarByFullName(String field) {
+		for (Iterator it = allVars.values().iterator(); it.hasNext();) {
+			Var var = (Var) it.next();
 
-    Set<Var> getTargetVars() {
-        return targetVars;
-    }
+			if (var.toString().equals(field)) {
+				return var;
+			}
+		}
+		return null;
+	}
 
-    Set<Rel> getAllRels() {
-        return allRels;
-    }
+	Set<Rel> getSubtasks() {
+		return subtasks;
+	}
 
-    Set<Rel> getRelsWithSubtasks() {
-        return relWithSubtasks;
-    }
+	void addSubtask(Rel rel) {
+		subtasks.add(rel);
+	}
 
-    void addAxiom( Rel rel ) {
-        axioms.add( rel );
-    }
+	Map<String, Var> getAllVars() {
+		return allVars;
+	}
 
-     void addKnown( Var var ) {
-        knownVars.add( var );
-    }
+	Set<Rel> getAxioms() {
+		return axioms;
+	}
 
-     void addKnown( List<Var> vars ) {
-        knownVars.addAll( vars );
-    }
+	Set<Var> getKnownVars() {
+		return knownVars;
+	}
 
-     void addTarget( Var var ) {
-        targetVars.add( var );
-    }
+	Set<Var> getFoundVars() {
+		return foundVars;
+	}
 
-     void addRel( Rel rel ) {
-        allRels.add( rel );
-    }
+	Set<Var> getTargetVars() {
+		return targetVars;
+	}
 
-     void addAllRels( HashSet<Rel> set ) {
-        allRels.addAll( set );
-    }
+	Set<Rel> getAllRels() {
+		return allRels;
+	}
 
-     void addRelWithSubtask( Rel rel ) {
-        relWithSubtasks.add( rel );
-    }
+	Set<Rel> getRelsWithSubtasks() {
+		return relWithSubtasks;
+	}
 
-     void addVar( Var var ) {
-        allVars.put( var.getObject() + "." + var.getName(), var );
-    }
+	void addAxiom(Rel rel) {
+		axioms.add(rel);
+	}
 
-     Problem getCopy() {
-        try {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            ObjectOutputStream oos = new ObjectOutputStream( bos );
-            oos.writeObject( this );
-            oos.flush();
+	void addKnown(Var var) {
+		knownVars.add(var);
+	}
 
-            ByteArrayInputStream bis = new ByteArrayInputStream( bos.toByteArray() );
+	void addKnown(List<Var> vars) {
+		knownVars.addAll(vars);
+	}
 
-            oos.close();
+	void addTarget(Var var) {
+		targetVars.add(var);
+	}
 
-            ObjectInputStream ois = new ObjectInputStream( bis );
+	void addRel(Rel rel) {
+		allRels.add(rel);
+	}
 
-            Problem problem = ( Problem ) ois.readObject();
+	void addAllRels(HashSet<Rel> set) {
+		allRels.addAll(set);
+	}
 
-            ois.close();
+	void addRelWithSubtask(Rel rel) {
+		relWithSubtasks.add(rel);
+	}
 
-            return problem;
+	void addVar(Var var) {
+		allVars.put(var.getObject() + "." + var.getName(), var);
+	}
 
-        } catch ( Exception e ) {
-            return null;
-        }
-    }
-
-    public String toString() {
-        return ( "All: " + allVars
-                 + "\n Rels: " + allRels
-                 + "\n Known: " + knownVars
-                 + "\n Targets:" + targetVars
-                 + "\n Axioms:" + axioms
-                 + "\n Subtasks:" + relWithSubtasks
-                 + "\n subGoal:" + subGoal
-                 + "\n" );
-    }
-
-//    public int isSubGoal( Rel comparableRel ) {
-//
-//        if ( subGoal != null ) {
-//
-//            for ( int i = 0; i < subGoal.size(); i++ ) {
-//
-//                Rel rel = subGoal.get(i);
-//
-//                if ( rel.equals( comparableRel ) ) {
-//
-//                    return i;
-//                }
-//            }
-//        }
-//
-//        return -1;
-//    }
-
-    int currentDepth = 0;
-
-    public void addToAlgorithm( Rel rel ) {
-        if ( currentDepth > 1 ) {
-            subGoal.get( currentDepth - 2 ).getAlgorithm().add( rel );
-        } else {
-//            algorithm.add( rel );
-            throw new IllegalStateException(
-				"Wrong Algorithm");
-        }
-    }
-
-//    public boolean decreaseCurrentDepth() {
-//        if( currentDepth > 1 ) {
-//            subGoal.removeElementAt( subGoal.size() - 1 );
-//            currentDepth--;
-//        }
-//        else
-//            return false;
-//
-//        return currentDepth == 0;
-//    }
-
-    public Rel getSubGoal( int depth ) {
-        return subGoal.get( depth - 1 );
-    }
-
-    public Rel getSubGoal() {
-        return subGoal.get(currentDepth-1);
-    }
-
-    public void setSubGoal( Rel goal, int depth ) {
-        if ( depth < 1 )
-            throw new IllegalStateException(
-                    "Root problem cannot contain subgoal" );
-
-        currentDepth = depth;
-
-        if ( subGoal == null )
-            subGoal = new Vector<Rel>( ( subtasks.size() == 0 ) ? 5 : subtasks.size() );
-//        System.err.println("Vector size: " + subGoal.size() + " goal " + subGoal);
-        if ( depth - 1 >= subGoal.size() )
-            subGoal.add( depth - 1, goal );
-        else
-            subGoal.set( depth - 1, goal );
-//        System.err.println("Vector size2: " + subGoal.size() + " goal " + subGoal);
-    }
-    
-    Rel getSubtask( Rel subt ) {
-        for ( Iterator<Rel> iter = subtasks.iterator(); iter.hasNext(); ) {
-            Rel subtask = iter.next();
-            if ( subtask.equals( subt ) )
-                return subtask;
-        }
-        return null;
-    }
+	Rel getSubtask(Rel subt) {
+		for (Iterator<Rel> iter = subtasks.iterator(); iter.hasNext();) {
+			Rel subtask = iter.next();
+			if (subtask.equals(subt))
+				return subtask;
+		}
+		return null;
+	}
 
 	public List<Var> getAssumptions() {
 		return assumptions;
 	}
+
+	Problem getCopy() {
+		try {
+			ByteArrayOutputStream bos = new ByteArrayOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(bos);
+			oos.writeObject(this);
+			oos.flush();
+
+			ByteArrayInputStream bis = new ByteArrayInputStream(bos
+					.toByteArray());
+
+			oos.close();
+
+			ObjectInputStream ois = new ObjectInputStream(bis);
+
+			Problem problem = (Problem) ois.readObject();
+
+			ois.close();
+
+			return problem;
+
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public String toString() {
+		return ("All: " + allVars + "\n Rels: " + allRels + "\n Known: "
+				+ knownVars + "\n Targets:" + targetVars + "\n Axioms:"
+				+ axioms + "\n Subtasks:" + relWithSubtasks + "\n subGoal:"
+				+ subGoal + "\n");
+	}
+
 }

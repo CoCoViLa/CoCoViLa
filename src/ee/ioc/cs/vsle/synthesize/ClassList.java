@@ -30,7 +30,7 @@ public class ClassList<E>
 		for (int i = 0; i < this.size(); i++) {
 			AnnotatedClass ac = (AnnotatedClass)this.get(i);
 
-			if (ac.name.equals(type)) {
+			if (ac.getName().equals(type)) {
 				return ac;
 			}
 		}

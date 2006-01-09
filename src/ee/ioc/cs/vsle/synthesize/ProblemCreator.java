@@ -33,8 +33,8 @@ public class ProblemCreator {
         Rel rel;
         HashSet<Rel> relSet = new HashSet<Rel>();
 
-        for ( int j = 0; j < ac.fields.size(); j++ ) {
-            cf = ac.fields.get( j );
+        for ( int j = 0; j < ac.getFields().size(); j++ ) {
+            cf = ac.getFields().get( j );
             if ( classes.getType( cf.getType() ) != null ) {
                 problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
             }
@@ -57,8 +57,8 @@ public class ProblemCreator {
             }
         }
 
-        for ( int j = 0; j < ac.classRelations.size(); j++ ) {
-            classRelation = ac.classRelations.get( j );
+        for ( int j = 0; j < ac.getClassRelations().size(); j++ ) {
+            classRelation = ac.getClassRelations().get( j );
             cf = null;
             String obj = caller;
 
@@ -181,8 +181,8 @@ public class ProblemCreator {
                 cf.getVars().add( clf );
             }
             
-            for ( int i = 0; i < ac.fields.size(); i++ ) {
-                clf = ac.fields.get( i );
+            for ( int i = 0; i < ac.getFields().size(); i++ ) {
+                clf = ac.getFields().get( i );
                 AnnotatedClass anc = classes.getType( clf.getType() );
                 if ( anc != null ) {
                     if ( anc.hasField( wildcardVar ) ) {
@@ -232,8 +232,8 @@ public class ProblemCreator {
 			}
         }
         
-    	for ( int i = 0; i < ac.fields.size(); i++ ) {
-    		clf = ac.fields.get( i );
+    	for ( int i = 0; i < ac.getFields().size(); i++ ) {
+    		clf = ac.getFields().get( i );
     		AnnotatedClass anc = classes.getType( clf.getType() );
     		if ( anc != null ) {
     			if ( anc.hasField( wildcardVar ) ) {
@@ -263,8 +263,8 @@ public class ProblemCreator {
     	rel.setMethod( classRelation.getMethod() );
     	rel.setObj( obj );
     	rel.setType( classRelation.getType() );
-    	for ( int i = 0; i < ac.fields.size(); i++ ) {
-    		clf = ac.fields.get( i );
+    	for ( int i = 0; i < ac.getFields().size(); i++ ) {
+    		clf = ac.getFields().get( i );
     		AnnotatedClass anc = classes.getType( clf.getType() );
     		if ( anc != null ) {
     			if ( anc.hasField( wildcardVar ) ) {
@@ -377,8 +377,8 @@ public class ProblemCreator {
 	   }
 	   ClassField clf;
 	   HashSet<Rel> set = new HashSet<Rel>();
-	   for ( int i = 0; i < ac.fields.size(); i++ ) {
-		   clf = ac.fields.get( i );
+	   for ( int i = 0; i < ac.getFields().size(); i++ ) {
+		   clf = ac.getFields().get( i );
 		   AnnotatedClass anc = classes.getType( clf.getType() );
 		   if ( anc != null ) {
 			   if ( anc.hasField( wildcardVar ) ) {

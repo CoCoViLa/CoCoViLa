@@ -21,7 +21,7 @@ class ClassRelation
 	private ArrayList<ClassField> inputs = new ArrayList<ClassField>();
 	private ArrayList<ClassRelation> subtasks = new ArrayList<ClassRelation>();
 	private ArrayList<ClassField> outputs = new ArrayList<ClassField>();
-        private ArrayList<ClassField> exceptions = new ArrayList<ClassField>();
+	private ArrayList<ClassField> exceptions = new ArrayList<ClassField>();
 
 	/**
 	 * Type of the relation.

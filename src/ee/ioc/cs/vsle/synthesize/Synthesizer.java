@@ -1,6 +1,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
@@ -26,7 +26,7 @@ public class Synthesizer {
     */
     public static void makeProgram( String progText, ClassList classes, String mainClassName ) {
         generateSubclasses( classes );
-        writeFile( progText, mainClassName );
+        FileFuncs.writeFile( progText, mainClassName, "java", RuntimeProperties.genFileDir );
     }
 
     /** Takes care of steps needed for planning and algorithm extracting, calling problem creator
@@ -68,9 +68,9 @@ public class Synthesizer {
         AnnotatedClass ac = classList.getType( "this" );
 
         // check all the fields and make declarations accordingly
-        for ( int i = 0; i < ac.fields.size(); i++ ) {
+        for ( int i = 0; i < ac.getFields().size(); i++ ) {
 
-            field = ac.fields.get( i );
+            field = ac.getFields().get( i );
             if ( !( field.getType().equals( "alias" ) || field.getType().equals( "void" ) ) ) {
                 if ( field.isSpecField() ) {
                     prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + " = new " +
@@ -137,23 +137,23 @@ public class Synthesizer {
 
         for ( int h = 0; h < classes.size(); h++ ) {
             pClass = ( AnnotatedClass ) classes.get( h );
-            if ( !pClass.name.equals( "this" ) ) {
+            if ( !pClass.getName().equals( "this" ) ) {
                 fileString = "";
                 try {
                 	fileString = SpecParser.getStringFromFile( RuntimeProperties.
-                            packageDir + File.separator + pClass.name + ".java" );
+                            packageDir + File.separator + pClass.getName() + ".java" );
                 	
                 } catch ( IOException io ) {
                     db.p( io );
                 }
                 // find the class declaration
-                pattern = Pattern.compile( "class[ \t\n]+" + pClass.name 
-                		+ "|" + "public class[ \t\n]+" + pClass.name);
+                pattern = Pattern.compile( "class[ \t\n]+" + pClass.getName() 
+                		+ "|" + "public class[ \t\n]+" + pClass.getName());
                 matcher = pattern.matcher( fileString );
 
                 // be sure class is public
                 if ( matcher.find() ) {
-                    fileString = matcher.replaceAll( "public class " + pClass.name );
+                    fileString = matcher.replaceAll( "public class " + pClass.getName() );
                 }
                 
                 String declars = "";
@@ -172,9 +172,9 @@ public class Synthesizer {
 
                             if ( !type.equals( "void" ) ) {
                                 for ( int i = 0; i < vs.length; i++ ) {
-                                    if ( isPrimitive( type ) ) {
+                                    if ( TypeUtil.isPrimitive( type ) ) {
                                         declars += "    public " + type + " " + vs[ i ] + ";\n";
-                                    } else if ( isArray( type ) ) {
+                                    } else if ( TypeUtil.isArray( type ) ) {
                                         declars += "    public " + type + " " + vs[ i ] + " ;\n";
                                     } else if ( classes.getType( type ) != null ) {
                                         declars += "    public " + type + " " + vs[ i ] +
@@ -203,48 +203,9 @@ public class Synthesizer {
                     fileString = matcher.replaceAll( "\n    " + declars );
                 }
 
-                writeFile( fileString, pClass.name );
-                /*try {
-                    PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter(
-                            RuntimeProperties.genFileDir + System.getProperty( "file.separator" ) +
-                            "" + pClass.name + ".java" ) ) );
-
-                    out.println( fileString );
-                    out.close();
-                } catch ( Exception e ) {
-                    db.p( e );
-                }*/
+                FileFuncs.writeFile( fileString, pClass.getName(), "java", RuntimeProperties.genFileDir );
             }
         }
-    }
-
-    private static String getTypeWithoutArray( String type ) {
-        return type.substring( 0, type.length() - 2 );
-    }
-
-    private static void writeFile( String prog, String mainClassName ) {
-        try {
-            PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter(
-                    RuntimeProperties.genFileDir + System.getProperty( "file.separator" ) +
-                    mainClassName + ".java" ) ) );
-
-            out.println( prog );
-            out.close();
-        } catch ( Exception e ) {
-            db.p( e );
-        }
-    }
-
-    private static boolean isPrimitive( String type ) {
-        return ( type.equals( "int" ) || type.equals( "double" ) || type.equals( "float" ) ||
-             type.equals( "long" ) || type.equals( "short" ) || type.equals( "boolean" ) ||
-             type.equals( "char" ) );
-    }
-
-    private static boolean isArray( String type ) {
-        int length = type.length();
-
-        return ( type.length() >= 2 && type.substring( length - 2, length ).equals( "[]" ) );
     }
 
     /**

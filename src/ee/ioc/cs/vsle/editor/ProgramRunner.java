@@ -1,25 +1,181 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.ObjectList;
-import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.vclass.ClassField;
+import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.synthesize.Var;
+import ee.ioc.cs.vsle.synthesize.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
 import javax.swing.*;
-import javax.swing.JTextArea;
 
 /**
  */
 public class ProgramRunner {
-	Object genObject;
+	private Object genObject;
 
+	private ObjectList objects;
+	private ClassList classList;
+    private List<Var> assumptions = new ArrayList<Var>(); 
+    private Object[] arguments;
+    private String mainClassName = new String();
+    private ArrayList relations;
+    private VPackage vPackage;
+    
+	public ProgramRunner( ArrayList relations, ObjectList objs, VPackage pack ) {
+		objects = GroupUnfolder.unfold( objs );
+		this.relations = relations;
+		this.vPackage = pack;
+	}
+	
+	public String getSpec() {
+		ISpecGenerator sgen = SpecGenFactory.getInstance().getCurrentSpecGen();
+
+        return sgen.generateSpec( objects, relations, vPackage );
+	}
+	
+	private Object[] getArguments() throws Exception {
+    	if( assumptions.isEmpty() ) {
+    		return new Object[0];
+    	}
+    	
+    	if( arguments == null ) {
+    		ProgramAssumptionsDialog ass = new ProgramAssumptionsDialog( null, mainClassName, assumptions );
+    		
+    		if( ass.isOK )
+    		{
+    			arguments = ass.getArgs();
+    		} else {
+    			throw new Exception( "Assumptions undefined" );
+    		}
+    	}
+    	
+    	return arguments;
+    }
+	
+	public boolean compileAndRun( String genCode )
+    {
+    	arguments = null;
+    	
+    	Synthesizer.makeProgram( genCode, classList, mainClassName );
+    	
+        ArrayList<String> watchFields = watchableFields( objects );
+        
+        try {
+        	return compileAndRun( watchFields, getArguments() ) != null;
+        } catch ( CompileException ce ) {
+            ErrorWindow.showErrorMessage(
+                    "Compilation failed:\n " + ce.excDesc );
+        } catch ( Exception ce ) {
+            ErrorWindow.showErrorMessage( ce.getMessage() );
+        }
+        
+        return false;
+    }
+	
+	public String invoke( String invokeText )
+    {
+    	ArrayList<String> watchFields = watchableFields( objects );
+
+        if ( genObject != null ) {
+            if ( !invokeText.equals( "" ) ) {
+                int k = Integer.parseInt( invokeText );
+
+                for ( int i = 0; i < k; i++ ) {
+                    try {
+						return run( watchFields, getArguments() );
+					} catch (Exception e) {
+						ErrorWindow.showErrorMessage( e.getMessage() );
+					}
+                }
+            } else {
+                try {
+					return run( watchFields, getArguments() );
+				} catch (Exception e) {
+					ErrorWindow.showErrorMessage( e.getMessage() );
+				}
+            }
+            
+            runPropagate();
+        }
+        return "";
+    }
+       
+	public String invokeNew( String invokeText ) {
+		arguments = null;
+		return invoke( invokeText );
+	}
+	
+    public String compute()
+    {
+    	return compute( getSpec(), true );
+    }
+    
+    public String compute( String fullSpec, boolean computeAll ) {
+    	
+        try {
+            mainClassName = SpecParser.getClassName( fullSpec );
+            
+            if ( RuntimeProperties.isLogInfoEnabled() )
+    			db.p( "Computing " + mainClassName );
+            
+            classList = SpecParser.parseSpecification( fullSpec );
+            assumptions.clear();
+            return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, assumptions );
+        } catch ( UnknownVariableException uve ) {
+
+            db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
+            ErrorWindow.showErrorMessage(
+                    "Fatal error: variable " + uve.excDesc + " not declared" );
+
+        } catch ( LineErrorException lee ) {
+            db.p( "Fatal error on line " + lee.excDesc );
+            ErrorWindow.showErrorMessage(
+                    "Syntax error on line '" + lee.excDesc + "'" );
+
+        } catch ( EquationException ee ) {
+            ErrorWindow.showErrorMessage( ee.excDesc );
+
+        } catch ( MutualDeclarationException lee ) {
+            db.p(
+                    "Mutual recursion in specifications, between classes "
+                    + lee.excDesc );
+            ErrorWindow.showErrorMessage(
+                    "Mutual recursion in specifications, classes " + lee.excDesc );
+
+        } catch ( SpecParseException spe ) {
+            db.p( spe.excDesc );
+            ErrorWindow.showErrorMessage( spe.excDesc );
+
+        } catch ( Exception ex ) {
+            ex.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    private ArrayList<String> watchableFields( ObjectList objects ) {
+        ClassField field;
+        GObj obj;
+
+        objects = GroupUnfolder.unfold( objects );
+        ArrayList<String> watchFields = new ArrayList<String>();
+
+        for ( int i = 0; i < objects.size(); i++ ) {
+            obj = ( GObj ) objects.get( i );
+            for ( int j = 0; j < obj.fields.size(); j++ ) {
+                field = ( ClassField ) obj.fields.get( j );
+                if ( field.isWatched() ) {
+                    watchFields.add( obj.name + "." + field.getName() );
+                }
+            }
+        }
+        return watchFields;
+    }
+    
 	private static HashSet<Var> foundVars = new HashSet<Var>();
 
 	public static void clearFoundVars() {
@@ -38,9 +194,6 @@ public class ProgramRunner {
 			if( !foundVars.contains(var) ) {
 				foundVars.add(var);
 			}
-//			if (!isFoundVar(var)) {
-//				foundVars.add(var);
-//			}
 		}
 	}
 
@@ -59,15 +212,11 @@ public class ProgramRunner {
 			System.err.println("foundVars: " + foundVars);
 	}
 
-	void runPropagate(Object genObject, ObjectList objects) {
+	public void runPropagate() {
 		try {
 			Class clasType;
 			Class clas = genObject.getClass();
 
-			/*
-			 * Method method = clas.getMethod("compute", null);
-			 * method.invoke(genObject, null);
-			 */
 			Field f, f2;
 			Object lastObj;
 			GObj obj;
@@ -77,7 +226,6 @@ public class ProgramRunner {
 			Var var;
 			boolean varIsComputed;
 			db.p("runPropagate() foundVars: " + foundVars);
-			// ee.ioc.cs.editor.util.db.p(genClass.getClass().getFields()[0]);
 			for (int i = 0; i < objects.size(); i++) {
 				obj = (GObj) objects.get(i);
 				f = clas.getDeclaredField(obj.name);
@@ -138,7 +286,6 @@ public class ProgramRunner {
 								}
 							}
 						}
-						// field.updateGraphics();
 					}
 				}
 			}
@@ -147,16 +294,24 @@ public class ProgramRunner {
 		}
 	}
 
-	Object compileAndRun(String programName, ArrayList<String> watchFields,
-			JTextArea runResultArea, Object[] args ) throws CompileException {
-		genObject = makeGeneratedObject(programName);
-		if (genObject != null) {
-			run(watchFields, runResultArea, args );
-		}
+	private Object compile() throws CompileException {
+		genObject = makeGeneratedObject( mainClassName );
+		
 		return genObject;
 	}
+	
+	private String compileAndRun( ArrayList<String> watchFields,
+			Object[] args ) throws CompileException {
+		
+		if ( compile() != null ) {
+			return run(watchFields, args );
+		}
+		return null;
+	}
 
-	void run(ArrayList<String> watchFields, JTextArea runResultArea, Object[] args ) {
+	private String run(ArrayList<String> watchFields, Object[] args ) {
+		StringBuffer result = new StringBuffer();
+		
 		try {
 			Class clas = genObject.getClass();
 			Method method = clas.getMethod("compute", Object[].class);
@@ -169,7 +324,6 @@ public class ProgramRunner {
 			StringTokenizer st;
 			Object lastObj;
 
-			// ee.ioc.cs.editor.util.db.p(genClass.getClass().getFields()[0]);
 			for (int i = 0; i < watchFields.size(); i++) {
 				lastObj = genObject;
 				clas = genObject.getClass();
@@ -185,38 +339,38 @@ public class ProgramRunner {
 						Class c = f.getType();
 
 						if (c.toString().equals("int")) {
-							// textArea.append((String)watchFields.get(i) +":
-							// "+f.getInt(lastObj)+"\n");
-							runResultArea.append(watchFields.get(i)
+							result.append(watchFields.get(i)
 									+ ": " + f.getInt(lastObj) + "\n");
 						} else if (c.toString().equals("double")) {
-							runResultArea.append(watchFields.get(i)
+							result.append(watchFields.get(i)
 									+ ": " + f.getDouble(lastObj) + "\n");
 						} else if (c.toString().equals("boolean")) {
-							runResultArea.append(watchFields.get(i)
+							result.append(watchFields.get(i)
 									+ ": " + f.getBoolean(lastObj) + "\n");
 						} else if (c.toString().equals("char")) {
-							runResultArea.append(watchFields.get(i)
+							result.append(watchFields.get(i)
 									+ ": " + f.getChar(lastObj) + "\n");
 						} else if (c.toString().equals("float")) {
-							runResultArea.append(watchFields.get(i)
+							result.append(watchFields.get(i)
 									+ ": " + f.getFloat(lastObj) + "\n");
 						} else {
-							runResultArea.append(watchFields.get(i)
+							result.append(watchFields.get(i)
 									+ ": " + f.get(lastObj) + "\n");
 						}
 					}
 
 				}
 			}
-			runResultArea.append("----------------------\n");
+			result.append("----------------------\n");
 
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
 		}
+		
+		return result.toString();
 	}
 
-	Object makeGeneratedObject(String programName) throws CompileException {
+	private Object makeGeneratedObject(String programName) throws CompileException {
 		CCL classLoader = new CCL();
 
 		Object inst = null;

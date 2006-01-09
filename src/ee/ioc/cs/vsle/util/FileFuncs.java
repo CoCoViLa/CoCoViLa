@@ -2,6 +2,8 @@ package ee.ioc.cs.vsle.util;
 
 import java.io.*;
 
+import ee.ioc.cs.vsle.editor.*;
+
 /**
  * Created by IntelliJ IDEA.
  * User: Ando
@@ -10,7 +12,7 @@ import java.io.*;
  * To change this template use Options | File Templates.
  */
 public class FileFuncs {
-	public String getFileContents(String fileName) {
+	public static String getFileContents(String fileName) {
 		String fileString = new String();
 		try {
 			BufferedReader in = new BufferedReader(new FileReader(fileName));
@@ -28,7 +30,7 @@ public class FileFuncs {
 		return fileString;
 	}
 
-	public void writeFile(String fileName, String text) {
+	public static void writeFile(String fileName, String text) {
 		try {
 			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName)));
 			out.println(text);
@@ -40,4 +42,19 @@ public class FileFuncs {
 		}
 	}
 
+	public static void writeFile( String prog, String mainClassName, String ext, String dir ) {
+        try {
+        	if( !dir.endsWith( System.getProperty( "file.separator" ) ) ) {
+        		dir += System.getProperty( "file.separator" );
+        	}
+            PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter(
+            		dir + System.getProperty( "file.separator" ) +
+                    mainClassName + "." + ext ) ) );
+
+            out.println( prog );
+            out.close();
+        } catch ( Exception e ) {
+            db.p( e );
+        }
+    }
 }

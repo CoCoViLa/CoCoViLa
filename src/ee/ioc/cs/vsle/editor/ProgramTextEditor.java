@@ -25,26 +25,21 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     
     private JPanel progText, specText, runResult;
     private JTextField invokeField;
-    private VPackage vPackage;
     private JTabbedPane tabbedPane;
-    private ObjectList objects;
-    private Object runnableObject;
+    
     private ProgramRunner runner;
-    private ClassList classList;
-    private List<Var> assumptions = new ArrayList<Var>(); 
-    private Object[] arguments;
-    private String mainClassName = new String();
+    
     private Editor editor;
 
-    public ProgramTextEditor( ArrayList relations, ObjectList objs, VPackage vPackage, Editor ed ) {
+    public ProgramTextEditor( Editor ed, ProgramRunner prunner ) {
         super( "Specification" );
         
         setDefaultCloseOperation( DISPOSE_ON_CLOSE );
         
         editor = ed;
-        this.vPackage = vPackage;
-        objects = GroupUnfolder.unfold( objs );
 
+        this.runner = prunner;
+        
         tabbedPane = new JTabbedPane();
 
         jta_spec = new JavaColoredTextPane();
@@ -125,9 +120,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
         tabbedPane.addTab( "Run results", runResult );
 
-        ISpecGenerator sgen = SpecGenFactory.getInstance().getCurrentSpecGen();
-
-        jta_spec.append( sgen.generateSpec( objects, relations, vPackage ) );
+        jta_spec.append( runner.getSpec() );
 
         getContentPane().add( tabbedPane );
         validate();
@@ -148,175 +141,29 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     	
     }
     public void actionPerformed( ActionEvent e ) {
-        if ( e.getSource() == computeGoal ) {            
-        	compute( false );
-        }
-        else if ( e.getSource() == computeAll ) {
-        	compute( true );            
+        if ( ( e.getSource() == computeGoal ) || ( e.getSource() == computeAll ) ) {            
+        	String res = runner.compute( jta_spec.getText(), e.getSource() == computeAll );
+        	if( res != null ) {
+        		jta_generatedCode.setText( res );
+        		tabbedPane.setSelectedComponent( progText );
+        	}
+        	validate();
         }
         else if ( e.getSource() == runProg ) {
-        	compileAndRun();
-        }
-        else if ( e.getSource() == propagate ) {
-        	propagate();
-        }
-        else if ( e.getSource() == invoke ) {
-        	invoke();
-        }
-        else if ( e.getSource() == invokeNew ) {
-        	arguments = null;
-        	invoke();
-        }
-    }
-
-    void compileAndRun()
-    {
-    	arguments = null;
-    	
-    	Synthesizer.makeProgram( jta_generatedCode.getText(), classList,
-                           mainClassName );
-        runner = new ProgramRunner();
-        ArrayList<String> watchFields = watchableFields( objects );
-        
-        try {
-            runnableObject = runner.compileAndRun( mainClassName,
-                    watchFields, jta_runResult, getArguments() );
-            if ( runnableObject != null ) {
+        	if ( runner.compileAndRun( jta_generatedCode.getText() ) ) {
                 tabbedPane.setSelectedComponent( runResult );
             }
-        } catch ( CompileException ce ) {
-            ErrorWindow.showErrorMessage(
-                    "Compilation failed:\n " + ce.excDesc );
-        } catch ( Exception ce ) {
-            ErrorWindow.showErrorMessage( ce.getMessage() );
         }
-    }
-    
-    private Object[] getArguments() throws Exception {
-    	if( assumptions.isEmpty() ) {
-    		return new Object[0];
-    	}
-    	
-    	if( arguments == null ) {
-    		ProgramAssumptionsDialog ass = new ProgramAssumptionsDialog( this, mainClassName, assumptions );
-    		
-    		if( ass.isOK )
-    		{
-    			arguments = ass.getArgs();
-    		} else {
-    			throw new Exception( "Assumptions undefined" );
-    		}
-    	}
-    	
-    	return arguments;
-    }
-    
-    void invoke()
-    {
-    	ArrayList<String> watchFields = watchableFields( objects );
-
-        if ( runnableObject != null ) {
-            if ( !invokeField.getText().equals( "" ) ) {
-                int k = Integer.parseInt( invokeField.getText() );
-
-                for ( int i = 0; i < k; i++ ) {
-                    try {
-						runner.run( watchFields, jta_runResult, getArguments() );
-					} catch (Exception e) {
-						ErrorWindow.showErrorMessage( e.getMessage() );
-					}
-                }
-            } else {
-                try {
-					runner.run( watchFields, jta_runResult, getArguments() );
-				} catch (Exception e) {
-					ErrorWindow.showErrorMessage( e.getMessage() );
-				}
-            }
-            
-            propagate();
+        else if ( e.getSource() == propagate ) {
+        	runner.runPropagate();
+        	editor.repaint();
         }
-    }
-    
-    void propagate()
-    {
-    	db.p( "propageerin" );
-        if ( runnableObject != null ) {
-            runner.runPropagate( runnableObject, objects );
+        else if ( e.getSource() == invoke ) {
+        	jta_runResult.append( runner.invoke( invokeField.getText() ) );
         }
-        editor.repaint();
-    }
-    
-    void compute()
-    {
-    	compute( true );
-    }
-    
-    private void compute( boolean computeAll ) {
-    	
-        try {
-            String fullSpec = jta_spec.getText();
-
-            mainClassName = SpecParser.getClassName( fullSpec );
-            
-            if ( RuntimeProperties.isLogInfoEnabled() )
-    			db.p( "Computing " + mainClassName );
-            
-            classList = SpecParser.parseSpecification( fullSpec );
-            jta_generatedCode.setText( "" );
-            assumptions.clear();
-            jta_generatedCode.append(
-            		Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, assumptions ) );
-            tabbedPane.setSelectedComponent( progText );
-        } catch ( UnknownVariableException uve ) {
-
-            db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
-            ErrorWindow.showErrorMessage(
-                    "Fatal error: variable " + uve.excDesc + " not declared" );
-
-        } catch ( LineErrorException lee ) {
-            db.p( "Fatal error on line " + lee.excDesc );
-            ErrorWindow.showErrorMessage(
-                    "Syntax error on line '" + lee.excDesc + "'" );
-
-        } catch ( EquationException ee ) {
-            ErrorWindow.showErrorMessage( ee.excDesc );
-
-        } catch ( MutualDeclarationException lee ) {
-            db.p(
-                    "Mutual recursion in specifications, between classes "
-                    + lee.excDesc );
-            ErrorWindow.showErrorMessage(
-                    "Mutual recursion in specifications, classes " + lee.excDesc );
-
-        } catch ( SpecParseException spe ) {
-            db.p( spe.excDesc );
-            ErrorWindow.showErrorMessage( spe.excDesc );
-
-        } catch ( Exception ex ) {
-            ex.printStackTrace();
+        else if ( e.getSource() == invokeNew ) {
+        	jta_runResult.append( runner.invokeNew( invokeField.getText() ) );
         }
-        
-        validate();
-    }
-    
-    private ArrayList<String> watchableFields( ObjectList objects ) {
-        ClassField field;
-        GObj obj;
-
-        objects = GroupUnfolder.unfold( objects );
-        ArrayList<String> watchFields = new ArrayList<String>();
-
-        for ( int i = 0; i < objects.size(); i++ ) {
-            obj = ( GObj ) objects.get( i );
-            for ( int j = 0; j < obj.fields.size(); j++ ) {
-                field = ( ClassField ) obj.fields.get( j );
-                if ( field.isWatched() ) {
-                    watchFields.add( obj.name + "." + field.getName() );
-                }
-            }
-        }
-        return watchFields;
     }
 
     static class CommentKeyListener implements KeyListener {

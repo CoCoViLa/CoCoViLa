@@ -15,11 +15,11 @@ import java.util.ArrayList;
  */
 public class AnnotatedClass {
 
-	String name;
-	AnnotatedClass parent;
-	ArrayList subClasses = new ArrayList();
-	ArrayList<ClassRelation> classRelations = new ArrayList<ClassRelation>();
-	ArrayList<ClassField> fields = new ArrayList<ClassField>();
+	private String name;
+	private AnnotatedClass parent;
+	private ArrayList subClasses = new ArrayList();
+	private ArrayList<ClassRelation> classRelations = new ArrayList<ClassRelation>();
+	private ArrayList<ClassField> fields = new ArrayList<ClassField>();
 
 	/**
 	 * Class constructor.
@@ -80,6 +80,18 @@ public class AnnotatedClass {
 				return f;
 		}
 		return null;
+	}
+
+	String getName() {
+		return name;
+	}
+
+	ArrayList<ClassRelation> getClassRelations() {
+		return classRelations;
+	}
+
+	ArrayList<ClassField> getFields() {
+		return fields;
 	}
 }
 
