@@ -21,52 +21,54 @@ public class SpecGenerator implements ISpecGenerator {
 	public String generateSpec(ObjectList objects, ArrayList relations, VPackage pack) {
 		GObj obj;
 		ClassField field;
-		String methName = RuntimeProperties.packageDir + pack.name + ".meth";
-		String specName = RuntimeProperties.packageDir + pack.name + ".spec";
+		File methF = new File( RuntimeProperties.packageDir + pack.name + ".meth" );
+		File specF = new File( RuntimeProperties.packageDir + pack.name + ".spec" );
 		String method = "";
-		String spec  ="";
+		String spec  = "";
 		try {
-			BufferedReader in = new BufferedReader(new FileReader(methName));
-			String lineString = new String();
-
-			while ( (lineString = in.readLine()) != null) {
-				method += lineString+"\n";
+			BufferedReader in;
+			String lineString;
+			
+			if( methF.exists() ) {
+				in = new BufferedReader(new FileReader(methF));
+				lineString = new String();
+				
+				while ( (lineString = in.readLine()) != null) {
+					method += lineString+"\n";
+				}
+				in.close();
 			}
-			in.close();
-
-			in = new BufferedReader(new FileReader(specName));
-
-			while ( (lineString = in.readLine()) != null) {
-				spec += lineString+"\n";
+			
+			if( specF.exists() ) {
+				in = new BufferedReader(new FileReader(specF));
+				
+				while ( (lineString = in.readLine()) != null) {
+					spec += lineString+"\n";
+				}
+				in.close();
 			}
-			in.close();
-
 		} catch (IOException ioe)     {
-			//ioe.printStackTrace();
-                        db.p("Method file " + methName + " does not exist");
+			db.p( ioe.getMessage() );
 		}
-
-
-
-
+		
 		StringBuffer s = new StringBuffer();
 		s.append("public class " + pack.getPackageClassName() + " {");
 		s.append("\n    /*@ specification  " + pack.getPackageClassName() + " {\n");
-
+		
 		for (int i = 0; i < objects.size(); i++) {
 			obj = (GObj) objects.get(i);
 			s.append(
-				"    " + obj.getClassName() + " " + obj.getName() + ";\n");
+					"    " + obj.getClassName() + " " + obj.getName() + ";\n");
 			for (int j = 0; j < obj.fields.size(); j++) {
 				field = (ClassField) obj.fields.get(j);
 				if (field.getValue() != null) {
 					if (field.getType().equals("String")) {
 						s.append("        " + obj.getName() + "." + field.getName()
-							+ " = \"" + field.getValue() + "\";\n");
+								+ " = \"" + field.getValue() + "\";\n");
 					} else if (field.isPrimitiveArray()) {
 						s.append(
-							"        " + obj.getName() + "." + field.getName()
-							+ " = {");
+								"        " + obj.getName() + "." + field.getName()
+								+ " = {");
 						String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
@@ -75,11 +77,11 @@ public class SpecGenerator implements ISpecGenerator {
 								s.append(", " + split[k]);
 						}
 						s.append("};\n");
-
+						
 					} else if (field.isPrimOrStringArray()) {
 						s.append(
-							"        " + obj.getName() + "." + field.getName()
-							+ " = {");
+								"        " + obj.getName() + "." + field.getName()
+								+ " = {");
 						String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
@@ -90,42 +92,42 @@ public class SpecGenerator implements ISpecGenerator {
 						s.append("};\n");
 					} else {
 						s.append(
-							"        " + obj.getName() + "." + field.getName() + " = "
-							+ field.getValue() + ";\n");
+								"        " + obj.getName() + "." + field.getName() + " = "
+								+ field.getValue() + ";\n");
 					}
 				}
 			}
 		}
-			Connection rel;
-
+		Connection rel;
+		
 		for (int i = 0; i < relations.size(); i++) {
 			rel = (Connection) relations.get(i);
-
-
-
+			
+			
+			
 			if (rel.endPort.getName().equals("any")) {
 				s.append(
-					"    " + rel.endPort.obj.getName() + "." + rel.beginPort.getName()
-					+ " = " + rel.beginPort.obj.getName() + "."
-					+ rel.beginPort.getName() + ";\n");
+						"    " + rel.endPort.obj.getName() + "." + rel.beginPort.getName()
+						+ " = " + rel.beginPort.obj.getName() + "."
+						+ rel.beginPort.getName() + ";\n");
 			}  else if  (rel.beginPort.getName().equals("any")) {
 				s.append(
-					"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
-					+ " = " + rel.beginPort.obj.getName() + "."
-					+ rel.endPort.getName() + ";\n");
+						"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
+						+ " = " + rel.beginPort.obj.getName() + "."
+						+ rel.endPort.getName() + ";\n");
 			} else   {
 				s.append(
-					"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
-					+ " = " + rel.beginPort.obj.getName() + "."
-					+ rel.beginPort.getName() + ";\n");
+						"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
+						+ " = " + rel.beginPort.obj.getName() + "."
+						+ rel.beginPort.getName() + ";\n");
 			}
-
+			
 		}
-                s.append(spec);
+		s.append(spec);
 		s.append("    }@*/\n");
 		s.append("\t"+method);
 		s.append("\n}");
-
+		
 		return s.toString();
 	}
 	
