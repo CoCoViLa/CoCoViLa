@@ -23,8 +23,9 @@ public class Synthesizer {
     This method makes a compilable class from problem specification, calling createProblem,
     planner, generates needed classes(_Class_ notation), putting it all together and writing into
     a file.
+     * @throws SpecParseException 
     */
-    public static void makeProgram( String progText, ClassList classes, String mainClassName ) {
+    public static void makeProgram( String progText, ClassList classes, String mainClassName ) throws SpecParseException {
         generateSubclasses( classes );
         FileFuncs.writeFile( progText, mainClassName, "java", RuntimeProperties.genFileDir );
     }
@@ -125,8 +126,9 @@ public class Synthesizer {
     /**
      Generates compilable java classes from the annotated classes that have been used in the specification.
      @param classes List of classes obtained from the ee.ioc.cs.editor.synthesize.SpecParser
+     * @throws SpecParseException 
      */
-    private static void generateSubclasses( ClassList classes ) {
+    private static void generateSubclasses( ClassList classes ) throws SpecParseException {
 
         AnnotatedClass pClass;
         String fileString;
@@ -198,11 +200,13 @@ public class Synthesizer {
 
                 // find spec
                 pattern = Pattern.compile(
-                        "/\\*@.*specification[ \t\n]+[a-zA-Z_0-9-.]+[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *",
+                        "/\\*@.*specification[ \t\n]+[a-zA-Z_0-9-.]+[ \t\n]*(super ([ a-zA-Z_0-9-,]+ ))?[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *",
                         Pattern.DOTALL );
                 matcher = pattern.matcher( fileString );
                 if ( matcher.find() ) {
-                    fileString = matcher.replaceAll( "\n    " + declars );
+                    fileString = matcher.replaceAll( "\n" + declars );
+                } else {
+                	throw new SpecParseException( "Unable to parse " + pClass.getName() + " specification" );
                 }
 
                 FileFuncs.writeFile( fileString, pClass.getName(), "java", RuntimeProperties.genFileDir );

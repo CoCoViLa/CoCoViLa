@@ -60,15 +60,18 @@ public class ProgramRunner {
 		
 		arguments = null;
 		
-		Synthesizer.makeProgram( genCode, classList, mainClassName );
-		
 		try {
+			Synthesizer.makeProgram( genCode, classList, mainClassName );
+			
 			if ( makeGeneratedObject() ) {
 				return run();
 			}
 		} catch ( CompileException ce ) {
 			ErrorWindow.showErrorMessage(
 					"Compilation failed:\n " + ce.excDesc );
+		} catch (SpecParseException e) {
+			ErrorWindow.showErrorMessage(
+					"Compilation failed:\n " + e.excDesc );
 		} catch ( Exception ce ) {
 			ErrorWindow.showErrorMessage( ce.getMessage() );
 		}
