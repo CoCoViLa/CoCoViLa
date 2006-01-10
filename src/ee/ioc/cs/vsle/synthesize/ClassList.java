@@ -30,7 +30,7 @@ public class ClassList<E>
 		for (int i = 0; i < this.size(); i++) {
 			AnnotatedClass ac = (AnnotatedClass)this.get(i);
 
-			if (ac.getName().equals(type)) {
+			if (ac.getName().equals(type) && !ac.isOnlyForSuperclassGeneration() ) {
 				return ac;
 			}
 		}
@@ -38,6 +38,15 @@ public class ClassList<E>
 	} // getType
 
 
-    /** @link dependency */
-    /*# AnnotatedClass lnkAnnotatedClass; */
+	public ArrayList<AnnotatedClass> getSuperClasses() {
+		ArrayList<AnnotatedClass> a = new ArrayList<AnnotatedClass>();
+		for (int i = 0; i < this.size(); i++) {
+			AnnotatedClass ac = (AnnotatedClass)this.get(i);
+
+			if ( ac.isOnlyForSuperclassGeneration() ) {
+				a.add( ac );
+			}
+		}
+		return a;
+	} // getType
 }

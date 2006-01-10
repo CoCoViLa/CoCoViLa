@@ -56,44 +56,42 @@ public class ProgramRunner {
     	return arguments;
     }
 	
-	public boolean compileAndRun( String genCode )
-    {
-    	arguments = null;
-    	
-    	Synthesizer.makeProgram( genCode, classList, mainClassName );
-    	
-        ArrayList<String> watchFields = watchableFields( objects );
-        
-        try {
-        	return compileAndRun( watchFields, getArguments() ) != null;
-        } catch ( CompileException ce ) {
-            ErrorWindow.showErrorMessage(
-                    "Compilation failed:\n " + ce.excDesc );
-        } catch ( Exception ce ) {
-            ErrorWindow.showErrorMessage( ce.getMessage() );
-        }
-        
-        return false;
-    }
+	public String compileAndRun( String genCode ) {
+		
+		arguments = null;
+		
+		Synthesizer.makeProgram( genCode, classList, mainClassName );
+		
+		try {
+			if ( makeGeneratedObject() ) {
+				return run();
+			}
+		} catch ( CompileException ce ) {
+			ErrorWindow.showErrorMessage(
+					"Compilation failed:\n " + ce.excDesc );
+		} catch ( Exception ce ) {
+			ErrorWindow.showErrorMessage( ce.getMessage() );
+		}
+		
+		return null;
+	}
 	
 	public String invoke( String invokeText )
     {
-    	ArrayList<String> watchFields = watchableFields( objects );
-
         if ( genObject != null ) {
             if ( !invokeText.equals( "" ) ) {
                 int k = Integer.parseInt( invokeText );
 
                 for ( int i = 0; i < k; i++ ) {
                     try {
-						return run( watchFields, getArguments() );
+						return run();
 					} catch (Exception e) {
 						ErrorWindow.showErrorMessage( e.getMessage() );
 					}
                 }
             } else {
                 try {
-					return run( watchFields, getArguments() );
+					return run();
 				} catch (Exception e) {
 					ErrorWindow.showErrorMessage( e.getMessage() );
 				}
@@ -157,7 +155,7 @@ public class ProgramRunner {
         return null;
     }
     
-    private ArrayList<String> watchableFields( ObjectList objects ) {
+    private ArrayList<String> watchableFields() {
         ClassField field;
         GObj obj;
 
@@ -294,28 +292,14 @@ public class ProgramRunner {
 		}
 	}
 
-	private Object compile() throws CompileException {
-		genObject = makeGeneratedObject( mainClassName );
-		
-		return genObject;
-	}
-	
-	private String compileAndRun( ArrayList<String> watchFields,
-			Object[] args ) throws CompileException {
-		
-		if ( compile() != null ) {
-			return run(watchFields, args );
-		}
-		return null;
-	}
-
-	private String run(ArrayList<String> watchFields, Object[] args ) {
+	private String run() {
 		StringBuffer result = new StringBuffer();
 		
 		try {
 			Class clas = genObject.getClass();
 			Method method = clas.getMethod("compute", Object[].class);
 			db.p( "Running" );
+			Object[] args = getArguments();
 			for (int i = 0; i < args.length; i++) {
 				db.p( args[i].getClass() + " " + args[i] );
 			}
@@ -324,6 +308,8 @@ public class ProgramRunner {
 			StringTokenizer st;
 			Object lastObj;
 
+			ArrayList<String> watchFields = watchableFields();
+			
 			for (int i = 0; i < watchFields.size(); i++) {
 				lastObj = genObject;
 				clas = genObject.getClass();
@@ -370,24 +356,23 @@ public class ProgramRunner {
 		return result.toString();
 	}
 
-	private Object makeGeneratedObject(String programName) throws CompileException {
+	private boolean makeGeneratedObject() throws CompileException {
 		CCL classLoader = new CCL();
 
-		Object inst = null;
+		genObject = null;
 		try {
-			if (classLoader.compile2(programName)) {				
-				Class clas = classLoader.loadClass(programName);
-				inst = clas.newInstance();
+			if (classLoader.compile2(mainClassName)) {				
+				Class clas = classLoader.loadClass(mainClassName);
+				genObject = clas.newInstance();
 			}
-
+			return true;
 		} catch (NoClassDefFoundError e) { 
 			JOptionPane.showMessageDialog(null, "Class not found:\n" + e.getMessage(),
 					"Execution error", JOptionPane.ERROR_MESSAGE);
 			e.printStackTrace(System.err);
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
-			return null;
 		}
-		return inst;
+		return false;
 	}
 }

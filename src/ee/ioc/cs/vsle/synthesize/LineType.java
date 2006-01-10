@@ -11,6 +11,7 @@ public class LineType {
             TYPE_ALIAS = 5,
             TYPE_SPECAXIOM = 6,
             TYPE_CONST = 7,
+            TYPE_SUPERCLASSES = 8,
             TYPE_ERROR = 10;
 
 	private int type;
@@ -22,7 +23,7 @@ public class LineType {
 	}
 
 	public String toString() {
-		return (Integer.toString(type) + specLine);
+		return ( "Type=" + Integer.toString(type) + " Line=" + specLine);
 	}
 
         int getType() {

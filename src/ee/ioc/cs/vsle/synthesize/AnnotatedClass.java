@@ -16,20 +16,10 @@ import java.util.ArrayList;
 public class AnnotatedClass {
 
 	private String name;
-	private AnnotatedClass parent;
-	private ArrayList subClasses = new ArrayList();
+	private ArrayList<AnnotatedClass> superClasses = new ArrayList<AnnotatedClass>();
 	private ArrayList<ClassRelation> classRelations = new ArrayList<ClassRelation>();
 	private ArrayList<ClassField> fields = new ArrayList<ClassField>();
-
-	/**
-	 * Class constructor.
-	 * @param s String
-	 * @param p ee.ioc.cs.editor.synthesize.AnnotatedClass
-	 */AnnotatedClass(String s, AnnotatedClass p) {
-		name = s;
-		parent = p;
-	} // ee.ioc.cs.editor.synthesize.AnnotatedClass
-
+	private boolean isOnlyForSuperclassGeneration = false;
 	/**
 	 * Class constructor.
 	 * @param s String
@@ -37,6 +27,9 @@ public class AnnotatedClass {
 		name = s;
 	} // ee.ioc.cs.editor.synthesize.AnnotatedClass
 
+	 void addSuperClass( AnnotatedClass clas ) {
+		 superClasses.add( clas );
+	 }
 	/**
 	 * Adds a new field to the ArrayList of fields.
 	 * @param field ClassField - a field to be appended to the list of fields.
@@ -92,6 +85,18 @@ public class AnnotatedClass {
 
 	ArrayList<ClassField> getFields() {
 		return fields;
+	}
+
+	public ArrayList<AnnotatedClass> getSuperClasses() {
+		return superClasses;
+	}
+
+	public boolean isOnlyForSuperclassGeneration() {
+		return isOnlyForSuperclassGeneration;
+	}
+
+	public void setOnlyForSuperclassGeneration(boolean isOnlyForSuperclassGeneration) {
+		this.isOnlyForSuperclassGeneration = isOnlyForSuperclassGeneration;
 	}
 }
 

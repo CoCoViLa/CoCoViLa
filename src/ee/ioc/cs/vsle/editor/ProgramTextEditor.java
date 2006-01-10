@@ -1,13 +1,5 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.synthesize.*;
-import ee.ioc.cs.vsle.ccl.*;
-
-import java.util.*;
-import java.util.List;
-
 import java.awt.*;
 import java.awt.event.*;
 
@@ -150,7 +142,9 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         	validate();
         }
         else if ( e.getSource() == runProg ) {
-        	if ( runner.compileAndRun( jta_generatedCode.getText() ) ) {
+        	String result = runner.compileAndRun( jta_generatedCode.getText() );
+        	if ( result != null ) {
+        		jta_runResult.setText( result );
                 tabbedPane.setSelectedComponent( runResult );
             }
         }

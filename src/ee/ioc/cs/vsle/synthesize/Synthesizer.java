@@ -129,15 +129,17 @@ public class Synthesizer {
     private static void generateSubclasses( ClassList classes ) {
 
         AnnotatedClass pClass;
-        String lineString = "", fileString;
+        String fileString;
         Pattern pattern;
         Matcher matcher;
 
+        HashSet<String> generated = new HashSet<String>();
         // for each class generate new one used in synthesis
 
         for ( int h = 0; h < classes.size(); h++ ) {
             pClass = ( AnnotatedClass ) classes.get( h );
-            if ( !pClass.getName().equals( "this" ) ) {
+            if ( !pClass.getName().equals( "this" ) && !generated.contains( pClass.getName() ) ) {
+            	generated.add( pClass.getName() );
                 fileString = "";
                 try {
                 	fileString = SpecParser.getStringFromFile( RuntimeProperties.

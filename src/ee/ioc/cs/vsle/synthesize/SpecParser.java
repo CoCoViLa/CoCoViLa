@@ -22,8 +22,10 @@ public class SpecParser {
     public static void main( String[] args ) {
 
         try {
-            String s = new String( getStringFromFile( args[ 0 ] ) );
-            ArrayList a = getSpec( s, false );
+            //String s = new String( getStringFromFile( args[ 0 ] ) );
+            String ss = "class blah /*@ specification blah super ffff, fffdddd, gjjjh { spec } @*/";
+            
+            ArrayList<String> a = getSpec( ss, false );
 
             while ( !a.isEmpty() ) {
                 if ( !( a.get( 0 ) ).equals( "" ) ) {
@@ -111,6 +113,15 @@ public class SpecParser {
                 return new LineType( LineType.TYPE_ALIAS, returnLine );
             }
 			return new LineType( LineType.TYPE_ERROR, line );
+        } else if ( line.indexOf( "super" ) >= 0 ) {
+        	pattern = Pattern.compile( "super#([^ .]+)" );
+            matcher2 = pattern.matcher( line );
+            if ( matcher2.find() ) {
+                String returnLine = matcher2.group( 1 );
+
+                return new LineType( LineType.TYPE_SUPERCLASSES, returnLine );
+            }
+			return new LineType( LineType.TYPE_ERROR, line );
         } else if ( line.indexOf( ":=" ) >= 0 ) {
         	pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*[\\[\\]]*) +([a-zA-Z_$][0-9a-zA-Z_$]*) *:= *([a-zA-Z0-9.{}\"]+|new [a-zA-Z0-9.{}\\[\\]]+) *$" );
             matcher2 = pattern.matcher( line );
@@ -179,10 +190,21 @@ public class SpecParser {
 
         // find spec
         pattern = Pattern.compile( //"[ ]+(super [ a-zA-Z_0-9-,]+ )? "
-                ".*/\\*@.*specification [a-zA-Z_0-9-.]+ ?\\{ ?(.+) ?\\} ?@\\*/ ?" );
+                ".*/\\*@.*specification [a-zA-Z_0-9-.]+ ?(super ([ a-zA-Z_0-9-,]+ ))? ?\\{ ?(.+) ?\\} ?@\\*/ ?" );
         matcher = pattern.matcher( fileString );
         if ( matcher.find() ) {
-            fileString = matcher.group( 1 );
+        	String sc = "";
+        	if( matcher.group( 2 ) != null ) {
+        		sc += "super";
+        		String[] superclasses = matcher.group( 2 ).split( "," );
+        		for (int i = 0; i < superclasses.length; i++) {
+        			String t = superclasses[i].trim();
+        			if( t.length() > 0 )
+        			sc += "#" + t;
+				}
+        		sc += ";\n";
+        	}
+            fileString = sc + matcher.group( 3 );
         }
         return fileString;
     }
@@ -190,7 +212,7 @@ public class SpecParser {
     public static ClassList parseSpecification( String fullSpec ) throws IOException,
     										SpecParseException, EquationException {
     	HashSet<String> hs = new HashSet<String>();
-    	return parseSpecificationImpl( refineSpec( fullSpec ), "this", null, hs );
+    	return parseSpecificationImpl( refineSpec( fullSpec ), "this", hs );
     }
     
     /**
@@ -203,7 +225,7 @@ public class SpecParser {
      @param	checkedClasses the list of classes that parser has started to check. Needed to prevent infinite loop
      in case of mutual declarations.
      */
-    private static ClassList<AnnotatedClass> parseSpecificationImpl( String spec, String className, AnnotatedClass parent,
+    private static ClassList<AnnotatedClass> parseSpecificationImpl( String spec, String className,
                                          HashSet<String> checkedClasses ) throws IOException,
             SpecParseException, EquationException {
         Matcher matcher2;
@@ -211,7 +233,7 @@ public class SpecParser {
         String[] split;
         ArrayList<ClassField> vars = new ArrayList<ClassField>();
         ArrayList<String> subtasks = new ArrayList<String>();
-        AnnotatedClass annClass = new AnnotatedClass( className, parent );
+        AnnotatedClass annClass = new AnnotatedClass( className );
         ClassList<AnnotatedClass> classList = new ClassList<AnnotatedClass>();
 
         ArrayList<String> specLines = getSpec( spec, true );
@@ -222,8 +244,40 @@ public class SpecParser {
                 LineType lt = getLine( specLines );
 
                 if ( lt != null ) {
-                	db.p( "Parsing: Class " + className + " Line " + lt.getSpecLine() );
-                    if ( lt.getType() == LineType.TYPE_ASSIGNMENT ) {
+                	db.p( "Parsing: Class " + className + " " + lt );
+                	if ( lt.getType() == LineType.TYPE_SUPERCLASSES ) {
+                		split = lt.getSpecLine().split( "#", -1 );
+                		
+                		for (int i = 0; i < split.length; i++) {
+							String name = split[i];
+							
+							File file = new File( RuntimeProperties.packageDir + name + ".java" );
+
+	                        if ( file.exists() && isSpecClass( name ) ) {
+	                            if ( classList.getType( name ) == null ) {
+	                                checkedClasses.add( name );
+	                                String s = new String( getStringFromFile( RuntimeProperties.
+	                                        packageDir + name + ".java" ) );
+
+	                                ClassList<AnnotatedClass> superClasses = parseSpecificationImpl( refineSpec( s ), name,
+	                                        checkedClasses );
+	                                checkedClasses.remove( name );
+	                                
+	                                superClasses.getType( name ).setOnlyForSuperclassGeneration( true );
+	                                
+	                                for ( AnnotatedClass annCl : superClasses.getSuperClasses() ) {
+	                                	annClass.addSuperClass( annCl );
+	                                	annClass.getFields().addAll( annCl.getFields() );
+	                                	vars.addAll( annCl.getFields() );
+	                                	annClass.getClassRelations().addAll( annCl.getClassRelations() );
+	                                	annCl.getFields().clear();
+	                                	annCl.getClassRelations().clear();
+									}
+	                                classList.addAll( superClasses );
+	                            }
+	                        }
+						}
+                	} else if ( lt.getType() == LineType.TYPE_ASSIGNMENT ) {
                         split = lt.getSpecLine().split( ":", -1 );
                         ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION );
 
@@ -276,7 +330,7 @@ public class SpecParser {
                                         packageDir + type + ".java" ) );
 
                                 classList.addAll( parseSpecificationImpl( refineSpec( s ), type,
-                                        annClass, checkedClasses ) );
+                                        checkedClasses ) );
                                 checkedClasses.remove( type );
                                 specClass = true;
                             }
