@@ -11,6 +11,7 @@ import ee.ioc.cs.vsle.graphics.ShapeGroup;
 public class IconClass {
 	ShapeGroup shapeList;
 	ArrayList ports;
+	ArrayList fields;
 	String name;
 	String description;
 	String iconName;
@@ -22,6 +23,7 @@ public class IconClass {
 	IconClass(){
 		this.shapeList = new ShapeGroup(new ArrayList());
 		this.ports = new ArrayList();
+		this.fields = new ArrayList();
 		this.name = null;
 		this.description = null;
 		this.iconName = null;
@@ -170,5 +172,19 @@ public class IconClass {
 		for (int i = 0; i < ports.size(); i++){
 			((IconPort)ports.get(i)).shift(offsetX, offsetY);
 		}
+	}
+
+	/**
+	 * @return Returns the fields.
+	 */
+	public ArrayList getFields() {
+		return fields;
+	}
+
+	/**
+	 * @param fields The fields to set.
+	 */
+	public void setFields(ArrayList fields) {
+		this.fields = fields;
 	}
 }
