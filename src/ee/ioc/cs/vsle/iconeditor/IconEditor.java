@@ -12,6 +12,7 @@ import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.util.queryutil.DBResult;
 import ee.ioc.cs.vsle.vclass.*;
 
 public class IconEditor
@@ -37,10 +38,12 @@ public class IconEditor
 	Dimension drawAreaSize = new Dimension(700, 500);
 	ShapeGroup shapeList = new ShapeGroup(new ArrayList());
 	ArrayList <IconClass> icons = new ArrayList<IconClass>();
+	ArrayList  <ClassField>fields = new ArrayList<ClassField>();
 	Shape currentShape;
 	ArrayList ports = new ArrayList();
 	IconKeyOps keyListener;
 	ArrayList <String> packageClasses = new ArrayList <String>();
+	boolean newClass = true;
 	
 	ChooseClassDialog ccd = new ChooseClassDialog(packageClasses);
 	DeleteClassDialog dcd = new DeleteClassDialog(packageClasses);
@@ -426,7 +429,7 @@ public class IconEditor
 			for (int i = 0; i < ports.size(); i++) {
 				IconPort p = (IconPort) ports.get(i);
 
-				buf.append("<port name=\"");
+				buf.append("		<port name=\"");
 				buf.append(p.getName());
 				buf.append("\" type=\"");
 				buf.append(p.type);
@@ -458,7 +461,7 @@ public class IconEditor
 				buf.append("</port>\n");
 				*/
 			}
-			buf.append("</ports>");
+			buf.append("	</ports>\n");
 		}
 		return buf;
 	} // appendPorts
@@ -466,7 +469,7 @@ public class IconEditor
 	public StringBuffer appendClassFields(StringBuffer buf) {
 		ClassPropertiesDialog.removeEmptyRows();
 		if (RuntimeProperties.dbrClassFields != null && RuntimeProperties.dbrClassFields.getRowCount() > 0) {
-			buf.append("<fields>\n");
+			buf.append("	<fields>\n");
 			for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
 				String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], i);
 				String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], i);
@@ -475,12 +478,12 @@ public class IconEditor
 				if (fieldType == null) fieldType = "";
 				if (fieldValue == null) fieldValue = "";
 				if (fieldValue.equals(""))
-					buf.append("<field name=\"" + fieldName + "\" type=\"" + fieldType + "\"/>\n");
+					buf.append("		<field name=\"" + fieldName + "\" type=\"" + fieldType + "\"/>\n");
 				else
-					buf.append("<field name=\"" + fieldName + "\" type=\"" + fieldType + "\" value=\"" + fieldValue + "\" />\n");
+					buf.append("		<field name=\"" + fieldName + "\" type=\"" + fieldType + "\" value=\"" + fieldValue + "\" />\n");
 
 			}
-			buf.append("</fields>\n");
+			buf.append("	</fields>\n");
 		}
 		return buf;
 	} // appendClassFields
@@ -1047,6 +1050,9 @@ public class IconEditor
 	public void saveToPackage() {
 		Boolean inPackage = false;
 		String className = RuntimeProperties.className;
+		if (RuntimeProperties.classIcon == null) {
+			RuntimeProperties.classIcon = "default.gif";
+		}
 		
 		try {
 
@@ -1067,6 +1073,7 @@ public class IconEditor
 				// See if class allready exists in package
 				ci = new ClassImport(file, packageClasses, icons);
 				for (int i = 0; i< icons.size();i++){
+				
 					// class exists, move changed class to the end
 					
 					if (RuntimeProperties.className.equalsIgnoreCase(icons.get(i).getName())){
@@ -1078,18 +1085,33 @@ public class IconEditor
 						// set values to those on screen
 						icons.get(i).setBoundingbox(boundingbox);
 						icons.get(i).setDescription(RuntimeProperties.classDescription);
-						icons.get(i).setIconName(RuntimeProperties.classIcon);
+						if (RuntimeProperties.classIcon == null) {
+							icons.get(i).setIconName("default.gif");
+						}else {
+							icons.get(i).setIconName(RuntimeProperties.classIcon);
+						}
 						icons.get(i).setIsRelation(RuntimeProperties.classIsRelation);
 						icons.get(i).setName(RuntimeProperties.className);
 						icons.get(i).setPorts(ports);
 						icons.get(i).shiftPorts(classX,classY);
 						icons.get(i).setShapeList(shapeList);
-											
+						
+						if (RuntimeProperties.dbrClassFields != null && RuntimeProperties.dbrClassFields.getRowCount() > 0) {
+							fields.clear();
+							for (int j = 1; j <= RuntimeProperties.dbrClassFields.getRowCount(); j++) {
+								String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], j);
+								String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], j);
+								String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], j);
+								ClassField field = new ClassField (fieldName, fieldType, fieldValue);
+								fields.add(field);
+							} 
+						}
+						icons.get(i).setFields(fields);
 						icons.add(icons.get(i));
 						icons.remove(i);
 						// assume that we only have one class with that name
 						break;
-					}
+					}		
 				}
 				try {
 					// Read the contents of the package, escaping the package end that
@@ -1122,8 +1144,10 @@ public class IconEditor
 					}else {
 						// write all classes
 						for (int i = 0; i< icons.size(); i++) {
+							
 							classX = 0;
 							classY = 0;
+							
 							makeClass(icons.get(i));
 							content.append(getShapesInXML(false));
 						}
@@ -1140,7 +1164,7 @@ public class IconEditor
 					if (javaFile.exists()) {
 					
 						overWriteFile = JOptionPane.showConfirmDialog(null,"Java class already exists. Overwrite?");
-					}
+					} 
 					
 					if (overWriteFile != JOptionPane.CANCEL_OPTION) {
 						
@@ -1177,9 +1201,12 @@ public class IconEditor
 			exc.printStackTrace();
 		}
 		
+		
 	} // saveToPackage
 	
-	
+	public void copyFilesToNewDir() {
+		
+	}
 	/**
 	 * Sets all objects selected or unselected, depending on the method parameter value.
 	 * @param b - select or unselect shapes.
@@ -1651,7 +1678,12 @@ public class IconEditor
 				mListener.state = State.selection;
 				shapeCount = 0;
 				shapeList = new ShapeGroup(new ArrayList());
-				ports = new ArrayList();
+				
+				for (int i = RuntimeProperties.dbrClassFields.getRowCount(); i > 0; i--){
+					RuntimeProperties.dbrClassFields.removeRow(i);	
+				}
+				ports.clear();
+				fields.clear();
 				palette.boundingbox.setEnabled(true);
 				importClassFromPackage(file);
 			} catch (Exception exc) {
@@ -1672,6 +1704,7 @@ public class IconEditor
 		ccd.setVisible(true);
 		ccd.repaint();
 		String selection = ccd.getSelectedValue();
+		newClass = false;
 		for (int i = 0; i < icons.size(); i++){
 			if ((icons.get(i)).getName().equals(selection)) {
 				makeClass( icons.get(i));
@@ -1691,6 +1724,13 @@ public class IconEditor
 		icon.shiftPorts(classX, classY);
 		shapeList.shift(classX,classY);
 		ports = icon.getPorts();
+		fields = icon.getFields();
+		emptyClassFields();
+		for (int i = 0; i < fields.size(); i++) {
+			
+			String[] row = {(fields.get(i)).getName() , (fields.get(i)).getType(), (fields.get(i)).getValue()};
+			RuntimeProperties.dbrClassFields.appendRow(row);
+		}
 		RuntimeProperties.className = icon.getName();
 		RuntimeProperties.classDescription = icon.getDescription();
 		RuntimeProperties.classIcon = icon.getIconName();
