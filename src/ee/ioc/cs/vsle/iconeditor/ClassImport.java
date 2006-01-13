@@ -16,6 +16,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import ee.ioc.cs.vsle.graphics.*;
+import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
 public class ClassImport {
@@ -24,7 +25,7 @@ public class ClassImport {
 	ShapeGroup shapeList;
 	IconClass classIcon;
 	ArrayList <IconPort> ports;
-	
+	ArrayList <ClassField> fields;
 	
 /*
  * Takes the package file and gives a list of class names and a list of classes information
@@ -85,7 +86,9 @@ public class ClassImport {
 			String strVal;
 			int startAngle, arcAngle;
 			boolean filled, fixed, strict;
-			String name;
+			String name = null;
+			String type = null;
+			String value = null;
 			String fontName = null;
 			String fontStyle = null;
 			int fontSize = 10;
@@ -94,6 +97,7 @@ public class ClassImport {
 				inClass = true;
 				classIcon = new IconClass();
 				ports = new ArrayList<IconPort>();
+				fields = new ArrayList<ClassField>();
 				shapeList = new ShapeGroup (new ArrayList());
 			}
 			if(element.equals("name") && inClass){
@@ -109,8 +113,8 @@ public class ClassImport {
 				inIcon = true;
 			}
 			if (element.equals("rect")){
-				x = Integer.parseInt(attrs.getValue("x"));
-				y = Integer.parseInt(attrs.getValue("y"));
+				x = getCoordinate(attrs.getValue("x"));
+				y = getCoordinate(attrs.getValue("y"));
 				w = Integer.parseInt(attrs.getValue("width"));
 				h = Integer.parseInt(attrs.getValue("height"));
 				classIcon.setMax(w,h);
@@ -130,8 +134,8 @@ public class ClassImport {
 				rect.setFixed(fixed);
 				shapeList.add(rect);
 			}else if(element.equals("oval")){
-				x = Integer.parseInt(attrs.getValue("x"));
-				y = Integer.parseInt(attrs.getValue("y"));
+				x = getCoordinate(attrs.getValue("x"));
+				y = getCoordinate(attrs.getValue("y"));
 				w = Integer.parseInt(attrs.getValue("width"));
 				h = Integer.parseInt(attrs.getValue("height"));
 				classIcon.setMax(w,h);
@@ -153,10 +157,13 @@ public class ClassImport {
 				oval.setFixed(fixed);
 				shapeList.add(oval);
 			}else if(element.equals("line")){
-				x = Integer.parseInt(attrs.getValue("x1"));
-				y = Integer.parseInt(attrs.getValue("y1"));
-				x2 = Integer.parseInt(attrs.getValue("x2"));
-				y2 = Integer.parseInt(attrs.getValue("y2"));
+				fixed = Boolean.valueOf(attrs.getValue("fixed"));
+				
+				x = getCoordinate(attrs.getValue("x1"));
+				y = getCoordinate(attrs.getValue("y1"));
+				x2 = getCoordinate(attrs.getValue("x2"));
+				y2 = getCoordinate(attrs.getValue("y2"));
+				
 				col = Integer.parseInt(attrs.getValue("colour"));
 				strVal = attrs.getValue("stroke");
 				if (strVal != null)
@@ -168,13 +175,13 @@ public class ClassImport {
 				if (strVal != null)
 					tr = Integer.parseInt(strVal);
 				
-				fixed = Boolean.valueOf(attrs.getValue("fixed"));
+				
 				Line line = new Line(x, y, x2, y2, col, st, tr, lt);
 				line.setFixed(fixed);
 				shapeList.add(line);
 			}else if(element.equals("arc")){
-				x = Integer.parseInt(attrs.getValue("x"));
-				y = Integer.parseInt(attrs.getValue("y"));
+				x = getCoordinate(attrs.getValue("x"));
+				y = getCoordinate(attrs.getValue("y"));
 				w = Integer.parseInt(attrs.getValue("width"));
 				h = Integer.parseInt(attrs.getValue("height"));
 				classIcon.setMax(w,h);
@@ -200,8 +207,8 @@ public class ClassImport {
 				arc.setFixed(fixed);
 				shapeList.add(arc);
 			}else if (element.equals("bounds")){
-				x = Integer.parseInt(attrs.getValue("x"));
-				y = Integer.parseInt(attrs.getValue("y"));
+				x = getCoordinate(attrs.getValue("x"));
+				y = getCoordinate(attrs.getValue("y"));
 				w = Integer.parseInt(attrs.getValue("width"));
 				h = Integer.parseInt(attrs.getValue("height"));
 				classIcon.setMax(w,h);
@@ -209,8 +216,8 @@ public class ClassImport {
 				classIcon.boundingbox = b;
 				shapeList.add(b);
 			}else if(element.equals("dot")){
-				x = Integer.parseInt(attrs.getValue("x"));
-				y = Integer.parseInt(attrs.getValue("y"));
+				x = getCoordinate(attrs.getValue("x"));
+				y = getCoordinate(attrs.getValue("y"));
 				col = Integer.parseInt(attrs.getValue("colour"));
 				st = Integer.parseInt(attrs.getValue("stroke"));
 				tr = Integer.parseInt(attrs.getValue("transparency"));
@@ -219,8 +226,8 @@ public class ClassImport {
 				dot.setFixed(fixed);
 				shapeList.add(dot);
 			}else if(element.equals("text")){
-				x = Integer.parseInt(attrs.getValue("x"));
-				y = Integer.parseInt(attrs.getValue("y"));
+				x = getCoordinate(attrs.getValue("x"));
+				y = getCoordinate(attrs.getValue("y"));
 				col = Integer.parseInt(attrs.getValue("colour"));
 				fontSize = Integer.parseInt(attrs.getValue("fontsize"));
 				fontName = attrs.getValue("fontname");
@@ -244,14 +251,21 @@ public class ClassImport {
 				}
 				
 			}else if(element.equals("port")){
-				x = Integer.parseInt(attrs.getValue("x"));
-				y = Integer.parseInt(attrs.getValue("y"));
+				x = getCoordinate(attrs.getValue("x"));
+				y = getCoordinate(attrs.getValue("y"));
 				name = attrs.getValue("name");
 				boolean isAreaConn = Boolean.valueOf(attrs.getValue("isAreaConn"));
 				strict= Boolean.valueOf(attrs.getValue("strict"));
 				
 				IconPort port = new IconPort(name, x, y, isAreaConn, strict);
 				ports.add(port);
+			}else if (element.equals("field")){
+				
+				name = attrs.getValue("name");
+				type = attrs.getValue("type");
+				value = attrs.getValue("value");
+				ClassField field = new ClassField (name, type, value);
+				fields.add(field);
 			}
 			
 		}
@@ -262,6 +276,7 @@ public class ClassImport {
 				inClass = false;
 				classIcon.shapeList = shapeList;
 				classIcon.ports = ports;
+				classIcon.fields = fields;
 				icons.add(classIcon);
 			}
 			if(element.equals("name")){
@@ -290,6 +305,16 @@ public class ClassImport {
 			if (inIcon)
 				classIcon.setIconName(new String(ch,start,length));
 		   
+		}
+		/*
+		 * Removes either r or f or both from the end of the
+		 * coordinate
+		 */
+		public int getCoordinate(String c) {
+			while (c.length() > 1 && (((c.charAt(c.length() - 1)) == 'f') || ((c.charAt(c.length() - 1)) == 'r'))){
+				c = c.substring(0,c.length() - 1);
+			}
+			return Integer.parseInt(c);
 		}
 	
 	}
