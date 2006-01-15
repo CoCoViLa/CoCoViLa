@@ -13,16 +13,6 @@ public class CodeGenerator {
 
     public static final String OT_TAB = "        ";
 
-    private static final TypeToken TOKEN_INT = new TypeToken( "int", Integer.class, int.class, "intValue" );
-    private static final TypeToken TOKEN_DOUBLE = new TypeToken( "double", Double.class, double.class, "doubleValue" );
-    private static final TypeToken TOKEN_FLOAT = new TypeToken( "float", Float.class, float.class, "floatValue" );
-    private static final TypeToken TOKEN_CHAR = new TypeToken( "char", Character.class, char.class, "charValue" );
-    private static final TypeToken TOKEN_BYTE = new TypeToken( "byte", Byte.class, byte.class, "byteValue" );
-    private static final TypeToken TOKEN_SHORT = new TypeToken( "short", Short.class, short.class, "shortValue" );
-    private static final TypeToken TOKEN_LONG = new TypeToken( "long", Long.class, long.class, "longValue" );
-    private static final TypeToken TOKEN_BOOLEAN = new TypeToken( "boolean", Boolean.class, boolean.class, "booleanValue" );
-    private static final TypeToken TOKEN_OBJECT = new TypeToken( null, null, null, "" );
-
     private final static int OT_NOC = 0;
     private final static int OT_INC = 1;
     private final static int OT_DEC = 2;
@@ -81,11 +71,11 @@ public class CodeGenerator {
     	for (Var var : assumptions) {
     		
     		String varType = var.getType();
-    		TypeToken token = getTypeToken( varType );
+    		TypeToken token = TypeToken.getTypeToken( varType );
     		
     		result += offset;
     		
-    		if ( token == TOKEN_OBJECT ) {
+    		if ( token == TypeToken.TOKEN_OBJECT ) {
     			result += var.toString() + " = (" + varType + ")args[" + i++ + "];\n";
     		} else {
     			result += var.toString()
@@ -214,11 +204,11 @@ public class CodeGenerator {
     		}
     		
     		String varType = var.getType();
-    		TypeToken token = getTypeToken( varType );
+    		TypeToken token = TypeToken.getTypeToken( varType );
     		
     		result += offset;
     		
-    		if ( token == TOKEN_OBJECT ) {
+    		if ( token == TypeToken.TOKEN_OBJECT ) {
     			result += var.toString() + " = (" + varType + ")in[" + i + "];\n";
     		} else {
     			result += var.toString()
@@ -279,33 +269,6 @@ public class CodeGenerator {
     	return declarations + result + varList + " };\n";
     }
 
-    public static TypeToken getTypeToken( String varType ) {
-    	
-    	TypeToken token;
-    	
-    	if ( varType.equals( TOKEN_INT.getType() ) ) {
-			token = TOKEN_INT;
-		} else if ( varType.equals( TOKEN_DOUBLE.getType() ) ) {
-			token = TOKEN_DOUBLE;
-		} else if ( varType.equals( TOKEN_FLOAT.getType() ) ) {
-			token = TOKEN_FLOAT;
-		} /*else if ( varType.equals( TOKEN_CHAR.getType() ) ) {
-			token = TOKEN_CHAR;
-		} */else if ( varType.equals( TOKEN_BYTE.getType() ) ) {
-			token = TOKEN_BYTE;
-		} else if ( varType.equals( TOKEN_SHORT.getType() ) ) {
-			token = TOKEN_SHORT;
-		} else if ( varType.equals( TOKEN_LONG.getType() ) ) {
-			token = TOKEN_LONG;
-		} else if ( varType.equals( TOKEN_BOOLEAN.getType() ) ) {
-			token = TOKEN_BOOLEAN;
-		} else {
-			token = TOKEN_OBJECT;
-		}
-    	
-    	return token;
-    }
-    
     private String getAliasSubtaskInput( Var input, String offset, int num ) {
         Alias alias = (Alias)input.getField();
         String aliasType = alias.getRealType();
@@ -320,43 +283,6 @@ public class CodeGenerator {
             out += offset + Rel.getObject(input.getObject()) + var.getName() + " = " + aliasTmp + "[" + i + "];\n";
         }
         return out;
-    }
-
-    public static class TypeToken {
-
-        String m_type;
-        String m_objType;
-        String m_method;
-        Class  m_wclass;
-        Class  m_pclass;
-
-        private TypeToken( String type, Class wrapperClass, Class primeClass, String method ) {
-            m_type = type;
-            m_objType = wrapperClass != null ? wrapperClass.getName() : "";
-            m_method = method;
-            m_wclass = wrapperClass;
-            m_pclass = primeClass;
-        }
-
-        public String getType() {
-            return m_type;
-        }
-
-        public String getObjType() {
-            return m_objType;
-        }
-
-        public String getMethod() {
-            return m_method;
-        }
-        
-        public Class getWrapperClass() {
-        	return m_wclass;
-        }
-        
-        public Class getPrimeClass() {
-        	return m_pclass;
-        }
     }
 
 	public static String getOffset() {

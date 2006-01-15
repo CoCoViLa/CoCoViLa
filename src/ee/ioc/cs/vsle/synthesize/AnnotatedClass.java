@@ -53,6 +53,13 @@ public class AnnotatedClass {
 		classRelations.add(classRelation);
 	} // addClassRelation
 
+	public boolean equals( Object o ) {
+		if( o != null && o instanceof AnnotatedClass )
+		{
+			return name.equals( ((AnnotatedClass)o).name );
+		}
+		return false;
+	}
 	/**
 	 * Converts the ee.ioc.cs.editor.synthesize.AnnotatedClass to a string, returning the name of the class.
 	 * @return String - a name of the class.

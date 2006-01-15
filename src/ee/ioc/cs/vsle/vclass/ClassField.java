@@ -4,43 +4,70 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import ee.ioc.cs.vsle.synthesize.Var;
+import ee.ioc.cs.vsle.util.*;
 
 /**
- * <p>Title: ee.ioc.cs.editor.vclass.ClassField</p>
- * <p>Description: <description></p>
- * <p>Copyright: Copyright (c) 2004</p>
- * <p>Company: </p>
+ * <p>
+ * Title: ee.ioc.cs.editor.vclass.ClassField
+ * </p>
+ * <p>
+ * Description: <description>
+ * </p>
+ * <p>
+ * Copyright: Copyright (c) 2004
+ * </p>
+ * <p>
+ * Company:
+ * </p>
+ * 
  * @author Ando Saabas
  * @version 1.0
  */
 public class ClassField implements Cloneable, Serializable {
 
 	public final static String ARRAY_TOKEN = "%%";
-	
+
 	protected String name;
-	protected String type;
+
+	protected String type = "";
+
 	protected String value;
+
 	protected String description;
-        private Var m_parentVar;
+
+	private Var m_parentVar;
+
 	protected boolean specField = false;
+
 	protected boolean isConstant = false;
+
 	protected boolean alias = false;
+
 	protected boolean watched = false;
+
 	protected ArrayList<ClassField> vars;
+
 	protected ClassGraphics knownGraphics;
+
 	protected ClassGraphics defaultGraphics;
 
 	/**
 	 * Class constructor.
 	 */
-	public ClassField( String name ) {
-            this.name = name;
+	public ClassField(String name) {
+		if( name == null ) {
+			throw new IllegalArgumentException( "Name cannot be null!" );
+		}
+		this.name = name;
 	} // ee.ioc.cs.editor.vclass.ClassField
 
 	/**
 	 * Class constructor
-	 * @param name String - name of the class.
-	 * @param type String - type of the class.
+	 * 
+	 * @param name
+	 *            String - name of the class.
+	 * @param type
+	 *            String - type of the class.
 	 */
 	public ClassField(String name, String type) {
 		this.name = name;
@@ -53,18 +80,22 @@ public class ClassField implements Cloneable, Serializable {
 		this.type = type;
 	}
 
-	public ClassField(String name, String type, String value, boolean isConstant ) {
+	public ClassField(String name, String type, String value, boolean isConstant) {
 		this.value = value;
 		this.name = name;
 		this.type = type;
 		this.isConstant = isConstant;
 	}
-	
+
 	/**
 	 * Class constructor.
-	 * @param name String
-	 * @param type String
-	 * @param b boolean
+	 * 
+	 * @param name
+	 *            String
+	 * @param type
+	 *            String
+	 * @param b
+	 *            boolean
 	 */
 	public ClassField(String name, String type, boolean b) {
 		this.name = name;
@@ -81,7 +112,9 @@ public class ClassField implements Cloneable, Serializable {
 
 	/**
 	 * Checks if we have an ee.ioc.cs.editor.vclass.Alias class or not.
-	 * @return boolean - indicator indicating whether the class is or is not an alias.
+	 * 
+	 * @return boolean - indicator indicating whether the class is or is not an
+	 *         alias.
 	 */
 	public boolean isAlias() {
 		if (type.equals("alias")) {
@@ -92,22 +125,17 @@ public class ClassField implements Cloneable, Serializable {
 
 	/**
 	 * <UNCOMMENTED>
+	 * 
 	 * @return boolean -
 	 */
 	public boolean isArray() {
-		int length = type.length();
-
-		if (type.substring(length - 2, length).equals("[]")) {
-			return true;
-		}
-		return false;
+		return TypeUtil.isArray( type );
 	} // isArray
 
 	public String arrayType() {
-		int length = type.length();
 
-		if (type.substring(length - 2, length).equals("[]")) {
-			return type.substring(0, length - 2);
+		if (TypeUtil.isArray(type)) {
+			return TypeUtil.getTypeWithoutArray(type);
 		}
 		return "notArray";
 	}
@@ -127,33 +155,24 @@ public class ClassField implements Cloneable, Serializable {
 	}
 
 	public boolean isPrimitive(String s) {
-		if (s.equals("int") || s.equals("double") || s.equals("float")
-			|| s.equals("long") || s.equals("short") || s.equals("byte")
-			|| s.equals("boolean") || s.equals("char")) {
-			return true;
-		}
-		return false;
+		return TypeUtil.isPrimitive(s);
 	}
 
 	public boolean isPrimitive() {
-		if (type.equals("int") || type.equals("double") || type.equals("float")
-			|| type.equals("long") || type.equals("short") || type.equals("byte")
-			|| type.equals("boolean") || type.equals("char")) {
-			return true;
-		}
-		return false;
+		return TypeUtil.isPrimitive(type);
 	}
 
 	public boolean isPrimitiveOrString(String s) {
-		return s.equals("String") || isPrimitive(s);
+		return TypeUtil.isPrimitiveOrString(s);
 	}
 
 	public boolean isPrimitiveOrString() {
-		return type.equals("String") || isPrimitive();
+		return TypeUtil.isPrimitiveOrString(type);
 	}
 
 	/**
 	 * Performs cloning.
+	 * 
 	 * @return Object
 	 */
 	public Object clone() {
@@ -167,6 +186,7 @@ public class ClassField implements Cloneable, Serializable {
 
 	/**
 	 * <UNCOMMENTED>
+	 * 
 	 * @return boolean -
 	 */
 	public boolean isWatched() {
@@ -175,6 +195,7 @@ public class ClassField implements Cloneable, Serializable {
 
 	/**
 	 * Converts the class into a string and returns the name of it.
+	 * 
 	 * @return String - name of the class.
 	 */
 	public String toString() {
@@ -183,6 +204,7 @@ public class ClassField implements Cloneable, Serializable {
 
 	/**
 	 * <UNCOMMENTED>
+	 * 
 	 * @return boolean -
 	 */
 	public boolean isSpecField() {
@@ -190,10 +212,7 @@ public class ClassField implements Cloneable, Serializable {
 	} // isSpecField
 
 	public boolean isKnown() {
-		if (value == null) {
-			return false;
-		}
-		return true;
+		return value != null;
 	}
 
 	public String toXML() {
@@ -204,68 +223,82 @@ public class ClassField implements Cloneable, Serializable {
 		return xml;
 	}
 
-        public void setParentVar( Var var ) {
-            m_parentVar = var;
-        }
+	public void setParentVar(Var var) {
+		m_parentVar = var;
+	}
 
-        public Var getParentVar() {
-            return m_parentVar;
-        }
+	public Var getParentVar() {
+		return m_parentVar;
+	}
 
-        public String getName() {
-            return name;
-        }
+	public String getName() {
+		return name;
+	}
 
-        public String getType() {
-            return type;
-        }
+	public String getType() {
+		return type;
+	}
 
-        public void setType( String type ) {
-            this.type = type;
-        }
+	public void setType(String type) {
+		this.type = type;
+	}
 
-        public String getValue() {
-            return value;
-        }
+	public String getValue() {
+		return value;
+	}
 
-        public void setValue( String value ) {
-            this.value = value;
-        }
+	public void setValue(String value) {
+		this.value = value;
+	}
 
-        public String getDescription() {
-            return description;
-        }
+	public String getDescription() {
+		return description;
+	}
 
-        public ArrayList<ClassField> getVars() {
-            return vars;
-        }
+	public ArrayList<ClassField> getVars() {
+		return vars;
+	}
 
-        public void setWatched( boolean value ) {
-            this.watched = value;
-        }
+	public void setWatched(boolean value) {
+		this.watched = value;
+	}
 
-        public void setKnownGraphics( ClassGraphics gr ) {
-            knownGraphics = gr;
-        }
+	public void setKnownGraphics(ClassGraphics gr) {
+		knownGraphics = gr;
+	}
 
-        public ClassGraphics getKnownGraphics() {
-            return knownGraphics;
-        }
+	public ClassGraphics getKnownGraphics() {
+		return knownGraphics;
+	}
 
-        public void setDefaultGraphics( ClassGraphics gr ) {
-            defaultGraphics = gr;
-        }
+	public void setDefaultGraphics(ClassGraphics gr) {
+		defaultGraphics = gr;
+	}
 
-        public ClassGraphics getDefaultGraphics() {
-            return defaultGraphics;
-        }
+	public ClassGraphics getDefaultGraphics() {
+		return defaultGraphics;
+	}
 
-		public boolean isConstant() {
-			return isConstant;
+	public boolean isConstant() {
+		return isConstant;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if( obj != null && obj instanceof ClassField ) {
+			ClassField cf = (ClassField)obj;
+			return name.equals( cf.name ) && type.equals( cf.type );
 		}
+		return false;
+	}
 
-		public void setName(String name) {
-			this.name = name;
-		}
+	@Override
+	public int hashCode() {
+		return ( name + type ).hashCode();
+	}
 
 }

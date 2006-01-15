@@ -10,7 +10,6 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.synthesize.*;
-import ee.ioc.cs.vsle.synthesize.CodeGenerator.TypeToken;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
@@ -201,7 +200,7 @@ implements ActionListener, KeyListener {
 	}
 	
 	private Object createObject( ClassField field, String value ) throws Exception {
-		TypeToken token = CodeGenerator.getTypeToken( field.getType() );
+		TypeToken token = TypeToken.getTypeToken( field.getType() );
 		db.p( "var: " + field.getName() + " type " + field.getType() + " value " + value);
 		
 		Class clazz = token.getWrapperClass();
@@ -216,7 +215,7 @@ implements ActionListener, KeyListener {
 		} else if( field.isPrimOrStringArray() ) {
 			String type = field.arrayType();
 			
-			token = CodeGenerator.getTypeToken( type );
+			token = TypeToken.getTypeToken( type );
 			clazz = token.getWrapperClass();
 			
 			

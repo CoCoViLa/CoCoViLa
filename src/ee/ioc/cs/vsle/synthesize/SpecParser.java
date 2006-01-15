@@ -1,6 +1,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.util.*;
 
 import java.io.*;
 import java.util.*;
@@ -272,8 +272,11 @@ public class SpecParser {
 	                                	annClass.getClassRelations().addAll( annCl.getClassRelations() );
 	                                	annCl.getFields().clear();
 	                                	annCl.getClassRelations().clear();
+	                                	
+	                                	if( !classList.contains(annCl) ) {
+	                                		classList.add( annCl );
+	                                	}
 									}
-	                                classList.addAll( superClasses );
 	                            }
 	                        }
 						}
@@ -283,6 +286,7 @@ public class SpecParser {
 
                         classRelation.setOutput( split[ 0 ], vars );
                         classRelation.setMethod( split[ 0 ] + " = " + split[ 1 ] );
+                        checkAnyType( split[ 0 ], split[ 1 ], vars);
                         annClass.addClassRelation( classRelation );
                         if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
                         
@@ -395,6 +399,7 @@ public class SpecParser {
                             String[] inputs = pieces[ 1 ].trim().split( " " );
 
                             //checkAliasLength( inputs, vars, className );
+                            checkAnyType( pieces[ 2 ].trim(), inputs, vars);
                             
                             if ( !inputs[ 0 ].equals( "" ) ) {
                                 classRelation.addInputs( inputs, vars );
@@ -494,6 +499,58 @@ public class SpecParser {
         return classList;
     }
 
+    private static void checkAnyType( String output, String input, ArrayList<ClassField> vars ) throws UnknownVariableException {
+    	checkAnyType( output, new String[]{ input }, vars );
+    }
+    
+    private static void checkAnyType( String output, String[] inputs, ArrayList<ClassField> vars ) throws UnknownVariableException {
+    	ClassField out = ClassRelation.getVar( output, vars );
+    	
+    	if( out == null || !out.getType().equals("any") ) {
+    		return;
+    	}
+    	
+    	String newType = "any";
+    	
+    	for (int i = 0; i < inputs.length; i++) {
+    		ClassField in = ClassRelation.getVar( inputs[i], vars );
+    		
+    		if( in == null ) {
+    			try {
+    				Integer.parseInt( inputs[i] );
+    				newType = "int";
+    				continue;
+    			} catch( NumberFormatException ex ) {}
+    			
+    			try {
+    				Double.parseDouble( inputs[i] );
+    				newType = "double";
+    				continue;
+    			} catch( NumberFormatException ex ) {}
+    			
+    			if( inputs[i] != null && inputs[i].trim().equals("") ) {
+    				newType = "double";//TODO - tmp
+    				continue;
+    			}
+    			
+    			throw new UnknownVariableException( inputs[i] );
+    		}
+    		if( i == 0 ) {
+    			newType = in.getType();
+    			continue;
+    		}
+    		TypeToken token = TypeToken.getTypeToken( newType );
+    		
+    		TypeToken tokenIn = TypeToken.getTypeToken( in.getType() );
+    		
+    		if( token != null && tokenIn != null && token.compareTo( tokenIn ) < 0 ) {
+    			newType = in.getType();
+    		}
+		}
+    	
+    	out.setType( newType );
+    }
+    
     private static void checkAliasLength( String inputs[], ArrayList<ClassField> vars, String className ) 
     				throws UnknownVariableException {
     	for( int i = 0; i < inputs.length; i++ ) {

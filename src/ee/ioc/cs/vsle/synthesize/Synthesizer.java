@@ -111,7 +111,7 @@ public class Synthesizer {
         matcher = pattern.matcher( fileString );
 
         if ( matcher.find() ) {
-            fileString = matcher.replaceAll( "\n" + CodeGenerator.OT_TAB + prog );
+            fileString = matcher.replaceAll( "\n" + prog );
         }
 
         createGeneratedInterface();

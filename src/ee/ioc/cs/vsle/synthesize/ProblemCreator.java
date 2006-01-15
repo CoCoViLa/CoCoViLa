@@ -34,6 +34,8 @@ public class ProblemCreator {
         HashSet<Rel> relSet = new HashSet<Rel>();
 
         for ( int j = 0; j < ac.getFields().size(); j++ ) {
+        	if( ac.isOnlyForSuperclassGeneration() ) continue;
+        	
             cf = ac.getFields().get( j );
             if ( classes.getType( cf.getType() ) != null ) {
                 problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
