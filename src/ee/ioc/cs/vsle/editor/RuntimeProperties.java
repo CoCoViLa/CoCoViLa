@@ -23,6 +23,7 @@ public class RuntimeProperties {
 	public static int snapToGrid;
 	public static boolean isAntialiasingOn;
 	public static double zoomFactor;
+	public static boolean isSyntaxHighlightingOn = true;
 	
 	// Class properties.
 	public static String className;

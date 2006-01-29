@@ -13,7 +13,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
     private JButton computeGoal, runProg, computeAll, propagate, invoke, invokeNew;
     private JTextArea jta_runResult;
-    private JavaColoredTextPane jta_spec, jta_generatedCode;
+    private JTextComponent jta_spec, jta_generatedCode;
     
     private JPanel progText, specText, runResult;
     private JTextField invokeField;
@@ -34,7 +34,12 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         
         tabbedPane = new JTabbedPane();
 
-        jta_spec = new JavaColoredTextPane();
+        if( RuntimeProperties.isSyntaxHighlightingOn ) {
+        	jta_spec = new JavaColoredTextPane();
+        } else {
+        	jta_spec = new JTextArea();
+        }
+        
         jta_spec.addKeyListener( new CommentKeyListener() );
         jta_spec.setFont( RuntimeProperties.font );
         JScrollPane areaScrollPane = new JScrollPane( jta_spec );
@@ -59,7 +64,12 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         specText.add( progToolBar, BorderLayout.NORTH );
         tabbedPane.addTab( "Specification", specText );
 
-        jta_generatedCode = new JavaColoredTextPane();
+        if( RuntimeProperties.isSyntaxHighlightingOn ) {
+        	jta_generatedCode = new JavaColoredTextPane();
+        } else {
+        	jta_generatedCode = new JTextArea();
+        }
+        
         jta_generatedCode.addKeyListener( new CommentKeyListener() );
         jta_generatedCode.setFont( RuntimeProperties.font );
         JToolBar toolBar = new JToolBar();
@@ -112,7 +122,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
         tabbedPane.addTab( "Run results", runResult );
 
-        jta_spec.append( runner.getSpec() );
+        jta_spec.setText( runner.getSpec() );
 
         getContentPane().add( tabbedPane );
         validate();
@@ -121,13 +131,13 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     public void dispose() {
     	super.dispose();
     	
-    	if( jta_spec != null) {
-    		jta_spec.destroy();
+    	if( jta_spec != null && jta_spec instanceof JavaColoredTextPane ) {
+    		((JavaColoredTextPane)jta_spec).destroy();
     		jta_spec = null;
     	}
     	
-    	if( jta_generatedCode != null) {
-    		jta_generatedCode.destroy();
+    	if( jta_generatedCode != null && jta_generatedCode instanceof JavaColoredTextPane ) {
+    		((JavaColoredTextPane)jta_generatedCode).destroy();
     		jta_generatedCode = null;
     	}
     	

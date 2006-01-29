@@ -32,16 +32,18 @@ public class OptionsDialog extends JDialog {
 	private static final JLabel lblShowGrid = new JLabel("Show grid:");
 	private static final JLabel lblGridStep = new JLabel("Grid step:");
 	private static final JLabel lblNudgeStep = new JLabel("Nudge step:");
+	private static final JLabel lblSyntaxColor = new JLabel("Syntax Highlighting:");
 
 	// Text Fields.
-	private static final JTextField tfGenFilesDir = new JTextField();
-	private static final JTextField tfCompClasspath = new JTextField();
-	private static final JTextField tfPaletteFile = new JTextField();
+	private static final JTextField tfGenFilesDir = new JTextField(40);
+	private static final JTextField tfCompClasspath = new JTextField(40);
+	private static final JTextField tfPaletteFile = new JTextField(40);
 
 	// Checkboxes.
 	private static final JCheckBox chbDebugInfo = new JCheckBox();
 	private static final JCheckBox chbAntiAlias = new JCheckBox();
 	private static final JCheckBox chbShowGrid = new JCheckBox();
+	private static final JCheckBox chbSyntaxColor = new JCheckBox();
 
 	// Spinners.
 	Spinner spinnerGridStep = new Spinner(1, 100, 1, 1);
@@ -95,7 +97,7 @@ public class OptionsDialog extends JDialog {
 		pnlLabels.setMinimumSize(pnlLabels.getPreferredSize());
 
 		// Set field labels on their panel.
-		pnlLabels.setLayout(new GridLayout(9, 0));
+		pnlLabels.setLayout(new GridLayout(10, 0));
 		pnlLabels.add(lblGenFilesDir);
 		pnlLabels.add(lblCompClasspath);
 		pnlLabels.add(lblPaletteFile);
@@ -105,6 +107,7 @@ public class OptionsDialog extends JDialog {
 		pnlLabels.add(lblShowGrid);
 		pnlLabels.add(lblGridStep);
 		pnlLabels.add(lblNudgeStep);
+		pnlLabels.add(lblSyntaxColor);
 
 		// Set fields' panel size.
 		//pnlFields.setPreferredSize(new Dimension(200, 180));
@@ -131,7 +134,7 @@ public class OptionsDialog extends JDialog {
 		pnlNudgeSpinner.add(spinnerNudgeStep);
 
 		// Set fields to their panel.
-		pnlFields.setLayout(new GridLayout(9, 0));
+		pnlFields.setLayout(new GridLayout(10, 0));
 		pnlFields.add(tfGenFilesDir);
 		pnlFields.add(tfCompClasspath);
 		pnlFields.add(tfPaletteFile);
@@ -141,6 +144,7 @@ public class OptionsDialog extends JDialog {
 		pnlFields.add(chbShowGrid);
 		pnlFields.add(pnlGridSpinner);
 		pnlFields.add(pnlNudgeSpinner);
+		pnlFields.add(chbSyntaxColor);
 
 		// Set settings panel size.
 		//pnlSettings.setPreferredSize(new Dimension(300, 180));
@@ -175,10 +179,10 @@ public class OptionsDialog extends JDialog {
 
 		getContentPane().add(pnlMain);
 
-		setSize(new Dimension(500, 300));
+		//setSize(new Dimension(500, 300));
 		setResizable(false);
 		setModal(true);
-		//pack();
+		pack();
 		initializeSettings();
 
 		/*
@@ -281,6 +285,8 @@ public class OptionsDialog extends JDialog {
 		} else {
 			chbShowGrid.setSelected(true);
 		}
+		
+		chbSyntaxColor.setSelected( RuntimeProperties.isSyntaxHighlightingOn );
 	} // initializeSettings
 
 	/**
@@ -324,6 +330,7 @@ public class OptionsDialog extends JDialog {
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 			PropertyBox.NUDGE_STEP, spinnerNudgeStep.getModel().getValue().toString());
 
+		RuntimeProperties.isSyntaxHighlightingOn = chbSyntaxColor.isSelected();
 		RuntimeProperties.isAntialiasingOn = chbAntiAlias.isSelected();
 		RuntimeProperties.gridStep = Integer.parseInt(spinnerGridStep.getModel().getValue().toString());
 		RuntimeProperties.debugInfo = Integer.parseInt(sDebugOutput);
