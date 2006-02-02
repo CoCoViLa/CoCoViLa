@@ -22,9 +22,8 @@ public class CodeViewer extends JFrame implements ActionListener{
         public CodeViewer(String name, String extension) {
             super(name + extension);
                 this.fileName = name + extension;
-                FileFuncs ff = new FileFuncs();
 
-                String fileText = ff.getFileContents(RuntimeProperties.packageDir + fileName);
+                String fileText = FileFuncs.getFileContents(RuntimeProperties.packageDir + fileName);
 
                 textArea = new JavaColoredTextPane();
                 textArea.addKeyListener( new ProgramTextEditor.CommentKeyListener() );
