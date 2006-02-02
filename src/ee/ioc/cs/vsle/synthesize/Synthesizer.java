@@ -46,6 +46,7 @@ public class Synthesizer {
 
         Problem problem = null;
         // call the packageParser to create a problem from the specification
+
         try {
             problem = ProblemCreator.makeProblem( classList );
         } catch ( Exception e ) {
