@@ -43,6 +43,7 @@ public class ProblemCreator {
             if ( cf.getType().equals( "alias" ) ) {
                 cf = rewriteWildcardAlias( cf, ac, classes );
             } else if( cf.isConstant() && cf.getName().startsWith( "*" ) ) {
+            	//this denotes for alias.length constant
             	Alias alias = (Alias)ac.getFieldByName( cf.getName().substring( 0, cf.getName().length() - 7 ).substring( 1 ) );
             	cf.setName( cf.getName().substring( 1 ) );
             	cf.setValue( "" + alias.getVars().size() );
@@ -155,20 +156,37 @@ public class ProblemCreator {
                         rel.getSubtaskCounter() == 0 ) { // if class relation doesnt have inputs, its an axiom
                 problem.addAxiom( rel );
             }
-            else if ( rel != null && rel.getSubtaskCounter() > 0 ) {
-                problem.addRelWithSubtask( rel );
-                problem.addRel( rel );
+            else if ( rel != null ) {
+            	problem.addRel( rel );
+            	
+            	if( rel.getSubtaskCounter() > 0 ) {
+            		problem.addRelWithSubtask( rel );
+            	}
+            	
             } else {
-                if ( rel != null && rel.getSubtasks().size() == 0 ) {
-                    problem.addRel( rel );
-                } else {
-                    problem.addAllRels( relSet );
-                }
+            	problem.addAllRels( relSet );
             }
 
         }
         //System.out.println(problem);
         return problem;
+    }
+    
+    private static int getUniqueInputCount( ArrayList<ClassField> inputs ) {
+    	
+    	HashSet<ClassField> inps = new HashSet<ClassField>();
+    	
+    	int size = 0;
+    	
+    	for ( ClassField object : inputs ) {
+			if( inps.contains( object ) ) {
+				continue;
+			}
+			size++;
+			inps.add( object );
+		}
+    	
+    	return size;
     }
     
     private static ClassField rewriteWildcardAlias( ClassField cf, AnnotatedClass ac, ClassList classes ) {
@@ -312,13 +330,18 @@ public class ProblemCreator {
 
        rel.setMethod( classRelation.getMethod() );
        int constants = 0;
+       //fist, count constants
+       //second, if we deal with equation and one variable is used on both sides of "=", we cannot use it.
        for (ClassField field : classRelation.getInputs() ) {
 			if( field.isConstant() ) {
 				constants++;
 			}
+			if( classRelation.getType() == RelType.TYPE_EQUATION && classRelation.getOutputs().contains( field ) ) {
+				return null;
+			}
 		}
        
-       rel.setUnknownInputs( classRelation.getInputs().size() - constants );
+       rel.setUnknownInputs( getUniqueInputCount( classRelation.getInputs() ) - constants );
        rel.setSubtaskFlag( classRelation.getSubtasks().size() );
        rel.setObj( obj );
        rel.setType( classRelation.getType() );

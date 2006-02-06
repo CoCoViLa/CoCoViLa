@@ -64,7 +64,7 @@ public class ProgramRunner {
 			Synthesizer.makeProgram( genCode, classList, mainClassName );
 			
 			if ( makeGeneratedObject() ) {
-				return run();
+				return run( false );
 			}
 		} catch ( CompileException ce ) {
 			ErrorWindow.showErrorMessage(
@@ -87,20 +87,18 @@ public class ProgramRunner {
 
                 for ( int i = 0; i < k; i++ ) {
                     try {
-						return run();
+						return run( true );
 					} catch (Exception e) {
 						ErrorWindow.showErrorMessage( e.getMessage() );
 					}
                 }
             } else {
                 try {
-					return run();
+					return run( true );
 				} catch (Exception e) {
 					ErrorWindow.showErrorMessage( e.getMessage() );
 				}
             }
-            
-            runPropagate();
         }
         return "";
     }
@@ -215,6 +213,7 @@ public class ProgramRunner {
 
 	public void runPropagate() {
 		try {
+			System.err.println( "Propagate" );
 			Class clasType;
 			Class clas = genObject.getClass();
 
@@ -295,7 +294,7 @@ public class ProgramRunner {
 		}
 	}
 
-	private String run() {
+	private String run( boolean propagate ) {
 		StringBuffer result = new StringBuffer();
 		
 		try {
@@ -354,6 +353,10 @@ public class ProgramRunner {
 
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+		}
+		
+		if( propagate ) {
+			runPropagate();
 		}
 		
 		return result.toString();

@@ -164,9 +164,11 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         }
         else if ( e.getSource() == invoke ) {
         	jta_runResult.append( runner.invoke( invokeField.getText() ) );
+        	editor.repaint();
         }
         else if ( e.getSource() == invokeNew ) {
         	jta_runResult.append( runner.invokeNew( invokeField.getText() ) );
+        	editor.repaint();
         }
     }
 

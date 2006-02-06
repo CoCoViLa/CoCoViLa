@@ -209,8 +209,11 @@ public class SpecParser {
         return fileString;
     }
 
+    private static ArrayList<String> s_parseErrors = new ArrayList<String>();
+    
     public static ClassList parseSpecification( String fullSpec ) throws IOException,
     										SpecParseException, EquationException {
+    	s_parseErrors.clear();
     	HashSet<String> hs = new HashSet<String>();
     	return parseSpecificationImpl( refineSpec( fullSpec ), "this", hs );
     }
@@ -297,12 +300,16 @@ public class SpecParser {
                     	String value = split[ 2 ].trim();
                     	
                     	if ( varListIncludes( vars, name ) ) {
+                    		s_parseErrors.add("Variable " + name +
+                                    " declared more than once in class " + className);
+                    		
                             throw new SpecParseException( "Variable " + name +
                                     " declared more than once in class " + className );
                         }
                     	
                     	File file = new File( RuntimeProperties.packageDir + type + ".java" );
                     	if( file.exists() && isSpecClass( type ) ) {
+                    		s_parseErrors.add("Constant " + name + " cannot be of type " + type);
                     		throw new SpecParseException( "Constant " + name +
                                     " cannot be of type " + type );
                     	}
@@ -341,6 +348,8 @@ public class SpecParser {
                         }
                         for ( int i = 0; i < vs.length; i++ ) {
                             if ( varListIncludes( vars, vs[ i ] ) ) {
+                            	s_parseErrors.add( "Variable " + vs[ i ] +
+                                        " declared more than once in class " + className );
                                 throw new SpecParseException( "Variable " + vs[ i ] +
                                         " declared more than once in class " + className );
                             }
@@ -354,6 +363,8 @@ public class SpecParser {
                         String[] list = split[ 1 ].trim().split( " *, *", -1 );
                         String name = split[ 0 ];
                         if ( varListIncludes( vars, name ) ) {
+                        	s_parseErrors.add( "Variable " + name +
+                                    " declared more than once in class " + className );
                             throw new SpecParseException( "Variable " + name +
                                     " declared more than once in class " + className );
                         }
@@ -389,6 +400,10 @@ public class SpecParser {
                             ClassField tmp = ClassRelation.getVar( pieces[ 2 ].trim(), vars );
                             if( tmp != null && tmp.isConstant() ) {
                             	db.p( "Ignoring constant and equation output: " + tmp );
+                            	continue;
+                            }
+                            //if one variable is used on both sides of "=", we cannot use such relation.
+                            if( pieces[0].substring( pieces[0].indexOf("=")).indexOf( pieces[ 2 ].trim() ) > -1 ) {
                             	continue;
                             }
                             
@@ -438,6 +453,9 @@ public class SpecParser {
                             ClassRelation classRelation = new ClassRelation( RelType.TYPE_JAVAMETHOD );
 
                             if ( matcher2.group( 2 ).trim().equals( "" ) ) {
+                            	s_parseErrors.add("Error in line \n" + lt.getSpecLine() +
+                                        "\nin class " + className +
+                                        ".\nAn axiom can not have an empty output.");
                                 throw new SpecParseException( "Error in line \n" + lt.getSpecLine() +
                                         "\nin class " + className +
                                         ".\nAn axiom can not have an empty output." );
