@@ -519,13 +519,20 @@ public class Canvas extends JPanel implements ActionListener {
 
 	class DrawingArea extends JPanel {
 		protected void drawGrid(Graphics g) {
-			g.setColor(Color.lightGray);
-			for (int i = 0; i < getWidth(); i += RuntimeProperties.gridStep) {
-				// draw vertical lines
-				g.drawLine(i, 0, i, getHeight());
-// draw horizontal lines
-				g.drawLine(0, i, getWidth(), i);
-			}
+            g.setColor(Color.lightGray);
+
+            Rectangle vr = getVisibleRect();
+            int step = RuntimeProperties.gridStep;
+            int bx = vr.x + vr.width;
+            int by = vr.y + vr.height;
+
+            // draw vertical lines
+            for (int i = (vr.x + step - 1) / step * step; i < bx; i += step)
+                g.drawLine(i, vr.y, i, by);
+
+            // draw horizontal lines
+            for (int i = (vr.y + step - 1) / step * step; i < by; i += step)
+				g.drawLine(vr.x, i, bx, i);
 		}
 
 		protected void paintComponent(Graphics g) {
