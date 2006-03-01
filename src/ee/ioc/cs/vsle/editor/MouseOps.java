@@ -126,11 +126,11 @@ class MouseOps
 			Connection relation = canvas.connections.nearPoint(x, y);
 			if (relation != null) {
 				ConnectionPopupMenu popupMenu = new ConnectionPopupMenu(relation, canvas.connections, canvas);
-				popupMenu.show(canvas, x, y);
+				popupMenu.show(canvas, x + canvas.drawingArea.getX(), y + canvas.drawingArea.getY());
 			} else {
 				canvas.currentObj = canvas.objects.checkInside(x, y);
 				if (canvas.currentObj != null) {
-					openObjectPopupMenu(x, y);
+					openObjectPopupMenu(x + canvas.drawingArea.getX(), y + canvas.drawingArea.getY());
 				}
 			}
 
