@@ -5,7 +5,7 @@ import ee.ioc.cs.vsle.util.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ObjectList extends ArrayList
+public class ObjectList extends ArrayList<GObj>
 	implements Serializable {
 	public ObjectList() {
 		super();
@@ -44,7 +44,7 @@ public class ObjectList extends ArrayList
 		GObj obj;
 
 		for (int i = this.size() - 1; i >= 0; i--) {
-			obj = (GObj) this.get(i);
+			obj = this.get(i);
 			if (obj.contains(x, y)) {
 				return obj;
 			}
@@ -53,10 +53,7 @@ public class ObjectList extends ArrayList
 	}
 
 	public GObj checkInside(int x, int y, GObj asker) {
-		GObj obj;
-
-		for (int i = 0; i < this.size(); i++) {
-			obj = (GObj) this.get(i);
+        for (GObj obj: this) {
 			if (obj.contains(x, y) && obj != asker) {
 				return obj;
 			}
@@ -65,10 +62,7 @@ public class ObjectList extends ArrayList
 	}
 
 	public void selectObjectsInsideBox(int x1, int y1, int x2, int y2) {
-		GObj obj;
-
-		for (int i = 0; i < this.size(); i++) {
-			obj = (GObj) this.get(i);
+		for (GObj obj: this) {
 			if (obj.isInside(x1, y1, x2, y2)) {
 				obj.setSelected(true);
 			}
@@ -76,10 +70,7 @@ public class ObjectList extends ArrayList
 	}
 
 	public void updateSize(float newXSize, float newYSize) {
-		GObj obj;
-
-		for (int i = 0; i < this.size(); i++) {
-			obj = (GObj) this.get(i);
+		for (GObj obj: this) {
 			obj.setXsize(obj.getXsize() * newXSize);
 			obj.setYsize(obj.getYsize() * newYSize);
 			obj.setX((int) (obj.getX() * newXSize));
@@ -88,20 +79,14 @@ public class ObjectList extends ArrayList
 	}
 
 	public void clearSelected() {
-		GObj obj;
-
-		for (int i = 0; i < this.size(); i++) {
-			obj = (GObj) this.get(i);
+		for (GObj obj: this) {
 			obj.setSelected(false);
 		}
 	}
 
-	public ArrayList getSelected() {
-		ArrayList a = new ArrayList();
-		GObj obj;
-
-		for (int i = 0; i < this.size(); i++) {
-			obj = (GObj) this.get(i);
+	public ArrayList<GObj> getSelected() {
+		ArrayList<GObj> a = new ArrayList<GObj>();
+		for (GObj obj: this) {
 			if (obj.isSelected()) {
 				a.add(obj);
 			}
@@ -110,47 +95,44 @@ public class ObjectList extends ArrayList
 	}
 
 	public void updateRelObjs() {
-		GObj obj;
+        RelObj obj;
 		Point endPoint;
-		for (int i = 0; i < this.size(); i++) {
-			obj = (GObj) this.get(i);
-			if (obj instanceof RelObj) {
-				if (!((RelObj) obj).startPort.area) {
-					obj.x = ((RelObj) obj).startPort.getAbsoluteX();
-					obj.y = ((RelObj) obj).startPort.getAbsoluteY();
+		for (GObj o: this) {
+			if (o instanceof RelObj) {
+                obj = (RelObj) o;
+				if (!obj.startPort.area) {
+					obj.x = obj.startPort.getAbsoluteX();
+					obj.y = obj.startPort.getAbsoluteY();
 				} else {
 					endPoint = VMath.nearestPointOnRectangle
-						(((RelObj) obj).startPort.getStartX(), ((RelObj) obj).startPort.getStartY(),
-							((RelObj) obj).startPort.getWidth(), ((RelObj) obj).startPort.getHeight(),
-							((RelObj) obj).endPort.getAbsoluteX(), ((RelObj) obj).endPort.getAbsoluteY());
+						(obj.startPort.getStartX(), obj.startPort.getStartY(),
+							obj.startPort.getWidth(), obj.startPort.getHeight(),
+							obj.endPort.getAbsoluteX(), obj.endPort.getAbsoluteY());
 					obj.x = endPoint.x;
 					obj.y = endPoint.y;
 
 				}
 
-				if (!((RelObj) obj).endPort.area) {
-					((RelObj) obj).endX = ((RelObj) obj).endPort.getAbsoluteX();
-					((RelObj) obj).endY = ((RelObj) obj).endPort.getAbsoluteY();
+				if (!obj.endPort.area) {
+					obj.endX = obj.endPort.getAbsoluteX();
+					obj.endY = obj.endPort.getAbsoluteY();
 				} else {
 					endPoint = VMath.nearestPointOnRectangle
-						(((RelObj) obj).endPort.getStartX(), ((RelObj) obj).endPort.getStartY(),
-							((RelObj) obj).endPort.getWidth(), ((RelObj) obj).endPort.getHeight(), obj.x, obj.y);
-					((RelObj) obj).endX = endPoint.x;
-					((RelObj) obj).endY = endPoint.y;
+						(obj.endPort.getStartX(), obj.endPort.getStartY(),
+							obj.endPort.getWidth(), obj.endPort.getHeight(), obj.x, obj.y);
+					obj.endX = endPoint.x;
+					obj.endY = endPoint.y;
 				}
-				obj.Xsize = (float) Math.sqrt(Math.pow((obj.x - ((RelObj) obj).endX), 2.0) + Math.pow((obj.y - ((RelObj) obj).endY), 2.0)) / obj.width;
-				((RelObj) obj).angle = VMath.calcAngle(obj.x, obj.y, ((RelObj) obj).endX, ((RelObj) obj).endY);
-
+				obj.Xsize = (float) Math.sqrt(Math.pow((obj.x - obj.endX), 2.0) + Math.pow((obj.y - obj.endY), 2.0)) / obj.width;
+				obj.angle = VMath.calcAngle(obj.x, obj.y, obj.endX, obj.endY);
 			}
 		}
 	}
 
 
 	public void deleteExcessRels(ConnectionList con) {
-		GObj obj;
-		ArrayList toBeRemoved = new ArrayList();
-		for (int i = 0; i < this.size(); i++) {
-			obj = (GObj) this.get(i);
+		ArrayList<GObj> toBeRemoved = new ArrayList<GObj>();
+		for (GObj obj: this) {
 			if (obj instanceof RelObj) {
 				if (!(contains(((RelObj) obj).startPort.obj) && contains(((RelObj) obj).endPort.obj))) {
 					toBeRemoved.add(obj);
@@ -162,24 +144,19 @@ public class ObjectList extends ArrayList
 	}
 
 	public int controlRectContains(int x, int y) {
-		GObj obj;
 		int corner;
-		for (int i = 0; i < this.size(); i++) {
-			obj = (GObj) this.get(i);
+		for (GObj obj: this) {
 			corner = obj.controlRectContains(x, y);
 			if (corner != 0) {
 				return corner;
 			}
 		}
 		return 0;
-
 	}
 
 	public Port getPort(String objName, String portId) {
-		GObj obj;
 		Port port;
-		for (int i = 0; i < this.size(); i++) {
-			obj = (GObj) this.get(i);
+		for (GObj obj: this) {
 			if (obj.name.equals(objName)) {
 				for (int j = 0; j < obj.ports.size(); j++) {
 					port = (Port) obj.ports.get(j);
