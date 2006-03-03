@@ -2,8 +2,6 @@ package ee.ioc.cs.vsle.util;
 
 import java.io.*;
 
-import ee.ioc.cs.vsle.editor.*;
-
 /**
  * Created by IntelliJ IDEA.
  * User: Ando
