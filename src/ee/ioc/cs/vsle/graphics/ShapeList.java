@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class ShapeList
-	extends ArrayList
+	extends ArrayList<Shape>
 	implements Serializable {
 
 	public ShapeList() {
@@ -29,7 +29,7 @@ public class ShapeList
 
 	boolean isLocatedAtPoint(int x, int y) {
 		for (int i = this.size() - 1; i >= 0; i--) {
-			Shape shape = (Shape) this.get(i);
+			Shape shape = this.get(i);
 
 			if (shape.contains(x, y)) {
 				return true;
@@ -42,7 +42,7 @@ public class ShapeList
 		Shape shape;
 
 		for (int i = this.size() - 1; i >= 0; i--) {
-			shape = (Shape) this.get(i);
+			shape = this.get(i);
 			if (shape.contains(x, y)) {
 				return shape;
 			}
@@ -51,10 +51,7 @@ public class ShapeList
 	}
 
 	Shape checkInside(int x, int y, Shape asker) {
-		Shape shape;
-
-		for (int i = 0; i < this.size(); i++) {
-			shape = (Shape) this.get(i);
+		for (Shape shape: this) {
 			if (shape.contains(x, y) && shape != asker) {
 				return shape;
 			}
@@ -63,10 +60,7 @@ public class ShapeList
 	}
 
 	void selectShapesInsideBox(int x1, int y1, int x2, int y2) {
-		Shape shape;
-
-		for (int i = 0; i < this.size(); i++) {
-			shape = (Shape) this.get(i);
+		for (Shape shape: this) {
 			if (shape.isInside(x1, y1, x2, y2)) {
 				shape.setSelected(true);
 			}
@@ -102,20 +96,14 @@ public class ShapeList
 	}
 
 	void clearSelected() {
-		Shape shape;
-
-		for (int i = 0; i < this.size(); i++) {
-			shape = (Shape) this.get(i);
+		for (Shape shape: this) {
 			shape.setSelected(false);
 		}
 	}
 
-	public ArrayList getSelected() {
-		ArrayList a = new ArrayList();
-		Shape shape;
-
-		for (int i = 0; i < this.size(); i++) {
-			shape = (Shape) this.get(i);
+	public ArrayList<Shape> getSelected() {
+		ArrayList<Shape> a = new ArrayList<Shape>();
+		for (Shape shape: this) {
 			if (shape.isSelected()) {
 				a.add(shape);
 			}
