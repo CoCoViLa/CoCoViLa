@@ -64,7 +64,7 @@ public abstract class Shape implements Serializable, Cloneable {
 		return 0;
 	}
 
-	public ArrayList getShapes() {
+	public ArrayList<Shape> getShapes() {
 		return null;
 	}
 
@@ -124,9 +124,9 @@ public abstract class Shape implements Serializable, Cloneable {
 
 	public abstract boolean isFixed();
 
-	public Object clone() {
+	public Shape clone() {
 		try {
-			return super.clone();
+			return (Shape) super.clone();
 		} catch (Exception e) {
 
 			return null;
