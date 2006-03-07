@@ -77,7 +77,6 @@ public class IconEditor
 		});
 		keyListener = new IconKeyOps(this);
 		scheme = new Scheme();
-		shapeList.addAll(scheme.objects);
 		scheme.packageName = "IconEditor";
 		mListener = new IconMouseOps(this);
 
