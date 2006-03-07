@@ -632,7 +632,7 @@ class MouseOps
 		Shape shape;
 		for (int i = 0; i < obj.shapes.size(); i++) {
 			shape = (Shape) obj.shapes.get(i);
-			obj.shapes.set(i, shape.clone());
+			obj.shapes.set(i, (Shape) shape.clone());
 		}
 
 		obj.ports = (ArrayList) pClass.ports.clone();

@@ -236,7 +236,7 @@ public class SchemeLoader {
 						Shape shape;
 						for (int i = 0; i < obj.shapes.size(); i++) {
 							shape = (Shape) obj.shapes.get(i);
-							obj.shapes.set(i, shape.clone());
+							obj.shapes.set(i, (Shape) shape.clone());
 						}
 
 						Port port;
@@ -296,7 +296,7 @@ public class SchemeLoader {
 						Shape shape;
 						for (int i = 0; i < relObj.shapes.size(); i++) {
 							shape = (Shape) relObj.shapes.get(i);
-							relObj.shapes.set(i, shape.clone());
+							relObj.shapes.set(i, (Shape) shape.clone());
 						}
 					}
 				}
