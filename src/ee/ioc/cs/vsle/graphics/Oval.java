@@ -340,8 +340,8 @@ public class Oval extends Shape implements Serializable {
 		return stroke;
 	}
 
-	public Object clone() {
-		return super.clone();
+	public Oval clone() {
+		return (Oval) super.clone();
 	} // clone
 
 }

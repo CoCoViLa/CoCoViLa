@@ -458,8 +458,8 @@ public class Line extends Shape implements Serializable {
 
     } // draw
 
-    public Object clone() {
-        return super.clone();
+    public Line clone() {
+        return (Line) super.clone();
     } // clone
 
 	public void shift(int offsetX, int offsetY) {

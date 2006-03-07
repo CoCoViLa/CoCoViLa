@@ -532,13 +532,8 @@ public class Arc extends Shape implements Serializable, Cloneable {
         return stroke;
     }
 
-    public Object clone() {
-        try {
-            return super.clone();
-        } catch (Exception e) {
-
-            return null;
-        }
+    public Arc clone() {
+        return (Arc) super.clone();
     } // clone
 
 } // end of class

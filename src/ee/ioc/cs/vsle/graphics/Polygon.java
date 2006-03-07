@@ -330,8 +330,8 @@ public class Polygon extends Shape {
 	public BasicStroke getStroke() {
 		return stroke;
 	}
-	public Object clone() {
-		return super.clone();
+	public Polygon clone() {
+		return (Polygon) super.clone();
 	} // clone
 
 }

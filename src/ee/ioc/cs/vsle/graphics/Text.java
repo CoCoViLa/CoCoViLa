@@ -386,8 +386,8 @@ public class Text extends Shape implements Serializable {
 
 	}
 
-	public Object clone() {
-		return super.clone();
+	public Text clone() {
+		return (Text) super.clone();
 	} // clone
 
 }

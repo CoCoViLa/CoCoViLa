@@ -367,8 +367,8 @@ public class Rect extends Shape implements Serializable {
 		return stroke;
 	}
 
-	public Object clone() {
-		return super.clone();
+	public Rect clone() {
+		return (Rect) super.clone();
 	} // clone
 
 }

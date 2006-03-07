@@ -421,8 +421,8 @@ public class Dot extends Shape implements Serializable {
         }
     }
 
-    public Object clone() {
-        return super.clone();
+    public Dot clone() {
+        return (Dot) super.clone();
     } // clone
 
 }
