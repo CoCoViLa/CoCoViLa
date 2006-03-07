@@ -6,10 +6,9 @@ import java.util.ArrayList;
 
 public class GObjGroup extends GObj
 	implements Serializable {
-	public ArrayList objects;
-	private int attribute1;
+	public ArrayList<GObj> objects;
 
-	public GObjGroup(ArrayList objects) {
+	public GObjGroup(ArrayList<GObj> objects) {
 		super();
 		this.objects = objects;
 		setBounds();
@@ -19,14 +18,14 @@ public class GObjGroup extends GObj
 		int x1, x2, y1, y2;
 		GObj obj;
 
-		obj = (GObj) objects.get(0);
+		obj = objects.get(0);
 		x1 = obj.getX() + obj.portOffsetX1;
 		y1 = obj.getY() + obj.portOffsetY1;
 		x2 = obj.getX() + obj.getRealWidth() + obj.portOffsetX2;
 		y2 = obj.getY() + obj.getRealHeight() + obj.portOffsetY2;
 
 		for (int i = 1; i < objects.size(); i++) {
-			obj = (GObj) objects.get(i);
+			obj = objects.get(i);
 			if (obj.getX() < x1) {
 				x1 = obj.getX() + obj.portOffsetX1;
 			}
@@ -46,7 +45,7 @@ public class GObjGroup extends GObj
 		setHeight(y2 - y1);
 		setWidth(x2 - x1);
 		for (int i = 0; i < objects.size(); i++) {
-			obj = (GObj) objects.get(i);
+			obj = objects.get(i);
 			obj.difWithMasterX = obj.getX() - getX();
 			obj.difWithMasterY = obj.getY() - getY();
 		}
@@ -77,7 +76,7 @@ public class GObjGroup extends GObj
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 			port = obj.portContains(pointX, pointY);
 			if (port != null) {
 				return port;
@@ -101,7 +100,7 @@ public class GObjGroup extends GObj
 		int changeY = y - this.getY();
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 			obj.setPosition(obj.getX() + changeX, obj.getY() + changeY);
 		}
 		this.setX(x);
@@ -109,23 +108,23 @@ public class GObjGroup extends GObj
 
 	}
 
-	public ArrayList getConnections() {
-		ArrayList c = new ArrayList();
+	public ArrayList<Connection> getConnections() {
+		ArrayList<Connection> c = new ArrayList<Connection>();
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 			c.addAll(obj.getConnections());
 		}
 		return c;
 	}
 
-	public ArrayList getComponents() {
-		ArrayList c = new ArrayList();
+	public ArrayList<GObj> getComponents() {
+		ArrayList<GObj> c = new ArrayList<GObj>();
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 			c.addAll(obj.getComponents());
 		}
 		return c;
@@ -136,7 +135,7 @@ public class GObjGroup extends GObj
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 			if (obj.includesObject(checkObj)) {
 				return true;
 			}
@@ -145,12 +144,12 @@ public class GObjGroup extends GObj
 
 	}
 
-	public ArrayList getPorts() {
-		ArrayList c = new ArrayList();
+	public ArrayList<Port> getPorts() {
+		ArrayList<Port> c = new ArrayList<Port>();
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 			c.addAll(obj.getPorts());
 		}
 		return c;
@@ -164,7 +163,7 @@ public class GObjGroup extends GObj
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 			obj.drawClassGraphics(g);
 		}
 		if (isSelected() == true) {
@@ -195,7 +194,7 @@ public class GObjGroup extends GObj
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 
 			obj.setMultXSize(change);
 			obj.setX(getX() + (int) (getXsize() * obj.difWithMasterX));
@@ -211,7 +210,7 @@ public class GObjGroup extends GObj
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 
 			obj.setMultYSize(change);
 			obj.setY(getY() + (int) (getYsize() * obj.difWithMasterY));
@@ -226,7 +225,7 @@ public class GObjGroup extends GObj
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 
 			obj.setMultYSize(change);
 			obj.setY(getY() + (int) (getYsize() * obj.difWithMasterY));
@@ -241,7 +240,7 @@ public class GObjGroup extends GObj
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 
 			obj.setMultXSize(change);
 			obj.setX(getX() + (int) (getXsize() * obj.difWithMasterX));
@@ -253,20 +252,20 @@ public class GObjGroup extends GObj
 		String s = getName();
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
+			obj = objects.get(j);
 			s += " " + obj;
 		}
 		return s;
 	}
 
-	public Object clone() {
+	public GObjGroup clone() {
 		GObjGroup g = (GObjGroup) super.clone();
 		GObj obj;
-		ArrayList newList = new ArrayList();
+		ArrayList<GObj> newList = new ArrayList<GObj>();
 
 		for (int j = 0; j < objects.size(); j++) {
-			obj = (GObj) objects.get(j);
-			obj = (GObj) obj.clone();
+			obj = objects.get(j);
+			obj = obj.clone();
 			newList.add(obj);
 		}
 		g.objects = newList;
@@ -280,11 +279,11 @@ public class GObjGroup extends GObj
 		StringBuffer s = new StringBuffer();
 		ClassField field;
 		for (int i = 0; i < objects.size(); i++) {
-			obj = (GObj) objects.get(i);
+			obj = objects.get(i);
 			s.append(
 				"    " + obj.getClassName() + " " + obj.getName() + ";\n");
 			for (int j = 0; j < obj.fields.size(); j++) {
-				field = (ClassField) obj.fields.get(j);
+				field = obj.fields.get(j);
 				if (field.value != null) {
 					if (field.type.equals("String")) {
 						s.append("        " + obj.getName() + "." + field.name
@@ -325,7 +324,7 @@ public class GObjGroup extends GObj
 		}
 		Connection rel;
 		for (int j = 0; j < relations.size(); j++) {
-			rel = (Connection) relations.get(j);
+			rel = relations.get(j);
 			if (this.includesObject(rel.endPort.obj) && this.includesObject(rel.beginPort.obj)) {
 				if (rel.endPort.getName().equals("any")) {
 					s.append(

@@ -9,7 +9,7 @@ public class PackageClass implements Serializable {
     int x, y;
 	public String name;
 	public String icon;
-	public ArrayList fields = new ArrayList();
+	public ArrayList<ClassField> fields = new ArrayList<ClassField>();
 	public ClassGraphics graphics;
 	public ArrayList<Port> ports = new ArrayList<Port>();
 	public String description;

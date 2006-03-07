@@ -14,7 +14,7 @@ public class Port implements Cloneable, Serializable {
 	public int y;
 	boolean strict, area;
 	public ClassGraphics openGraphics, closedGraphics;
-	public ArrayList connections = new ArrayList();
+	public ArrayList<Connection> connections = new ArrayList<Connection>();
 	boolean selected = false, connected = false;
 	boolean known = false, target = false;
 	boolean watched = false;
@@ -45,7 +45,7 @@ public class Port implements Cloneable, Serializable {
 		Connection con;
 
 		for (int i = 0; i < connections.size(); i++) {
-			con = (Connection) connections.get(i);
+			con = connections.get(i);
 
 			if (con.beginPort.isStrict()) {
 				if (con.beginPort == this) {
@@ -185,19 +185,17 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public String getType() {
-		for (int i = 0; i < obj.getFields().size(); i++) {
-			if (((ClassField) obj.getFields().get(i)).getName().equals(name)) {
-				return ((ClassField) obj.getFields().get(i)).type;
-			}
+        for (ClassField field: obj.getFields()) {
+			if (field.getName().equals(name))
+				return field.type;
 		}
 		return null;
 	}
 
 	public ClassField getField() {
-		for (int i = 0; i < obj.getFields().size(); i++) {
-			if (((ClassField) obj.getFields().get(i)).getName().equals(name)) {
-				return ((ClassField) obj.getFields().get(i));
-			}
+        for (ClassField field: obj.getFields()) {
+			if (field.getName().equals(name))
+				return field;
 		}
 		return null;
 	}
@@ -218,7 +216,7 @@ public class Port implements Cloneable, Serializable {
 		Port port;
 
 		for (int j = 0; j < obj.getPorts().size(); j++) {
-			port = (Port) obj.getPorts().get(j);
+			port = obj.getPorts().get(j);
 			if (port == this) {
 				return j;
 			}
@@ -238,15 +236,14 @@ public class Port implements Cloneable, Serializable {
 		return hilighted;
 	}
 
-	public ArrayList getConnections() {
+	public ArrayList<Connection> getConnections() {
 		return connections;
 	}
 
-	public Object clone() {
+	public Port clone() {
 		try {
-			return super.clone();
+			return (Port) super.clone();
 		} catch (CloneNotSupportedException e) {
-
 			return null;
 		}
 	}

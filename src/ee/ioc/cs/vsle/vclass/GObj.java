@@ -20,11 +20,11 @@ public class GObj implements Serializable, Cloneable {
 	public String className;
 	public String name;
 
-	public ArrayList ports = new ArrayList();
-	public ArrayList fields = new ArrayList();
-	public ArrayList shapes = new ArrayList();
+	public ArrayList<Port> ports = new ArrayList<Port>();
+	public ArrayList<ClassField> fields = new ArrayList<ClassField>();
+	public ArrayList<Shape> shapes = new ArrayList<Shape>();
 
-	public ArrayList classRelations;
+	// public ArrayList classRelations;
 	public boolean draggable;
 	public boolean selected;
 	public boolean group = false;
@@ -115,7 +115,7 @@ public class GObj implements Serializable, Cloneable {
 		Port port;
 
 		for (int i = 0; i < getPorts().size(); i++) {
-			port = (Port) getPorts().get(i);
+			port = getPorts().get(i);
 			if (port.inBoundsX(pointX) && port.inBoundsY(pointY)) {
 				return port;
 			}
@@ -240,12 +240,12 @@ public class GObj implements Serializable, Cloneable {
 		return group;
 	}
 
-	public ArrayList getConnections() {
-		ArrayList c = new ArrayList();
+	public ArrayList<Connection> getConnections() {
+		ArrayList<Connection> c = new ArrayList<Connection>();
 		Port port;
 
 		for (int i = 0; i < getPorts().size(); i++) {
-			port = (Port) getPorts().get(i);
+			port = getPorts().get(i);
 			c.addAll(port.getConnections());
 		}
 		return c;
@@ -259,14 +259,14 @@ public class GObj implements Serializable, Cloneable {
 		}
 	}
 
-	public ArrayList getComponents() {
-		ArrayList c = new ArrayList();
+	public ArrayList<GObj> getComponents() {
+		ArrayList<GObj> c = new ArrayList<GObj>();
 
 		c.add(this);
 		return c;
 	}
 
-	public ArrayList getPorts() {
+	public ArrayList<Port> getPorts() {
 		return ports;
 	}
 
@@ -274,7 +274,7 @@ public class GObj implements Serializable, Cloneable {
 	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
 		Shape s;
 		for (int i = 0; i < shapes.size(); i++) {
-			s = (Shape) shapes.get(i);
+			s = shapes.get(i);
 			s.draw(xPos, yPos, Xsize, Ysize, g2);
 		}
 	} // draw
@@ -286,7 +286,7 @@ public class GObj implements Serializable, Cloneable {
 		int yModifier = getY();
         g2.setColor(Color.black);
 		for (int i = 0; i < getPorts().size(); i++) {
-			Port port = (Port) getPorts().get(i);
+			Port port = getPorts().get(i);
 
 			if (port.isSelected()) {
 				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
@@ -304,7 +304,7 @@ public class GObj implements Serializable, Cloneable {
 		}
 
 		for (int i = 0; i < fields.size(); i++) { //print all field values
-			ClassField field = (ClassField)fields.get(i);
+			ClassField field = fields.get(i);
 			if (field.defaultGraphics != null) {
 				if (!TypeUtil.isArray(field.type)) {
 					field.defaultGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value);
@@ -347,27 +347,27 @@ public class GObj implements Serializable, Cloneable {
 			getY() + (int) (getYsize() * (+portOffsetY2 + getHeight())) + 1, CORNER_SIZE, CORNER_SIZE);
 	}
 
-	public Object clone() {
+	public GObj clone() {
 		try {
 			GObj obj = (GObj) super.clone();
 			Port port;
 
-			obj.setPorts((ArrayList) getPorts().clone());
+            obj.setPorts(new ArrayList<Port>());
 			for (int i = 0; i < obj.getPorts().size(); i++) {
-				port = (Port) obj.getPorts().get(i);
-				port = (Port) port.clone();
+				port = obj.getPorts().get(i);
+				port = port.clone();
 				port.setConnected(false);
 				obj.getPorts().set(i, port);
 				port.obj = obj;
-				port.connections = new ArrayList();
+				port.connections = new ArrayList<Connection>();
 			}
 
-			obj.setFields((ArrayList) getFields().clone());
+			obj.setFields(new ArrayList<ClassField>());
 			// deep clone each separate field
 			ClassField field;
 
 			for (int i = 0; i < getFields().size(); i++) {
-				field = (ClassField) getFields().get(i);
+				field = getFields().get(i);
 				obj.getFields().set(i, field.clone());
 			}
 
@@ -410,18 +410,19 @@ public class GObj implements Serializable, Cloneable {
 		this.height = height;
 	}
 
-	public void setPorts(ArrayList ports) {
+	public void setPorts(ArrayList<Port> ports) {
 		this.ports = ports;
 	}
 
-	public ArrayList getFields() {
+	public ArrayList<ClassField> getFields() {
 		return fields;
 	}
 
-	public void setFields(ArrayList fields) {
+	public void setFields(ArrayList<ClassField> fields) {
 		this.fields = fields;
 	}
 
+    /*
 	public ArrayList getClassRelations() {
 		return classRelations;
 	}
@@ -429,6 +430,7 @@ public class GObj implements Serializable, Cloneable {
 	public void setClassRelations(ArrayList classRelations) {
 		this.classRelations = classRelations;
 	}
+    */
 
 	public void setGroup(boolean group) {
 		this.group = group;

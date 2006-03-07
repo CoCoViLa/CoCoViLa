@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /**
 
  */
-public class ConnectionList extends ArrayList implements Serializable {
+public class ConnectionList extends ArrayList<Connection> implements Serializable {
 
 	/**
 	 * Class constructor.
@@ -27,7 +27,7 @@ public class ConnectionList extends ArrayList implements Serializable {
 		Connection relation;
 
 		for (int i = 0; i < this.size(); i++) {
-			relation = (Connection) this.get(i);
+			relation = this.get(i);
 			if (relation.distanceFromPoint(x, y) < 4) {
 				return relation;
 			}
@@ -39,12 +39,12 @@ public class ConnectionList extends ArrayList implements Serializable {
 	 * Removes all relations.
 	 * @param relations ArrayList - list of relations to be emptied.
 	 */
-	public void removeAll(ArrayList relations) {
+	public void removeAll(ArrayList<Connection> relations) {
 		super.removeAll(relations);
 		Connection con;
 
 		for (int i = 0; i < relations.size(); i++) {
-			con = (Connection) relations.get(i);
+			con = relations.get(i);
 			con.beginPort.connections.remove(con);
 			if (con.beginPort.connections.isEmpty()) {
 				con.beginPort.setConnected(false);
@@ -81,7 +81,7 @@ public class ConnectionList extends ArrayList implements Serializable {
 		Connection con;
 
 		for (int i = 0; i < this.size(); i++) {
-			con = (Connection) this.get(i);
+			con = this.get(i);
 			if ((con.beginPort == p1 && con.endPort == p2)
 				|| (con.beginPort == p2 && con.endPort == p1)) {
 				super.remove(con);
@@ -100,7 +100,7 @@ public class ConnectionList extends ArrayList implements Serializable {
 		Connection relation;
 
 		for (int i = 0; i < this.size(); i++) {
-			relation = (Connection) this.get(i);
+			relation = this.get(i);
 			relation.calcAllBreakPoints();
 		}
 	} // calcAllBreakPoints
@@ -112,7 +112,7 @@ public class ConnectionList extends ArrayList implements Serializable {
 		Connection con;
 
 		for (int i = 0; i < this.size(); i++) {
-			con = (Connection) this.get(i);
+			con = this.get(i);
 			con.selected = false;
 		}
 	} // clearSelected
