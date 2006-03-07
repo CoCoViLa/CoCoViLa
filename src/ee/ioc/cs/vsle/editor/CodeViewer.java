@@ -61,8 +61,7 @@ public class CodeViewer extends JFrame implements ActionListener{
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == saveBtn) {
-			FileFuncs ff = new FileFuncs();
-			ff.writeFile(RuntimeProperties.packageDir + fileName, textArea.getText());
+			FileFuncs.writeFile(RuntimeProperties.packageDir + fileName, textArea.getText());
 		}
 	}
 

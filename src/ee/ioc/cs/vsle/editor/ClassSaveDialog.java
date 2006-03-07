@@ -51,7 +51,6 @@ public class ClassSaveDialog extends JFrame implements ActionListener {
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == ok) {
-			FileFuncs ff = new FileFuncs();
 			String className = textField.getText();
 		    String fileText = "class "+className+" {";
 		    fileText += "\n    /*@ specification "+className+" {\n";
@@ -59,7 +58,7 @@ public class ClassSaveDialog extends JFrame implements ActionListener {
 			fileText += "    }@*/\n \n}";
 
 			if (className.length() != 0) {
-				ff.writeFile(RuntimeProperties.packageDir + className+".java", fileText);
+				FileFuncs.writeFile(RuntimeProperties.packageDir + className+".java", fileText);
 				canvas.currentObj.className = className;
 				this.dispose();
 				canvas.repaint();
