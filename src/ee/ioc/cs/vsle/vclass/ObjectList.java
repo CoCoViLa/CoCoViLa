@@ -159,7 +159,7 @@ public class ObjectList extends ArrayList<GObj>
 		for (GObj obj: this) {
 			if (obj.name.equals(objName)) {
 				for (int j = 0; j < obj.ports.size(); j++) {
-					port = (Port) obj.ports.get(j);
+					port = obj.ports.get(j);
 					if (port.id != null) {
 						if (port.id.equals(portId)) {
 							return port;
