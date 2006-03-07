@@ -8,7 +8,7 @@ import ee.ioc.cs.vsle.graphics.*;
 
 public class ClassGraphics implements Serializable {
 
-	public ArrayList shapes = new ArrayList();
+	public ArrayList<Shape> shapes = new ArrayList<Shape>();
 	public double angle = 0.0;
 	public int boundX;
 	public int boundY;
@@ -70,7 +70,7 @@ public class ClassGraphics implements Serializable {
 		Shape s;
 
 		for (int i = 0; i < shapes.size(); i++) {
-			s = (Shape) shapes.get(i);
+			s = shapes.get(i);
 			s.draw(xPos, yPos, Xsize, Ysize, g2);
 		}
 
@@ -80,7 +80,7 @@ public class ClassGraphics implements Serializable {
 		Shape s;
 
 		for (int i = 0; i < shapes.size(); i++) {
-			s = (Shape) shapes.get(i);
+			s = shapes.get(i);
 			if (s instanceof Text)
 				((Text)s).drawSpecial(xPos, yPos, Xsize, Ysize, g2, name, value, angle);
 			else
