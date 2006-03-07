@@ -329,6 +329,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * Returns port number.
 	 * @return int - port number.
 	 */
+    /*
 	int getNumber() {
 		IconPort port;
 		for (int j = 0; j < obj.ports.size(); j++) {
@@ -339,6 +340,7 @@ public class IconPort implements Cloneable, Serializable {
 		}
 		return -1;
 	} // getNumber
+    */
 
 	/**
 	 * Add connection to the port.
