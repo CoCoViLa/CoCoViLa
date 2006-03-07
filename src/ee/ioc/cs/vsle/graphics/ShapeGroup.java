@@ -13,7 +13,7 @@ public class ShapeGroup extends Shape implements Serializable {
 
 	float size = 1; // percentage for resizing, 1 means real size
 
-	public ArrayList shapes = new ArrayList();
+	public ArrayList<Shape> shapes = new ArrayList<Shape>();
 
 	/**
 	 * Defines if the shape is resizable or not.
@@ -27,7 +27,7 @@ public class ShapeGroup extends Shape implements Serializable {
 	public String toText() {
 		StringBuffer text = new StringBuffer();
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 			text.append(shape.toText());
 		}
 		return text.toString();
@@ -36,7 +36,7 @@ public class ShapeGroup extends Shape implements Serializable {
 	public void setFixed(boolean b) {
 		this.fixed = b;
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 			shape.setFixed(b);
 		}
 	} // setFixed
@@ -83,21 +83,21 @@ public class ShapeGroup extends Shape implements Serializable {
 
 	public void setStrokeWidth(double d) {
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 			shape.setStrokeWidth(d);
 		}
 	} // setStrokeWidth
 
 	public void setColor(Color col) {
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 			shape.setColor(col);
 		}
 	} // setColor
 
 	public void setTransparency(int d) {
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 			shape.setTransparency(d);
 		}
 	} // setTransparency
@@ -108,7 +108,7 @@ public class ShapeGroup extends Shape implements Serializable {
 	 */
 	public void setLineType(int lineType) {
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 			shape.setLineType(lineType);
 		}
 	} // setLineType
@@ -120,7 +120,7 @@ public class ShapeGroup extends Shape implements Serializable {
 	public String toFile(int boundingboxX, int boundingboxY) {
 		StringBuffer text = new StringBuffer();
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 			text.append(shape.toFile(boundingboxX, boundingboxY));
 		}
 		return text.toString();
@@ -134,7 +134,7 @@ public class ShapeGroup extends Shape implements Serializable {
 		return 0;
 	} // getRealWidth
 
-	public ShapeGroup(ArrayList shapes) {
+	public ShapeGroup(ArrayList<Shape> shapes) {
 		super();
 		this.shapes = shapes;
 		setBounds();
@@ -167,18 +167,18 @@ public class ShapeGroup extends Shape implements Serializable {
 		shapes.removeAll(shapes);
 	} // removeAll
 
-	public void removeAll(ArrayList a) {
+	public void removeAll(ArrayList<Shape> a) {
 		shapes.removeAll(a);
 	} // removeAll
 
-	public void addAll(ArrayList a) {
+	public void addAll(ArrayList<Shape> a) {
 		shapes.addAll(a);
 	} // addAll
 
 	public Shape checkInside(int x, int y) {
 		Shape shape;
 		for (int i = shapes.size() - 1; i >= 0; i--) {
-			shape = (Shape) shapes.get(i);
+			shape = shapes.get(i);
 			if (shape.contains(x, y)) {
 				return shape;
 			}
@@ -197,7 +197,7 @@ public class ShapeGroup extends Shape implements Serializable {
 
 	public boolean isLocatedAtPoint(int x, int y) {
 		for (int i = shapes.size() - 1; i >= 0; i--) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 
 			if (shape.contains(x, y)) {
 				return true;
@@ -253,7 +253,7 @@ public class ShapeGroup extends Shape implements Serializable {
 	public void clearSelected() {
 		Shape shape;
 		for (int i = 0; i < shapes.size(); i++) {
-			shape = (Shape) shapes.get(i);
+			shape = shapes.get(i);
 			shape.setSelected(false);
 		}
 	} // clearSelected
@@ -261,7 +261,7 @@ public class ShapeGroup extends Shape implements Serializable {
 	public Shape checkInside(int x, int y, Shape asker) {
 		Shape shape;
 		for (int i = 0; i < shapes.size(); i++) {
-			shape = (Shape) shapes.get(i);
+			shape = shapes.get(i);
 			if (shape.contains(x, y) && shape != asker) {
 				return shape;
 			}
@@ -281,7 +281,7 @@ public class ShapeGroup extends Shape implements Serializable {
 		shapes.remove(s);
 	} // remove
 
-	public Object get(int i) {
+	public Shape get(int i) {
 		return shapes.get(i);
 	} // get
 
@@ -289,10 +289,10 @@ public class ShapeGroup extends Shape implements Serializable {
 		return shapes.size();
 	} // size
 
-	public ArrayList getSelected() {
-		ArrayList a = new ArrayList();
+	public ArrayList<Shape> getSelected() {
+		ArrayList<Shape> a = new ArrayList<Shape>();
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 			if (shape != null && shape.isSelected()) {
 				a.add(shape);
 			}
@@ -304,14 +304,14 @@ public class ShapeGroup extends Shape implements Serializable {
 		int x1, x2, y1, y2;
 		Shape shape;
 		if (shapes != null && shapes.size() > 0) {
-			shape = (Shape) shapes.get(0);
+			shape = shapes.get(0);
 			x1 = shape.x;
 			y1 = shape.y;
 			x2 = shape.x + shape.getRealWidth();
 			y2 = shape.y + shape.getRealHeight();
 
 			for (int i = 1; i < shapes.size(); i++) {
-				shape = (Shape) shapes.get(i);
+				shape = shapes.get(i);
 				if (shape.x < x1) {
 					x1 = shape.x;
 				}
@@ -331,7 +331,7 @@ public class ShapeGroup extends Shape implements Serializable {
 			height = y2 - y1;
 			width = x2 - x1;
 			for (int i = 0; i < shapes.size(); i++) {
-				shape = (Shape) shapes.get(i);
+				shape = shapes.get(i);
 				shape.difWithMasterX = shape.x - x;
 				shape.difWithMasterY = shape.y - y;
 			}
@@ -362,17 +362,17 @@ public class ShapeGroup extends Shape implements Serializable {
 		return false;
 	} // isInsideRect
 
-	public ArrayList getShapes() {
+	public ArrayList<Shape> getShapes() {
 		return this.shapes;
 	} // getShapes
 
 	public void setPosition(int deltaX, int deltaY) {
 		Shape shape;
 		for (int j = 0; j < shapes.size(); j++) {
-			shape = (Shape) shapes.get(j);
+			shape = shapes.get(j);
 			if (shape instanceof ShapeGroup && shape.isSelected()) {
 				for (int k = 0; k < shape.getShapes().size(); k++) {
-					Shape s = (Shape) shape.getShapes().get(k);
+					Shape s = shape.getShapes().get(k);
 					s.setPosition(s.getX() + deltaX, s.getY() + deltaY);
 				}
 			} else {
@@ -386,7 +386,7 @@ public class ShapeGroup extends Shape implements Serializable {
 		int x = 0;
 		int y = 0;
 		for (int i = 0; i < shapes.size(); i++) {
-			Shape shape = (Shape) shapes.get(i);
+			Shape shape = shapes.get(i);
 			if (i == 0) {
 				x = shape.getX();
 				y = shape.getY();
@@ -399,12 +399,12 @@ public class ShapeGroup extends Shape implements Serializable {
 		this.y = y;
 	} // setXY
 
-	ArrayList getComponents() {
-		ArrayList c = new ArrayList();
+	ArrayList<Shape> getComponents() {
+		ArrayList<Shape> c = new ArrayList<Shape>();
 		Shape shape;
 
 		for (int j = 0; j < shapes.size(); j++) {
-			shape = (Shape) shapes.get(j);
+			shape = shapes.get(j);
 			c.add(shape);
 		}
 		return c;
@@ -412,7 +412,7 @@ public class ShapeGroup extends Shape implements Serializable {
 
 	boolean includesObject(Shape checkObj) {
 		for (int j = 0; j < shapes.size(); j++) {
-			Shape shape = (Shape) shapes.get(j);
+			Shape shape = shapes.get(j);
 			if (shape == checkObj) {
 				return true;
 			}
@@ -423,7 +423,7 @@ public class ShapeGroup extends Shape implements Serializable {
 	public void draw(int x, int y, float Xsize, float Ysize, Graphics2D g) {
 		Shape shape;
 		for (int j = 0; j < shapes.size(); j++) {
-			shape = (Shape) shapes.get(j);
+			shape = shapes.get(j);
 			shape.draw(0, 0, 1, 1, g);
 		}
 	} // draw
@@ -431,7 +431,7 @@ public class ShapeGroup extends Shape implements Serializable {
 
 	public void setMultSize(float s1, float s2) {
 		for (int j = 0; j < shapes.size(); j++) {
-			Shape shape = (Shape) shapes.get(j);
+			Shape shape = shapes.get(j);
 			shape.setMultSize(s1, s2);
 //	  shape.x = x + (int) (size * shape.difWithMasterX);
 //	  shape.y = y + (int) (size * shape.difWithMasterY);
@@ -443,20 +443,20 @@ public class ShapeGroup extends Shape implements Serializable {
 		String s = name;
 
 		for (int j = 0; j < shapes.size(); j++) {
-			shape = (Shape) shapes.get(j);
+			shape = shapes.get(j);
 			s += " " + shape;
 		}
 		return s;
 	} // toString
 
-	public Object clone() {
+	public ShapeGroup clone() {
 		ShapeGroup g = (ShapeGroup) super.clone();
 		Shape shape;
-		ArrayList newList = new ArrayList();
+		ArrayList<Shape> newList = new ArrayList<Shape>();
 
 		for (int j = 0; j < shapes.size(); j++) {
-			shape = (Shape) shapes.get(j);
-			shape = (Shape) shape.clone();
+			shape = shapes.get(j);
+			shape = shape.clone();
 			newList.add(shape);
 		}
 		g.shapes = newList;
@@ -470,7 +470,7 @@ public class ShapeGroup extends Shape implements Serializable {
 	public void shift(int offsetX, int offsetY) {
 		Shape shape;
 		for (int i = 0; i < this.size(); i++) {
-			shape = (Shape) this.get(i);
+			shape = this.get(i);
 			shape.shift(offsetX, offsetY);
 
 		}
