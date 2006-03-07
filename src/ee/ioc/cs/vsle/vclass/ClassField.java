@@ -173,13 +173,12 @@ public class ClassField implements Cloneable, Serializable {
 	/**
 	 * Performs cloning.
 	 * 
-	 * @return Object
+	 * @return ClassField
 	 */
-	public Object clone() {
+	public ClassField clone() {
 		try {
-			return super.clone();
+			return (ClassField) super.clone();
 		} catch (CloneNotSupportedException e) {
-			System.out.println("Unable to clone.");
 			return null;
 		}
 	} // clone
