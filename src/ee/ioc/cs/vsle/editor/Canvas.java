@@ -125,11 +125,11 @@ public class Canvas extends JPanel implements ActionListener {
 	 * Method for grouping objects.
 	 */
 	public void groupObjects() {
-		ArrayList selected = objects.getSelected();
+		ArrayList<GObj> selected = objects.getSelected();
 		if (selected.size() > 1) {
 			GObj obj;
 			for (int i = 0; i < selected.size(); i++) {
-				obj = (GObj) selected.get(i);
+				obj = selected.get(i);
 				obj.setSelected(false);
 			}
 			GObjGroup og = new GObjGroup(selected);
@@ -148,7 +148,7 @@ public class Canvas extends JPanel implements ActionListener {
 	 */
 	public void moveObject(int moveX, int moveY) {
 		for (int i = 0; i < objects.getSelected().size(); i++) {
-			GObj obj = (GObj) objects.getSelected().get(i);
+			GObj obj = objects.getSelected().get(i);
 			if (!(obj instanceof RelObj))
 				obj.setPosition(obj.getX() + moveX, obj.getY() + moveY);
 
@@ -157,10 +157,10 @@ public class Canvas extends JPanel implements ActionListener {
 			if (obj.isStrict()) {
 				Port port, port2;
 				GObj obj2;
-				ArrayList ports = obj.getPorts();
+				ArrayList<Port> ports = obj.getPorts();
 
 				for (int j = 0; j < ports.size(); j++) {
-					port = (Port) ports.get(j);
+					port = ports.get(j);
 					if (port.isStrict()) {
 						port2 = port.getStrictConnected();
 						// if the port is connected to another port, and they are not both selected, we might
@@ -196,7 +196,7 @@ public class Canvas extends JPanel implements ActionListener {
 			}
 
 			for (int j = 0; j < connections.size(); j++) {
-				Connection relation = (Connection) connections.get(j);
+				Connection relation = connections.get(j);
 				if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
 					relation.calcEndBreakPoints();
 				}
@@ -213,7 +213,7 @@ public class Canvas extends JPanel implements ActionListener {
 	public void ungroupObjects() {
 		GObj obj;
 		for (int i = 0; i < objects.getSelected().size(); i++) {
-			obj = (GObj) objects.getSelected().get(i);
+			obj = objects.getSelected().get(i);
 			if (obj.isGroup()) {
 				objects.addAll(((GObjGroup) obj).objects);
 				objects.remove(obj);
@@ -229,9 +229,9 @@ public class Canvas extends JPanel implements ActionListener {
 	 */
 	public void deleteObjects() {
 		GObj obj;
-		ArrayList removable = new ArrayList();
+		ArrayList<GObj> removable = new ArrayList<GObj>();
 		for (int i = 0; i < objects.size(); i++) {
-			obj = (GObj) objects.get(i);
+			obj = objects.get(i);
 			if (obj.isSelected()) {
 				connections.removeAll(obj.getConnections());
 				removable.add(obj);
@@ -247,7 +247,7 @@ public class Canvas extends JPanel implements ActionListener {
 	public void selectAllObjects() {
 		GObj obj;
 		for (int i = 0; i < objects.size(); i++) {
-			obj = (GObj) objects.get(i);
+			obj = objects.get(i);
 			obj.setSelected(true);
 		}
 		repaint();
@@ -270,30 +270,30 @@ public class Canvas extends JPanel implements ActionListener {
 	 * menu Clone selection.
 	 */
 	public void cloneObject() {
-		ArrayList selected = objects.getSelected();
+		ArrayList<GObj> selected = objects.getSelected();
 		// objCount = objects.size();
-		ArrayList newObjects = new ArrayList();
+		ArrayList<GObj> newObjects = new ArrayList<GObj>();
 		GObj obj;
 		// clone every selected objects
 		for (int i = 0; i < selected.size(); i++) {
-			obj = (GObj) selected.get(i);
-			GObj newObj = (GObj) obj.clone();
+			obj = selected.get(i);
+			GObj newObj = obj.clone();
 			newObj.setPosition(newObj.x + 20, newObj.y + 20);
 			newObjects.add(newObj);
 		}
 		// some of these objects might have been groups, so ungroup everything
 		ObjectList objects2 = new ObjectList();
 		for (int i = 0; i < newObjects.size(); i++) {
-			obj = (GObj) newObjects.get(i);
+			obj = newObjects.get(i);
 			objects2.addAll(obj.getComponents());
 		}
 
 		GObj obj2;
 		for (int i = 0; i < objects2.size(); i++) {
-			obj = (GObj) objects2.get(i);
+			obj = objects2.get(i);
 			if (obj instanceof RelObj) {
 				for (int j = 0; j < objects2.size(); j++) {
-					obj2 = (GObj) objects2.get(j);
+					obj2 = objects2.get(j);
 					if (((RelObj) obj).startPort.obj.name.equals(obj2.name))
 						((RelObj) obj).startPort.obj = obj2;
 					if (((RelObj) obj).endPort.obj.name.equals(obj2.name))
@@ -309,24 +309,24 @@ public class Canvas extends JPanel implements ActionListener {
 		GObj endObj;
 		ConnectionList newConnections = new ConnectionList();
 		for (int i = 0; i < connections.size(); i++) {
-			con = (Connection) connections.get(i);
+			con = connections.get(i);
 			int beginNum = con.beginPort.getNumber();
 			int endNum = con.endPort.getNumber();
 			beginObj = null;
 			endObj = null;
 			for (int j = 0; j < objects2.size(); j++) {
-				obj = (GObj) objects2.get(j);
+				obj = objects2.get(j);
 				if (obj.name.equals(con.beginPort.obj.name)) {
 					beginObj = obj;
 					if (endObj != null) {
-						Port beginPort = (Port) beginObj.ports.get(beginNum);
-						Port endPort = (Port) endObj.ports.get(endNum);
+						Port beginPort = beginObj.ports.get(beginNum);
+						Port endPort = endObj.ports.get(endNum);
 						beginPort.setConnected(true);
 						endPort.setConnected(true);
 						Connection con2 = new Connection(beginPort, endPort);
 						Point p;
 						for (int l = 0; l < con.breakPoints.size(); l++) {
-							p = (Point) con.breakPoints.get(l);
+							p = con.breakPoints.get(l);
 							con2.addBreakPoint(new Point(p.x + 20, p.y + 20));
 						}
 						beginPort.addConnection(con2);
@@ -337,8 +337,8 @@ public class Canvas extends JPanel implements ActionListener {
 				if (obj.name.equals(con.endPort.obj.name)) {
 					endObj = obj;
 					if (beginObj != null) {
-						Port beginPort = (Port) beginObj.ports.get(beginNum);
-						Port endPort = (Port) endObj.ports.get(endNum);
+						Port beginPort = beginObj.ports.get(beginNum);
+						Port endPort = endObj.ports.get(endNum);
 						beginPort.setConnected(true);
 						endPort.setConnected(true);
 						Connection con3 = new Connection(beginPort, endPort);
@@ -351,16 +351,16 @@ public class Canvas extends JPanel implements ActionListener {
 		}
 		connections.addAll(newConnections);
 		for (int i = 0; i < connections.size(); i++) {
-			con = (Connection) connections.get(i);
+			con = connections.get(i);
 		}
 		for (int i = 0; i < objects2.size(); i++) {
-			obj = (GObj) objects2.get(i);
+			obj = objects2.get(i);
 			obj.setName(obj.className + "_" + Integer.toString(objCount));
 			objCount++;
 		}
 
 		for (int i = 0; i < selected.size(); i++) {
-			obj = (GObj) selected.get(i);
+			obj = selected.get(i);
 			obj.setSelected(false);
 		}
 		objects.addAll(newObjects);
@@ -383,10 +383,10 @@ public class Canvas extends JPanel implements ActionListener {
 
 	public void hilightPorts() {
 		for (int i = 0; i < objects.getSelected().size(); i++) {
-			GObj obj = (GObj) objects.getSelected().get(i);
-			ArrayList ps = obj.getPorts();
+			GObj obj = objects.getSelected().get(i);
+			ArrayList<Port> ps = obj.getPorts();
 			for (int port_index = 0; port_index < ps.size(); port_index++) {
-				Port p = (Port) ps.get(port_index);
+				Port p = ps.get(port_index);
 				p.setHilighted(!p.isHilighted());
 			}
 		}
@@ -417,11 +417,11 @@ public class Canvas extends JPanel implements ActionListener {
 			out.println("<!DOCTYPE scheme SYSTEM \"" + RuntimeProperties.SCHEME_DTD + "\">");
             out.println("<scheme package=\""+vPackage.name+"\">");
 			for (int i = 0; i < objects.size(); i++) {
-				GObj obj = (GObj) objects.get(i);
+				GObj obj = objects.get(i);
 				out.print(obj.toXML());
 			}
 			for (int i = 0; i < connections.size(); i++) {
-				Connection con = (Connection) connections.get(i);
+				Connection con = connections.get(i);
 				out.print(con.toXML());
 			}
 			out.println("</scheme>");
@@ -433,7 +433,7 @@ public class Canvas extends JPanel implements ActionListener {
 
 
 	public void saveSchemeAsClass(String classText) {
-		ObjectPropertiesEditor prop = new ObjectPropertiesEditor((GObj) objects.getSelected().get(0), this);
+		ObjectPropertiesEditor prop = new ObjectPropertiesEditor(objects.getSelected().get(0), this);
 		prop.pack();
 		prop.setVisible(true);
 		prop.setLocationRelativeTo(this);
@@ -445,7 +445,7 @@ public class Canvas extends JPanel implements ActionListener {
 	 */
 	public void openPropertiesDialog() {
 		if (objects.getSelected().size() == 1) {
-			ObjectPropertiesEditor prop = new ObjectPropertiesEditor((GObj) objects.getSelected().get(0), this);
+			ObjectPropertiesEditor prop = new ObjectPropertiesEditor(objects.getSelected().get(0), this);
 			prop.pack();
 			prop.setLocationRelativeTo(this);
 			prop.setVisible(true);
@@ -551,18 +551,18 @@ public class Canvas extends JPanel implements ActionListener {
 
 
 			for (int i = 0; i < objects.size(); i++) {
-				obj = (GObj) objects.get(i);
+				obj = objects.get(i);
 				obj.drawClassGraphics(g2);
 			}
 
 			g2.setColor(Color.blue);
 			for (int i = 0; i < connections.size(); i++) {
-				rel = (Connection) connections.get(i);
+				rel = connections.get(i);
 				rel.drawRelation(g2);
 			}
 			if (firstPort != null && mListener.state.equals(State.addRelation)) {
 				currentCon.drawRelation(g2);
-				Point p = (Point) currentCon.breakPoints.get(
+				Point p = currentCon.breakPoints.get(
 					currentCon.breakPoints.size() - 1);
 				g2.drawLine(p.x, p.y, mouseX, mouseY);
 			} else if (firstPort != null && mListener.state.startsWith("??") && currentObj != null) {
