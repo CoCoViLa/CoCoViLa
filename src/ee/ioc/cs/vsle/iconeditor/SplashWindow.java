@@ -92,7 +92,7 @@ public class SplashWindow extends Window {
 
 		// Show the window.
 		w.toFront();
-		w.show();
+		w.setVisible(true);
 
 		// Note: To make sure the user gets a chance to see the
 		// splash window we wait until its paint method has been
