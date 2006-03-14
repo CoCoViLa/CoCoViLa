@@ -7,7 +7,9 @@ import java.awt.*;
 
 public class BoundingBox extends Shape implements Serializable {
 
-	String xEquation;
+    private static final long serialVersionUID = 1L;
+
+    String xEquation;
 	String yEquation;
 	String widthEquation;
 	String heightEquation;

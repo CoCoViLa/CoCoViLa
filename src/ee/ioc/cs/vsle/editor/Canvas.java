@@ -6,6 +6,8 @@ import ee.ioc.cs.vsle.packageparse.PackageParser;
 import ee.ioc.cs.vsle.util.PropertyBox;
 import ee.ioc.cs.vsle.util.VMath;
 import ee.ioc.cs.vsle.util.PrintUtilities;
+import ee.ioc.cs.vsle.util.db;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -36,7 +38,7 @@ public class Canvas extends JPanel implements ActionListener {
 	JPanel infoPanel;
 	JLabel posInfo;
 	DrawingArea drawingArea;
-
+    ISchemeEventListener sListener;
 
 	public Canvas(File f) {
 		super();
@@ -45,8 +47,6 @@ public class Canvas extends JPanel implements ActionListener {
 			RuntimeProperties.packageDir = workDir;
 			PackageParser pp = new PackageParser(f);
 			vPackage = pp.getPackage();
-//			Scheme scheme = new Scheme();
-//			scheme.packageName = vPackage.name;
 			initialize();
 			palette = new Palette(vPackage, mListener, this);
 			validate();
@@ -56,12 +56,38 @@ public class Canvas extends JPanel implements ActionListener {
 		}
 	}
 
-	void initialize() {
+    private void triggerSchemeLoadedEvent() {
+        if (sListener != null) {
+            SchemeEvent evt = new SchemeEvent();
+            evt.setScheme(scheme);
+            sListener.schemeLoaded(evt);
+        }
+    }
+
+    void initialize() {
 		scheme = new Scheme();
 		scheme.packageName = vPackage.name;
 		objects = scheme.objects;
 		connections = scheme.connections;
-		mListener = new MouseOps(this);
+        
+        if (vPackage.eventlistener != null) {
+            try {
+                Class elc = Class.forName(vPackage.eventlistener);
+                Object o = elc.newInstance();
+                sListener = ISchemeEventListener.class.cast(o);
+                db.p("Created instance of " + vPackage.eventlistener + " implementing ISchemeEventListener: " + sListener);
+                
+                triggerSchemeLoadedEvent();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        mListener = new MouseOps(this);
 		keyListener = new KeyOps(this);
 		drawingArea = new DrawingArea();
 		drawingArea.setBackground(Color.white);
@@ -75,8 +101,6 @@ public class Canvas extends JPanel implements ActionListener {
 
 		// Initializes key listeners, for keyboard shortcuts.
 		drawingArea.addKeyListener(keyListener);
-
-		// Initializes key listeners, for keyboard shortcuts.
 
 		JScrollPane areaScrollPane = new JScrollPane(drawingArea,
 			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,

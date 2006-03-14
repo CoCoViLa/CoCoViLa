@@ -22,7 +22,7 @@ import ee.ioc.cs.vsle.vclass.*;
  */
 public class Editor extends JFrame implements ChangeListener {
 
-	JTabbedPane tabbedPane = new JTabbedPane();
+    JTabbedPane tabbedPane = new JTabbedPane();
 
 	EditorActionListener aListener;
 
@@ -670,8 +670,7 @@ public class Editor extends JFrame implements ChangeListener {
 				} else {
 					// application.properties failis polnud vastavat kirjet
 					// vaikimisi laetava faili kohta.
-					db
-							.p("Module file name was not specified in command line nor in the application.properties file. Starting without.");
+					db.p("Module file name was not specified in command line nor in the application.properties file. Starting without.");
 					RuntimeProperties.packageDir = directory;
 					window = new Editor();
 				}

@@ -6,6 +6,8 @@ import java.awt.*;
 
 public class Arc extends Shape implements Serializable, Cloneable {
 
+    private static final long serialVersionUID = 1L;
+
     int startAngle;
 
     int arcAngle;

@@ -23,6 +23,8 @@ import java.awt.*;
  */
 public class Dot extends Shape implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     int x;
 
     int y;
@@ -424,5 +426,4 @@ public class Dot extends Shape implements Serializable {
     public Dot clone() {
         return (Dot) super.clone();
     } // clone
-
 }

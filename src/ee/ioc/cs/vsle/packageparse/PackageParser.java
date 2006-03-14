@@ -30,7 +30,7 @@ public class PackageParser {
     private Polygon polygon;
     private ArrayList<String> polyXs = new ArrayList<String>();
     private ArrayList<String> polyYs = new ArrayList<String>();
-    private final int CLASS = 1, PORT_OPEN = 2, PORT_CLOSED = 3, PACKAGE = 4, FIELD = 5, FIELD_KNOWN = 6;
+    private final int CLASS = 1, PORT_OPEN = 2, PORT_CLOSED = 3, PACKAGE = 4, FIELD = 5, FIELD_KNOWN = 6, EVTLISTENER = 7;
 
     private int status;
 
@@ -317,7 +317,6 @@ public class PackageParser {
                 newGraphics.setBounds( Integer.parseInt( x ), Integer.parseInt( y ),
                                        Integer.parseInt( width ), Integer.parseInt( height ) );
             }
-
         }
 
         private Text makeText( Attributes attrs, ClassGraphics newGraphics ) {
@@ -591,6 +590,9 @@ public class PackageParser {
             if ( element.equals( "icon" ) ) {
                 newClass.icon = s;
             }
+            
+            if ("eventlistener".equals(element) && status == PACKAGE)
+                pack.eventlistener = s;
         }
 
         public void ignorableWhitespace( char buf[], int offset, int len ) throws SAXException { // Purposely ignore it.

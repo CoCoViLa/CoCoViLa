@@ -11,7 +11,9 @@ import java.awt.*;
  */
 public class Polygon extends Shape {
 
-	boolean filled = false;
+    private static final long serialVersionUID = 1L;
+
+    boolean filled = false;
     int[] xPoints;
 	int[] yPoints;
 	int[] xFixed;

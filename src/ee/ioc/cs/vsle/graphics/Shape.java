@@ -128,7 +128,6 @@ public abstract class Shape implements Serializable, Cloneable {
 		try {
 			return (Shape) super.clone();
 		} catch (Exception e) {
-
 			return null;
 		}
 	}

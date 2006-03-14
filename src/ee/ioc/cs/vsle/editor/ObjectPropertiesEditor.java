@@ -18,10 +18,11 @@ import javax.swing.*;
  */
 public class ObjectPropertiesEditor extends JFrame
 	implements ActionListener, KeyListener {
-	ArrayList textFields = new ArrayList(), watchFields = new ArrayList();
-	ArrayList comboBoxes = new ArrayList();
-	ArrayList primitiveNameList = new ArrayList();
-	ArrayList arrayNameList = new ArrayList();
+	ArrayList<JTextField> textFields = new ArrayList<JTextField>();
+    ArrayList<JCheckBox> watchFields = new ArrayList<JCheckBox>();
+	ArrayList<JComboBox> comboBoxes = new ArrayList<JComboBox>();
+	ArrayList<ClassField> primitiveNameList = new ArrayList<ClassField>();
+	ArrayList<ClassField> arrayNameList = new ArrayList<ClassField>();
 
 	GObj controlledObject;
 	JTextField nameTextField;
@@ -57,14 +58,11 @@ public class ObjectPropertiesEditor extends JFrame
 		label = new JLabel("Watch");
 		watchPane.add(label);
 
-		ClassField field;
 		JTextField textField;
 		JComboBox comboBox;
 		JCheckBox watch;
 
-		for (int i = 0; i < object.fields.size(); i++) {
-			field = (ClassField) object.fields.get(i);
-
+		for (ClassField field: object.fields) {
 			if (field.isArray()) {
 				comboBox = new JComboBox();
 				comboBox.setEditable(true);
@@ -76,9 +74,8 @@ public class ObjectPropertiesEditor extends JFrame
 						comboBox.addItem(split[j]);
 					}
 				}
-				JTextField jtf = (JTextField) (comboBox.getEditor().getEditorComponent());
+				Component jtf = comboBox.getEditor().getEditorComponent();
 				jtf.addKeyListener(this);
-
 
 				comboBoxes.add(comboBox);
 				label = new JLabel(field.getName(), SwingConstants.CENTER);
@@ -113,8 +110,6 @@ public class ObjectPropertiesEditor extends JFrame
 				watchPane.add(watch);
 				watchFields.add(watch);
 			}
-
-
 		}
 		JPanel contentPane = new JPanel();
 		JScrollPane areaScrollPane = new JScrollPane(contentPane,
@@ -178,9 +173,9 @@ public class ObjectPropertiesEditor extends JFrame
 		db.p(e);
 		if (e.getSource() == ok) {
 			for (int i = 0; i < textFields.size(); i++) {
-				textField = (JTextField) textFields.get(i);
-				field = (ClassField) primitiveNameList.get(i);
-				b = ((JCheckBox) watchFields.get(i)).isSelected();
+				textField = textFields.get(i);
+				field = primitiveNameList.get(i);
+				b = watchFields.get(i).isSelected();
 				field.setWatched( b );
 				if (!textField.getText().equals("")) {
 					field.setValue( textField.getText() );
@@ -190,8 +185,8 @@ public class ObjectPropertiesEditor extends JFrame
 				}
 			}
 			for (int i = 0; i < comboBoxes.size(); i++) {
-				JComboBox comboBox = (JComboBox) comboBoxes.get(i);
-				field = (ClassField) arrayNameList.get(i);
+				JComboBox comboBox = comboBoxes.get(i);
+				field = arrayNameList.get(i);
 				String s = "";
 				for (int j = 0; j < comboBox.getItemCount(); j++) {
 					s += (String) comboBox.getItemAt(j) + ClassField.ARRAY_TOKEN;
@@ -211,9 +206,9 @@ public class ObjectPropertiesEditor extends JFrame
 		if (e.getSource() == clear) {
 			// Clears object properties except the object name.
 			for (int i = 0; i < textFields.size(); i++) {
-				textField = (JTextField) textFields.get(i);
-				field = (ClassField) controlledObject.fields.get(i);
-				((JCheckBox) watchFields.get(i)).setSelected(false);
+				textField = textFields.get(i);
+				field = controlledObject.fields.get(i);
+				watchFields.get(i).setSelected(false);
 				field.setWatched( false );
 				field.setValue( null );
 				textField.setText("");
@@ -222,13 +217,11 @@ public class ObjectPropertiesEditor extends JFrame
 	}
 
 	JComboBox getComboBox(JTextField jtf) {
-		for (int i = 0; i < comboBoxes.size(); i++) {
-			JComboBox jcb = (JComboBox) comboBoxes.get(i);
+		for (JComboBox jcb: comboBoxes) {
 			if (jtf == jcb.getEditor().getEditorComponent()) {
 				return jcb;
 			}
 		}
 		return null;
 	}
-
 }

@@ -6,7 +6,9 @@ import java.awt.*;
 
 public class Oval extends Shape implements Serializable {
 
-	Color color;
+    private static final long serialVersionUID = 1L;
+
+    Color color;
 	String name;
 	boolean filled = false;
 	private boolean selected = false;

@@ -6,7 +6,9 @@ import java.io.Serializable;
 
  */
 public class Scheme implements Serializable {
-	public String packageName;
+
+    private static final long serialVersionUID = 1L;
+    public String packageName;
 	public int objCount;
 	public ObjectList objects = new ObjectList();
 	public ConnectionList connections = new ConnectionList();

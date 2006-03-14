@@ -14,15 +14,16 @@ import java.util.regex.Matcher;
  */
 public class VPackage {
 
-	public String name;
+    public String name;
 	public String description;
-        private String path;
-        private String lastScheme;
+    public String eventlistener;
+	private String path;
+	private String lastScheme;
 	public ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
 
-        public VPackage( String path ) {
-            this.path = path;
-        }
+	public VPackage(String path) {
+        this.path = path;
+    }
 
 	/**
 	 * Detects whether a package includes a specified class or not.

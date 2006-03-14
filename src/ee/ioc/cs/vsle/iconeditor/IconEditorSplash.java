@@ -10,7 +10,7 @@ public class IconEditorSplash {
 
 		// -------------------------------------------------
 		Frame splashFrame = null;
-		String splashImageUrl = "images/iesplash.gif";
+		String splashImageUrl = "/images/iesplash.gif";
 		URL imageURL = IconEditorSplash.class.getResource(splashImageUrl);
 		if (imageURL != null) {
 			splashFrame = SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(imageURL));

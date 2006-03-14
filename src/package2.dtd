@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='us-ascii'?>
-<!ELEMENT package (name, description, class+)>
+<!ELEMENT package (name, description, eventlistener?, class+)>
 <!ELEMENT class 	(name, description, icon, graphics, ports?, fields?)>
 <!ELEMENT fields 	(field*)>
 <!ELEMENT ports 	(port+)>
@@ -19,6 +19,7 @@
 <!ELEMENT datatype 	(#PCDATA)>
 <!ELEMENT xpos 		(#PCDATA)>
 <!ELEMENT ypos 		(#PCDATA)>
+<!ELEMENT eventlistener	(#PCDATA)>
 <!ELEMENT point		EMPTY>
 <!ELEMENT line 		EMPTY>
 <!ELEMENT arc 		EMPTY>
@@ -28,6 +29,7 @@
 <!ELEMENT strict 	EMPTY>
 <!ELEMENT text 		EMPTY>
 <!ELEMENT portConnection EMPTY>
+
 <!ATTLIST class
 	type (relation|class) #IMPLIED>
 <!ATTLIST graphics 

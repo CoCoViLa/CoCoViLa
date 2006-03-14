@@ -7,7 +7,8 @@ import java.awt.geom.*;
 
 public class Text extends Shape implements Serializable {
 
-	/**
+    private static final long serialVersionUID = 1L;
+    /**
 	 * Text string represented by the shape.
 	 */
 	public int fixedX;

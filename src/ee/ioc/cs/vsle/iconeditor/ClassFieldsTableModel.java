@@ -126,7 +126,7 @@ public class ClassFieldsTableModel extends AbstractTableModel {
 	 * @param i number of column
 	 * @return Object column class
 	 */
-	public Class getColumnClass(int i) {
+	public Class<?> getColumnClass(int i) {
 		return Object.class;
 	} // getColumnClass
 

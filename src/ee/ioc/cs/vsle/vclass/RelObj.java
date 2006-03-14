@@ -9,7 +9,8 @@ import ee.ioc.cs.vsle.util.*;
 
  */
 public class RelObj extends GObj {
-	public double angle;
+    private static final long serialVersionUID = 1L;
+    public double angle;
 	public Port startPort;
 	public Port endPort;
 	public int endX, endY;
@@ -30,17 +31,14 @@ public class RelObj extends GObj {
 	}
 
 	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
-		Shape s;
-
 		g2.translate(xPos, yPos);
 		g2.rotate(angle);
 		g2.translate(-1 * (xPos), -1 * (yPos));
 
-		for (int i = 0; i < shapes.size(); i++) {
-			s = (Shape) shapes.get(i);
+		for (Shape s: shapes)
 			s.draw(xPos, yPos, Xsize, Ysize, g2);
-		}
-		g2.translate(xPos, yPos);
+
+        g2.translate(xPos, yPos);
 		g2.rotate(-1 * angle);
 		g2.translate(-1 * (xPos), -1 * (yPos));
 	} // draw
@@ -51,10 +49,7 @@ public class RelObj extends GObj {
 		int xModifier = getX();
 		int yModifier = getY();
 
-		int len = fields.size();
-		for (int i = 0; i < len; i++) {
-			ClassField field = (ClassField) fields.get(i);
-
+		for (ClassField field: fields) {
 			if (field.defaultGraphics != null) {
 				field.defaultGraphics.angle = angle;
 				field.defaultGraphics.drawSpecial(xModifier,
@@ -79,14 +74,11 @@ public class RelObj extends GObj {
 		String xml = "<relobject name=\"" + name + "\" type=\"" + className + "\" >\n";
 		xml += "  <relproperties x=\"" + x + "\" y=\"" + y + "\" endX=\"" + endX + "\" endY=\"" + endY + "\" angle=\"" + angle + "\" width=\"" + width + "\" height=\"" + height + "\" xsize=\"" + Xsize + "\" ysize=\"" + Ysize + "\" strict=\"" + strict + "\" />\n";
 		xml += "  <fields>\n";
-		for (int i = 0; i < fields.size(); i++) {
-			ClassField field = (ClassField) fields.get(i);
+		for (ClassField field: fields) {
 			xml += StringUtil.indent(4) + field.toXML();
 		}
 		xml += "  </fields>\n";
 		xml += "</relobject>\n";
 		return xml;
-
 	}
-
 }
