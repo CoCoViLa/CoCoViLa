@@ -350,14 +350,12 @@ public class GObj implements Serializable, Cloneable {
 	public GObj clone() {
 		try {
 			GObj obj = (GObj) super.clone();
-			Port port;
 
             obj.setPorts(new ArrayList<Port>());
-			for (int i = 0; i < obj.getPorts().size(); i++) {
-				port = obj.getPorts().get(i);
+			for (Port port: getPorts()) {
 				port = port.clone();
 				port.setConnected(false);
-				obj.getPorts().set(i, port);
+				obj.getPorts().add(port);
 				port.obj = obj;
 				port.connections = new ArrayList<Connection>();
 			}
@@ -368,7 +366,7 @@ public class GObj implements Serializable, Cloneable {
 
 			for (int i = 0; i < getFields().size(); i++) {
 				field = getFields().get(i);
-				obj.getFields().set(i, field.clone());
+				obj.getFields().add(field.clone());
 			}
 
 			return obj;
