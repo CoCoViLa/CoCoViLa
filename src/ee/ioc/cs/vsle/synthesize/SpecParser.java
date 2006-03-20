@@ -392,8 +392,8 @@ public class SpecParser {
 
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {
                         EquationSolver.solve( lt.getSpecLine() );
-                        for ( int i = 0; i < EquationSolver.relations.size(); i++ ) {
-                            String result = ( String ) EquationSolver.relations.get( i );
+                        next: 
+                        for ( String result : EquationSolver.relations ) {
                             String[] pieces = result.split( ":" );
 
                             //cannot assign new values for constants
@@ -403,9 +403,13 @@ public class SpecParser {
                             	continue;
                             }
                             //if one variable is used on both sides of "=", we cannot use such relation.
-                            if( pieces[0].substring( pieces[0].indexOf("=")).indexOf( pieces[ 2 ].trim() ) > -1 ) {
-                            	continue;
-                            }
+                            String out = pieces[ 2 ].trim();
+                            String[] in = pieces[ 1 ].trim().split( " " );
+                            for (int j = 0; j < in.length; j++) {
+								if( in[j].equals(out) ) {
+									continue next;
+								}
+							}
                             
                             ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION );
 
