@@ -252,19 +252,28 @@ public class Canvas extends JPanel implements ActionListener {
 	 * Method for deleting selected objects.
 	 */
 	public void deleteObjects() {
+		ArrayList<GObj> removableObjs = new ArrayList<GObj>();
+		ArrayList<Connection> removableCons = new ArrayList<Connection>();
+		Connection con;
+		for (int i = 0; i < connections.size(); i++) {
+			con = connections.get(i);
+			if (con.isSelected()) {
+				connections.remove(con);
+			}
+		}
 		GObj obj;
-		ArrayList<GObj> removable = new ArrayList<GObj>();
 		for (int i = 0; i < objects.size(); i++) {
 			obj = objects.get(i);
 			if (obj.isSelected()) {
 				connections.removeAll(obj.getConnections());
-				removable.add(obj);
+				removableObjs.add(obj);
 			}
 		}
-		objects.removeAll(removable);
+		objects.removeAll(removableObjs);
 		objects.deleteExcessRels(connections);
 		currentObj = null;
 		repaint();
+
 
 	}
 

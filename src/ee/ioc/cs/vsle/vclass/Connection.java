@@ -234,4 +234,8 @@ public class Connection implements Serializable {
 		}
 	} // drawRelation
 
+	public boolean isSelected() {
+		return selected;
+	}
+
 }
