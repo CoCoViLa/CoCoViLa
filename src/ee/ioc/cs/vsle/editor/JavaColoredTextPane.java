@@ -10,6 +10,8 @@ import javax.swing.text.*;
 
 import com.Ostermiller.Syntax.Lexer.*;
 
+import ee.ioc.cs.vsle.util.*;
+
 public class JavaColoredTextPane extends JTextPane {
 
 	private Font m_font = new Font("Courier New", Font.PLAIN, 12);
@@ -616,7 +618,9 @@ public class JavaColoredTextPane extends JTextPane {
      * removes to color them.
      */
     private class HighLightedDocument extends DefaultStyledDocument {
+    	
     	private boolean isBeingHighlighted = false;
+    	
         public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
             synchronized (doclock){
                 super.insertString(offs, str, a);
@@ -625,7 +629,13 @@ public class JavaColoredTextPane extends JTextPane {
             }
         }
 
-        public void remove(int offs, int len) throws BadLocationException {
+		public void replace(int offset, int length, String text, AttributeSet attrs) throws BadLocationException {
+        	synchronized (doclock){
+        		super.replace(offset, length, text, attrs);
+        	}
+		}
+
+		public void remove(int offs, int len) throws BadLocationException {
             synchronized (doclock){
                 super.remove(offs, len);
                 color(offs, -len);
@@ -641,7 +651,14 @@ public class JavaColoredTextPane extends JTextPane {
         
         public void setCharacterAttributes(int offset, int length, AttributeSet s, boolean replace) {
         	isBeingHighlighted = true;
-        	super.setCharacterAttributes(offset, length, s, replace);
+//        	db.p("setCharacterAttributes: " 
+//        			+ "offset " + offset + "\n"
+//        			+ "length " + length + "\n"
+//        			+ "s " + s + "\n"
+//        			+ "replace " + replace + "\n");
+        	synchronized (doclock){
+        		super.setCharacterAttributes(offset, length, s, replace);
+        	}
         	isBeingHighlighted= false;
         }
     }
