@@ -48,7 +48,7 @@ public class Canvas extends JPanel implements ActionListener {
 			PackageParser pp = new PackageParser(f);
 			vPackage = pp.getPackage();
 			initialize();
-			palette = new Palette(vPackage, mListener, this);
+			palette = new Palette(vPackage, this);
 			validate();
 		} else {
 			JOptionPane.showMessageDialog(this, "Cannot read file " + f, "Error",
@@ -139,9 +139,7 @@ public class Canvas extends JPanel implements ActionListener {
 			firstPort = null;
 		}
 
-		mListener.state = State.selection;
-		Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
-		setCursor(cursor);
+		mListener.setState(State.selection);
 		repaint();
 	}
 
@@ -253,7 +251,6 @@ public class Canvas extends JPanel implements ActionListener {
 	 */
 	public void deleteObjects() {
 		ArrayList<GObj> removableObjs = new ArrayList<GObj>();
-		ArrayList<Connection> removableCons = new ArrayList<Connection>();
 		Connection con;
 		for (int i = 0; i < connections.size(); i++) {
 			con = connections.get(i);
@@ -290,7 +287,7 @@ public class Canvas extends JPanel implements ActionListener {
 	 * Removes all objects.
 	 */
 	public void clearObjects() {
-		mListener.state = State.selection;
+		mListener.setState(State.selection);
 		objects.removeAll(objects);
 		connections.removeAll(connections);
 		repaint();
@@ -436,7 +433,7 @@ public class Canvas extends JPanel implements ActionListener {
 		scheme = sl.getScheme();
 		connections = scheme.connections;
 		objects = scheme.objects;
-		mListener.state = State.selection;
+		mListener.setState(State.selection);
 		repaint();
 
 	} // loadScheme
@@ -609,7 +606,7 @@ public class Canvas extends JPanel implements ActionListener {
 				currentObj.y = p.y;
 				currentObj.x = p.x;
 				currentObj.drawClassGraphics(g2);
-			} else if (currentObj != null && !mListener.state.startsWith("?")) {
+			} else if (currentObj != null && !mListener.state.startsWith("?") && mListener.mouseOver) {
 				g2.setColor(Color.black);
 				currentObj.drawClassGraphics(g2);
 			}
@@ -625,4 +622,10 @@ public class Canvas extends JPanel implements ActionListener {
 		}
 	}
 
+    /**
+     * Update mouse position in info label 
+     */
+    public void setPosInfo(int x, int y) {
+        posInfo.setText(x + ", " + y);
+    }
 }

@@ -8,8 +8,6 @@ import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 import java.awt.Cursor;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 
@@ -17,26 +15,31 @@ import java.util.ArrayList;
  * Mouse operations on Canvas.
  */
 class MouseOps
-	extends MouseInputAdapter
-	implements ActionListener {
+	extends MouseInputAdapter {
 
-	ArrayList selectedObjs = new ObjectList();
+	ArrayList<GObj> selectedObjs = new ObjectList();
 	Canvas canvas;
 	public Point draggedBreakPoint;
-	public String state = "";
+	public String state = State.selection;
 	int cornerClicked;
-
 	int startX, startY;
+    boolean mouseOver;
 
 	public MouseOps(Canvas e) {
 		this.canvas = e;
 	}
 
-
 	public void setState(String state) {
 		this.state = state;
-		if (state.equals("selection"))
-			canvas.currentObj = null;
+        
+        if (State.addRelation.equals(state))
+            canvas.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
+        else if (State.selection.equals(state)) {
+            canvas.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+            canvas.palette.resetButtons();
+            canvas.currentObj = null;
+        } else if (State.magnifier.equals(state))
+            canvas.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	}
 
 	void addObj() {
@@ -48,19 +51,17 @@ class MouseOps
 	 * Mouse entered event from the MouseMotionListener. Invoked when the mouse enters a component.
 	 * @param e MouseEvent - Mouse event performed.
 	 */
-	/*
-	   public void mouseEntered(MouseEvent e) {
-	   Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
-	   editor.setCursor(cursor);
-	   } */
+	public void mouseEntered(MouseEvent e) {
+		mouseOver = true;
+	}
 
 	/**
 	 * Mouse exited event from the MouseMotionListener. Invoked when the mouse exits a component.
 	 * @param e MouseEvent - Mouse event performed.
 	 */
 	public void mouseExited(MouseEvent e) {
-		//	Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
-		//	editor.setCursor(cursor);
+        mouseOver = false;
+        canvas.repaint();
 	}
 
 	private void openObjectPopupMenu(int x, int y) {
@@ -122,26 +123,30 @@ class MouseOps
 		y = e.getY();
 
 		if (SwingUtilities.isRightMouseButton(e)) {
-			//if right mouse button clicked, check whether
-			Connection relation = canvas.connections.nearPoint(x, y);
-			if (relation != null) {
-				ConnectionPopupMenu popupMenu = new ConnectionPopupMenu(relation, canvas.connections, canvas);
-				popupMenu.show(canvas, x + canvas.drawingArea.getX(), y + canvas.drawingArea.getY());
-			} else {
-				canvas.currentObj = canvas.objects.checkInside(x, y);
-				if (canvas.currentObj != null) {
-					openObjectPopupMenu(x + canvas.drawingArea.getX(), y + canvas.drawingArea.getY());
-				}
-			}
-
-			if (state.equals(State.magnifier)) {
+            if (State.selection.equals(state)) {
+                Connection relation = canvas.connections.nearPoint(x, y);
+                if (relation != null) {
+                    ConnectionPopupMenu popupMenu = new ConnectionPopupMenu(relation, canvas.connections, canvas);
+                    popupMenu.show(canvas, x + canvas.drawingArea.getX(), y + canvas.drawingArea.getY());
+                } else {
+                    canvas.currentObj = canvas.objects.checkInside(x, y);
+                    if (canvas.currentObj != null) {
+                        openObjectPopupMenu(x + canvas.drawingArea.getX(), y + canvas.drawingArea.getY());
+                    }
+                }
+            } else if (State.magnifier.equals(state)) {
 				canvas.drawAreaSize.width = (int) (canvas.drawAreaSize.width * 0.8);
 				canvas.drawAreaSize.height = (int) (canvas.drawAreaSize.height * 0.8);
 				canvas.drawingArea.setPreferredSize(canvas.drawAreaSize);
 				canvas.objects.updateSize(0.8f, 0.8f);
 				canvas.drawingArea.revalidate();
 				canvas.connections.calcAllBreakPoints();
-			}
+			} else if (!State.addRelation.equals(state)) {
+                setState(State.selection);
+                // if adding relation class and first port was connected
+                if (canvas.firstPort != null)
+                    canvas.firstPort = null;
+            }
 		} // **********End of RIGHT mouse button controls**********************************************
 		else {
 
@@ -226,14 +231,10 @@ class MouseOps
 					addingSpecialRelation(y, x);
 				} else if (canvas.currentObj != null) {
 					addObj();
-					state = State.selection;
-					Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
-
-					canvas.setCursor(cursor);
+					setState(State.selection);
 				}
 			}
 		}
-
 		canvas.repaint();
 	}
 
@@ -248,8 +249,8 @@ class MouseOps
 					canvas.mouseX = x;
 					canvas.mouseY = y;
 				} else {
-					Port port1 = (Port) canvas.currentObj.ports.get(0);
-					Port port2 = (Port) canvas.currentObj.ports.get(1);
+					Port port1 = canvas.currentObj.ports.get(0);
+					Port port2 = canvas.currentObj.ports.get(1);
 					Connection con = new Connection(canvas.firstPort, port1);
 					canvas.firstPort.addConnection(con);
 					port1.addConnection(con);
@@ -283,9 +284,7 @@ class MouseOps
 				draggedBreakPoint = con.breakPointContains(canvas.mouseX, canvas.mouseY);
 			}
 			if (con != null && draggedBreakPoint != null) {
-				state = State.dragBreakPoint;
-
-
+				setState(State.dragBreakPoint);
 			} else {
 				GObj obj = canvas.objects.checkInside(canvas.mouseX, canvas.mouseY);
 				if (obj != null) {
@@ -297,28 +296,23 @@ class MouseOps
 							obj.setSelected(true);
 						}
 					}
-					state = State.drag;
+					setState(State.drag);
 					canvas.repaint();
-
 				} else {
 					cornerClicked = canvas.objects.controlRectContains(canvas.mouseX, canvas.mouseY);
 					if (cornerClicked != 0) {
 						//if (obj.isSelected())
-						state = State.resize;
-
+						setState(State.resize);
 					} else {
-						state = State.dragBox;
+						setState(State.dragBox);
 						startX = canvas.mouseX;
 						startY = canvas.mouseY;
 					}
 				}
 				// drawConnections();
 				selectedObjs = canvas.objects.getSelected();
-
 			}
-
 		}
-
 	}
 
 	public void mouseDragged(MouseEvent e) {
@@ -331,6 +325,8 @@ class MouseOps
 		GObj obj;
 		Connection relation;
 
+        canvas.setPosInfo(x, y);
+
 		if (state.equals(State.dragBreakPoint)) {
 			draggedBreakPoint.x = x;
 			draggedBreakPoint.y = y;
@@ -339,7 +335,7 @@ class MouseOps
 		if (state.equals(State.drag)) {
 			int x1, x2, y1, y2, newX, newY;
 			for (int i = 0; i < selectedObjs.size(); i++) {
-				obj = (GObj) selectedObjs.get(i);
+				obj = selectedObjs.get(i);
 				if (!(obj instanceof RelObj)) {
 
 					if (RuntimeProperties.snapToGrid == 1) {
@@ -361,10 +357,10 @@ class MouseOps
 				if (obj.isStrict()) {
 					Port port, port2;
 					GObj obj2;
-					ArrayList ports = obj.getPorts();
+					ArrayList<Port> ports = obj.getPorts();
 
 					for (int j = 0; j < ports.size(); j++) {
-						port = (Port) ports.get(j);
+						port = ports.get(j);
 						if (port.isStrict()) {
 							port2 = port.getStrictConnected();
 							// if the port is connected to another port, and they are not both selected, we might
@@ -400,7 +396,7 @@ class MouseOps
 				}
 
 				for (int j = 0; j < canvas.connections.size(); j++) {
-					relation = (Connection) canvas.connections.get(j);
+					relation = canvas.connections.get(j);
 					if (selectedObjs.contains(relation.endPort.obj) && selectedObjs.contains(relation.beginPort.obj)) {
 						relation.calcAllBreakPoints();
 					} else if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
@@ -423,12 +419,12 @@ class MouseOps
 		}
 		if (state.equals(State.resize)) {
 			for (int i = 0; i < selectedObjs.size(); i++) {
-				obj = (GObj) selectedObjs.get(i);
+				obj = selectedObjs.get(i);
 
 				obj.resize(x - canvas.mouseX, y - canvas.mouseY, cornerClicked);
 
 				for (int j = 0; j < canvas.connections.size(); j++) {
-					relation = (Connection) canvas.connections.get(j);
+					relation = canvas.connections.get(j);
 					if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
 						relation.calcAllBreakPoints();
 					}
@@ -446,8 +442,7 @@ class MouseOps
 		int x = e.getX();
 		int y = e.getY();
 
-		// update mouse position in info label
-		canvas.posInfo.setText(Integer.toString(x) + ", " + Integer.toString(y));
+		canvas.setPosInfo(x, y);
 
 		// check if port needs to be nicely drawn coz of mouseover
 		if (state.equals(State.addRelation) || state.startsWith("??")) {
@@ -494,7 +489,7 @@ class MouseOps
 				GObj obj;
 
 				for (int i = 0; i < canvas.currentObj.ports.size(); i++) {
-					port = (Port) canvas.currentObj.ports.get(i);
+					port = canvas.currentObj.ports.get(i);
 					port2 = port.getStrictConnected();
 					if (port2 != null) {
 						if (Math.abs(port.getRealCenterX() - port2.getRealCenterX()) > 1 || Math.abs(port.getRealCenterY() - port2.getRealCenterY()) > 1) {
@@ -591,102 +586,65 @@ class MouseOps
 		return false;
 	}
 
+    void startAddingObject() {
+        GObj obj;
+        PackageClass pClass;
 
-	public void actionPerformed(ActionEvent e) {
-		// Jbutton pressed
-		if (e.getSource().getClass().getName() == "javax.swing.JButton") {
-			if (e.getActionCommand().equals(State.relation)) {
-				canvas.mListener.setState(State.addRelation);
-				Cursor cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+        if (state.startsWith("??")) {
+            pClass = canvas.vPackage.getClass(state.substring(2));
+            obj = new RelObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
+        } else {
+            pClass = canvas.vPackage.getClass(state);
+            obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
+        }
 
-				canvas.setCursor(cursor);
-			} else if (e.getActionCommand().equals(State.selection)) {
-				Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
+        obj.shapes = new ArrayList<Shape>(pClass.graphics.shapes.size());
+        for (Shape shape: pClass.graphics.shapes)
+            obj.shapes.add(shape.clone());
 
-				canvas.setCursor(cursor);
-				canvas.mListener.setState(State.selection);
-			} else if (e.getActionCommand().equals(State.magnifier)) {
-				canvas.mListener.setState(State.magnifier);
-			} else {
-				canvas.mListener.setState(e.getActionCommand());
-				startAddingObject();
-			}
-			canvas.drawingArea.grabFocus();
-		}
-	}
+        obj.ports = new ArrayList<Port>(pClass.ports.size());
+        for (Port port: pClass.ports) {
+            port = port.clone();
+            port.setObject(obj);
+            obj.ports.add(port);
 
-	private void startAddingObject() {
-		GObj obj;
-		PackageClass pClass;
+            if (port.isStrict()) {
+                obj.strict = true;
+            }
 
-		if (state.startsWith("??")) {
-			pClass = canvas.vPackage.getClass(state.substring(2));
-			obj = new RelObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
-		} else {
-			pClass = canvas.vPackage.getClass(state);
-			obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
-		}
+            if (port.x + port.openGraphics.boundX < obj.portOffsetX1) {
+                obj.portOffsetX1 = port.x + port.openGraphics.boundX;
+            }
 
+            if (port.y + port.openGraphics.boundY < obj.portOffsetY1) {
+                obj.portOffsetY1 = port.y + port.openGraphics.boundY;
+            }
 
-		obj.shapes = (ArrayList) pClass.graphics.shapes.clone();
-		Shape shape;
-		for (int i = 0; i < obj.shapes.size(); i++) {
-			shape = (Shape) obj.shapes.get(i);
-			obj.shapes.set(i, (Shape) shape.clone());
-		}
+            if (port.x + port.openGraphics.boundWidth > obj.width + obj.portOffsetX2) {
+                obj.portOffsetX2 = Math.max((port.x + port.openGraphics.boundX + port.openGraphics.boundWidth) - obj.width, 0);
+            }
 
-		obj.ports = (ArrayList) pClass.ports.clone();
-		Port port;
+            if (port.y + port.openGraphics.boundHeight > obj.height + obj.portOffsetY2) {
+                obj.portOffsetY2 = Math.max((port.y + port.openGraphics.boundY + port.openGraphics.boundHeight) - obj.height, 0);
+            }
 
-		for (int i = 0; i < obj.ports.size(); i++) {
-			port = (Port) obj.ports.get(i);
-			obj.ports.set(i, port.clone());
-			port = (Port) obj.ports.get(i);
-			port.setObject(obj);
+            port.connections = new ArrayList<Connection>();
+        }
+        // deep clone fields list
+        obj.fields = new ArrayList<ClassField>(pClass.fields.size());
+        for (ClassField field: pClass.fields)
+            obj.fields.add(field.clone());
 
-			if (port.isStrict()) {
-				obj.strict = true;
-			}
+        obj.setName(pClass.name + "_" + Integer.toString(canvas.objCount));
+        canvas.objCount++;
 
-			if (port.x + port.openGraphics.boundX < obj.portOffsetX1) {
-				obj.portOffsetX1 = port.x + port.openGraphics.boundX;
-			}
-
-			if (port.y + port.openGraphics.boundY < obj.portOffsetY1) {
-				obj.portOffsetY1 = port.y + port.openGraphics.boundY;
-			}
-
-			if (port.x + port.openGraphics.boundWidth > obj.width + obj.portOffsetX2) {
-				obj.portOffsetX2 = Math.max((port.x + port.openGraphics.boundX + port.openGraphics.boundWidth) - obj.width, 0);
-			}
-
-			if (port.y + port.openGraphics.boundHeight > obj.height + obj.portOffsetY2) {
-				obj.portOffsetY2 = Math.max((port.y + port.openGraphics.boundY + port.openGraphics.boundHeight) - obj.height, 0);
-			}
-
-			// deep clone port's connectionlist
-			port.connections = (ArrayList) port.connections.clone();
-		}
-		// clone fields arraylist
-		obj.fields = (ArrayList) pClass.fields.clone();
-		// deep clone each separate field
-		ClassField field;
-
-		for (int i = 0; i < obj.fields.size(); i++) {
-			field = (ClassField) obj.fields.get(i);
-			obj.fields.set(i, field.clone());
-		}
-
-		obj.setName(pClass.name + "_" + Integer.toString(canvas.objCount));
-		canvas.objCount++;
-
-		canvas.currentObj = obj;
-		Cursor cursor;
-		if (state.startsWith("??")) {
-			cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
-		} else {
-			cursor = new Cursor(Cursor.HAND_CURSOR);
-		}
-		canvas.setCursor(cursor);
-	}
+        canvas.currentObj = obj;
+        Cursor cursor;
+        if (state.startsWith("??")) {
+            cursor = new Cursor(Cursor.CROSSHAIR_CURSOR);
+        } else {
+            cursor = new Cursor(Cursor.HAND_CURSOR);
+        }
+        canvas.setCursor(cursor);
+    }
 }
