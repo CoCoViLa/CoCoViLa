@@ -144,8 +144,13 @@ class MouseOps
 			} else if (!State.addRelation.equals(state)) {
                 setState(State.selection);
                 // if adding relation class and first port was connected
-                if (canvas.firstPort != null)
+                if (canvas.firstPort != null) {
+                    if (canvas.firstPort.connections == null
+                            || canvas.firstPort.connections.size() == 0)
+                        canvas.firstPort.setConnected(false);
+
                     canvas.firstPort = null;
+                }
             }
 		} // **********End of RIGHT mouse button controls**********************************************
 		else {
