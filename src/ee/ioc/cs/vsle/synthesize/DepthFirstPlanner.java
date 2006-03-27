@@ -369,21 +369,33 @@ public class DepthFirstPlanner implements IPlanner {
 				if ( ( rel.getOutputs().size() > 0 ) 
 						&& ( rel.getOutputs().get(0) == subtaskInput ) ) {
 					removableRels.add( rel );
-//					problem.getAllRels().remove(rel);// rel??? iter.remove();
 				}
 			}
 		}
 		
+		/* Pavel[27Mar06]
+		 * probably we do not need the functionality commented below 
+		 * because sometimes we want to compute something else 
+		 * when subtask's output is known, e.g. -
+		 * 
+		 * double a,b,c,d,x,y;
+		 * y=sin(x);
+		 * a = x;
+		 * b = y;
+		 * c=a+b;
+		 * [x->y]->d{f};
+		 * 
 		// remove all rels with inputs same as subtask outputs
 		for (Var subtaskOutput : subtask.getOutputs()) {
 			for (Rel rel : problem.getAllRels()) {
 				if (rel.getType() == RelType.TYPE_EQUATION
 						&& rel.getInputs().get(0) == subtaskOutput) {
 					removableRels.add( rel );
-//					problem.getAllRels().remove(rel);// rel??? iter.remove();
 				}
 			}
 		}
+		*/
+		
 		problem.getAllRels().removeAll(removableRels);
 		removableRels.clear();
 	}
