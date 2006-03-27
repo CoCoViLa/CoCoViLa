@@ -85,7 +85,10 @@ public class ProblemCreator {
                     }
                 }
 
-                if ( problem.getAllVars().containsKey( obj + "." + cf1.getName() ) ) {
+                //the following is for x = y, not x -> y relation where both x and y are aliases
+                if ( ( classRelation.getType() == RelType.TYPE_EQUATION ) 
+                		&& problem.getAllVars().containsKey( obj + "." + cf1.getName() ) ) {
+                	
                     Var v1 = problem.getAllVars().get( obj + "." + cf1.getName() );
                     Var v2 = problem.getAllVars().get( obj + "." + cf2.getName() );
 
