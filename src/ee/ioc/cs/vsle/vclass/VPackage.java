@@ -16,7 +16,6 @@ public class VPackage {
 
     public String name;
 	public String description;
-    public String eventlistener;
 	private String path;
 	private String lastScheme;
 	public ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
