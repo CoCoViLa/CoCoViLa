@@ -6,14 +6,14 @@ import ee.ioc.cs.vsle.packageparse.PackageParser;
 import ee.ioc.cs.vsle.util.PropertyBox;
 import ee.ioc.cs.vsle.util.VMath;
 import ee.ioc.cs.vsle.util.PrintUtilities;
-import ee.ioc.cs.vsle.util.db;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.io.*;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /**
  */
@@ -38,7 +38,8 @@ public class Canvas extends JPanel implements ActionListener {
 	JPanel infoPanel;
 	JLabel posInfo;
 	DrawingArea drawingArea;
-    ISchemeEventListener sListener;
+    ISchemeDaemon daemon;
+    Thread daemonThread;
 
 	public Canvas(File f) {
 		super();
@@ -56,37 +57,12 @@ public class Canvas extends JPanel implements ActionListener {
 		}
 	}
 
-    private void triggerSchemeLoadedEvent() {
-        if (sListener != null) {
-            SchemeEvent evt = new SchemeEvent();
-            evt.setScheme(scheme);
-            sListener.schemeLoaded(evt);
-        }
-    }
-
     void initialize() {
 		scheme = new Scheme();
 		scheme.packageName = vPackage.name;
 		objects = scheme.objects;
 		connections = scheme.connections;
-        
-        if (vPackage.eventlistener != null) {
-            try {
-                Class elc = Class.forName(vPackage.eventlistener);
-                Object o = elc.newInstance();
-                sListener = ISchemeEventListener.class.cast(o);
-                db.p("Created instance of " + vPackage.eventlistener + " implementing ISchemeEventListener: " + sListener);
-                
-                triggerSchemeLoadedEvent();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-        }
-
+        startDaemon();
         mListener = new MouseOps(this);
 		keyListener = new KeyOps(this);
 		drawingArea = new DrawingArea();
@@ -143,7 +119,51 @@ public class Canvas extends JPanel implements ActionListener {
 		repaint();
 	}
 
-	/**
+    public void stopDaemon() {
+        if (daemon != null) {
+            daemon.stop();
+            daemon = null;
+        }
+        if (daemonThread != null) {
+            daemonThread.interrupt();
+            try {
+                daemonThread.join(5000);
+                if (daemonThread.isAlive())
+                    System.err.println("Daemon did not die.. giving up.");
+                else
+                    System.err.println("Thread ended normally: " + daemonThread);
+            } catch (InterruptedException e) {
+                System.err.println("Current tread was interrupted.");
+            }
+            daemonThread = null;
+        }
+    }
+
+    public void startDaemon() {
+        stopDaemon();
+        try {
+            File path = new File(workDir);
+            URL[] classPath = {path.toURI().toURL()};
+            ClassLoader cl = new URLClassLoader(classPath);
+
+            Class elc = Class.forName(vPackage.getPackageClassName(), true, cl);
+            Object o = elc.newInstance();
+            daemon = ISchemeDaemon.class.cast(o);
+            daemon.setScheme(scheme);
+            daemonThread = new Thread(daemon);
+            daemonThread.start();
+        } catch (ClassNotFoundException e) {
+            // e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
 	 * Method for grouping objects.
 	 */
 	public void groupObjects() {
@@ -431,6 +451,7 @@ public class Canvas extends JPanel implements ActionListener {
 
 		SchemeLoader sl = new SchemeLoader(file, vPackage);
 		scheme = sl.getScheme();
+        startDaemon();
 		connections = scheme.connections;
 		objects = scheme.objects;
 		mListener.setState(State.selection);

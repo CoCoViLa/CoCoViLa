@@ -714,6 +714,7 @@ public class Editor extends JFrame implements ChangeListener {
 	}
 
 	public void clearPane() {
+        getCurrentCanvas().stopDaemon();
 		tabbedPane.remove(tabbedPane.getSelectedComponent());
 		if (tabbedPane.getTabCount() > 0) {
 			tabbedPane.setSelectedIndex(0);
