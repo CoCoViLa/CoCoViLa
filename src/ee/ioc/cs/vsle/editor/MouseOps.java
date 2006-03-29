@@ -577,18 +577,24 @@ class MouseOps
 	}
 
 	private boolean canBeConnected(Port firstPort, Port port) {
-		if (firstPort.getType().equals(port.getType()))
+		if ( firstPort.isMulti() && port.isMulti() )
+			return false;
+		else if( ( firstPort.isMulti() && firstPort.getType().equals( port.getType()) ) 
+				|| ( port.isMulti() && port.getType().equals( firstPort.getType()) ) ) 
+			return true;
+		
+		else if (firstPort.getType().equals(port.getType()))
 			return true;
 
-		if ((port.isAny() || firstPort.isAny()) && !(port.isAny() || firstPort.isAny())) {
+		else if ((port.isAny() || firstPort.isAny()) && !(port.isAny() || firstPort.isAny())) {
 			return true;
 		}
-		if (port.getType().equals("alias") && firstPort.getType().substring(firstPort.getType().length() - 2, firstPort.getType().length()).equals("[]"))
+		else if (port.getType().equals("alias") && firstPort.getType().substring(firstPort.getType().length() - 2, firstPort.getType().length()).equals("[]"))
 			return true;
-		if (firstPort.getType().equals("alias") && port.getType().substring(port.getType().length() - 2, port.getType().length()).equals("[]"))
+		else if (firstPort.getType().equals("alias") && port.getType().substring(port.getType().length() - 2, port.getType().length()).equals("[]"))
 			return true;
-
-		return false;
+		else 
+			return false;
 	}
 
     void startAddingObject() {

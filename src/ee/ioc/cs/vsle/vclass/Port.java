@@ -20,6 +20,8 @@ public class Port implements Cloneable, Serializable {
 	private boolean watched = false;
 	private boolean hilighted = false;
 
+	private boolean isMulti = false;//1:* type e.g. "{int}" will be transformed into int[]
+	
 	public Port(String name, String type, int x, int y, String portConnection, String strict) {
 		this.name = name;
 		this.type = type;
@@ -29,13 +31,14 @@ public class Port implements Cloneable, Serializable {
 		
 		area = portConnection.equals("area");
 
-		if (strict.equals("true")) {
-			this.strict = true;
-		} else {
-			this.strict = false;
+		this.strict = Boolean.parseBoolean( strict );
+
+		if( type.trim().startsWith("{") && type.trim().endsWith("}") ) {
+			this.type = type.substring( 0, type.length() - 1 ).substring( 1 );
+			
+			isMulti = true;
 		}
 	}
-
 
 	public Port getStrictConnected() {
 		Connection con;
@@ -46,9 +49,8 @@ public class Port implements Cloneable, Serializable {
 			if (con.beginPort.isStrict()) {
 				if (con.beginPort == this) {
 					return con.endPort;
-				} else {
-					return con.beginPort;
 				}
+				return con.beginPort;
 			}
 		}
 		return null;
@@ -126,8 +128,7 @@ public class Port implements Cloneable, Serializable {
 	public String toString() {
 		if (id!=null)
 			return id;
-		else
-			return name;
+		return name;
 	}
 
 	public void setSelected(boolean b) {
@@ -171,11 +172,12 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public String getType() {
-        for (ClassField field: obj.getFields()) {
-			if (field.getName().equals(name))
-				return field.type;
-		}
-		return null;
+		return type;
+//        for (ClassField field: obj.getFields()) {
+//			if (field.getName().equals(name))
+//				return field.type;
+//		}
+//		return null;
 	}
 
 	public ClassField getField() {
@@ -276,6 +278,11 @@ public class Port implements Cloneable, Serializable {
 
 	public void setConnections(ArrayList<Connection> connections) {
 		this.connections = connections;
+	}
+
+
+	public boolean isMulti() {
+		return isMulti;
 	}
 
 }

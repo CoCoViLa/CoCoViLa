@@ -22,10 +22,10 @@ public class ProgramRunner {
     private List<Var> assumptions = new ArrayList<Var>(); 
     private Object[] arguments;
     private String mainClassName = new String();
-    private ArrayList relations;
+    private ArrayList<Connection> relations;
     private VPackage vPackage;
     
-	public ProgramRunner( ArrayList relations, ObjectList objs, VPackage pack ) {
+	public ProgramRunner( ArrayList<Connection> relations, ObjectList objs, VPackage pack ) {
 		objects = GroupUnfolder.unfold( objs );
 		this.relations = relations;
 		this.vPackage = pack;

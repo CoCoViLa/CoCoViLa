@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 
 import ee.ioc.cs.vsle.factoryStorage.*;
+import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
@@ -18,7 +19,7 @@ public class SpecGenerator implements ISpecGenerator {
 	
 	private SpecGenerator() {}
 	
-	public String generateSpec(ObjectList objects, ArrayList relations, VPackage pack) {
+	public String generateSpec(ObjectList objects, ArrayList<Connection> relations, VPackage pack) {
 		GObj obj;
 		ClassField field;
 		File methF = new File( RuntimeProperties.packageDir + pack.name + ".meth" );
@@ -56,11 +57,11 @@ public class SpecGenerator implements ISpecGenerator {
 		s.append("\n    /*@ specification  " + pack.getPackageClassName() + " {\n");
 		
 		for (int i = 0; i < objects.size(); i++) {
-			obj = (GObj) objects.get(i);
+			obj = objects.get(i);
 			s.append(
 					"    " + obj.getClassName() + " " + obj.getName() + ";\n");
 			for (int j = 0; j < obj.fields.size(); j++) {
-				field = (ClassField) obj.fields.get(j);
+				field = obj.fields.get(j);
 				if (field.getValue() != null) {
 					if (field.getType().equals("String")) {
 						s.append("        " + obj.getName() + "." + field.getName()
@@ -98,31 +99,62 @@ public class SpecGenerator implements ISpecGenerator {
 				}
 			}
 		}
-		Connection rel;
 		
-		for (int i = 0; i < relations.size(); i++) {
-			rel = (Connection) relations.get(i);
+		Hashtable<String, String> multiRels = new Hashtable<String, String>();
+		
+		for (Connection rel : relations) {
 			
-			
-			
-			if (rel.endPort.getName().equals("any")) {
+//			WTF????????
+//			if (rel.endPort.getType().equals("any")) {
+//				s.append(
+//						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.beginPort.getName()
+//						+ " = " + rel.beginPort.getObject().getName() + "."
+//						+ rel.beginPort.getName() + ";\n");
+//			}  else if  (rel.beginPort.getType().equals("any")) {
+//				s.append(
+//						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
+//						+ " = " + rel.beginPort.getObject().getName() + "."
+//						+ rel.endPort.getName() + ";\n");
+//			} else 
+			if( rel.beginPort.isMulti() || rel.endPort.isMulti() ) {
+				
+				Port multi = rel.beginPort.isMulti() ? rel.beginPort : rel.endPort;
+				Port simple = !rel.beginPort.isMulti() ? rel.beginPort : rel.endPort;
+				
+				String multiport = multi.getObject().getName() + "." + multi.getName();
+				String port = simple.getObject().getName() + "." + simple.getName();
+				String list = multiRels.get( multiport );
+				
+				if( list == null ) {
+					list = port;
+				} else {
+					list += " " + port;
+				}
+				multiRels.put( multiport, list );
+			} else {
 				s.append(
-						"    " + rel.endPort.getObject().getName() + "." + rel.beginPort.getName()
-						+ " = " + rel.beginPort.getObject().getName() + "."
-						+ rel.beginPort.getName() + ";\n");
-			}  else if  (rel.beginPort.getName().equals("any")) {
-				s.append(
-						"    " + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
-						+ " = " + rel.beginPort.getObject().getName() + "."
-						+ rel.endPort.getName() + ";\n");
-			} else   {
-				s.append(
-						"    " + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
+						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
 						+ " = " + rel.beginPort.getObject().getName() + "."
 						+ rel.beginPort.getName() + ";\n");
 			}
 			
 		}
+		
+		for (String multiport : multiRels.keySet() ) {
+			String portlist = multiRels.get( multiport );
+			String[] ports = portlist.split( " " );
+			String portarray = "";
+			for (int i = 0; i < ports.length; i++) {
+				String port = ports[i];
+				if( i != ports.length - 1 ) {
+					portarray += port + ", ";
+				} else {
+					portarray += port;
+				}
+			}
+			s.append( CodeGenerator.OT_TAB + multiport + " = { " + portarray + " };\n");
+		}
+		
 		s.append(spec);
 		s.append("    }@*/\n");
 		s.append("\t"+method);
