@@ -105,10 +105,10 @@ public class Connection implements Serializable {
 	public void calcAllBreakPoints() {
 		Point p;
 		if (breakPoints.size() > 1) {
-			int port1X = beginPort.getX() + beginPort.obj.getX();
-			int port1Y = beginPort.getY() + beginPort.obj.getY();
-			int port2X = endPort.getX() + endPort.obj.getX();
-			int port2Y = endPort.getY() + endPort.obj.getY();
+			int port1X = beginPort.getX() + beginPort.getObject().getX();
+			int port1Y = beginPort.getY() + beginPort.getObject().getY();
+			int port2X = endPort.getX() + endPort.getObject().getX();
+			int port2Y = endPort.getY() + endPort.getObject().getY();
 			Point oldPoint1 = breakPoints.get(0);
 			int old1x = oldPoint1.x;
 			int old1y = oldPoint1.y;
@@ -167,10 +167,10 @@ public class Connection implements Serializable {
 
 	public void calcEndBreakPoints() {
 		if (breakPoints.size() > 1) {
-			int port1X = beginPort.getX() + beginPort.obj.getX();
-			int port1Y = beginPort.getY() + beginPort.obj.getY();
-			int port2X = endPort.getX() + endPort.obj.getX();
-			int port2Y = endPort.getY() + endPort.obj.getY();
+			int port1X = beginPort.getX() + beginPort.getObject().getX();
+			int port1Y = beginPort.getY() + beginPort.getObject().getY();
+			int port2X = endPort.getX() + endPort.getObject().getX();
+			int port2Y = endPort.getY() + endPort.getObject().getY();
 			Point oldPoint1 = breakPoints.get(0);
 			Point oldPoint2 = breakPoints.get(breakPoints.size() - 1);
 
@@ -203,8 +203,8 @@ public class Connection implements Serializable {
 	} // breakPointContains
 
 	public String toXML() {
-		String xml = "<connection obj1=\"" + beginPort.obj.name + "\" port1=\"" + beginPort +
-			"\" obj2=\"" + endPort.obj.name + "\" port2=\"" + endPort + "\">\n";
+		String xml = "<connection obj1=\"" + beginPort.getObject().getName() + "\" port1=\"" + beginPort +
+			"\" obj2=\"" + endPort.getObject().getName() + "\" port2=\"" + endPort + "\">\n";
 		xml += "  <breakpoints>\n";
 		for (Point point: breakPoints) {
 			xml += StringUtil.indent(4) + "<point x=\"" + point.x + "\" y=\"" + point.y + "\"/>\n";

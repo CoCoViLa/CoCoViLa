@@ -107,18 +107,18 @@ public class SpecGenerator implements ISpecGenerator {
 			
 			if (rel.endPort.getName().equals("any")) {
 				s.append(
-						"    " + rel.endPort.obj.getName() + "." + rel.beginPort.getName()
-						+ " = " + rel.beginPort.obj.getName() + "."
+						"    " + rel.endPort.getObject().getName() + "." + rel.beginPort.getName()
+						+ " = " + rel.beginPort.getObject().getName() + "."
 						+ rel.beginPort.getName() + ";\n");
 			}  else if  (rel.beginPort.getName().equals("any")) {
 				s.append(
-						"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
-						+ " = " + rel.beginPort.obj.getName() + "."
+						"    " + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
+						+ " = " + rel.beginPort.getObject().getName() + "."
 						+ rel.endPort.getName() + ";\n");
 			} else   {
 				s.append(
-						"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
-						+ " = " + rel.beginPort.obj.getName() + "."
+						"    " + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
+						+ " = " + rel.beginPort.getObject().getName() + "."
 						+ rel.beginPort.getName() + ";\n");
 			}
 			

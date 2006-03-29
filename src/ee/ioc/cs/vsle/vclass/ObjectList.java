@@ -100,7 +100,7 @@ public class ObjectList extends ArrayList<GObj>
 		for (GObj o: this) {
 			if (o instanceof RelObj) {
                 obj = (RelObj) o;
-				if (!obj.startPort.area) {
+				if (!obj.startPort.isArea()) {
 					obj.x = obj.startPort.getAbsoluteX();
 					obj.y = obj.startPort.getAbsoluteY();
 				} else {
@@ -113,7 +113,7 @@ public class ObjectList extends ArrayList<GObj>
 
 				}
 
-				if (!obj.endPort.area) {
+				if (!obj.endPort.isArea()) {
 					obj.endX = obj.endPort.getAbsoluteX();
 					obj.endY = obj.endPort.getAbsoluteY();
 				} else {
@@ -134,7 +134,7 @@ public class ObjectList extends ArrayList<GObj>
 		ArrayList<GObj> toBeRemoved = new ArrayList<GObj>();
 		for (GObj obj: this) {
 			if (obj instanceof RelObj) {
-				if (!(contains(((RelObj) obj).startPort.obj) && contains(((RelObj) obj).endPort.obj))) {
+				if (!(contains(((RelObj) obj).startPort.getObject()) && contains(((RelObj) obj).endPort.getObject()))) {
 					toBeRemoved.add(obj);
 					con.removeAll(obj.getConnections());
 				}
@@ -157,14 +157,14 @@ public class ObjectList extends ArrayList<GObj>
 	public Port getPort(String objName, String portId) {
 		Port port;
 		for (GObj obj: this) {
-			if (obj.name.equals(objName)) {
+			if (obj.getName().equals(objName)) {
 				for (int j = 0; j < obj.ports.size(); j++) {
 					port = obj.ports.get(j);
-					if (port.id != null) {
-						if (port.id.equals(portId)) {
+					if (port.getId() != null) {
+						if (port.getId().equals(portId)) {
 							return port;
 						}
-					} else if (port.name.equals(portId)) {
+					} else if (port.getName().equals(portId)) {
 						return port;
 					}
 				}

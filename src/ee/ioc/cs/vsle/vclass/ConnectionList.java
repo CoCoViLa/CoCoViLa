@@ -45,12 +45,12 @@ public class ConnectionList extends ArrayList<Connection> implements Serializabl
 
 		for (int i = 0; i < relations.size(); i++) {
 			con = relations.get(i);
-			con.beginPort.connections.remove(con);
-			if (con.beginPort.connections.isEmpty()) {
+			con.beginPort.getConnections().remove(con);
+			if (con.beginPort.getConnections().isEmpty()) {
 				con.beginPort.setConnected(false);
 			}
-			con.endPort.connections.remove(con);
-			if (con.endPort.connections.isEmpty()) {
+			con.endPort.getConnections().remove(con);
+			if (con.endPort.getConnections().isEmpty()) {
 				con.endPort.setConnected(false);
 			}
 		}
@@ -62,12 +62,12 @@ public class ConnectionList extends ArrayList<Connection> implements Serializabl
 	 */
 	public void remove(Connection relation) {
 		super.remove(relation);
-		relation.beginPort.connections.remove(relation);
-		if (relation.beginPort.connections.isEmpty()) {
+		relation.beginPort.getConnections().remove(relation);
+		if (relation.beginPort.getConnections().isEmpty()) {
 			relation.beginPort.setConnected(false);
 		}
-		relation.endPort.connections.remove(relation);
-		if (relation.endPort.connections.isEmpty()) {
+		relation.endPort.getConnections().remove(relation);
+		if (relation.endPort.getConnections().isEmpty()) {
 			relation.endPort.setConnected(false);
 		}
 	} // remove
@@ -86,9 +86,9 @@ public class ConnectionList extends ArrayList<Connection> implements Serializabl
 				|| (con.beginPort == p2 && con.endPort == p1)) {
 				super.remove(con);
 				p2.setConnected(false);
-				p2.connections.remove(con);
+				p2.getConnections().remove(con);
 				p1.setConnected(false);
-				p1.connections.remove(con);
+				p1.getConnections().remove(con);
 			}
 		}
 	} // remove

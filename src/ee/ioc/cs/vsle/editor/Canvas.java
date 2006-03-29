@@ -110,7 +110,7 @@ public class Canvas extends JPanel implements ActionListener {
 		currentPort = null;
 		currentCon = null;
 		if (firstPort != null) {
-			if (firstPort.connections.size() < 1)
+			if (firstPort.getConnections().size() < 1)
 				firstPort.setConnected(false);
 			firstPort = null;
 		}
@@ -207,18 +207,18 @@ public class Canvas extends JPanel implements ActionListener {
 						port2 = port.getStrictConnected();
 						// if the port is connected to another port, and they are not both selected, we might
 						// wanna remove the connection
-						if (port2 != null && !port2.obj.isSelected()) {
+						if (port2 != null && !port2.getObject().isSelected()) {
 							// We dont want to remove the connection, if the objects belong to the same group
-							if (!(obj.isGroup() && obj.includesObject(port2.obj))) {
+							if (!(obj.isGroup() && obj.includesObject(port2.getObject()))) {
 								if (Math.abs(port.getRealCenterX() - port2.getRealCenterX()) > 1 || Math.abs(port.getRealCenterY() - port2.getRealCenterY()) > 1) {
 									connections.remove(port, port2);
 								}
 							}
 						}
 
-						obj2 = objects.checkInside(port.obj.getX() + moveX + port.getCenterX(), port.obj.getY() + moveY + port.getCenterY(), obj);
+						obj2 = objects.checkInside(port.getObject().getX() + moveX + port.getCenterX(), port.getObject().getY() + moveY + port.getCenterY(), obj);
 						if (obj2 != null && !obj2.isSelected()) {
-							port2 = obj2.portContains(port.obj.getX() + moveX + port.getCenterX(), port.obj.getY() + moveY + port.getCenterY());
+							port2 = obj2.portContains(port.getObject().getX() + moveX + port.getCenterX(), port.getObject().getY() + moveY + port.getCenterY());
 
 							if (port2 != null && port2.isStrict()) {
 								if (!port.isConnected()) {
@@ -230,7 +230,7 @@ public class Canvas extends JPanel implements ActionListener {
 									port.addConnection(con);
 									connections.add(con);
 								}
-								obj.setPosition(port2.obj.x + port2.getCenterX() - ((port.obj.x - obj.x) + port.getCenterX()), port2.obj.y + port2.getCenterY() - ((port.obj.y - obj.y) + port.getCenterY()));
+								obj.setPosition(port2.getObject().x + port2.getCenterX() - ((port.getObject().x - obj.x) + port.getCenterX()), port2.getObject().y + port2.getCenterY() - ((port.getObject().y - obj.y) + port.getCenterY()));
 							}
 						}
 					}
@@ -239,7 +239,7 @@ public class Canvas extends JPanel implements ActionListener {
 
 			for (int j = 0; j < connections.size(); j++) {
 				Connection relation = connections.get(j);
-				if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
+				if (obj.includesObject(relation.endPort.getObject()) || obj.includesObject(relation.beginPort.getObject())) {
 					relation.calcEndBreakPoints();
 				}
 			}
@@ -344,10 +344,10 @@ public class Canvas extends JPanel implements ActionListener {
 			if (obj instanceof RelObj) {
 				for (int j = 0; j < objects2.size(); j++) {
 					obj2 = objects2.get(j);
-					if (((RelObj) obj).startPort.obj.name.equals(obj2.name))
-						((RelObj) obj).startPort.obj = obj2;
-					if (((RelObj) obj).endPort.obj.name.equals(obj2.name))
-						((RelObj) obj).endPort.obj = obj2;
+					if (((RelObj) obj).startPort.getObject().getName().equals(obj2.getName()))
+						((RelObj) obj).startPort.setObject( obj2 );
+					if (((RelObj) obj).endPort.getObject().getName().equals(obj2.getName()))
+						((RelObj) obj).endPort.setObject( obj2 );
 				}
 			}
 		}
@@ -366,7 +366,7 @@ public class Canvas extends JPanel implements ActionListener {
 			endObj = null;
 			for (int j = 0; j < objects2.size(); j++) {
 				obj = objects2.get(j);
-				if (obj.name.equals(con.beginPort.obj.name)) {
+				if (obj.getName().equals(con.beginPort.getObject().getName())) {
 					beginObj = obj;
 					if (endObj != null) {
 						Port beginPort = beginObj.ports.get(beginNum);
@@ -384,7 +384,7 @@ public class Canvas extends JPanel implements ActionListener {
 						newConnections.add(con2);
 					}
 				}
-				if (obj.name.equals(con.endPort.obj.name)) {
+				if (obj.getName().equals(con.endPort.getObject().getName())) {
 					endObj = obj;
 					if (beginObj != null) {
 						Port beginPort = beginObj.ports.get(beginNum);

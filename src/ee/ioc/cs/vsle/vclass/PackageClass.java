@@ -40,9 +40,9 @@ public class PackageClass implements Serializable {
 		for (int i = 0; i < ports.size(); i++) {
 			Port port = ports.get(i);
 
-			if (port.type.equals("in")) {
+			if (port.getType().equals("in")) {
 				g.setColor(Color.blue);
-			} else if (port.type.equals("out")) {
+			} else if (port.getType().equals("out")) {
 				g.setColor(Color.red);
 			}
 

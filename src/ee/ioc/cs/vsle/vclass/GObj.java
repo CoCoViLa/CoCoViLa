@@ -18,7 +18,7 @@ public class GObj implements Serializable, Cloneable {
 	public int x, y, difWithMasterX, difWithMasterY;
 	public int width, height;
 	public String className;
-	public String name;
+	protected String name;
 
 	public ArrayList<Port> ports = new ArrayList<Port>();
 	public ArrayList<ClassField> fields = new ArrayList<ClassField>();
@@ -289,16 +289,16 @@ public class GObj implements Serializable, Cloneable {
 			Port port = getPorts().get(i);
 
 			if (port.isSelected()) {
-				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
+				port.getClosedGraphics().draw(xModifier + (int) (getXsize() * port.x),
 					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
 			} else if (port.isConnected()) {
-				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
+				port.getClosedGraphics().draw(xModifier + (int) (getXsize() * port.x),
 					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
 			} else if (port.isHilighted()) {
-				port.closedGraphics.draw(xModifier + (int) (getXsize() * port.x),
+				port.getClosedGraphics().draw(xModifier + (int) (getXsize() * port.x),
 					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
 			} else {
-				port.openGraphics.draw(xModifier + (int) (getXsize() * port.x),
+				port.getOpenGraphics().draw(xModifier + (int) (getXsize() * port.x),
 					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
 			}
 		}
@@ -356,8 +356,8 @@ public class GObj implements Serializable, Cloneable {
 				port = port.clone();
 				port.setConnected(false);
 				obj.getPorts().add(port);
-				port.obj = obj;
-				port.connections = new ArrayList<Connection>();
+				port.setObject( obj );
+				port.setConnections( new ArrayList<Connection>() );
 			}
 
 			obj.setFields(new ArrayList<ClassField>());

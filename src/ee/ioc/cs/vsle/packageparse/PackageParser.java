@@ -155,7 +155,7 @@ public class PackageParser {
 
                 newPort = new Port( name, type, Integer.parseInt( x ),
                                     Integer.parseInt( y ), portConnection, strict );
-                newPort.id = id;
+                newPort.setId( id );
             }
             if ( element.equals( "open" ) ) {
                 status = PORT_OPEN;
@@ -462,19 +462,19 @@ public class PackageParser {
                 pack.classes.add( newClass );
             }
             if ( qName.equals( "port" ) ) {
-                if ( newPort.openGraphics == null ) {
+                if ( newPort.getOpenGraphics() == null ) {
                     newGraphics = new ClassGraphics();
                     newGraphics.addShape( new Oval( -4, -4, 8, 8, 12632256, true, 1.0, 255, 0 ) );
                     newGraphics.addShape( new Oval( -4, -4, 8, 8, 0, false, 1.0, 255, 0 ) );
 
                     newGraphics.setBounds( -4, -4, 8, 8 );
-                    newPort.openGraphics = newGraphics;
+                    newPort.setOpenGraphics( newGraphics );
                 }
-                if ( newPort.closedGraphics == null ) {
+                if ( newPort.getClosedGraphics() == null ) {
                     newGraphics = new ClassGraphics();
                     newGraphics.addShape( new Oval( -4, -4, 8, 8, 0, true, 1.0, 255, 0 ) );
                     newGraphics.setBounds( -4, -4, 8, 8 );
-                    newPort.closedGraphics = newGraphics;
+                    newPort.setClosedGraphics( newGraphics );
                 }
 
                 newClass.addPort( newPort );
@@ -555,9 +555,9 @@ public class PackageParser {
                 } else if ( status == FIELD_KNOWN ) {
                     newField.setKnownGraphics( newGraphics );
                 } else if ( status == PORT_OPEN ) {
-                    newPort.openGraphics = newGraphics;
+                    newPort.setOpenGraphics( newGraphics );
                 } else if ( status == PORT_CLOSED ) {
-                    newPort.closedGraphics = newGraphics;
+                    newPort.setClosedGraphics( newGraphics );
                 } else {
                     //newGraphics.packageClass = newClass;
                     newClass.addGraphics( newGraphics );

@@ -145,8 +145,8 @@ class MouseOps
                 setState(State.selection);
                 // if adding relation class and first port was connected
                 if (canvas.firstPort != null) {
-                    if (canvas.firstPort.connections == null
-                            || canvas.firstPort.connections.size() == 0)
+                    if (canvas.firstPort.getConnections() == null
+                            || canvas.firstPort.getConnections().size() == 0)
                         canvas.firstPort.setConnected(false);
 
                     canvas.firstPort = null;
@@ -178,7 +178,7 @@ class MouseOps
 							canvas.firstPort = port;
 							canvas.firstPort.setConnected(true);
 							canvas.currentCon = new Connection();
-							canvas.currentCon.addBreakPoint(new Point(canvas.firstPort.getX() + canvas.firstPort.obj.getX(), canvas.firstPort.getY() + canvas.firstPort.obj.getY()));
+							canvas.currentCon.addBreakPoint(new Point(canvas.firstPort.getX() + canvas.firstPort.getObject().getX(), canvas.firstPort.getY() + canvas.firstPort.getObject().getY()));
 							canvas.mouseX = x;
 							canvas.mouseY = y;
 						} else if (canBeConnected(canvas.firstPort, port)) {
@@ -193,7 +193,7 @@ class MouseOps
 								canvas.currentCon.endPort = port;
 								canvas.firstPort.addConnection(canvas.currentCon);
 								port.addConnection(canvas.currentCon);
-								canvas.currentCon.addBreakPoint(new Point(port.getX() + port.obj.getX(), port.getY() + port.obj.getY()));
+								canvas.currentCon.addBreakPoint(new Point(port.getX() + port.getObject().getX(), port.getY() + port.getObject().getY()));
 								canvas.connections.add(canvas.currentCon);
 								canvas.firstPort = null;
 							}
@@ -370,18 +370,18 @@ class MouseOps
 							port2 = port.getStrictConnected();
 							// if the port is connected to another port, and they are not both selected, we might
 							// wanna remove the connection
-							if (port2 != null && !port2.obj.isSelected()) {
+							if (port2 != null && !port2.getObject().isSelected()) {
 								// We dont want to remove the connection, if the objects belong to the same group
-								if (!(obj.isGroup() && obj.includesObject(port2.obj))) {
+								if (!(obj.isGroup() && obj.includesObject(port2.getObject()))) {
 									if (Math.abs(port.getRealCenterX() - port2.getRealCenterX()) > 1 || Math.abs(port.getRealCenterY() - port2.getRealCenterY()) > 1) {
 										canvas.connections.remove(port, port2);
 									}
 								}
 							}
 
-							obj2 = canvas.objects.checkInside(port.obj.getX() + (x - canvas.mouseX) + port.getCenterX(), port.obj.getY() + (y - canvas.mouseY) + port.getCenterY(), obj);
+							obj2 = canvas.objects.checkInside(port.getObject().getX() + (x - canvas.mouseX) + port.getCenterX(), port.getObject().getY() + (y - canvas.mouseY) + port.getCenterY(), obj);
 							if (obj2 != null && !obj2.isSelected()) {
-								port2 = obj2.portContains(port.obj.getX() + (x - canvas.mouseX) + port.getCenterX(), port.obj.getY() + (y - canvas.mouseY) + port.getCenterY());
+								port2 = obj2.portContains(port.getObject().getX() + (x - canvas.mouseX) + port.getCenterX(), port.getObject().getY() + (y - canvas.mouseY) + port.getCenterY());
 
 								if (port2 != null && port2.isStrict()) {
 									if (!port.isConnected()) {
@@ -393,7 +393,7 @@ class MouseOps
 										port.addConnection(con);
 										canvas.connections.add(con);
 									}
-									obj.setPosition(port2.obj.x + port2.getCenterX() - ((port.obj.x - obj.x) + port.getCenterX()), port2.obj.y + port2.getCenterY() - ((port.obj.y - obj.y) + port.getCenterY()));
+									obj.setPosition(port2.getObject().x + port2.getCenterX() - ((port.getObject().x - obj.x) + port.getCenterX()), port2.getObject().y + port2.getCenterY() - ((port.getObject().y - obj.y) + port.getCenterY()));
 								}
 							}
 						}
@@ -402,9 +402,9 @@ class MouseOps
 
 				for (int j = 0; j < canvas.connections.size(); j++) {
 					relation = canvas.connections.get(j);
-					if (selectedObjs.contains(relation.endPort.obj) && selectedObjs.contains(relation.beginPort.obj)) {
+					if (selectedObjs.contains(relation.endPort.getObject()) && selectedObjs.contains(relation.beginPort.getObject())) {
 						relation.calcAllBreakPoints();
-					} else if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
+					} else if (obj.includesObject(relation.endPort.getObject()) || obj.includesObject(relation.beginPort.getObject())) {
 						relation.calcEndBreakPoints();
 					}
 
@@ -430,7 +430,7 @@ class MouseOps
 
 				for (int j = 0; j < canvas.connections.size(); j++) {
 					relation = canvas.connections.get(j);
-					if (obj.includesObject(relation.endPort.obj) || obj.includesObject(relation.beginPort.obj)) {
+					if (obj.includesObject(relation.endPort.getObject()) || obj.includesObject(relation.beginPort.getObject())) {
 						relation.calcAllBreakPoints();
 					}
 				}
@@ -516,8 +516,8 @@ class MouseOps
 								port.addConnection(con);
 								canvas.connections.add(con);
 							}
-							canvas.currentObj.x = port2.obj.x + port2.getCenterX() - port.getCenterX();
-							canvas.currentObj.y = port2.obj.y + port2.getCenterY() - port.getCenterY();
+							canvas.currentObj.x = port2.getObject().x + port2.getCenterX() - port.getCenterX();
+							canvas.currentObj.y = port2.getObject().y + port2.getCenterY() - port.getCenterY();
 						}
 					}
 				}
@@ -577,15 +577,15 @@ class MouseOps
 	}
 
 	private boolean canBeConnected(Port firstPort, Port port) {
-		if (firstPort.type.equals(port.type))
+		if (firstPort.getType().equals(port.getType()))
 			return true;
 
 		if ((port.isAny() || firstPort.isAny()) && !(port.isAny() || firstPort.isAny())) {
 			return true;
 		}
-		if (port.type.equals("alias") && firstPort.type.substring(firstPort.type.length() - 2, firstPort.type.length()).equals("[]"))
+		if (port.getType().equals("alias") && firstPort.getType().substring(firstPort.getType().length() - 2, firstPort.getType().length()).equals("[]"))
 			return true;
-		if (firstPort.type.equals("alias") && port.type.substring(port.type.length() - 2, port.type.length()).equals("[]"))
+		if (firstPort.getType().equals("alias") && port.getType().substring(port.getType().length() - 2, port.getType().length()).equals("[]"))
 			return true;
 
 		return false;
@@ -617,23 +617,23 @@ class MouseOps
                 obj.strict = true;
             }
 
-            if (port.x + port.openGraphics.boundX < obj.portOffsetX1) {
-                obj.portOffsetX1 = port.x + port.openGraphics.boundX;
+            if (port.x + port.getOpenGraphics().boundX < obj.portOffsetX1) {
+                obj.portOffsetX1 = port.x + port.getOpenGraphics().boundX;
             }
 
-            if (port.y + port.openGraphics.boundY < obj.portOffsetY1) {
-                obj.portOffsetY1 = port.y + port.openGraphics.boundY;
+            if (port.y + port.getOpenGraphics().boundY < obj.portOffsetY1) {
+                obj.portOffsetY1 = port.y + port.getOpenGraphics().boundY;
             }
 
-            if (port.x + port.openGraphics.boundWidth > obj.width + obj.portOffsetX2) {
-                obj.portOffsetX2 = Math.max((port.x + port.openGraphics.boundX + port.openGraphics.boundWidth) - obj.width, 0);
+            if (port.x + port.getOpenGraphics().boundWidth > obj.width + obj.portOffsetX2) {
+                obj.portOffsetX2 = Math.max((port.x + port.getOpenGraphics().boundX + port.getOpenGraphics().boundWidth) - obj.width, 0);
             }
 
-            if (port.y + port.openGraphics.boundHeight > obj.height + obj.portOffsetY2) {
-                obj.portOffsetY2 = Math.max((port.y + port.openGraphics.boundY + port.openGraphics.boundHeight) - obj.height, 0);
+            if (port.y + port.getOpenGraphics().boundHeight > obj.height + obj.portOffsetY2) {
+                obj.portOffsetY2 = Math.max((port.y + port.getOpenGraphics().boundY + port.getOpenGraphics().boundHeight) - obj.height, 0);
             }
 
-            port.connections = new ArrayList<Connection>();
+            port.setConnections( new ArrayList<Connection>() );
         }
         // deep clone fields list
         obj.fields = new ArrayList<ClassField>(pClass.fields.size());

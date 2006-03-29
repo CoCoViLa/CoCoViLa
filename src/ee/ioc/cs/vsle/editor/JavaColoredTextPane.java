@@ -10,8 +10,6 @@ import javax.swing.text.*;
 
 import com.Ostermiller.Syntax.Lexer.*;
 
-import ee.ioc.cs.vsle.util.*;
-
 public class JavaColoredTextPane extends JTextPane {
 
 	private Font m_font = new Font("Courier New", Font.PLAIN, 12);

@@ -224,7 +224,7 @@ public class SchemeLoader {
 				throws SAXException {
 			if (qName.equals("object")) {
 				for (int j = 0; j < vPackage.classes.size(); j++) {
-					PackageClass pClass = (PackageClass) vPackage.classes
+					PackageClass pClass = vPackage.classes
 							.get(j);
 					if (pClass.name.equals(obj.className)) {
 
@@ -232,8 +232,8 @@ public class SchemeLoader {
 						ClassField field;
 						ClassField objField;
 						for (int i = 0; i < pClass.fields.size(); i++) {
-							field = (ClassField) pClass.fields.get(i);
-							objField = (ClassField) obj.fields.get(i);
+							field = pClass.fields.get(i);
+							objField = obj.fields.get(i);
 							objField.setKnownGraphics(field.getKnownGraphics());
 							objField.setDefaultGraphics(field
 									.getDefaultGraphics());
@@ -245,52 +245,52 @@ public class SchemeLoader {
 						obj.shapes = (ArrayList) pClass.graphics.shapes.clone();
 						Shape shape;
 						for (int i = 0; i < obj.shapes.size(); i++) {
-							shape = (Shape) obj.shapes.get(i);
+							shape = obj.shapes.get(i);
 							obj.shapes.set(i, shape.clone());
 						}
 
 						Port port;
 						for (int i = 0; i < obj.ports.size(); i++) {
-							port = (Port) obj.ports.get(i);
+							port = obj.ports.get(i);
 							obj.ports.set(i, port.clone());
-							port = (Port) obj.ports.get(i);
+							port = obj.ports.get(i);
 							port.setObject(obj);
 
 							if (port.isStrict()) {
 								obj.strict = true;
 							}
 
-							if (port.x + port.openGraphics.boundX < obj.portOffsetX1) {
+							if (port.x + port.getOpenGraphics().boundX < obj.portOffsetX1) {
 								obj.portOffsetX1 = port.x
-										+ port.openGraphics.boundX;
+										+ port.getOpenGraphics().boundX;
 							}
 
-							if (port.y + port.openGraphics.boundY < obj.portOffsetY1) {
+							if (port.y + port.getOpenGraphics().boundY < obj.portOffsetY1) {
 								obj.portOffsetY1 = port.y
-										+ port.openGraphics.boundY;
+										+ port.getOpenGraphics().boundY;
 							}
 
-							if (port.x + port.openGraphics.boundWidth > obj.width
+							if (port.x + port.getOpenGraphics().boundWidth > obj.width
 									+ obj.portOffsetX2) {
 								obj.portOffsetX2 = Math
 										.max(
 												(port.x
-														+ port.openGraphics.boundX + port.openGraphics.boundWidth)
+														+ port.getOpenGraphics().boundX + port.getOpenGraphics().boundWidth)
 														- obj.width, 0);
 							}
 
-							if (port.y + port.openGraphics.boundHeight > obj.height
+							if (port.y + port.getOpenGraphics().boundHeight > obj.height
 									+ obj.portOffsetY2) {
 								obj.portOffsetY2 = Math
 										.max(
 												(port.y
-														+ port.openGraphics.boundY + port.openGraphics.boundHeight)
+														+ port.getOpenGraphics().boundY + port.getOpenGraphics().boundHeight)
 														- obj.height, 0);
 							}
 
 							// deep clone port's connectionlist
-							port.connections = (ArrayList) port.connections
-									.clone();
+							port.setConnections( (ArrayList) port.getConnections()
+									.clone() );
 						}
 					}
 				}
@@ -298,7 +298,7 @@ public class SchemeLoader {
 
 			if (qName.equals("relobject")) {
 				for (int j = 0; j < vPackage.classes.size(); j++) {
-					PackageClass pClass = (PackageClass) vPackage.classes
+					PackageClass pClass = vPackage.classes
 							.get(j);
 					if (pClass.name.equals(relObj.className)) {
 
@@ -306,8 +306,8 @@ public class SchemeLoader {
 						ClassField field;
 						ClassField objField;
 						for (int i = 0; i < pClass.fields.size(); i++) {
-							field = (ClassField) pClass.fields.get(i);
-							objField = (ClassField) relObj.fields.get(i);
+							field = pClass.fields.get(i);
+							objField = relObj.fields.get(i);
 							objField.setKnownGraphics(field.getKnownGraphics());
 							objField.setDefaultGraphics(field
 									.getDefaultGraphics());
@@ -320,52 +320,52 @@ public class SchemeLoader {
 								.clone();
 						Shape shape;
 						for (int i = 0; i < relObj.shapes.size(); i++) {
-							shape = (Shape) relObj.shapes.get(i);
+							shape = relObj.shapes.get(i);
 							relObj.shapes.set(i, shape.clone());
 						}
 
 						Port port;
 						for (int i = 0; i < relObj.ports.size(); i++) {
-							port = (Port) relObj.ports.get(i);
+							port = relObj.ports.get(i);
 							relObj.ports.set(i, port.clone());
-							port = (Port) relObj.ports.get(i);
+							port = relObj.ports.get(i);
 							port.setObject(relObj);
 
 							if (port.isStrict()) {
 								relObj.strict = true;
 							}
 
-							if (port.x + port.openGraphics.boundX < relObj.portOffsetX1) {
+							if (port.x + port.getOpenGraphics().boundX < relObj.portOffsetX1) {
 								relObj.portOffsetX1 = port.x
-										+ port.openGraphics.boundX;
+										+ port.getOpenGraphics().boundX;
 							}
 
-							if (port.y + port.openGraphics.boundY < relObj.portOffsetY1) {
+							if (port.y + port.getOpenGraphics().boundY < relObj.portOffsetY1) {
 								relObj.portOffsetY1 = port.y
-										+ port.openGraphics.boundY;
+										+ port.getOpenGraphics().boundY;
 							}
 
-							if (port.x + port.openGraphics.boundWidth > relObj.width
+							if (port.x + port.getOpenGraphics().boundWidth > relObj.width
 									+ relObj.portOffsetX2) {
 								relObj.portOffsetX2 = Math
 										.max(
 												(port.x
-														+ port.openGraphics.boundX + port.openGraphics.boundWidth)
+														+ port.getOpenGraphics().boundX + port.getOpenGraphics().boundWidth)
 														- relObj.width, 0);
 							}
 
-							if (port.y + port.openGraphics.boundHeight > relObj.height
+							if (port.y + port.getOpenGraphics().boundHeight > relObj.height
 									+ relObj.portOffsetY2) {
 								relObj.portOffsetY2 = Math
 										.max(
 												(port.y
-														+ port.openGraphics.boundY + port.openGraphics.boundHeight)
+														+ port.getOpenGraphics().boundY + port.getOpenGraphics().boundHeight)
 														- relObj.height, 0);
 							}
 
 							// deep clone port's connectionlist
-							port.connections = (ArrayList) port.connections
-									.clone();
+							port.setConnections( (ArrayList) port.getConnections()
+									.clone() );
 						}
 
 					}
@@ -377,14 +377,14 @@ public class SchemeLoader {
 				// RelObjects
 				// üsna valus häkk
 				for (int i = 0; i < objects.size(); i++) {
-					obj = (GObj) objects.get(i);
+					obj = objects.get(i);
 					if (obj instanceof RelObj) {
-						Port port = (Port) obj.ports.get(0);
-						Connection con = (Connection) port.connections.get(0);
+						Port port = obj.ports.get(0);
+						Connection con = port.getConnections().get(0);
 						((RelObj) obj).startPort = con.beginPort;
 						// ((RelObj)obj).startPort.obj = con.beginPort.obj;
-						port = (Port) obj.ports.get(1);
-						con = (Connection) port.connections.get(0);
+						port = obj.ports.get(1);
+						con = port.getConnections().get(0);
 						((RelObj) obj).endPort = con.endPort;
 
 					}

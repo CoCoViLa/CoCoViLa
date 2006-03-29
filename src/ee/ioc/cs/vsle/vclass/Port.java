@@ -5,20 +5,20 @@ import java.util.ArrayList;
 
 public class Port implements Cloneable, Serializable {
 
-    public String id;
-	public GObj obj;
-	int width, height;
-	public String name;
-	public String type;
+	private String id;
+	private GObj obj;
+	private int width, height;
+	private String name;
+	private String type;
 	public int x;
 	public int y;
-	boolean strict, area;
-	public ClassGraphics openGraphics, closedGraphics;
-	public ArrayList<Connection> connections = new ArrayList<Connection>();
-	boolean selected = false, connected = false;
-	boolean known = false, target = false;
-	boolean watched = false;
-	boolean hilighted = false;
+	private boolean strict, area;
+	private ClassGraphics openGraphics, closedGraphics;
+	private ArrayList<Connection> connections = new ArrayList<Connection>();
+	private boolean selected = false, connected = false;
+	private boolean known = false, target = false;
+	private boolean watched = false;
+	private boolean hilighted = false;
 
 	public Port(String name, String type, int x, int y, String portConnection, String strict) {
 		this.name = name;
@@ -26,12 +26,8 @@ public class Port implements Cloneable, Serializable {
 		this.x = x;
 
 		this.y = y;
-		if (portConnection.equals("area")) {
-			area = true;
-		} else {
-			area = false;
-
-		}
+		
+		area = portConnection.equals("area");
 
 		if (strict.equals("true")) {
 			this.strict = true;
@@ -111,26 +107,16 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public boolean inBoundsX(int pointX) {
-		if (obj.getX() + obj.getXsize() * (x + openGraphics.boundX) < pointX
-			&& (obj.getX() + obj.getXsize() * (x + openGraphics.boundX + openGraphics.boundWidth) > pointX)) {
-			return true;
-		} else {
-			return false;
-		}
-
+		return (obj.getX() + obj.getXsize() * (x + openGraphics.boundX) < pointX
+			&& (obj.getX() + obj.getXsize() * (x + openGraphics.boundX + openGraphics.boundWidth) > pointX));
 	}
 
 	public boolean inBoundsY(int pointY) {
-		if (obj.getY() + (obj.getYsize() * (y + openGraphics.boundY)) < pointY
+		return (obj.getY() + (obj.getYsize() * (y + openGraphics.boundY)) < pointY
 			&& (obj.getY()
 			+ obj.getYsize()
 			* (y + openGraphics.boundY + openGraphics.boundHeight))
-			> pointY) {
-			return true;
-		} else {
-			return false;
-		}
-
+			> pointY);
 	}
 
 	public String getName() {
@@ -212,6 +198,9 @@ public class Port implements Cloneable, Serializable {
 		this.obj = obj;
 	}
 
+	public GObj getObject() {
+		return obj;
+	}
 	public int getNumber() {
 		Port port;
 
@@ -252,6 +241,41 @@ public class Port implements Cloneable, Serializable {
 		if (name.equals("*any") || type.equals("any"))
 			return true;
 		return false;
+	}
+
+
+	public String getId() {
+		return id;
+	}
+
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+
+	public ClassGraphics getClosedGraphics() {
+		return closedGraphics;
+	}
+
+
+	public void setClosedGraphics(ClassGraphics closedGraphics) {
+		this.closedGraphics = closedGraphics;
+	}
+
+
+	public ClassGraphics getOpenGraphics() {
+		return openGraphics;
+	}
+
+
+	public void setOpenGraphics(ClassGraphics openGraphics) {
+		this.openGraphics = openGraphics;
+	}
+
+
+	public void setConnections(ArrayList<Connection> connections) {
+		this.connections = connections;
 	}
 
 }

@@ -325,21 +325,21 @@ public class GObjGroup extends GObj
 		Connection rel;
 		for (int j = 0; j < relations.size(); j++) {
 			rel = relations.get(j);
-			if (this.includesObject(rel.endPort.obj) && this.includesObject(rel.beginPort.obj)) {
+			if (this.includesObject(rel.endPort.getObject()) && this.includesObject(rel.beginPort.getObject())) {
 				if (rel.endPort.getName().equals("any")) {
 					s.append(
-						"    " + rel.endPort.obj.getName() + "." + rel.beginPort.getName()
-						+ " = " + rel.beginPort.obj.getName() + "."
+						"    " + rel.endPort.getObject().getName() + "." + rel.beginPort.getName()
+						+ " = " + rel.beginPort.getObject().getName() + "."
 						+ rel.beginPort.getName() + ";\n");
 				} else if (rel.beginPort.getName().equals("any")) {
 					s.append(
-						"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
-						+ " = " + rel.beginPort.obj.getName() + "."
+						"    " + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
+						+ " = " + rel.beginPort.getObject().getName() + "."
 						+ rel.endPort.getName() + ";\n");
 				} else {
 					s.append(
-						"    " + rel.endPort.obj.getName() + "." + rel.endPort.getName()
-						+ " = " + rel.beginPort.obj.getName() + "."
+						"    " + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
+						+ " = " + rel.beginPort.getObject().getName() + "."
 						+ rel.beginPort.getName() + ";\n");
 				}
 			}

@@ -164,11 +164,11 @@ public class ProgramRunner {
         ArrayList<String> watchFields = new ArrayList<String>();
 
         for ( int i = 0; i < objects.size(); i++ ) {
-            obj = ( GObj ) objects.get( i );
+            obj = objects.get( i );
             for ( int j = 0; j < obj.fields.size(); j++ ) {
-                field = ( ClassField ) obj.fields.get( j );
+                field = obj.fields.get( j );
                 if ( field.isWatched() ) {
-                    watchFields.add( obj.name + "." + field.getName() );
+                    watchFields.add( obj.getName() + "." + field.getName() );
                 }
             }
         }
@@ -227,16 +227,16 @@ public class ProgramRunner {
 			boolean varIsComputed;
 			db.p("runPropagate() foundVars: " + foundVars);
 			for (int i = 0; i < objects.size(); i++) {
-				obj = (GObj) objects.get(i);
-				f = clas.getDeclaredField(obj.name);
+				obj = objects.get(i);
+				f = clas.getDeclaredField(obj.getName());
 				lastObj = f.get(genObject);
 				for (int j = 0; j < obj.fields.size(); j++) {
-					field = (ClassField) obj.fields.get(j);
+					field = obj.fields.get(j);
 					if (!field.getType().equals("alias")) {
 						clasType = f.getType();
 						f2 = clasType.getDeclaredField(field.getName());
 						Class c = f2.getType();
-						fullName = obj.name + "." + field.getName();
+						fullName = obj.getName() + "." + field.getName();
 						varIsComputed = false;
 						if (foundVars != null) {
 							Iterator allVarsIter = foundVars.iterator();

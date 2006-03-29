@@ -44,19 +44,19 @@ public class XMLSpecGenerator implements ISpecGenerator {
             rel = (Connection) relations.get(i);
 
             if (rel.endPort.getName().equals("any")) {
-                s.append("<rel obj1 =\"" + rel.endPort.obj.getName() 
+                s.append("<rel obj1 =\"" + rel.endPort.getObject().getName() 
                         + "\" port1 =\"" +rel.beginPort.getName() + "\""  
-                        + " obj2 =\""  + rel.beginPort.obj.getName() + "\" port2=\""
+                        + " obj2 =\""  + rel.beginPort.getObject().getName() + "\" port2=\""
                         + rel.beginPort.getName() + "\"/>\n");
             } else if (rel.beginPort.getName().equals("any")) {
-                s.append("<rel obj1 =\"" + rel.endPort.obj.getName() + "\" port1=\""
+                s.append("<rel obj1 =\"" + rel.endPort.getObject().getName() + "\" port1=\""
                         + rel.endPort.getName() + "\" obj2=\""
-                        + rel.beginPort.obj.getName() + "\" port2 =\""
+                        + rel.beginPort.getObject().getName() + "\" port2 =\""
                         + rel.endPort.getName() + "\"/>\n");
             } else {
-                s.append("<rel obj1 =\"" + rel.endPort.obj.getName() + "\" port1=\""
+                s.append("<rel obj1 =\"" + rel.endPort.getObject().getName() + "\" port1=\""
                         + rel.endPort.getName() + "\" "
-                        + " obj2=\"" + rel.beginPort.obj.getName() + "\""
+                        + " obj2=\"" + rel.beginPort.getObject().getName() + "\""
                         + " port2=\"" + rel.beginPort.getName() + "\"/>\n");
             }
 
