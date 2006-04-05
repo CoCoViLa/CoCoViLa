@@ -116,7 +116,7 @@ public class Canvas extends JPanel implements ActionListener {
 		}
 
 		mListener.setState(State.selection);
-		repaint();
+		drawingArea.repaint();
 	}
 
     public void stopDaemon() {
@@ -179,7 +179,7 @@ public class Canvas extends JPanel implements ActionListener {
 			og.setAsGroup(true);
 			objects.removeAll(selected);
 			objects.add(og);
-			repaint();
+			drawingArea.repaint();
 		}
 	} // groupObjects
 
@@ -246,7 +246,7 @@ public class Canvas extends JPanel implements ActionListener {
 
 		}
 		objects.updateRelObjs();
-		repaint();
+		drawingArea.repaint();
 	} // moveObject
 
 	/**
@@ -263,7 +263,7 @@ public class Canvas extends JPanel implements ActionListener {
 				currentObj = null;
 			}
 		}
-		repaint();
+		drawingArea.repaint();
 	}
 
 	/**
@@ -289,9 +289,7 @@ public class Canvas extends JPanel implements ActionListener {
 		objects.removeAll(removableObjs);
 		objects.deleteExcessRels(connections);
 		currentObj = null;
-		repaint();
-
-
+		drawingArea.repaint();
 	}
 
 	public void selectAllObjects() {
@@ -300,7 +298,7 @@ public class Canvas extends JPanel implements ActionListener {
 			obj = objects.get(i);
 			obj.setSelected(true);
 		}
-		repaint();
+		drawingArea.repaint();
 	} // selectAllObjects
 
 	/**
@@ -310,7 +308,7 @@ public class Canvas extends JPanel implements ActionListener {
 		mListener.setState(State.selection);
 		objects.removeAll(objects);
 		connections.removeAll(connections);
-		repaint();
+		drawingArea.repaint();
 	}
 
 
@@ -414,7 +412,7 @@ public class Canvas extends JPanel implements ActionListener {
 			obj.setSelected(false);
 		}
 		objects.addAll(newObjects);
-		repaint();
+		drawingArea.repaint();
 	}
 
 	/**
@@ -440,7 +438,7 @@ public class Canvas extends JPanel implements ActionListener {
 				p.setHilighted(!p.isHilighted());
 			}
 		}
-		repaint();
+		drawingArea.repaint();
 	} // hilightPorts
 
 	public void print() {
@@ -455,8 +453,7 @@ public class Canvas extends JPanel implements ActionListener {
 		connections = scheme.connections;
 		objects = scheme.objects;
 		mListener.setState(State.selection);
-		repaint();
-
+		drawingArea.repaint();
 	} // loadScheme
 
 	public void saveScheme(File file) {
@@ -511,7 +508,7 @@ public class Canvas extends JPanel implements ActionListener {
 
 	public void setGridVisible(boolean b) {
 		this.showGrid = b;
-		repaint();
+		drawingArea.repaint();
 	}
 
 	/**
@@ -537,22 +534,22 @@ public class Canvas extends JPanel implements ActionListener {
 			// MOVE OBJECT BACKWARD IN THE LIST
 			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
 			objects.sendBackward(currentObj, 1);
-			repaint();
+			drawingArea.repaint();
 		} else if (e.getActionCommand().equals(Menu.FORWARD)) {
 			// MOVE OBJECT FORWARD IN THE LIST
 			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
 			objects.bringForward(currentObj, 1);
-			repaint();
+			drawingArea.repaint();
 		} else if (e.getActionCommand().equals(Menu.TOFRONT)) {
 			// MOVE OBJECT TO THE FRONT IN THE LIST,
 			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
 			objects.bringToFront(currentObj);
-			repaint();
+			drawingArea.repaint();
 		} else if (e.getActionCommand().equals(Menu.TOBACK)) {
 			// MOVE OBJECT TO THE BACK IN THE LIST
 			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
 			objects.sendToBack(currentObj);
-			repaint();
+			drawingArea.repaint();
 		} else if (e.getActionCommand().equals(Menu.MAKECLASS)) {
 			ClassSaveDialog csd = new ClassSaveDialog(((GObjGroup)currentObj).getSpec(connections), this);
             csd.pack();

@@ -61,7 +61,7 @@ class MouseOps
 	 */
 	public void mouseExited(MouseEvent e) {
         mouseOver = false;
-        canvas.repaint();
+        canvas.drawingArea.repaint();
 	}
 
 	private void openObjectPopupMenu(int x, int y) {
@@ -240,7 +240,7 @@ class MouseOps
 				}
 			}
 		}
-		canvas.repaint();
+		canvas.drawingArea.repaint();
 	}
 
 	private void addingSpecialRelation(int y, int x) {
@@ -311,7 +311,7 @@ class MouseOps
 						}
 					}
 					setState(State.drag);
-					canvas.repaint();
+					canvas.drawingArea.repaint();
 				} else {
 					cornerClicked = canvas.objects.controlRectContains(canvas.mouseX, canvas.mouseY);
 					if (cornerClicked != 0) {
@@ -344,7 +344,7 @@ class MouseOps
 		if (state.equals(State.dragBreakPoint)) {
 			draggedBreakPoint.x = x;
 			draggedBreakPoint.y = y;
-			canvas.repaint();
+			canvas.drawingArea.repaint();
 		}
 		if (state.equals(State.drag)) {
 			int x1, x2, y1, y2, newX, newY;
@@ -424,12 +424,12 @@ class MouseOps
 			canvas.objects.updateRelObjs();
 			canvas.mouseX = x;
 			canvas.mouseY = y;
-			canvas.repaint();
+			canvas.drawingArea.repaint();
 		}
 		if (state.equals(State.dragBox)) {
 			canvas.mouseX = x;
 			canvas.mouseY = y;
-			canvas.repaint();
+			canvas.drawingArea.repaint();
 		}
 		if (state.equals(State.resize)) {
 			for (int i = 0; i < selectedObjs.size(); i++) {
@@ -446,7 +446,7 @@ class MouseOps
 			}
 			canvas.mouseX = x;
 			canvas.mouseY = y;
-			canvas.repaint();
+			canvas.drawingArea.repaint();
 
 			canvas.objects.updateRelObjs();
 		}
@@ -462,7 +462,7 @@ class MouseOps
 		if (state.equals(State.addRelation) || state.startsWith("??")) {
 			if (canvas.currentPort != null) {
 				canvas.currentPort.setSelected(false);
-				canvas.repaint();
+				canvas.drawingArea.repaint();
 			}
 
 			GObj obj = canvas.objects.checkInside(x, y);
@@ -475,12 +475,12 @@ class MouseOps
 						if (canBeConnected(canvas.firstPort, port)) {
 							port.setSelected(true);
 							canvas.currentPort = port;
-							canvas.repaint();
+							canvas.drawingArea.repaint();
 						}
 					} else {
 						port.setSelected(true);
 						canvas.currentPort = port;
-						canvas.repaint();
+						canvas.drawingArea.repaint();
 					}
 				}
 			}
@@ -546,9 +546,9 @@ class MouseOps
 				canvas.drawingArea.setPreferredSize(canvas.drawAreaSize);
 				canvas.drawingArea.revalidate();
 			}
-			canvas.repaint();
+			canvas.drawingArea.repaint();
 		} else if (state.startsWith("??") && canvas.firstPort != null) { //if class is of type relation
-			canvas.repaint();
+			canvas.drawingArea.repaint();
 		}
 		if (canvas.firstPort != null) {
 			canvas.mouseX = x;
@@ -573,7 +573,7 @@ class MouseOps
             int y2 = Math.max(startY, canvas.mouseY);
             canvas.objects.selectObjectsInsideBox(x1, y1, x2, y2);
 			state = State.selection;
-			canvas.repaint();
+			canvas.drawingArea.repaint();
 		}
 		if (canvas.objects.getSelected() != null && canvas.objects.getSelected().size() > 0) {
 			String selObjects = canvas.objects.getSelected().toString();

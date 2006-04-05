@@ -112,7 +112,7 @@ public class Palette implements ActionListener {
             canvas.mListener.startAddingObject();
         }
         canvas.drawingArea.grabFocus();
-        canvas.repaint();
+        canvas.drawingArea.repaint();
     }
 
     void resetButtons() {

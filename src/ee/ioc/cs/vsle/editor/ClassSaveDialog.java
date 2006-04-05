@@ -61,14 +61,14 @@ public class ClassSaveDialog extends JFrame implements ActionListener {
 				FileFuncs.writeFile(RuntimeProperties.packageDir + className+".java", fileText);
 				canvas.currentObj.className = className;
 				this.dispose();
-				canvas.repaint();
+				canvas.drawingArea.repaint();
 			}
 
 		}
 
 		if (e.getSource() == cancel) {
 			this.dispose();
-			canvas.repaint();
+			canvas.drawingArea.repaint();
 		}
 	}
 }
