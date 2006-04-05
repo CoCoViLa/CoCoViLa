@@ -248,12 +248,21 @@ class MouseOps
 		if (obj != null) {
 			Port port = obj.portContains(x, y);
 			if (port != null) {
-				if (canvas.firstPort == null) {
+                GObj currentObj = canvas.currentObj;
+                if (currentObj == null || currentObj.ports == null
+                        || currentObj.ports.size() != 2)
+                    return;
+                
+                if (canvas.firstPort == null) {
+                    if (!canBeConnected(port, currentObj.ports.get(0)))
+                        return;
 					canvas.firstPort = port;
 					canvas.firstPort.setConnected(true);
 					canvas.mouseX = x;
 					canvas.mouseY = y;
 				} else {
+                    if (!canBeConnected(port, currentObj.ports.get(1)))
+                        return;
 					Port port1 = canvas.currentObj.ports.get(0);
 					Port port2 = canvas.currentObj.ports.get(1);
 					Connection con = new Connection(canvas.firstPort, port1);
