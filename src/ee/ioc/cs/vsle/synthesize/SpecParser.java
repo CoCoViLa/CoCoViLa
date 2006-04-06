@@ -29,7 +29,12 @@ public class SpecParser {
 
             while ( !a.isEmpty() ) {
                 if ( !( a.get( 0 ) ).equals( "" ) ) {
-                    db.p( getLine( a ) );
+                    try {
+						db.p( getLine( a ) );
+					} catch (SpecParseException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
                 } else {
                     a.remove( 0 );
 
@@ -91,8 +96,8 @@ public class SpecParser {
      @return	a specification line with its type information
      @param	a	arraylist of specification lines
      */
-    static LineType getLine( ArrayList<String> a ) {
-        Matcher matcher2;
+    static LineType getLine( ArrayList<String> a ) throws SpecParseException {
+        Matcher matcher;
         Pattern pattern;
 
         while ( ( a.get( 0 ) ).equals( "" ) || a.get( 0 ).trim().startsWith( "//" ) ) {
@@ -105,61 +110,95 @@ public class SpecParser {
 
         a.remove( 0 );
         if ( line.indexOf( "alias " ) >= 0 ) {
-            pattern = Pattern.compile( "alias ([^= ]+) ?= ?\\((.*)\\) *" );
-            matcher2 = pattern.matcher( line );
-            if ( matcher2.find() ) {
-                String returnLine = matcher2.group( 1 ) + ":" + matcher2.group( 2 );
-
+            pattern = Pattern.compile( "alias *(\\(( *[^\\(\\) ]+ *)\\))* *([^= ]+) *= *\\((.*)\\) *" );
+            matcher = pattern.matcher( line );
+            if ( matcher.find() ) {
+            	if( matcher.group( 3 ).indexOf( "." ) > -1 ) {
+            		throw new SpecParseException( "Alias " + matcher.group( 3 ) +
+                            " cannot be declared with compound name" );
+            	}
+            	String returnLine = matcher.group( 3 ) 
+            						+ ":" + matcher.group( 4 )
+            						+ ":" + ( matcher.group( 2 ) == null 
+            								|| matcher.group( 2 ).equals("null")? "" : matcher.group( 2 ));
                 return new LineType( LineType.TYPE_ALIAS, returnLine );
             }
+            //allow empty alias declaration e.g. "alias x;"
+            pattern = Pattern.compile( "alias *(\\(( *[^\\(\\) ]+ *)\\))* *([^= ]+) *" );
+            matcher = pattern.matcher( line );
+            if ( matcher.find() ) {
+            	if( matcher.group( 3 ).indexOf( "." ) > -1 ) {
+            		throw new SpecParseException( "Alias " + matcher.group( 3 ) +
+                            " cannot be declared with compound name" );
+            	}
+            	String returnLine = matcher.group( 3 ) 
+            						+ "::" + ( matcher.group( 2 ) == null 
+            								|| matcher.group( 2 ).equals("null")? "" : matcher.group( 2 ));
+            	return new LineType( LineType.TYPE_ALIAS, returnLine );
+            }
+            
 			return new LineType( LineType.TYPE_ERROR, line );
+			
         } else if ( line.indexOf( "super" ) >= 0 ) {
         	pattern = Pattern.compile( "super#([^ .]+)" );
-            matcher2 = pattern.matcher( line );
-            if ( matcher2.find() ) {
-                String returnLine = matcher2.group( 1 );
+            matcher = pattern.matcher( line );
+            if ( matcher.find() ) {
+                String returnLine = matcher.group( 1 );
 
                 return new LineType( LineType.TYPE_SUPERCLASSES, returnLine );
             }
 			return new LineType( LineType.TYPE_ERROR, line );
+			
         } else if ( line.indexOf( ":=" ) >= 0 ) {
         	pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*[\\[\\]]*) +([a-zA-Z_$][0-9a-zA-Z_$]*) *:= *([a-zA-Z0-9.{}\"]+|new [a-zA-Z0-9.{}\\[\\]]+) *$" );
-            matcher2 = pattern.matcher( line );
-            if ( matcher2.find() ) {
-                return new LineType( LineType.TYPE_CONST, matcher2.group( 1 ) + ":" + matcher2.group( 2 ) + ":" + matcher2.group( 3 ) );
+            matcher = pattern.matcher( line );
+            if ( matcher.find() ) {
+                return new LineType( LineType.TYPE_CONST, matcher.group( 1 ) + ":" + matcher.group( 2 ) + ":" + matcher.group( 3 ) );
             }
 			return new LineType( LineType.TYPE_ERROR, line );
+			
         } else if ( line.indexOf( "=" ) >= 0 ) { // Extract on solve equations
+        	//lets check if it's an alias
+        	pattern = Pattern.compile( " *([^= ]+) *= *\\[(.*)\\] *$" );
+        	matcher = pattern.matcher( line );
+            if ( matcher.find() ) {
+            	//TODO here is no check against existance of alias we try to use
+            	//"true" means that this is an assignment, not declaration
+            	String returnLine = matcher.group( 1 ) + ":" + matcher.group( 2 ) + "::true";
+            	
+            	return new LineType( LineType.TYPE_ALIAS, returnLine );
+            }
+            
             pattern = Pattern.compile( " *([^= ]+) *= *((\".*\")|(new .*\\(.*\\))|(\\{.*\\})) *$" );
-            matcher2 = pattern.matcher( line );
-            if ( matcher2.find() ) {
-                return new LineType( LineType.TYPE_ASSIGNMENT, matcher2.group( 1 ) + ":" + matcher2.group( 2 ) );
+            matcher = pattern.matcher( line );
+            if ( matcher.find() ) {
+                return new LineType( LineType.TYPE_ASSIGNMENT, matcher.group( 1 ) + ":" + matcher.group( 2 ) );
             }
 			pattern = Pattern.compile( " *([^=]+) *= *([-_0-9a-zA-Z.()\\+\\*/^ ]+) *$" );
-			matcher2 = pattern.matcher( line );
-			if ( matcher2.find() ) {
+			matcher = pattern.matcher( line );
+			if ( matcher.find() ) {
 			    return new LineType( LineType.TYPE_EQUATION, line );
 			}
 			return new LineType( LineType.TYPE_ERROR, line );
 
         } else if ( line.indexOf( "->" ) >= 0 ) {
             pattern = Pattern.compile( "(.*) *-> *(.+) *\\{(.+)\\}" );
-            matcher2 = pattern.matcher( line );
-            if ( matcher2.find() ) {
+            matcher = pattern.matcher( line );
+            if ( matcher.find() ) {
                 return new LineType( LineType.TYPE_AXIOM, line );
             }
 			pattern = Pattern.compile( "(.*) *-> *([ -_a-zA-Z0-9.,]+) *$" );
-			matcher2 = pattern.matcher( line );
-			if ( matcher2.find() ) {
+			matcher = pattern.matcher( line );
+			if ( matcher.find() ) {
 			    return new LineType( LineType.TYPE_SPECAXIOM, line );
 
 			}
 			return new LineType( LineType.TYPE_ERROR, line );
         }  else {
             pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])*) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)" );
-            matcher2 = pattern.matcher( line );
-            if ( matcher2.find() ) {
-                return new LineType( LineType.TYPE_DECLARATION, matcher2.group( 1 ) + ":" + matcher2.group( 3 ) );
+            matcher = pattern.matcher( line );
+            if ( matcher.find() ) {
+                return new LineType( LineType.TYPE_DECLARATION, matcher.group( 1 ) + ":" + matcher.group( 3 ) );
             }
 			return new LineType( LineType.TYPE_ERROR, line );
         }
@@ -360,29 +399,106 @@ public class SpecParser {
 
                     } else if ( lt.getType() == LineType.TYPE_ALIAS ) {
                         split = lt.getSpecLine().split( ":", -1 );
-                        String[] list = split[ 1 ].trim().split( " *, *", -1 );
                         String name = split[ 0 ];
-                        if ( varListIncludes( vars, name ) ) {
+                        
+                        Alias a;
+                        
+                        if( split[ 1 ].trim().equals("") ) {
+                        	//if there are no variables on the rhs, mark alias as empty
+                        	if ( !varListIncludes( vars, name ) ) {
+                        		a = new Alias( name );
+                        		a.setEmpty( true );
+                        		if( !split[ 2 ].trim().equals("") )
+                        		{
+                        			a.setStrictTypeOfVars( split[ 2 ].trim() );
+                        		}
+                        		vars.add( a );
+                        		continue;
+                        	}
+                        }
+                        
+                        String[] list = split[ 1 ].trim().split( " *, *", -1 );
+                        
+                        ClassField var = ClassRelation.getVar( name, vars );
+                        
+                        if ( var != null && !var.isAlias() ) {
                         	s_parseErrors.add( "Variable " + name +
                                     " declared more than once in class " + className );
                             throw new SpecParseException( "Variable " + name +
                                     " declared more than once in class " + className );
+                        } else if ( var != null && var.isAlias() ) {
+                        	a = (Alias)var;
+                        	if( !a.isEmpty() ) {
+                        		throw new SpecParseException( "Alias " + name +
+                                        " cannot be overriden, class " + className );
+                        	}
+                        	a.setEmpty( false );
+                        } else {
+                        	//if its an assignment, check if alias has already been declared
+                        	if( split.length > 3 && Boolean.parseBoolean( split[ 3 ] ) ) {
+                        		try {
+                        			if( ( name.indexOf( "." ) == -1 ) && !varListIncludes( vars, name ) ) {
+                        				throw new Exception();
+                        				
+                        			} else if ( name.indexOf( "." ) > -1 ) {
+                        				//here we have to dig deeply
+                        				int ind = name.indexOf( "." );
+                        				
+                        				String parent = name.substring( 0, ind );
+                        				String leftFromName = name.substring( ind + 1, name.length() );
+                        				
+                        				ArrayList<ClassField> varsFromClass = vars;
+                        				ClassField parentVar = ClassRelation.getVar( parent, varsFromClass );
+                        				String parentType = parentVar.getType();
+                        				
+                        				AnnotatedClass parentClass = classList.getType( parentType );
+                        				
+                        				while( leftFromName.indexOf( "." ) > -1 ) {
+                        					
+                        					ind = leftFromName.indexOf( "." );
+                        					parent = leftFromName.substring( 0, ind );
+                        					leftFromName = leftFromName.substring( ind + 1, leftFromName.length() );
+                        					
+                        					parentVar = parentClass.getFieldByName( parent );
+                        					
+                        					parentType = parentVar.getType();
+                        					parentClass = classList.getType( parentType );
+                        				}
+                        				
+                        				if( !parentClass.hasField(leftFromName) ) {
+                        					throw new Exception( "Variable " + leftFromName + " is not declared in class " + parentClass );
+                        				}
+                        			}
+                        		} catch( Exception e) {
+                        			throw new SpecParseException( "Alias " + name +
+                        					" is not declared, class " + className + ( e.getMessage() != null ? "\n" + e.getMessage() : "" ) );
+                        		}
+                        	}
+                        	//if everything is ok, create alias
+                        	a = new Alias( name );
+                        	
+                        	if( !split[ 2 ].trim().equals("") )
+                    		{
+                    			a.setStrictTypeOfVars( split[ 2 ].trim() );
+                    		}
                         }
-                        Alias a = new Alias( name );
 
                         a.addAll( list, vars, classList );
                         vars.add( a );
                         ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS );
 
                         classRelation.addInputs( list, vars );
-                        classRelation.setMethod( "alias" );
+                        classRelation.setMethod( TypeUtil.TYPE_ALIAS );
                         classRelation.setOutput( name, vars );
                         annClass.addClassRelation( classRelation );
-                        if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
+                        
+                        if ( RuntimeProperties.isLogDebugEnabled() ) 
+                        	db.p( classRelation );
+                        
                         if ( !list[ 0 ].startsWith( "*" ) ) {
                             classRelation = new ClassRelation( RelType.TYPE_ALIAS );
                             classRelation.addOutputs( list, vars );
-                            classRelation.setMethod( "alias" );
+                            classRelation.setMethod( TypeUtil.TYPE_ALIAS );
                             classRelation.setInput( name, vars );
                             annClass.addClassRelation( classRelation );
                             if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
@@ -627,7 +743,13 @@ public class SpecParser {
         String[] split;
 
         while ( !specLines.isEmpty() ) {
-            LineType lt = getLine( specLines );
+            LineType lt = null;
+			try {
+				lt = getLine( specLines );
+			} catch (SpecParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 
             if ( lt != null ) {
                 if ( lt.getType() == LineType.TYPE_ASSIGNMENT ) {
@@ -672,7 +794,7 @@ public class SpecParser {
         }
         return false;
     }
-
+  
     private static boolean varListIncludes( ArrayList<ClassField> vars, String varName ) {
         ClassField cf;
 

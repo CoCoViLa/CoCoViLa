@@ -24,7 +24,7 @@ public class Port implements Cloneable, Serializable {
 	
 	public Port(String name, String type, int x, int y, String portConnection, String strict) {
 		this.name = name;
-		this.type = type;
+		this.type = type.trim();
 		this.x = x;
 
 		this.y = y;
@@ -33,8 +33,8 @@ public class Port implements Cloneable, Serializable {
 
 		this.strict = Boolean.parseBoolean( strict );
 
-		if( type.trim().startsWith("{") && type.trim().endsWith("}") ) {
-			this.type = type.substring( 0, type.length() - 1 ).substring( 1 );
+		if( this.type.startsWith("[") && this.type.endsWith("]") ) {
+			this.type = this.type.substring( 0, type.length() - 1 ).substring( 1 );
 			
 			isMulti = true;
 		}

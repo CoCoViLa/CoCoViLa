@@ -103,20 +103,19 @@ public class SpecGenerator implements ISpecGenerator {
 		Hashtable<String, String> multiRels = new Hashtable<String, String>();
 		
 		for (Connection rel : relations) {
-			
-//			WTF????????
-//			if (rel.endPort.getType().equals("any")) {
-//				s.append(
-//						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.beginPort.getName()
-//						+ " = " + rel.beginPort.getObject().getName() + "."
-//						+ rel.beginPort.getName() + ";\n");
-//			}  else if  (rel.beginPort.getType().equals("any")) {
-//				s.append(
-//						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
-//						+ " = " + rel.beginPort.getObject().getName() + "."
-//						+ rel.endPort.getName() + ";\n");
-//			} else 
-			if( rel.beginPort.isMulti() || rel.endPort.isMulti() ) {
+			if (rel.endPort.getName().equals("any")) {
+				s.append(
+						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.beginPort.getName()
+						+ " = " + rel.beginPort.getObject().getName() + "."
+						+ rel.beginPort.getName() + ";\n");
+				
+			}  else if  (rel.beginPort.getName().equals("any")) {
+				s.append(
+						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
+						+ " = " + rel.beginPort.getObject().getName() + "."
+						+ rel.endPort.getName() + ";\n");
+
+			} else if( rel.beginPort.isMulti() || rel.endPort.isMulti() ) {
 				
 				Port multi = rel.beginPort.isMulti() ? rel.beginPort : rel.endPort;
 				Port simple = !rel.beginPort.isMulti() ? rel.beginPort : rel.endPort;
@@ -152,7 +151,7 @@ public class SpecGenerator implements ISpecGenerator {
 					portarray += port;
 				}
 			}
-			s.append( CodeGenerator.OT_TAB + multiport + " = { " + portarray + " };\n");
+			s.append( CodeGenerator.OT_TAB + multiport + " = [ " + portarray + " ];\n");
 		}
 		
 		s.append(spec);

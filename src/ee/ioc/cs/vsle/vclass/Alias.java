@@ -2,14 +2,23 @@ package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.synthesize.UnknownVariableException;
 import ee.ioc.cs.vsle.synthesize.ClassList;
+import ee.ioc.cs.vsle.util.*;
+
 import java.util.ArrayList;
 
 
 public class Alias extends ClassField {
 
-	private static final String ALIAS = "alias";
+	private static final String ALIAS = TypeUtil.TYPE_ALIAS;
 
 	private boolean isWildcard = false;
+	private boolean isEmpty = false;
+	private boolean isStrictType = false;
+	private boolean isOneTypeVars = false;
+	//this means that alias represents Object[] with elements of any type
+	private boolean isObjectType = false;
+	private String strictTypeOfVars;
+	
 	/**
 	 * Class constructor.
 	 * @param name String - alias name.
@@ -93,6 +102,17 @@ public class Alias extends ClassField {
 		return type;
 	} // getAliasType
 
+	public boolean compareByTypes( Alias alias ) {
+
+		for (int i = 0; i < vars.size(); i++) {
+			//TODO if alias contains alias then need additional check
+			if( !vars.get(i).getType().equals(alias.vars.get(i).getType()) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public String getRealType() {
 		ClassField cf1 = null, cf2;
                 if( vars.size() == 1 ) {
@@ -134,6 +154,22 @@ public class Alias extends ClassField {
 
 	public void setWildcard(boolean isWildcard) {
 		this.isWildcard = isWildcard;
+	}
+
+	public boolean isEmpty() {
+		return isEmpty;
+	}
+
+	public void setEmpty(boolean isEmpty) {
+		this.isEmpty = isEmpty;
+	}
+
+	public String getStrictTypeOfVars() {
+		return strictTypeOfVars;
+	}
+
+	public void setStrictTypeOfVars(String strictTypeOfVars) {
+		this.strictTypeOfVars = strictTypeOfVars;
 	}
 
 }

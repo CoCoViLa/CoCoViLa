@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.util.db;
 
 import java.io.Serializable;
@@ -144,7 +145,7 @@ class Rel implements Serializable {
         String outputString = "";
         Var var = outputs.get(0);
 
-        if (!var.getType().equals("void")) {
+        if (!TypeUtil.TYPE_VOID.equals( var.getType() )) {
             if (var.getField().isAlias()) {
                 String alias_tmp = getAliasTmpName(var.getName());
 
@@ -164,7 +165,7 @@ class Rel implements Serializable {
     }
 
     private String getAliasTmpName(String varName) {
-        return CodeGenerator.ALIASTMP + "_" + varName + "_" + relNumber;
+        return TypeUtil.TYPE_ALIAS + "_" + varName + "_" + relNumber;
     }
 
     String getParameters(boolean useBrackets) {
@@ -179,8 +180,8 @@ class Rel implements Serializable {
 
             var = inputs.get(i);
 
-            if (!var.getType().equals("void")) {
-                if (var.getType().equals("alias")) {
+            if (!TypeUtil.TYPE_VOID.equals( var.getType() ) ) {
+                if ( TypeUtil.TYPE_ALIAS.equals( var.getType() ) ) {
                     paramString = getAliasTmpName(var.getName());
                 } else {
                     paramString = var.toString();
@@ -250,7 +251,7 @@ class Rel implements Serializable {
         if (type == RelType.TYPE_JAVAMETHOD) {
             Var op = outputs.get(0);
 
-            if (op.getType().equals("void")) {
+            if ( TypeUtil.TYPE_VOID.equals( op.getType() )) {
                 return (checkAliasInputs() + getObject(object) + method + getParameters(true));
             }
             return checkAliasInputs() /* + outputAliasDeclar() */
@@ -489,7 +490,7 @@ class Rel implements Serializable {
         String assigns = "";
         Var output = outputs.get(0);
         if (output.getField().isAlias()) {
-            String alias_tmp = CodeGenerator.ALIASTMP + "_" + output.getName()
+            String alias_tmp = TypeUtil.TYPE_ALIAS + "_" + output.getName()
                     + "_" + relNumber;
             if (output.getField().getVars().size() == 0) {
                 assigns = "Object " + output.getName() + " = null";

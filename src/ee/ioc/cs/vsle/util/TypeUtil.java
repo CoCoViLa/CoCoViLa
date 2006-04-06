@@ -2,6 +2,9 @@ package ee.ioc.cs.vsle.util;
 
 public class TypeUtil {
 
+	public static final String TYPE_ALIAS = "alias";
+	public static final String TYPE_VOID = "void";
+	
 	public static boolean isPrimitive( String type ) {
 		
 		return type.equals("int") || type.equals("double") || type.equals("float")

@@ -1,7 +1,7 @@
 package ee.ioc.cs.vsle.editor;
 
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.vclass.Point;
 import ee.ioc.cs.vsle.graphics.Shape;
 
 import javax.swing.*;
@@ -598,9 +598,9 @@ class MouseOps
 		else if ((port.isAny() || firstPort.isAny()) && !(port.isAny() || firstPort.isAny())) {
 			return true;
 		}
-		else if (port.getType().equals("alias") && firstPort.getType().substring(firstPort.getType().length() - 2, firstPort.getType().length()).equals("[]"))
+		else if ( TypeUtil.TYPE_ALIAS.equals( port.getType() ) && firstPort.getType().substring(firstPort.getType().length() - 2, firstPort.getType().length()).equals("[]"))
 			return true;
-		else if (firstPort.getType().equals("alias") && port.getType().substring(port.getType().length() - 2, port.getType().length()).equals("[]"))
+		else if ( TypeUtil.TYPE_ALIAS.equals( firstPort.getType() ) && port.getType().substring(port.getType().length() - 2, port.getType().length()).equals("[]"))
 			return true;
 		else 
 			return false;

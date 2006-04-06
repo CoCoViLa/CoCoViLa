@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.editor;
 import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.ccl.CCL;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.synthesize.*;
 
@@ -232,7 +233,7 @@ public class ProgramRunner {
 				lastObj = f.get(genObject);
 				for (int j = 0; j < obj.fields.size(); j++) {
 					field = obj.fields.get(j);
-					if (!field.getType().equals("alias")) {
+					if (! TypeUtil.TYPE_ALIAS.equals( field.getType() )) {
 						clasType = f.getType();
 						f2 = clasType.getDeclaredField(field.getName());
 						Class c = f2.getType();

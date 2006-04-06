@@ -117,10 +117,7 @@ public class ClassField implements Cloneable, Serializable {
 	 *         alias.
 	 */
 	public boolean isAlias() {
-		if (type.equals("alias")) {
-			return true;
-		}
-		return false;
+		return TypeUtil.TYPE_ALIAS.equals( type );
 	} // isAlias
 
 	/**

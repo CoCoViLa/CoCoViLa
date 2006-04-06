@@ -40,7 +40,7 @@ public class ProblemCreator {
             if ( classes.getType( cf.getType() ) != null ) {
                 problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
             }
-            if ( cf.getType().equals( "alias" ) ) {
+            if ( TypeUtil.TYPE_ALIAS.equals( cf.getType() ) ) {
                 cf = rewriteWildcardAlias( cf, ac, classes );
             } else if( cf.isConstant() && cf.getName().startsWith( "*" ) ) {
             	//this denotes for alias.length constant
@@ -93,12 +93,11 @@ public class ProblemCreator {
                     Var v2 = problem.getAllVars().get( obj + "." + cf2.getName() );
 
                     if ( v1.getField().isAlias() && v2.getField().isAlias() ) {
-                        if ( RuntimeProperties.isLogDebugEnabled() )
-                            db.p( ( ( Alias ) v1.getField() ).getAliasType() + " " +
-                                  ( ( Alias ) v2.getField() ).getAliasType() );
-                        if ( !( ( Alias ) v1.getField() ).getAliasType().equals( ( ( Alias ) v2.
-                                getField() ).
-                                getAliasType() ) ) {
+//                        if ( RuntimeProperties.isLogDebugEnabled() )
+//                            db.p( ( ( Alias ) v1.getField() ).getAliasType() + " " +
+//                                  ( ( Alias ) v2.getField() ).getAliasType() );
+                        if ( !( ( Alias ) v1.getField() ).compareByTypes( ( Alias ) v2.
+                                getField() ) ) {
                             throw new AliasException( "Differently typed aliases connected: " + obj +
                                     "." + cf1.getName() + " and " + obj + "." + cf2.getName() );
                         }
