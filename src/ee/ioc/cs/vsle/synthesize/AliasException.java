@@ -15,7 +15,7 @@ public class AliasException
 	 * Class constructor.
 	 * @param s String
 	 */
-	AliasException(String s) {
+	public AliasException(String s) {
 		super(s);
 	} // AliasException
 

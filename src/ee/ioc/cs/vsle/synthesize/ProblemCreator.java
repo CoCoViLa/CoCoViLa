@@ -41,7 +41,7 @@ public class ProblemCreator {
                 problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
             }
             if ( TypeUtil.TYPE_ALIAS.equals( cf.getType() ) ) {
-                cf = rewriteWildcardAlias( cf, ac, classes );
+                cf = rewriteWildcardAlias( (Alias)cf, ac, classes );
             } else if( cf.isConstant() && cf.getName().startsWith( "*" ) ) {
             	//this denotes for alias.length constant
             	Alias alias = (Alias)ac.getFieldByName( cf.getName().substring( 0, cf.getName().length() - 7 ).substring( 1 ) );
@@ -96,7 +96,7 @@ public class ProblemCreator {
 //                        if ( RuntimeProperties.isLogDebugEnabled() )
 //                            db.p( ( ( Alias ) v1.getField() ).getAliasType() + " " +
 //                                  ( ( Alias ) v2.getField() ).getAliasType() );
-                        if ( !( ( Alias ) v1.getField() ).compareByTypes( ( Alias ) v2.
+                        if ( !( ( Alias ) v1.getField() ).equalsByTypes( ( Alias ) v2.
                                 getField() ) ) {
                             throw new AliasException( "Differently typed aliases connected: " + obj +
                                     "." + cf1.getName() + " and " + obj + "." + cf2.getName() );
@@ -191,9 +191,8 @@ public class ProblemCreator {
     	return size;
     }
     
-    private static ClassField rewriteWildcardAlias( ClassField cf, AnnotatedClass ac, ClassList classes ) {
-        if ( cf.getVars().size() == 1 &&
-             cf.getVars().get( 0 ).getName().startsWith( "*." ) ) {
+    private static ClassField rewriteWildcardAlias( Alias cf, AnnotatedClass ac, ClassList classes ) {
+        if ( cf.isWildcard() ) {
             String wildcardVar = cf.getVars().get( 0 ).getName().substring( 2 );
             cf.getVars().clear();
             

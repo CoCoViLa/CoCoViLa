@@ -502,9 +502,9 @@ public class SpecParser {
                             classRelation.setInput( name, vars );
                             annClass.addClassRelation( classRelation );
                             if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
-                        } else {
-                        	a.setWildcard( true );
-                        }
+                        } 
+                        //wildcard flag will be set inside alias
+                        //else { a.setWildcard( true ); }
 
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {
                         EquationSolver.solve( lt.getSpecLine() );

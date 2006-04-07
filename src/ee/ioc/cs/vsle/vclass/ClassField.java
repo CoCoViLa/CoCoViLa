@@ -138,17 +138,11 @@ public class ClassField implements Cloneable, Serializable {
 	}
 
 	public boolean isPrimitiveArray() {
-		if (isPrimitive(arrayType())) {
-			return true;
-		}
-		return false;
+		return isPrimitive(arrayType());
 	}
 
 	public boolean isPrimOrStringArray() {
-		if (isPrimitiveOrString(arrayType())) {
-			return true;
-		}
-		return false;
+		return isPrimitiveOrString(arrayType());
 	}
 
 	public boolean isPrimitive(String s) {
@@ -252,6 +246,10 @@ public class ClassField implements Cloneable, Serializable {
 	}
 
 	public ArrayList<ClassField> getVars() {
+		//alias
+		if( !isAlias() ) {
+			throw new IllegalStateException( "ClassField " + name + " is not alias, but " + type );
+		}
 		return vars;
 	}
 

@@ -4,6 +4,7 @@ public class TypeUtil {
 
 	public static final String TYPE_ALIAS = "alias";
 	public static final String TYPE_VOID = "void";
+	public static final String TYPE_OBJECT = "Object";
 	
 	public static boolean isPrimitive( String type ) {
 		
