@@ -103,7 +103,7 @@ public class CodeGenerator {
             cOT( OT_INC, 1 );
             alg.append( cOT( OT_NOC, 0 ) + "//Subtask: " + subtask + "\n" );
             // apend subtask inputs to algorithm
-            alg.append( getSubtaskInputs( subInputs, cOT( OT_NOC, 0 ) ) );
+            alg.append( getSubtaskInputs( subInputs ) );
             for ( int i = 0; i < subAlg.size(); i++ ) {
                 Rel trel = subAlg.get( i );
                 if (RuntimeProperties.isLogDebugEnabled())
@@ -190,15 +190,16 @@ public class CodeGenerator {
         return buf.toString();
     }
 
-    private String getSubtaskInputs( List<Var> vars, String offset ) {
+    private String getSubtaskInputs( List<Var> vars ) {
     	
     	String result = "";
     	
     	for ( int i = 0; i < vars.size(); i++ ) {
     		Var var = vars.get( i );
-    		
+    		String object = Rel.getObject(var.getObject());
     		if ( var.getField().isAlias() ) {
-    			result += getAliasSubtaskInput( var, offset, i);
+    			String aliasTmp = getAliasTmpName(var.getName());;
+    			result += getVarsFromAlias( (Alias)var.getField(), aliasTmp, object, "in", i);
     			continue;
     		}
     		
@@ -208,9 +209,9 @@ public class CodeGenerator {
     		result += offset;
     		
     		if ( token == TypeToken.TOKEN_OBJECT ) {
-    			result += var.toString() + " = (" + varType + ")in[" + i + "];\n";
+    			result += object + var.toString() + " = (" + varType + ")in[" + i + "];\n";
     		} else {
-    			result += var.toString()
+    			result += object + var.toString()
     			+ " = ((" + token.getObjType() + ")in[" + i + "])."
     			+ token.getMethod() + "();\n";
     		}
@@ -220,6 +221,41 @@ public class CodeGenerator {
     	return result;
     }
 
+    //TODO compare with Rel.checkAliasOutputs()
+    //getAliasSubtaskInput
+    public static String getVarsFromAlias( Alias alias, String aliasTmp, String object, String parentVar, int num ) {
+        String aliasType = alias.getRealType() + "[]";
+        
+        String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType
+                     + ")" + parentVar + "[" + num + "];\n";
+
+        ClassField var;
+
+        for ( int i = 0; i < alias.getVars().size(); i++ ) {
+            var = alias.getVars().get( i );
+            //out += offset + object + var.getName() + " = " + aliasTmp + "[" + i + "];\n";
+            
+            String varType = var.getType();
+    		TypeToken token = TypeToken.getTypeToken( varType );
+    		
+    		if( var.isAlias() ) {
+    			//recursion
+    			String tmp = getAliasTmpName(var.getName());
+				out += getVarsFromAlias( (Alias)var, tmp, object, parentVar, i );
+				
+			} else if ( token == TypeToken.TOKEN_OBJECT ) {
+				
+    			out += offset + object
+    					+ var + " = (" + varType + ")" + aliasTmp + "[" + i + "];\n";
+    		} else {
+    			out += offset + object
+    					+ var + " = ((" + token.getObjType() + ")" 
+    					+ aliasTmp + "[" + i + "])." + token.getMethod() + "();\n";
+    		}
+        }
+        return out;
+    }
+    
     private String getSubtaskOutputs( List<Var> vars, String offset ) {
     	
     	String declarations = "";
@@ -233,23 +269,9 @@ public class CodeGenerator {
     		
     		if ( var.getField().isAlias() ) {
     			Alias alias = (Alias)var.getField();
-
-    	        String aliasTmp = TypeUtil.TYPE_ALIAS + "_" + alias.getName() + "_" + ALIASTMP_NR++;
-    	        String aliasType = alias.getRealType();
-    	        String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
-
-    	        ClassField field;
-    	        for ( int j = 0; j < alias.getVars().size(); j++ ) {
-    	        	field = alias.getVars().get( j );
-    	            if ( j == 0 ) {
-    	                out += Rel.getObject(var.getObject()) + field.getName();
-    	            } else {
-    	                out += ", " + Rel.getObject(var.getObject()) + field.getName();
-    	            }
-    	        }
-    	        out += " };\n";
+    			String aliasTmp = getAliasTmpName(alias.getName());
     	        
-    	        declarations += out;
+    	        declarations += getVarsToAlias( alias, aliasTmp, Rel.getObject(var.getObject()) );
     	        
     	        varName = aliasTmp;
     	        
@@ -268,23 +290,41 @@ public class CodeGenerator {
     	return declarations + result + varList + " };\n";
     }
 
-    private String getAliasSubtaskInput( Var input, String offset, int num ) {
-        Alias alias = (Alias)input.getField();
-        String aliasType = alias.getRealType();
-        String aliasTmp = TypeUtil.TYPE_ALIAS + "_" + alias.getName() + "_" + ALIASTMP_NR++;
-        String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType
-                     + ")in[" + num + "];\n";
+    //getAliasSubtaskOutput
+    public static String getVarsToAlias( Alias alias, String aliasTmp, String object ) {
+    	
+        String aliasType = alias.getRealType() + "[]";
+        String before = "";
+        String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
 
-        ClassField var;
-
-        for ( int i = 0; i < alias.getVars().size(); i++ ) {
-            var = alias.getVars().get( i );
-            out += offset + Rel.getObject(input.getObject()) + var.getName() + " = " + aliasTmp + "[" + i + "];\n";
+        ClassField field;
+        for ( int j = 0; j < alias.getVars().size(); j++ ) {
+        	field = alias.getVars().get( j );
+        	String varName;
+        	if( field.isAlias() ) {
+        		varName = getAliasTmpName(alias.getName());
+        		before += getVarsToAlias( (Alias)field, varName, object );
+        	} else {
+        		varName = object + field.getName();
+        	}
+        	
+            if ( j == 0 ) {
+                out += varName;
+            } else {
+                out += ", " + varName;
+            }
         }
-        return out;
+        out += " };\n";
+        
+        return before + out;
     }
-
+    
 	public static String getOffset() {
 		return offset;
 	}
+	
+	public static String getAliasTmpName(String varName) {
+		varName = varName.replaceAll( "\\.", "_" );
+        return TypeUtil.TYPE_ALIAS + "_" + varName + "_" + ALIASTMP_NR++;
+    }
 }

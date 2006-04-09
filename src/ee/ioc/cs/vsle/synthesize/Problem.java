@@ -76,14 +76,6 @@ class Problem implements Serializable {
 		axioms.add(rel);
 	}
 
-	void addKnown(Var var) {
-		knownVars.add(var);
-	}
-
-	void addKnown(List<Var> vars) {
-		knownVars.addAll(vars);
-	}
-
 	void addTarget(Var var) {
 		targetVars.add(var);
 	}

@@ -234,7 +234,7 @@ public class DepthFirstPlanner implements IPlanner {
 	private boolean subtaskPlanningImpl(Problem problem, List<Rel> algorithm,
 			ArrayList subgoals, HashSet<Rel> subtaskRelsInPath, int depth) {
 
-		List<Var> newVars = new ArrayList<Var>();
+		Set<Var> newVars = new HashSet<Var>();
 		
 		// or
 		OR: for (Rel subtaskRel : problem.getRelsWithSubtasks()) {
@@ -311,23 +311,24 @@ public class DepthFirstPlanner implements IPlanner {
 				algorithm.add( subtaskRel );
 				//newVars.addAll( subtaskRel.getOutputs() );
 				
-				for (Var output : subtaskRel.getOutputs() ) {
-
-					newVars.add(output);
-					// if output var is alias then all its vars should be found as well
-					if (output.getField().isAlias()) {
-						for (ClassField field : output.getField().getVars()) {
-							String object = (output.getObject().equals("this")) ? ""
-									: output.getObject().substring(5) + ".";
-							Var var = problem.getVarByFullName(object
-									+ field.toString());
-
-							if (var != null) {
-								newVars.add(var);
-							}
-						}
-					}
-				}
+				addKnownVarsToSet( problem, subtaskRel.getOutputs(), newVars );
+//				for (Var output : subtaskRel.getOutputs() ) {
+//
+//					newVars.add(output);
+//					// if output var is alias then all its vars should be found as well
+//					if (output.getField().isAlias()) {
+//						for (ClassField field : output.getField().getVars()) {
+//							String object = (output.getObject().equals("this")) ? ""
+//									: output.getObject().substring(5) + ".";
+//							Var var = problem.getVarByFullName(object
+//									+ field.toString());
+//
+//							if (var != null) {
+//								newVars.add(var);
+//							}
+//						}
+//					}
+//				}
 				
 			} else if( !m_isSubtaskRepetitionAllowed ) {
 				if (RuntimeProperties.isLogDebugEnabled())
@@ -336,30 +337,57 @@ public class DepthFirstPlanner implements IPlanner {
 			}
 		}
 		
-		problem.addKnown( newVars );
+		problem.getKnownVars().addAll( newVars );
 		problem.getFoundVars().addAll( newVars );
 		return false;
 	}
 
-	private void prepareSubtask(Problem problem, Rel subtask) {
-		// [x->y] assume x is known
-		for (Var input : subtask.getInputs()) {
+	private void addKnownVarsToSet( Problem problem, List<Var> fromList, Set<Var> toSet ) {
+		for (Var topvar : fromList ) {
 
-			problem.addKnown(input);
-			// if input var is alias then all its vars should be known as well
-			if (input.getField().isAlias()) {
-				for (ClassField field : input.getField().getVars()) {
-					String object = (input.getObject().equals("this")) ? ""
-							: input.getObject().substring(5) + ".";
+			toSet.add(topvar);
+			// if output var is alias then all its vars should be found as well
+			if (topvar.getField().isAlias()) {
+				for (ClassField field : topvar.getField().getVars()) {
+					String object = (topvar.getObject().equals("this")) ? ""
+							: topvar.getObject().substring(5) + ".";
 					Var var = problem.getVarByFullName(object
 							+ field.toString());
 
 					if (var != null) {
-						problem.getKnownVars().add(var);
+						toSet.add(var);
+						if( var.getField().isAlias() ) {
+							//this is used if we have alias in alias structure
+							db.p( "addVarsToList: alias " + var + " in alias " + topvar );
+							addKnownVarsToSet( problem, var.getField().getParentVars(), toSet );//recursion
+						}
 					}
 				}
 			}
 		}
+	}
+	
+	private void prepareSubtask(Problem problem, Rel subtask) {
+		// [x->y] assume x is known
+		addKnownVarsToSet( problem, subtask.getInputs(), problem.getKnownVars() );
+		
+//		for (Var input : subtask.getInputs()) {
+//
+//			problem.getKnownVars().add(input);
+//			// if input var is alias then all its vars should be known as well
+//			if (input.getField().isAlias()) {
+//				for (ClassField field : input.getField().getVars()) {
+//					String object = (input.getObject().equals("this")) ? ""
+//							: input.getObject().substring(5) + ".";
+//					Var var = problem.getVarByFullName(object
+//							+ field.toString());
+//
+//					if (var != null) {
+//						problem.getKnownVars().add(var);
+//					}
+//				}
+//			}
+//		}
 
 		HashSet<Rel> removableRels = new HashSet<Rel>();
 		// remove all rels with otputs same as subtask inputs

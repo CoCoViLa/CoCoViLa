@@ -41,8 +41,6 @@ public class ClassField implements Cloneable, Serializable {
 
 	protected boolean isConstant = false;
 
-	protected boolean alias = false;
-
 	protected boolean watched = false;
 
 	protected ArrayList<ClassField> vars;
@@ -117,7 +115,8 @@ public class ClassField implements Cloneable, Serializable {
 	 *         alias.
 	 */
 	public boolean isAlias() {
-		return TypeUtil.TYPE_ALIAS.equals( type );
+		//return TypeUtil.TYPE_ALIAS.equals( type );
+		return false;
 	} // isAlias
 
 	/**
@@ -253,6 +252,20 @@ public class ClassField implements Cloneable, Serializable {
 		return vars;
 	}
 
+	public ArrayList<Var> getParentVars() {
+		//alias
+		if( !isAlias() ) {
+			throw new IllegalStateException( "ClassField " + name + " is not alias, but " + type );
+		}
+		ArrayList<Var> list = new ArrayList<Var>();
+		for (ClassField var : vars) {
+			if( var.getParentVar() != null ) {
+				list.add( var.getParentVar() );
+			}
+		}
+		return list;
+	}
+	
 	public void setWatched(boolean value) {
 		this.watched = value;
 	}

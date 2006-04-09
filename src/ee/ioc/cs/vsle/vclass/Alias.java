@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.synthesize.*;
+import ee.ioc.cs.vsle.util.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ALIAS;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_OBJECT;
 
@@ -12,7 +13,7 @@ public class Alias extends ClassField {
 	private boolean isWildcard = false;
 	private boolean isEmpty = false;
 	private boolean isStrictType = false;
-	private boolean isOneTypeVars = false;
+	private boolean isOneTypeVars = true;
 	//this means that alias represents Object[] with elements of any type
 	private boolean isObjectType = false;
 	private String aliasTypeOfVars;
@@ -32,14 +33,15 @@ public class Alias extends ClassField {
 	 * @param f ClassField - a variable added to the variables ArrayList.
 	 * @throws AliasException 
 	 */
-	void addVar(ClassField f) throws AliasException {
-		if( isStrictType && !f.getType().equals( aliasTypeOfVars ) ) {
+	public void addVar(ClassField f) throws AliasException {
+		if( isStrictType && !isWildcard() && !f.getType().equals( aliasTypeOfVars ) ) {
 			throw new AliasException( "Unable to add " + f.type + " " + f + " to alias " 
 					+ this + " because types do not match: " + aliasTypeOfVars + " vs. " + f.type );
-		} else if( !isStrictType && !f.getType().equals( aliasTypeOfVars ) ) {
+		} else if( ( aliasTypeOfVars != null ) && !isObjectType && (!isStrictType && !f.getType().equals( aliasTypeOfVars ) 
+									 || ( TYPE_ALIAS.equals( f.getType() ) ) ) ) {
 			isOneTypeVars = false;
 			aliasTypeOfVars = TYPE_OBJECT;
-		} else {
+		} else if( aliasTypeOfVars == null ){
 			aliasTypeOfVars = f.getType();
 		}
 		vars.add(f);
@@ -130,7 +132,7 @@ public class Alias extends ClassField {
 	
 	public String getRealType() {
 		
-		return aliasTypeOfVars + "[]";
+		return aliasTypeOfVars;
 //		ClassField cf1 = null, cf2;
 //		if( vars.size() == 1 ) {
 //			cf1 = vars.get(0);
@@ -178,7 +180,11 @@ public class Alias extends ClassField {
 	}
 
 	public void setStrictTypeOfVars(String strictTypeOfVars) {
-		isStrictType = true;
+		if( TYPE_OBJECT.equals( strictTypeOfVars ) ) {
+			isObjectType = true;
+		} else {
+			isStrictType = true;
+		}
 		this.aliasTypeOfVars = strictTypeOfVars;
 	}
 
@@ -186,4 +192,19 @@ public class Alias extends ClassField {
 		return isStrictType;
 	}
 
+	public boolean isObjectType() {
+		return isObjectType;
+	}
+
+	public boolean isOneTypeVars() {
+		return isOneTypeVars;
+	}
+	public boolean isAlias() {
+		//return TypeUtil.TYPE_ALIAS.equals( type );
+		return true;
+	} // isAlias
+	
+	public Alias clone() {
+		return (Alias) super.clone();
+	} // clone
 }

@@ -1,7 +1,7 @@
 package ee.ioc.cs.vsle.synthesize;
 
 import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -151,7 +151,7 @@ class Rel implements Serializable {
 
                 if (var.getField().getVars().size() > 0) {
 
-                    outputString = var.getField().getVars().get(0).getType()
+                    outputString = ((Alias)var.getField()).getRealType()
                             + "[] " + alias_tmp + " ";
                 }
 
@@ -165,6 +165,7 @@ class Rel implements Serializable {
     }
 
     private String getAliasTmpName(String varName) {
+    	varName = varName.replaceAll( "\\.", "_" );
         return TypeUtil.TYPE_ALIAS + "_" + varName + "_" + relNumber;
     }
 
@@ -381,8 +382,9 @@ class Rel implements Serializable {
 
         } else if (type == RelType.TYPE_METHOD_WITH_SUBTASK) {
             if (!outputs.isEmpty()) {
+            	String output = getOutput();
                 return (checkAliasInputs() /* + outputAliasDeclar() */
-                        + getOutput() + " = " + getObject(object) + method + getSubtaskParameters())
+                        + ( output.length() > 0 ? output + " = " : "" )  + getObject(object) + method + getSubtaskParameters())
                         + ";\n" + checkAliasOutputs();
             }
             return (checkAliasInputs() + getObject(object) + method + getSubtaskParameters());
@@ -447,25 +449,45 @@ class Rel implements Serializable {
     private String checkAliasInputs() {
         Var input;
         String assigns = "";
+        String obj = getObject(object);
         for (int i = 0; i < inputs.size(); i++) {
             input = inputs.get(i);
             if (input.getField().isAlias()) {
-                if (input.getField().getVars().size() == 0) {
-                    assigns = "Object " + input.getName() + " = null";
+            	Alias alias = (Alias)input.getField();
+            	
+            	String alias_tmp = getAliasTmpName( alias.getName() );
+                
+                if (alias.getVars().size() == 0) {
+                    assigns = alias.getRealType() + " " + alias_tmp + " = null";
                 } else {
 
-                    String alias_tmp = getAliasTmpName(input.getName());
-                    assigns += checkObjectArrayDimension(alias_tmp, input
-                            .getField().getVars().get(0).getType(), input
-                            .getField().getVars().size());
+                    assigns += checkObjectArrayDimension( alias_tmp, 
+                    				alias.getRealType(), 
+                    				alias.getVars().size() );
+                    String declarations = "";
+                    String varList = "";
+                    
                     for (int k = 0; k < input.getField().getVars().size(); k++) {
-                        String s1 = input.getField().getVars().get(k)
-                                .toString();
-                        assigns += CodeGenerator.getOffset() + alias_tmp + "["
+                    	ClassField field = input.getField().getVars().get(k);
+                    	String varName;
+                		
+                		if ( field.isAlias() ) {
+                			Alias aliasFromInput = (Alias)field;
+                			String aliasTmpFromInput = getAliasTmpName(aliasFromInput.getName());
+                	        
+                	        declarations += CodeGenerator.getVarsToAlias( aliasFromInput, aliasTmpFromInput, obj );
+                	        
+                	        varName = aliasTmpFromInput;
+                	        
+                		} else {
+                			varName = field.toString();
+                		}
+                		
+                		varList += CodeGenerator.getOffset() + alias_tmp + "["
                                 + Integer.toString(k) + "] = "
-                                + getObject(object) + s1 + ";\n";
+                                + obj + varName + ";\n";
                     }
-                    assigns += CodeGenerator.getOffset();
+                    assigns += declarations + varList + CodeGenerator.getOffset();
                 }
             }
         }
@@ -486,20 +508,37 @@ class Rel implements Serializable {
         return type + "[] " + name + " = new " + type + "[" + size + "];\n";
     }
 
+    //TODO compare with CodeGenerator.getAliasSubtaskInput() 
     private String checkAliasOutputs() {
         String assigns = "";
         Var output = outputs.get(0);
         if (output.getField().isAlias()) {
-            String alias_tmp = TypeUtil.TYPE_ALIAS + "_" + output.getName()
-                    + "_" + relNumber;
-            if (output.getField().getVars().size() == 0) {
-                assigns = "Object " + output.getName() + " = null";
+        	Alias alias = (Alias)output.getField();
+        	
+            String alias_tmp = getAliasTmpName( alias.getName() );
+            
+            if (alias.getVars().size() == 0) {
+                assigns = alias.getRealType() + " " + alias_tmp + " = null";
             } else {
-                for (int k = 0; k < output.getField().getVars().size(); k++) {
-                    String s1 = output.getField().getVars().get(k).toString();
-                    assigns += CodeGenerator.getOffset() + getObject(object)
-                            + s1 + "= " + alias_tmp + "[" + Integer.toString(k)
-                            + "];\n";
+            	String obj = getObject(object);
+                for (int k = 0; k < alias.getVars().size(); k++) {
+                	ClassField varFromAlias = alias.getVars().get(k);
+                    
+                	String varType = varFromAlias.getType();
+            		TypeToken token = TypeToken.getTypeToken( varType );
+            		
+            		if ( token == TypeToken.TOKEN_OBJECT ) {
+            			if( varFromAlias.isAlias() ) {
+            				assigns += CodeGenerator.getVarsFromAlias( (Alias)varFromAlias, 
+            						CodeGenerator.getAliasTmpName( varFromAlias.getName() ),
+            						obj, alias_tmp, k );
+            			}
+            		} else {
+            			assigns += CodeGenerator.getOffset() + obj
+            					+ varFromAlias + " = ((" + token.getObjType() + ")" 
+            					+ alias_tmp + "[" + k + "])." + token.getMethod() + "();\n";
+            		}
+                    
                 }
                 assigns += CodeGenerator.getOffset();
             }

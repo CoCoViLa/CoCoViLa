@@ -40,7 +40,7 @@ public class ProblemCreator {
             if ( classes.getType( cf.getType() ) != null ) {
                 problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
             }
-            if ( TypeUtil.TYPE_ALIAS.equals( cf.getType() ) ) {
+            if ( cf.isAlias() ) {
                 cf = rewriteWildcardAlias( (Alias)cf, ac, classes );
             } else if( cf.isConstant() && cf.getName().startsWith( "*" ) ) {
             	//this denotes for alias.length constant
@@ -55,7 +55,7 @@ public class ProblemCreator {
             var.setType( cf.getType() );
             problem.addVar( var );
             if( cf.isConstant() ) {
-            	problem.addKnown( var );
+            	problem.getKnownVars().add( var );
             	problem.getFoundVars().add( var );
             }
         }
@@ -191,27 +191,45 @@ public class ProblemCreator {
     	return size;
     }
     
-    private static ClassField rewriteWildcardAlias( Alias cf, AnnotatedClass ac, ClassList classes ) {
+    private static ClassField rewriteWildcardAlias( Alias cf, AnnotatedClass ac, ClassList classes ) throws AliasException {
         if ( cf.isWildcard() ) {
             String wildcardVar = cf.getVars().get( 0 ).getName().substring( 2 );
             cf.getVars().clear();
             
             ClassField clf = ac.getFieldByName( wildcardVar );
             
-            if ( clf != null && !clf.isAlias() ) {
-                cf.getVars().add( clf );
+            if ( clf != null && cf != clf ) {
+            	String type = clf.isAlias() ? ((Alias)clf).getRealType() : clf.getType();
+            	
+            	if( !cf.isStrictType() || cf.getRealType().equals( type ) ) {
+            		cf.addVar( clf );
+            	}
             }
             
             for ( int i = 0; i < ac.getFields().size(); i++ ) {
                 clf = ac.getFields().get( i );
                 AnnotatedClass anc = classes.getType( clf.getType() );
                 if ( anc != null ) {
-                    if ( anc.hasField( wildcardVar ) ) {
-                    	ClassField cf2 = new ClassField(
-                    			clf.getName() + "." + wildcardVar,
-                    			anc.getFieldByName( wildcardVar ).getType() );
+                	ClassField field = anc.getFieldByName( wildcardVar );
+                    if ( field != null ) {
+                    	String type = field.isAlias() ? ((Alias)field).getRealType() : field.getType();
                     	
-                    	cf.getVars().add( cf2 );
+                    	if( !cf.isStrictType() || cf.getRealType().equals( type ) ) {
+                    		ClassField cf2 = field.clone();
+                    		cf2.setName( clf.getName() + "." + wildcardVar );
+                    		//TODO check for wildcards on deeper levels
+                    		for (int j = 0; j < cf2.getVars().size(); j++) {
+								ClassField cfFrom2 = cf2.getVars().get(j);
+								cfFrom2 = cfFrom2.clone();
+								cfFrom2.setName( clf.getName() + "." + cfFrom2.getName() );
+								cf2.getVars().set(j, cfFrom2);
+							}
+//                    		ClassField cf2 = new ClassField(
+//                        			clf.getName() + "." + wildcardVar,
+//                        			type );
+                        	
+                        	cf.addVar( cf2 );
+                    	}
                     }
                 }
             }
@@ -474,7 +492,7 @@ public class ProblemCreator {
           cf = classRelation.getInputs().get( k );
           if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
               var = problem.getAllVars().get( obj + "." + cf.getName() );
-              problem.addKnown( var );
+              problem.getKnownVars().add( var );
               problem.getFoundVars().add( var );
               problem.getAssumptions().add( var );
           } else {
