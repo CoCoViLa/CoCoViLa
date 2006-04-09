@@ -218,12 +218,14 @@ public class ProblemCreator {
                     		ClassField cf2 = field.clone();
                     		cf2.setName( clf.getName() + "." + wildcardVar );
                     		//TODO check for wildcards on deeper levels
-                    		for (int j = 0; j < cf2.getVars().size(); j++) {
-								ClassField cfFrom2 = cf2.getVars().get(j);
-								cfFrom2 = cfFrom2.clone();
-								cfFrom2.setName( clf.getName() + "." + cfFrom2.getName() );
-								cf2.getVars().set(j, cfFrom2);
-							}
+                    		if( cf2.isAlias() ) {
+                    			for (int j = 0; j < cf2.getVars().size(); j++) {
+                    				ClassField cfFrom2 = cf2.getVars().get(j);
+                    				cfFrom2 = cfFrom2.clone();
+                    				cfFrom2.setName( clf.getName() + "." + cfFrom2.getName() );
+                    				cf2.getVars().set(j, cfFrom2);
+                    			}
+                    		}
 //                    		ClassField cf2 = new ClassField(
 //                        			clf.getName() + "." + wildcardVar,
 //                        			type );
