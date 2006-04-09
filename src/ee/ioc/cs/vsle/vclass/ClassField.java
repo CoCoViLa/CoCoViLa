@@ -5,6 +5,8 @@ import java.util.ArrayList;
 
 import ee.ioc.cs.vsle.synthesize.Var;
 import ee.ioc.cs.vsle.util.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ANY;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_VOID;
 
 /**
  * <p>
@@ -308,4 +310,11 @@ public class ClassField implements Cloneable, Serializable {
 		return ( name + type ).hashCode();
 	}
 
+	public boolean isAny() {
+		return TYPE_ANY.equals( getType() );
+	}
+	
+	public boolean isVoid() {
+		return TYPE_VOID.equals( getType() );
+	}
 }

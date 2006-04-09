@@ -261,7 +261,7 @@ public class ProblemCreator {
     	
     	ClassField clf = ac.getFieldByName( wildcardVar );
         
-        if ( clf != null && !clf.isAlias() ) {
+        if ( clf != null && clf != classRelation.getOutputs().get( 0 ) ) {
         	String varName = obj + "." + wildcardVar;
         	
         	if ( problem.getAllVars().containsKey( varName ) ) {

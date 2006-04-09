@@ -73,7 +73,7 @@ public class Synthesizer {
         for ( int i = 0; i < ac.getFields().size(); i++ ) {
 
             field = ac.getFields().get( i );
-            if ( !( TypeUtil.TYPE_ALIAS.equals( field.getType() ) || TypeUtil.TYPE_VOID.equals( field.getType() ) ) ) {
+            if ( !( field.isAlias() || field.isVoid() ) ) {
                 if ( field.isSpecField() ) {
                     prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + " = new " +
                             field.getType() + "();\n";
@@ -175,7 +175,7 @@ public class Synthesizer {
                             String[] vs = split[ 1 ].trim().split( " *, *", -1 );
                             String type = split[ 0 ].trim();
 
-                            if ( !TypeUtil.TYPE_VOID.equals( type ) ) {
+                            if ( !( TypeUtil.TYPE_VOID.equals( type ) || TypeUtil.TYPE_ANY.equals( type ) ) ) {
                                 for ( int i = 0; i < vs.length; i++ ) {
                                     if ( TypeUtil.isPrimitive( type ) ) {
                                         declars += "    public " + type + " " + vs[ i ] + ";\n";
@@ -197,6 +197,7 @@ public class Synthesizer {
                         //}
                     }
                 } catch ( Exception e ) {
+                	e.printStackTrace();
                 }
 
                 // find spec
