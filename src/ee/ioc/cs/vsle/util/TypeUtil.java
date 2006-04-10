@@ -40,7 +40,8 @@ public class TypeUtil {
     
     public static String getDeclaration( String varName, String type, boolean isClass, 
     									/*for constant*/String value ) {
-    	if ( TypeUtil.TYPE_VOID.equals( type ) || TypeUtil.TYPE_ANY.equals( type ) ) {
+    	if ( TypeUtil.TYPE_VOID.equals( type ) || TypeUtil.TYPE_ANY.equals( type ) 
+    			|| TypeUtil.TYPE_ALIAS.equals( type ) ) {
     		return "";
     	} else if ( value != null && value.length() > 0 ) {
     		return "final public " + type + " " + varName + " = " + value + ";\n";
