@@ -11,7 +11,7 @@ public class CodeGenerator {
 
     private static String offset = "";
 
-    public static final String OT_TAB = "        ";
+    public static final String OT_TAB = "\t";
 
     private final static int OT_NOC = 0;
     private final static int OT_INC = 1;
@@ -221,7 +221,6 @@ public class CodeGenerator {
     	return result;
     }
 
-    //TODO compare with Rel.checkAliasOutputs()
     //getAliasSubtaskInput
     public static String getVarsFromAlias( Alias alias, String aliasTmp, String object, String parentVar, int num ) {
         String aliasType = alias.getRealType() + "[]";

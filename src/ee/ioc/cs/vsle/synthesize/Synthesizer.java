@@ -73,22 +73,8 @@ public class Synthesizer {
         for ( int i = 0; i < ac.getFields().size(); i++ ) {
 
             field = ac.getFields().get( i );
-            if ( !( field.isAlias() || field.isVoid() ) ) {
-                if ( field.isSpecField() ) {
-                    prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + " = new " +
-                            field.getType() + "();\n";
-                } else if ( field.isConstant() ) { 
-                	prog += CodeGenerator.OT_TAB + "final public " + field.getType() 
-                		 + " " + field.getName() + " = " + field.getValue() + ";\n";
-                } else if ( field.isPrimitive() ) {
-                    prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + ";\n";
-                } else if ( field.isArray() ) {
-                    prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + ";\n";
-                } else {
-                    prog += CodeGenerator.OT_TAB + "public " + field.getType() + " " + field.getName() + " = new " +
-                            field.getType() + "();\n";
-                }
-            }
+            prog += CodeGenerator.OT_TAB + TypeUtil.getDeclaration( field );
+            
         }
 
         prog += CodeGenerator.OT_TAB + getComputeMethodSignature() + " {\n";
@@ -168,33 +154,25 @@ public class Synthesizer {
 
                     while ( !specLines.isEmpty() ) {
                         LineType lt = SpecParser.getLine( specLines );
-
-                        //if (! (specLines.get(0)).equals("")) {
-                        if ( lt.getType() == LineType.TYPE_DECLARATION ) {
+                        if( lt == null ) {
+                        	continue;
+                        } else if ( lt.getType() == LineType.TYPE_DECLARATION ) {
                             String[] split = lt.getSpecLine().split( ":", -1 );
                             String[] vs = split[ 1 ].trim().split( " *, *", -1 );
                             String type = split[ 0 ].trim();
 
-                            if ( !( TypeUtil.TYPE_VOID.equals( type ) || TypeUtil.TYPE_ANY.equals( type ) ) ) {
                                 for ( int i = 0; i < vs.length; i++ ) {
-                                    if ( TypeUtil.isPrimitive( type ) ) {
-                                        declars += "    public " + type + " " + vs[ i ] + ";\n";
-                                    } else if ( TypeUtil.isArray( type ) ) {
-                                        declars += "    public " + type + " " + vs[ i ] + " ;\n";
-                                    } else if ( classes.getType( type ) != null ) {
-                                        declars += "    public " + type + " " + vs[ i ] +
-                                                " = new " + type + "();\n";
-
-                                    } else {
-                                        declars += "    public " + type + " " + vs[ i ] + " = new " +
-                                                type + "();\n";
-
-                                    }
-
+                                	declars += CodeGenerator.OT_TAB 
+                                			+ TypeUtil.getDeclaration( vs[ i ], type, classes.getType( type ) != null, "" );
                                 }
-                            }
+                        } else if ( lt.getType() == LineType.TYPE_CONST ) {
+                        	String[] split = lt.getSpecLine().split( ":", -1 );
+                        	String type  = split[ 0 ].trim();
+                        	String name  = split[ 1 ].trim();
+                        	String value = split[ 2 ].trim();
+                        	declars += CodeGenerator.OT_TAB 
+                					+ TypeUtil.getDeclaration( name, type, false, value );
                         }
-                        //}
                     }
                 } catch ( Exception e ) {
                 	e.printStackTrace();

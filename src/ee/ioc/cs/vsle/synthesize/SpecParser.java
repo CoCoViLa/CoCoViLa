@@ -149,8 +149,8 @@ public class SpecParser {
             }
 			return new LineType( LineType.TYPE_ERROR, line );
 			
-        } else if ( line.indexOf( ":=" ) >= 0 ) {
-        	pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*[\\[\\]]*) +([a-zA-Z_$][0-9a-zA-Z_$]*) *:= *([a-zA-Z0-9.{}\"]+|new [a-zA-Z0-9.{}\\[\\]]+) *$" );
+        } else if ( line.trim().startsWith( "const" ) ) {
+        	pattern = Pattern.compile( " *([a-zA-Z_$][0-9a-zA-Z_$]*[\\[\\]]*) +([a-zA-Z_$][0-9a-zA-Z_$]*) *= *([a-zA-Z0-9.{}\"]+|new [a-zA-Z0-9.{}\\[\\]]+) *" );
             matcher = pattern.matcher( line );
             if ( matcher.find() ) {
                 return new LineType( LineType.TYPE_CONST, matcher.group( 1 ) + ":" + matcher.group( 2 ) + ":" + matcher.group( 3 ) );

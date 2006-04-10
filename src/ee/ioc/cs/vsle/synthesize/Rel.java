@@ -508,7 +508,6 @@ class Rel implements Serializable {
         return type + "[] " + name + " = new " + type + "[" + size + "];\n";
     }
 
-    //TODO compare with CodeGenerator.getAliasSubtaskInput() 
     private String checkAliasOutputs() {
         String assigns = "";
         Var output = outputs.get(0);
