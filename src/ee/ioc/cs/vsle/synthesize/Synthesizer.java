@@ -65,19 +65,21 @@ public class Synthesizer {
         
         String prog = "";
         
-        ClassField field;
         // start building the main source file.
         AnnotatedClass ac = classList.getType( "this" );
 
         // check all the fields and make declarations accordingly
         for ( int i = 0; i < ac.getFields().size(); i++ ) {
 
-            field = ac.getFields().get( i );
-            prog += CodeGenerator.OT_TAB + TypeUtil.getDeclaration( field );
+        	String dec = TypeUtil.getDeclaration( ac.getFields().get( i ) );
+        	
+        	if( dec != null && dec.length() > 0 ) {
+        		prog += CodeGenerator.OT_TAB + dec;
+        	}
             
         }
 
-        prog += CodeGenerator.OT_TAB + getComputeMethodSignature() + " {\n";
+        prog += "\n" + CodeGenerator.OT_TAB + getComputeMethodSignature() + " {\n";
         prog += algorithm;
         prog += CodeGenerator.OT_TAB + "}";
         Pattern pattern;
@@ -163,7 +165,7 @@ public class Synthesizer {
 
                                 for ( int i = 0; i < vs.length; i++ ) {
                                 	declars += CodeGenerator.OT_TAB 
-                                			+ TypeUtil.getDeclaration( vs[ i ], type, classes.getType( type ) != null, "" );
+                                			+ TypeUtil.getDeclaration( vs[ i ], type, false, classes.getType( type ) != null, "" );
                                 }
                         } else if ( lt.getType() == LineType.TYPE_CONST ) {
                         	String[] split = lt.getSpecLine().split( ":", -1 );
@@ -171,7 +173,7 @@ public class Synthesizer {
                         	String name  = split[ 1 ].trim();
                         	String value = split[ 2 ].trim();
                         	declars += CodeGenerator.OT_TAB 
-                					+ TypeUtil.getDeclaration( name, type, false, value );
+                					+ TypeUtil.getDeclaration( name, type, false, false, value );
                         }
                     }
                 } catch ( Exception e ) {

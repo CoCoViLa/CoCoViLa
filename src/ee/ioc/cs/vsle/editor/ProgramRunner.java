@@ -233,7 +233,7 @@ public class ProgramRunner {
 				lastObj = f.get(genObject);
 				for (int j = 0; j < obj.fields.size(); j++) {
 					field = obj.fields.get(j);
-					if (! TypeUtil.TYPE_ALIAS.equals( field.getType() )) {
+					if ( !field.isAlias() ) {
 						clasType = f.getType();
 						f2 = clasType.getDeclaredField(field.getName());
 						Class c = f2.getType();

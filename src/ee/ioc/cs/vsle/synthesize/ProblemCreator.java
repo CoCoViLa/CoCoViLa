@@ -52,7 +52,7 @@ public class ProblemCreator {
             var.setObj( caller );
             var.setField( cf );
             var.setName( cf.getName() );
-            var.setType( cf.isAlias() ? TypeUtil.TYPE_ALIAS : cf.getType() );
+            var.setType( cf.getType() );
             problem.addVar( var );
             if( cf.isConstant() ) {
             	problem.getKnownVars().add( var );

@@ -182,7 +182,7 @@ class Rel implements Serializable {
             var = inputs.get(i);
 
             if (!TypeUtil.TYPE_VOID.equals( var.getType() ) ) {
-                if ( TypeUtil.TYPE_ALIAS.equals( var.getType() ) ) {
+                if ( var.getField().isAlias() ) {
                     paramString = getAliasTmpName(var.getName());
                 } else {
                     paramString = var.toString();

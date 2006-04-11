@@ -407,7 +407,6 @@ public class SpecParser {
                         	//if there are no variables on the rhs, mark alias as empty
                         	if ( !varListIncludes( vars, name ) ) {
                         		a = new Alias( name );
-                        		a.setEmpty( true );
                         		if( !split[ 2 ].trim().equals("") )
                         		{
                         			a.setStrictTypeOfVars( split[ 2 ].trim() );
@@ -432,7 +431,6 @@ public class SpecParser {
                         		throw new SpecParseException( "Alias " + name +
                                         " cannot be overriden, class " + className );
                         	}
-                        	a.setEmpty( false );
                         } else {
                         	//if its an assignment, check if alias has already been declared
                         	if( split.length > 3 && Boolean.parseBoolean( split[ 3 ] ) ) {
@@ -495,7 +493,7 @@ public class SpecParser {
                         if ( RuntimeProperties.isLogDebugEnabled() ) 
                         	db.p( classRelation );
                         
-                        if ( !list[ 0 ].startsWith( "*" ) ) {
+                        if ( !a.isWildcard() ) {
                             classRelation = new ClassRelation( RelType.TYPE_ALIAS );
                             classRelation.addOutputs( list, vars );
                             classRelation.setMethod( TypeUtil.TYPE_ALIAS );

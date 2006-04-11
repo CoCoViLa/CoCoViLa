@@ -93,7 +93,7 @@ public class CodeGenerator {
         for ( Rel subtask : rel.getSubtasks() ) {
             subNum = subCount++;
 
-            alg.append( cOT( OT_NOC, 0 ) + "class " + Synthesizer.SUBTASK_INTERFACE_NAME + "_" + subNum
+            alg.append( "\n" + cOT( OT_NOC, 0 ) + "class " + Synthesizer.SUBTASK_INTERFACE_NAME + "_" + subNum
                         + " implements " + Synthesizer.SUBTASK_INTERFACE_NAME + " {\n" );
             alg.append( cOT( OT_INC, 1 ) + "public Object[] run(Object[] in) throws Exception {\n" );
 
@@ -123,7 +123,7 @@ public class CodeGenerator {
                         + cOT( OT_DEC, 1 ) + "} //End of subtask: " + subtask + "\n" );
 
             alg.append( cOT( OT_NOC, 0 ) + "Subtask_" + subNum + " subtask_" + subNum +
-                        " = new Subtask_" + subNum + "();\n" );
+                        " = new Subtask_" + subNum + "();\n\n" );
         }
 
         appendSubtaskRelToAlg( rel, start, alg, isNestedSubtask );
@@ -166,10 +166,10 @@ public class CodeGenerator {
             relString = relString.replaceFirst( RelType.TAG_SUBTASK, "subtask_" + ( startInd + i ) );
         }
         if(rel.getExceptions().size() == 0 || isNestedSubtask ) {
-            buf.append(cOT( OT_NOC, 0 ) + relString + ";\n" );
+            buf.append(cOT( OT_NOC, 0 ) + relString + "\n" );
         }
         else {
-            buf.append( appendExceptions( rel, relString ) );
+            buf.append( appendExceptions( rel, relString ) + "\n" );
         }
     }
 
@@ -218,12 +218,12 @@ public class CodeGenerator {
     		
     	}
     	
-    	return result;
+    	return result + "\n";
     }
 
     //getAliasSubtaskInput
     public static String getVarsFromAlias( Alias alias, String aliasTmp, String object, String parentVar, int num ) {
-        String aliasType = alias.getRealType() + "[]";
+        String aliasType = alias.getType();
         
         String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType
                      + ")" + parentVar + "[" + num + "];\n";
@@ -240,7 +240,7 @@ public class CodeGenerator {
     		if( var.isAlias() ) {
     			//recursion
     			String tmp = getAliasTmpName(var.getName());
-				out += getVarsFromAlias( (Alias)var, tmp, object, parentVar, i );
+				out += getVarsFromAlias( (Alias)var, tmp, object, aliasTmp, i );
 				
 			} else if ( token == TypeToken.TOKEN_OBJECT ) {
 				
@@ -257,7 +257,7 @@ public class CodeGenerator {
     
     private String getSubtaskOutputs( List<Var> vars, String offset ) {
     	
-    	String declarations = "";
+    	String declarations = "\n";
     	String varList = "";
     	String result = offset + "return new Object[]{ ";
     	
@@ -292,7 +292,7 @@ public class CodeGenerator {
     //getAliasSubtaskOutput
     public static String getVarsToAlias( Alias alias, String aliasTmp, String object ) {
     	
-        String aliasType = alias.getRealType() + "[]";
+        String aliasType = alias.getType();
         String before = "";
         String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
 

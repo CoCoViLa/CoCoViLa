@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.util;
 
-import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.vclass.*;
 
 public class TypeUtil {
@@ -34,21 +33,21 @@ public class TypeUtil {
     public static String getDeclaration( ClassField field ) {
 
     	String value = field.isConstant() ? field.getValue() : "";
-		return getDeclaration( field.getName(), field.getType(), field.isSpecField(), value );
+		return getDeclaration( field.getName(), field.getType(), field.isAlias(), field.isSpecField(), value );
 
     }
     
-    public static String getDeclaration( String varName, String type, boolean isClass, 
+    public static String getDeclaration( String varName, String type, boolean isAlias, boolean isClass, 
     									/*for constant*/String value ) {
     	if ( TypeUtil.TYPE_VOID.equals( type ) || TypeUtil.TYPE_ANY.equals( type ) 
-    			|| TypeUtil.TYPE_ALIAS.equals( type ) ) {
+    			|| isAlias ) {
     		return "";
     	} else if ( value != null && value.length() > 0 ) {
     		return "final public " + type + " " + varName + " = " + value + ";\n";
     	} else if ( TypeUtil.isPrimitive( type ) ) {
     		return "public " + type + " " + varName + ";\n";
     	} else if ( TypeUtil.isArray( type ) ) {
-    		return "public " + type + " " + varName + " ;\n";
+    		return "public " + type + " " + varName + ";\n";
     	} else if ( isClass ) {
     		return "public " + type + " " + varName + " = new " + type + "();\n";
     	} else {
