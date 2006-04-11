@@ -151,8 +151,8 @@ class Rel implements Serializable {
 
                 if (var.getField().getVars().size() > 0) {
 
-                    outputString = ((Alias)var.getField()).getRealType()
-                            + "[] " + alias_tmp + " ";
+                    outputString = ((Alias)var.getField()).getType()
+                            + " " + alias_tmp + " ";
                 }
 
             } else {
@@ -383,9 +383,10 @@ class Rel implements Serializable {
         } else if (type == RelType.TYPE_METHOD_WITH_SUBTASK) {
             if (!outputs.isEmpty()) {
             	String output = getOutput();
+            	String aout = checkAliasOutputs();
                 return (checkAliasInputs() /* + outputAliasDeclar() */
                         + ( output.length() > 0 ? output + " = " : "" )  + getObject(object) + method + getSubtaskParameters())
-                        + ";\n" + checkAliasOutputs();
+                        + ";\n" + aout;
             }
             return (checkAliasInputs() + getObject(object) + method + getSubtaskParameters());
         } else {
@@ -429,23 +430,6 @@ class Rel implements Serializable {
         }
     }
 
-    /**
-     * @return
-     */
-    private String outputAliasDeclar() {
-        String declar = "";
-        Var output = outputs.get(0);
-        if (output.getField().isAlias()) {
-            String alias_tmp = getAliasTmpName(output.getName());
-            declar = output.getField().getVars().get(0).getType() + "[] "
-                    + alias_tmp + " = new "
-                    + output.getField().getVars().get(0).getType() + "["
-                    + output.getField().getVars().size() + "];\n"
-                    + CodeGenerator.OT_TAB + CodeGenerator.OT_TAB;
-        }
-        return declar;
-    }
-
     private String checkAliasInputs() {
         Var input;
         String assigns = "";
@@ -458,11 +442,12 @@ class Rel implements Serializable {
             	String alias_tmp = getAliasTmpName( alias.getName() );
                 
                 if (alias.getVars().size() == 0) {
-                    assigns = alias.getRealType() + " " + alias_tmp + " = null";
+                    assigns = alias.getType() + " " + alias_tmp + " = null;\n";
+                    assigns += CodeGenerator.getOffset();
                 } else {
 
                     assigns += checkObjectArrayDimension( alias_tmp, 
-                    				alias.getRealType(), 
+                    				alias.getType(), 
                     				alias.getVars().size() );
                     String declarations = "";
                     String varList = "";
@@ -500,12 +485,12 @@ class Rel implements Serializable {
          * as follows: from double[][] tmp = new double[][2]; to double[][] tmp =
          * new double[2][];
          */
-        if (type.endsWith("[]")) {
+        if (type.endsWith("[][]")) {
             return type + "[] " + name + " = new "
-                    + type.substring(0, type.length() - 2) + "[" + size
+                    + type.substring(0, type.length() - 4) + "[" + size
                     + "][];\n";
         }
-        return type + "[] " + name + " = new " + type + "[" + size + "];\n";
+        return type + " " + name + " = new " + type.substring(0, type.length() - 2) + "[" + size + "];\n";
     }
 
     private String checkAliasOutputs() {
@@ -517,7 +502,7 @@ class Rel implements Serializable {
             String alias_tmp = getAliasTmpName( alias.getName() );
             
             if (alias.getVars().size() == 0) {
-                assigns = alias.getRealType() + " " + alias_tmp + " = null";
+                assigns = CodeGenerator.getOffset() + alias.getType() + " " + alias_tmp + " = null;\n";
             } else {
             	String obj = getObject(object);
                 for (int k = 0; k < alias.getVars().size(); k++) {
@@ -539,8 +524,8 @@ class Rel implements Serializable {
             		}
                     
                 }
-                assigns += CodeGenerator.getOffset();
             }
+            assigns += CodeGenerator.getOffset();
         }
 
         return assigns;

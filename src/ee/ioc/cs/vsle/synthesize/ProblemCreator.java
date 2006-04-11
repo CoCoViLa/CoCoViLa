@@ -52,7 +52,7 @@ public class ProblemCreator {
             var.setObj( caller );
             var.setField( cf );
             var.setName( cf.getName() );
-            var.setType( cf.getType() );
+            var.setType( cf.isAlias() ? TypeUtil.TYPE_ALIAS : cf.getType() );
             problem.addVar( var );
             if( cf.isConstant() ) {
             	problem.getKnownVars().add( var );
@@ -193,18 +193,9 @@ public class ProblemCreator {
     
     private static ClassField rewriteWildcardAlias( Alias cf, AnnotatedClass ac, ClassList classes ) throws AliasException {
         if ( cf.isWildcard() ) {
-            String wildcardVar = cf.getVars().get( 0 ).getName().substring( 2 );
-            cf.getVars().clear();
+            String wildcardVar = cf.getWildcardVar();
             
-            ClassField clf = ac.getFieldByName( wildcardVar );
-            
-            if ( clf != null && cf != clf ) {
-            	String type = clf.isAlias() ? ((Alias)clf).getRealType() : clf.getType();
-            	
-            	if( !cf.isStrictType() || cf.getRealType().equals( type ) ) {
-            		cf.addVar( clf );
-            	}
-            }
+            ClassField clf;
             
             for ( int i = 0; i < ac.getFields().size(); i++ ) {
                 clf = ac.getFields().get( i );
@@ -212,9 +203,8 @@ public class ProblemCreator {
                 if ( anc != null ) {
                 	ClassField field = anc.getFieldByName( wildcardVar );
                     if ( field != null ) {
-                    	String type = field.isAlias() ? ((Alias)field).getRealType() : field.getType();
                     	
-                    	if( !cf.isStrictType() || cf.getRealType().equals( type ) ) {
+                    	if( !cf.isStrictType() || cf.getVarType().equals( field.getType() ) ) {
                     		ClassField cf2 = field.clone();
                     		cf2.setName( clf.getName() + "." + wildcardVar );
                     		//TODO check for wildcards on deeper levels
@@ -259,19 +249,7 @@ public class ProblemCreator {
     	rel.setObj( obj );
     	rel.setType( classRelation.getType() );
     	
-    	ClassField clf = ac.getFieldByName( wildcardVar );
-        
-        if ( clf != null && clf != classRelation.getOutputs().get( 0 ) ) {
-        	String varName = obj + "." + wildcardVar;
-        	
-        	if ( problem.getAllVars().containsKey( varName ) ) {
-        		Var var = problem.getAllVars().get( varName );
-				var.addRel( rel );
-				rel.addInput( var );
-			} else {
-				throw new UnknownVariableException( varName );
-			}
-        }
+    	ClassField clf;
         
     	for ( int i = 0; i < ac.getFields().size(); i++ ) {
     		clf = ac.getFields().get( i );
