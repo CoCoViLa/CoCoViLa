@@ -198,7 +198,7 @@ public class CodeGenerator {
     		Var var = vars.get( i );
     		String object = Rel.getObject(var.getObject());
     		if ( var.getField().isAlias() ) {
-    			String aliasTmp = getAliasTmpName(var.getName());;
+    			String aliasTmp = getAliasTmpName(var.getName());
     			result += getVarsFromAlias( (Alias)var.getField(), aliasTmp, object, "in", i);
     			continue;
     		}
@@ -209,9 +209,9 @@ public class CodeGenerator {
     		result += offset;
     		
     		if ( token == TypeToken.TOKEN_OBJECT ) {
-    			result += object + var.toString() + " = (" + varType + ")in[" + i + "];\n";
+    			result += /*object + */var.toString() + " = (" + varType + ")in[" + i + "];\n";
     		} else {
-    			result += object + var.toString()
+    			result += /*object + */var.toString()
     			+ " = ((" + token.getObjType() + ")in[" + i + "])."
     			+ token.getMethod() + "();\n";
     		}

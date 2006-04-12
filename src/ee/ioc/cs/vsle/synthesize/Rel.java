@@ -516,9 +516,12 @@ class Rel implements Serializable {
             				assigns += CodeGenerator.getVarsFromAlias( (Alias)varFromAlias, 
             						CodeGenerator.getAliasTmpName( varFromAlias.getName() ),
             						obj, alias_tmp, k );
+            			} else {
+            				assigns += CodeGenerator.getOffset() + varFromAlias + " = (" + varType + ")" 
+            						+ alias_tmp + "[" + k + "];\n";
             			}
             		} else {
-            			assigns += CodeGenerator.getOffset() + obj
+            			assigns += CodeGenerator.getOffset() //+ obj
             					+ varFromAlias + " = ((" + token.getObjType() + ")" 
             					+ alias_tmp + "[" + k + "])." + token.getMethod() + "();\n";
             		}
