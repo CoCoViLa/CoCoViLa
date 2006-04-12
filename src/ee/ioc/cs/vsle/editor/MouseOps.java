@@ -116,8 +116,11 @@ class MouseOps
 	}
 
 	public void mouseClicked(MouseEvent e) {
-
 		int x, y;
+
+		// ignore mouse clicks while dragging
+        if (State.drag.equals(state))
+        	return;
 
 		x = e.getX();
 		y = e.getY();
@@ -310,7 +313,8 @@ class MouseOps
 							obj.setSelected(true);
 						}
 					}
-					setState(State.drag);
+                    if (SwingUtilities.isLeftMouseButton(e))
+                        setState(State.drag);
 					canvas.drawingArea.repaint();
 				} else {
 					cornerClicked = canvas.objects.controlRectContains(canvas.mouseX, canvas.mouseY);
@@ -561,6 +565,8 @@ class MouseOps
 			state = State.selection;
 		}
 		if (state.equals(State.drag)) {
+            if (!SwingUtilities.isLeftMouseButton(e))
+                return;
 			state = State.selection;
 		}
 		if (state.equals(State.resize)) {
