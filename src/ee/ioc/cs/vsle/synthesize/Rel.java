@@ -486,7 +486,7 @@ class Rel implements Serializable {
          * new double[2][];
          */
         if (type.endsWith("[][]")) {
-            return type + "[] " + name + " = new "
+            return type + " " + name + " = new "
                     + type.substring(0, type.length() - 4) + "[" + size
                     + "][];\n";
         }
