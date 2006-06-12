@@ -212,7 +212,8 @@ public class ProblemCreator {
                     			for (int j = 0; j < cf2.getVars().size(); j++) {
                     				ClassField cfFrom2 = cf2.getVars().get(j);
                     				cfFrom2 = cfFrom2.clone();
-                    				cfFrom2.setName( clf.getName() + "." + cfFrom2.getName() );
+                    				cfFrom2.setName( //clf.getName() + "." + 
+                    									cfFrom2.getName() );
                     				cf2.getVars().set(j, cfFrom2);
                     			}
                     		}

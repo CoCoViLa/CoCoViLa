@@ -507,7 +507,8 @@ public class SpecParser {
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {
                         EquationSolver.solve( lt.getSpecLine() );
                         next: 
-                        for ( String result : EquationSolver.relations ) {
+                        for ( String result : EquationSolver.getRelations() ) {
+                        	db.p( result );
                             String[] pieces = result.split( ":" );
 
                             //cannot assign new values for constants

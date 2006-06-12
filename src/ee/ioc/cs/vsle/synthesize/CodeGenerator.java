@@ -11,7 +11,7 @@ public class CodeGenerator {
 
     private static String offset = "";
 
-    public static final String OT_TAB = "\t";
+    public static final String OT_TAB = "    ";
 
     private final static int OT_NOC = 0;
     private final static int OT_INC = 1;
@@ -209,13 +209,15 @@ public class CodeGenerator {
     		result += offset;
     		
     		if ( token == TypeToken.TOKEN_OBJECT ) {
-    			result += /*object + */var.toString() + " = (" + varType + ")in[" + i + "];\n";
+    			result += //object + 
+    			var.toString() + " = (" + varType + ")in[" + i + "];\n";
     		} else {
-    			result += /*object + */var.toString()
+    			result += //object + 
+    			var.toString()
     			+ " = ((" + token.getObjType() + ")in[" + i + "])."
     			+ token.getMethod() + "();\n";
     		}
-    		
+    		System.err.println( "si: " + object + "|" + var.toString() );
     	}
     	
     	return result + "\n";
@@ -244,13 +246,18 @@ public class CodeGenerator {
 				
 			} else if ( token == TypeToken.TOKEN_OBJECT ) {
 				
-    			out += offset + object
+    			out += offset //+ object
     					+ var + " = (" + varType + ")" + aliasTmp + "[" + i + "];\n";
     		} else {
-    			out += offset + object
+    			out += offset //+ object
     					+ var + " = ((" + token.getObjType() + ")" 
     					+ aliasTmp + "[" + i + "])." + token.getMethod() + "();\n";
     		}
+    		if( var.toString().equals("Source_6.Source_4.state_c"))
+    		{
+    			System.err.println( "fa: " );
+    		}
+    		System.err.println( "fa: " + object + "|" + var );
         }
         return out;
     }
@@ -277,7 +284,7 @@ public class CodeGenerator {
     		} else {
     			varName = var.toString();
     		}
-    		
+    		System.err.println( "so: " + "|" + varName );
     		if( i == 0 ) {
     			varList += varName;
     		} else {
@@ -304,9 +311,10 @@ public class CodeGenerator {
         		varName = getAliasTmpName(alias.getName());
         		before += getVarsToAlias( (Alias)field, varName, object );
         	} else {
-        		varName = object + field.getName();
+        		varName = //object + 
+        			field.getName();
         	}
-        	
+        	System.err.println( "ta: " + object + "|" + field.getName() );
             if ( j == 0 ) {
                 out += varName;
             } else {

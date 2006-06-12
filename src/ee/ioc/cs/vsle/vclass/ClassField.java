@@ -58,7 +58,7 @@ public class ClassField implements Cloneable, Serializable {
 		if( name == null ) {
 			throw new IllegalArgumentException( "Name cannot be null!" );
 		}
-		this.name = name;
+		setName( name );
 	} // ee.ioc.cs.editor.vclass.ClassField
 
 	/**
@@ -70,19 +70,19 @@ public class ClassField implements Cloneable, Serializable {
 	 *            String - type of the class.
 	 */
 	public ClassField(String name, String type) {
-		this.name = name;
+		setName( name );
 		this.type = type;
 	}
 
 	public ClassField(String name, String type, String value) {
 		this.value = value;
-		this.name = name;
+		setName( name );
 		this.type = type;
 	}
 
 	public ClassField(String name, String type, String value, boolean isConstant) {
 		this.value = value;
-		this.name = name;
+		setName( name );
 		this.type = type;
 		this.isConstant = isConstant;
 	}
@@ -98,13 +98,13 @@ public class ClassField implements Cloneable, Serializable {
 	 *            boolean
 	 */
 	public ClassField(String name, String type, boolean b) {
-		this.name = name;
+		setName( name );
 		this.type = type;
 		specField = b;
 	} // ee.ioc.cs.editor.vclass.ClassField
 
 	public ClassField(String name, String type, String value, String desc) {
-		this.name = name;
+		setName( name );
 		this.type = type;
 		this.value = value;
 		description = desc;
@@ -190,7 +190,7 @@ public class ClassField implements Cloneable, Serializable {
 	 * @return String - name of the class.
 	 */
 	public String toString() {
-		return name;
+		return getName();
 	} // toString
 
 	/**
@@ -207,7 +207,7 @@ public class ClassField implements Cloneable, Serializable {
 	}
 
 	public String toXML() {
-		String xml = "<field name=\"" + name + "\" type=\"" + type + "\"";
+		String xml = "<field name=\"" + getName() + "\" type=\"" + type + "\"";
 		if (value != null)
 			xml += " value=\"" + value + "\"";
 		xml += "/>\n";
@@ -249,7 +249,7 @@ public class ClassField implements Cloneable, Serializable {
 	public ArrayList<ClassField> getVars() {
 		//alias
 		if( !isAlias() ) {
-			throw new IllegalStateException( "ClassField " + name + " is not alias, but " + type );
+			throw new IllegalStateException( "ClassField " + getName() + " is not alias, but " + type );
 		}
 		return vars;
 	}
@@ -257,7 +257,7 @@ public class ClassField implements Cloneable, Serializable {
 	public ArrayList<Var> getParentVars() {
 		//alias
 		if( !isAlias() ) {
-			throw new IllegalStateException( "ClassField " + name + " is not alias, but " + type );
+			throw new IllegalStateException( "ClassField " + getName() + " is not alias, but " + type );
 		}
 		ArrayList<Var> list = new ArrayList<Var>();
 		for (ClassField var : vars) {
@@ -293,6 +293,10 @@ public class ClassField implements Cloneable, Serializable {
 	}
 
 	public void setName(String name) {
+		if( name.equals("Source_6.Source_4.state_c"))
+		{
+			System.err.println( "fa: " );
+		}
 		this.name = name;
 	}
 
@@ -300,14 +304,14 @@ public class ClassField implements Cloneable, Serializable {
 	public boolean equals(Object obj) {
 		if( obj != null && obj instanceof ClassField ) {
 			ClassField cf = (ClassField)obj;
-			return name.equals( cf.name ) && type.equals( cf.type );
+			return getName().equals( cf.getName() ) && type.equals( cf.type );
 		}
 		return false;
 	}
 
 	@Override
 	public int hashCode() {
-		return ( name + type ).hashCode();
+		return ( getName() + type ).hashCode();
 	}
 
 	public boolean isAny() {
