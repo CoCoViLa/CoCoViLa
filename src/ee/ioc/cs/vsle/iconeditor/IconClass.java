@@ -3,27 +3,29 @@ package ee.ioc.cs.vsle.iconeditor;
 import java.util.ArrayList;
 
 import ee.ioc.cs.vsle.graphics.BoundingBox;
+import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.ShapeGroup;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 /*
  * Info about class (shapes, ports, descriptions, properties)
  */
 public class IconClass {
 	ShapeGroup shapeList;
-	ArrayList ports;
-	ArrayList fields;
+	ArrayList<IconPort> ports;
+	ArrayList<ClassField> fields;
 	String name;
 	String description;
 	String iconName;
-	Boolean isRelation;
+	boolean isRelation;
 	BoundingBox boundingbox;
 	int maxWidth = 0, maxHeight = 0;
 	
 	
 	IconClass(){
-		this.shapeList = new ShapeGroup(new ArrayList());
-		this.ports = new ArrayList();
-		this.fields = new ArrayList();
+		this.shapeList = new ShapeGroup(new ArrayList<Shape>());
+		this.ports = new ArrayList<IconPort>();
+		this.fields = new ArrayList<ClassField>();
 		this.name = null;
 		this.description = null;
 		this.iconName = null;
@@ -62,14 +64,14 @@ public class IconClass {
 	/**
 	 * @return Returns the isRelation.
 	 */
-	public Boolean getIsRelation() {
+	public boolean getIsRelation() {
 		return isRelation;
 	}
 
 	/**
 	 * @param isRelation The isRelation to set.
 	 */
-	public void setIsRelation(Boolean isRelation) {
+	public void setIsRelation(boolean isRelation) {
 		this.isRelation = isRelation;
 	}
 
@@ -90,14 +92,14 @@ public class IconClass {
 	/**
 	 * @return Returns the ports.
 	 */
-	public ArrayList getPorts() {
+	public ArrayList<IconPort> getPorts() {
 		return ports;
 	}
 
 	/**
 	 * @param ports The ports to set.
 	 */
-	public void setPorts(ArrayList ports) {
+	public void setPorts(ArrayList<IconPort> ports) {
 		this.ports = ports;
 	}
 
@@ -170,21 +172,21 @@ public class IconClass {
 	
 	public void shiftPorts(int offsetX, int offsetY) {
 		for (int i = 0; i < ports.size(); i++){
-			((IconPort)ports.get(i)).shift(offsetX, offsetY);
+			ports.get(i).shift(offsetX, offsetY);
 		}
 	}
 
 	/**
 	 * @return Returns the fields.
 	 */
-	public ArrayList getFields() {
+	public ArrayList<ClassField> getFields() {
 		return fields;
 	}
 
 	/**
 	 * @param fields The fields to set.
 	 */
-	public void setFields(ArrayList fields) {
+	public void setFields(ArrayList<ClassField> fields) {
 		this.fields = fields;
 	}
 }
