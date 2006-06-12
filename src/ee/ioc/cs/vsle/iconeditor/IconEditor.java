@@ -12,7 +12,6 @@ import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.util.queryutil.DBResult;
 import ee.ioc.cs.vsle.vclass.*;
 
 public class IconEditor
@@ -36,13 +35,13 @@ public class IconEditor
 	IconPalette palette;
 	Scheme scheme;
 	Dimension drawAreaSize = new Dimension(700, 500);
-	ShapeGroup shapeList = new ShapeGroup(new ArrayList());
-	ArrayList <IconClass> icons = new ArrayList<IconClass>();
-	ArrayList  <ClassField>fields = new ArrayList<ClassField>();
+	ShapeGroup shapeList = new ShapeGroup(new ArrayList<Shape>());
+	ArrayList<IconClass> icons = new ArrayList<IconClass>();
+	ArrayList<ClassField>fields = new ArrayList<ClassField>();
 	Shape currentShape;
-	ArrayList ports = new ArrayList();
+	ArrayList<IconPort> ports = new ArrayList<IconPort>();
 	IconKeyOps keyListener;
-	ArrayList <String> packageClasses = new ArrayList <String>();
+	ArrayList<String> packageClasses = new ArrayList<String>();
 	boolean newClass = true;
 	
 	ChooseClassDialog ccd = new ChooseClassDialog(packageClasses);
@@ -128,11 +127,11 @@ public class IconEditor
 		moveX = moveX * RuntimeProperties.nudgeStep;
 		moveY = moveY * RuntimeProperties.nudgeStep;
 		for (int i = 0; i < shapeList.getSelected().size(); i++) {
-			Shape s = (Shape) shapeList.getSelected().get(i);
+			Shape s = shapeList.getSelected().get(i);
 			s.setPosition(moveX, moveY);
 		}
 		for (int i = 0; i < ports.size(); i++) {
-			IconPort p = (IconPort) ports.get(i);
+			IconPort p = ports.get(i);
 			if (p.isSelected()) {
 				p.setPosition(moveX, moveY);
 			}
@@ -302,7 +301,7 @@ public class IconEditor
 
 	public void fixShape() {
 		for (int i = 0; i < shapeList.size(); i++) {
-			Shape shape = (Shape) shapeList.get(i);
+			Shape shape = shapeList.get(i);
 			if (shape.isSelected()) {
 				shape.setFixed(!shape.isFixed());
 			}
@@ -410,7 +409,7 @@ public class IconEditor
 		buf.append("<graphics>\n");
 		if (boundingbox != null) buf.append(boundingbox.toFile(0, 0));
 		for (int i = 0; i < shapeList.size(); i++) {
-			Shape shape = (Shape) shapeList.get(i);
+			Shape shape = shapeList.get(i);
 			if (!(shape instanceof BoundingBox)) {
 				String shapeXML = null;
 				shapeXML = shape.toFile(boundingbox.x, boundingbox.y);
@@ -426,7 +425,7 @@ public class IconEditor
 		if (ports != null && ports.size() > 0) {
 			buf.append("	<ports>\n");
 			for (int i = 0; i < ports.size(); i++) {
-				IconPort p = (IconPort) ports.get(i);
+				IconPort p = ports.get(i);
 
 				buf.append("		<port name=\"");
 				buf.append(p.getName());
@@ -489,13 +488,13 @@ public class IconEditor
 
 	public void selectShapesInsideBox(int x1, int y1, int x2, int y2) {
 		for (int i = 0; i < shapeList.size(); i++) {
-			Shape shape = (Shape) shapeList.get(i);
+			Shape shape = shapeList.get(i);
 			if (shape.isInsideRect(x1, y1, x2, y2)) {
 				shape.setSelected(true);
 			}
 		}
 		for (int i = 0; i < ports.size(); i++) {
-			IconPort port = (IconPort) ports.get(i);
+			IconPort port = ports.get(i);
 			if (port.isInsideRect(x1, y1, x2, y2)) {
 				port.setSelected(true);
 			}
@@ -504,7 +503,7 @@ public class IconEditor
 
 	public Shape checkInside(int x, int y) {
 		for (int i = shapeList.size() - 1; i >= 0; i--) {
-			Shape shape = (Shape) shapeList.get(i);
+			Shape shape = shapeList.get(i);
 			if (shape.contains(x, y)) {
 				return shape;
 			}
@@ -554,7 +553,7 @@ public class IconEditor
 			}
 
 			for (int i = 0; i < shapeList.size(); i++) {
-				Shape shape = (Shape) shapeList.get(i);
+				Shape shape = shapeList.get(i);
 				//2 esimest parameetrit 0,0.0 on offset ehk palju me teda nihutame (oli vajalik kui shape on objekti graafika osa sest
 				//siis peame arvestama ka objekti asukohta, antud juhul pole oluline, aga ma ei viitsi meetodeid �mber
 				//kirjutada, tulevikus voib seda teha. Kolmas parameeter ehk 1 on suurenduskordaja
@@ -567,7 +566,7 @@ public class IconEditor
 			
 			IconPort port;
 			for (int i = 0; i < ports.size(); i++) {
-				port = (IconPort) ports.get(i);
+				port = ports.get(i);
 				if (g2 != null) {
 					port.draw(0, 0, 1, g2);
 				}
@@ -693,8 +692,8 @@ public class IconEditor
 	 */
 	public void clearObjects() {
 		mListener.state = State.selection;
-		shapeList = new ShapeGroup(new ArrayList());
-		ports = new ArrayList();
+		shapeList = new ShapeGroup(new ArrayList<Shape>());
+		ports = new ArrayList<IconPort>();
 		palette.boundingbox.setEnabled(true);
 		boundingbox = null;
 		repaint();
@@ -869,8 +868,8 @@ public class IconEditor
 			try {
 				mListener.state = State.selection;
 				shapeCount = 0;
-				shapeList = new ShapeGroup(new ArrayList());
-				ports = new ArrayList();
+				shapeList = new ShapeGroup(new ArrayList<Shape>());
+				ports = new ArrayList<IconPort>();
 				palette.boundingbox.setEnabled(true);
 				loadGraphicsFromFile(file);
 			} catch (Exception exc) {
@@ -901,24 +900,24 @@ public class IconEditor
 		currentShape = null;
 
 		// Remove all selected shapes.
-		ArrayList removable = new ArrayList();
+		ArrayList<Shape> removableShapes = new ArrayList<Shape>();
 		for (int i = 0; i < shapeList.size(); i++) {
-			Shape shape = (Shape) shapeList.get(i);
+			Shape shape = shapeList.get(i);
 			if (shape.isSelected()) {
-				removable.add(shape);
+				removableShapes.add(shape);
 			}
 		}
-		shapeList.removeAll(removable);
+		shapeList.removeAll(removableShapes);
 
 		// Remove all selected ports.
-		removable = new ArrayList();
+		ArrayList<IconPort> removablePorts = new ArrayList<IconPort>();
 		for (int i = 0; i < ports.size(); i++) {
-			IconPort port = (IconPort) ports.get(i);
+			IconPort port = ports.get(i);
 			if (port.isSelected()) {
-				removable.add(port);
+				removablePorts.add(port);
 			}
 		}
-		ports.removeAll(removable);
+		ports.removeAll(removablePorts);
 
 		// Refresh the drawing canvas.
 		repaint();
@@ -928,12 +927,12 @@ public class IconEditor
 	 * Method for grouping objects.
 	 */
 	public void groupObjects() {
-		ArrayList selected = shapeList.getSelected();
+		ArrayList<Shape> selected = shapeList.getSelected();
 
 		Shape shape;
 
 		for (int i = 0; i < selected.size(); i++) {
-			shape = (Shape) selected.get(i);
+			shape = selected.get(i);
 			shape.setSelected(false);
 		}
 		ShapeGroup sg = new ShapeGroup(selected);
@@ -948,7 +947,7 @@ public class IconEditor
 	public void ungroupObjects() {
 		Shape shape;
 		for (int i = 0; i < shapeList.getSelected().size(); i++) {
-			shape = (Shape) shapeList.getSelected().get(i);
+			shape = shapeList.getSelected().get(i);
 			if (shape.getName() != null && shape.getName().startsWith("GROUP")) {
 				shapeList.addAll(((ShapeGroup) shape).shapes);
 				shapeList.remove(shape);
@@ -1047,7 +1046,7 @@ public class IconEditor
 	 * Saves any input string into a file.
 	 */
 	public void saveToPackage() {
-		Boolean inPackage = false;
+		boolean inPackage = false;
 		String className = RuntimeProperties.className;
 		if (RuntimeProperties.classIcon == null) {
 			RuntimeProperties.classIcon = "default.gif";
@@ -1173,21 +1172,20 @@ public class IconEditor
 						out.close();
 						
 						if (overWriteFile == JOptionPane.YES_OPTION) {
-							FileFuncs ff = new FileFuncs();
 							String fileText = "class " + className + " {";
 							fileText += "\n    /*@ specification " + className + " {\n";
 
 							for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
 								String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], i);
 								String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], i);
-								String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], i);
+								//String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], i);
 								
 								if (fieldType != null) {
 									fileText += "    "+fieldType+" "+fieldName+";\n";
 								}
 							}
 							fileText += "    }@*/\n \n}";
-							ff.writeFile(file.getParent() +System.getProperty("file.separator")+className + ".java", fileText);
+							FileFuncs.writeFile(file.getParent() +System.getProperty("file.separator")+className + ".java", fileText);
 						}
 						
 						JOptionPane.showMessageDialog(null, "Saved to package: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
@@ -1213,7 +1211,7 @@ public class IconEditor
 	public void selectAllObjects(boolean b) {
 		if (shapeList != null && shapeList.size() > 0) {
 			for (int i = 0; i < shapeList.size(); i++) {
-				Shape shape = (Shape) shapeList.get(i);
+				Shape shape = shapeList.get(i);
 				shape.setSelected(b);
 			}
 			repaint();
@@ -1227,7 +1225,7 @@ public class IconEditor
 	public void selectAllPorts(boolean b) {
 		if (ports != null && ports.size() > 0) {
 			for (int i = 0; i < ports.size(); i++) {
-				IconPort port = (IconPort) ports.get(i);
+				IconPort port = ports.get(i);
 				port.setSelected(b);
 			}
 			repaint();
@@ -1238,11 +1236,11 @@ public class IconEditor
 	 * Clones the currently selected object.
 	 */
 	public void cloneObject() {
-		ShapeGroup sl = new ShapeGroup(new ArrayList());
+		ShapeGroup sl = new ShapeGroup(new ArrayList<Shape>());
 
 		for (int i = 0; i < shapeList.size(); i++) {
 
-			Shape shape = (Shape) shapeList.get(i);
+			Shape shape = shapeList.get(i);
 			boolean isFixed = shape.isFixed();
 			sl.add(shape);
 
@@ -1301,7 +1299,7 @@ public class IconEditor
 	public Shape getSelectedShape() {
 		if (shapeList != null && shapeList.size() > 0) {
 			for (int i = 0; i < shapeList.size(); i++) {
-				Shape s = (Shape) shapeList.get(i);
+				Shape s = shapeList.get(i);
 				if (s.isSelected()) return s;
 			}
 		}
@@ -1385,13 +1383,13 @@ public class IconEditor
 		StringBuffer sb = new StringBuffer();
 
 		for (int i = 0; i < shapeList.size(); i++) {
-			Shape shape = (Shape) shapeList.get(i);
+			Shape shape = shapeList.get(i);
 			sb.append(shape.toText());
 			sb.append("\n");
 		} // end for.
 
 		for (int i = 0; i < ports.size(); i++) {
-			IconPort port = (IconPort) ports.get(i);
+			IconPort port = ports.get(i);
 			sb.append(port.toText());
 			sb.append("\n");
 		} // end for.
@@ -1473,9 +1471,9 @@ public class IconEditor
 				str = str.substring(str.indexOf(":") + 1);
 				int y = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
-				int width = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				//int width = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
-				int height = Integer.parseInt(str.substring(0, str.indexOf(":")));
+				//int height = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
 				int colorInt = Integer.parseInt(str.substring(0, str.indexOf(":")));
 				str = str.substring(str.indexOf(":") + 1);
@@ -1654,11 +1652,11 @@ public class IconEditor
 
 	public void zoom(double newZ, double oldZ) {
 		for (int i = 0; i < shapeList.size(); i++) {
-			Shape s = (Shape) shapeList.get(i);
+			Shape s = shapeList.get(i);
 			s.setMultSize((float) newZ, (float) oldZ);
 		}
 		for (int i = 0; i < ports.size(); i++) {
-			IconPort p = (IconPort) ports.get(i);
+			IconPort p = ports.get(i);
 			p.setMultSize((float) newZ, (float) oldZ);
 		}
 	} // zoom
@@ -1676,7 +1674,7 @@ public class IconEditor
 			try {
 				mListener.state = State.selection;
 				shapeCount = 0;
-				shapeList = new ShapeGroup(new ArrayList());
+				shapeList = new ShapeGroup(new ArrayList<Shape>());
 				
 				for (int i = RuntimeProperties.dbrClassFields.getRowCount(); i > 0; i--){
 					RuntimeProperties.dbrClassFields.removeRow(i);	
