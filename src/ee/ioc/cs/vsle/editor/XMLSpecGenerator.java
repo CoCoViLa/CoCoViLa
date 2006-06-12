@@ -23,12 +23,12 @@ public class XMLSpecGenerator implements ISpecGenerator {
         s.append("<package name=\"" + pack.getPackageClassName() + "\">\n");
 
         for (int i = 0; i < objects.size(); i++) {
-            obj = (GObj) objects.get(i);
+            obj = objects.get(i);
             s.append("<object type=\"" + obj.getClassName() + "\" name=\""
                     + obj.getName() + "\">\n");
             s.append("  <fields>\n");
             for (int j = 0; j < obj.fields.size(); j++) {
-                field = (ClassField) obj.fields.get(j);
+                field = obj.fields.get(j);
                 if (field.getValue() != null) {
                     s.append("    <field name=\""+ field.getName()
                             + "\" value =\""+ field.getValue() + "\">\n");
