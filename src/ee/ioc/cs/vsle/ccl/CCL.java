@@ -30,6 +30,8 @@ import ee.ioc.cs.vsle.util.db;
  */
 public class CCL extends URLClassLoader {
 
+	CompileEventListener m_listener = new CompileEventListener();
+	
 	public CCL() {
 		super(createClasspath());
 	}
@@ -90,6 +92,23 @@ public class CCL extends URLClassLoader {
 		return classpath;
 	}
 	
+	private void _onCompileEvent( String javaFile ) {
+		
+		try {
+			
+			compile2( javaFile );
+			
+		} catch (IOException e) {
+			
+			e.printStackTrace();
+			
+		} catch (CompileException e) {
+			
+			e.printStackTrace();
+			
+		}
+		
+	}
 	
 	/**
 	 * Another implementation which uses internal compiler.
@@ -131,96 +150,107 @@ public class CCL extends URLClassLoader {
 		
 		return status == 0;
 	}
-	/**
-	 * Spawns a process to compile the java source code file specified in the
-	 * 'javaFile' parameter. Return a true if the compilation worked, false
-	 * otherwise.
-	 * 
-	 * @param javaFile
-	 *            String - name of the Java file to be compiled.
-	 * @return boolean - indicates whether the compilation succeeded or not.
-	 * @throws java.io.IOException -
-	 *             Input/Output exception at reading the file.
-	 * @throws ee.ioc.cs.vsle.ccl.CompileException -
-	 *             Exception at compilation.
-	 */
-	public boolean compile(String javaFile) throws IOException,
-			CompileException {
-		javaFile = RuntimeProperties.genFileDir
-				+ System.getProperty("file.separator") + javaFile + ".java";
-		db.p("ee.ioc.cs.editor.ccl.CCL: Compiling " + javaFile + "...");
+	
+	private class CompileEventListener implements CompileEvent.Listener {
 
-		File file = new File(javaFile);
-
-		// Check if the file exists.
-		if (!file.exists()) {
-			throw new CompileException("File " + javaFile + " does not exist.");
-		}
-		
-		String execCMD = "javac -classpath "
-			+ RuntimeProperties.genFileDir
-			+ prepareClasspathOS( RuntimeProperties.compilationClasspath )
-			+ " " + javaFile;
-		
-		Process p = null;
-		
-		try {
-			p = Runtime.getRuntime().exec(execCMD);
-		} catch (IOException ex) {
-			JOptionPane.showMessageDialog(null, ex.getMessage(),
-					"Compilation error", JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
-
-		db.p(execCMD);
-
-		int ret = 1;
-
-		try {
-			// Wait for it to finish running.
-			p.waitFor();
-			ret = p.exitValue();
-
-			// check if an error has occured, in this case throw an exception
-			if (ret != 0) {
-
-				InputStream inpStream = p.getErrorStream();
-				InputStreamReader inpReader = new InputStreamReader(inpStream);
-				BufferedReader err = new BufferedReader(inpReader);
-
-				String errBuff = new String();
-				String line;
-
-				while ((line = err.readLine()) != null) {
-					errBuff += line + "\n";
-				}
-
-				throw new CompileException(errBuff);
-
-			}
-			db.p("Compilation successful!");
+		public void onCompileEvent(CompileEvent event) {
 			
-		} catch (InterruptedException ie) {
-			db.p(ie);
+			_onCompileEvent( event.getFileName() );
+				
 		}
+		
+	}
+	
+//	/**
+//	 * Spawns a process to compile the java source code file specified in the
+//	 * 'javaFile' parameter. Return a true if the compilation worked, false
+//	 * otherwise.
+//	 * 
+//	 * @param javaFile
+//	 *            String - name of the Java file to be compiled.
+//	 * @return boolean - indicates whether the compilation succeeded or not.
+//	 * @throws java.io.IOException -
+//	 *             Input/Output exception at reading the file.
+//	 * @throws ee.ioc.cs.vsle.ccl.CompileException -
+//	 *             Exception at compilation.
+//	 */
+//	public boolean compile(String javaFile) throws IOException,
+//			CompileException {
+//		javaFile = RuntimeProperties.genFileDir
+//				+ System.getProperty("file.separator") + javaFile + ".java";
+//		db.p("ee.ioc.cs.editor.ccl.CCL: Compiling " + javaFile + "...");
+//
+//		File file = new File(javaFile);
+//
+//		// Check if the file exists.
+//		if (!file.exists()) {
+//			throw new CompileException("File " + javaFile + " does not exist.");
+//		}
+//		
+//		String execCMD = "javac -classpath "
+//			+ RuntimeProperties.genFileDir
+//			+ prepareClasspathOS( RuntimeProperties.compilationClasspath )
+//			+ " " + javaFile;
+//		
+//		Process p = null;
+//		
+//		try {
+//			p = Runtime.getRuntime().exec(execCMD);
+//		} catch (IOException ex) {
+//			JOptionPane.showMessageDialog(null, ex.getMessage(),
+//					"Compilation error", JOptionPane.ERROR_MESSAGE);
+//			return false;
+//		}
+//
+//		db.p(execCMD);
+//
+//		int ret = 1;
+//
+//		try {
+//			// Wait for it to finish running.
+//			p.waitFor();
+//			ret = p.exitValue();
+//
+//			// check if an error has occured, in this case throw an exception
+//			if (ret != 0) {
+//
+//				InputStream inpStream = p.getErrorStream();
+//				InputStreamReader inpReader = new InputStreamReader(inpStream);
+//				BufferedReader err = new BufferedReader(inpReader);
+//
+//				String errBuff = new String();
+//				String line;
+//
+//				while ((line = err.readLine()) != null) {
+//					errBuff += line + "\n";
+//				}
+//
+//				throw new CompileException(errBuff);
+//
+//			}
+//			db.p("Compilation successful!");
+//			
+//		} catch (InterruptedException ie) {
+//			db.p(ie);
+//		}
+//
+//		// Tell whether the compilation worked.
+//		return ret == 0;
+//	} // compile
 
-		// Tell whether the compilation worked.
-		return ret == 0;
-	} // compile
-
-	/**
-	 * Perform an automatic compilation of sources as necessary when looking for
-	 * class files. If the source modification is dated/timed later than the
-	 * class files, then a recompilation will be performed. Otherwise the file
-	 * is skipped.
-	 * 
-	 * @param name
-	 *            String - name of the file.
-	 * @param resolve
-	 *            boolean
-	 * @throws java.lang.ClassNotFoundException
-	 * @return Class - a compiled class.
-	 */
+//	/**
+//	 * Perform an automatic compilation of sources as necessary when looking for
+//	 * class files. If the source modification is dated/timed later than the
+//	 * class files, then a recompilation will be performed. Otherwise the file
+//	 * is skipped.
+//	 * 
+//	 * @param name
+//	 *            String - name of the file.
+//	 * @param resolve
+//	 *            boolean
+//	 * @throws java.lang.ClassNotFoundException
+//	 * @return Class - a compiled class.
+//	 */
 //	public Class loadClass(String name, boolean resolve)
 //			throws ClassNotFoundException {
 //
@@ -290,16 +320,16 @@ public class CCL extends URLClassLoader {
 //		return c;
 //	} // loadClass
 	
-	/**
-	 * Given a file name, reads the entirety of that file from disk and return
-	 * it as a byte array.
-	 * 
-	 * @param filename
-	 *            String - name of the file to be read.
-	 * @return byte[] - byte stream of the file read.
-	 * @throws java.io.IOException -
-	 *             Input/Output Exception thrown at reading the file.
-	 */
+//	/**
+//	 * Given a file name, reads the entirety of that file from disk and return
+//	 * it as a byte array.
+//	 * 
+//	 * @param filename
+//	 *            String - name of the file to be read.
+//	 * @return byte[] - byte stream of the file read.
+//	 * @throws java.io.IOException -
+//	 *             Input/Output Exception thrown at reading the file.
+//	 */
 //	private byte[] getBytes(String filename) throws IOException {
 //
 //		File file = new File(filename);
@@ -326,5 +356,4 @@ public class CCL extends URLClassLoader {
 //
 //		return raw;
 //	} // getBytes
-	
 }
