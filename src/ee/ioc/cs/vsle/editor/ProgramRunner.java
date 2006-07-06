@@ -216,7 +216,7 @@ public class ProgramRunner {
 		try {
 			System.err.println( "Propagate" );
 			
-			if( genObject == null ) return;
+			if( genObject == null || isWorking ) return;
 			
 			Class clasType;
 			Class clas = genObject.getClass();
@@ -298,76 +298,97 @@ public class ProgramRunner {
 		}
 	}
 
-	private String run() {
-		
-		if( genObject == null ) return null;
-		
-		StringBuffer result = new StringBuffer();
-		
-		try {
-			Class clas = genObject.getClass();
-			Method method = clas.getMethod("compute", Object[].class);
-			db.p( "Running... ( NB! The process is blocking the EventQueue until the next message --> )" );
-			isWorking = true;
-			Object[] args = getArguments();
-			for (int i = 0; i < args.length; i++) {
-				db.p( args[i].getClass() + " " + args[i] );
-			}
-			method.invoke(genObject, new Object[]{ args } );
-			
-			isWorking = false;
-			db.p( "--> Finished!!! EventQueue is free." );
-			
-			Field f;
-			StringTokenizer st;
-			Object lastObj;
+	private void run( final boolean sendFeedback, final long id, final boolean doPropagate ) {
 
-			ArrayList<String> watchFields = watchableFields();
-			
-			for (int i = 0; i < watchFields.size(); i++) {
-				lastObj = genObject;
-				clas = genObject.getClass();
-				st = new StringTokenizer( watchFields.get(i), ".");
-				while (st.hasMoreElements()) {
-					String s = st.nextToken();
+		if( genObject == null ) return;
 
-					f = clas.getDeclaredField(s);
-					if (st.hasMoreElements()) {
-						clas = f.getType();
-						lastObj = f.get(lastObj);
-					} else {
-						Class c = f.getType();
+		new Thread() {
+			public void run()
+			{
+				Thread.currentThread().setName( "RunningThread" );
+				
+				StringBuffer result = new StringBuffer();
 
-						if (c.toString().equals("int")) {
-							result.append(watchFields.get(i)
-									+ ": " + f.getInt(lastObj) + "\n");
-						} else if (c.toString().equals("double")) {
-							result.append(watchFields.get(i)
-									+ ": " + f.getDouble(lastObj) + "\n");
-						} else if (c.toString().equals("boolean")) {
-							result.append(watchFields.get(i)
-									+ ": " + f.getBoolean(lastObj) + "\n");
-						} else if (c.toString().equals("char")) {
-							result.append(watchFields.get(i)
-									+ ": " + f.getChar(lastObj) + "\n");
-						} else if (c.toString().equals("float")) {
-							result.append(watchFields.get(i)
-									+ ": " + f.getFloat(lastObj) + "\n");
-						} else {
-							result.append(watchFields.get(i)
-									+ ": " + f.get(lastObj) + "\n");
+				try {
+					Class clas = genObject.getClass();
+					Method method = clas.getMethod("compute", Object[].class);
+					db.p( "Running... ( NB! The process is blocking the EventQueue until the next message --> )" );
+					
+					setWorking( true );
+					
+					Object[] args = getArguments();
+					for (int i = 0; i < args.length; i++) {
+						db.p( args[i].getClass() + " " + args[i] );
+					}
+					method.invoke(genObject, new Object[]{ args } );
+
+					setWorking( false );
+					
+					db.p( "--> Finished!!! EventQueue is free." );
+
+					Field f;
+					StringTokenizer st;
+					Object lastObj;
+
+					ArrayList<String> watchFields = watchableFields();
+
+					for (int i = 0; i < watchFields.size(); i++) {
+						lastObj = genObject;
+						clas = genObject.getClass();
+						st = new StringTokenizer( watchFields.get(i), ".");
+						while (st.hasMoreElements()) {
+							String s = st.nextToken();
+
+							f = clas.getDeclaredField(s);
+							if (st.hasMoreElements()) {
+								clas = f.getType();
+								lastObj = f.get(lastObj);
+							} else {
+								Class c = f.getType();
+
+								if (c.toString().equals("int")) {
+									result.append(watchFields.get(i)
+											+ ": " + f.getInt(lastObj) + "\n");
+								} else if (c.toString().equals("double")) {
+									result.append(watchFields.get(i)
+											+ ": " + f.getDouble(lastObj) + "\n");
+								} else if (c.toString().equals("boolean")) {
+									result.append(watchFields.get(i)
+											+ ": " + f.getBoolean(lastObj) + "\n");
+								} else if (c.toString().equals("char")) {
+									result.append(watchFields.get(i)
+											+ ": " + f.getChar(lastObj) + "\n");
+								} else if (c.toString().equals("float")) {
+									result.append(watchFields.get(i)
+											+ ": " + f.getFloat(lastObj) + "\n");
+								} else {
+									result.append(watchFields.get(i)
+											+ ": " + f.get(lastObj) + "\n");
+								}
+							}
+
 						}
 					}
+					result.append("----------------------\n");
 
+				} catch (Exception e) {
+					e.printStackTrace(System.err);
+				}
+				if( sendFeedback ) {
+					
+					ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, id,
+							ProgramRunnerFeedbackEvent.TEXT_RESULT, result.toString() );
+					
+					EventSystem.queueEvent( evt );
+				}
+				
+				if( doPropagate ) {
+					propagate();
+					Editor.getInstance().repaint();
 				}
 			}
-			result.append("----------------------\n");
+		}.start();
 
-		} catch (Exception e) {
-			e.printStackTrace(System.err);
-		}
-		
-		return result.toString();
 	}
 	
 	public long getId() {
@@ -416,29 +437,24 @@ public class ProgramRunner {
 				compile( event.getProgramText() != null ? event.getProgramText() : programSource );
 				
 			}
-
+			
+			boolean isPropagated = false;
+			
 			if( ( operation & ProgramRunnerEvent.RUN ) > 0 ) {
 
-				String result = "";
-				
 				for ( int i = 0; i < event.getRepeat(); i++ ) {
 					try {
-						result += run();
+						run( event.isRequestFeedback(), 
+								event.getId(),
+								( ( operation & ProgramRunnerEvent.PROPAGATE ) > 0 ) );
+						isPropagated = true;
 					} catch (Exception e) {
 						ErrorWindow.showErrorMessage( e.getMessage() );
 					}
 				}
-				
-				if( event.isRequestFeedback() ) {
-					
-					ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
-							ProgramRunnerFeedbackEvent.TEXT_RESULT, result );
-					
-					EventSystem.queueEvent( evt );
-				}
 			}
 
-			if( ( operation & ProgramRunnerEvent.PROPAGATE ) > 0 ) {
+			if( !isPropagated && ( operation & ProgramRunnerEvent.PROPAGATE ) > 0 ) {
 				propagate();
 				Editor.getInstance().repaint();
 			}
@@ -455,6 +471,12 @@ public class ProgramRunner {
 		
 		synchronized( s_lock ) {
 			return isWorking;
+		}
+	}
+
+	public void setWorking( boolean isWorking ) {
+		synchronized( s_lock ) {
+			this.isWorking = isWorking;
 		}
 	}
 
