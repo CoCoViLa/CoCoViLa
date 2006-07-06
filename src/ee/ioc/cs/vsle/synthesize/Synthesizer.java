@@ -119,6 +119,10 @@ public class Synthesizer {
      */
     private static void generateSubclasses( ClassList classes ) throws SpecParseException {
 
+    	if( classes == null ) {
+    		throw new SpecParseException( "Empty Class list!!!" );
+    	}
+    	
         AnnotatedClass pClass;
         String fileString;
         Pattern pattern;

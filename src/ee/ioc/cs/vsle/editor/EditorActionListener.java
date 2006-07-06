@@ -1,22 +1,17 @@
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.iconeditor.AboutDialog;
 import ee.ioc.cs.vsle.iconeditor.LicenseDialog;
 
 import javax.swing.*;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.awt.event.*;
 import java.io.File;
 
 public class EditorActionListener implements ActionListener {
-    Editor editor;
-
-    public EditorActionListener( Editor editor ) {
-        this.editor = editor;
-    }
-
+	
     public void actionPerformed( ActionEvent e ) {
 
         // JmenuItem chosen
@@ -24,12 +19,12 @@ public class EditorActionListener implements ActionListener {
              e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem" ) {
 
             if ( e.getActionCommand().equals( Menu.SAVE_SCHEME ) ) {
-                if( editor.getCurrentPackage() == null ) {
-                    JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                if( Editor.getInstance().getCurrentPackage() == null ) {
+                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
                     return;
                 }
 
-                JFileChooser fc = new JFileChooser( editor.getCurrentPackage().getPath() );
+                JFileChooser fc = new JFileChooser( Editor.getInstance().getCurrentPackage().getPath() );
                 CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.extensionSyn,
                         CustomFileFilter.descriptionSyn );
                 fc.setFileFilter( synFilter );
@@ -46,15 +41,15 @@ public class EditorActionListener implements ActionListener {
 
                     Editor.setLastPath( file.getAbsolutePath() );
                     db.p( "Saving scheme: " + file.getName() );
-                    editor.getCurrentCanvas().saveScheme( file );
-                    editor.getCurrentPackage().setLastScheme( file.getAbsolutePath() );
+                    Editor.getInstance().getCurrentCanvas().saveScheme( file );
+                    Editor.getInstance().getCurrentPackage().setLastScheme( file.getAbsolutePath() );
                 }
             } else if ( e.getActionCommand().equals( Menu.LOAD_SCHEME ) ) {
-                if( editor.getCurrentPackage() == null ) {
-                    JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                if( Editor.getInstance().getCurrentPackage() == null ) {
+                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
                     return;
                 }
-                JFileChooser fc = new JFileChooser( editor.getCurrentPackage().getPath() );
+                JFileChooser fc = new JFileChooser( Editor.getInstance().getCurrentPackage().getPath() );
                 CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.extensionSyn,
                         CustomFileFilter.descriptionSyn );
                 fc.setFileFilter( synFilter );
@@ -65,26 +60,26 @@ public class EditorActionListener implements ActionListener {
                     Editor.setLastPath( file.getAbsolutePath() );
                     db.p( "Loading scheme: " + file.getName() );
                     try {
-                        editor.getCurrentCanvas().loadScheme( file );
-                        editor.getCurrentPackage().setLastScheme( file.getAbsolutePath() );
+                        Editor.getInstance().getCurrentCanvas().loadScheme( file );
+                        Editor.getInstance().getCurrentPackage().setLastScheme( file.getAbsolutePath() );
                     } catch ( Exception exc ) {
                         exc.printStackTrace();
                     }
                 }
 
             } else if ( e.getActionCommand().equals( Menu.RELOAD_SCHEME ) ) {
-            	if( editor.getCurrentPackage() == null ) {
-                    JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+            	if( Editor.getInstance().getCurrentPackage() == null ) {
+                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
                     return;
-                } else if( editor.getCurrentPackage().getLastScheme() == null ) {
-                    JOptionPane.showMessageDialog( editor, "No scheme has been recently saved or loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                } else if( Editor.getInstance().getCurrentPackage().getLastScheme() == null ) {
+                    JOptionPane.showMessageDialog( Editor.getInstance(), "No scheme has been recently saved or loaded", "Error", JOptionPane.ERROR_MESSAGE );
                     return;
                 }
-            	File file = new File( editor.getCurrentPackage().getLastScheme() );
+            	File file = new File( Editor.getInstance().getCurrentPackage().getLastScheme() );
             	if( file.exists() ) {
             		db.p( "Reloading scheme: " + file.getName() );
             		try {
-            			editor.getCurrentCanvas().loadScheme( file );
+            			Editor.getInstance().getCurrentCanvas().loadScheme( file );
             		} catch ( Exception exc ) {
             			exc.printStackTrace();
             		}
@@ -98,7 +93,7 @@ public class EditorActionListener implements ActionListener {
 
                 fc.setFileFilter( synFilter );
 
-                int returnVal = fc.showOpenDialog( editor );
+                int returnVal = fc.showOpenDialog( Editor.getInstance() );
 
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File pack = fc.getSelectedFile();
@@ -107,85 +102,104 @@ public class EditorActionListener implements ActionListener {
                     Editor.setMultyProperty( PropertyBox.RECENT_PACKAGES, pack.getAbsolutePath(), true );
                     Editor.setMultyProperty( PropertyBox.PALETTE_FILE, pack.getAbsolutePath(), true );
                     db.p( "Loading package: " + pack.getName() );
-                    editor.loadPackage( pack );
-                    //editor.validate();
+                    Editor.getInstance().loadPackage( pack );
+                    //Editor.getInstance().validate();
                 }
             } else if ( e.getActionCommand().equals( Menu.CLOSE ) ) {
-                if ( editor.getCurrentPackage() != null ) {
-                    Editor.setMultyProperty( PropertyBox.PALETTE_FILE, editor.getCurrentPackage().getPath(), false );
-                    editor.clearPane();
+                if ( Editor.getInstance().getCurrentPackage() != null ) {
+                    Editor.setMultyProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
+                    Editor.getInstance().clearPane();
                 }
             } else if ( e.getActionCommand().equals( Menu.RELOAD ) ) {
-                if ( editor.getCurrentPackage() != null ) {
-                	File pack = new File(editor.getCurrentPackage().getPath());
+                if ( Editor.getInstance().getCurrentPackage() != null ) {
+                	File pack = new File(Editor.getInstance().getCurrentPackage().getPath());
                 	if( pack.exists() ) {
-                		editor.clearPane();
+                		Editor.getInstance().clearPane();
                 		Editor.setLastPath( pack.getAbsolutePath() );
-                		editor.loadPackage( pack );
+                		Editor.getInstance().loadPackage( pack );
                 	}
                 }
             } else if ( e.getActionCommand().equals( Menu.INFO ) ) {
                 String message;
-                if ( editor.getCurrentPackage() != null ) {
-                    message = editor.getCurrentPackage().description;
+                if ( Editor.getInstance().getCurrentPackage() != null ) {
+                    message = Editor.getInstance().getCurrentPackage().description;
                 } else {
                     message = "No packages loaded";
                 }
-                JOptionPane.showMessageDialog( editor, message );
+                JOptionPane.showMessageDialog( Editor.getInstance(), message );
             } else if ( e.getActionCommand().equals( Menu.PRINT ) ) {
-                if( editor.getCurrentCanvas() != null ) {
-                    editor.getCurrentCanvas().print();
+                if( Editor.getInstance().getCurrentCanvas() != null ) {
+                    Editor.getInstance().getCurrentCanvas().print();
                 }
             } else if ( e.getActionCommand().equals( Menu.EXIT ) ) {
-                editor.exitApplication();
+                Editor.getInstance().exitApplication();
             } else if ( e.getActionCommand().equals( Menu.GRID ) ) {
-                if( editor.getCurrentCanvas() != null ) {
-                    editor.getCurrentCanvas().setGridVisible(
-                            !editor.getCurrentCanvas().isGridVisible() );
+                if( Editor.getInstance().getCurrentCanvas() != null ) {
+                    Editor.getInstance().getCurrentCanvas().setGridVisible(
+                            !Editor.getInstance().getCurrentCanvas().isGridVisible() );
                 }
             } else if ( e.getActionCommand().equals( Menu.CLEAR_ALL ) ) {
-                if( editor.getCurrentCanvas() != null ) {
-                    editor.getCurrentCanvas().clearObjects();
+                if( Editor.getInstance().getCurrentCanvas() != null ) {
+                    Editor.getInstance().getCurrentCanvas().clearObjects();
                 }
             } else if ( e.getActionCommand().equals( Menu.SPECIFICATION ) ) {
-                if( editor.getCurrentCanvas() != null ) {
+                if( Editor.getInstance().getCurrentCanvas() != null ) {
                 	
-                	ProgramRunner runner = new ProgramRunner( 
-                			editor.getCurrentCanvas().connections, 
-            				editor.getCurrentCanvas().objects,
-            				editor.getCurrentCanvas().vPackage );
+                	final ProgramRunner runner = new ProgramRunner( 
+                			Editor.getInstance().getCurrentCanvas().connections, 
+            				Editor.getInstance().getCurrentCanvas().objects,
+            				Editor.getInstance().getCurrentCanvas().vPackage );
                 	
-            		ProgramTextEditor programEditor = new ProgramTextEditor( editor, runner );
+            		ProgramTextEditor programEditor = new ProgramTextEditor( runner.getId() );
+            		
+            		programEditor.addWindowListener( new WindowAdapter(){
+
+            			public void windowClosing(WindowEvent e) {
+            				runner.destroy();
+            			}
+                    });
             		
                     programEditor.setSize( 550, 450 );
                     programEditor.setVisible( true );
                 } else {
-                    JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
                 }
             } else if ( e.getActionCommand().equals( Menu.RUN ) ) {
-            	if( editor.getCurrentCanvas() != null ) {
-            		ProgramRunner runner = new ProgramRunner( editor.
-            				getCurrentCanvas().connections, editor.getCurrentCanvas().objects,
-            				editor.getCurrentCanvas().vPackage );
+            	if( Editor.getInstance().getCurrentCanvas() != null ) {
+            		ProgramRunner runner = new ProgramRunner( Editor.getInstance().
+            				getCurrentCanvas().connections, Editor.getInstance().getCurrentCanvas().objects,
+            				Editor.getInstance().getCurrentCanvas().vPackage );
             		
-            		runner.compileAndRun( runner.compute() );
+            		int op =  ProgramRunnerEvent.COMPUTE_ALL
+            				| ProgramRunnerEvent.RUN_NEW
+            				| ProgramRunnerEvent.DESTROY;
+            		
+            		ProgramRunnerEvent evt = new ProgramRunnerEvent( this, runner.getId(), op );
+            		
+            		EventSystem.queueEvent( evt );
             	} else {
-            		JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+            		JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
             	}
             } else if ( e.getActionCommand().equals( Menu.RUNPROPAGATE ) ) {
-            	if( editor.getCurrentCanvas() != null ) {
-            		ProgramRunner runner = new ProgramRunner( editor.
-            				getCurrentCanvas().connections, editor.getCurrentCanvas().objects,
-            				editor.getCurrentCanvas().vPackage );
+            	if( Editor.getInstance().getCurrentCanvas() != null ) {
+            		final ProgramRunner runner = new ProgramRunner( Editor.getInstance().
+            				getCurrentCanvas().connections, Editor.getInstance().getCurrentCanvas().objects,
+            				Editor.getInstance().getCurrentCanvas().vPackage );
             		
-            		runner.compileAndRun( runner.compute() );
-            		runner.runPropagate();
-            		editor.repaint();
+            		int op =  ProgramRunnerEvent.COMPUTE_ALL
+    						| ProgramRunnerEvent.RUN_NEW
+    						| ProgramRunnerEvent.PROPAGATE
+    						| ProgramRunnerEvent.DESTROY;
+    		
+            		ProgramRunnerEvent evt = new ProgramRunnerEvent( this, runner.getId(), op );
+    		
+            		EventSystem.queueEvent( evt );
+            		           		
             	} else {
-            		JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+            		JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
             	}
             } else if ( e.getActionCommand().equals( Menu.SCHEMEOPTIONS ) ) {
-            	new SchemeSettingsDialog(editor);
+            	new SchemeSettingsDialog(Editor.getInstance());
             }
             /* else if (e.getActionCommand().equals("Planner")) {
               PlannerEditor plannerEditor = new PlannerEditor(objects, connections);
@@ -194,8 +208,8 @@ public class EditorActionListener implements ActionListener {
 
               } */
             else if ( e.getActionCommand().equals( Menu.SELECT_ALL ) ) {
-                if( editor.getCurrentCanvas() != null ) {
-                    editor.getCurrentCanvas().selectAllObjects();
+                if( Editor.getInstance().getCurrentCanvas() != null ) {
+                    Editor.getInstance().getCurrentCanvas().selectAllObjects();
                 }
             }
             /* else if (e.getActionCommand().equals("Run")) {
@@ -209,16 +223,16 @@ public class EditorActionListener implements ActionListener {
                 if ( documentationUrl != null && documentationUrl.trim().length() > 0 ) {
                     Editor.openInBrowser( documentationUrl );
                 } else {
-                    editor.showInfoDialog( "Missing information",
+                    Editor.getInstance().showInfoDialog( "Missing information",
                                            "No documentation URL defined in properties." );
                 }
 
             } else if ( e.getActionCommand().equals( Menu.SETTINGS ) ) {
-                editor.openOptionsDialog();
+                Editor.getInstance().openOptionsDialog();
             } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
-                new AboutDialog( null, editor );
+                new AboutDialog( null, Editor.getInstance() );
             } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
-                new LicenseDialog( null, editor );
+                new LicenseDialog( null, Editor.getInstance() );
             } else if ( e.getActionCommand().equals( Look.LOOK_WINDOWS ) ) {
                 try {
                     Look.changeLayout( Look.LOOK_WINDOWS );

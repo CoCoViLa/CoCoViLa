@@ -1,21 +1,20 @@
-/**
- * 
- */
-package ee.ioc.cs.vsle.ccl;
+package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.event.*;
 
-/**
- * @author pavelg
- *
- */
-public class CompileEvent extends BaseEvent {
+public class ProgramRunnerFeedbackEvent extends BaseEvent {
 
 	private static Dispatcher s_dispatcher;
 
 	private static Object s_lock = new Object();
 
-	private String m_fileName;
+	public static final int TEXT_SPECIFICATION = 0;
+	public static final int TEXT_PROGRAM = 1;
+	public static final int TEXT_RESULT = 2;
+	
+	private long m_id;
+	private int m_type;
+	private String m_text;
 	
 	static {
 		init();
@@ -24,10 +23,12 @@ public class CompileEvent extends BaseEvent {
 	/**
 	 * @param originator
 	 */
-	public CompileEvent( Object originator, String fileName ) {
+	public ProgramRunnerFeedbackEvent( Object originator, long id, int type, String text ) {
 		super(originator);
 		
-		m_fileName = fileName;
+		m_id = id;
+		m_type = type;
+		m_text = text;
 	}
 
 	/* (non-Javadoc)
@@ -64,7 +65,7 @@ public class CompileEvent extends BaseEvent {
 
 			Listener listener = (Listener) obj;
 
-			listener.onCompileEvent((CompileEvent) evt);
+			listener.onProgramRunnerFeedbackEvent((ProgramRunnerFeedbackEvent) evt);
 		}
 	}
 
@@ -78,14 +79,19 @@ public class CompileEvent extends BaseEvent {
 	 */
 	public interface Listener extends BaseEventListener {
 
-		public void onCompileEvent(CompileEvent event);
+		public void onProgramRunnerFeedbackEvent(ProgramRunnerFeedbackEvent event);
 	}
 
-	public String getFileName() {
-		return m_fileName;
+	public long getId() {
+		return m_id;
 	}
 
-	public void setFileName(String name) {
-		m_fileName = name;
+	public int getType() {
+		return m_type;
 	}
+
+	public String getText() {
+		return m_text;
+	}
+
 }

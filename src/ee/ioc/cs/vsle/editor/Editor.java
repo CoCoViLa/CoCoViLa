@@ -8,6 +8,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -22,6 +23,8 @@ import ee.ioc.cs.vsle.vclass.*;
  */
 public class Editor extends JFrame implements ChangeListener {
 
+	private static Editor s_instance;
+	
     JTabbedPane tabbedPane = new JTabbedPane();
 
 	EditorActionListener aListener;
@@ -44,7 +47,7 @@ public class Editor extends JFrame implements ChangeListener {
 	/**
 	 * Class constructor [1].
 	 */
-	public Editor() {
+	private Editor() {
 		//enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 		initialize();
 		validate();
@@ -56,7 +59,7 @@ public class Editor extends JFrame implements ChangeListener {
 	 * @param fileName -
 	 *            package file name.
 	 */
-	public Editor(String fileName) {
+	private Editor(String fileName) {
 		//enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 		initialize();
 		File file = new File(fileName);
@@ -79,7 +82,7 @@ public class Editor extends JFrame implements ChangeListener {
 		infoPanel = new JPanel(new GridLayout(1, 2));
 		posInfo = new JLabel();
 		// keyListener = new KeyOps(this);
-		aListener = new EditorActionListener(this);
+		aListener = new EditorActionListener();
 
 		mainPanel.setLayout(new BorderLayout());
 		// mainPanel.add(areaScrollPane, BorderLayout.CENTER);
@@ -621,7 +624,7 @@ public class Editor extends JFrame implements ChangeListener {
 				.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
 						PropertyBox.SNAP_TO_GRID));
 
-		Editor window;
+		Editor window = null;
 		try {
 			if (args.length > 0) {
 				if (args[0].equals("-p")) {
@@ -684,6 +687,9 @@ public class Editor extends JFrame implements ChangeListener {
 			window.setSize(getWinWidth(), getWinHeight());
 			window.setVisible(true);
 		}
+		
+		s_instance = window;
+		
 		// log application executions, also making sure that the properties file
 		// is
 		// available for writing (required by some of current application
@@ -749,6 +755,10 @@ public class Editor extends JFrame implements ChangeListener {
 			getCurrentCanvas().drawingArea.grabFocus();
 			RuntimeProperties.packageDir = getCurrentCanvas().workDir;
 		}
+	}
+
+	public static Editor getInstance() {
+		return s_instance;
 	}
 
 }

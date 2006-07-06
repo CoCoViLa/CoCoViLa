@@ -7,10 +7,15 @@ import javax.swing.*;
 
 import javax.swing.text.*;
 
+import ee.ioc.cs.vsle.event.*;
+
 /**
+ * This class contains only GUI and interacts with ProgrammRunner via ProgramRunnerEvents
  */
 public class ProgramTextEditor extends JFrame implements ActionListener {
 
+	private ProgramRunnerFeedbackEventListener m_lst = new ProgramRunnerFeedbackEventListener();
+	
     private JButton computeGoal, runProg, computeAll, propagate, invoke, invokeNew;
     private JTextArea jta_runResult;
     private JTextComponent jta_spec, jta_generatedCode;
@@ -19,18 +24,17 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     private JTextField invokeField;
     private JTabbedPane tabbedPane;
     
-    private ProgramRunner runner;
+    private long m_progRunnerID;
     
-    private Editor editor;
-
-    public ProgramTextEditor( Editor ed, ProgramRunner prunner ) {
+    public ProgramTextEditor( long prunnerID ) {
+    	
         super( "Specification" );
+        
+        ProgramRunnerFeedbackEvent.registerListener( m_lst );
         
         setDefaultCloseOperation( DISPOSE_ON_CLOSE );
         
-        editor = ed;
-
-        this.runner = prunner;
+        m_progRunnerID = prunnerID;
         
         tabbedPane = new JTabbedPane();
 
@@ -122,8 +126,17 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
         tabbedPane.addTab( "Run results", runResult );
 
-        jta_spec.setText( runner.getSpec() );
+        SwingUtilities.invokeLater( new Runnable() {
 
+        	public void run() {
+        		ProgramRunnerEvent evt = new ProgramRunnerEvent( this, 
+        				m_progRunnerID, 
+        				ProgramRunnerEvent.REQUEST_SPEC );
+
+        		EventSystem.queueEvent( evt );
+        	}} 
+        );
+    	
         getContentPane().add( tabbedPane );
         validate();
     }
@@ -141,37 +154,98 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     		jta_generatedCode = null;
     	}
     	
+    	if( m_lst != null ) {
+    		ProgramRunnerFeedbackEvent.unregisterListener( m_lst );
+    		m_lst = null;
+    	}
+    	
     }
+    
     public void actionPerformed( ActionEvent e ) {
-        if ( ( e.getSource() == computeGoal ) || ( e.getSource() == computeAll ) ) {            
-        	String res = runner.compute( jta_spec.getText(), e.getSource() == computeAll );
-        	if( res != null ) {
-        		jta_generatedCode.setText( res );
-        		tabbedPane.setSelectedComponent( progText );
-        	}
-        	validate();
+    	
+    	int op = -1;
+    	ProgramRunnerEvent evt = null;
+    	
+        if ( ( e.getSource() == computeGoal ) || ( e.getSource() == computeAll ) ) {    
+        	
+        	op = ( e.getSource() == computeGoal )
+        		? ProgramRunnerEvent.COMPUTE_GOAL
+        		: ProgramRunnerEvent.COMPUTE_ALL;
+
+        	evt = new ProgramRunnerEvent( this, m_progRunnerID, op );
+
+        	evt.setSpecText( jta_spec.getText() );
+	
+        	evt.setRequestFeedback( true );
         }
-        else if ( e.getSource() == runProg ) {
-        	String result = runner.compileAndRun( jta_generatedCode.getText() );
-        	if ( result != null ) {
-        		jta_runResult.setText( result );
-                tabbedPane.setSelectedComponent( runResult );
-            }
+        else if ( ( e.getSource() == runProg ) || ( e.getSource() == invokeNew ) ) {
+        	
+        	op = ProgramRunnerEvent.RUN_NEW;
+
+        	evt = new ProgramRunnerEvent( this, m_progRunnerID, op );
+
+        	evt.setProgramText( jta_generatedCode.getText() );
+    	
+        	evt.setRequestFeedback( true );
         }
         else if ( e.getSource() == propagate ) {
-        	runner.runPropagate();
-        	editor.repaint();
+        	
+        	op = ProgramRunnerEvent.PROPAGATE;
+
+        	evt = new ProgramRunnerEvent( this, m_progRunnerID, op );
         }
         else if ( e.getSource() == invoke ) {
-        	jta_runResult.append( runner.invoke( invokeField.getText() ) );
-        	editor.repaint();
+        	
+        	op = ProgramRunnerEvent.RUN;
+
+        	evt = new ProgramRunnerEvent( this, m_progRunnerID, op );
+        	
+        	try {
+        		evt.setRepeat( Integer.parseInt( invokeField.getText() ) );
+        	} catch( NumberFormatException ee ) {}
+        	
+        	evt.setRequestFeedback( true );
         }
-        else if ( e.getSource() == invokeNew ) {
-        	jta_runResult.append( runner.invokeNew( invokeField.getText() ) );
-        	editor.repaint();
+        
+        if( evt != null ) {
+        	EventSystem.queueEvent( evt );
         }
     }
 
+    class ProgramRunnerFeedbackEventListener implements ProgramRunnerFeedbackEvent.Listener {
+
+    	public void onProgramRunnerFeedbackEvent( ProgramRunnerFeedbackEvent event) {
+
+    		if( event.getId() == m_progRunnerID ) {
+    			
+    			final int type = event.getType();
+    			final String text = event.getText();
+    			
+    			SwingUtilities.invokeLater( new Runnable() {
+
+    				public void run() {
+    					if( type == ProgramRunnerFeedbackEvent.TEXT_SPECIFICATION ) {
+
+    						jta_spec.setText( text );
+    						tabbedPane.setSelectedComponent( specText );
+
+    					} else if( type == ProgramRunnerFeedbackEvent.TEXT_PROGRAM ) {
+
+    						jta_generatedCode.setText( text );
+    						tabbedPane.setSelectedComponent( progText );
+
+    					} else if( type == ProgramRunnerFeedbackEvent.TEXT_RESULT ) {
+
+    						jta_runResult.append( text );
+    						tabbedPane.setSelectedComponent( runResult );
+    					}
+    				}} 
+    			);
+    		}
+    	}
+
+    }
+    
     static class CommentKeyListener implements KeyListener {
 
         public void keyTyped( KeyEvent e ) {

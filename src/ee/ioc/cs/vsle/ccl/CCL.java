@@ -30,8 +30,6 @@ import ee.ioc.cs.vsle.util.db;
  */
 public class CCL extends URLClassLoader {
 
-	CompileEventListener m_listener = new CompileEventListener();
-	
 	public CCL() {
 		super(createClasspath());
 	}
@@ -92,23 +90,6 @@ public class CCL extends URLClassLoader {
 		return classpath;
 	}
 	
-	private void _onCompileEvent( String javaFile ) {
-		
-		try {
-			
-			compile2( javaFile );
-			
-		} catch (IOException e) {
-			
-			e.printStackTrace();
-			
-		} catch (CompileException e) {
-			
-			e.printStackTrace();
-			
-		}
-		
-	}
 	
 	/**
 	 * Another implementation which uses internal compiler.
@@ -150,17 +131,7 @@ public class CCL extends URLClassLoader {
 		
 		return status == 0;
 	}
-	
-	private class CompileEventListener implements CompileEvent.Listener {
-
-		public void onCompileEvent(CompileEvent event) {
-			
-			_onCompileEvent( event.getFileName() );
-				
-		}
-		
-	}
-	
+//	
 //	/**
 //	 * Spawns a process to compile the java source code file specified in the
 //	 * 'javaFile' parameter. Return a true if the compilation worked, false
@@ -237,7 +208,7 @@ public class CCL extends URLClassLoader {
 //		// Tell whether the compilation worked.
 //		return ret == 0;
 //	} // compile
-
+//
 //	/**
 //	 * Perform an automatic compilation of sources as necessary when looking for
 //	 * class files. If the source modification is dated/timed later than the
@@ -319,7 +290,7 @@ public class CCL extends URLClassLoader {
 //		// Otherwise, return the class.
 //		return c;
 //	} // loadClass
-	
+//	
 //	/**
 //	 * Given a file name, reads the entirety of that file from disk and return
 //	 * it as a byte array.
@@ -356,4 +327,5 @@ public class CCL extends URLClassLoader {
 //
 //		return raw;
 //	} // getBytes
+	
 }

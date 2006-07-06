@@ -1,14 +1,12 @@
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.ccl.CompileException;
-import ee.ioc.cs.vsle.ccl.CCL;
+import ee.ioc.cs.vsle.ccl.*;
+import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.synthesize.*;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.lang.reflect.*;
 import java.util.*;
 
 import javax.swing.*;
@@ -16,6 +14,13 @@ import javax.swing.*;
 /**
  */
 public class ProgramRunner {
+	
+	private final static Object s_lock = new Object();
+	private boolean isWorking = false;
+	
+	private long m_id;
+	private ProgramRunnerEventListener m_lst = new ProgramRunnerEventListener();
+	
 	private Object genObject;
 
 	private ObjectList objects;
@@ -27,12 +32,27 @@ public class ProgramRunner {
     private VPackage vPackage;
     
 	public ProgramRunner( ArrayList<Connection> relations, ObjectList objs, VPackage pack ) {
+		
+		m_id = System.currentTimeMillis();
+		ProgramRunnerEvent.registerListener( m_lst );
+		
 		objects = GroupUnfolder.unfold( objs );
 		this.relations = relations;
 		this.vPackage = pack;
 	}
 	
-	public String getSpec() {
+	public void destroy() {
+		
+		if( m_lst != null ) {
+			
+			ProgramRunnerEvent.unregisterListener( m_lst );
+			
+			m_lst = null;
+			
+		}
+	}
+	
+	private String getSpec() {
 		ISpecGenerator sgen = SpecGenFactory.getInstance().getCurrentSpecGen();
 
         return sgen.generateSpec( objects, relations, vPackage );
@@ -57,16 +77,26 @@ public class ProgramRunner {
     	return arguments;
     }
 	
-	public String compileAndRun( String genCode ) {
-		
+	private String compile( String genCode ) {
+
 		arguments = null;
-		
+
 		try {
 			Synthesizer.makeProgram( genCode, classList, mainClassName );
-			
-			if ( makeGeneratedObject() ) {
-				return run( false );
+
+			CCL classLoader = new CCL();
+
+			genObject = null;
+
+			if (classLoader.compile2(mainClassName)) {				
+				Class clas = classLoader.loadClass(mainClassName);
+				genObject = clas.newInstance();
 			}
+		} catch (NoClassDefFoundError e) { 
+			JOptionPane.showMessageDialog(null, "Class not found:\n" + e.getMessage(),
+					"Execution error", JOptionPane.ERROR_MESSAGE);
+			e.printStackTrace(System.err);
+
 		} catch ( CompileException ce ) {
 			ErrorWindow.showErrorMessage(
 					"Compilation failed:\n " + ce.excDesc );
@@ -75,48 +105,16 @@ public class ProgramRunner {
 					"Compilation failed:\n " + e.excDesc );
 		} catch ( Exception ce ) {
 			ErrorWindow.showErrorMessage( ce.getMessage() );
+			ce.printStackTrace( System.err );
 		}
-		
+
 		return null;
 	}
-	
-	public String invoke( String invokeText )
-    {
-        if ( genObject != null ) {
-            if ( !invokeText.equals( "" ) ) {
-                int k = Integer.parseInt( invokeText );
-
-                for ( int i = 0; i < k; i++ ) {
-                    try {
-						return run( true );
-					} catch (Exception e) {
-						ErrorWindow.showErrorMessage( e.getMessage() );
-					}
-                }
-            } else {
-                try {
-					return run( true );
-				} catch (Exception e) {
-					ErrorWindow.showErrorMessage( e.getMessage() );
-				}
-            }
-        }
-        return "";
-    }
-       
-	public String invokeNew( String invokeText ) {
-		arguments = null;
-		return invoke( invokeText );
-	}
-	
-    public String compute()
-    {
-    	return compute( getSpec(), true );
-    }
-    
-    public String compute( String fullSpec, boolean computeAll ) {
+	   
+    private String compute( String fullSpec, boolean computeAll ) {
     	
         try {
+        	
             mainClassName = SpecParser.getClassName( fullSpec );
             
             if ( RuntimeProperties.isLogInfoEnabled() )
@@ -124,7 +122,9 @@ public class ProgramRunner {
             
             classList = SpecParser.parseSpecification( fullSpec );
             assumptions.clear();
+            
             return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, assumptions );
+            
         } catch ( UnknownVariableException uve ) {
 
             db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
@@ -212,9 +212,12 @@ public class ProgramRunner {
 			System.err.println("foundVars: " + foundVars);
 	}
 
-	public void runPropagate() {
+	private void propagate() {
 		try {
 			System.err.println( "Propagate" );
+			
+			if( genObject == null ) return;
+			
 			Class clasType;
 			Class clas = genObject.getClass();
 
@@ -295,18 +298,26 @@ public class ProgramRunner {
 		}
 	}
 
-	private String run( boolean propagate ) {
+	private String run() {
+		
+		if( genObject == null ) return null;
+		
 		StringBuffer result = new StringBuffer();
 		
 		try {
 			Class clas = genObject.getClass();
 			Method method = clas.getMethod("compute", Object[].class);
-			db.p( "Running" );
+			db.p( "Running... ( NB! The process is blocking the EventQueue until the next message --> )" );
+			isWorking = true;
 			Object[] args = getArguments();
 			for (int i = 0; i < args.length; i++) {
 				db.p( args[i].getClass() + " " + args[i] );
 			}
 			method.invoke(genObject, new Object[]{ args } );
+			
+			isWorking = false;
+			db.p( "--> Finished!!! EventQueue is free." );
+			
 			Field f;
 			StringTokenizer st;
 			Object lastObj;
@@ -356,30 +367,95 @@ public class ProgramRunner {
 			e.printStackTrace(System.err);
 		}
 		
-		if( propagate ) {
-			runPropagate();
-		}
-		
 		return result.toString();
 	}
-
-	private boolean makeGeneratedObject() throws CompileException {
-		CCL classLoader = new CCL();
-
-		genObject = null;
-		try {
-			if (classLoader.compile2(mainClassName)) {				
-				Class clas = classLoader.loadClass(mainClassName);
-				genObject = clas.newInstance();
-			}
-			return true;
-		} catch (NoClassDefFoundError e) { 
-			JOptionPane.showMessageDialog(null, "Class not found:\n" + e.getMessage(),
-					"Execution error", JOptionPane.ERROR_MESSAGE);
-			e.printStackTrace(System.err);
-		} catch (Exception e) {
-			e.printStackTrace(System.err);
-		}
-		return false;
+	
+	public long getId() {
+		return m_id;
 	}
+	
+	class ProgramRunnerEventListener implements ProgramRunnerEvent.Listener {
+
+		public void onProgramRunnerEvent(ProgramRunnerEvent event) {
+			System.err.println( "onProgramRunnerEvent: " + Thread.currentThread() );
+			if( event.getId() != m_id ) return;
+			
+			int operation = event.getOperation();
+			
+			String programSource = null;
+			
+			if( ( operation & ProgramRunnerEvent.REQUEST_SPEC ) > 0 ) {
+				
+				ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
+						ProgramRunnerFeedbackEvent.TEXT_SPECIFICATION, getSpec() );
+				
+				EventSystem.queueEvent( evt );
+				
+				return;
+			}
+
+			if( ( ( operation & ProgramRunnerEvent.COMPUTE_GOAL ) > 0 ) 
+					|| ( ( operation & ProgramRunnerEvent.COMPUTE_ALL ) > 0 ) ) {
+				
+				String spec = ( event.getSpecText() != null )
+							    ? event.getSpecText()
+							    : getSpec();
+							  
+				programSource = compute( spec, ( ( operation & ProgramRunnerEvent.COMPUTE_ALL ) > 0 ) );
+				
+				if( event.isRequestFeedback() ) {
+					ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
+							ProgramRunnerFeedbackEvent.TEXT_PROGRAM, programSource );
+					
+					EventSystem.queueEvent( evt );
+				}
+			}
+
+			if( ( operation & ProgramRunnerEvent.COMPILE ) > 0 ) {
+				
+				compile( event.getProgramText() != null ? event.getProgramText() : programSource );
+				
+			}
+
+			if( ( operation & ProgramRunnerEvent.RUN ) > 0 ) {
+
+				String result = "";
+				
+				for ( int i = 0; i < event.getRepeat(); i++ ) {
+					try {
+						result += run();
+					} catch (Exception e) {
+						ErrorWindow.showErrorMessage( e.getMessage() );
+					}
+				}
+				
+				if( event.isRequestFeedback() ) {
+					
+					ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
+							ProgramRunnerFeedbackEvent.TEXT_RESULT, result );
+					
+					EventSystem.queueEvent( evt );
+				}
+			}
+
+			if( ( operation & ProgramRunnerEvent.PROPAGATE ) > 0 ) {
+				propagate();
+				Editor.getInstance().repaint();
+			}
+
+			if( ( operation & ProgramRunnerEvent.DESTROY ) > 0 ) {
+				destroy();
+			}
+
+		}
+		
+	}
+
+	public boolean isWorking() {
+		
+		synchronized( s_lock ) {
+			return isWorking;
+		}
+	}
+
 }
