@@ -81,7 +81,6 @@ public class EventSystem {
 
 	public static void queueEvent( BaseEvent event )
 	{
-		System.err.println( "queueEvent: " + event + " " + s_instance );
 		s_instance.addEventToQueue( event );
 	}
 

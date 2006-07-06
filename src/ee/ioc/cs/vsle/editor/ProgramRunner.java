@@ -214,7 +214,6 @@ public class ProgramRunner {
 
 	private void propagate() {
 		try {
-			System.err.println( "Propagate" );
 			
 			if( genObject == null || isWorking ) return;
 			
@@ -305,16 +304,19 @@ public class ProgramRunner {
 		new Thread() {
 			public void run()
 			{
-				Thread.currentThread().setName( "RunningThread" );
+				Thread.currentThread().setName( "RunningThread" + System.currentTimeMillis() );
 				
 				StringBuffer result = new StringBuffer();
 
 				try {
 					Class clas = genObject.getClass();
 					Method method = clas.getMethod("compute", Object[].class);
-					db.p( "Running... ( NB! The process is blocking the EventQueue until the next message --> )" );
+					db.p( "Running... ( NB! The thread is alive until the next message --> ) " 
+							+ Thread.currentThread().getName() );
 					
 					setWorking( true );
+					
+					RunningThreadKillerDialog.addThread( this );
 					
 					Object[] args = getArguments();
 					for (int i = 0; i < args.length; i++) {
@@ -322,9 +324,11 @@ public class ProgramRunner {
 					}
 					method.invoke(genObject, new Object[]{ args } );
 
+					RunningThreadKillerDialog.removeThread( this );
+					
 					setWorking( false );
 					
-					db.p( "--> Finished!!! EventQueue is free." );
+					db.p( "--> Finished!!! " + Thread.currentThread().getName() );
 
 					Field f;
 					StringTokenizer st;
@@ -398,7 +402,7 @@ public class ProgramRunner {
 	class ProgramRunnerEventListener implements ProgramRunnerEvent.Listener {
 
 		public void onProgramRunnerEvent(ProgramRunnerEvent event) {
-			System.err.println( "onProgramRunnerEvent: " + Thread.currentThread() );
+
 			if( event.getId() != m_id ) return;
 			
 			int operation = event.getOperation();
@@ -463,6 +467,7 @@ public class ProgramRunner {
 				destroy();
 			}
 
+			//RunningThreadKillerDialog.getInstance();
 		}
 		
 	}
