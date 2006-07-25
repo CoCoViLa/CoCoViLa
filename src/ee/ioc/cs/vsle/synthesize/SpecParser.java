@@ -32,7 +32,6 @@ public class SpecParser {
                     try {
 						db.p( getLine( a ) );
 					} catch (SpecParseException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
                 } else {
@@ -746,7 +745,6 @@ public class SpecParser {
 			try {
 				lt = getLine( specLines );
 			} catch (SpecParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 

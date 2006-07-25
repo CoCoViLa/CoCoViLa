@@ -45,7 +45,6 @@ public class CCL extends URLClassLoader {
 		try {
 			urls.add( new File( RuntimeProperties.genFileDir ).toURL() );
 		} catch (MalformedURLException e1) {
-			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
 		
@@ -58,7 +57,6 @@ public class CCL extends URLClassLoader {
 					urls.add( file.toURL() );
 					db.p("file.toURL() " + file.toURL() );
 				} catch (MalformedURLException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

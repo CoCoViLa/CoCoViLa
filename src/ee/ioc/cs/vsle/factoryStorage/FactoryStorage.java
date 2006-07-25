@@ -17,7 +17,6 @@ public abstract class FactoryStorage {
 	 */
 	public FactoryStorage() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public static void register( IFactory factory ) {

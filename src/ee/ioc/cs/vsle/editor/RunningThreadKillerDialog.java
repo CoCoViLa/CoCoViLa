@@ -109,7 +109,7 @@ public class RunningThreadKillerDialog extends JDialog {
 			jButtonRefresh = new JButton( "Refresh" );
 			jButtonRefresh.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
-					System.out.println("actionPerformed()"); // TODO Auto-generated Event stub actionPerformed()
+					System.out.println("actionPerformed()");
 				}
 			});
 		}
@@ -128,8 +128,6 @@ public class RunningThreadKillerDialog extends JDialog {
 		RunningThreadKillerDialog d = new RunningThreadKillerDialog();
 		d.setDefaultCloseOperation( JDialog.EXIT_ON_CLOSE );
 		d.setVisible( true );
-		// TODO Auto-generated method stub
-
 	}
 
 	/**

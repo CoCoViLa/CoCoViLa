@@ -63,17 +63,13 @@ public class JavaColoredTextPane extends JTextPane {
         document.addDocumentListener(new DocumentListener() {
 
 			public void changedUpdate(DocumentEvent e) {
-				// TODO Auto-generated method stub
-				
 			}
 
 			public void insertUpdate(DocumentEvent e) {
-				// TODO Auto-generated method stub
 				colorer.resumeColoring();
 			}
 
 			public void removeUpdate(DocumentEvent e) {
-				// TODO Auto-generated method stub
 				colorer.resumeColoring();
 			}});
 	}
@@ -82,7 +78,6 @@ public class JavaColoredTextPane extends JTextPane {
 		try {
 			document.insertString( document.getLength(), s, getStyles("text") );
 		} catch (BadLocationException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
