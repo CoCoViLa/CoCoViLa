@@ -71,6 +71,7 @@ public class OptionsDialog extends JDialog {
 	 */
 	private void initialize() {
 
+		setLocationByPlatform( true );
 		// Specify smaller font for title and buttons.
 		Font f = new Font("Arial", Font.BOLD, 11);
 
@@ -97,7 +98,7 @@ public class OptionsDialog extends JDialog {
 		pnlLabels.setMinimumSize(pnlLabels.getPreferredSize());
 
 		// Set field labels on their panel.
-		pnlLabels.setLayout(new GridLayout(10, 0));
+		pnlLabels.setLayout(new GridLayout(11, 1));
 		pnlLabels.add(lblGenFilesDir);
 		pnlLabels.add(lblCompClasspath);
 		pnlLabels.add(lblPaletteFile);
@@ -108,6 +109,7 @@ public class OptionsDialog extends JDialog {
 		pnlLabels.add(lblGridStep);
 		pnlLabels.add(lblNudgeStep);
 		pnlLabels.add(lblSyntaxColor);
+		pnlLabels.add( new JLabel( "Unterminated threads:") );
 
 		// Set fields' panel size.
 		//pnlFields.setPreferredSize(new Dimension(200, 180));
@@ -134,7 +136,7 @@ public class OptionsDialog extends JDialog {
 		pnlNudgeSpinner.add(spinnerNudgeStep);
 
 		// Set fields to their panel.
-		pnlFields.setLayout(new GridLayout(10, 0));
+		pnlFields.setLayout(new GridLayout(11, 1));
 		pnlFields.add(tfGenFilesDir);
 		pnlFields.add(tfCompClasspath);
 		pnlFields.add(tfPaletteFile);
@@ -145,7 +147,22 @@ public class OptionsDialog extends JDialog {
 		pnlFields.add(pnlGridSpinner);
 		pnlFields.add(pnlNudgeSpinner);
 		pnlFields.add(chbSyntaxColor);
+		JButton threads = new JButton( "View" );
+		
+		JPanel pan = new JPanel(new FlowLayout(FlowLayout.LEFT) );
+		pan.add(threads);
+		pnlFields.add(pan);
+		threads.addActionListener( new ActionListener(){
 
+			public void actionPerformed(ActionEvent e) {
+				SwingUtilities.invokeLater(new Runnable() {
+					public void run() {
+						OptionsDialog.this.dispose();
+						RunningThreadKillerDialog.getInstance();
+					}
+				});
+			}});
+		
 		// Set settings panel size.
 		//pnlSettings.setPreferredSize(new Dimension(300, 180));
 		pnlSettings.setMaximumSize(pnlSettings.getPreferredSize());

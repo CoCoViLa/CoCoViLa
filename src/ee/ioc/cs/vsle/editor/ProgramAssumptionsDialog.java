@@ -32,6 +32,8 @@ implements ActionListener, KeyListener {
 		
 		setDefaultCloseOperation( DISPOSE_ON_CLOSE );
 		
+		setLocationRelativeTo( getParent() );
+		
 		args = new Object[assmps.size()];
 		asumptions = assmps;
 		

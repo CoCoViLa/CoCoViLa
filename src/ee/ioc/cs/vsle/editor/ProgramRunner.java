@@ -322,8 +322,10 @@ public class ProgramRunner {
 					for (int i = 0; i < args.length; i++) {
 						db.p( args[i].getClass() + " " + args[i] );
 					}
+					try {
 					method.invoke(genObject, new Object[]{ args } );
-
+					} catch( InvocationTargetException ex ) {}
+					
 					RunningThreadKillerDialog.removeThread( this );
 					
 					setWorking( false );
@@ -467,7 +469,6 @@ public class ProgramRunner {
 				destroy();
 			}
 
-			//RunningThreadKillerDialog.getInstance();
 		}
 		
 	}

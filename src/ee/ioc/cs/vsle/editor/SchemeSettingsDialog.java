@@ -24,6 +24,9 @@ public class SchemeSettingsDialog extends JDialog {
 	}
 
 	private void init() {
+		
+		setLocationRelativeTo( getParent() );
+		
 		JPanel spec_flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );
 		spec_flow.setBorder( BorderFactory.createTitledBorder("Specification"));
 		JPanel spec = new JPanel( );		

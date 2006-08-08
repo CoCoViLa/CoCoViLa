@@ -261,7 +261,7 @@ public class EventQueue extends Thread {
 	public void run()
 	{
 
-		Thread.currentThread().setName( "FTOeventQueue" );
+		Thread.currentThread().setName( "EventQueue" );
 
 		m_running = true;
 

@@ -23,82 +23,82 @@ public class RunningThreadKillerDialog extends JDialog {
 	
 	private static final long serialVersionUID = 1L;
 
-	private static Vector<Runnable> threads = new Vector<Runnable>();  //  @jve:decl-index=0:
+	private static HashMap<Thread, JPanel> threads = new HashMap<Thread, JPanel>();  
 	
 	private JPanel jContentPane = null;
 
-	private JList jList = null;
+	private JPanel m_mainPanel;
 
 	private JButton jButtonRefresh = null;
 
 	
-	public static void addThread( final Runnable thr ) {
+	public static void addThread( final Thread thr ) {
 		SwingUtilities.invokeLater( new Runnable() {
 
         	public void run() {
-        		threads.add( thr );
+        		JPanel panel = createThreadPanel( thr );
+        		threads.put( thr, panel );
         		
-        		System.err.println( "add: " + threads );
-        		
-        		s_instance.jList.setListData( threads.toArray() );
+        		s_instance.m_mainPanel.add( panel );
+        		s_instance.validate();
         	}} 
         );
-		
-//		s_instance.jList.getModel().
 	}
 	
 	public static void removeThread( final Runnable thr ) {
 		SwingUtilities.invokeLater( new Runnable() {
 
         	public void run() {
-        		threads.remove( thr );
-        		System.err.println( "remove: " + threads );
-        		s_instance.jList.setListData( threads.toArray() );
+        		JPanel panel = threads.remove( thr );
+        		
+        		if( panel != null )
+        		{
+        			s_instance.m_mainPanel.remove( panel );
+        			s_instance.m_mainPanel.validate();
+        			s_instance.m_mainPanel.repaint();
+        		}
         	}} 
         );
 		
-//		s_instance.jList.getModel().
 	}
 	
-	/**
-	 * This method initializes jList	
-	 * 	
-	 * @return javax.swing.JList	
-	 */
-	private JList getJList() {
-		if (jList == null) {
-			jList = new JList();
+	
+	private JPanel getMainPanel()
+	{
+		if( m_mainPanel == null )
+		{
+			m_mainPanel = new JPanel();
 			
-			jList.setCellRenderer( new DefaultListCellRenderer() {
-				
-				public Component getListCellRendererComponent( JList list, Object value,
-						int index, boolean isSelected, boolean cellHasFocus)
-				{
-					System.err.println( "gdf" );
-					final Thread thr = (Thread)value;
-
-					JPanel panel = new JPanel();
-
-					panel.add( new JLabel( thr.getName() ) );
-
-					JButton but = new JButton( "X" );
-					panel.add( but );
-
-					but.addActionListener( new ActionListener() {
-						public void actionPerformed(ActionEvent e) {
-							thr.stop();
-
-							removeThread( thr );
-						}
-					} );
-
-					return panel;
-				}
-			} );
+//			m_mainPanel.setLayout( new BoxLayout( m_mainPanel, BoxLayout.Y_AXIS ) );
+			m_mainPanel.setLayout( new GridLayout( 0, 1 ) );
 		}
-		return jList;
+		
+		return m_mainPanel;
 	}
 
+	private static JPanel createThreadPanel( final Thread thread )
+	{
+		JPanel panel = new JPanel();
+		
+		panel.add( new JLabel( thread.getName() ) );
+
+		JButton but = new JButton( "X" );
+		panel.add( but );
+		
+		panel.setEnabled( true );
+		but.addActionListener( new ActionListener() {
+			@SuppressWarnings("deprecation")
+			public void actionPerformed(ActionEvent e) {
+				removeThread( thread );
+				try {
+					thread.stop();
+				} catch( Exception ex ) {}
+			}
+		} );
+		
+		return panel;
+	}
+	
 	/**
 	 * This method initializes jButtonRefresh	
 	 * 	
@@ -109,7 +109,12 @@ public class RunningThreadKillerDialog extends JDialog {
 			jButtonRefresh = new JButton( "Refresh" );
 			jButtonRefresh.addActionListener(new java.awt.event.ActionListener() {
 				public void actionPerformed(java.awt.event.ActionEvent e) {
-					System.out.println("actionPerformed()");
+					getMainPanel().removeAll();
+					
+					for (Iterator iter = threads.values().iterator(); iter.hasNext();) {
+						JPanel el = (JPanel)iter.next();
+						getMainPanel().add( el );
+					}
 				}
 			});
 		}
@@ -117,6 +122,10 @@ public class RunningThreadKillerDialog extends JDialog {
 	}
 
 	public static void getInstance() {
+		//s_instance.jList.setEnabled( true );
+//		s_instance.dispose();
+//		
+//		s_instance = new RunningThreadKillerDialog();
 		
 		s_instance.setVisible( true );
 	}
@@ -128,13 +137,33 @@ public class RunningThreadKillerDialog extends JDialog {
 		RunningThreadKillerDialog d = new RunningThreadKillerDialog();
 		d.setDefaultCloseOperation( JDialog.EXIT_ON_CLOSE );
 		d.setVisible( true );
+		
+		for (int i = 0; i < 5; i++) {
+			Thread runn = new Thread() {
+				public void run() {
+					while ( true ) {
+						try {
+							Thread.sleep( 2000 );
+						} catch (InterruptedException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}
+			};
+			
+			runn.start();
+			
+			d.addThread( runn );
+		}
+		
 	}
 
 	/**
 	 * @param owner
 	 */
 	private RunningThreadKillerDialog() {
-		super( Editor.getInstance() );
+		super( Editor.getInstance(), "Thread killah" );
 		initialize();
 	}
 
@@ -147,6 +176,7 @@ public class RunningThreadKillerDialog extends JDialog {
 		this.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
 		this.setSize(300, 200);
 		this.setContentPane(getJContentPane());
+		this.setLocationRelativeTo( getParent() );
 	}
 
 	/**
@@ -158,7 +188,9 @@ public class RunningThreadKillerDialog extends JDialog {
 		if (jContentPane == null) {
 			jContentPane = new JPanel();
 			jContentPane.setLayout(new BorderLayout());
-			jContentPane.add(getJList(), BorderLayout.CENTER);
+			 JScrollPane scrollPane = new JScrollPane(getMainPanel());
+
+			jContentPane.add(scrollPane, BorderLayout.CENTER);
 			jContentPane.add(getJButtonRefresh(), BorderLayout.SOUTH);
 		}
 		return jContentPane;

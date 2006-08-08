@@ -120,6 +120,7 @@ public class CustomLookDialog extends JDialog {
 	  look = look.trim();
 	  if(look.length()==0) {
 		look = null;
+		return;
 	  }
 	}
 	RuntimeProperties.customLayout = look;
