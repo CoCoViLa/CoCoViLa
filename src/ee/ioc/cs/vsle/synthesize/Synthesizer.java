@@ -27,7 +27,7 @@ public class Synthesizer {
     */
     public static void makeProgram( String progText, ClassList classes, String mainClassName ) throws SpecParseException {
         generateSubclasses( classes );
-        FileFuncs.writeFile( progText, mainClassName, "java", RuntimeProperties.genFileDir );
+        FileFuncs.writeFile( progText, mainClassName, "java", RuntimeProperties.genFileDir, false );
     }
 
     /** Takes care of steps needed for planning and algorithm extracting, calling problem creator
@@ -195,7 +195,7 @@ public class Synthesizer {
                 	throw new SpecParseException( "Unable to parse " + pClass.getName() + " specification" );
                 }
 
-                FileFuncs.writeFile( fileString, pClass.getName(), "java", RuntimeProperties.genFileDir );
+                FileFuncs.writeFile( fileString, pClass.getName(), "java", RuntimeProperties.genFileDir, false );
             }
         }
     }

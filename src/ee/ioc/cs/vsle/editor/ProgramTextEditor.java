@@ -196,7 +196,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         }
         else if ( e.getSource() == invoke ) {
         	
-        	op = ProgramRunnerEvent.RUN;
+        	op = ProgramRunnerEvent.RUN | ProgramRunnerEvent.PROPAGATE;
 
         	evt = new ProgramRunnerEvent( this, m_progRunnerID, op );
         	

@@ -54,15 +54,13 @@ public class PropertyBox {
 
 		try {
 			properties.load(new FileInputStream(propFile + ".properties"));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		properties.put(propName, propValue);
-		// Write properties file.
-		try {
+			
+			properties.put(propName, propValue);
+			// Write properties file.
 			properties.store(new FileOutputStream(propFile + ".properties"), null);
+			
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.err.println( e.getMessage() );
 		}
 	} // setProperty
 

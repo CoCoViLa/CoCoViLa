@@ -40,14 +40,20 @@ public class FileFuncs {
 		}
 	}
 
-	public static void writeFile( String prog, String mainClassName, String ext, String dir ) {
+	public static void writeFile( String prog, String mainClassName, String ext, String dir, boolean append ) {
         try {
         	if( !dir.endsWith( System.getProperty( "file.separator" ) ) ) {
         		dir += System.getProperty( "file.separator" );
         	}
-            PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter(
-            		dir + System.getProperty( "file.separator" ) +
-                    mainClassName + "." + ext ) ) );
+        	String path = dir + System.getProperty( "file.separator" ) + mainClassName + "." + ext;
+        	
+        	File file = new File( path );
+        	
+        	if( !append && file.exists() ) {
+        		file.delete();
+        	}
+        	
+            PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter( path, append ) ) );
 
             out.println( prog );
             out.close();

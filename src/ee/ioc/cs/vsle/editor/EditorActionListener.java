@@ -110,6 +110,11 @@ public class EditorActionListener implements ActionListener {
                     Editor.setMultyProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
                     Editor.getInstance().clearPane();
                 }
+            } else if ( e.getActionCommand().equals( Menu.CLOSE_ALL ) ) {
+                while ( Editor.getInstance().getCurrentPackage() != null ) {
+                    Editor.setMultyProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
+                    Editor.getInstance().clearPane();
+                }
             } else if ( e.getActionCommand().equals( Menu.RELOAD ) ) {
                 if ( Editor.getInstance().getCurrentPackage() != null ) {
                 	File pack = new File(Editor.getInstance().getCurrentPackage().getPath());

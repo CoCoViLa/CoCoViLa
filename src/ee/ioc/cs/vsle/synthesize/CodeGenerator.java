@@ -246,10 +246,10 @@ public class CodeGenerator {
 				
 			} else if ( token == TypeToken.TOKEN_OBJECT ) {
 				
-    			out += offset //+ object
+    			out += offset + object
     					+ var + " = (" + varType + ")" + aliasTmp + "[" + i + "];\n";
     		} else {
-    			out += offset //+ object
+    			out += offset + object
     					+ var + " = ((" + token.getObjType() + ")" 
     					+ aliasTmp + "[" + i + "])." + token.getMethod() + "();\n";
     		}
