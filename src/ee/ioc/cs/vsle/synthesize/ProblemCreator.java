@@ -48,11 +48,8 @@ public class ProblemCreator {
             	cf.setName( cf.getName().substring( 1 ) );
             	cf.setValue( "" + alias.getVars().size() );
             }
-            var = new Var();
-            var.setObj( caller );
-            var.setField( cf );
-            var.setName( cf.getName() );
-            var.setType( cf.getType() );
+            var = new Var( cf, caller );
+            
             problem.addVar( var );
             if( cf.isConstant() ) {
             	problem.getKnownVars().add( var );
@@ -368,8 +365,7 @@ public class ProblemCreator {
        }
        for ( int k = 0; k < classRelation.getExceptions().size(); k++ ) {
            cf = classRelation.getExceptions().get( k );
-           Var ex = new Var();
-           ex.setName( cf.getType() );
+           Var ex = new Var( cf, null );
            rel.getExceptions().add( ex );
        }
 

@@ -359,7 +359,7 @@ public class DepthFirstPlanner implements IPlanner {
 						if( var.getField().isAlias() ) {
 							//this is used if we have alias in alias structure
 							db.p( "addVarsToList: alias " + var + " in alias " + topvar );
-							addKnownVarsToSet( problem, var.getField().getParentVars(), toSet );//recursion
+							//addKnownVarsToSet( problem, var.getField().getParentVars(), toSet );//recursion TODO - fix
 						}
 					}
 				}

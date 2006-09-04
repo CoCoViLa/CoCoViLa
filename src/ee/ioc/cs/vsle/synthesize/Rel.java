@@ -470,7 +470,7 @@ class Rel implements Serializable {
                 		
                 		varList += CodeGenerator.getOffset() + alias_tmp + "["
                                 + Integer.toString(k) + "] = "
-                                + obj + varName + ";\n";
+                                + obj + varName + ";\n";//TODO check obj!!!
                     }
                     assigns += declarations + varList + CodeGenerator.getOffset();
                 }
@@ -521,7 +521,7 @@ class Rel implements Serializable {
             						+ alias_tmp + "[" + k + "];\n";
             			}
             		} else {
-            			assigns += CodeGenerator.getOffset() //+ obj
+            			assigns += CodeGenerator.getOffset() + obj
             					+ varFromAlias + " = ((" + token.getObjType() + ")" 
             					+ alias_tmp + "[" + k + "])." + token.getMethod() + "();\n";
             		}

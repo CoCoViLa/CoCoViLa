@@ -253,10 +253,7 @@ public class CodeGenerator {
     					+ var + " = ((" + token.getObjType() + ")" 
     					+ aliasTmp + "[" + i + "])." + token.getMethod() + "();\n";
     		}
-    		if( var.toString().equals("Source_6.Source_4.state_c"))
-    		{
-    			System.err.println( "fa: " );
-    		}
+
     		System.err.println( "fa: " + object + "|" + var );
         }
         return out;
@@ -314,7 +311,7 @@ public class CodeGenerator {
         		varName = //object + 
         			field.getName();
         	}
-        	System.err.println( "ta: " + object + "|" + field.getName() );
+        	System.err.println( "ta: " + object + "|" + field.getName() + " varName: " + varName );
             if ( j == 0 ) {
                 out += varName;
             } else {

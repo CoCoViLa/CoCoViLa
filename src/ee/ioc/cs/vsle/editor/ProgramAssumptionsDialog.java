@@ -161,7 +161,7 @@ implements ActionListener, KeyListener {
 				String text = textField.getText();
 				
 				try {
-					args[asumptions.indexOf( field.getParentVar() )] = createObject( field, text );
+					//args[asumptions.indexOf( field.getParentVar() )] = createObject( field, text ); TODO - fix
 				} catch (Exception e1) {
 					showError( field.getName(), e1 );
 					return;
@@ -175,7 +175,7 @@ implements ActionListener, KeyListener {
 					s += (String) comboBox.getItemAt(j) + ClassField.ARRAY_TOKEN;
 				}
 				try {
-					args[asumptions.indexOf( field.getParentVar() )] = createObject( field, s );
+					//args[asumptions.indexOf( field.getParentVar() )] = createObject( field, s ); TODO - fix
 				} catch (Exception e1) {
 					showError( field.getName(), e1 );					
 					return;

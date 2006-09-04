@@ -18,13 +18,21 @@ public class Var implements //Cloneable,
 
     private Set<Rel> rels = new HashSet<Rel>();
     private ClassField field;
-    private String type;
     private String object;
-    private String name;
     private int varNumber;
 
-    Var() {
-        varNumber = RelType.varCounter++;
+    private Var() {
+
+    	varNumber = RelType.varCounter++;
+    }
+    
+    public Var( ClassField cf, String object ) {
+    	
+    	this();
+        
+        setField( cf );
+        
+        this.object = object;
     }
 
 
@@ -33,40 +41,15 @@ public class Var implements //Cloneable,
     }
 
     public String getType() {
-        return type;
+        return field.getType();
     }
-    /**
-     * <UNCOMMENTED>
-     * @param obj String
-     */
-    void setObj( String obj ) {
-        object = obj;
-    } // setObj
-
-    /**
-     * <UNCOMMENTED>
-     * @param name String
-     */
-    void setName( String name ) {
-        this.name = name;
-    } // setName
-
-    /**
-     * <UNCOMMENTED>
-     * @param type String
-     */
-    void setType( String type ) {
-        this.type = type;
-    } // setType
-
+    
     /**
      * <UNCOMMENTED>
      * @param field ClassField
      */
     void setField( ClassField field ) {
         this.field = field;
-
-        field.setParentVar(this);
     } // setField
 
     public ClassField getField() {
@@ -86,7 +69,7 @@ public class Var implements //Cloneable,
      * @return String
      */
     public String getName() {
-        return name;
+        return field.getName();
     } // getName
 
     /**
@@ -103,7 +86,7 @@ public class Var implements //Cloneable,
      public
      */
     public String toString() {
-        return ( object + "." + name ).substring( 5 );
+        return ( object + "." + field.getName() ).substring( 5 );
     } // toString
 
     public boolean equals( Object e ) {

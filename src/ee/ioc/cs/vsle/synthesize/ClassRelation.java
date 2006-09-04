@@ -176,7 +176,9 @@ class ClassRelation
                 Pattern pattern = Pattern.compile( ".*\\([ .A-Za-z0-9]+\\).*" );
                 Matcher matcher = pattern.matcher( s );
                 if ( matcher.find() ) {
-                    ClassField cf = new ClassField( "exception", s.replaceAll( "[ ()]+", "" ) );
+                	
+                	String ex = s.replaceAll( "[ ()]+", "" );
+                    ClassField cf = new ClassField( ex, "exception" );
 
                     exceptions.add( cf );
 

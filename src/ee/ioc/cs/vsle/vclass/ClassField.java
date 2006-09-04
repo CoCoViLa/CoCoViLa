@@ -28,7 +28,12 @@ import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_VOID;
 public class ClassField implements Cloneable, Serializable {
 
 	public final static String ARRAY_TOKEN = "%%";
-
+	
+	public final static int TYPE_VARIABLE = 1;
+	public final static int TYPE_ALIAS = 2;
+	public final static int TYPE_EXCEPTION = 3;
+	public final static int TYPE_CONSTANT = 4;
+	
 	protected String name;
 
 	protected String type = "";
@@ -36,8 +41,6 @@ public class ClassField implements Cloneable, Serializable {
 	protected String value;
 
 	protected String description;
-
-	private Var m_parentVar;
 
 	protected boolean specField = false;
 
@@ -214,14 +217,6 @@ public class ClassField implements Cloneable, Serializable {
 		return xml;
 	}
 
-	public void setParentVar(Var var) {
-		m_parentVar = var;
-	}
-
-	public Var getParentVar() {
-		return m_parentVar;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -253,20 +248,6 @@ public class ClassField implements Cloneable, Serializable {
 		}
 		return vars;
 	}
-
-	public ArrayList<Var> getParentVars() {
-		//alias
-		if( !isAlias() ) {
-			throw new IllegalStateException( "ClassField " + getName() + " is not alias, but " + type );
-		}
-		ArrayList<Var> list = new ArrayList<Var>();
-		for (ClassField var : vars) {
-			if( var.getParentVar() != null ) {
-				list.add( var.getParentVar() );
-			}
-		}
-		return list;
-	}
 	
 	public void setWatched(boolean value) {
 		this.watched = value;
@@ -293,10 +274,6 @@ public class ClassField implements Cloneable, Serializable {
 	}
 
 	public void setName(String name) {
-		if( name.equals("Source_6.Source_4.state_c"))
-		{
-			System.err.println( "fa: " );
-		}
 		this.name = name;
 	}
 
