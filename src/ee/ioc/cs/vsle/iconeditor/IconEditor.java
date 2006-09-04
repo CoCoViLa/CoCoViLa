@@ -143,9 +143,7 @@ public class IconEditor
 		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
 		if (vis != null) {
 			int v = Integer.parseInt(vis);
-			
-			return !( v < 1 );
-
+			return v >= 1;
 		}
 		return false;
 	}
