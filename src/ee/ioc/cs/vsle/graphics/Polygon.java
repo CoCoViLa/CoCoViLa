@@ -159,8 +159,7 @@ public class Polygon extends Shape {
 	public int getLineType() {
 		if (stroke.getDashArray() != null)
 			return (int)stroke.getDashArray()[0];
-		else
-			return 0;
+		return 0;
 	} // getLineType
 
 	/**

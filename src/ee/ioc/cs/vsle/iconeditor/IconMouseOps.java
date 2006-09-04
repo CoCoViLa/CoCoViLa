@@ -117,7 +117,7 @@ class IconMouseOps
 		this.transparency = transparencyPercentage;
 		if (editor.shapeList != null && editor.shapeList.size() > 0) {
 			for (int i = 0; i < editor.shapeList.size(); i++) {
-				Shape s = (Shape) editor.shapeList.get(i);
+				Shape s = editor.shapeList.get(i);
 				if (s.isSelected()) {
 					s.setTransparency(transparency);
 				}
@@ -134,7 +134,7 @@ class IconMouseOps
 	  this.lineType = lineType;
 	  if(editor.shapeList != null && editor.shapeList.size() > 0) {
 		for (int i = 0; i < editor.shapeList.size(); i++) {
-		  Shape s = (Shape) editor.shapeList.get(i);
+		  Shape s = editor.shapeList.get(i);
 		  if(s.isSelected()) {
 			s.setLineType(lineType);
 		  }
@@ -151,7 +151,7 @@ class IconMouseOps
 		this.strokeWidth = strokeW;
 		if (editor.shapeList != null && editor.shapeList.size() > 0) {
 			for (int i = 0; i < editor.shapeList.size(); i++) {
-				Shape s = (Shape) editor.shapeList.get(i);
+				Shape s = editor.shapeList.get(i);
 				if (s.isSelected()) {
 					s.setStrokeWidth(strokeWidth);
 				}
@@ -295,7 +295,7 @@ class IconMouseOps
 		boolean portMenuOpened = false;
 		if (editor.ports != null && editor.ports.size() > 0) {
 			for (int i = 0; i < editor.ports.size(); i++) {
-				IconPort p = (IconPort) editor.ports.get(i);
+				IconPort p = editor.ports.get(i);
 				if (p.isInside(x, y)) {
 					portMenuOpened = true;
 					openPortPopupMenu(p, x, y);
@@ -377,7 +377,7 @@ class IconMouseOps
 					}
 					// Display selected shape dimensions on the mouse position label under the icon editor's drawing area.
 					if (editor.shapeList != null && editor.shapeList.size() > 0 && editor.shapeList.getSelected().size() == 1) {
-						Shape s = (Shape) editor.shapeList.getSelected().get(0);
+						Shape s = editor.shapeList.getSelected().get(0);
 						if (!(s instanceof Text)) {
 							String text = "W:" + s.width + ", H:" + s.height;
 							editor.posInfo.setText(text);
@@ -416,7 +416,7 @@ class IconMouseOps
 		boolean portSelected = false;
 		if (editor.ports != null && editor.ports.size() > 0) {
 			for (int i = 0; i < editor.ports.size(); i++) {
-				IconPort p = (IconPort) editor.ports.get(i);
+				IconPort p = editor.ports.get(i);
 				if (p.isInside(editor.mouseX, editor.mouseY)) {
 					p.setSelected(true);
 					state = State.drag;
@@ -521,7 +521,7 @@ class IconMouseOps
 
 			if (editor.ports != null && editor.ports.size() > 0) {
 				for (int i = 0; i < editor.ports.size(); i++) {
-					IconPort p = (IconPort) editor.ports.get(i);
+					IconPort p = editor.ports.get(i);
 					if (p.isSelected()) {
 						p.setPosition(p.getX() + (x - editor.mouseX), p.getY() + (y - editor.mouseY));
 					}
@@ -609,7 +609,7 @@ class IconMouseOps
 			startY = y;
 			editor.shapeList.eraseShape(startX, startY);
 			for (int i = 0; i < editor.ports.size(); i++) {
-				IconPort port = (IconPort) editor.ports.get(i);
+				IconPort port = editor.ports.get(i);
 				if (port.isInside(x, y)) {
 					editor.ports.remove(i);
 				}
@@ -806,7 +806,7 @@ class IconMouseOps
 		state = State.selection;
 		if (editor.shapeList != null && editor.shapeList.size() > 0) {
 			for (int i = 0; i < editor.shapeList.size(); i++) {
-				Shape s = (Shape) editor.shapeList.get(i);
+				Shape s = editor.shapeList.get(i);
 				if (s != null && s.isSelected()) {
 					s.setColor(col);
 					editor.repaint();

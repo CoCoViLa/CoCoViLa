@@ -92,12 +92,11 @@ public class Palette implements ActionListener {
         if (!button.isSelected()) {
             button.setSelected(true);
             return;
-        } else {
-            for (JToggleButton b: buttons) {
-                if (b != button)
-                    b.setSelected(false);
-            }
         }
+		for (JToggleButton b: buttons) {
+		    if (b != button)
+		        b.setSelected(false);
+		}
         
         String cmd = e.getActionCommand();
         

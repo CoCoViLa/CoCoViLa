@@ -38,7 +38,7 @@ public class IconKeyOps implements KeyListener {
 	 if(editor.shapeList.getSelected().size()==1) {
 	   // MOVE OBJECT BACKWARD IN THE LIST
 	   // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-	   editor.currentShape = (Shape)editor.shapeList.getSelected().get(0);
+	   editor.currentShape = editor.shapeList.getSelected().get(0);
 	   if(editor.shapeList.indexOf(editor.currentShape)!=0) {
 		 editor.shapeList.sendBackward(editor.currentShape, 1);
 		 editor.repaint();
@@ -48,7 +48,7 @@ public class IconKeyOps implements KeyListener {
 	 if(editor.shapeList.getSelected().size()==1) {
 	   // MOVE OBJECT FORWARD IN THE LIST
 	   // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-	   editor.currentShape = (Shape)editor.shapeList.getSelected().get(0);
+	   editor.currentShape = editor.shapeList.getSelected().get(0);
 	   if(editor.shapeList.indexOf(editor.currentShape)!=editor.shapeList.size()-1){
 		 editor.shapeList.bringForward(editor.currentShape, 1);
 		 editor.repaint();
@@ -58,7 +58,7 @@ public class IconKeyOps implements KeyListener {
 	 if(editor.shapeList.getSelected().size()==1) {
 	   // MOVE OBJECT TO THE FRONT IN THE LIST,
 	   // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-	   editor.currentShape = (Shape)editor.shapeList.getSelected().get(0);
+	   editor.currentShape = editor.shapeList.getSelected().get(0);
 	   if(editor.shapeList.indexOf(editor.currentShape)!=editor.shapeList.size()-1) {
 		 editor.shapeList.bringToFront(editor.currentShape);
 		 editor.repaint();
@@ -68,7 +68,7 @@ public class IconKeyOps implements KeyListener {
 	 if(editor.shapeList.getSelected().size()==1) {
 	   // MOVE OBJECT TO THE BACK IN THE LIST
 	   // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-	   editor.currentShape = (Shape)editor.shapeList.getSelected().get(0);
+	   editor.currentShape = editor.shapeList.getSelected().get(0);
 	   if(editor.shapeList.indexOf(editor.currentShape)!=0) {
 		 editor.shapeList.sendToBack(editor.currentShape);
 		 editor.repaint();

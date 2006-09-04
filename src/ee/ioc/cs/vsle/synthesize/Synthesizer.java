@@ -1,12 +1,11 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.vclass.ClassField;
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
-
 import java.io.*;
 import java.util.*;
 import java.util.regex.*;
+
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  This class is responsible for managing the planning and code generation process.

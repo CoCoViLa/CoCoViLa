@@ -3,15 +3,11 @@
  */
 package ee.ioc.cs.vsle.editor;
 
-import javax.swing.*;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 
 import javax.swing.*;
-
-import ee.ioc.cs.vsle.event.*;
 
 /**
  * @author pavelg
@@ -154,7 +150,7 @@ public class RunningThreadKillerDialog extends JDialog {
 			
 			runn.start();
 			
-			d.addThread( runn );
+			RunningThreadKillerDialog.addThread( runn );
 		}
 		
 	}

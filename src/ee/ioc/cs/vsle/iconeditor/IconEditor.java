@@ -143,11 +143,9 @@ public class IconEditor
 		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
 		if (vis != null) {
 			int v = Integer.parseInt(vis);
-			if (v < 1) {
-				return false;
-			} else {
-				return true;
-			}
+			
+			return !( v < 1 );
+
 		}
 		return false;
 	}
@@ -777,9 +775,8 @@ public class IconEditor
 				String osType = sysProps.getProperty("os.name");
 				if (isWin(osType)) {
 					return "Windows";
-				} else {
-					return "NotWindows";
 				}
+				return "NotWindows";
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1615,7 +1612,7 @@ public class IconEditor
 		RuntimeProperties.packageDtd = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PACKAGE_DTD);
 		RuntimeProperties.genFileDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
 		RuntimeProperties.nudgeStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.NUDGE_STEP));
-		;
+
 		int aa = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.ANTI_ALIASING));
 		if (aa == 0) {
 			RuntimeProperties.isAntialiasingOn = false;
@@ -1785,9 +1782,8 @@ public class IconEditor
             while ((str = in.readLine()) != null) {
                 if (str.trim().startsWith("<class")) {
                     break;
-                }else {
-                	content.append(str + "\n");
                 }
+				content.append(str + "\n");
             }
             for (int i = 0; i< icons.size(); i++) {
             	

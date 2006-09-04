@@ -297,12 +297,9 @@ public class EventQueue extends Thread {
 
 				continue;
 			}
-			else
+			if ( ( ( ++evtCnt ) & evtCntBeforeYield ) == 0 )
 			{
-				if ( ( ( ++evtCnt ) & evtCntBeforeYield ) == 0 )
-				{
-					yield();
-				}
+				yield();
 			}
 		}
 

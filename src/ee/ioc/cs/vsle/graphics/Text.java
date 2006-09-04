@@ -239,17 +239,12 @@ public class Text extends Shape implements Serializable {
 	public boolean contains(int pointX, int pointY) {
 		if (pointX >= x && pointX <= x + this.w && pointY >= y - this.h && pointY <= y) {
 			return true;
-		} else {
-			return false;
 		}
+		return false;
 	} // contains
 
 	public boolean isInside(int x1, int y1, int x2, int y2) {
-		if (x >= x1 && y >= y1 && x + this.w <= x2 && y - this.h <= y2) {
-			return true;
-		} else {
-			return false;
-		}
+		return x >= x1 && y >= y1 && x + this.w <= x2 && y - this.h <= y2;
 	} // isInside
 
 	public boolean isInsideRect(int x1, int y1, int x2, int y2) {

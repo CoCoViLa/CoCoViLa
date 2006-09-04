@@ -35,7 +35,7 @@ public class IconPort implements Cloneable, Serializable {
 	ClassGraphics openGraphics;
 	ClassGraphics closedGraphics;
 	Graphics2D graphics;
-	ArrayList connections = new ArrayList();
+	ArrayList<Connection> connections = new ArrayList<Connection>();
 	boolean selected = false;
 	boolean connected = false;
 	boolean known = false;
@@ -79,7 +79,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return int - port center x coordinate.
 	 */
 	int getCenterX() {
-		return (int) (x + openGraphics.boundX + (openGraphics.boundWidth) / 2);
+		return (x + openGraphics.boundX + (openGraphics.boundWidth) / 2);
 	} // getCenterX
 
 	/**
@@ -120,7 +120,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return int - port center y coordinate.
 	 */
 	int getCenterY() {
-		return (int) (y + openGraphics.boundY + (openGraphics.boundHeight) / 2);
+		return (y + openGraphics.boundY + (openGraphics.boundHeight) / 2);
 	} // getCenterY
 
 	/**
@@ -128,7 +128,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return int - center x coordinate of the port calculated from object bounds.
 	 */
 	int getRealCenterX() {
-		return (int) (obj.x + x + openGraphics.boundX + (openGraphics.boundWidth) / 2);
+		return (obj.x + x + openGraphics.boundX + (openGraphics.boundWidth) / 2);
 	} // getRealCenterX
 
 	/**
@@ -136,7 +136,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return int - center y coordinate of the port calculated from object bounds.
 	 */
 	int getRealCenterY() {
-		return (int) (obj.y + y + openGraphics.boundY + (openGraphics.boundHeight) / 2);
+		return (obj.y + y + openGraphics.boundY + (openGraphics.boundHeight) / 2);
 	} // getRealCenterY
 
 	/**
@@ -144,7 +144,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return int - port width.
 	 */
 	int getWidth() {
-		return (int) openGraphics.boundWidth;
+		return openGraphics.boundWidth;
 	} // getWidth
 
 	/**
@@ -152,7 +152,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return int - port height.
 	 */
 	int getHeight() {
-		return (int) openGraphics.boundHeight;
+		return openGraphics.boundHeight;
 	} // getHeight
 
 	/**
@@ -297,8 +297,8 @@ public class IconPort implements Cloneable, Serializable {
 	 */
 	String getType() {
 		for (int i = 0; i < obj.fields.size(); i++) {
-			if (((ClassField) obj.fields.get(i)).getName().equals(name)) {
-				return ((ClassField) obj.fields.get(i)).getType();
+			if (obj.fields.get(i).getName().equals(name)) {
+				return obj.fields.get(i).getType();
 			}
 		}
 		return null;
@@ -310,8 +310,8 @@ public class IconPort implements Cloneable, Serializable {
 	 */
 	ClassField getField() {
 		for (int i = 0; i < obj.fields.size(); i++) {
-			if (((ClassField) obj.fields.get(i)).getName().equals(name)) {
-				return ((ClassField) obj.fields.get(i));
+			if (obj.fields.get(i).getName().equals(name)) {
+				return obj.fields.get(i);
 			}
 		}
 		return null;

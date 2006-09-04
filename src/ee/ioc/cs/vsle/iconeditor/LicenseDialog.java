@@ -139,6 +139,7 @@ public class LicenseDialog extends JDialog implements ActionListener {
 	 */
 	public static void main(String[] args) {
 		LicenseDialog l = new LicenseDialog(new IconEditor(), null);
+		l.setVisible( true );
 	} // main
 
 } // end of class

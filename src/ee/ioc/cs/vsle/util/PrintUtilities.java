@@ -37,14 +37,13 @@ public class PrintUtilities
 	public int print(Graphics g, PageFormat pageFormat, int pageIndex) {
 		if (pageIndex > 0) {
 			return (NO_SUCH_PAGE);
-		} else {
-			Graphics2D g2d = (Graphics2D) g;
-			g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
-			disableDoubleBuffering(componentToBePrinted);
-			componentToBePrinted.paint(g2d);
-			enableDoubleBuffering(componentToBePrinted);
-			return (PAGE_EXISTS);
 		}
+		Graphics2D g2d = (Graphics2D) g;
+		g2d.translate(pageFormat.getImageableX(), pageFormat.getImageableY());
+		disableDoubleBuffering(componentToBePrinted);
+		componentToBePrinted.paint(g2d);
+		enableDoubleBuffering(componentToBePrinted);
+		return (PAGE_EXISTS);
 	}
 
 	public static void disableDoubleBuffering(Component c) {

@@ -171,8 +171,7 @@ public class Rect extends Shape implements Serializable {
 	public int getLineType() {
 		if (stroke.getDashArray() != null)
 			return (int)stroke.getDashArray()[0];
-		else
-			return 0;
+		return 0;
 	} // getLineType
 
 	public int getTransparency() {

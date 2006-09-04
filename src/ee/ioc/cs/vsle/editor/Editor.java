@@ -8,7 +8,6 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
-import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;

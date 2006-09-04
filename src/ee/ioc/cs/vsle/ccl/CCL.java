@@ -2,12 +2,10 @@ package ee.ioc.cs.vsle.ccl;
 
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
+import java.util.*;
 
-import javax.swing.JOptionPane;
-
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * <p>

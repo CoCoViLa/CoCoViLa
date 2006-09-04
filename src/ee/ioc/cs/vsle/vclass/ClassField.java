@@ -1,12 +1,12 @@
 package ee.ioc.cs.vsle.vclass;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-
-import ee.ioc.cs.vsle.synthesize.Var;
-import ee.ioc.cs.vsle.util.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ANY;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_VOID;
+
+import java.io.*;
+import java.util.*;
+
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * <p>

@@ -502,14 +502,8 @@ public class DBResult extends Object implements java.io.Serializable{
 
         public boolean equals(Object obj){
             try{
-                if (
-                fieldIndex==((FieldComparator)obj).fieldIndex&&
-                orderType==((FieldComparator)obj).orderType
-                ){
-                    return true;
-                }else{
-                    return false;
-                }
+                return  fieldIndex==((FieldComparator)obj).fieldIndex &&
+                			orderType==((FieldComparator)obj).orderType;
             }catch(Exception e){
                 return false;
             }
@@ -526,7 +520,7 @@ public class DBResult extends Object implements java.io.Serializable{
         if (column<1||column>this.getColumnCount())throw new ArrayIndexOutOfBoundsException("The column index must be between 1 and "+getColumnCount());
         DBResult ret=new DBResult(DBResultName);
         ret.nameToIndex=(Hashtable)nameToIndex.clone();
-        ret.columns=(String[])columns.clone();
+        ret.columns=columns.clone();
         ret.attributes=(Hashtable)attributes.clone();
         ret.defFieldFormatter=defFieldFormatter;
         ret.customFieldFormatter=customFieldFormatter;

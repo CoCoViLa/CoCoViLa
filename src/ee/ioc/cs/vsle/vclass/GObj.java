@@ -72,39 +72,39 @@ public class GObj implements Serializable, Cloneable {
 		if (corner == 1) {
 			if (Xsize > 0.1 || changeX < 0) {
 				setX(x + changeX);
-				setXsize((width * Xsize - changeX) /(float)width);
+				setXsize((width * Xsize - changeX) /width);
 			}
 			if (Ysize > 0.1 || changeY < 0) {
 			    setY(y + changeY);
-				setYsize((height * Ysize - changeY) /(float)height);
+				setYsize((height * Ysize - changeY) /height);
 			}
 		}
 		if (corner == 2) {
 			if (Xsize > 0.1  || changeX > 0) {
-				setXsize((width * Xsize + changeX) /(float)width);
+				setXsize((width * Xsize + changeX) /width);
 			}
 			if (Ysize > 0.1  || changeY < 0) {
 			    setY(y + changeY);
-				setYsize((height * Ysize - changeY) /(float)height);
+				setYsize((height * Ysize - changeY) /height);
 			}
 		}
 
 		if (corner == 3) {
 			if (Xsize > 0.1 || changeX < 0) {
 				setX(x + changeX);
-				setXsize((width * Xsize - changeX) /(float)width);
+				setXsize((width * Xsize - changeX) /width);
 			}
 			if (Ysize > 0.1 || changeY > 0) {
-				setYsize((height * Ysize + changeY) /(float)height);
+				setYsize((height * Ysize + changeY) /height);
 			}
 		}
 
 		if (corner == 4) {
 			if (Xsize > 0.1 || changeX > 0) {
-				setXsize((width * Xsize + changeX) /(float)width);
+				setXsize((width * Xsize + changeX) /width);
 			}
 			if (Ysize > 0.1  || changeY > 0) {
-				setYsize((height * Ysize + changeY) /(float)height);
+				setYsize((height * Ysize + changeY) /height);
 			}
 		}
 
@@ -252,11 +252,7 @@ public class GObj implements Serializable, Cloneable {
 	}
 
 	public boolean includesObject(GObj obj) {
-		if (obj == this) {
-			return true;
-		} else {
-			return false;
-		}
+		 return obj == this;
 	}
 
 	public ArrayList<GObj> getComponents() {
@@ -452,7 +448,7 @@ public class GObj implements Serializable, Cloneable {
         xml += "  <properties x=\""+ x+"\" y=\""+y+"\" width=\""+ width+"\" height=\""+height+"\" xsize=\""+Xsize+"\" ysize=\""+Ysize+"\" strict=\""+strict+"\" />\n";
 		xml += "  <fields>\n";
 		for (int i = 0; i < fields.size(); i++) {
-			ClassField field = (ClassField)fields.get(i);
+			ClassField field = fields.get(i);
             xml += StringUtil.indent(4) + field.toXML();
 		}
 		xml += "  </fields>\n";

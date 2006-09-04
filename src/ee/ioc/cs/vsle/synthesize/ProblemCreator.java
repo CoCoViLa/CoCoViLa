@@ -2,8 +2,6 @@ package ee.ioc.cs.vsle.synthesize;
 
 import java.util.*;
 
-import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
 public class ProblemCreator {

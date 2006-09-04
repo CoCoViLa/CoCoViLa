@@ -234,9 +234,10 @@ implements ActionListener, KeyListener {
 					db.p( "createObject[] " + val.getClass().getName() + " " + val );
 				}
 				return primeArray;
-			} else /* equals String[] */ {
-				return value.split( ClassField.ARRAY_TOKEN );
-			}
+			}  
+			/* equals String[] */ 
+			return value.split( ClassField.ARRAY_TOKEN );
+			
 		}
 		
 		return null;

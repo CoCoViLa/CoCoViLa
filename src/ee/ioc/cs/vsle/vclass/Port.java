@@ -7,7 +7,7 @@ public class Port implements Cloneable, Serializable {
 
 	private String id;
 	private GObj obj;
-	private int width, height;
+	//private int width, height;
 	private String name;
 	private String type;
 	public int x;
