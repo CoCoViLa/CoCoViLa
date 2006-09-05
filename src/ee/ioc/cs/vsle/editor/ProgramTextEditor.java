@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.editor;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 
 import javax.swing.*;
 
@@ -16,7 +17,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
 	private ProgramRunnerFeedbackEventListener m_lst = new ProgramRunnerFeedbackEventListener();
 	
-    private JButton computeGoal, runProg, computeAll, propagate, invoke, invokeNew;
+    private JButton computeGoal, runProg, computeAll, propagate, invoke, invokeNew, refreshSpec;
     private JTextArea jta_runResult;
     private JTextComponent jta_spec, jta_generatedCode;
     
@@ -26,9 +27,17 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     
     private long m_progRunnerID;
     
-    public ProgramTextEditor( long prunnerID ) {
+    private String m_packageName;
+    
+    private static HashMap<String, JFrame> s_frames = new HashMap<String, JFrame>();
+    
+    public ProgramTextEditor( long prunnerID, String packageName ) {
     	
-        super( "Specification" );
+        super( packageName + " - Specification" );
+        
+        s_frames.put( packageName, this );
+        
+        m_packageName = packageName;
         
         ProgramRunnerFeedbackEvent.registerListener( m_lst );
         
@@ -36,7 +45,26 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         
         m_progRunnerID = prunnerID;
         
-        tabbedPane = new JTabbedPane();
+        setLocationByPlatform( true );
+        
+        initUI();
+        
+        SwingUtilities.invokeLater( new Runnable() {
+
+        	public void run() {
+        		ProgramRunnerEvent evt = new ProgramRunnerEvent( this, 
+        				m_progRunnerID, 
+        				ProgramRunnerEvent.REQUEST_SPEC );
+
+        		EventSystem.queueEvent( evt );
+        	}} 
+        );
+    	
+    }
+
+    private void initUI() {
+    	
+    	tabbedPane = new JTabbedPane();
 
         if( RuntimeProperties.isSyntaxHighlightingOn ) {
         	jta_spec = new JavaColoredTextPane();
@@ -61,8 +89,12 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         progToolBar.add( computeGoal );
         computeAll = new JButton( "Compute all" );
         computeAll.addActionListener( this );
+        
         progToolBar.add( computeAll );
         progToolBar.add( new UndoRedoDocumentPanel( jta_spec.getDocument() ) );
+        refreshSpec = new JButton( "Refresh from Scheme" );
+        refreshSpec.addActionListener( this );
+        progToolBar.add( refreshSpec );
         progToolBar.add( new FontResizePanel( jta_spec ) );
 
         specText.add( progToolBar, BorderLayout.NORTH );
@@ -125,24 +157,15 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         runResult.add( resultToolBar, BorderLayout.NORTH );
 
         tabbedPane.addTab( "Run results", runResult );
-
-        SwingUtilities.invokeLater( new Runnable() {
-
-        	public void run() {
-        		ProgramRunnerEvent evt = new ProgramRunnerEvent( this, 
-        				m_progRunnerID, 
-        				ProgramRunnerEvent.REQUEST_SPEC );
-
-        		EventSystem.queueEvent( evt );
-        	}} 
-        );
-    	
+        
         getContentPane().add( tabbedPane );
         validate();
     }
-
+    
     public void dispose() {
     	super.dispose();
+    	
+    	s_frames.remove( m_packageName );
     	
     	if( jta_spec != null && jta_spec instanceof JavaColoredTextPane ) {
     		((JavaColoredTextPane)jta_spec).destroy();
@@ -161,12 +184,20 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     	
     }
     
+    public static JFrame getFrame( String packageName ) {
+    	return s_frames.get( packageName );
+    }
+    
     public void actionPerformed( ActionEvent e ) {
     	
     	int op = -1;
     	ProgramRunnerEvent evt = null;
     	
-        if ( ( e.getSource() == computeGoal ) || ( e.getSource() == computeAll ) ) {    
+    	if ( ( e.getSource() == refreshSpec ) ) {
+    		
+    		evt = new ProgramRunnerEvent( this, m_progRunnerID, ProgramRunnerEvent.REQUEST_SPEC );
+    		
+    	} else if ( ( e.getSource() == computeGoal ) || ( e.getSource() == computeAll ) ) {    
         	
         	op = ( e.getSource() == computeGoal )
         		? ProgramRunnerEvent.COMPUTE_GOAL

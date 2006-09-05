@@ -41,7 +41,7 @@ public class Editor extends JFrame implements ChangeListener {
 
 	KeyOps keyListener;
 
-	public static final String WINDOW_TITLE = "COCOVILA - Scheme Editor";
+	public static final String WINDOW_TITLE = "CoCoViLa - Scheme Editor";
 
 	/**
 	 * Class constructor [1].
@@ -567,8 +567,13 @@ public class Editor extends JFrame implements ChangeListener {
 			Canvas canvas = new Canvas(f);
 			String packageName = f.getName().substring(0,
 					f.getName().indexOf("."));
-			tabbedPane.addTab(packageName, canvas);
-			tabbedPane.setSelectedComponent(canvas);
+			
+			if( !isPackageOpen( packageName ) ) {
+				tabbedPane.addTab(packageName, canvas);
+				tabbedPane.setSelectedComponent(canvas);
+			} else {
+				JOptionPane.showMessageDialog( Editor.getInstance(), "The package " + packageName + " has already been loaded", "Error", JOptionPane.ERROR_MESSAGE );
+			}
 		}
 	} // loadPackage
 
@@ -749,6 +754,11 @@ public class Editor extends JFrame implements ChangeListener {
 
 	}
 
+	public boolean isPackageOpen( String packageName ) {
+		
+		return tabbedPane.indexOfTab( packageName ) > -1;
+	}
+	
 	public void stateChanged(ChangeEvent e) {
 		if (getCurrentCanvas() != null) {
 			JCheckBoxMenuItem cb = (JCheckBoxMenuItem) menuBar.getMenu(1)

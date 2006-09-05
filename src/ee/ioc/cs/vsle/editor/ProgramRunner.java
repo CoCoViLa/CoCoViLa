@@ -28,18 +28,22 @@ public class ProgramRunner {
     private List<Var> assumptions = new ArrayList<Var>(); 
     private Object[] arguments;
     private String mainClassName = new String();
-    private ArrayList<Connection> relations;
-    private VPackage vPackage;
+    private Canvas m_canvas;
     
-	public ProgramRunner( ArrayList<Connection> relations, ObjectList objs, VPackage pack ) {
+	public ProgramRunner( Canvas canvas ) {
 		
 		m_id = System.currentTimeMillis();
 		ProgramRunnerEvent.registerListener( m_lst );
 		
-		objects = GroupUnfolder.unfold( objs );
-		this.relations = relations;
-		this.vPackage = pack;
+		m_canvas = canvas;
+		
+		updateFromCanvas();
 	}
+	
+	private void updateFromCanvas() {
+		objects = GroupUnfolder.unfold( m_canvas.objects );
+	}
+	
 	
 	public void destroy() {
 		
@@ -53,9 +57,11 @@ public class ProgramRunner {
 	}
 	
 	private String getSpec() {
-		ISpecGenerator sgen = SpecGenFactory.getInstance().getCurrentSpecGen();
-
-        return sgen.generateSpec( objects, relations, vPackage );
+		
+		updateFromCanvas();
+		
+        return SpecGenFactory.getInstance()
+        			.getCurrentSpecGen().generateSpec( objects, m_canvas.connections, m_canvas.getCurrentPackage() );
 	}
 	
 	private Object[] getArguments() throws Exception {

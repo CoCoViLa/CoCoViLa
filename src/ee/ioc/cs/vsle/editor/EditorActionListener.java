@@ -148,14 +148,19 @@ public class EditorActionListener implements ActionListener {
                     Editor.getInstance().getCurrentCanvas().clearObjects();
                 }
             } else if ( e.getActionCommand().equals( Menu.SPECIFICATION ) ) {
-                if( Editor.getInstance().getCurrentCanvas() != null ) {
+            	Canvas canv = Editor.getInstance().getCurrentCanvas();
+                if( canv != null ) {
                 	
-                	final ProgramRunner runner = new ProgramRunner( 
-                			Editor.getInstance().getCurrentCanvas().connections, 
-            				Editor.getInstance().getCurrentCanvas().objects,
-            				Editor.getInstance().getCurrentCanvas().vPackage );
+                	JFrame frame = ProgramTextEditor.getFrame( canv.getCurrentPackage().name );
+                	if( frame != null ) {
+                		
+                		frame.toFront();
+                		return;
+                	}
                 	
-            		ProgramTextEditor programEditor = new ProgramTextEditor( runner.getId() );
+                	final ProgramRunner runner = new ProgramRunner( canv );
+                	
+            		ProgramTextEditor programEditor = new ProgramTextEditor( runner.getId(), canv.getCurrentPackage().name );
             		
             		programEditor.addWindowListener( new WindowAdapter(){
 
@@ -164,16 +169,16 @@ public class EditorActionListener implements ActionListener {
             			}
                     });
             		
-                    programEditor.setSize( 550, 450 );
+                    programEditor.setSize( 700, 450 );
                     programEditor.setVisible( true );
                 } else {
                     JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
                 }
             } else if ( e.getActionCommand().equals( Menu.RUN ) ) {
-            	if( Editor.getInstance().getCurrentCanvas() != null ) {
-            		ProgramRunner runner = new ProgramRunner( Editor.getInstance().
-            				getCurrentCanvas().connections, Editor.getInstance().getCurrentCanvas().objects,
-            				Editor.getInstance().getCurrentCanvas().vPackage );
+            	Canvas canv = Editor.getInstance().getCurrentCanvas();
+                if( canv != null ) {
+                	
+                	final ProgramRunner runner = new ProgramRunner( canv );
             		
             		int op =  ProgramRunnerEvent.COMPUTE_ALL
             				| ProgramRunnerEvent.RUN_NEW
@@ -186,10 +191,10 @@ public class EditorActionListener implements ActionListener {
             		JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
             	}
             } else if ( e.getActionCommand().equals( Menu.RUNPROPAGATE ) ) {
-            	if( Editor.getInstance().getCurrentCanvas() != null ) {
-            		final ProgramRunner runner = new ProgramRunner( Editor.getInstance().
-            				getCurrentCanvas().connections, Editor.getInstance().getCurrentCanvas().objects,
-            				Editor.getInstance().getCurrentCanvas().vPackage );
+            	Canvas canv = Editor.getInstance().getCurrentCanvas();
+                if( canv != null ) {
+                	
+                	final ProgramRunner runner = new ProgramRunner( canv );
             		
             		int op =  ProgramRunnerEvent.COMPUTE_ALL
     						| ProgramRunnerEvent.RUN_NEW
