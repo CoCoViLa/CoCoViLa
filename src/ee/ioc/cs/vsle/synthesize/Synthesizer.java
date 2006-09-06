@@ -24,8 +24,8 @@ public class Synthesizer {
     a file.
      * @throws SpecParseException 
     */
-    public static void makeProgram( String progText, ClassList classes, String mainClassName ) throws SpecParseException {
-        generateSubclasses( classes );
+    public static void makeProgram( String progText, ClassList classes, String mainClassName, String path ) throws SpecParseException {
+        generateSubclasses( classes, path );
         FileFuncs.writeFile( progText, mainClassName, "java", RuntimeProperties.genFileDir, false );
     }
 
@@ -116,7 +116,7 @@ public class Synthesizer {
      @param classes List of classes obtained from the ee.ioc.cs.editor.synthesize.SpecParser
      * @throws SpecParseException 
      */
-    private static void generateSubclasses( ClassList classes ) throws SpecParseException {
+    private static void generateSubclasses( ClassList classes, String path ) throws SpecParseException {
 
     	if( classes == null ) {
     		throw new SpecParseException( "Empty Class list!!!" );
@@ -136,8 +136,7 @@ public class Synthesizer {
             	generated.add( pClass.getName() );
                 fileString = "";
                 try {
-                	fileString = SpecParser.getStringFromFile( RuntimeProperties.
-                            packageDir + File.separator + pClass.getName() + ".java" );
+                	fileString = SpecParser.getStringFromFile( path + pClass.getName() + ".java" );
                 	
                 } catch ( IOException io ) {
                     db.p( io );
@@ -202,17 +201,17 @@ public class Synthesizer {
     /**
      * @param fileName -
      */
-    public static void parseFromCommandLine( String fileName ) {
+    public static void parseFromCommandLine( String path, String fileName ) {
         try {
             
-            String file = SpecParser.getStringFromFile( RuntimeProperties.packageDir + fileName );
+            String file = SpecParser.getStringFromFile( path + fileName );
 
             String mainClassName = SpecParser.getClassName( file );
             
-            ClassList classList = SpecParser.parseSpecification( file );
+            ClassList classList = SpecParser.parseSpecification( path, file );
             String prog = makeProgramText( file, true, classList, mainClassName, null ); //changed to true
 
-            makeProgram( prog, classList, mainClassName );
+            makeProgram( prog, classList, mainClassName, path );
         } catch ( UnknownVariableException uve ) {
             db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
         } catch ( LineErrorException lee ) {

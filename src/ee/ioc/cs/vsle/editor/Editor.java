@@ -461,7 +461,7 @@ public class Editor extends JFrame implements ChangeListener {
 		if (getCurrentPackage() != null) {
 			menu.add(new JSeparator());
 
-			final String packageName = getCurrentPackage().name;
+			final String packageName = getCurrentPackage().getName();
 			// <package>.meth
 			menuItem = new JMenuItem(packageName + ".meth", KeyEvent.VK_M);
 			menuItem.addActionListener(new ActionListener() {
@@ -635,14 +635,11 @@ public class Editor extends JFrame implements ChangeListener {
 		try {
 			if (args.length > 0) {
 				if (args[0].equals("-p")) {
-					if (args.length == 3) {
-						RuntimeProperties.packageDir = directory + args[2]
-								+ System.getProperty("file.separator");
-					} else {
-						RuntimeProperties.packageDir = directory;
-					}
 					
-					Synthesizer.parseFromCommandLine(args[1]);
+					String dir = ( args.length == 3 ) ? directory + args[2] + System.getProperty("file.separator")
+													: directory;
+					
+					Synthesizer.parseFromCommandLine( dir, args[1]);
 				} else {
 					// Esimeses hoos vaatame, kas moodulite fail on ette antud
 					// k�surealt.
@@ -681,7 +678,6 @@ public class Editor extends JFrame implements ChangeListener {
 					// application.properties failis polnud vastavat kirjet
 					// vaikimisi laetava faili kohta.
 					db.p("Module file name was not specified in command line nor in the application.properties file. Starting without.");
-					RuntimeProperties.packageDir = directory;
 					window = new Editor();
 				}
 				window.setTitle(WINDOW_TITLE);
@@ -763,7 +759,6 @@ public class Editor extends JFrame implements ChangeListener {
 					.getMenuComponent(2);
 			cb.setSelected(getCurrentCanvas().isGridVisible());
 			getCurrentCanvas().drawingArea.grabFocus();
-			RuntimeProperties.packageDir = getCurrentCanvas().workDir;
 		}
 	}
 

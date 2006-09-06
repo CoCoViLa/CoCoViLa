@@ -133,7 +133,7 @@ public class SchemeLoader {
 
 			if (element.equals("scheme")) {
 				String type = attrs.getValue("package");
-				if (!type.equals(vPackage.name)) {
+				if (!type.equals(vPackage.getName())) {
 					throw new SAXException("Scheme was built with package \""
 							+ type + "\", load this package first");
 				}

@@ -65,8 +65,7 @@ public class Palette implements ActionListener {
 			if (pClass.icon.equals("default.gif")) {
                 icon = new ImageIcon("images/default.gif");
 			} else {
-				icon = new ImageIcon(
-					RuntimeProperties.packageDir + File.separator + pClass.icon);
+				icon = new ImageIcon( canvas.getWorkDir() + pClass.icon);
 			}
 			JToggleButton button = new JToggleButton(icon);
 			button.setToolTipText(pClass.description);

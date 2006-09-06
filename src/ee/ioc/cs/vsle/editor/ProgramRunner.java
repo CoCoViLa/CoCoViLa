@@ -88,7 +88,7 @@ public class ProgramRunner {
 		arguments = null;
 
 		try {
-			Synthesizer.makeProgram( genCode, classList, mainClassName );
+			Synthesizer.makeProgram( genCode, classList, mainClassName, m_canvas.getWorkDir() );
 
 			CCL classLoader = new CCL();
 
@@ -126,7 +126,7 @@ public class ProgramRunner {
             if ( RuntimeProperties.isLogInfoEnabled() )
     			db.p( "Computing " + mainClassName );
             
-            classList = SpecParser.parseSpecification( fullSpec );
+            classList = SpecParser.parseSpecification( fullSpec, m_canvas.getWorkDir() );
             assumptions.clear();
             
             return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, assumptions );
@@ -300,6 +300,8 @@ public class ProgramRunner {
 			}
 		} catch (Exception e) {
 			e.printStackTrace(System.err);
+		} finally {
+			m_canvas.repaint();
 		}
 	}
 
@@ -396,7 +398,6 @@ public class ProgramRunner {
 				
 				if( doPropagate ) {
 					propagate();
-					Editor.getInstance().repaint();
 				}
 			}
 		}.start();
@@ -468,7 +469,6 @@ public class ProgramRunner {
 
 			if( !isPropagated && ( operation & ProgramRunnerEvent.PROPAGATE ) > 0 ) {
 				propagate();
-				Editor.getInstance().repaint();
 			}
 
 			if( ( operation & ProgramRunnerEvent.DESTROY ) > 0 ) {

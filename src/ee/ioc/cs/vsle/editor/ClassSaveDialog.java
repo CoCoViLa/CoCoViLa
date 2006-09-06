@@ -58,7 +58,7 @@ public class ClassSaveDialog extends JFrame implements ActionListener {
 			fileText += "    }@*/\n \n}";
 
 			if (className.length() != 0) {
-				FileFuncs.writeFile(RuntimeProperties.packageDir + className+".java", fileText);
+				FileFuncs.writeFile(canvas.getWorkDir() + className+".java", fileText);
 				canvas.currentObj.className = className;
 				this.dispose();
 				canvas.drawingArea.repaint();

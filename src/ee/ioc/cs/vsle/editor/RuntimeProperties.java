@@ -13,7 +13,6 @@ public class RuntimeProperties {
 	public static String[] classTblFields = {"Field Name", "Field Type", "Field Value"};
 	
 	// Application properties
-	public static String packageDir = "";
 	public static String genFileDir;
 	public static String compilationClasspath;
 	public static String customLayout;
@@ -49,5 +48,6 @@ public class RuntimeProperties {
 	public static boolean isLogInfoEnabled() {
 		return debugInfo >= 0;
 	}
+
 }
 

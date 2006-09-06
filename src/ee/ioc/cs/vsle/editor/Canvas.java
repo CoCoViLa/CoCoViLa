@@ -18,7 +18,7 @@ import java.io.*;
 public class Canvas extends JPanel implements ActionListener {
 	int mouseX; // Mouse X coordinate.
 	int mouseY; // Mouse Y coordinate.
-	String workDir;
+	private String workDir;
 	int objCount;
 	VPackage vPackage;
 	Palette palette;
@@ -40,8 +40,7 @@ public class Canvas extends JPanel implements ActionListener {
 	public Canvas(File f) {
 		super();
 		if (f.exists()) {
-			workDir = f.getParent() + File.separator;
-			RuntimeProperties.packageDir = workDir;
+			setWorkDir(f.getParent() + File.separator);
 			PackageParser pp = new PackageParser(f);
 			vPackage = pp.getPackage();
 			initialize();
@@ -55,7 +54,7 @@ public class Canvas extends JPanel implements ActionListener {
 
     void initialize() {
 		scheme = new Scheme();
-		scheme.packageName = vPackage.name;
+		scheme.packageName = vPackage.getName();
 		objects = scheme.objects;
 		connections = scheme.connections;
         mListener = new MouseOps(this);
@@ -414,7 +413,7 @@ public class Canvas extends JPanel implements ActionListener {
 			out.println("<?xml version='1.0' encoding='utf-8'?>");
 
 			out.println("<!DOCTYPE scheme SYSTEM \"" + RuntimeProperties.SCHEME_DTD + "\">");
-            out.println("<scheme package=\""+vPackage.name+"\">");
+            out.println("<scheme package=\""+vPackage.getName()+"\">");
 			for (int i = 0; i < objects.size(); i++) {
 				GObj obj = objects.get(i);
 				out.print(obj.toXML());
@@ -509,7 +508,7 @@ public class Canvas extends JPanel implements ActionListener {
 			csd.setVisible(true);
 
 		} else if (e.getActionCommand().equals(Menu.VIEWCODE)) {
-            CodeViewer cv = new CodeViewer(currentObj.getClassName());
+            CodeViewer cv = new CodeViewer( currentObj.getClassName(), getWorkDir() );
 			cv.setSize(550, 450);
 			cv.setVisible(true);
 		}
@@ -597,4 +596,18 @@ public class Canvas extends JPanel implements ActionListener {
     public void setPosInfo(int x, int y) {
         posInfo.setText(x + ", " + y);
     }
+
+	/**
+	 * @param workDir the workDir to set
+	 */
+	void setWorkDir(String workDir) {
+		this.workDir = workDir;
+	}
+
+	/**
+	 * @return the workDir
+	 */
+	String getWorkDir() {
+		return workDir;
+	}
 }

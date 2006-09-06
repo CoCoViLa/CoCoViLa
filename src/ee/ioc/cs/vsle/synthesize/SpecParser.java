@@ -249,11 +249,11 @@ public class SpecParser {
 
     private static ArrayList<String> s_parseErrors = new ArrayList<String>();
     
-    public static ClassList parseSpecification( String fullSpec ) throws IOException,
+    public static ClassList parseSpecification( String fullSpec, String path ) throws IOException,
     										SpecParseException, EquationException {
     	s_parseErrors.clear();
     	HashSet<String> hs = new HashSet<String>();
-    	return parseSpecificationImpl( refineSpec( fullSpec ), "this", hs );
+    	return parseSpecificationImpl( refineSpec( fullSpec ), "this", path, hs );
     }
     
     /**
@@ -266,7 +266,7 @@ public class SpecParser {
      @param	checkedClasses the list of classes that parser has started to check. Needed to prevent infinite loop
      in case of mutual declarations.
      */
-    private static ClassList<AnnotatedClass> parseSpecificationImpl( String spec, String className,
+    private static ClassList<AnnotatedClass> parseSpecificationImpl( String spec, String className, String path,
                                          HashSet<String> checkedClasses ) throws IOException,
             SpecParseException, EquationException {
         Matcher matcher2;
@@ -285,23 +285,24 @@ public class SpecParser {
                 LineType lt = getLine( specLines );
 
                 if ( lt != null ) {
-                	db.p( "Parsing: Class " + className + " " + lt );
+                	
+                	if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "Parsing: Class " + className + " " + lt );
+                	
                 	if ( lt.getType() == LineType.TYPE_SUPERCLASSES ) {
                 		split = lt.getSpecLine().split( "#", -1 );
                 		
                 		for (int i = 0; i < split.length; i++) {
 							String name = split[i];
 							
-							File file = new File( RuntimeProperties.packageDir + name + ".java" );
+							File file = new File( path + name + ".java" );
 
-	                        if ( file.exists() && isSpecClass( name ) ) {
+	                        if ( file.exists() && isSpecClass( path, name ) ) {
 	                            if ( classList.getType( name ) == null ) {
 	                                checkedClasses.add( name );
-	                                String s = new String( getStringFromFile( RuntimeProperties.
-	                                        packageDir + name + ".java" ) );
+	                                String s = new String( getStringFromFile( path + name + ".java" ) );
 
 	                                ClassList<AnnotatedClass> superClasses = parseSpecificationImpl( refineSpec( s ), name,
-	                                        checkedClasses );
+	                                		path, checkedClasses );
 	                                checkedClasses.remove( name );
 	                                
 	                                superClasses.getType( name ).setOnlyForSuperclassGeneration( true );
@@ -345,8 +346,8 @@ public class SpecParser {
                                     " declared more than once in class " + className );
                         }
                     	
-                    	File file = new File( RuntimeProperties.packageDir + type + ".java" );
-                    	if( file.exists() && isSpecClass( type ) ) {
+                    	File file = new File( path + type + ".java" );
+                    	if( file.exists() && isSpecClass( path, type ) ) {
                     		s_parseErrors.add("Constant " + name + " cannot be of type " + type);
                     		throw new SpecParseException( "Constant " + name +
                                     " cannot be of type " + type );
@@ -363,22 +364,21 @@ public class SpecParser {
                         String type = split[ 0 ].trim();
 
                         if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "Checking existence of " +
-                                RuntimeProperties.packageDir + type + ".java" );
+                        		path + type + ".java" );
                         if ( checkedClasses.contains( type ) ) {
                             throw new MutualDeclarationException( className + " <-> " + type );
                         }
-                        File file = new File( RuntimeProperties.packageDir + type + ".java" );
+                        File file = new File( path + type + ".java" );
                         boolean specClass = false;
 
                         // if a file by this name exists in the package directory and it includes a specification, we're gonna check it
-                        if ( file.exists() && isSpecClass( type ) ) {
+                        if ( file.exists() && isSpecClass( path, type ) ) {
                             specClass = true;
                             if ( classList.getType( type ) == null ) {
                                 checkedClasses.add( type );
-                                String s = new String( getStringFromFile( RuntimeProperties.
-                                        packageDir + type + ".java" ) );
+                                String s = new String( getStringFromFile( path + type + ".java" ) );
 
-                                classList.addAll( parseSpecificationImpl( refineSpec( s ), type,
+                                classList.addAll( parseSpecificationImpl( refineSpec( s ), type, path,
                                         checkedClasses ) );
                                 checkedClasses.remove( type );
                                 specClass = true;
@@ -507,7 +507,7 @@ public class SpecParser {
                         EquationSolver.solve( lt.getSpecLine() );
                         next: 
                         for ( String result : EquationSolver.getRelations() ) {
-                        	db.p( result );
+                        	if ( RuntimeProperties.isLogDebugEnabled() ) db.p( result );
                             String[] pieces = result.split( ":" );
 
                             //cannot assign new values for constants
@@ -735,7 +735,7 @@ public class SpecParser {
      @return list of fields declared in a specification.
      */
     public static ArrayList<ClassField> getFields( String fileName ) throws IOException {
-        ArrayList<ClassField> vars = new ArrayList<ClassField>();
+        ArrayList<ClassField> fields = new ArrayList<ClassField>();
         String s = new String( getStringFromFile( fileName ) );
         ArrayList<String> specLines = getSpec( s, false );
         String[] split;
@@ -751,9 +751,9 @@ public class SpecParser {
             if ( lt != null ) {
                 if ( lt.getType() == LineType.TYPE_ASSIGNMENT ) {
                     split = lt.getSpecLine().split( ":", -1 );
-                    for ( int i = 0; i < vars.size(); i++ ) {
-                        if ( vars.get( i ).getName().equals( split[ 0 ] ) ) {
-                            vars.get( i ).setValue( split[ 1 ] );
+                    for ( int i = 0; i < fields.size(); i++ ) {
+                        if ( fields.get( i ).getName().equals( split[ 0 ] ) ) {
+                            fields.get( i ).setValue( split[ 1 ] );
                         }
                     }
                 } else if ( lt.getType() == LineType.TYPE_DECLARATION ) {
@@ -764,18 +764,17 @@ public class SpecParser {
                     for ( int i = 0; i < vs.length; i++ ) {
                         ClassField var = new ClassField( vs[ i ], type );
 
-                        vars.add( var );
+                        fields.add( var );
                     }
                 }
             }
         }
-        return vars;
+        return fields;
     }
 
-    private static boolean isSpecClass( String file ) {
+    private static boolean isSpecClass( String path, String file ) {
         try {
-            BufferedReader in = new BufferedReader( new FileReader( RuntimeProperties.packageDir +
-                    file + ".java" ) );
+            BufferedReader in = new BufferedReader( new FileReader( path + file + ".java" ) );
             String lineString, fileString = new String();
 
             while ( ( lineString = in.readLine() ) != null ) {

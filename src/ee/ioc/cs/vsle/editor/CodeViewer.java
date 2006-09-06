@@ -18,12 +18,13 @@ public class CodeViewer extends JFrame implements ActionListener{
 	JPanel specText;
 	JButton saveBtn;
         String fileName;
+        String path;
 
-        public CodeViewer(String name, String extension) {
+        public CodeViewer(String name, String extension, String path ) {
             super(name + extension);
                 this.fileName = name + extension;
-
-                String fileText = FileFuncs.getFileContents(RuntimeProperties.packageDir + fileName);
+                this.path = path;
+                String fileText = FileFuncs.getFileContents(path + fileName);
 
                 textArea = new JavaColoredTextPane();
                 textArea.addKeyListener( new ProgramTextEditor.CommentKeyListener() );
@@ -55,13 +56,13 @@ public class CodeViewer extends JFrame implements ActionListener{
                 validate();
         }
 
-	public CodeViewer(String name) {
-		this( name, ".java" );
+	public CodeViewer(String name, String path ) {
+		this( name, ".java", path );
 	}
 
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == saveBtn) {
-			FileFuncs.writeFile(RuntimeProperties.packageDir + fileName, textArea.getText());
+			FileFuncs.writeFile(path + fileName, textArea.getText());
 		}
 	}
 

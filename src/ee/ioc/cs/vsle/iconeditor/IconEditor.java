@@ -1602,7 +1602,6 @@ public class IconEditor
 		String directory = System.getProperty("user.dir") + System.getProperty("file.separator");
 
 		PropertyBox.APP_PROPS_FILE_PATH = directory;
-		RuntimeProperties.packageDir = directory;
 		RuntimeProperties.zoomFactor = 100.0;
 		RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
 		RuntimeProperties.gridStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP));

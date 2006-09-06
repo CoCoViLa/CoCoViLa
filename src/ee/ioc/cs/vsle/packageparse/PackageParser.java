@@ -573,7 +573,7 @@ public class PackageParser {
             if ( element.equals( "name" ) ) {
                 // if we are reading a package field
                 if ( status == PACKAGE ) {
-                    pack.name = s;
+                    pack.setName(s);
                 } else { // else we a reading a class field
                     newClass.name = s;
                     // classNames.add(s);

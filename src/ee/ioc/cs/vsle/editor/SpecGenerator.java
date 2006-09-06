@@ -22,8 +22,8 @@ public class SpecGenerator implements ISpecGenerator {
 	public String generateSpec(ObjectList objects, ArrayList<Connection> relations, VPackage pack) {
 		GObj obj;
 		ClassField field;
-		File methF = new File( RuntimeProperties.packageDir + pack.name + ".meth" );
-		File specF = new File( RuntimeProperties.packageDir + pack.name + ".spec" );
+		File methF = new File( pack.getPath() + pack.getName() + ".meth" );
+		File specF = new File( pack.getPath() + pack.getName() + ".spec" );
 		String method = "";
 		String spec  = "";
 		try {

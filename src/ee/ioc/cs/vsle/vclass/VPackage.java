@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
  */
 public class VPackage {
 
-    public String name;
+    private String name;
 	public String description;
 	private String path;
 	private String lastScheme;
@@ -60,8 +60,8 @@ public class VPackage {
 	} // getClass
 
         public String getPackageClassName() {
-            String packClassName = name.substring( 0, 1 ).toUpperCase()
-                                   .concat( name.substring( 1, name.length() ) );
+            String packClassName = getName().substring( 0, 1 ).toUpperCase()
+                                   .concat( getName().substring( 1, getName().length() ) );
 
             Pattern pattern = Pattern.compile( "[ \t]+" );
             Matcher matcher = pattern.matcher( packClassName );
@@ -86,5 +86,19 @@ public class VPackage {
 
 		public void setLastScheme(String lastScheme) {
 			this.lastScheme = lastScheme;
+		}
+
+		/**
+		 * @param name the name to set
+		 */
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		/**
+		 * @return the name
+		 */
+		public String getName() {
+			return name;
 		}
 }

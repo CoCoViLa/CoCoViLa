@@ -92,7 +92,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         
         progToolBar.add( computeAll );
         progToolBar.add( new UndoRedoDocumentPanel( jta_spec.getDocument() ) );
-        refreshSpec = new JButton( "Refresh from Scheme" );
+        refreshSpec = new JButton( "Update from Scheme" );
         refreshSpec.addActionListener( this );
         progToolBar.add( refreshSpec );
         progToolBar.add( new FontResizePanel( jta_spec ) );
