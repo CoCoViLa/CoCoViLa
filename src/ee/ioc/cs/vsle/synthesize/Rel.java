@@ -255,7 +255,7 @@ class Rel implements Serializable {
             if ( TypeUtil.TYPE_VOID.equals( op.getType() )) {
                 return (checkAliasInputs() + getObject(object) + method + getParameters(true));
             }
-            return checkAliasInputs() /* + outputAliasDeclar() */
+            return checkAliasInputs()
                     + (getOutput() + " = " + getObject(object) + method + getParameters(true))
                     + ";\n" + checkAliasOutputs();
         } else if (type == RelType.TYPE_EQUATION) {
@@ -270,9 +270,7 @@ class Rel implements Serializable {
                             + Integer.toString(RelType.auxVarCounter) + "="
                             + split[1] + ";\n";
                     assign += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
-                            + getObject(op.getObject()) + op.getName()
-                            + " = TEMP"
-                            + Integer.toString(RelType.auxVarCounter) + ";\n";
+                            + op + " = TEMP" + Integer.toString(RelType.auxVarCounter) + ";\n";
                     RelType.auxVarCounter++;
                     return assign;
 
@@ -358,8 +356,7 @@ class Rel implements Serializable {
             }
 
             leftside = leftside.replaceFirst("([^a-zA-Z_]?" + left2
-                    + var.getName() + "[^a-zA-Z0-9_])", left
-                    + getObject(var.getObject()) + var.getName() + right);
+                    + var.getName() + "[^a-zA-Z0-9_])", left + var + right );
 
             if (outputs.get(0).getType().equals("int")
                     && (!getMaxType(inputs).equals("int") || method
