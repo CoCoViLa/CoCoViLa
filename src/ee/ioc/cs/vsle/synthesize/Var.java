@@ -17,6 +17,8 @@ public class Var implements //Cloneable,
         Serializable {
 
     private Set<Rel> rels = new HashSet<Rel>();
+    //the following is for alias only!!!
+    private List<Var> vars = new ArrayList<Var>();
     private ClassField field;
     private String object;
     private int varNumber;
@@ -44,6 +46,19 @@ public class Var implements //Cloneable,
         return field.getType();
     }
     
+    public List<Var> getChildVars() {
+    	if( !field.isAlias() ) {
+			throw new IllegalStateException( "getChildVars(): Var " + getName() + " is not alias, but " + getType() );
+		}
+    	return vars;
+    }
+    
+    public void addVar( Var var ) {
+    	if( !field.isAlias() ) {
+			throw new IllegalStateException( "addVar(): Var " + getName() + " is not alias, but " + getType() );
+		}
+    	vars.add( var );
+    }
     /**
      * <UNCOMMENTED>
      * @param field ClassField

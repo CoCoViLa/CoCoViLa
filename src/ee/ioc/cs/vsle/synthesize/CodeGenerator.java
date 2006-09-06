@@ -4,8 +4,6 @@ import java.util.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.vclass.Alias;
-import ee.ioc.cs.vsle.vclass.ClassField;
 
 public class CodeGenerator {
 
@@ -196,10 +194,9 @@ public class CodeGenerator {
     	
     	for ( int i = 0; i < vars.size(); i++ ) {
     		Var var = vars.get( i );
-    		String object = Rel.getObject(var.getObject());
     		if ( var.getField().isAlias() ) {
     			String aliasTmp = getAliasTmpName(var.getName());
-    			result += getVarsFromAlias( (Alias)var.getField(), aliasTmp, object, "in", i);
+    			result += getVarsFromAlias( var, aliasTmp, "in", i);
     			continue;
     		}
     		
@@ -209,52 +206,43 @@ public class CodeGenerator {
     		result += offset;
     		
     		if ( token == TypeToken.TOKEN_OBJECT ) {
-    			result += //object + 
-    			var.toString() + " = (" + varType + ")in[" + i + "];\n";
+    			result += var + " = (" + varType + ")in[" + i + "];\n";
     		} else {
-    			result += //object + 
-    			var.toString()
-    			+ " = ((" + token.getObjType() + ")in[" + i + "])."
-    			+ token.getMethod() + "();\n";
+    			result += var + " = ((" + token.getObjType() + ")in[" + i + "])." + token.getMethod() + "();\n";
     		}
-    		System.err.println( "si: " + object + "|" + var.toString() );
     	}
     	
     	return result + "\n";
     }
 
     //getAliasSubtaskInput
-    public static String getVarsFromAlias( Alias alias, String aliasTmp, String object, String parentVar, int num ) {
-        String aliasType = alias.getType();
+    public static String getVarsFromAlias( Var aliasVar, String aliasTmp, String parentVar, int num ) {
+        String aliasType = aliasVar.getType();
         
         String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType
                      + ")" + parentVar + "[" + num + "];\n";
 
-        ClassField var;
+        Var var;
 
-        for ( int i = 0; i < alias.getVars().size(); i++ ) {
-            var = alias.getVars().get( i );
-            //out += offset + object + var.getName() + " = " + aliasTmp + "[" + i + "];\n";
+        for ( int i = 0; i < aliasVar.getChildVars().size(); i++ ) {
+            var = aliasVar.getChildVars().get( i );
             
             String varType = var.getType();
     		TypeToken token = TypeToken.getTypeToken( varType );
     		
-    		if( var.isAlias() ) {
+    		if( var.getField().isAlias() ) {
     			//recursion
     			String tmp = getAliasTmpName(var.getName());
-				out += getVarsFromAlias( (Alias)var, tmp, object, aliasTmp, i );
+				out += getVarsFromAlias( var, tmp, aliasTmp, i );
 				
 			} else if ( token == TypeToken.TOKEN_OBJECT ) {
 				
-    			out += offset + object
-    					+ var + " = (" + varType + ")" + aliasTmp + "[" + i + "];\n";
+    			out += offset + var + " = (" + varType + ")" + aliasTmp + "[" + i + "];\n";
     		} else {
-    			out += offset + object
-    					+ var + " = ((" + token.getObjType() + ")" 
+    			out += offset + var + " = ((" + token.getObjType() + ")" 
     					+ aliasTmp + "[" + i + "])." + token.getMethod() + "();\n";
     		}
 
-    		System.err.println( "fa: " + object + "|" + var );
         }
         return out;
     }
@@ -271,17 +259,15 @@ public class CodeGenerator {
     		String varName;
     		
     		if ( var.getField().isAlias() ) {
-    			Alias alias = (Alias)var.getField();
-    			String aliasTmp = getAliasTmpName(alias.getName());
+    			String aliasTmp = getAliasTmpName( var.getName() );
     	        
-    	        declarations += getVarsToAlias( alias, aliasTmp, Rel.getObject(var.getObject()) );
+    	        declarations += getVarsToAlias( var, aliasTmp );
     	        
     	        varName = aliasTmp;
     	        
     		} else {
     			varName = var.toString();
     		}
-    		System.err.println( "so: " + "|" + varName );
     		if( i == 0 ) {
     			varList += varName;
     		} else {
@@ -294,24 +280,22 @@ public class CodeGenerator {
     }
 
     //getAliasSubtaskOutput
-    public static String getVarsToAlias( Alias alias, String aliasTmp, String object ) {
+    public static String getVarsToAlias( Var aliasVar, String aliasTmp ) {
     	
-        String aliasType = alias.getType();
+        String aliasType = aliasVar.getType();
         String before = "";
         String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
 
-        ClassField field;
-        for ( int j = 0; j < alias.getVars().size(); j++ ) {
-        	field = alias.getVars().get( j );
+        Var var;
+        for ( int j = 0; j < aliasVar.getChildVars().size(); j++ ) {
+        	var = aliasVar.getChildVars().get( j );
         	String varName;
-        	if( field.isAlias() ) {
-        		varName = getAliasTmpName(alias.getName());
-        		before += getVarsToAlias( (Alias)field, varName, object );
+        	if( var.getField().isAlias() ) {
+        		varName = getAliasTmpName(aliasVar.getName());
+        		before += getVarsToAlias( var, varName );
         	} else {
-        		varName = //object + 
-        			field.getName();
+        		varName = var.toString();
         	}
-        	System.err.println( "ta: " + object + "|" + field.getName() + " varName: " + varName );
             if ( j == 0 ) {
                 out += varName;
             } else {

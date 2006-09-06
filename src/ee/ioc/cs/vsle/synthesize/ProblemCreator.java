@@ -39,7 +39,8 @@ public class ProblemCreator {
                 problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
             }
             if ( cf.isAlias() ) {
-                cf = rewriteWildcardAlias( (Alias)cf, ac, classes );
+                createAlias( (Alias)cf, ac, classes, problem, caller );
+                continue;
             } else if( cf.isConstant() && cf.getName().startsWith( "*" ) ) {
             	//this denotes for alias.length constant
             	Alias alias = (Alias)ac.getFieldByName( cf.getName().substring( 0, cf.getName().length() - 7 ).substring( 1 ) );
@@ -97,12 +98,10 @@ public class ProblemCreator {
                                     "." + cf1.getName() + " and " + obj + "." + cf2.getName() );
                         }
                         isAliasRel = true;
-                        for ( int i = 0; i < v1.getField().getVars().size(); i++ ) {
-                            String s1 = v1.getField().getVars().get( i ).getName();
-                            String s2 = v2.getField().getVars().get( i ).getName();
+                        for ( int i = 0; i < v1.getChildVars().size(); i++ ) {
+                        	var1 = v1.getChildVars().get( i );
+                        	var2 = v2.getChildVars().get( i );
 
-                            var1 = problem.getAllVars().get( v1.getObject() + "." + s1 );
-                            var2 = problem.getAllVars().get( v2.getObject() + "." + s2 );
                             rel = new Rel();
                             rel.setUnknownInputs( classRelation.getInputs().size() );
                             rel.setSubtaskFlag( classRelation.getSubtasks().size() );
@@ -169,6 +168,57 @@ public class ProblemCreator {
         return problem;
     }
     
+    private static void createAlias( Alias alias, AnnotatedClass ac, ClassList classes, Problem problem, String object ) throws AliasException {
+    	
+    	Var var = new Var( alias, object );
+    	
+    	if( alias.isWildcard() ) {
+    		rewriteWildcardAlias( var, ac, classes, problem );
+    	} else {
+    		for ( ClassField childField : alias.getVars() ) {
+    			Var childVar = problem.getAllVars().get( object + "." + childField.getName() );
+    			
+    			if( childVar != null ) {
+    				var.addVar( childVar );
+    			}
+			}
+    	}
+        
+        problem.addVar( var );
+    }
+    
+    private static void rewriteWildcardAlias( Var aliasVar, AnnotatedClass ac, ClassList classes, Problem problem ) throws AliasException {
+    	
+    	String wildcardVar = ((Alias)aliasVar.getField()).getWildcardVar();
+
+    	ClassField clf;
+
+    	for ( int i = 0; i < ac.getFields().size(); i++ ) {
+    		clf = ac.getFields().get( i );
+    		//in the following AnnotatedClass we look for vars that match wildcard
+    		AnnotatedClass anc = classes.getType( clf.getType() );
+    		if ( anc != null ) {
+    			//this field matches
+    			ClassField field = anc.getFieldByName( wildcardVar );
+    			if ( field != null ) {
+
+    				if( !((Alias)aliasVar.getField()).isStrictType() 
+    						|| ((Alias)aliasVar.getField()).getVarType().equals( field.getType() ) ) {
+    					
+    					String absoluteName = aliasVar.getObject() + "." + clf + "." + field.getName();
+    					
+    					Var var = problem.getAllVars().get( absoluteName );
+    					
+    					if( var != null ) {
+    						aliasVar.addVar( var );
+    						((Alias)aliasVar.getField()).addVar( var.getField() );
+    					}
+    				}
+    			}
+    		}
+    	}
+    }
+    
     private static int getUniqueInputCount( ArrayList<ClassField> inputs ) {
     	
     	HashSet<ClassField> inps = new HashSet<ClassField>();
@@ -185,47 +235,7 @@ public class ProblemCreator {
     	
     	return size;
     }
-    
-    private static ClassField rewriteWildcardAlias( Alias cf, AnnotatedClass ac, ClassList classes ) throws AliasException {
-        if ( cf.isWildcard() ) {
-            String wildcardVar = cf.getWildcardVar();
-            
-            ClassField clf;
-            
-            for ( int i = 0; i < ac.getFields().size(); i++ ) {
-                clf = ac.getFields().get( i );
-                AnnotatedClass anc = classes.getType( clf.getType() );
-                if ( anc != null ) {
-                	ClassField field = anc.getFieldByName( wildcardVar );
-                    if ( field != null ) {
-                    	
-                    	if( !cf.isStrictType() || cf.getVarType().equals( field.getType() ) ) {
-                    		ClassField cf2 = field.clone();
-                    		cf2.setName( clf.getName() + "." + wildcardVar );
-                    		//TODO check for wildcards on deeper levels
-                    		if( cf2.isAlias() ) {
-                    			for (int j = 0; j < cf2.getVars().size(); j++) {
-                    				ClassField cfFrom2 = cf2.getVars().get(j);
-                    				cfFrom2 = cfFrom2.clone();
-                    				cfFrom2.setName( //clf.getName() + "." + 
-                    									cfFrom2.getName() );
-                    				cf2.getVars().set(j, cfFrom2);
-                    			}
-                    		}
-//                    		ClassField cf2 = new ClassField(
-//                        			clf.getName() + "." + wildcardVar,
-//                        			type );
-                        	
-                        	cf.addVar( cf2 );
-                    	}
-                    }
-                }
-            }
-            return cf;
-        }
-		return cf;
-    }
-    
+
     private static String checkIfAliasWildcard( ClassRelation classRelation ) {
         String s = classRelation.getInputs().get( 0 ).getName();
         if ( s.startsWith( "*." ) )

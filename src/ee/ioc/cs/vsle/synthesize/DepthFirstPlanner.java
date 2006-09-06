@@ -347,20 +347,15 @@ public class DepthFirstPlanner implements IPlanner {
 
 			toSet.add(topvar);
 			// if output var is alias then all its vars should be found as well
-			if (topvar.getField().isAlias()) {
-				for (ClassField field : topvar.getField().getVars()) {
-					String object = (topvar.getObject().equals("this")) ? ""
-							: topvar.getObject().substring(5) + ".";
-					Var var = problem.getVarByFullName(object
-							+ field.toString());
+			if ( topvar.getField().isAlias() ) {
+				for ( Var var : topvar.getChildVars() ) {
 
-					if (var != null) {
-						toSet.add(var);
-						if( var.getField().isAlias() ) {
-							//this is used if we have alias in alias structure
+					toSet.add(var);
+					if( var.getField().isAlias() ) {
+						//this is used if we have alias in alias structure
+						if (RuntimeProperties.isLogDebugEnabled())
 							db.p( "addVarsToList: alias " + var + " in alias " + topvar );
-							//addKnownVarsToSet( problem, var.getField().getParentVars(), toSet );//recursion TODO - fix
-						}
+						addKnownVarsToSet( problem, var.getChildVars(), toSet );//recursion
 					}
 				}
 			}
