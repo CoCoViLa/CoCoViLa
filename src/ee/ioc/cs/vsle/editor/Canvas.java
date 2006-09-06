@@ -12,8 +12,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.io.*;
-import java.net.URL;
-import java.net.URLClassLoader;
 
 /**
  */
@@ -38,8 +36,6 @@ public class Canvas extends JPanel implements ActionListener {
 	JPanel infoPanel;
 	JLabel posInfo;
 	DrawingArea drawingArea;
-    ISchemeDaemon daemon;
-    Thread daemonThread;
 
 	public Canvas(File f) {
 		super();
@@ -62,7 +58,6 @@ public class Canvas extends JPanel implements ActionListener {
 		scheme.packageName = vPackage.name;
 		objects = scheme.objects;
 		connections = scheme.connections;
-        startDaemon();
         mListener = new MouseOps(this);
 		keyListener = new KeyOps(this);
 		drawingArea = new DrawingArea();
@@ -119,49 +114,6 @@ public class Canvas extends JPanel implements ActionListener {
 		drawingArea.repaint();
 	}
 
-    public void stopDaemon() {
-        if (daemon != null) {
-            daemon.stop();
-            daemon = null;
-        }
-        if (daemonThread != null) {
-            daemonThread.interrupt();
-            try {
-                daemonThread.join(5000);
-                if (daemonThread.isAlive())
-                    System.err.println("Daemon did not die.. giving up.");
-                else
-                    System.err.println("Thread ended normally: " + daemonThread);
-            } catch (InterruptedException e) {
-                System.err.println("Current tread was interrupted.");
-            }
-            daemonThread = null;
-        }
-    }
-
-    public void startDaemon() {
-        stopDaemon();
-        try {
-            File path = new File(workDir);
-            URL[] classPath = {path.toURI().toURL()};
-            ClassLoader cl = new URLClassLoader(classPath);
-
-            Class elc = Class.forName(vPackage.getPackageClassName(), true, cl);
-            Object o = elc.newInstance();
-            daemon = ISchemeDaemon.class.cast(o);
-            daemon.setScheme(scheme);
-            daemonThread = new Thread(daemon);
-            daemonThread.start();
-        } catch (ClassNotFoundException e) {
-            // e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
 	 * Method for grouping objects.
@@ -449,7 +401,6 @@ public class Canvas extends JPanel implements ActionListener {
 
 		SchemeLoader sl = new SchemeLoader(file, vPackage);
 		scheme = sl.getScheme();
-        startDaemon();
 		connections = scheme.connections;
 		objects = scheme.objects;
 		mListener.setState(State.selection);
