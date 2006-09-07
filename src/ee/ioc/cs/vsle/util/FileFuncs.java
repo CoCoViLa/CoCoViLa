@@ -3,11 +3,9 @@ package ee.ioc.cs.vsle.util;
 import java.io.*;
 
 /**
- * Created by IntelliJ IDEA.
  * User: Ando
  * Date: 28.03.2005
  * Time: 21:45:37
- * To change this template use Options | File Templates.
  */
 public class FileFuncs {
 	public static String getFileContents(String fileName) {
@@ -22,7 +20,6 @@ public class FileFuncs {
 			in.close();
 		} catch (IOException ioe) {
 			db.p("Couldn't open file "+ fileName);
-
 		}
 
 		return fileString;
@@ -60,5 +57,16 @@ public class FileFuncs {
         } catch ( Exception e ) {
             db.p( e );
         }
+    }
+    
+    public static String getExtension(File f) {
+        String ext = null;
+        String s = f.getName();
+        int i = s.lastIndexOf('.');
+
+        if (i > 0 && i < s.length() - 1) {
+            ext = s.substring(i + 1).toLowerCase();
+        }
+        return ext;
     }
 }
