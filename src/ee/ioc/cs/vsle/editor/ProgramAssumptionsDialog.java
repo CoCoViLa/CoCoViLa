@@ -20,8 +20,8 @@ implements ActionListener, KeyListener {
 	
 	List<JTextField> textFields = new ArrayList<JTextField>();
 	List<JComboBox> comboBoxes = new ArrayList<JComboBox>();
-	List<ClassField> primitiveNameList = new ArrayList<ClassField>();
-	List<ClassField> arrayNameList = new ArrayList<ClassField>();
+	List<Var> primitiveNameList = new ArrayList<Var>();
+	List<Var> arrayNameList = new ArrayList<Var>();
 	List<Var> asumptions;
 	JButton clear, ok;
 	boolean isOK = false;
@@ -50,21 +50,18 @@ implements ActionListener, KeyListener {
 		textFieldPane.setLayout(new GridLayout(0, 1));
 		
 		JLabel label;
-		ClassField field;
 		JTextField textField;
 		JComboBox comboBox;
 		
 		for (Var var : assmps) {
-			field = var.getField();
 			
-			
-			if (field.isArray()) {
+			if (var.getField().isArray()) {
 				comboBox = new JComboBox();
 				comboBox.setEditable(true);
 				comboBox.addActionListener(this);
 				
-				if (field.getValue() != "" && field.getValue() != null) {
-					String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
+				if (var.getField().getValue() != "" && var.getField().getValue() != null) {
+					String[] split = var.getField().getValue().split( ClassField.ARRAY_TOKEN );
 					for (int j = 0; j < split.length; j++) {
 						comboBox.addItem(split[j]);
 					}
@@ -74,26 +71,26 @@ implements ActionListener, KeyListener {
 				
 				
 				comboBoxes.add(comboBox);
-				label = new JLabel(field.getName(), SwingConstants.CENTER);
-				label.setToolTipText(field.getDescription());
-				arrayNameList.add(field);
+				label = new JLabel(var.toString(), SwingConstants.CENTER);
+				label.setToolTipText(var.getField().getDescription());
+				arrayNameList.add(var);
 				labelPane.add(label);
-				label = new JLabel("(" + field.getType() + ")");
+				label = new JLabel("(" + var.getType() + ")");
 				typePane.add(label);
 				
 				textFieldPane.add(comboBox);
-			} else if (field.isPrimitiveOrString()) {
+			} else if (var.getField().isPrimitiveOrString()) {
 				textField = new JTextField();
 				textField.addKeyListener(this);
-				textField.setName(field.getName());
-				primitiveNameList.add(field);
-				textField.setText(field.getValue());
+				textField.setName(var.toString());
+				primitiveNameList.add(var);
+				textField.setText(var.getField().getValue());
 				textFields.add(textField);
-				label = new JLabel(field.getName(), SwingConstants.CENTER);
-				label.setToolTipText(field.getDescription());
+				label = new JLabel(var.toString(), SwingConstants.CENTER);
+				label.setToolTipText(var.getField().getDescription());
 				labelPane.add(label);
 				textFieldPane.add(textField);
-				label = new JLabel("(" + field.getType() + ")");
+				label = new JLabel("(" + var.getType() + ")");
 				typePane.add(label);
 			}
 		}
@@ -151,33 +148,33 @@ implements ActionListener, KeyListener {
 	
 	public void actionPerformed(ActionEvent e) {
 		JTextField textField;
-		ClassField field;
-		db.p(e);
+		Var var;
+		//db.p(e);
 		if (e.getSource() == ok) {
 			for (int i = 0; i < textFields.size(); i++) {
 				textField = textFields.get(i);
-				field = primitiveNameList.get(i);
+				var = primitiveNameList.get(i);
 				
 				String text = textField.getText();
 				
 				try {
-					//args[asumptions.indexOf( field.getParentVar() )] = createObject( field, text ); TODO - fix
+					args[asumptions.indexOf( var )] = createObject( var, text );
 				} catch (Exception e1) {
-					showError( field.getName(), e1 );
+					showError( var.getName(), e1 );
 					return;
 				}
 			}
 			for (int i = 0; i < comboBoxes.size(); i++) {
 				JComboBox comboBox = comboBoxes.get(i);
-				field = arrayNameList.get(i);
+				var = arrayNameList.get(i);
 				String s = "";
 				for (int j = 0; j < comboBox.getItemCount(); j++) {
 					s += (String) comboBox.getItemAt(j) + ClassField.ARRAY_TOKEN;
 				}
 				try {
-					//args[asumptions.indexOf( field.getParentVar() )] = createObject( field, s ); TODO - fix
+					args[asumptions.indexOf( var )] = createObject( var, s );
 				} catch (Exception e1) {
-					showError( field.getName(), e1 );					
+					showError( var.getName(), e1 );					
 					return;
 				}
 			}
@@ -201,21 +198,21 @@ implements ActionListener, KeyListener {
 				"Error", JOptionPane.ERROR_MESSAGE );
 	}
 	
-	private Object createObject( ClassField field, String value ) throws Exception {
-		TypeToken token = TypeToken.getTypeToken( field.getType() );
-		db.p( "var: " + field.getName() + " type " + field.getType() + " value " + value);
+	private Object createObject( Var var, String value ) throws Exception {
+		TypeToken token = TypeToken.getTypeToken( var.getType() );
+		//db.p( "var: " + var.getName() + " type " + var.getType() + " value " + value);
 		
 		Class clazz = token.getWrapperClass();
 		
 		if( clazz != null ) {
 				Method meth = clazz.getMethod( "valueOf", new Class[]{ String.class });
 				Object o = meth.invoke( null, new Object[]{ value });
-				db.p( "createObject " + o.getClass().getName() + " " + o );
+				//db.p( "createObject " + o.getClass().getName() + " " + o );
 				return o;
-		} else if ( field.getType().equals( "String" ) ) {
+		} else if ( var.getType().equals( "String" ) ) {
 			return value;
-		} else if( field.isPrimOrStringArray() ) {
-			String type = field.arrayType();
+		} else if( var.getField().isPrimOrStringArray() ) {
+			String type = var.getField().arrayType();
 			
 			token = TypeToken.getTypeToken( type );
 			clazz = token.getWrapperClass();
@@ -231,7 +228,7 @@ implements ActionListener, KeyListener {
 					Object val = meth.invoke( null, new Object[]{ split[j] });
 					Array.set( primeArray, j, val );
 					
-					db.p( "createObject[] " + val.getClass().getName() + " " + val );
+					//db.p( "createObject[] " + val.getClass().getName() + " " + val );
 				}
 				return primeArray;
 			}  

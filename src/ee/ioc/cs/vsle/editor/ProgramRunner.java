@@ -76,7 +76,7 @@ public class ProgramRunner {
     		{
     			arguments = ass.getArgs();
     		} else {
-    			throw new Exception( "Assumptions undefined" );
+    			throw new Exception( "Unable to run the program: assumptions undefined" );
     		}
     	}
     	
@@ -317,6 +317,11 @@ public class ProgramRunner {
 				StringBuffer result = new StringBuffer();
 
 				try {
+					Object[] args = getArguments();
+					for (int i = 0; i < args.length; i++) {
+						db.p( args[i].getClass() + " " + args[i] );
+					}
+					
 					Class clas = genObject.getClass();
 					Method method = clas.getMethod("compute", Object[].class);
 					db.p( "Running... ( NB! The thread is alive until the next message --> ) " 
@@ -326,13 +331,12 @@ public class ProgramRunner {
 					
 					RunningThreadKillerDialog.addThread( this );
 					
-					Object[] args = getArguments();
-					for (int i = 0; i < args.length; i++) {
-						db.p( args[i].getClass() + " " + args[i] );
-					}
 					try {
-					method.invoke(genObject, new Object[]{ args } );
-					} catch( InvocationTargetException ex ) {}
+						method.invoke(genObject, new Object[]{ args } );
+					} catch( InvocationTargetException ex ) { 
+						/* this is empty because we do not need to show ThreadDeath exception's 
+						 * stacktrace after killing a thread using RunningThreadKillerDialog*/
+					}
 					
 					RunningThreadKillerDialog.removeThread( this );
 					
@@ -386,7 +390,7 @@ public class ProgramRunner {
 					result.append("----------------------\n");
 
 				} catch (Exception e) {
-					e.printStackTrace(System.err);
+					ErrorWindow.showErrorMessage( e.getMessage() );
 				}
 				if( sendFeedback ) {
 					

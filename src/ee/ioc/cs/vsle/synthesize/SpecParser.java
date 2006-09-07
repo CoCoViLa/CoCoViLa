@@ -639,6 +639,7 @@ public class SpecParser {
     	checkAnyType( output, new String[]{ input }, vars );
     }
     
+    //TODO - implement _any_!!!
     private static void checkAnyType( String output, String[] inputs, ArrayList<ClassField> vars ) throws UnknownVariableException {
     	ClassField out = ClassRelation.getVar( output, vars );
     	
