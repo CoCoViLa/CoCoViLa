@@ -4,6 +4,8 @@ import java.io.File;
 
 import javax.swing.filechooser.FileFilter;
 
+import ee.ioc.cs.vsle.util.FileFuncs;
+
 /**
  */
 public class CustomFileFilter extends FileFilter {
@@ -37,7 +39,7 @@ public class CustomFileFilter extends FileFilter {
 			return true;
 		}
 
-		String extension = getExtension(f);
+		String extension = FileFuncs.getExtension(f);
 
 		if (extension != null) {
 		    return extension.equalsIgnoreCase(this.getExtension());
@@ -45,17 +47,6 @@ public class CustomFileFilter extends FileFilter {
 
 		return false;
 	} // accept
-
-	String getExtension(File f) {
-		String ext = null;
-		String s = f.getName();
-		int i = s.lastIndexOf('.');
-
-		if (i > 0 && i < s.length() - 1) {
-			ext = s.substring(i + 1).toLowerCase();
-		}
-		return ext;
-	} // getExtension
 
 	public void setExtension(String s) {
 		this.extension = s;
@@ -73,5 +64,4 @@ public class CustomFileFilter extends FileFilter {
 	public String getDescription() {
 		return this.description;
 	} // getDescription
-
 }
