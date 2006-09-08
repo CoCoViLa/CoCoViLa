@@ -3,7 +3,7 @@
  */
 package ee.ioc.cs.vsle.event;
 
-import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.util.db;
 
 /**
@@ -60,7 +60,6 @@ public class EventSystem {
 	 *
 	 *
 	 */
-	@SuppressWarnings("static-access")
 	private EventSystem()
 	{
 
@@ -73,7 +72,7 @@ public class EventSystem {
 		{
 			try
 			{
-				Thread.currentThread().sleep( 50 );
+				Thread.sleep(50);
 			}
 			catch ( InterruptedException ex ) {}
 		}
@@ -90,9 +89,7 @@ public class EventSystem {
 	/**
 	 * Method <code>addEventToQueue</code>
 	 *
-	 *
-	 * @param <code>event</code> is of <code>FTOevent</code> type
-	 *
+	 * @param event is of <code>FTOevent</code> type
 	 */
 	private void addEventToQueue( BaseEvent event )
 	{
