@@ -20,7 +20,7 @@ public class CodeViewer extends JFrame implements ActionListener{
         String fileName;
         String path;
 
-        public CodeViewer(String name, String extension, String path ) {
+        public CodeViewer(String name, String path, String extension ) {
             super(name + extension);
                 this.fileName = name + extension;
                 this.path = path;

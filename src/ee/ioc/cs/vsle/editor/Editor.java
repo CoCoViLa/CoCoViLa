@@ -462,11 +462,12 @@ public class Editor extends JFrame implements ChangeListener {
 			menu.add(new JSeparator());
 
 			final String packageName = getCurrentPackage().getName();
+			final String workDir = getCurrentCanvas().getWorkDir();
 			// <package>.meth
 			menuItem = new JMenuItem(packageName + ".meth", KeyEvent.VK_M);
 			menuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					CodeViewer cv = new CodeViewer(packageName, ".meth");
+					CodeViewer cv = new CodeViewer(packageName, workDir, ".meth");
 					cv.setSize(550, 450);
 					cv.setVisible(true);
 				}
@@ -477,7 +478,7 @@ public class Editor extends JFrame implements ChangeListener {
 			menuItem = new JMenuItem(packageName + ".spec", KeyEvent.VK_C);
 			menuItem.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
-					CodeViewer cv = new CodeViewer(packageName, ".spec");
+					CodeViewer cv = new CodeViewer(packageName, workDir, ".spec");
 					cv.setSize(550, 450);
 					cv.setVisible(true);
 				}
