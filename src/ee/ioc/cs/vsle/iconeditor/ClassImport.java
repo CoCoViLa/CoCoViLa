@@ -98,7 +98,7 @@ public class ClassImport {
 				classIcon = new IconClass();
 				ports = new ArrayList<IconPort>();
 				fields = new ArrayList<ClassField>();
-				shapeList = new ShapeGroup (new ArrayList());
+				shapeList = new ShapeGroup(new ArrayList<Shape>());
 			}
 			if(element.equals("name") && inClass){
 				inName = true;
@@ -119,7 +119,7 @@ public class ClassImport {
 				h = Integer.parseInt(attrs.getValue("height"));
 				classIcon.setMax(w,h);
 				col = Integer.parseInt(attrs.getValue("colour"));
-				filled = Boolean.valueOf(attrs.getValue("filled"));
+				filled = Boolean.parseBoolean(attrs.getValue("filled"));
 				strVal = attrs.getValue("stroke");
 				if (strVal != null)
 					st = Integer.parseInt(strVal);
@@ -129,7 +129,7 @@ public class ClassImport {
 				strVal = attrs.getValue("transparency");
 				if (strVal != null)
 					tr = Integer.parseInt(strVal);
-				fixed = Boolean.valueOf(attrs.getValue("fixed"));
+				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
 				Rect rect = new Rect(x, y, w, h, col, filled, st, tr, lt);
 				rect.setFixed(fixed);
 				shapeList.add(rect);
@@ -140,7 +140,7 @@ public class ClassImport {
 				h = Integer.parseInt(attrs.getValue("height"));
 				classIcon.setMax(w,h);
 				col = Integer.parseInt(attrs.getValue("colour"));
-				filled = Boolean.valueOf(attrs.getValue("filled"));
+				filled = Boolean.parseBoolean(attrs.getValue("filled"));
 				
 				strVal = attrs.getValue("stroke");
 				if (strVal != null)
@@ -152,12 +152,12 @@ public class ClassImport {
 				if (strVal != null)
 					tr = Integer.parseInt(strVal);
 				
-				fixed = Boolean.valueOf(attrs.getValue("fixed"));
+				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
 				Oval oval = new Oval(x, y, w, h, col, filled, st, tr, lt);
 				oval.setFixed(fixed);
 				shapeList.add(oval);
 			}else if(element.equals("line")){
-				fixed = Boolean.valueOf(attrs.getValue("fixed"));
+				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
 				
 				x = getCoordinate(attrs.getValue("x1"));
 				y = getCoordinate(attrs.getValue("y1"));
@@ -186,7 +186,7 @@ public class ClassImport {
 				h = Integer.parseInt(attrs.getValue("height"));
 				classIcon.setMax(w,h);
 				col = Integer.parseInt(attrs.getValue("colour"));
-				filled = Boolean.valueOf(attrs.getValue("filled"));
+				filled = Boolean.parseBoolean(attrs.getValue("filled"));
 				
 				strVal = attrs.getValue("stroke");
 				if (strVal != null)
@@ -202,7 +202,7 @@ public class ClassImport {
 				startAngle = Integer.parseInt(attrs.getValue("startAngle"));
 				arcAngle = Integer.parseInt(attrs.getValue("arcAngle"));
 				
-				fixed = Boolean.valueOf(attrs.getValue("fixed"));
+				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
 				Arc arc = new Arc(x, y, w, h, startAngle, arcAngle, col, filled, st, tr, lt);
 				arc.setFixed(fixed);
 				shapeList.add(arc);
@@ -221,7 +221,7 @@ public class ClassImport {
 				col = Integer.parseInt(attrs.getValue("colour"));
 				st = Integer.parseInt(attrs.getValue("stroke"));
 				tr = Integer.parseInt(attrs.getValue("transparency"));
-				fixed = Boolean.valueOf(attrs.getValue("fixed"));
+				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
 				Dot dot = new Dot(x, y, col, st, tr);
 				dot.setFixed(fixed);
 				shapeList.add(dot);
@@ -254,8 +254,8 @@ public class ClassImport {
 				x = getCoordinate(attrs.getValue("x"));
 				y = getCoordinate(attrs.getValue("y"));
 				name = attrs.getValue("name");
-				boolean isAreaConn = Boolean.valueOf(attrs.getValue("isAreaConn"));
-				strict= Boolean.valueOf(attrs.getValue("strict"));
+				boolean isAreaConn = Boolean.parseBoolean(attrs.getValue("isAreaConn"));
+				strict= Boolean.parseBoolean(attrs.getValue("strict"));
 				
 				IconPort port = new IconPort(name, x, y, isAreaConn, strict);
 				ports.add(port);
