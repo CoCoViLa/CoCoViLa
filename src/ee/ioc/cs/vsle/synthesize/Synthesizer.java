@@ -6,6 +6,7 @@ import java.util.regex.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  This class is responsible for managing the planning and code generation process.
@@ -153,6 +154,13 @@ public class Synthesizer {
                 
                 String declars = "";
 
+                for ( ClassField field : pClass.getFields() ) {
+                	declars += CodeGenerator.OT_TAB + TypeUtil.getDeclaration( field );
+				}
+                
+                /*
+                 * The line above does the same thing faster ;-)
+                 * TODO - delete the following code
                 try {
                     ArrayList<String> specLines = SpecParser.getSpec( fileString, false );
 
@@ -181,6 +189,7 @@ public class Synthesizer {
                 } catch ( Exception e ) {
                 	e.printStackTrace();
                 }
+                */
 
                 // find spec
                 pattern = Pattern.compile(
