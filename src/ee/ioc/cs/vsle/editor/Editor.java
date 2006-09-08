@@ -605,7 +605,7 @@ public class Editor extends JFrame implements ChangeListener {
 	public static void main(String[] args) {
 		String directory = System.getProperty("user.dir")
 				+ System.getProperty("file.separator");
-		
+		System.err.println( "directory: " + directory );
 		String version = System.getProperty("java.version");
 		
 		if( version.compareTo( "1.5.0" ) < 0 ) {
@@ -635,6 +635,15 @@ public class Editor extends JFrame implements ChangeListener {
 		Editor window = null;
 		try {
 			if (args.length > 0) {
+				
+				for ( int i = 0; i < args.length; i++ )
+				{
+					if ( args[ i ].equals( "-webstart" ) )
+					{
+						
+					}
+				}
+				
 				if (args[0].equals("-p")) {
 					
 					String dir = ( args.length == 3 ) ? directory + args[2] + System.getProperty("file.separator")

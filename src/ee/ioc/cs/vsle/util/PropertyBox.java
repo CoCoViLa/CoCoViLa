@@ -1,8 +1,6 @@
 package ee.ioc.cs.vsle.util;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.Properties;
 
 /**
@@ -59,6 +57,8 @@ public class PropertyBox {
 			// Write properties file.
 			properties.store(new FileOutputStream(propFile + ".properties"), null);
 			
+			properties.storeToXML(new FileOutputStream(propFile + ".xml"), null);
+			
 		} catch (IOException e) {
 			System.err.println( e.getMessage() );
 		}
@@ -71,19 +71,53 @@ public class PropertyBox {
 	 * @return String - read property value.
 	 */
 	public static String getProperty(String propFile, String propName) {
+		
+		if( propFile == null || propName == null || ( propName.trim().length() == 0 ) ) { return null; }
+		
 		try {
-			if (propFile != null && !propFile.endsWith(".properties")) {
-				propFile = propFile + ".properties";
+			String fileName = propFile;
+			
+			Properties props;
+			FileInputStream in;
+			File file;
+			
+			{
+				if ( ( propFile != null ) && !propFile.endsWith(".xml") ) {
+					fileName = propFile + ".xml";
+				}
+				
+				file = new File( fileName );
+				
+				if( file.exists() ) {
+					props = new Properties();
+					in = new FileInputStream( fileName );
+					props.loadFromXML(in);
+					in.close();
+					
+					String prop = props.getProperty( propName );
+					
+					if( prop != null ) {
+						return prop;
+					}
+				}
 			}
-			Properties props = new Properties();
-			FileInputStream in = new FileInputStream(propFile);
-
-			props.load(in);
-			in.close();
-
-			if (props != null) {
-				return props.getProperty(propName);
+			//if there is no XML, try to use .properties
+			{
+				if ( propFile != null && !propFile.endsWith(".properties") ) {
+					fileName = propFile + ".properties";
+				}
+				
+				file = new File( fileName );
+				
+				if( file.exists() ) {
+					props = new Properties();
+					in = new FileInputStream( fileName );
+					props.load(in);
+					in.close();
+					return props.getProperty( propName );
+				}
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
