@@ -28,6 +28,8 @@ public class SchemeLoader {
 	public SchemeLoader(File file, VPackage vp) {
 		this.vPackage = vp;
 
+		long startParsing = System.currentTimeMillis();
+		
 		// Use an instance of ourselves as the SAX event handler
 		DefaultHandler handler = new PackageHandler();
 
@@ -57,7 +59,8 @@ public class SchemeLoader {
 			// I/O error
 			ioe.printStackTrace();
 		}
-		db.p("Parsing finished");
+		if ( RuntimeProperties.isLogDebugEnabled() ) 
+        	db.p( "Scheme parsing completed in " + ( System.currentTimeMillis() - startParsing ) + "ms.\n" );
 	} // PackageParser
 
 	// ===========================================================

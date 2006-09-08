@@ -33,9 +33,9 @@ abstract public class EventDispatcher {
 
 	public void register( BaseEventListener listener )
 	{
-		db.p( "register listener: "
-				+ getClass().getName() + ","
-				+ listener.getClass().getName() );
+//		db.p( "register listener: "
+//				+ getClass().getName() + ","
+//				+ listener.getClass().getName() );
 		
 		//assert( listener != null, "listener cannot be null" );
 		m_container.add( listener );
@@ -43,9 +43,9 @@ abstract public class EventDispatcher {
 
 	public boolean unregister( BaseEventListener listener )
 	{
-		db.p( "unregister listener: "
-				+ getClass().getName() + ","
-				+ listener.getClass().getName() );
+//		db.p( "unregister listener: "
+//				+ getClass().getName() + ","
+//				+ listener.getClass().getName() );
 			
 		return m_container.delete( listener );
 	}

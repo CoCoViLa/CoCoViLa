@@ -58,7 +58,8 @@ public class EditorActionListener implements ActionListener {
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File file = fc.getSelectedFile();
                     Editor.setLastPath( file.getAbsolutePath() );
-                    db.p( "Loading scheme: " + file.getName() );
+                    if ( RuntimeProperties.isLogDebugEnabled() ) 
+                    	db.p( "Loading scheme: " + file.getName() );
                     try {
                         Editor.getInstance().getCurrentCanvas().loadScheme( file );
                         Editor.getInstance().getCurrentPackage().setLastScheme( file.getAbsolutePath() );

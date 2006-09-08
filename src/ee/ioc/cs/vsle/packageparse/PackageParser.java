@@ -40,8 +40,13 @@ public class PackageParser {
      */
     public PackageParser( File file ) {
 
+    	long startParsing = System.currentTimeMillis();
+    	
         pack = new VPackage( file.getAbsolutePath() );
 
+        if ( RuntimeProperties.isLogDebugEnabled() ) 
+        	db.p( "Parsing package: " + pack.getPath() );
+        
         // Use an instance of ourselves as the SAX event handler
         DefaultHandler handler = new PackageHandler();
 
@@ -72,7 +77,8 @@ public class PackageParser {
             // I/O error
         	 db.p( "IO error: " + ioe.getMessage() );
         }
-        db.p( "doneparsing\n" );
+        if ( RuntimeProperties.isLogDebugEnabled() ) 
+        	db.p( "Package parsing completed in " + ( System.currentTimeMillis() - startParsing ) + "ms.\n" );
     } // PackageParser
 
     // ===========================================================

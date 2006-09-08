@@ -3,6 +3,7 @@
  */
 package ee.ioc.cs.vsle.event;
 
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.db;
 
 /**
@@ -59,6 +60,7 @@ public class EventSystem {
 	 *
 	 *
 	 */
+	@SuppressWarnings("static-access")
 	private EventSystem()
 	{
 
@@ -76,7 +78,8 @@ public class EventSystem {
 			catch ( InterruptedException ex ) {}
 		}
 
-		db.p( "The queue is running" );
+		if ( RuntimeProperties.isLogDebugEnabled() ) 
+			db.p( "The queue is running" );
 	}
 
 	public static void queueEvent( BaseEvent event )

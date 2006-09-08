@@ -59,7 +59,8 @@ public class SpecParser {
      @param	fileName	name of the file name
      */
     static String getStringFromFile( String fileName ) throws IOException {
-        db.p( "Retrieving " + fileName );
+    	if ( RuntimeProperties.isLogDebugEnabled() ) 
+    		db.p( "Retrieving " + fileName );
 
         BufferedReader in = new BufferedReader( new FileReader( fileName ) );
         String lineString, fileString = new String();
@@ -286,7 +287,8 @@ public class SpecParser {
 
                 if ( lt != null ) {
                 	
-                	if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "Parsing: Class " + className + " " + lt );
+                	if ( RuntimeProperties.isLogDebugEnabled() ) 
+                		db.p( "Parsing: Class " + className + " " + lt );
                 	
                 	if ( lt.getType() == LineType.TYPE_SUPERCLASSES ) {
                 		split = lt.getSpecLine().split( "#", -1 );
@@ -330,7 +332,8 @@ public class SpecParser {
                         classRelation.setMethod( split[ 0 ] + " = " + split[ 1 ] );
                         checkAnyType( split[ 0 ], split[ 1 ], vars);
                         annClass.addClassRelation( classRelation );
-                        if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
+                        if ( RuntimeProperties.isLogDebugEnabled() ) 
+                        	db.p( classRelation );
                         
                     } else if ( lt.getType() == LineType.TYPE_CONST ) {
                     	split = lt.getSpecLine().split( ":", -1 );
@@ -352,7 +355,8 @@ public class SpecParser {
                     		throw new SpecParseException( "Constant " + name +
                                     " cannot be of type " + type );
                     	}
-                    	db.p( "---===!!! " + type + " " + name + " = " + value );
+                    	if ( RuntimeProperties.isLogDebugEnabled() ) 
+                    		db.p( "---===!!! " + type + " " + name + " = " + value );
                     	
                     	ClassField var = new ClassField( name, type, value, true );
 
@@ -363,8 +367,8 @@ public class SpecParser {
                         String[] vs = split[ 1 ].trim().split( " *, *", -1 );
                         String type = split[ 0 ].trim();
 
-                        if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "Checking existence of " +
-                        		path + type + ".java" );
+                        if ( RuntimeProperties.isLogDebugEnabled() ) 
+                        	db.p( "Checking existence of " + path + type + ".java" );
                         if ( checkedClasses.contains( type ) ) {
                             throw new MutualDeclarationException( className + " <-> " + type );
                         }
