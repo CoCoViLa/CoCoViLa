@@ -1,21 +1,17 @@
 package ee.ioc.cs.vsle.util;
 
 import java.io.*;
-import java.util.Properties;
+import java.net.*;
+import java.util.*;
+
+import ee.ioc.cs.vsle.editor.*;
 
 /**
  * Class for holding application properties property key values.
- *
- * Created by IntelliJ IDEA.
- * User: Administrator
- * Date: 10.1.2004
- * Time: 15:30:18
- * To change this template use Options | File Templates.
  */
 public class PropertyBox {
 
 	public static final String APP_PROPS_FILE_NAME = "application";
-	public static String APP_PROPS_FILE_PATH = "";
 	public static final String GPL_EN_SHORT_LICENSE_FILE_NAME = "gpl_en_short.txt";
 	public static final String GPL_EN_LICENSE_FILE_NAME = "gpl_en.txt";
 	public static final String GPL_EE_LICENSE_FILE_NAME = "gpl_ee.txt";
@@ -40,6 +36,30 @@ public class PropertyBox {
     public static final String RECENT_PACKAGES = "recentPackages";
     public static final String COMPILATION_CLASSPATH = "compilationClasspath";
     
+    private static final Properties s_defaultProperties = new Properties();
+    
+    static {
+    	s_defaultProperties.put( DOCUMENTATION_URL, "http://vsledit.sourceforge.net" );
+    	String gp = RuntimeProperties.isFromWebstart() 
+	    			? RuntimeProperties.getWorkingDirectory() + "generated" 
+	    			: "../generated";
+    	s_defaultProperties.put( GENERATED_FILES_DIR, gp );
+    	s_defaultProperties.put( PALETTE_FILE, "" );
+    	s_defaultProperties.put( DEBUG_INFO, "0" );
+    	s_defaultProperties.put( DEFAULT_LAYOUT, "Custom" );
+    	s_defaultProperties.put( ANTI_ALIASING, "1" );
+    	s_defaultProperties.put( SHOW_GRID, "1" );
+    	s_defaultProperties.put( GRID_STEP, "15" );
+    	s_defaultProperties.put( CUSTOM_LAYOUT, "com.incors.plaf.kunststoff.KunststoffLookAndFeel" );
+    	s_defaultProperties.put( PACKAGE_DTD, "package2.dtd" );
+    	s_defaultProperties.put( NUDGE_STEP, "1" );
+    	s_defaultProperties.put( SNAP_TO_GRID, "0" );
+    	s_defaultProperties.put( RECENT_PACKAGES, "" );
+    	String cp = RuntimeProperties.isFromWebstart() 
+    			    ? "" : ";../lib/gnujaxp.jar;../lib/jcommon.jar;../lib/jfreechart.jar";
+    	s_defaultProperties.put( COMPILATION_CLASSPATH, cp );
+    }
+    
 	/**
 	 * Store application properties.
 	 * @param propFile - properties file name (without an extension .properties).
@@ -50,17 +70,42 @@ public class PropertyBox {
 		// Read properties file.
 		Properties properties = new Properties();
 
+		String wd = RuntimeProperties.getWorkingDirectory();
+		
 		try {
-			properties.load(new FileInputStream(propFile + ".properties"));
+			boolean isFromProps = false;
+			
+			URL url = FileFuncs.getResource( wd + propFile + ".xml", true );
+			
+			if( url == null ) {
+				url = FileFuncs.getResource( wd + propFile + ".properties", true );
+				isFromProps = true;
+			}
+			//System.err.println( "url: " + url );
+			if( url == null || !url.getProtocol().equals( "file" ) ) {
+				System.err.println( "Writing defaults" );
+				properties = (Properties)s_defaultProperties.clone();
+				properties.put(propName, propValue);
+				properties.storeToXML(new FileOutputStream( wd + propFile + ".xml" ), null);
+				return;
+			}
+			
+			//System.err.println( "uri: " + url.getFile() + " propName: " + propName );
+			if( isFromProps ) {
+				properties.load(new FileInputStream( new File( url.getFile() ) ) );
+			} else {
+				properties.loadFromXML(new FileInputStream( new File( url.getFile() ) ) );
+			}
 			
 			properties.put(propName, propValue);
 			// Write properties file.
-			properties.store(new FileOutputStream(propFile + ".properties"), null);
+			properties.store(new FileOutputStream(wd + propFile + ".properties"), null);
 			
-			properties.storeToXML(new FileOutputStream(propFile + ".xml"), null);
+			properties.storeToXML(new FileOutputStream(wd + propFile + ".xml"), null);
 			
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.err.println( e.getMessage() );
+			//e.printStackTrace();
 		}
 	} // setProperty
 
@@ -74,6 +119,8 @@ public class PropertyBox {
 		
 		if( propFile == null || propName == null || ( propName.trim().length() == 0 ) ) { return null; }
 		
+		String wd = RuntimeProperties.getWorkingDirectory();
+		
 		try {
 			String fileName = propFile;
 			
@@ -86,11 +133,11 @@ public class PropertyBox {
 					fileName = propFile + ".xml";
 				}
 				
-				file = new File( fileName );
+				file = new File( wd + fileName );
 				
 				if( file.exists() ) {
 					props = new Properties();
-					in = new FileInputStream( fileName );
+					in = new FileInputStream( wd + fileName );
 					props.loadFromXML(in);
 					in.close();
 					
@@ -101,22 +148,29 @@ public class PropertyBox {
 					}
 				}
 			}
-			//if there is no XML, try to use .properties
+			//if there is no XML, try to use .properties (later delete the following block)
 			{
 				if ( propFile != null && !propFile.endsWith(".properties") ) {
 					fileName = propFile + ".properties";
 				}
 				
-				file = new File( fileName );
+				file = new File( wd + fileName );
 				
 				if( file.exists() ) {
 					props = new Properties();
-					in = new FileInputStream( fileName );
+					in = new FileInputStream( wd + fileName );
 					props.load(in);
 					in.close();
-					return props.getProperty( propName );
+
+					String prop = props.getProperty( propName );
+					
+					if( prop != null ) {
+						return prop;
+					}
 				}
 			}
+			
+			return s_defaultProperties.getProperty( propName );
 
 		} catch (Exception e) {
 			e.printStackTrace();

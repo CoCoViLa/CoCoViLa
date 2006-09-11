@@ -73,9 +73,7 @@ public class SchemeLoader {
 			InputSource is = null;
 			// order the DTD to be specified externally.
 			if (systemId != null && systemId.endsWith("dtd")) {
-				is = new InputSource(System.getProperty("user.dir")
-						+ System.getProperty("file.separator")
-						+ RuntimeProperties.SCHEME_DTD);
+				is = new InputSource(FileFuncs.getResource( RuntimeProperties.SCHEME_DTD, false ).toString());
 			}
 			return is;
 		}

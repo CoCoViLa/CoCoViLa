@@ -6,6 +6,12 @@ import java.awt.*;
 
 public class RuntimeProperties {
 	
+	public static final String FS =  System.getProperty("file.separator");
+	public static final String PS =  System.getProperty("path.separator");
+	
+	private static boolean fromWebstart;
+	private static String workingDirectory = System.getProperty("user.dir") + FS;
+	
 	public final static String SCHEME_DTD = "scheme.dtd";
 	public final static String PACKAGE_DTD = "package2.dtd";
 	// Names of the class field table as well as the dbresult columns.
@@ -49,5 +55,20 @@ public class RuntimeProperties {
 		return debugInfo >= 0;
 	}
 
+	public static boolean isFromWebstart() {
+		return fromWebstart;
+	}
+
+	public static void setFromWebstart() {
+		RuntimeProperties.fromWebstart = true;
+		
+		workingDirectory = System.getProperty("user.home") + System.getProperty("file.separator") + "CoCoViLa_WS";
+		
+		System.setProperty( "user.dir", workingDirectory );
+	}
+
+	public static String getWorkingDirectory() {
+		return workingDirectory;
+	}
 }
 

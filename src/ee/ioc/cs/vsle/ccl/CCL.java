@@ -77,10 +77,10 @@ public class CCL extends URLClassLoader {
 	
 	private static String prepareClasspathOS( String path ) {
 		String[] paths = prepareClasspath( path );
-		String classpath = System.getProperty("path.separator");
+		String classpath = RuntimeProperties.PS;
 		
 		for( int i= 0; i < paths.length; i++ ) {
-			classpath += paths[i] + System.getProperty("path.separator");
+			classpath += paths[i] + RuntimeProperties.PS;
 		}
 		
 		return classpath;
@@ -97,8 +97,7 @@ public class CCL extends URLClassLoader {
 	 */
 	public boolean compile2(String javaFile) throws IOException, CompileException {
 		
-		javaFile = RuntimeProperties.genFileDir
-			+ System.getProperty("file.separator") + javaFile + ".java";
+		javaFile = RuntimeProperties.genFileDir + RuntimeProperties.FS + javaFile + ".java";
 		
 		db.p("Compiling " + javaFile + "...");
 		

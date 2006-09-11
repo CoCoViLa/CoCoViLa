@@ -9,6 +9,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.VPackage;
 
@@ -28,7 +29,7 @@ public class Palette implements ActionListener {
 		ImageIcon icon;
 
 		// add relation and selection tools
-		icon = new ImageIcon("images/mouse.gif");
+		icon = FileFuncs.getImageIcon("images/mouse.gif", false );
 		JToggleButton selection = new JToggleButton(icon);
 
 		selection.setActionCommand(State.selection);
@@ -38,7 +39,7 @@ public class Palette implements ActionListener {
         buttons.add(selection);
 		toolBar.add(selection);
 
-		icon = new ImageIcon("images/rel.gif");
+		icon = FileFuncs.getImageIcon("images/rel.gif", false );
 		JToggleButton relation = new JToggleButton(icon);
 
 		relation.setActionCommand(State.relation);
@@ -47,7 +48,7 @@ public class Palette implements ActionListener {
         buttons.add(relation);
 		toolBar.add(relation);
 
-		icon = new ImageIcon("images/magnifier.gif");
+		icon = FileFuncs.getImageIcon("images/magnifier.gif", false );
 		JToggleButton magnifier = new JToggleButton(icon);
 
 		magnifier.setActionCommand(State.magnifier);
@@ -62,9 +63,9 @@ public class Palette implements ActionListener {
 		for (int i = 0; i < vPackage.classes.size(); i++) {
 			PackageClass pClass = vPackage.classes.get(i);
 			if (pClass.icon.equals("default.gif")) {
-                icon = new ImageIcon("images/default.gif");
+                icon = FileFuncs.getImageIcon("images/default.gif", false );
 			} else {
-				icon = new ImageIcon( canvas.getWorkDir() + pClass.icon);
+				icon = FileFuncs.getImageIcon( canvas.getWorkDir() + pClass.icon, true );
 			}
 			JToggleButton button = new JToggleButton(icon);
 			button.setToolTipText(pClass.description);

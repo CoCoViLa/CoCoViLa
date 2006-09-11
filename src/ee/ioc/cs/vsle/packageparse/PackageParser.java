@@ -13,7 +13,7 @@ import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.graphics.Polygon;
 import ee.ioc.cs.vsle.synthesize.SpecParser;
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
 
@@ -90,9 +90,7 @@ public class PackageParser {
                 SAXException {
             InputSource is = null;
             if ( systemId != null && systemId.endsWith( "dtd" ) )
-                is = new InputSource( System.getProperty("user.dir") 
-                		+ System.getProperty("file.separator")
-                		+ RuntimeProperties.PACKAGE_DTD );
+                is = new InputSource( FileFuncs.getResource( RuntimeProperties.PACKAGE_DTD, false ).toString() );
             return is;
         }
 

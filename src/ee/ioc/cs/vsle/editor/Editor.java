@@ -603,9 +603,19 @@ public class Editor extends JFrame implements ChangeListener {
 	 *            command line arguments
 	 */
 	public static void main(String[] args) {
-		String directory = System.getProperty("user.dir")
-				+ System.getProperty("file.separator");
-		System.err.println( "directory: " + directory );
+		
+		for ( int i = 0; i < args.length; i++ )
+		{
+			if ( args[ i ].equals( "-webstart" ) )
+			{
+				RuntimeProperties.setFromWebstart();
+			}
+		}
+		
+		String directory = RuntimeProperties.getWorkingDirectory();
+		
+		System.err.println( "Working directory: " + directory );
+		
 		String version = System.getProperty("java.version");
 		
 		if( version.compareTo( "1.5.0" ) < 0 ) {
@@ -634,19 +644,11 @@ public class Editor extends JFrame implements ChangeListener {
 
 		Editor window = null;
 		try {
-			if (args.length > 0) {
-				
-				for ( int i = 0; i < args.length; i++ )
-				{
-					if ( args[ i ].equals( "-webstart" ) )
-					{
-						
-					}
-				}
+			if ( !RuntimeProperties.isFromWebstart() && args.length > 0) {
 				
 				if (args[0].equals("-p")) {
 					
-					String dir = ( args.length == 3 ) ? directory + args[2] + System.getProperty("file.separator")
+					String dir = ( args.length == 3 ) ? directory + args[2] + RuntimeProperties.FS
 													: directory;
 					
 					Synthesizer.parseFromCommandLine( dir, args[1]);
@@ -660,10 +662,6 @@ public class Editor extends JFrame implements ChangeListener {
 					window.setVisible(true);
 				}
 			} else {
-				// Kui k�surealt ei olnud ette antud, v�tame
-				// vaikev��rtuse application.properties failist.
-				db
-						.p("No module file name was given as the command line argument, reading the application.properties file.");
 				String paletteFiles = PropertyBox.getProperty(
 						PropertyBox.APP_PROPS_FILE_NAME,
 						PropertyBox.PALETTE_FILE);

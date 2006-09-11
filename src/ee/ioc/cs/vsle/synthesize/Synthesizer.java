@@ -238,7 +238,7 @@ public class Synthesizer {
 
     private static void createSubtaskInterface() {
         File file = new File( RuntimeProperties.genFileDir
-                              + System.getProperty( "file.separator" )
+                              + RuntimeProperties.FS
                               + SUBTASK_INTERFACE_NAME + ".java" );
 
         if ( !file.exists() ) {
@@ -256,7 +256,7 @@ public class Synthesizer {
 
     private static void createGeneratedInterface() {
         File file = new File( RuntimeProperties.genFileDir
-                              + System.getProperty( "file.separator" )
+                              + RuntimeProperties.FS
                               + GENERATED_INTERFACE_NAME + ".java" );
 
         if ( !file.exists() ) {

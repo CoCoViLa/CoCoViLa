@@ -4,6 +4,9 @@ import javax.swing.event.*;
 import javax.swing.text.*;
 import javax.swing.undo.*;
 import javax.swing.*;
+
+import ee.ioc.cs.vsle.util.*;
+
 import java.awt.*;
 import java.awt.event.*;
 
@@ -12,8 +15,8 @@ public class UndoRedoDocumentPanel extends JPanel {
     private Document m_document;
     protected UndoManager undo = new UndoManager();
 
-    private JButton m_buttonUndo = new JButton( new ImageIcon( "images/undo.png" ) );
-    private JButton m_buttonRedo = new JButton( new ImageIcon( "images/redo.png" ) );
+    private JButton m_buttonUndo = new JButton( FileFuncs.getImageIcon( "images/undo.png", false ) );
+    private JButton m_buttonRedo = new JButton( FileFuncs.getImageIcon( "images/redo.png", false ) );
 
     public UndoRedoDocumentPanel( Document doc ) {
         m_document = doc;

@@ -4,6 +4,8 @@ import java.awt.Frame;
 import java.awt.Toolkit;
 import java.net.URL;
 
+import ee.ioc.cs.vsle.util.*;
+
 public class IconEditorSplash {
 	public static void main(String[] args) {
 		// Read the image data and display the splash screen.
@@ -11,7 +13,7 @@ public class IconEditorSplash {
 		// -------------------------------------------------
 		Frame splashFrame = null;
 		String splashImageUrl = "/images/iesplash.gif";
-		URL imageURL = IconEditorSplash.class.getResource(splashImageUrl);
+		URL imageURL = FileFuncs.getResource(splashImageUrl, false );
 		if (imageURL != null) {
 			splashFrame = SplashWindow.splash(Toolkit.getDefaultToolkit().createImage(imageURL));
 		} else {

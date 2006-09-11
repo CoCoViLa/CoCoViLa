@@ -16,6 +16,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import ee.ioc.cs.vsle.graphics.*;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
@@ -67,9 +68,7 @@ public class ClassImport {
 		public InputSource resolveEntity(java.lang.String publicId, java.lang.String systemId) throws SAXException {
 			InputSource is = null;
 			if (systemId != null && systemId.endsWith("dtd")) {
-				is = new InputSource(System.getProperty("user.dir") 
-                		+ System.getProperty("file.separator")
-                		+ RuntimeProperties.PACKAGE_DTD);
+				is = new InputSource( FileFuncs.getResource( RuntimeProperties.PACKAGE_DTD, false ).toString() );
 			}
 			return is;
 		}

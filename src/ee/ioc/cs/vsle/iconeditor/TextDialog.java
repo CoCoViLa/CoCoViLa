@@ -23,6 +23,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.border.TitledBorder;
 import javax.swing.BorderFactory;
 
+import ee.ioc.cs.vsle.util.*;
+
 public class TextDialog extends JDialog implements ActionListener {
 
 	private JLabel lblFont = new JLabel("Font:");
@@ -94,19 +96,19 @@ public class TextDialog extends JDialog implements ActionListener {
 		cbFont.setFont(f);
 
 		// add color chooser tool
-		ImageIcon icon = new ImageIcon("images/colorchooser.gif");
+		ImageIcon icon = FileFuncs.getImageIcon("images/colorchooser.gif", false );
 		bttnColor = new JButton(icon);
 		bttnColor.setToolTipText("Color chooser");
 
-		icon = new ImageIcon("images/bold.gif");
+		icon = FileFuncs.getImageIcon("images/bold.gif", false );
 		bttnBold = new JButton(icon);
 		bttnBold.setToolTipText("Bold");
 
-		icon = new ImageIcon("images/italic.gif");
+		icon = FileFuncs.getImageIcon("images/italic.gif", false );
 		bttnItalic = new JButton(icon);
 		bttnItalic.setToolTipText("Italic");
 
-		icon = new ImageIcon("images/underline.gif");
+		icon = FileFuncs.getImageIcon("images/underline.gif", false );
 		bttnUnderline = new JButton(icon);
 		bttnUnderline.setToolTipText("Underline");
 

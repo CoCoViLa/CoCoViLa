@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.iconeditor;
 
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -131,28 +132,28 @@ public class IconPalette {
 		spinnerLineType.getModel().addChangeListener(lineTypeListener);
 
 		//add relation and selection tool.
-		icon = new ImageIcon("images/mouse.gif");
+		icon = FileFuncs.getImageIcon("images/mouse.gif", false );
 		selection = new JButton(icon);
 		selection.setActionCommand(State.selection);
 		selection.addActionListener(mListener);
 		selection.setToolTipText("Select");
 		toolBar.add(selection);
 
-		icon = new ImageIcon("images/boundingbox.gif");
+		icon = FileFuncs.getImageIcon("images/boundingbox.gif", false );
 		boundingbox = new JButton(icon);
 		boundingbox.setActionCommand(State.boundingbox);
 		boundingbox.addActionListener(mListener);
 		boundingbox.setToolTipText("Bounding Box");
 		toolBar.add(boundingbox);
 
-		icon = new ImageIcon("images/port.gif");
+		icon = FileFuncs.getImageIcon("images/port.gif", false );
 		addport = new JButton(icon);
 		addport.setActionCommand(State.addPort);
 		addport.addActionListener(mListener);
 		addport.setToolTipText("Add Port");
 		toolBar.add(addport);
 
-		icon = new ImageIcon("images/text.gif");
+		icon = FileFuncs.getImageIcon("images/text.gif", false );
 		text = new JButton(icon);
 		text.setActionCommand(State.drawText);
 		text.addActionListener(mListener);
@@ -160,7 +161,7 @@ public class IconPalette {
 		toolBar.add(text);
 
 		// add line drawing tool
-		icon = new ImageIcon("images/line.gif");
+		icon = FileFuncs.getImageIcon("images/line.gif", false );
 		line = new JButton(icon);
 		line.setActionCommand(State.drawLine);
 		line.addActionListener(mListener);
@@ -168,7 +169,7 @@ public class IconPalette {
 		toolBar.add(line);
 
 		// add arc drawing tool
-		icon = new ImageIcon("images/arc.gif");
+		icon = FileFuncs.getImageIcon("images/arc.gif", false );
 		arc = new JButton(icon);
 		arc.setActionCommand(State.drawArc);
 		arc.addActionListener(mListener);
@@ -176,7 +177,7 @@ public class IconPalette {
 		toolBar.add(arc);
 
 		// add arc drawing tool
-		icon = new ImageIcon("images/fillarc.gif");
+		icon = FileFuncs.getImageIcon("images/fillarc.gif", false );
 		filledarc = new JButton(icon);
 		filledarc.setActionCommand(State.drawFilledArc);
 		filledarc.addActionListener(mListener);
@@ -184,7 +185,7 @@ public class IconPalette {
 		toolBar.add(filledarc);
 
 		// add rectangle drawing tool
-		icon = new ImageIcon("images/rect.gif");
+		icon = FileFuncs.getImageIcon("images/rect.gif", false );
 		rectangle = new JButton(icon);
 		rectangle.setActionCommand(State.drawRect);
 		rectangle.addActionListener(mListener);
@@ -192,7 +193,7 @@ public class IconPalette {
 		toolBar.add(rectangle);
 
 		// add filled rectangle drawing tool
-		icon = new ImageIcon("images/fillrect.gif");
+		icon = FileFuncs.getImageIcon("images/fillrect.gif", false );
 		filledrectangle = new JButton(icon);
 		filledrectangle.setActionCommand(State.drawFilledRect);
 		filledrectangle.addActionListener(mListener);
@@ -200,7 +201,7 @@ public class IconPalette {
 		toolBar.add(filledrectangle);
 
 		// add oval drawing tool
-		icon = new ImageIcon("images/oval.gif");
+		icon = FileFuncs.getImageIcon("images/oval.gif", false );
 		oval = new JButton(icon);
 		oval.setActionCommand(State.drawOval);
 		oval.addActionListener(mListener);
@@ -208,7 +209,7 @@ public class IconPalette {
 		toolBar.add(oval);
 
 		// add filled oval drawing tool
-		icon = new ImageIcon("images/filloval.gif");
+		icon = FileFuncs.getImageIcon("images/filloval.gif", false );
 		filledoval = new JButton(icon);
 		filledoval.setActionCommand(State.drawFilledOval);
 		filledoval.addActionListener(mListener);
@@ -216,7 +217,7 @@ public class IconPalette {
 		toolBar.add(filledoval);
 
 		// add freehand drawing tool
-		icon = new ImageIcon("images/freehand.gif");
+		icon = FileFuncs.getImageIcon("images/freehand.gif", false );
 		freehand = new JButton(icon);
 		freehand.setActionCommand(State.freehand);
 		freehand.addActionListener(mListener);
@@ -224,7 +225,7 @@ public class IconPalette {
 		toolBar.add(freehand);
 
 		// add freehand drawing tool
-		icon = new ImageIcon("images/eraser.gif");
+		icon = FileFuncs.getImageIcon("images/eraser.gif", false );
 		eraser = new JButton(icon);
 		eraser.setActionCommand(State.eraser);
 		eraser.addActionListener(mListener);
@@ -232,7 +233,7 @@ public class IconPalette {
 		toolBar.add(eraser);
 
 		// add color chooser tool
-		icon = new ImageIcon("images/colorchooser.gif");
+		icon = FileFuncs.getImageIcon("images/colorchooser.gif", false );
 		colors = new JButton(icon);
 		colors.setActionCommand(State.chooseColor);
 		colors.addActionListener(mListener);
@@ -247,15 +248,15 @@ public class IconPalette {
 		toolBar.add(lblLineWidth);
 		toolBar.add(spinnerLineWidth);
 
-		icon = new ImageIcon("images/transparency.gif");
+		icon = FileFuncs.getImageIcon("images/transparency.gif", false );
 		lblTransparency = new JLabel(icon);
 		lblTransparency.setToolTipText("Object transparency percentage");
 
-        icon = new ImageIcon("images/zoom.gif");
+        icon = FileFuncs.getImageIcon("images/zoom.gif", false );
 	    lblZoom = new JLabel(icon);
 		lblZoom.setToolTipText("Object zoom percentage");
 
-		icon = new ImageIcon("images/linetype.gif");
+		icon = FileFuncs.getImageIcon("images/linetype.gif", false );
 		lblLineType = new JLabel(icon);
 		lblLineType.setToolTipText("Dash style");
 

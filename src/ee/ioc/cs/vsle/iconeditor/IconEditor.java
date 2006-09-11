@@ -1150,7 +1150,7 @@ public class IconEditor
 					in.close();
 					
 					/* See if .java file exists */
-					File javaFile = new File(file.getParent() +System.getProperty("file.separator")+className + ".java");
+					File javaFile = new File(file.getParent() + RuntimeProperties.FS +className + ".java");
 					
 					/* If file exists show conformation dialog */ 
 					int overWriteFile = JOptionPane.YES_OPTION;
@@ -1180,7 +1180,7 @@ public class IconEditor
 								}
 							}
 							fileText += "    }@*/\n \n}";
-							FileFuncs.writeFile(file.getParent() +System.getProperty("file.separator")+className + ".java", fileText);
+							FileFuncs.writeFile(file.getParent() + RuntimeProperties.FS + className + ".java", fileText);
 						}
 						
 						JOptionPane.showMessageDialog(null, "Saved to package: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
@@ -1599,9 +1599,7 @@ public class IconEditor
 	} // processShapes
 
 	private static void initializeRuntimeProperties() {
-		String directory = System.getProperty("user.dir") + System.getProperty("file.separator");
 
-		PropertyBox.APP_PROPS_FILE_PATH = directory;
 		RuntimeProperties.zoomFactor = 100.0;
 		RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
 		RuntimeProperties.gridStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP));
@@ -1624,6 +1622,15 @@ public class IconEditor
 	 * @param args - command line arguments
 	 */
 	public static void main(String[] args) {
+		
+		for ( int i = 0; i < args.length; i++ )
+		{
+			if ( args[ i ].equals( "-webstart" ) )
+			{
+				RuntimeProperties.setFromWebstart();
+			}
+		}
+		
 		initializeRuntimeProperties();
 
 		JFrame window;

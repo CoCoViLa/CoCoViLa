@@ -1,6 +1,11 @@
 package ee.ioc.cs.vsle.util;
 
 import java.io.*;
+import java.net.*;
+
+import javax.swing.*;
+
+import ee.ioc.cs.vsle.editor.*;
 
 /**
  * User: Ando
@@ -39,10 +44,10 @@ public class FileFuncs {
 
 	public static void writeFile( String prog, String mainClassName, String ext, String dir, boolean append ) {
         try {
-        	if( !dir.endsWith( System.getProperty( "file.separator" ) ) ) {
-        		dir += System.getProperty( "file.separator" );
+        	if( !dir.endsWith( RuntimeProperties.FS ) ) {
+        		dir += RuntimeProperties.FS;
         	}
-        	String path = dir + System.getProperty( "file.separator" ) + mainClassName + "." + ext;
+        	String path = dir + RuntimeProperties.FS + mainClassName + "." + ext;
         	
         	File file = new File( path );
         	
@@ -68,5 +73,41 @@ public class FileFuncs {
             ext = s.substring(i + 1).toLowerCase();
         }
         return ext;
+    }
+    
+    public static URL getResource( String res, boolean checkFileIfNull ) {
+    	
+    	URL url = Thread.currentThread().getContextClassLoader().getResource( res );
+    	
+    	if( url != null || !checkFileIfNull ) {
+    		return url;
+    	}
+    	
+    	File file = new File( res );
+    	
+    	if( file.exists() ) {
+    		try {
+				return file.toURL();
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			}
+    	}
+    	
+    	return null;
+    }
+    
+    public static ImageIcon getImageIcon( String icon, boolean isAbsolutePath ) {
+    	
+    	if( !isAbsolutePath && RuntimeProperties.isFromWebstart() )
+    	{
+    		URL url = getResource( icon, false );
+    		
+    		if( url != null )
+    		{
+    			return new ImageIcon( url );
+    		}
+    	}
+    	
+    	return new ImageIcon( icon );
     }
 }

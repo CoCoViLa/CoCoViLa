@@ -88,7 +88,7 @@ public class EditorActionListener implements ActionListener {
             } else if ( e.getActionCommand().equals( Menu.LOAD ) ) {
                 JFileChooser fc = new JFileChooser( 
                 		( Editor.getLastPath() != null && new File(Editor.getLastPath()).exists() )
-                		? Editor.getLastPath() : System.getProperty("user.dir") );
+                		? Editor.getLastPath() : RuntimeProperties.getWorkingDirectory() );
                 CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.extensionXML,
                         CustomFileFilter.descriptionXML );
 
