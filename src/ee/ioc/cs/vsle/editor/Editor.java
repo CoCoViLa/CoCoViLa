@@ -609,6 +609,8 @@ public class Editor extends JFrame implements ChangeListener {
 			if ( args[ i ].equals( "-webstart" ) )
 			{
 				RuntimeProperties.setFromWebstart();
+				
+				SystemUtils.unpackConfigFiles();
 			}
 		}
 		

@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.editor;
 import ee.ioc.cs.vsle.util.queryutil.DBResult;
 
 import java.awt.*;
+import java.io.*;
 
 public class RuntimeProperties {
 	
@@ -60,9 +61,14 @@ public class RuntimeProperties {
 	}
 
 	public static void setFromWebstart() {
+		
 		RuntimeProperties.fromWebstart = true;
 		
 		workingDirectory = System.getProperty("user.home") + System.getProperty("file.separator") + "CoCoViLa_WS";
+		
+		File file = new File( workingDirectory );
+		
+		file.mkdirs();
 		
 		System.setProperty( "user.dir", workingDirectory );
 	}
