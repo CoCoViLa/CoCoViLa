@@ -6,11 +6,16 @@ import ee.ioc.cs.vsle.packageparse.PackageParser;
 import ee.ioc.cs.vsle.util.PropertyBox;
 import ee.ioc.cs.vsle.util.VMath;
 import ee.ioc.cs.vsle.util.PrintUtilities;
+
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.io.*;
 
 /**
@@ -36,6 +41,8 @@ public class Canvas extends JPanel implements ActionListener {
 	JPanel infoPanel;
 	JLabel posInfo;
 	DrawingArea drawingArea;
+    BufferedImage backgroundImage;
+    ExecutorService executor;
 
 	public Canvas(File f) {
 		super();
@@ -80,6 +87,7 @@ public class Canvas extends JPanel implements ActionListener {
 		infoPanel.add(posInfo);
 		add(infoPanel, BorderLayout.SOUTH);
 		posInfo.setText("-");
+        executor = Executors.newSingleThreadExecutor();
 	}
 
 	/**
@@ -533,11 +541,15 @@ public class Canvas extends JPanel implements ActionListener {
 				g.drawLine(vr.x, i, bx, i);
 		}
 
-		protected void paintComponent(Graphics g) {
-			Graphics2D g2 = (Graphics2D) g;
+
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g;
 			super.paintComponent(g2);
 
-			Connection rel;
+            if (backgroundImage != null)
+                g2.drawImage(backgroundImage, 0, 0, null);
+
+            Connection rel;
 			if (showGrid) drawGrid(g2);
 			GObj obj;
 
@@ -597,7 +609,41 @@ public class Canvas extends JPanel implements ActionListener {
         posInfo.setText(x + ", " + y);
     }
 
-	/**
+    /**
+     * Sets the background image for the scheme.
+     * The current image is removed when <code>image</code> is <code>null</code>.
+     * @param image The image
+     */
+    public void setBackgroundImage(BufferedImage image) {        
+        clearBackgroundImage();
+        if (image != null) {
+            backgroundImage = image;
+            drawingArea.repaint(0, 0, image.getWidth(), image.getHeight());
+        }
+    }
+
+    /**
+     * @return The current background image or <code>null</code> if there is no background image.
+     */
+    public BufferedImage getBackgroundImage() {
+        return backgroundImage;
+    }
+
+    /**
+     * Removes the background image if one is set.
+     * Resources will be freed and a <code>repaint()</code> of the image area is requested. 
+     */
+    public void clearBackgroundImage() {
+        if (backgroundImage != null) {
+            int width  = backgroundImage.getWidth();
+            int height = backgroundImage.getHeight();
+            backgroundImage.flush();
+            backgroundImage = null;
+            drawingArea.repaint(0, 0, width, height);
+        }
+    }
+
+    /**
 	 * @param workDir the workDir to set
 	 */
 	void setWorkDir(String workDir) {
