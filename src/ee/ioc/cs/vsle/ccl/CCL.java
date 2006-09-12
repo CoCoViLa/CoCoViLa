@@ -28,6 +28,8 @@ import ee.ioc.cs.vsle.util.*;
  */
 public class CCL extends URLClassLoader {
 
+    private String compileDir;
+    
 	public CCL() {
 		super(createClasspath());
 	}
@@ -91,13 +93,15 @@ public class CCL extends URLClassLoader {
 	 * Another implementation which uses internal compiler.
 	 * 
 	 * @param javaFile
-	 * @return
+	 * @return <code>true</code> on successful compilation
 	 * @throws IOException
 	 * @throws CompileException
 	 */
 	public boolean compile2(String javaFile) throws IOException, CompileException {
-		
-		javaFile = RuntimeProperties.genFileDir + RuntimeProperties.FS + javaFile + ".java";
+	    if (compileDir == null)
+            compileDir = RuntimeProperties.genFileDir;
+        
+		javaFile = compileDir + RuntimeProperties.FS + javaFile + ".java";
 		
 		db.p("Compiling " + javaFile + "...");
 		
@@ -322,5 +326,13 @@ public class CCL extends URLClassLoader {
 //
 //		return raw;
 //	} // getBytes
+
+    public String getCompileDir() {
+        return compileDir;
+    }
+
+    public void setCompileDir(String compileDir) {
+        this.compileDir = compileDir;
+    }
 	
 }
