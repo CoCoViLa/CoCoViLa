@@ -610,7 +610,7 @@ public class Editor extends JFrame implements ChangeListener {
 			{
 				RuntimeProperties.setFromWebstart();
 				
-				SystemUtils.unpackConfigFiles();
+				SystemUtils.unpackPackages();
 			}
 		}
 		

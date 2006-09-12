@@ -39,37 +39,41 @@ public class SystemUtils {
 	 *
 	 *
 	 */
-	public static void unpackConfigFiles()
+	public static void unpackPackages()
 	{
 
 		// determine the location of the FTOconfig.jar
-		URL jarUrl = cl.getResource( RuntimeProperties.PACKAGE_DTD );
+		URL jarUrl = cl.getResource( RuntimeProperties.PACKAGE_LOCATOR );
 
+		System.out.println( "jarUrl=" + jarUrl );
+		
+		if( jarUrl == null ) return;
 //		;
 //		// extract path+filename of the jar file
-//		String jarFn = parsePath( jarUrl );
+		String jarFn = parsePath( jarUrl );
 //
-//		if ( jarFn.length() == 0 )
-//		{
-//			return;
-//		}
+		if ( jarFn.length() == 0 )
+		{
+			return;
+		}
 
 		
 		//      if ( ( jarUrl == null ) || ( jarUrl.toString().length() <= 10 ) )
 		//          return;
 		try
 		{
-			System.out.println( "jarUrl=" + jarUrl + " URI: " + jarUrl.toURI() );
+			System.out.println( " jarFn: " + jarFn );
 			// extract path+filename of the jar file
 			//          String  jarFn = jarUrl.toString().substring( 10,
 			//                              jarUrl.toString().indexOf( "!" ) );
-			JarFile jarF = new JarFile( new File( jarUrl.toURI() ) );
+			JarFile jarF = new JarFile( new File( jarFn ) );
 
 			// loop through the jar file entries and copy them to files
 			for ( Enumeration e = jarF.entries(); e.hasMoreElements(); )
 			{
 				String entryName   = e.nextElement().toString();
-				String newFileName = RuntimeProperties.getWorkingDirectory() + File.separator + entryName;
+				String newFileName = RuntimeProperties.getWorkingDirectory() 
+										+ "packages" + RuntimeProperties.FS + entryName;
 
 				// ignore CVS directories
 				if ( entryName.indexOf( "CVS" ) != -1 )
@@ -101,7 +105,8 @@ public class SystemUtils {
 					continue;
 				}
 
-				System.out.println( "entryName=" + newFileName );
+				if( RuntimeProperties.isLogDebugEnabled() )
+					db.p( "entryName=" + newFileName );
 
 				// create input stream associated with the jar file entry
 				InputStream source = jarF.getInputStream( jarF.getEntry( entryName ) );
@@ -134,10 +139,6 @@ public class SystemUtils {
 		{
 			System.out.println( ex3 );
 		} 
-		catch ( URISyntaxException ex4 ) 
-		{
-			System.out.println( ex4 );
-		}
 	}
 	
 	private static final String parsePath( URL url )
@@ -193,10 +194,7 @@ public class SystemUtils {
 			{
 				break;
 			}
-			else
-			{
-				path = path.substring( 0, pos ) + " " + path.substring( pos + 3 );
-			}
+			path = path.substring( 0, pos ) + " " + path.substring( pos + 3 );
 		}
 
 		return path;

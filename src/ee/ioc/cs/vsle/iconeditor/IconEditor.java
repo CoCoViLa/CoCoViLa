@@ -1628,6 +1628,8 @@ public class IconEditor
 			if ( args[ i ].equals( "-webstart" ) )
 			{
 				RuntimeProperties.setFromWebstart();
+				
+				SystemUtils.unpackPackages();
 			}
 		}
 		
@@ -1809,7 +1811,7 @@ public class IconEditor
             out.flush();
             out.close();
             if (deleteJavaClass){
-            	File javaFile = new File(f.getParent() +System.getProperty("file.separator")+selection + ".java");
+            	File javaFile = new File(f.getParent() + RuntimeProperties.FS + selection + ".java");
 				javaFile.delete();				
             }
             if (selection != null)

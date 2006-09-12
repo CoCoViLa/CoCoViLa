@@ -99,7 +99,8 @@ public class PropertyBox {
 			
 			properties.put(propName, propValue);
 			// Write properties file.
-			properties.store(new FileOutputStream(wd + propFile + ".properties"), null);
+			//properties.store(new FileOutputStream(wd + propFile + ".properties"), null);
+			new File( wd + propFile + ".properties" ).delete();
 			
 			properties.storeToXML(new FileOutputStream(wd + propFile + ".xml"), null);
 			
