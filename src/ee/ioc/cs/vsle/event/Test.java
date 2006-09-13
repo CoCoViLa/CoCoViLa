@@ -73,7 +73,6 @@ class TestEvent extends BaseEvent {
 	 * Method <code>registerListener</code>
 	 *
 	 * @param listener is of <code>Listener</code> type
-	 * @param ticketListID is of <code>FTOticketListID</code> type
 	 */
 	public static void registerListener( Listener listener )
 	{
@@ -85,7 +84,6 @@ class TestEvent extends BaseEvent {
 	 * Method <code>unregisterListener</code>
 	 *
 	 * @param listener is of <code>Listener</code> type
-	 * @param ticketListID is of <code>FTOticketListID</code> type
 	 */
 	public static void unregisterListener( Listener listener )
 	{
@@ -125,7 +123,7 @@ class TestEvent extends BaseEvent {
 
 		/**
 		 * Method <code>onTicketEvent</code>
-		 * @param <code>event</code> is of <code>FTOticketEvent</code> type
+		 * @param event is of <code>FTOticketEvent</code> type
 		 */
 		public void onTest( TestEvent event );
 	}

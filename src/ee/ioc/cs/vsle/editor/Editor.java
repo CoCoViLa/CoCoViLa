@@ -13,11 +13,11 @@ import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
 /**
- * Visual Specification Language Editor main module for combining separate
- * logical units (Built in the IconEditor) into a structured schema.
+ * <a href="http://vsledit.sourceforge.net">Visual Specification Language Editor</a>
+ * main module for combining separate logical units (Built in the IconEditor)
+ * into a structured schema.
  * 
  * @author Ando Saabas, Aulo Aasma
- * @link http://vsledit.sourceforge.net
  * @version 1.0
  */
 public class Editor extends JFrame implements ChangeListener {

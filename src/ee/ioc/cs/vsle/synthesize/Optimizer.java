@@ -13,7 +13,6 @@ public class Optimizer {
     
 	/**
 	 Takes an algorithm and optimizes it to only calculate the variables that are targets.
-	 @return an algorithm for calculating the target variables
 	 @param algorithm an unoptimized algorithm
 	 @param targets the variables which the algorithm has to calculate (other branches are removed)
 	 */   

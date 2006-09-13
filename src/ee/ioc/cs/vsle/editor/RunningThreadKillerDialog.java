@@ -164,8 +164,6 @@ public class RunningThreadKillerDialog extends JDialog {
 
 	/**
 	 * This method initializes this
-	 * 
-	 * @return void
 	 */
 	private void initialize() {
 		this.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
