@@ -196,12 +196,11 @@ public class Editor extends JFrame implements ChangeListener {
             }
 
             public void menuSelected(MenuEvent evt) {
-                System.err.println(evt.getSource());
                 Canvas canvas = s_instance.getCurrentCanvas();
-                if (canvas == null) {
-                    painterEnabled.setEnabled(false);
+                if (canvas == null || !canvas.getCurrentPackage().hasPainters()) {
+                    painterEnabled.setVisible(false);
                 } else {
-                    painterEnabled.setEnabled(true);
+                    painterEnabled.setVisible(true);
                     painterEnabled.setSelected(canvas.isEnableClassPainter());
                 }
             }
