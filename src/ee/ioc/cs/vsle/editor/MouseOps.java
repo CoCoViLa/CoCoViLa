@@ -144,6 +144,7 @@ class MouseOps
 				canvas.objects.updateSize(0.8f, 0.8f);
 				canvas.drawingArea.revalidate();
 				canvas.connections.calcAllBreakPoints();
+                canvas.setScale(canvas.getScale() * 0.8f);
 			} else if (!State.addRelation.equals(state)) {
                 setState(State.selection);
                 // if adding relation class and first port was connected
@@ -166,7 +167,7 @@ class MouseOps
 				canvas.drawingArea.revalidate();
 				canvas.objects.updateSize(1.25f, 1.25f);
 				canvas.connections.calcAllBreakPoints();
-
+				canvas.setScale(canvas.getScale() * 1.25f);
 			}
 
 			// **********Relation adding code**************************
@@ -622,6 +623,13 @@ class MouseOps
         } else {
             pClass = canvas.vPackage.getClass(state);
             obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
+        }
+
+        if (pClass.painterPrototype != null) {
+            ClassPainter painter = pClass.painterPrototype.clone();
+            painter.setClass(obj);
+            painter.setScheme(canvas.scheme);
+            canvas.classPainters.add(painter);
         }
 
         obj.shapes = new ArrayList<Shape>(pClass.graphics.shapes.size());

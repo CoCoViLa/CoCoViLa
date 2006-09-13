@@ -6,7 +6,7 @@
 <!ELEMENT port 		(open|closed)*>
 <!ELEMENT field 	(known|default)*>
 <!ELEMENT polygon 	(point+)>
-<!ELEMENT graphics 	(bounds| (line | rect | oval| arc | polygon) | text)*>
+<!ELEMENT graphics 	((bounds| (line | rect | oval| arc | polygon) | text)*, painter?)>
 <!ELEMENT open 		(graphics)>
 <!ELEMENT closed 	(graphics)>
 <!ELEMENT known 	(graphics)>
@@ -29,6 +29,7 @@
 <!ELEMENT strict 	EMPTY>
 <!ELEMENT text 		EMPTY>
 <!ELEMENT portConnection EMPTY>
+<!ELEMENT painter	(#PCDATA)>
 
 <!ATTLIST class
 	type (relation|class) #IMPLIED>

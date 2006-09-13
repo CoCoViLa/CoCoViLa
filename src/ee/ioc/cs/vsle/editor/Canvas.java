@@ -1,22 +1,46 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.vclass.Point;
-import ee.ioc.cs.vsle.packageparse.PackageParser;
-import ee.ioc.cs.vsle.util.PropertyBox;
-import ee.ioc.cs.vsle.util.VMath;
-import ee.ioc.cs.vsle.util.PrintUtilities;
-
-import javax.swing.*;
-
-import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.io.*;
+
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+
+import ee.ioc.cs.vsle.ccl.CCL;
+import ee.ioc.cs.vsle.ccl.CompileException;
+import ee.ioc.cs.vsle.packageparse.PackageParser;
+import ee.ioc.cs.vsle.util.PrintUtilities;
+import ee.ioc.cs.vsle.util.PropertyBox;
+import ee.ioc.cs.vsle.util.VMath;
+import ee.ioc.cs.vsle.vclass.ClassPainter;
+import ee.ioc.cs.vsle.vclass.Connection;
+import ee.ioc.cs.vsle.vclass.ConnectionList;
+import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.GObjGroup;
+import ee.ioc.cs.vsle.vclass.ObjectList;
+import ee.ioc.cs.vsle.vclass.PackageClass;
+import ee.ioc.cs.vsle.vclass.Point;
+import ee.ioc.cs.vsle.vclass.Port;
+import ee.ioc.cs.vsle.vclass.RelObj;
+import ee.ioc.cs.vsle.vclass.Scheme;
+import ee.ioc.cs.vsle.vclass.VPackage;
 
 /**
  */
@@ -30,6 +54,7 @@ public class Canvas extends JPanel implements ActionListener {
 	Scheme scheme;
 	ConnectionList connections;
 	ObjectList objects;
+    ArrayList<ClassPainter> classPainters;
 	GObj currentObj;
 	Port firstPort;
 	Port currentPort;
@@ -43,6 +68,8 @@ public class Canvas extends JPanel implements ActionListener {
 	DrawingArea drawingArea;
     BufferedImage backgroundImage;
     ExecutorService executor;
+    private float scale = 1.0f;
+    private boolean enableClassPainter = true;
 
 	public Canvas(File f) {
 		super();
@@ -88,8 +115,43 @@ public class Canvas extends JPanel implements ActionListener {
 		add(infoPanel, BorderLayout.SOUTH);
 		posInfo.setText("-");
         executor = Executors.newSingleThreadExecutor();
+        
+        if (vPackage.hasPainters()) {
+            classPainters = new ArrayList<ClassPainter>();
+            if (!createPainterPrototypes()) {
+                JOptionPane.showMessageDialog(this,
+                        "One or more errors occured. See the error log for details.",
+                        "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
 	}
 
+    private boolean createPainterPrototypes() {
+        boolean success = true;
+        CCL classLoader = new CCL();
+        classLoader.setCompileDir(workDir);
+        for (PackageClass pclass : vPackage.classes) {
+            if (pclass.painterName == null)
+                continue;
+            
+            try {
+                if (classLoader.compile2(pclass.painterName)) {
+                    Class painterClass = classLoader.loadClass(pclass.painterName);
+                    pclass.painterPrototype = (ClassPainter) painterClass.newInstance();
+                } else {
+                    success = false;
+                }
+            } catch (CompileException e) {
+                success = false;
+                e.printStackTrace();
+            } catch (Exception e) {
+                success = false;
+                e.printStackTrace();
+            }
+        }
+        return success;
+    }
+    
 	/**
 	 * Check if the grid should be visible or not.
 	 * @return boolean - grid visibility from the properties file.
@@ -570,7 +632,13 @@ public class Canvas extends JPanel implements ActionListener {
 				rel = connections.get(i);
 				rel.drawRelation(g2);
 			}
-			if (firstPort != null && mListener.state.equals(State.addRelation)) {
+            
+            if (enableClassPainter && classPainters != null) {
+                for (ClassPainter painter : classPainters)
+                    painter.paint(g2, scale);
+            }
+
+            if (firstPort != null && mListener.state.equals(State.addRelation)) {
 				currentCon.drawRelation(g2);
 				Point p = currentCon.breakPoints.get(
 					currentCon.breakPoints.size() - 1);
@@ -656,4 +724,21 @@ public class Canvas extends JPanel implements ActionListener {
 	String getWorkDir() {
 		return workDir;
 	}
+
+    public float getScale() {
+        return scale;
+    }
+
+    public void setScale(float scale) {
+        this.scale = scale;
+    }
+
+    public boolean isEnableClassPainter() {
+        return enableClassPainter;
+    }
+
+    public void setEnableClassPainter(boolean enableClassPainter) {
+        this.enableClassPainter = enableClassPainter;
+        drawingArea.repaint();
+    }
 }

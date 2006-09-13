@@ -180,6 +180,33 @@ public class Editor extends JFrame implements ChangeListener {
 		menuItem.setMnemonic('G');
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
+        
+        final JCheckBoxMenuItem painterEnabled = new JCheckBoxMenuItem(Menu.CLASSPAINTER, true);
+        painterEnabled.addActionListener(aListener);
+        menu.add(painterEnabled);
+        
+        menu.addMenuListener(new MenuListener() {
+
+            public void menuCanceled(MenuEvent evt) {
+                // nothing to do
+            }
+
+            public void menuDeselected(MenuEvent evt) {
+                // nothing to do
+            }
+
+            public void menuSelected(MenuEvent evt) {
+                System.err.println(evt.getSource());
+                Canvas canvas = s_instance.getCurrentCanvas();
+                if (canvas == null) {
+                    painterEnabled.setEnabled(false);
+                } else {
+                    painterEnabled.setEnabled(true);
+                    painterEnabled.setSelected(canvas.isEnableClassPainter());
+                }
+            }
+            
+        });
 
 		menuBar.add(menu);
 		menu = new JMenu(Menu.MENU_PACKAGE);

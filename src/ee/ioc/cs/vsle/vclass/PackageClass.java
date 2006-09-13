@@ -14,6 +14,8 @@ public class PackageClass implements Serializable {
 	public ArrayList<Port> ports = new ArrayList<Port>();
 	public String description;
 	public boolean relation = false;
+    public String painterName;
+    public ClassPainter painterPrototype;
 
 	public PackageClass(String name) {
 		this.name = name;

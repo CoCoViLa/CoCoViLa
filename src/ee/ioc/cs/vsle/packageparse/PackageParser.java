@@ -594,6 +594,10 @@ public class PackageParser {
             if ( element.equals( "icon" ) ) {
                 newClass.icon = s;
             }
+            if (element.equals("painter")) {
+                newClass.painterName = s;
+                pack.setPainters(true);
+            }
         }
 
         public void ignorableWhitespace( char buf[], int offset, int len ) throws SAXException { // Purposely ignore it.

@@ -19,6 +19,10 @@ public class VPackage {
 	private String path;
 	private String lastScheme;
 	public ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
+    /**
+     * Are there any classes with custom painters in this package?
+     */
+    private boolean painters;
 
 	public VPackage(String path) {
         this.path = path;
@@ -101,4 +105,12 @@ public class VPackage {
 		public String getName() {
 			return name;
 		}
+
+        public boolean hasPainters() {
+            return painters;
+        }
+
+        public void setPainters(boolean painters) {
+            this.painters = painters;
+        }
 }

@@ -264,6 +264,11 @@ public class EditorActionListener implements ActionListener {
                     Look.changeLayout( Look.LOOK_CUSTOM );
                 } catch ( Exception uie ) {
                 }
+            } else if (e.getActionCommand().equals(Menu.CLASSPAINTER)) {
+                Canvas canvas = Editor.getInstance().getCurrentCanvas();
+                if (canvas != null) {
+                    canvas.setEnableClassPainter(!canvas.isEnableClassPainter());
+                }
             }
         }
     }
