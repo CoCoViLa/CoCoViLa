@@ -2,8 +2,6 @@ package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.ClassField;
-import ee.ioc.cs.vsle.util.db;
-
 import java.util.ArrayList;
 import java.awt.*;
 import java.awt.event.ActionListener;
@@ -170,7 +168,6 @@ public class ObjectPropertiesEditor extends JFrame
 		JTextField textField;
 		ClassField field;
 		boolean b;
-		db.p(e);
 		if (e.getSource() == ok) {
 			for (int i = 0; i < textFields.size(); i++) {
 				textField = textFields.get(i);
