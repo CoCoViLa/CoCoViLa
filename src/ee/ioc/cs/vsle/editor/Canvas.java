@@ -14,6 +14,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -130,6 +131,13 @@ public class Canvas extends JPanel implements ActionListener {
         boolean success = true;
         CCL classLoader = new CCL();
         classLoader.setCompileDir(workDir);
+        try {
+            classLoader.addURL(new File(vPackage.getPath()).getParentFile().toURL());
+        } catch (MalformedURLException e1) {
+            // TODO Clean up this class loading mess
+            e1.printStackTrace();
+        }
+        
         for (PackageClass pclass : vPackage.classes) {
             if (pclass.painterName == null)
                 continue;

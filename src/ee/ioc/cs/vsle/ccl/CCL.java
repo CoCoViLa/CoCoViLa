@@ -32,10 +32,6 @@ public class CCL extends URLClassLoader {
     
 	public CCL() {
 		super(createClasspath());
-		
-//		for ( URL url : getURLs() ) {
-//			db.p( "cp: " + url + " sys: " + System.getProperty( "java.class.path" ) );
-//		}
 	}
 	
 	/**
@@ -338,5 +334,8 @@ public class CCL extends URLClassLoader {
     public void setCompileDir(String compileDir) {
         this.compileDir = compileDir;
     }
-	
+
+    public void addURL(URL url) {
+        super.addURL(url);
+    }
 }
