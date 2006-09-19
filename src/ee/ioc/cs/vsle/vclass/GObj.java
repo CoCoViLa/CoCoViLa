@@ -12,6 +12,7 @@ public class GObj implements Serializable, Cloneable {
 	public float Xsize = 1; // percentage for resizing, 1 means real size
 	public float Ysize = 1;
 	static final int CORNER_SIZE = 6;
+    private static final float MIN_SCALE = 0.1f; // the minimal value for X|Ysize
 
 	/* difWithMasterX, difWithMasterY variables are for resizeing an object group, we need to know
 	 the intitial difference to make it work correctly*/
@@ -68,47 +69,54 @@ public class GObj implements Serializable, Cloneable {
 		return false;
 	}
 
-	public void resize (int changeX, int changeY, int corner) {
-		if (corner == 1) {
-			if (Xsize > 0.1 || changeX < 0) {
-				setX(x + changeX);
-				setXsize((width * Xsize - changeX) /width);
-			}
-			if (Ysize > 0.1 || changeY < 0) {
-			    setY(y + changeY);
-				setYsize((height * Ysize - changeY) /height);
-			}
-		}
-		if (corner == 2) {
-			if (Xsize > 0.1  || changeX > 0) {
-				setXsize((width * Xsize + changeX) /width);
-			}
-			if (Ysize > 0.1  || changeY < 0) {
-			    setY(y + changeY);
-				setYsize((height * Ysize - changeY) /height);
-			}
-		}
+	public void resize(int changeX, int changeY, int corner) {
+        /*
+         * All these special cases and formulas are for making
+         * sure that the object's dimensions will not become negative
+         * even when the mouse is moved very quickly. If there is a
+         * cleaner way to do it then please implement it.
+         */
+        switch (corner) { // changeX
+        case 1: // top left
+        case 3: // bottom left
+            if (changeX > 0 && (Xsize - changeX / width < MIN_SCALE))
+                changeX = (int) ((Xsize - MIN_SCALE) * width + .5);
+            if (changeX != 0) {
+                setX(x + changeX);
+                setXsize(Xsize - (float) changeX / width);
+            }
+            break;
+        case 2: // top right
+        case 4: // bottom right
+            if (changeX < 0 && (Xsize + changeX / width < MIN_SCALE))
+                changeX = (int) ((MIN_SCALE - Xsize) * width - .5);
+            if (changeX != 0)
+                setXsize(Xsize + (float) changeX / width);
+            break;
+        default:
+            throw new IllegalArgumentException("The argument corner can have values 1, 2, 3 or 4.");
+        }
 
-		if (corner == 3) {
-			if (Xsize > 0.1 || changeX < 0) {
-				setX(x + changeX);
-				setXsize((width * Xsize - changeX) /width);
-			}
-			if (Ysize > 0.1 || changeY > 0) {
-				setYsize((height * Ysize + changeY) /height);
-			}
-		}
-
-		if (corner == 4) {
-			if (Xsize > 0.1 || changeX > 0) {
-				setXsize((width * Xsize + changeX) /width);
-			}
-			if (Ysize > 0.1  || changeY > 0) {
-				setYsize((height * Ysize + changeY) /height);
-			}
-		}
-
-
+        switch (corner) { // changeY
+        case 1: // top left
+        case 2: // top right
+            if (changeY > 0 && (Ysize - changeY / width < MIN_SCALE))
+                changeY = (int) ((Ysize - MIN_SCALE) * width + .5);
+            if (changeY != 0) {
+                setY(y + changeY);
+                setYsize(Ysize - (float) changeY / height);
+            }
+            break;
+        case 3: // bottom left
+        case 4: // bottom right
+            if (changeY < 0 && (Ysize + changeY / width < MIN_SCALE))
+                changeY = (int) ((MIN_SCALE - Ysize) * height - .5);
+            if (changeY != 0)
+                setYsize(Ysize + (float) changeY / height);
+            break;
+        default:
+            // an exception was already thrown in previous switch statement
+        }
 	}
 
 	public Port portContains(int pointX, int pointY) {
