@@ -41,7 +41,7 @@ import java.awt.Graphics2D;
  * ...
  * </pre>
  * In the above example the line in italics specifies that there exists a Java source code
- * file {@code MyClassPainter.java} in the package direcrory containing a class
+ * file {@code MyClassPainter.java} in the package directory containing a class
  * with the {@code ClassPainter} interface. The source will be automatically (re)compiled
  * when the package is loaded. For each visual class of type {@code MyClass} on the scheme
  * a new instance of {@code MyClassPainter} is created.</p>
@@ -57,7 +57,7 @@ import java.awt.Graphics2D;
 public abstract class ClassPainter implements Cloneable {
 
     /**
-     * Reference to the instance of a visual class this <code>ClassPainter</code>
+     * Reference to the instance of a visual class this {@code ClassPainter}
      * is responsible for.
      */
     protected GObj vclass;
@@ -80,9 +80,9 @@ public abstract class ClassPainter implements Cloneable {
     public abstract void paint(Graphics2D graphics, float scale);
     
     /**
-     * Sets the instance of a visual class this paitner is associated to.
-     * This method is guaranteed to be called with a non-<code>null</code> argument
-     * before the first <code>paint()</code> call. Note that the <code>vclass</code>
+     * Sets the instance of a visual class this painter is associated to.
+     * This method is guaranteed to be called with a non-{@code null} argument
+     * before the first {@code paint} call. The referenced {@code vclass}
      * should not be modified here.
      * 
      * @param vclass the instance of a visual class the painter is responsible for
@@ -92,8 +92,8 @@ public abstract class ClassPainter implements Cloneable {
     }
     
     /**
-     * Sets the scheme description before the first call to <code>paint()</code>
-     * method. Note that it is probably not a good idea to modify the scheme directly.
+     * Sets the scheme description before the first call to {@code paint}
+     * method. It is probably not a good idea to modify the scheme directly.
      * 
      * @param scheme the scheme description
      */
