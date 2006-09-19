@@ -3,9 +3,56 @@ package ee.ioc.cs.vsle.vclass;
 import java.awt.Graphics2D;
 
 /**
- * The abstract class <code>ClassPainter</code> provides an extension point
+ * <p>The abstract class {@code ClassPainter} provides an extension point
  * to the Scheme Editor where every visual class can customize its default
- * appearance and create additional visual artifacts on the scheme. 
+ * appearance and create additional visual artifacts on the scheme.</p>
+ * <p>Two steps are necessary to make use of this extension. First,
+ * the package creator has to implement the painter's code in a Java
+ * class that extends the abstract class {@code ClassPainter}.
+ * A definition of the abstract method {@link #paint(Graphics2D, float) paint}
+ * is needed. The simplest possible example which draws the name of the
+ * visual class at the coordinates of the object's top left corner is:<br />
+ * <pre>
+ * import java.awt.Graphics2D;
+ * import ee.ioc.cs.vsle.vclass.ClassPainter;
+ * 
+ * public class MyClassPainter extends ClassPainter {
+ *     public void paint(Graphics2D graphics, float scale) {
+ *         graphics.drawString("My name is " + vclass.getName(), 
+ *                 vclass.getX(), vclass.getY());
+ *     }
+ * }
+ * </pre>
+ * </p>
+ *
+ * <p>Second, the name of the painter class has to be declared in the package
+ * description XML file. For example, a relevant part of the package description might
+ * look as follows:
+ * <pre>
+ * ...
+ * &lt;class type="class"&gt;
+ * &lt;name&gt;MyClass&lt;/name&gt;
+ * ...
+ * &lt;graphics&gt;
+ * <i>&lt;painter&gt;MyClassPainter&lt;/painter&gt;</i>
+ * &lt;/graphics&gt; 
+ * ...
+ * &lt;/class&gt;
+ * ...
+ * </pre>
+ * In the above example the line in italics specifies that there exists a Java source code
+ * file {@code MyClassPainter.java} in the package direcrory containing a class
+ * with the {@code ClassPainter} interface. The source will be automatically (re)compiled
+ * when the package is loaded. For each visual class of type {@code MyClass} on the scheme
+ * a new instance of {@code MyClassPainter} is created.</p>
+ * <p>Please note that although the {@code ClassPainter} has a reference to the
+ * scheme description and could modify it directly, the scheme description including the
+ * visual class {@code vclass} itself should be considered read-only at present.
+ * Unexpected things will happen if this rule is ignored. In future versions there
+ * will be another interface for modifying the scheme in a thread safe way.</p>
+ * 
+ * @see GObj
+ * @see Scheme
  */
 public abstract class ClassPainter implements Cloneable {
 
