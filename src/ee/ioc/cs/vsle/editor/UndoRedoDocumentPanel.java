@@ -54,19 +54,11 @@ public class UndoRedoDocumentPanel extends JPanel {
     }
 
     private void updateUndoState() {
-        if ( undo.canUndo() ) {
-            m_buttonUndo.setEnabled( true );
-        } else {
-            m_buttonUndo.setEnabled( false );
-        }
+    	m_buttonUndo.setEnabled( undo.canUndo() );
     }
 
     private void updateRedoState() {
-        if ( undo.canRedo() ) {
-            m_buttonRedo.setEnabled( true );
-        } else {
-            m_buttonRedo.setEnabled( false );
-        }
+    	m_buttonRedo.setEnabled( undo.canRedo() );
     }
 
     private class MyUndoableEditListener implements UndoableEditListener {
