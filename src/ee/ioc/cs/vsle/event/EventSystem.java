@@ -4,7 +4,7 @@
 package ee.ioc.cs.vsle.event;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * @author pavelg
@@ -27,6 +27,24 @@ public class EventSystem {
 		return s_instance.m_eventQueue;
 	}
 
+	private void startQueue() {
+		
+		if( m_eventQueue == null ) {
+			m_eventQueue  = new EventQueue();
+
+			m_eventQueue.start();
+		}
+	}
+	
+	private void restartQueue() {
+		if ( RuntimeProperties.isLogDebugEnabled() ) 
+			db.p( "The queue is restarting" );
+		System.gc();
+		m_eventQueue.stop();
+		shutdown();
+		startQueue();
+	}
+	
 	/**
 	 * Method <code>shutdown</code>
 	 *
@@ -63,9 +81,7 @@ public class EventSystem {
 	private EventSystem()
 	{
 
-		m_eventQueue  = new EventQueue();
-
-		m_eventQueue.start();
+		startQueue();
 
 		// Wait until the queue gets started
 		while ( !m_eventQueue.isRunning() )
@@ -79,6 +95,14 @@ public class EventSystem {
 
 		if ( RuntimeProperties.isLogDebugEnabled() ) 
 			db.p( "The queue is running" );
+		
+		MemoryWarningSystem.getInstance().addListener(new MemoryWarningSystem.Listener() {
+			public void memoryUsageLow(long usedMemory, long maxMemory) {
+				if ( RuntimeProperties.isLogDebugEnabled() ) 
+					db.p("Memory usage low!!!");
+				restartQueue();
+			}
+		});
 	}
 
 	public static void queueEvent( BaseEvent event )
@@ -93,11 +117,13 @@ public class EventSystem {
 	 */
 	private void addEventToQueue( BaseEvent event )
 	{
-		if ( m_eventQueue == null )
-		{
+		if ( m_eventQueue == null ) {
 			return;
+		} else if( !m_eventQueue.isAlive() ) {
+			//restart the queue if for example OutOfMemory error happens
+			restartQueue();
 		}
-
+		
 		try
 		{
 			m_eventQueue.addEvent( event );

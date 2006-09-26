@@ -4,16 +4,20 @@ import javax.management.*;
 import java.lang.management.*;
 import java.util.*;
 
-public class MemoryWarningSystem {
+public final class MemoryWarningSystem {
 
+	private final static MemoryWarningSystem s_instance = new MemoryWarningSystem();
+	
+	public static MemoryWarningSystem getInstance() {
+		return s_instance;
+	}
+	
 	private final Collection<Listener> listeners =
 		new ArrayList<Listener>();
 
-	public interface Listener {
-		public void memoryUsageLow(long usedMemory, long maxMemory);
-	}
-
-	public MemoryWarningSystem() {
+	private MemoryWarningSystem() {
+		setPercentageUsageThreshold( 0.6 );
+		//System.err.println( "Starting Memody Warning System" );
 		MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
 		NotificationEmitter emitter = (NotificationEmitter) mbean;
 		emitter.addNotificationListener(new NotificationListener() {
@@ -69,7 +73,10 @@ public class MemoryWarningSystem {
 		throw new AssertionError("Could not find tenured space");
 	}
 
-
+	public interface Listener {
+		public void memoryUsageLow(long usedMemory, long maxMemory);
+	}
+	
 	/**
 	 * @param args
 	 */
