@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.packageparse;
 
 import java.awt.*;
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 
 import javax.xml.parsers.*;
@@ -86,11 +87,14 @@ public class PackageParser {
     // ===========================================================
     class PackageHandler extends DefaultHandler {
 
-        public InputSource resolveEntity( java.lang.String publicId, java.lang.String systemId ) throws
+        public InputSource resolveEntity(String publicId, String systemId) throws
                 SAXException {
             InputSource is = null;
-            if ( systemId != null && systemId.endsWith( "dtd" ) )
-                is = new InputSource( FileFuncs.getResource( RuntimeProperties.PACKAGE_DTD, false ).toString() );
+            if (systemId != null && systemId.endsWith("dtd")) {
+            	URL url = FileFuncs.getResource(RuntimeProperties.PACKAGE_DTD, false);
+            	if (url != null)
+            		is = new InputSource(url.toString());
+            }
             return is;
         }
 
