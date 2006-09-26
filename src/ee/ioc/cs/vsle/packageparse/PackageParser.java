@@ -89,13 +89,12 @@ public class PackageParser {
 
         public InputSource resolveEntity(String publicId, String systemId) throws
                 SAXException {
-            InputSource is = null;
             if (systemId != null && systemId.endsWith("dtd")) {
             	URL url = FileFuncs.getResource(RuntimeProperties.PACKAGE_DTD, false);
             	if (url != null)
-            		is = new InputSource(url.toString());
+            		return new InputSource(url.toString());
             }
-            return is;
+            return null;
         }
 
         public void error( SAXParseException spe ) {
@@ -492,7 +491,7 @@ public class PackageParser {
                 newClass.fields = classFields;
                 ArrayList<ClassField> a = new ArrayList<ClassField>();
                 try {
-                    a = SpecParser.getFields( path + File.separator + newClass.name + ".java" );
+                    a = SpecParser.getFields( path + RuntimeProperties.FS + newClass.name + ".java" );
                 } catch ( IOException e ) {
                     db.p( "Warning: class " + newClass.name +
                           " specified in package does not exist." );

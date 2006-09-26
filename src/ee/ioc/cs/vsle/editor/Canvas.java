@@ -75,7 +75,7 @@ public class Canvas extends JPanel implements ActionListener {
 	public Canvas(File f) {
 		super();
 		if (f.exists()) {
-			setWorkDir(f.getParent() + File.separator);
+			setWorkDir(f.getParent() + RuntimeProperties.FS);
 			PackageParser pp = new PackageParser(f);
 			vPackage = pp.getPackage();
 			initialize();
