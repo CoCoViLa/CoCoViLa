@@ -686,7 +686,8 @@ public class Canvas extends JPanel implements ActionListener {
     }
 
     /**
-     * Sets the background image for the scheme.
+     * Sets the background image for the scheme. The preferred size of the
+     * drawing area is incremented if necessary to fit the whole image.
      * The current image is removed when <code>image</code> is <code>null</code>.
      * @param image The image
      */
@@ -694,7 +695,10 @@ public class Canvas extends JPanel implements ActionListener {
         clearBackgroundImage();
         if (image != null) {
             backgroundImage = image;
+            drawAreaSize.height = Math.max(image.getHeight(), drawingArea.getHeight());
+            drawAreaSize.width = Math.max(image.getWidth(), drawingArea.getWidth());
             drawingArea.repaint(0, 0, image.getWidth(), image.getHeight());
+            drawingArea.revalidate();
         }
     }
 
