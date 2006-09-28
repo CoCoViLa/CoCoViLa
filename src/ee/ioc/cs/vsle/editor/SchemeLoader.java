@@ -376,7 +376,7 @@ public class SchemeLoader {
 			if (qName.equals("scheme")) {
 				// create proper references to start and endports in all
 				// RelObjects
-				// üsna valus häkk
+				// Ãœsna valus hÃ¤kk
 				for (int i = 0; i < objects.size(); i++) {
 					obj = objects.get(i);
 					if (obj instanceof RelObj) {
