@@ -670,6 +670,25 @@ public class Editor extends JFrame implements ChangeListener {
 				.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
 						PropertyBox.SNAP_TO_GRID));
 
+        // Initialize runtime environment before loading any packages
+        // that might need compilation of classpainters or something.
+        RuntimeProperties.genFileDir = PropertyBox.getProperty(
+                PropertyBox.APP_PROPS_FILE_NAME,
+                PropertyBox.GENERATED_FILES_DIR);
+        
+        File file = new File(RuntimeProperties.genFileDir);
+        if( !file.exists() ) {
+            file.mkdirs();
+        }
+        
+        RuntimeProperties.compilationClasspath = PropertyBox.getProperty(
+                PropertyBox.APP_PROPS_FILE_NAME,
+                PropertyBox.COMPILATION_CLASSPATH );
+        
+        if( RuntimeProperties.compilationClasspath == null ) {
+            RuntimeProperties.compilationClasspath = "";
+        }
+
 		Editor window = null;
 		try {
 			if ( !RuntimeProperties.isFromWebstart() && args.length > 0) {
@@ -682,7 +701,7 @@ public class Editor extends JFrame implements ChangeListener {
 					Synthesizer.parseFromCommandLine( dir, args[1]);
 				} else {
 					// Esimeses hoos vaatame, kas moodulite fail on ette antud
-					// k�surealt.
+					// käsurealt.
 					db.p(args[0] + " read from command line.");
 					window = new Editor(directory + args[0]);
 					window.setTitle(WINDOW_TITLE);
@@ -703,7 +722,7 @@ public class Editor extends JFrame implements ChangeListener {
 						db.p("Found module file name " + paletteFile[i]
 								+ " from the "
 								+ PropertyBox.APP_PROPS_FILE_NAME
-								+ ".properties file.");
+								+ " properties file.");
 						File f = new File(paletteFile[i]);
 						if (f.exists()) {
 							window.loadPackage(f);
@@ -727,28 +746,7 @@ public class Editor extends JFrame implements ChangeListener {
 			window.setVisible(true);
 		}
 		
-		s_instance = window;
-		
-		// log application executions, also making sure that the properties file
-		// is
-		// available for writing (required by some of current application
-		// modules).
-		RuntimeProperties.genFileDir = PropertyBox.getProperty(
-				PropertyBox.APP_PROPS_FILE_NAME,
-				PropertyBox.GENERATED_FILES_DIR);
-		
-		File file = new File(RuntimeProperties.genFileDir);
-		if( !file.exists() ) {
-			file.mkdirs();
-		}
-		
-		RuntimeProperties.compilationClasspath = PropertyBox.getProperty(
-				PropertyBox.APP_PROPS_FILE_NAME,
-				PropertyBox.COMPILATION_CLASSPATH );
-		
-		if( RuntimeProperties.compilationClasspath == null ) {
-			RuntimeProperties.compilationClasspath = "";
-		}
+		s_instance = window;		
 		
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 				PropertyBox.LAST_EXECUTED, new java.util.Date().toString());
