@@ -27,17 +27,18 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     
     private long m_progRunnerID;
     
-    private String m_packageName;
+    //the title should be unique for each spec window because it is used as an ID for managing frames
+    private String m_title;
     
     private static HashMap<String, JFrame> s_frames = new HashMap<String, JFrame>();
     
-    public ProgramTextEditor( long prunnerID, String packageName ) {
+    public ProgramTextEditor( long prunnerID, String title ) {
     	
-        super( packageName + " - Specification" );
+        super( title + " - Specification" );
         
-        s_frames.put( packageName, this );
+        s_frames.put( title, this );
         
-        m_packageName = packageName;
+        m_title = title;
         
         ProgramRunnerFeedbackEvent.registerListener( m_lst );
         
@@ -165,7 +166,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     public void dispose() {
     	super.dispose();
     	
-    	s_frames.remove( m_packageName );
+    	s_frames.remove( m_title );
     	
     	if( jta_spec != null && jta_spec instanceof JavaColoredTextPane ) {
     		((JavaColoredTextPane)jta_spec).destroy();
@@ -269,7 +270,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
     						jta_runResult.append( text );
     						tabbedPane.setSelectedComponent( runResult );
+    					} else if( type == ProgramRunnerFeedbackEvent.DISPOSE ) {
+    						dispose();
     					}
+    					
     				}} 
     			);
     		}

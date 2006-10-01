@@ -11,6 +11,7 @@ public class ProgramRunnerFeedbackEvent extends BaseEvent {
 	public static final int TEXT_SPECIFICATION = 0;
 	public static final int TEXT_PROGRAM = 1;
 	public static final int TEXT_RESULT = 2;
+	public static final int DISPOSE = 3;
 	
 	private long m_id;
 	private int m_type;

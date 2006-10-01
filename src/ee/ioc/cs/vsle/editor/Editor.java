@@ -591,16 +591,24 @@ public class Editor extends JFrame implements ChangeListener {
 	 */
 	void loadPackage(File f) {
 		if (f != null) {
-			Canvas canvas = new Canvas(f);
-			String packageName = f.getName().substring(0,
-					f.getName().indexOf("."));
+			Canvas canvas = new Canvas( f );
+			String packageName = f.getName().substring( 0, f.getName().indexOf(".") );
 			
-			if( !isPackageOpen( packageName ) ) {
-				tabbedPane.addTab(packageName, canvas);
-				tabbedPane.setSelectedComponent(canvas);
-			} else {
-				JOptionPane.showMessageDialog( Editor.getInstance(), "The package " + packageName + " has already been loaded", "Error", JOptionPane.ERROR_MESSAGE );
+			int count = 0;
+			
+			for ( Component canv : tabbedPane.getComponents() ) {
+				if( packageName.equals( ((Canvas)canv).getCurrentPackage().getName() ) ) {
+					count++;
+				}
 			}
+			
+			if( count > 0 ) {
+				packageName = packageName + " (" + ( count + 1 ) + ")";
+				canvas.setTitle( packageName );
+			}
+			
+			tabbedPane.addTab(packageName, canvas);
+			tabbedPane.setSelectedComponent(canvas);
 		}
 	} // loadPackage
 
@@ -757,7 +765,10 @@ public class Editor extends JFrame implements ChangeListener {
 	}
 
 	public void clearPane() {
-		tabbedPane.remove(tabbedPane.getSelectedComponent());
+		
+		Canvas canv = getCurrentCanvas();
+		canv.destroy();
+		tabbedPane.remove(canv);
 		if (tabbedPane.getTabCount() > 0) {
 			tabbedPane.setSelectedIndex(0);
 			getCurrentCanvas().drawingArea.grabFocus();

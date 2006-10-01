@@ -15,7 +15,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,6 +26,7 @@ import javax.swing.JScrollPane;
 
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.ccl.CompileException;
+import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.packageparse.PackageParser;
 import ee.ioc.cs.vsle.util.PrintUtilities;
 import ee.ioc.cs.vsle.util.PropertyBox;
@@ -80,6 +81,7 @@ public class Canvas extends JPanel implements ActionListener {
 			vPackage = pp.getPackage();
 			initialize();
 			palette = new Palette(vPackage, this);
+			m_canvasTitle = vPackage.getName();
 			validate();
 		} else {
 			JOptionPane.showMessageDialog(this, "Cannot read file " + f, "Error",
@@ -87,6 +89,16 @@ public class Canvas extends JPanel implements ActionListener {
 		}
 	}
 
+	private String m_canvasTitle;
+	
+	public void setTitle( String title ) {
+		m_canvasTitle = title;
+	}
+	
+	public String getTitle() {
+		return m_canvasTitle;
+	}
+	
     void initialize() {
 		scheme = new Scheme();
 		scheme.packageName = vPackage.getName();
@@ -752,5 +764,25 @@ public class Canvas extends JPanel implements ActionListener {
     public void setEnableClassPainter(boolean enableClassPainter) {
         this.enableClassPainter = enableClassPainter;
         drawingArea.repaint();
+    }
+    
+    private HashSet<Long> m_runners = new HashSet<Long>();
+    
+    public void registerRunner( long id ) {
+    	m_runners.add( id );
+    }
+    
+    public void unregisterRunner( long id ) {
+    	m_runners.remove( id );
+    }
+    
+    public void destroy() {
+    	for ( long id : m_runners ) {
+			ProgramRunnerEvent event = new ProgramRunnerEvent( this, id, ProgramRunnerEvent.DESTROY );
+			
+			EventSystem.queueEvent( event );
+		}
+    	m_runners.clear();
+    	drawingArea = null;
     }
 }

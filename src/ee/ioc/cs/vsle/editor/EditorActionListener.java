@@ -152,8 +152,12 @@ public class EditorActionListener implements ActionListener {
             	Canvas canv = Editor.getInstance().getCurrentCanvas();
                 if( canv != null ) {
                 	
-                	JFrame frame = ProgramTextEditor.getFrame( canv.getCurrentPackage().getName() );
+                	JFrame frame = ProgramTextEditor.getFrame( canv.getTitle() );
                 	if( frame != null ) {
+                		
+                		if( frame.getState() == JFrame.ICONIFIED ) {
+                			frame.setState( JFrame.NORMAL );
+                		}
                 		
                 		frame.toFront();
                 		return;
@@ -161,7 +165,7 @@ public class EditorActionListener implements ActionListener {
                 	
                 	final ProgramRunner runner = new ProgramRunner( canv );
                 	
-            		ProgramTextEditor programEditor = new ProgramTextEditor( runner.getId(), canv.getCurrentPackage().getName() );
+            		ProgramTextEditor programEditor = new ProgramTextEditor( runner.getId(), canv.getTitle() );
             		
             		programEditor.addWindowListener( new WindowAdapter(){
 

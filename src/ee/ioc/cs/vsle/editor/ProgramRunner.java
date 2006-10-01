@@ -37,6 +37,8 @@ public class ProgramRunner {
 		
 		m_canvas = canvas;
 		
+		m_canvas.registerRunner( m_id );
+		
 		updateFromCanvas();
 	}
 	
@@ -46,6 +48,8 @@ public class ProgramRunner {
 	
 	
 	public void destroy() {
+		
+		m_canvas.unregisterRunner( m_id );
 		
 		if( m_lst != null ) {
 			
@@ -330,7 +334,7 @@ public class ProgramRunner {
 					setWorking( true );
 					
 					RunningThreadKillerDialog.addThread( this );
-					
+
 					try {
 						method.invoke(genObject, new Object[]{ args } );
 					} catch( InvocationTargetException ex ) { 
@@ -477,6 +481,11 @@ public class ProgramRunner {
 
 			if( ( operation & ProgramRunnerEvent.DESTROY ) > 0 ) {
 				destroy();
+				
+				ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
+						ProgramRunnerFeedbackEvent.DISPOSE, null );
+				
+				EventSystem.queueEvent( evt );
 			}
 
 		}

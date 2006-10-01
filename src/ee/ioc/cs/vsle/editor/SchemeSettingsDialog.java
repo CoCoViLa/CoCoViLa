@@ -93,6 +93,7 @@ public class SchemeSettingsDialog extends JDialog {
 							public void setVisible( boolean b ) {
 								if( b ) {
 									setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
+									setLocationRelativeTo(SchemeSettingsDialog.this);
 									getContentPane().add( opt );
 									pack();
 								}
