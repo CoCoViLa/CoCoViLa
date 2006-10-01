@@ -16,8 +16,7 @@ public final class MemoryWarningSystem {
 		new ArrayList<Listener>();
 
 	private MemoryWarningSystem() {
-		setPercentageUsageThreshold( 0.6 );
-		//System.err.println( "Starting Memody Warning System" );
+		System.err.println( "Starting Memory Warning System" );
 		MemoryMXBean mbean = ManagementFactory.getMemoryMXBean();
 		NotificationEmitter emitter = (NotificationEmitter) mbean;
 		emitter.addNotificationListener(new NotificationListener() {
@@ -26,7 +25,7 @@ public final class MemoryWarningSystem {
 						MemoryNotificationInfo.MEMORY_THRESHOLD_EXCEEDED)) {
 					long maxMemory = tenuredGenPool.getUsage().getMax();
 					long usedMemory = tenuredGenPool.getUsage().getUsed();
-					//System.err.println( "usedMemory: " + usedMemory + " maxMemory: " + maxMemory );
+					System.err.println( "usedMemory: " + usedMemory + " maxMemory: " + maxMemory );
 					for (Listener listener : listeners) {
 						listener.memoryUsageLow(usedMemory, maxMemory);
 					}
@@ -52,7 +51,7 @@ public final class MemoryWarningSystem {
 		}
 		long maxMemory = tenuredGenPool.getUsage().getMax();
 		long warningThreshold = (long) (maxMemory * percentage);
-		//System.err.println( "percentage: " + percentage + " warningThreshold: " + warningThreshold + " maxMemory: " + maxMemory );
+		System.err.println( "percentage: " + percentage + " warningThreshold: " + warningThreshold + " maxMemory: " + maxMemory );
 		tenuredGenPool.setUsageThreshold(warningThreshold);
 	}
 

@@ -37,7 +37,7 @@ public class EventSystem {
 	}
 	
 	private void restartQueue() {
-		if ( RuntimeProperties.isLogDebugEnabled() ) 
+		if ( RuntimeProperties.isLogInfoEnabled() ) 
 			db.p( "The queue is restarting" );
 		System.gc();
 		m_eventQueue.stop();
@@ -98,11 +98,13 @@ public class EventSystem {
 		
 		MemoryWarningSystem.getInstance().addListener(new MemoryWarningSystem.Listener() {
 			public void memoryUsageLow(long usedMemory, long maxMemory) {
-				if ( RuntimeProperties.isLogDebugEnabled() ) 
+				if ( RuntimeProperties.isLogInfoEnabled() ) 
 					db.p("Memory usage low!!!");
 				restartQueue();
 			}
 		});
+		
+		MemoryWarningSystem.setPercentageUsageThreshold( 0.6 );
 	}
 
 	public static void queueEvent( BaseEvent event )
