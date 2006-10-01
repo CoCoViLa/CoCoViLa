@@ -172,7 +172,8 @@ public class ClassPropertiesDialog extends JDialog {
 		// Ok button pressed, close the window and update class properties.
 		bttnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent evt) {
-				// Store the defined properties in runtime variables.
+                stopCellEditing();
+                // Store the defined properties in runtime variables.
 				storeVariables();
 				// Close the dialog. The closing method validates variables.
 				closeDialog(true);
@@ -200,6 +201,7 @@ public class ClassPropertiesDialog extends JDialog {
 		// and refresh the table.
 		bttnNewField.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent evt) {
+                stopCellEditing();
 				addEmptyClassField();
 			}
 		});
@@ -245,7 +247,19 @@ public class ClassPropertiesDialog extends JDialog {
 		setVisible(true);
 	} // ClassPropertiesDialog
 
-	/**
+
+    /**
+     * Stops cell editing if a cell is being edited to store the
+     * value to the table model.
+     */
+    private void stopCellEditing() {
+        int col = tblClassFields.getEditingColumn();
+        int row = tblClassFields.getEditingRow();
+        if (row > -1 && col > -1)
+            tblClassFields.getCellEditor(row, col).stopCellEditing();
+    }
+
+    /**
 	 * Add an empty row to the end of the DBResult and scroll the added row visible.
 	 */
 	private void addEmptyClassField() {
@@ -384,12 +398,14 @@ public class ClassPropertiesDialog extends JDialog {
 				fldClassIcon.requestFocus();
 			}
 		}
-		if (this.fldClassIcon != null && this.fldClassIcon.getText() != null && this.fldClassIcon.getText().trim().length() > 0) {
-			if (!this.fldClassIcon.getText().trim().toLowerCase().endsWith(".gif")) {
+		if (this.fldClassIcon != null && this.fldClassIcon.getText() != null) {
+            String icon = this.fldClassIcon.getText().trim().toLowerCase();
+            if (icon.length() > 0 && !(icon.endsWith(".gif") || icon.endsWith(".png"))) {
 				valid = false;
 				this.fldClassIcon.setText("");
 				RuntimeProperties.classIcon = "";
-				JOptionPane.showMessageDialog(null, "Only icons in GIF format allowed.", "Invalid icon format", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(null, "Only icons in GIF or PNG format allowed.",
+                        "Invalid icon format", JOptionPane.INFORMATION_MESSAGE);
 				fldClassIcon.requestFocus();
 			}
 		}
