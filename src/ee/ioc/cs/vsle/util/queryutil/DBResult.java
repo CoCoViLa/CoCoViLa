@@ -1,10 +1,13 @@
 package ee.ioc.cs.vsle.util.queryutil;
 
-import java.util.*;
-import java.sql.*;
-import java.math.*;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Enumeration;
+import java.util.Hashtable;
+
 import ee.ioc.cs.vsle.util.StringUtil;
-import java.io.*;
 
 /**
  * Title: DBResult.
@@ -18,8 +21,6 @@ public class DBResult extends Object implements java.io.Serializable{
 
     /**
      * SerialVersionUID of a current class.
-     * Execute the main method for getting
-     * the SerialVersionUID
      */
     public static final long serialVersionUID = -4134322799836540081L;
 
@@ -27,9 +28,9 @@ public class DBResult extends Object implements java.io.Serializable{
     //teisiti, kasutatakse seda.
     private FieldFormatter defFieldFormatter=new DefaultFieldFormatter();
 
-    private FieldFormatter customFieldFormatter=null;
-    private Hashtable columnToFormatter=new Hashtable();
-    private int[][] indexes=null;
+    private FieldFormatter customFieldFormatter;
+    private Hashtable<Integer, FieldFormatter> columnToFormatter=new Hashtable<Integer, FieldFormatter>();
+    private int[][] indexes;
 
     /** Order type
      */
@@ -68,16 +69,16 @@ public class DBResult extends Object implements java.io.Serializable{
     public static final int NOT_EQUAL=8;
 
     //raporti nimi
-    String DBResultName=null;
+    String DBResultName;
 
     //read
-    ArrayList rows=new ArrayList();
+    ArrayList<Object[]> rows = new ArrayList<Object[]>();
     //tulpade nimed->tulba index
-    Hashtable nameToIndex=new Hashtable();
+    Hashtable<String, Integer> nameToIndex=new Hashtable<String, Integer>();
     //tulpade nimed
-    String[] columns=null;
+    String[] columns;
     //raporti atribuudid
-    Hashtable attributes=new Hashtable();
+    Hashtable<String, Object> attributes = new Hashtable<String, Object>();
 
     /** Creates new DBResult
      * @param s -
@@ -86,55 +87,12 @@ public class DBResult extends Object implements java.io.Serializable{
         this(s,new String[0]);
     }
 
-    public DBResult(String s,ResultSet rs)throws Exception{
-        this(s,new String[0]);
-        ResultSetMetaData rsmd=rs.getMetaData();
-        int columnCount=rsmd.getColumnCount();
-        for (int i=1;i<=columnCount;i++){
-            addColumn(rsmd.getColumnName(i));
-        }
-        while (rs.next()){
-            Object[] row=new Object[columnCount];
-            for (int i=1;i<=columnCount;i++){
-                row[i-1]=rs.getObject(i);
-            }
-            appendRow(row);
-        }
-    }
-
-    /**
-     * Returns SerialVersionUID of the class
-     * @return long
-     */
-    public static long getSerialVersionUID() {
-        long serVerUID = 0;
-        try {
-            ObjectStreamClass myObj = ObjectStreamClass.lookup(Class.forName("box.queryutil.DBResult"));
-            serVerUID = myObj.getSerialVersionUID();
-        } catch (ClassNotFoundException e) { }
-        return serVerUID;
-    }
-
-    public DBResult(String s,Vector columns) {
-        String[] ss=new String[columns.size()];
-        for (int i=0;i<columns.size();i++){
-            ss[i]=(String)columns.get(i);
-        }
-        DBResultName=s;
-        this.columns=ss;
-        for (int i=0;i<this.columns.length;i++){
-            Integer indx=new Integer(i+1);
-            nameToIndex.put(this.columns[i],indx);
-            columnToFormatter.put(indx,defFieldFormatter);
-        }
-    }
-
     public DBResult(String s,String[] columns){
         DBResultName=s;
         this.columns=columns;
         for (int i=0;i<columns.length;i++){
-            nameToIndex.put(columns[i],new Integer(i+1));
-            columnToFormatter.put(new Integer(i+1),defFieldFormatter);
+            nameToIndex.put(columns[i],Integer.valueOf(i+1));
+            columnToFormatter.put(Integer.valueOf(i+1),defFieldFormatter);
         }
     }
 
@@ -173,12 +131,12 @@ public class DBResult extends Object implements java.io.Serializable{
         return attributes.get(key);
     }
 
-    public Enumeration getAttributeKeys(){
+    public Enumeration<String> getAttributeKeys(){
         return attributes.keys();
     }
 
     public void removeAllAttributes(){
-        attributes=new Hashtable();
+        attributes.clear();
     }
 
     public String getDBResultName(){
@@ -210,7 +168,7 @@ public class DBResult extends Object implements java.io.Serializable{
    * @return Object
    */
     public Object getFieldAsObject(int col, int row){
-        return ((Object[])rows.get(row-1))[col-1];
+        return rows.get(row-1)[col-1];
     }
 
     /** Tagastab fieldi objectina
@@ -269,10 +227,10 @@ public class DBResult extends Object implements java.io.Serializable{
      * @return String
      */
     public String getField(int col,int row){
-        return ((FieldFormatter)columnToFormatter.get(new Integer(col))).asString(getFieldAsObject(col,row));
+        return columnToFormatter.get(Integer.valueOf(col)).asString(getFieldAsObject(col,row));
     }
 
-    /** Tagastab fieldi stringina. Kui v��rtus on null, siis ka tagastab nulli.
+    /** Tagastab fieldi stringina. Kui väärtus on null, siis ka tagastab nulli.
      * @param columnName fieldi nimi
      * @param row rea index (1..n)
      * @return String
@@ -284,9 +242,9 @@ public class DBResult extends Object implements java.io.Serializable{
     private DBResult select(int column,int compType, Comparable compValue, boolean asString) throws ArrayIndexOutOfBoundsException{
         if (column<1||column>this.getColumnCount())throw new ArrayIndexOutOfBoundsException("The column index must be between 1 and "+getColumnCount());
         DBResult ret=new DBResult(DBResultName);
-        ret.nameToIndex=(Hashtable)nameToIndex.clone();
-        ret.columns=(String[])columns.clone();
-        ret.attributes=(Hashtable)attributes.clone();
+        ret.nameToIndex = new Hashtable<String, Integer>(nameToIndex);
+        ret.columns = columns.clone();
+        ret.attributes = new Hashtable<String, Object>(attributes);
         ret.defFieldFormatter=defFieldFormatter;
         ret.customFieldFormatter=customFieldFormatter;
         ret.columnToFormatter=columnToFormatter;
@@ -343,9 +301,9 @@ public class DBResult extends Object implements java.io.Serializable{
     private DBResult remove(int column,int compType, Comparable compValue, boolean asString) throws ArrayIndexOutOfBoundsException{
         if (column<1||column>this.getColumnCount())throw new ArrayIndexOutOfBoundsException("The column index must be between 1 and "+getColumnCount());
         DBResult ret=new DBResult(DBResultName);
-        ret.nameToIndex=(Hashtable)nameToIndex.clone();
-        ret.columns=(String[])columns.clone();
-        ret.attributes=(Hashtable)attributes.clone();
+        ret.nameToIndex = new Hashtable<String, Integer>(nameToIndex);
+        ret.columns = columns.clone();
+        ret.attributes = new Hashtable<String, Object>(attributes);
         ret.defFieldFormatter=defFieldFormatter;
         ret.customFieldFormatter=customFieldFormatter;
         ret.columnToFormatter=columnToFormatter;
@@ -457,7 +415,7 @@ public class DBResult extends Object implements java.io.Serializable{
         return select(getColumnIndex(columnName),compType,compValue);
     }
 
-    private class FieldComparator implements java.util.Comparator{
+    private class FieldComparator implements Comparator<Object>{
         int fieldIndex=-1;
         int orderType=1;
 
@@ -479,7 +437,7 @@ public class DBResult extends Object implements java.io.Serializable{
                 f1=(Comparable)(((Object[])o1)[fieldIndex]);
                 f2=(Comparable)(((Object[])o2)[fieldIndex]);
             }else{
-                f1=(Comparable)o1;
+                f1=(Comparable) o1;
                 f2=(Comparable)o2;
             }
             int ret=0;
@@ -519,15 +477,14 @@ public class DBResult extends Object implements java.io.Serializable{
     public DBResult orderBy(int column,int orderType)throws ArrayIndexOutOfBoundsException{
         if (column<1||column>this.getColumnCount())throw new ArrayIndexOutOfBoundsException("The column index must be between 1 and "+getColumnCount());
         DBResult ret=new DBResult(DBResultName);
-        ret.nameToIndex=(Hashtable)nameToIndex.clone();
-        ret.columns=columns.clone();
-        ret.attributes=(Hashtable)attributes.clone();
+        ret.nameToIndex = new Hashtable<String, Integer>(nameToIndex);
+        ret.columns = columns.clone();
+        ret.attributes = new Hashtable<String, Object>(attributes);
         ret.defFieldFormatter=defFieldFormatter;
         ret.customFieldFormatter=customFieldFormatter;
         ret.columnToFormatter=columnToFormatter;
-        Object[] sortedRows=(Object[])rows.toArray().clone();
-        Arrays.sort(sortedRows,new FieldComparator(column-1,orderType));
-        ret.rows=new ArrayList(Arrays.asList(sortedRows));
+        ret.rows = new ArrayList<Object[]>(rows);
+        Collections.sort(ret.rows, new FieldComparator(column - 1, orderType));
         return ret;
     }
 
@@ -554,11 +511,11 @@ public class DBResult extends Object implements java.io.Serializable{
     }
 
     public String[] getColumnNames(){
-        return (String[])columns.clone();
+        return columns.clone();
     }
 
     public void setField(int col, int row, Object o){
-        Object[] r=(Object[])rows.get(row-1);
+        Object[] r = rows.get(row-1);
         r[col-1]=o;
     }
 
@@ -590,10 +547,10 @@ public class DBResult extends Object implements java.io.Serializable{
         columns=columnsNew;
         nameToIndex.clear();
         for (int i=0;i<columns.length;i++){
-          nameToIndex.put(columns[i],new Integer(i+1));
+          nameToIndex.put(columns[i],Integer.valueOf(i+1));
         }
         for (int i=0;i<rows.size();i++){
-            Object[] row=(Object[])rows.get(i);
+            Object[] row = rows.get(i);
             Object[] rowNew=new Object[row.length-1];
             System.arraycopy(row,0,rowNew,0,col);
             System.arraycopy(row,col+1,rowNew,col,row.length-col-1);
@@ -606,9 +563,9 @@ public class DBResult extends Object implements java.io.Serializable{
     }
 
     public int addColumn(String columnName){
-        Integer ret=(Integer)nameToIndex.get(columnName);
+        Integer ret = nameToIndex.get(columnName);
         if (ret!=null)throw new ArrayIndexOutOfBoundsException("Column exists allready");
-        ret=new Integer(getColumnCount()+1);
+        ret=Integer.valueOf(getColumnCount()+1);
         String[] colNew=new String[columns.length+1];
         System.arraycopy(columns,0,colNew,0,columns.length);
         colNew[colNew.length-1]=columnName;
@@ -618,7 +575,7 @@ public class DBResult extends Object implements java.io.Serializable{
         if (ff==null)ff=defFieldFormatter;
         columnToFormatter.put(ret,ff);
         for (int i=0;i<getRowCount();i++){
-            Object[] o=(Object[])rows.get(i);
+            Object[] o = rows.get(i);
             if (o.length<columns.length){
                 Object[] oNew=new Object[columns.length];
                 System.arraycopy(o,0,oNew,0,o.length);
@@ -638,7 +595,7 @@ public class DBResult extends Object implements java.io.Serializable{
         sb.append("<"+getDBResultName()+"_Row row_nr=\""+row+"\">\n");
             for(int j=1;j<=columns.length;j++){
                 try{
-                    sb.append("<"+StringUtil.asXML(columns[j-1])+">"+(DBResult)getFieldAsObject(j,row)+"</"+StringUtil.asXML(columns[j-1])+">\n");
+                    sb.append("<"+StringUtil.asXML(columns[j-1])+">"+getFieldAsObject(j,row)+"</"+StringUtil.asXML(columns[j-1])+">\n");
                 }catch(Exception e){
                     sb.append("<"+StringUtil.asXML(columns[j-1])+">"+StringUtil.asXML(getField(j,row))+"</"+StringUtil.asXML(columns[j-1])+">\n");
                 }
@@ -655,9 +612,9 @@ public class DBResult extends Object implements java.io.Serializable{
 
         StringBuffer sb=new StringBuffer();
         sb.append("<"+StringUtil.asXML(getDBResultName())+" ");
-        Enumeration en=attributes.keys();
+        Enumeration<String> en = attributes.keys();
         while (en.hasMoreElements()){
-            String key=(String)en.nextElement();
+            String key = en.nextElement();
             sb.append(" "+key+"=\""+StringUtil.asXML(defFieldFormatter.asString(attributes.get(key)))+"\" ");
         }
         sb.append(">\n");
@@ -665,7 +622,7 @@ public class DBResult extends Object implements java.io.Serializable{
             sb.append("<"+getDBResultName()+"_Row row_nr=\""+i+"\">\n");
             for(int j=1;j<=columns.length;j++){
                 try{
-                    sb.append("<"+StringUtil.asXML(columns[j-1])+">"+(DBResult)getFieldAsObject(j,i)+"</"+StringUtil.asXML(columns[j-1])+">\n");
+                    sb.append("<"+StringUtil.asXML(columns[j-1])+">"+getFieldAsObject(j,i)+"</"+StringUtil.asXML(columns[j-1])+">\n");
                 }catch(Exception e){
                     sb.append("<"+StringUtil.asXML(columns[j-1])+">"+StringUtil.asXML(getField(j,i))+"</"+StringUtil.asXML(columns[j-1])+">\n");
                 }
@@ -679,9 +636,9 @@ public class DBResult extends Object implements java.io.Serializable{
     public String toStringUTF(){
         StringBuffer sb=new StringBuffer();
         sb.append("<"+StringUtil.asXML(getDBResultName())+" ");
-        Enumeration en=attributes.keys();
+        Enumeration<String> en = attributes.keys();
         while (en.hasMoreElements()){
-            String key=(String)en.nextElement();
+            String key = en.nextElement();
             sb.append(" "+key+"=\""+StringUtil.asUTF(defFieldFormatter.asString(attributes.get(key)))+"\" ");
         }
         sb.append(">\n");
@@ -689,7 +646,7 @@ public class DBResult extends Object implements java.io.Serializable{
             sb.append("<"+getDBResultName()+"_Row row_nr=\""+i+"\">\n");
             for(int j=1;j<=columns.length;j++){
                 try{
-                    sb.append("<"+StringUtil.asXML(columns[j-1])+">"+(DBResult)getFieldAsObject(j,i)+"</"+StringUtil.asXML(columns[j-1])+">\n");
+                    sb.append("<"+StringUtil.asXML(columns[j-1])+">"+getFieldAsObject(j,i)+"</"+StringUtil.asXML(columns[j-1])+">\n");
                 }catch(Exception e){
                     sb.append("<"+StringUtil.asXML(columns[j-1])+">"+StringUtil.asXML(getField(j,i))+"</"+StringUtil.asXML(columns[j-1])+">\n");
                 }
@@ -714,7 +671,7 @@ public class DBResult extends Object implements java.io.Serializable{
             sb.append("<"+getDBResultName()+"_Row row_nr=\""+i+"\">\n");
             for(int j=1;j<=columns.length;j++){
                 try{
-                    sb.append("<"+StringUtil.asXML(columns[j-1])+">"+(DBResult)getFieldAsObject(j,i)+"</"+StringUtil.asXML(columns[j-1])+">\n");
+                    sb.append("<"+StringUtil.asXML(columns[j-1])+">"+getFieldAsObject(j,i)+"</"+StringUtil.asXML(columns[j-1])+">\n");
                 }catch(Exception e){
                     Object o=getFieldAsObject(j,i);
                     String ss="";
@@ -730,13 +687,13 @@ public class DBResult extends Object implements java.io.Serializable{
 
     public void setFieldFormatter(FieldFormatter ff){
         customFieldFormatter=ff;
-        Enumeration en=columnToFormatter.keys();
+        Enumeration<Integer> en=columnToFormatter.keys();
         for (;en.hasMoreElements();){
             columnToFormatter.put(en.nextElement(),ff);
         }
     }
     public void setFieldFormatter(int col,FieldFormatter ff){
-        columnToFormatter.put(new Integer(col),ff);
+        columnToFormatter.put(Integer.valueOf(col),ff);
     }
     public void setFieldFormatter(String columnName,FieldFormatter ff)throws ArrayIndexOutOfBoundsException{
         setFieldFormatter(getColumnIndex(columnName),ff);
@@ -744,12 +701,12 @@ public class DBResult extends Object implements java.io.Serializable{
 
     public void renameColumn(int column, String newName)throws ArrayIndexOutOfBoundsException{
         if (column<1||column>this.getColumnCount())throw new ArrayIndexOutOfBoundsException("The column index must be between 1 and "+getColumnCount());
-        Enumeration en=nameToIndex.keys();
+        Enumeration<String> en = nameToIndex.keys();
         while (en.hasMoreElements()){
-            String key=(String)en.nextElement();
-            if (((Integer)nameToIndex.get(key)).intValue()==column){
+            String key = en.nextElement();
+            if (nameToIndex.get(key).intValue() == column){
                 nameToIndex.remove(key);
-                nameToIndex.put(newName,new Integer(column));
+                nameToIndex.put(newName,Integer.valueOf(column));
                 break;
             }
         }
@@ -773,13 +730,13 @@ public class DBResult extends Object implements java.io.Serializable{
     }
 
     public DBResult mergeVertically(DBResult dbr){
-        DBResult ret=new DBResult(DBResultName,(String[])columns.clone());
-        ret.nameToIndex=(Hashtable)nameToIndex.clone();
-        ret.attributes=(Hashtable)attributes.clone();
+        DBResult ret = new DBResult(DBResultName, columns.clone());
+        ret.nameToIndex = new Hashtable<String, Integer>(nameToIndex);
+        ret.attributes = new Hashtable<String, Object>(attributes);
         ret.defFieldFormatter=defFieldFormatter;
         ret.customFieldFormatter=customFieldFormatter;
         ret.columnToFormatter=columnToFormatter;
-        ret.rows=(ArrayList)rows.clone();
+        ret.rows = new ArrayList<Object[]>(rows);
         for (int i=1;i<=dbr.getRowCount();i++){
             for (int j=1;j<=dbr.getColumnCount();j++){
                 ret.appendField(dbr.getColumnName(j),getRowCount()+i,dbr.getFieldAsObject(j,i));
@@ -805,12 +762,4 @@ public class DBResult extends Object implements java.io.Serializable{
         }
         return true;
     }
-
-	/**
-	 * For debugging.
-	 */
-	public static void main(String args[]){
-		// System.out.println("Serial Version UID: " + DBResult.getSerialVersionUID());
-	}
-
 }
