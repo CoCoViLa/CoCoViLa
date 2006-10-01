@@ -27,7 +27,6 @@ public class IconPort implements Cloneable, Serializable {
 	int height = 10;
 	String name;
 	String type;
-	String dataType;
 	int x;
 	int y;
 	boolean strict;
