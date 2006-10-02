@@ -95,11 +95,10 @@ public class FileFuncs {
     	
     	return null;
     }
-    
+
     public static ImageIcon getImageIcon( String icon, boolean isAbsolutePath ) {
     	
-    	if( !isAbsolutePath && RuntimeProperties.isFromWebstart() )
-    	{
+    	if (!isAbsolutePath) {
     		URL url = getResource( icon, false );
     		
     		if( url != null )
