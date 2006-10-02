@@ -338,9 +338,10 @@ public class ProgramRunner {
 					try {
 						method.invoke(genObject, new Object[]{ args } );
 					} catch( InvocationTargetException ex ) { 
-						/* this is empty because we do not need to show ThreadDeath exception's 
-						 * stacktrace after killing a thread using RunningThreadKillerDialog*/
-					}
+						/* Stacktrace is printed so that there is some feedback when generated
+						 * code throws an exception which isn't caught. */
+						ex.printStackTrace();
+					} 
 					
 					RunningThreadKillerDialog.removeThread( this );
 					
