@@ -1,23 +1,20 @@
 package ee.ioc.cs.vsle.editor;
 
+import java.awt.Component;
+
 import javax.swing.UIManager;
 import javax.swing.SwingUtilities;
-
-import ee.ioc.cs.vsle.iconeditor.IconEditor;
 
 /**
  * Look and feel handler.
  *
- * Created by IntelliJ IDEA.
  * User: AASMAAUL
  * Date: 13.01.2004
  * Time: 13:01:50
- * To change this template use Options | File Templates.
  */
 public class Look {
 
-	private static Editor ed;
-	private static IconEditor ied;
+	private static Component component;
 
 	// LAYOUT
 	public static final String LOOK_CUSTOM = "Custom";
@@ -25,12 +22,8 @@ public class Look {
 	public static final String LOOK_MOTIF = "Motif";
 	public static final String LOOK_WINDOWS = "Windows";
 
-	public void setGUI(Editor e) {
-		ed = e;
-	}
-
-	public void setGUI(IconEditor e) {
-		ied = e;
+	public void setGUI(Component e) {
+		Look.component = component;
 	}
 
 	/**
@@ -63,11 +56,8 @@ public class Look {
 			} catch (Exception uie) {
 			}
 		}
-		if (ed != null) {
-			SwingUtilities.updateComponentTreeUI(ed);
-		}
-		if (ied != null) {
-			SwingUtilities.updateComponentTreeUI(ied);
+		if (component != null) {
+			SwingUtilities.updateComponentTreeUI(component);
 		}
 	}
 
