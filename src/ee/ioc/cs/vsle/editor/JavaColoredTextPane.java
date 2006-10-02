@@ -607,8 +607,8 @@ public class JavaColoredTextPane extends JTextPane {
         styles.put("unknown", style);
         
         style = new SimpleAttributeSet();
-        StyleConstants.setFontFamily(style, "Monospaced");
-        StyleConstants.setFontSize(style, 12);
+        StyleConstants.setFontFamily(style, m_font.getFamily());
+        StyleConstants.setFontSize(style, m_font.getSize());
         StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.GREEN.darker());
         StyleConstants.setBold(style, true);
@@ -616,8 +616,8 @@ public class JavaColoredTextPane extends JTextPane {
         styles.put("specComment", style);
         
         style = new SimpleAttributeSet();
-        StyleConstants.setFontFamily(style, "Monospaced");
-        StyleConstants.setFontSize(style, 12);
+        StyleConstants.setFontFamily(style, m_font.getFamily());
+        StyleConstants.setFontSize(style, m_font.getSize());
         StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.blue);
         StyleConstants.setBold(style, true);
