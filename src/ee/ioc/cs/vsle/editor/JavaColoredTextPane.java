@@ -293,7 +293,8 @@ public class JavaColoredTextPane extends JTextPane {
                                         t.getCharEnd()-t.getCharBegin(),
                                         getStyles(t.getDescription()),
                                         true
-                                    );                                                                  
+                                    );              
+                                    //System.out.println(t.getDescription());
                                     // record the position of the last bit of text that we colored
                                     dpEnd = new DocPosition(t.getCharEnd());
                                 }
@@ -604,6 +605,25 @@ public class JavaColoredTextPane extends JTextPane {
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
         styles.put("unknown", style);
+        
+        style = new SimpleAttributeSet();
+        StyleConstants.setFontFamily(style, "Monospaced");
+        StyleConstants.setFontSize(style, 12);
+        StyleConstants.setBackground(style, Color.white);
+        StyleConstants.setForeground(style, Color.GREEN.darker());
+        StyleConstants.setBold(style, true);
+        StyleConstants.setItalic(style, false);
+        styles.put("specComment", style);
+        
+        style = new SimpleAttributeSet();
+        StyleConstants.setFontFamily(style, "Monospaced");
+        StyleConstants.setFontSize(style, 12);
+        StyleConstants.setBackground(style, Color.white);
+        StyleConstants.setForeground(style, Color.blue);
+        StyleConstants.setBold(style, true);
+        StyleConstants.setItalic(style, false);
+        styles.put("specReservedWord", style);
+        
     }
 
     /**
