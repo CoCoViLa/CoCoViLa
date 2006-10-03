@@ -42,7 +42,7 @@ public class PropertyBox {
     	s_defaultProperties.put( DOCUMENTATION_URL, "http://vsledit.sourceforge.net" );
     	String gp = RuntimeProperties.isFromWebstart() 
 	    			? RuntimeProperties.getWorkingDirectory() + "generated" 
-	    			: "../generated";
+	    			: "generated";
     	s_defaultProperties.put( GENERATED_FILES_DIR, gp );
     	s_defaultProperties.put( PALETTE_FILE, "" );
     	s_defaultProperties.put( DEBUG_INFO, "0" );
@@ -56,7 +56,7 @@ public class PropertyBox {
     	s_defaultProperties.put( SNAP_TO_GRID, "0" );
     	s_defaultProperties.put( RECENT_PACKAGES, "" );
     	String cp = RuntimeProperties.isFromWebstart() 
-    			    ? "" : ";../lib/gnujaxp.jar;../lib/jcommon.jar;../lib/jfreechart.jar";
+    			    ? "" : "lib/jcommon.jar;lib/jfreechart.jar";
     	s_defaultProperties.put( COMPILATION_CLASSPATH, cp );
     }
     
