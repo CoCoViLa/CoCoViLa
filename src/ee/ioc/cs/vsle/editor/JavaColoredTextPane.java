@@ -8,7 +8,7 @@ import javax.swing.JTextPane;
 import javax.swing.event.*;
 import javax.swing.text.*;
 
-import com.Ostermiller.Syntax.Lexer.*;
+import ee.ioc.cs.vsle.util.syntax.*;
 
 public class JavaColoredTextPane extends JTextPane {
 
