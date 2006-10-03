@@ -219,7 +219,7 @@
       Distribution
   -->
 
-  <target name="dist" depends="copy-resources,test"
+  <target name="dist" depends="runtime-dep,copy-resources,test"
           description="Generate distribution files" >
 
     <mkdir dir="${dist}/lib"/>
