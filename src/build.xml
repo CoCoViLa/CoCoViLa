@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="cocovila" default="compile" basedir="../">
+  <description>
+    CoCoViLa - a Compiler Compiler for Visual Languages.
+    CoCoViLa provides a framework for developing visual specification languages.
+    It includes a visual editor for drawing the schemes and a synthesizer
+    for generating a Java program from the scheme and the class specifications.
+  </description>
+
+  <!--
+       The build process can be customized by changing values in
+       the build.properties file. Remember that Ant properties
+       are immutable.
+  -->
+  <property file="src/build.properties"/>
+
+  <property name="src" location="src"/>
+  <property name="src.tests" location="test"/>
+  <property name="lib" location="lib"/>
+  <property name="build" location="classes"/>
+  <property name="dist" location="dist"/>
+  <property name="packages" location="packages"/>
+  <property name="reports" location="${dist}/reports"/>
+  <property name="reports.junit" location="${reports}/junit"/>
+  <property name="docs.api" location="${dist}/docs/api"/>
+
+  <property name="project.se.jar" value="${ant.project.name}-${project.version}.jar"/>
+  <property name="project.ce.jar" value="${ant.project.name}-ce-${project.version}.jar"/>
+  <property name="dist.name" value="${ant.project.name}-${project.version}"/>
+
+  <property name="encoding" value="UTF-8"/>
+  <property name="javasource" value="1.5"/>
+  <property name="javatarget" value="1.5"/>
+  <property name="compiler" value="javac1.5"/>
+  <property name="compile" value="compile-debug"/>
+
+  <path id="build.classpath">
+    <fileset dir="${lib}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="init">
+    <mkdir dir="${lib}"/>
+    <mkdir dir="${build}"/>
+    <mkdir dir="${dist}"/>
+  </target>
+
+
+  <!--
+      Dependency management. For now we just assume that
+      everything is present under lib directory and complain
+      when something is missing.
+  -->
+
+  <target name="check-dep">
+    <available file="${lib}/tools.jar" type="file" property="dep.tools.present"/>
+    <available file="${lib}/jcommon.jar" type="file" property="dep.jcommon.present"/>
+    <available file="${lib}/jfreechart.jar" type="file" property="dep.jfreechart.present"/>
+  </target>
+
+  <target name="build-dep" depends="check-dep">
+    <echo message="Build dependencies are present"/>
+  </target>
+
+  <target name="runtime-dep" depends="check-dep">
+    <fail message="Cannot find ${lib}/tools.jar" unless="dep.tools.present"/>
+    <fail message="Cannot find ${lib}/jcommon.jar" unless="dep.jcommon.present"/>
+    <fail message="Cannot find ${lib}/jfreechart.jar" unless="dep.jfreechart.present"/>
+
+    <echo message="Runtime dependencies are present"/>
+  </target>
+
+
+  <!--
+      Compilation
+  -->
+
+  <target name="compile" depends="compile-debug,compile-normal"
+          description="Compile the program sources"/>
+
+  <target name="compile-debug" depends="init,build-dep"
+          if="javac.debug">
+
+    <echo message="Debug build"/>
+    <javac srcdir="${src}" destdir="${build}"
+            compiler="${compiler}"
+            debug="on"
+            debuglevel="lines,vars,source"
+            encoding="${encoding}"
+            source="${javasource}"
+            target="${javatarget}">
+
+      <classpath refid="build.classpath"/>
+
+      <compilerarg value="-Xlint:deprecation" />
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+  </target>
+
+  <target name="compile-normal" depends="init,build-dep"
+          unless="javac.debug">
+
+    <echo message="Optimized build"/>
+    <javac srcdir="${src}" destdir="${build}"
+            compiler="${compiler}"
+            debug="off"
+            optimize="on"
+            encoding="${encoding}"
+            source="${javasource}"
+            target="${javatarget}">
+
+      <classpath refid="build.classpath"/>
+    </javac>
+  </target>
+
+
+  <!--
+      Testing
+  -->
+
+  <target name="compile-tests" depends="compile">
+     <javac srcdir="${src.tests}" destdir="${build}"
+            compiler="${compiler}"
+            debug="on"
+            debuglevel="lines,vars,source"
+            encoding="${encoding}"
+            source="${javasource}"
+            target="${javatarget}">
+
+      <classpath refid="build.classpath"/>
+
+      <compilerarg value="-Xlint:deprecation" />
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+  </target>
+
+  <target name="test" depends="compile-tests" unless="test.junit.skip"
+          description="Runs JUnit tests">
+
+    <mkdir dir="${reports.junit}/xml"/>
+
+    <junit fork="yes" forkmode="once">
+      <classpath>
+        <path refid="build.classpath"/>
+        <pathelement location="${build}"/>
+      </classpath>
+      <formatter type="xml"/>
+
+      <batchtest todir="${reports.junit}/xml">
+        <fileset dir="${src.tests}">
+          <include name="**/*Test*.java"/>
+          <exclude name="**/AllTests.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="test-reports" depends="test" unless="test.junit.skip"
+          description="Generate test reports in HTML format">
+    <mkdir dir="${reports.junit}/html"/>
+
+    <junitreport todir="${reports.junit}/html">
+      <fileset dir="${reports.junit}/xml">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${reports.junit}/html"/>
+    </junitreport>
+
+    <echo message="JUnit test reports are in ${reports.junit}/html"/>
+  </target>
+
+
+  <!--
+      Documentation
+  -->
+
+  <target name="javadoc" description="Generate Javadoc">
+    <javadoc
+            sourcepath="${src}"
+            destdir="${docs.api}"
+            windowtitle="${ant.project.name} API Documentation">
+      <classpath refid="build.classpath"/>
+      <packageset dir="${src}" defaultexcludes="yes">
+        <include name="ee/**"/>
+      </packageset>
+
+      <bottom><![CDATA[<p>Version: ${project.version}</p>]]></bottom>
+
+    </javadoc>
+  </target>
+
+
+  <!--
+      Running
+      TODO
+  -->
+
+  <target name="copy-resources" depends="compile">
+    <copy todir="${build}">
+      <fileset dir="${src}">
+        <include name="application.properties"/>
+        <include name="*.dtd"/>
+      </fileset>
+      <filterset>
+        <filter token="project.version" value="${project.version}"/>
+      </filterset>
+    </copy>
+    <copy todir="${build}">
+      <fileset dir="${src}">
+        <include name="images/*.gif"/>
+        <include name="images/*.png"/>
+      </fileset>
+    </copy>
+  </target>
+
+
+  <!--
+      Distribution
+  -->
+
+  <target name="dist" depends="copy-resources,test"
+          description="Generate distribution files" >
+
+    <mkdir dir="${dist}/lib"/>
+
+    <jar destfile="${dist}/lib/${project.se.jar}"
+            basedir="${build}"
+            duplicate="fail">
+        <exclude name="**/*Test*.class"/>
+        <manifest>
+          <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
+          <attribute name="Class-Path" value="lib/tools.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+    <jar destfile="${dist}/lib/${project.ce.jar}"
+            basedir="${build}"
+            duplicate="fail">
+        <exclude name="**"/>
+        <manifest>
+          <attribute name="Main-Class" value="ee.ioc.cs.vsle.iconeditor.IconEditor"/>
+          <attribute name="Class-Path" value="${project.se.jar}"/>
+          <attribute name="Implementation-Title" value="${project.title} ${project.title.ce}"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+    <zip destfile="${dist}/${dist.name}.zip">
+      <zipfileset dir="${lib}" prefix="${dist.name}/lib"/>
+      <zipfileset dir="${packages}" prefix="${dist.name}/packages"/>
+      <zipfileset dir="${dist}/lib" includes="*.jar" prefix="${dist.name}"/>
+    </zip>
+  </target>
+
+
+  <!--
+      Clean up
+  -->
+
+  <target name="clean"
+          description="Remove all generated files">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+</project>
