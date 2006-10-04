@@ -76,7 +76,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         jta_spec.addKeyListener( new CommentKeyListener() );
         jta_spec.setFont( RuntimeProperties.font );
         JScrollPane areaScrollPane = new JScrollPane( jta_spec );
-
+        areaScrollPane.setRowHeaderView(new LineNumberView(jta_spec));
         areaScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
 
@@ -117,7 +117,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         toolBar.add( new UndoRedoDocumentPanel( jta_generatedCode.getDocument() ) );
         toolBar.add( new FontResizePanel( jta_generatedCode ) );
         JScrollPane programAreaScrollPane = new JScrollPane( jta_generatedCode );
-
+        programAreaScrollPane.setRowHeaderView(new LineNumberView(jta_generatedCode));
         programAreaScrollPane.setVerticalScrollBarPolicy(
                 JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
         

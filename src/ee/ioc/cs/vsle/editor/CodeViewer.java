@@ -30,9 +30,9 @@ public class CodeViewer extends JFrame implements ActionListener{
                 textArea.addKeyListener( new ProgramTextEditor.CommentKeyListener() );
                 textArea.setFont(RuntimeProperties.font);
                 textArea.append(fileText);
-
+               
                 JScrollPane areaScrollPane = new JScrollPane(textArea);
-
+                areaScrollPane.setRowHeaderView(new LineNumberView(textArea));
                 areaScrollPane.setVerticalScrollBarPolicy(
                         JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
 

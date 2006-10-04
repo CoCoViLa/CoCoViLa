@@ -59,6 +59,8 @@ public class JavaColoredTextPane extends JTextPane {
         documentReader = new DocumentReader(document);
 
         syntaxLexer = new JavaLexer(documentReader);
+
+
         
         document.addDocumentListener(new DocumentListener() {
 
