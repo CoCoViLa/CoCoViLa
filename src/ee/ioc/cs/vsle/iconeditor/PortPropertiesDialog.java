@@ -47,6 +47,8 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	IconEditor editor;
 
 	PortPropertiesDialog(IconEditor editor, IconPort port) {
+		super(editor);
+		this.setModal(true);
 		this.editor = editor;
 		this.port = port;
 		if (this.port != null) {
@@ -83,26 +85,14 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		setResizable(false);
 
 		setLocationRelativeTo(editor);
+
+		//tfPortName.requestFocus();
+
+		bttnCancel.addActionListener(this); // end bttnCancel Action Listener
+
+		bttnOk.addActionListener(this);
 		setVisible(true);
-
-		tfPortName.requestFocus();
-
-		bttnCancel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				if (evt.getSource() == bttnCancel) {
-					setVisible(false);
-				}
-			} // end actionPerformed
-		}); // end bttnCancel Action Listener
-
-		bttnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				if (evt.getSource() == bttnOk) {
-					setPortProperties();
-				}
-			} // end actionPerformed
-		}); // end bttnOk Action Listener
-
+	
 	} // PortPropertiesDialog
 
 	/**
@@ -206,6 +196,14 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	 * @param evt ActionEvent - action event.
 	 */
 	public void actionPerformed(ActionEvent evt) {
+		System.out.println("true");
+		if (evt.getSource() == bttnCancel) {
+			dispose();
+			setVisible(false);
+		}
+		if (evt.getSource() == bttnOk) {
+			setPortProperties();
+		}
 	}
 
 	/**

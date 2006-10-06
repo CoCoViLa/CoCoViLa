@@ -53,7 +53,7 @@ public class ShapePopupMenu extends JPopupMenu {
 		itemDelete.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0));
 		this.add(itemDelete);
 
-		itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
+/*		itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
 		itemGroup.addActionListener(mListener);
 		itemGroup.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemGroup);
@@ -68,7 +68,7 @@ public class ShapePopupMenu extends JPopupMenu {
 		checkItemFixed.addActionListener(mListener);
 		checkItemFixed.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_DOWN_MASK));
 		this.add(checkItemFixed);
-
+*/
 		itemBackward = new JMenuItem(Menu.BACKWARD, KeyEvent.VK_B);
 		itemBackward.addActionListener(mListener);
 		itemBackward.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0));
