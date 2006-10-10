@@ -4,6 +4,18 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+/*
+ * When using Eclipse 3.x this import can be resolved as follows:
+ * Project -> Properties -> Java Build Path -> Libraries ->
+ * -> Add Variable... -> ECLIPSE_HOME -> Extend... ->
+ * -> plugins/org.eclipse.jdt.core_3.x.jar (-> OK)^3
+ * 
+ * A stripped down version of this library consisting of the compiler
+ * only is distributed within release archives which are downloadable
+ * from the homepage.
+ */
+import org.eclipse.jdt.internal.compiler.batch.Main;
+
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 
@@ -25,6 +37,12 @@ import ee.ioc.cs.vsle.util.*;
  * 
  * @author Ando Saabas, Pavel Grigorenko
  * @version 1.0
+ */
+/*
+ * This thing really needs some refactoring to make it anywhere even remotely
+ * nice, reusable and future proof. It is probably not worth the time right
+ * now as Java 1.6 is going to have a nice javax.tools.ToolProvider interface
+ * and ejc will most likely adapt it quite soon.
  */
 public class CCL extends URLClassLoader {
 
@@ -117,6 +135,7 @@ public class CCL extends URLClassLoader {
 		
 		String classpath = RuntimeProperties.genFileDir + prepareClasspathOS( RuntimeProperties.compilationClasspath );
 		
+		/*
 		int status = com.sun.tools.javac.Main.compile( 
 				new String[]{ "-classpath", classpath, javaFile }, pw );
 			
@@ -125,10 +144,16 @@ public class CCL extends URLClassLoader {
 			throw new CompileException( sw.getBuffer().toString() );
 
 		}
+		*/
+		if (!Main.compile("-source 1.5 -target 1.5 -classpath "
+				+ classpath + File.pathSeparator
+				+ System.getProperty("java.class.path") + " "
+				+ javaFile, pw, pw))
+			throw new CompileException(sw.toString());
 		
 		db.p("Compilation successful!");
 		
-		return status == 0;
+		return true;
 	}
 //	
 //	/**
