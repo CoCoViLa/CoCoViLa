@@ -54,17 +54,19 @@
   -->
 
   <target name="check-dep">
-    <available file="${lib}/tools.jar" type="file" property="dep.tools.present"/>
+    <available file="${lib}/ejc.jar" type="file" property="dep.tools.present"/>
     <available file="${lib}/jcommon.jar" type="file" property="dep.jcommon.present"/>
     <available file="${lib}/jfreechart.jar" type="file" property="dep.jfreechart.present"/>
   </target>
 
   <target name="build-dep" depends="check-dep">
+    <fail message="Cannot find ${lib}/ejc.jar" unless="dep.tools.present"/>
+
     <echo message="Build dependencies are present"/>
   </target>
 
   <target name="runtime-dep" depends="check-dep">
-    <fail message="Cannot find ${lib}/tools.jar" unless="dep.tools.present"/>
+    <fail message="Cannot find ${lib}/ejc.jar" unless="dep.tools.present"/>
     <fail message="Cannot find ${lib}/jcommon.jar" unless="dep.jcommon.present"/>
     <fail message="Cannot find ${lib}/jfreechart.jar" unless="dep.jfreechart.present"/>
 
@@ -193,7 +195,6 @@
 
   <!--
       Running
-      TODO
   -->
 
   <target name="copy-resources" depends="compile">
@@ -214,6 +215,32 @@
     </copy>
   </target>
 
+  <target name="run-se" description="Run CoCoViLa Scheme Editor"
+          depends="compile,copy-resources">
+    <java classname="ee.ioc.cs.vsle.editor.Editor"
+            fork="true"
+            dir="${basedir}"
+            >
+      <classpath>
+        <pathelement location="${build}"/>
+        <path refid="build.classpath"/>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="run-ce" description="Run CoCoViLa Class Editor"
+          depends="compile,copy-resources">
+    <java classname="ee.ioc.cs.vsle.iconeditor.IconEditor"
+            fork="true"
+            dir="${basedir}"
+            >
+      <classpath>
+        <pathelement location="${build}"/>
+        <path refid="build.classpath"/>
+      </classpath>
+    </java>
+  </target>
+
 
   <!--
       Distribution
@@ -230,7 +257,7 @@
         <exclude name="**/*Test*.class"/>
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
-          <attribute name="Class-Path" value="lib/tools.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Class-Path" value="lib/ejc.jar lib/jfreechart.jar lib/jcommon.jar"/>
           <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
           <attribute name="Implementation-Vendor" value="${project.vendor}"/>
           <attribute name="Implementation-Version" value="${project.version}"/>
