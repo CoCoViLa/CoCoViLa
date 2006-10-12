@@ -54,17 +54,12 @@ public class IconPortPopupMenu
    * @param e ActionEvent - action event performed.
    */
   public void actionPerformed(ActionEvent e) {
-	if (e.getActionCommand().equals(Menu.DELETE)) {
-	  editor.ports.remove(editor.ports.indexOf(port));
-	  editor.repaint();
-	} else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
-	  PortPropertiesDialog ppd = new PortPropertiesDialog(editor, port);
-	  ppd.setPortName(port.getName());
-	  ppd.setStrict(port.isStrict());
-	  ppd.setAreaConn(port.isArea());
-	  ppd.setPortType(port.type);
-	  ppd.setModal(true);
-	}
+	  if (e.getActionCommand().equals(Menu.DELETE)) {
+		  editor.ports.remove(editor.ports.indexOf(port));
+		  editor.repaint();
+	  } else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
+		  new PortPropertiesDialog(editor, port).setVisible( true );
+	  }
   } // actionPerformed
 
 }

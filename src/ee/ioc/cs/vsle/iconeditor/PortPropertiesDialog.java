@@ -50,13 +50,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		super(editor);
 		this.setModal(true);
 		this.editor = editor;
-		this.port = port;
-		if (this.port != null) {
-			setTitle("Edit Port Properties");
-		} else {
-			setTitle("Define Port Properties");
-		}
-
+		
 		pnlAttrs.setLayout(new GridLayout(0, 2));
 		pnlAttrs.add(lblPortName);
 		pnlAttrs.add(tfPortName);
@@ -70,6 +64,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		cbPortType.setEditable(true);
 		cbPortType.addItem("");
 		cbPortType.addItem("int");
+		cbPortType.addItem("double");
 		cbPortType.addItem("Object");
 		cbPortType.addItem("String");
 
@@ -80,6 +75,17 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		pnlMain.add(pnlAttrs, BorderLayout.CENTER);
 		pnlMain.add(pnlButtons, BorderLayout.SOUTH);
 
+		if (port != null) {
+			setTitle("Edit Port Properties");
+			setPortName(port.getName());
+			setStrict(port.isStrict());
+			setAreaConn(port.isArea());
+			setPortType(port.getType());
+			this.port = port;
+		} else {
+			setTitle("Define Port Properties");
+		}
+		
 		getContentPane().add(pnlMain);
 		setSize(new Dimension(220, 150));
 		setResizable(false);
@@ -91,7 +97,6 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		bttnCancel.addActionListener(this); // end bttnCancel Action Listener
 
 		bttnOk.addActionListener(this);
-		setVisible(true);
 	
 	} // PortPropertiesDialog
 
@@ -139,7 +144,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		if (port == null) {
 			if (valid) editor.mListener.drawPort(getPortName(), isAreaConn(), isStrict(), getPortType());
 		} else {
-		    port.type = getPortType();
+		    port.setType(getPortType());
 			port.setName(getPortName());
 			port.area = isAreaConn();
 			port.strict = isStrict();
@@ -211,7 +216,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	 * @param args String[] - command line arguments.
 	 */
 	public static void main(String[] args) {
-		new PortPropertiesDialog(new IconEditor(), null);
+		new PortPropertiesDialog(new IconEditor(), null).setVisible( true );
 	} // main
 
 }

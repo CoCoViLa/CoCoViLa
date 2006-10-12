@@ -257,7 +257,7 @@ public class ClassImport {
 				strict= Boolean.parseBoolean(attrs.getValue("strict"));
 				
 				IconPort port = new IconPort(name, x, y, isAreaConn, strict);
-                port.type = attrs.getValue("type");
+                port.setType(attrs.getValue("type"));
 				ports.add(port);
 			}else if (element.equals("field")){
 				

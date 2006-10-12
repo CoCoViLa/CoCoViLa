@@ -86,8 +86,7 @@ class IconMouseOps
 	 * to the center of the open application window.
 	 */
 	private void openPortPropertiesDialog() {
-		PortPropertiesDialog pd = new PortPropertiesDialog(editor, null);
-		pd.setModal(true);
+		new PortPropertiesDialog(editor, null).setVisible( true );
 	} // openPortPropertiesDialog
 
 	/**
@@ -169,7 +168,7 @@ class IconMouseOps
 	 */
 	public void drawPort(String portName, boolean isAreaConn, boolean isStrict, String portType) {
 		IconPort p = new IconPort(portName, startX, startY, isAreaConn, isStrict);
-		p.type = portType;
+		p.setType(portType);
 		editor.ports.add(p);
 		editor.repaint();
 	} // drawPort

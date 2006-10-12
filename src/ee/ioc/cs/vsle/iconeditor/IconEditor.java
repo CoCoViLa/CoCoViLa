@@ -426,7 +426,7 @@ public class IconEditor
 				buf.append("		<port name=\"");
 				buf.append(p.getName());
 				buf.append("\" type=\"");
-				buf.append(p.type);
+				buf.append(p.getType());
 				buf.append("\" x=\"");
 				buf.append(p.getX() - boundingbox.x);
 

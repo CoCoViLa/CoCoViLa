@@ -26,7 +26,7 @@ public class IconPort implements Cloneable, Serializable {
 	int width = 10;
 	int height = 10;
 	String name;
-	String type;
+	private String type;
 	int x;
 	int y;
 	boolean strict;
@@ -295,12 +295,16 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return String - port object type.
 	 */
 	String getType() {
-		for (int i = 0; i < obj.fields.size(); i++) {
-			if (obj.fields.get(i).getName().equals(name)) {
-				return obj.fields.get(i).getType();
-			}
-		}
-		return null;
+		return type;
+		
+		//TODO - obj is always null because no one calls setObject, why???
+		
+//		for (int i = 0; i < obj.fields.size(); i++) {
+//			if (obj.fields.get(i).getName().equals(name)) {
+//				return obj.fields.get(i).getType();
+//			}
+//		}
+//		return null;
 	} // getType
 
 	/**
@@ -423,6 +427,13 @@ public class IconPort implements Cloneable, Serializable {
 	public void shift(int offsetX, int offsetY) {
 		x += offsetX;
 		y += offsetY;
+	}
+
+	/**
+	 * @param type the type to set
+	 */
+	void setType(String type) {
+		this.type = type;
 	}
 
 } // end of class
