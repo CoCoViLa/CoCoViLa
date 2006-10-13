@@ -487,9 +487,13 @@ public class Canvas extends JPanel implements ActionListener {
 	} // print
 
 	public void loadScheme(File file) {
-
-		SchemeLoader sl = new SchemeLoader(file, vPackage);
-		scheme = sl.getScheme();
+		scheme = SchemeLoader.getScheme(file, vPackage);
+		if (scheme == null) {
+			JOptionPane.showMessageDialog(this,
+                    "See the error log for details.",
+                    "Error loading scheme", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		connections = scheme.connections;
 		objects = scheme.objects;
 		mListener.setState(State.selection);
@@ -624,7 +628,8 @@ public class Canvas extends JPanel implements ActionListener {
 		}
 
 
-        protected void paintComponent(Graphics g) {
+        @Override
+		protected void paintComponent(Graphics g) {
             Graphics2D g2 = (Graphics2D) g;
 			super.paintComponent(g2);
 
