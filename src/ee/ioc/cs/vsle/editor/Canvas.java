@@ -56,7 +56,7 @@ public class Canvas extends JPanel implements ActionListener {
 	Scheme scheme;
 	ConnectionList connections;
 	ObjectList objects;
-    ArrayList<ClassPainter> classPainters;
+    Map<GObj, ClassPainter> classPainters;
 	GObj currentObj;
 	Port firstPort;
 	Port currentPort;
@@ -130,7 +130,7 @@ public class Canvas extends JPanel implements ActionListener {
         executor = Executors.newSingleThreadExecutor();
         
         if (vPackage.hasPainters()) {
-            classPainters = new ArrayList<ClassPainter>();
+            classPainters = new HashMap<GObj, ClassPainter>();
             if (!createPainterPrototypes()) {
                 JOptionPane.showMessageDialog(this,
                         "One or more errors occured. See the error log for details.",
@@ -325,12 +325,45 @@ public class Canvas extends JPanel implements ActionListener {
 			if (obj.isSelected()) {
 				connections.removeAll(obj.getConnections());
 				removableObjs.add(obj);
+				deleteClassPainters(obj);
 			}
 		}
 		objects.removeAll(removableObjs);
 		objects.deleteExcessRels(connections);
 		currentObj = null;
 		drawingArea.repaint();
+	}
+
+	private void deleteClassPainters(GObj obj) {
+		if (classPainters == null)
+			return;
+		
+		if (obj.isGroup()) {
+			for (GObj component : obj.getComponents())
+				deleteClassPainters(component);
+		} else {
+			classPainters.remove(obj);
+		}
+	}
+
+	private void initClassPainters() {
+		if (!vPackage.hasPainters()) {
+			classPainters = null;
+			return;
+		}
+		
+		if (classPainters == null)
+			classPainters = new HashMap<GObj, ClassPainter>();
+		
+		for (GObj obj : objects) {
+			PackageClass pc = vPackage.getClass(obj.getClassName());
+			if (pc != null && pc.painterPrototype != null) {
+				ClassPainter painter = pc.painterPrototype.clone();
+				painter.setClass(obj);
+				painter.setScheme(scheme);
+				classPainters.put(obj, painter);
+			}
+		}
 	}
 
 	public void selectAllObjects() {
@@ -496,6 +529,7 @@ public class Canvas extends JPanel implements ActionListener {
 		}
 		connections = scheme.connections;
 		objects = scheme.objects;
+		initClassPainters();
 		mListener.setState(State.selection);
 		drawingArea.repaint();
 	} // loadScheme
@@ -659,7 +693,7 @@ public class Canvas extends JPanel implements ActionListener {
 			}
             
             if (enableClassPainter && classPainters != null) {
-                for (ClassPainter painter : classPainters)
+                for (ClassPainter painter : classPainters.values())
                     painter.paint(g2, scale);
             }
 

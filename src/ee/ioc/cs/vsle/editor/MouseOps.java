@@ -629,7 +629,7 @@ class MouseOps
             ClassPainter painter = pClass.painterPrototype.clone();
             painter.setClass(obj);
             painter.setScheme(canvas.scheme);
-            canvas.classPainters.add(painter);
+            canvas.classPainters.put(obj, painter);
         }
 
         obj.shapes = new ArrayList<Shape>(pClass.graphics.shapes.size());
