@@ -213,6 +213,9 @@
         <include name="images/*.png"/>
       </fileset>
     </copy>
+    <copy todir="${build}/resources">
+      <fileset dir="${src}/resources"/>
+    </copy>
   </target>
 
   <target name="run-se" description="Run CoCoViLa Scheme Editor"
