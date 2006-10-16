@@ -15,7 +15,6 @@ import java.util.*;
  * from the homepage.
  */
 import org.eclipse.jdt.internal.compiler.batch.Main;
-
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 
@@ -47,6 +46,7 @@ import ee.ioc.cs.vsle.util.*;
 public class CCL extends URLClassLoader {
 
     private String compileDir;
+    private Main batchCompiler;
     
 	public CCL() {
 		super(createClasspath());
@@ -112,10 +112,9 @@ public class CCL extends URLClassLoader {
 	 * 
 	 * @param javaFile
 	 * @return <code>true</code> on successful compilation
-	 * @throws IOException
 	 * @throws CompileException
 	 */
-	public boolean compile2(String javaFile) throws IOException, CompileException {
+	public boolean compile2(String javaFile) throws CompileException {
 	    if (compileDir == null)
             compileDir = RuntimeProperties.genFileDir;
         
@@ -145,10 +144,14 @@ public class CCL extends URLClassLoader {
 
 		}
 		*/
-		if (!Main.compile("-source 1.5 -target 1.5 -classpath "
-				+ classpath + File.pathSeparator
-				+ System.getProperty("java.class.path") + " "
-				+ javaFile, pw, pw))
+		if (batchCompiler == null)
+			batchCompiler = new Main(pw, pw,false);
+		
+		if (!batchCompiler.compile(new String[] {"-source", "1.5",
+				"-target", "1.5",
+				"-classpath", classpath + File.pathSeparator 
+				+ System.getProperty("java.class.path"),
+				javaFile }))
 			throw new CompileException(sw.toString());
 		
 		db.p("Compilation successful!");
