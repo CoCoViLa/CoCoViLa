@@ -87,7 +87,7 @@ public class FileFuncs {
     	
     	if( file.exists() ) {
     		try {
-				return file.toURL();
+				return file.toURI().toURL();
 			} catch (MalformedURLException e) {
 				e.printStackTrace();
 			}

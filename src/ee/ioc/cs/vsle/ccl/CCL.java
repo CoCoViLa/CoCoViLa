@@ -61,9 +61,9 @@ public class CCL extends URLClassLoader {
 		ArrayList<URL> urls = new ArrayList<URL>();
 		
 		try {
-			urls.add( new File( RuntimeProperties.genFileDir ).toURL() );
-		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
+			urls.add(new File(RuntimeProperties.genFileDir).toURI().toURL());
+		} catch (MalformedURLException e) {
+			db.p(e);
 		}
 		
 		String[] paths = prepareClasspath( RuntimeProperties.compilationClasspath );
@@ -72,10 +72,11 @@ public class CCL extends URLClassLoader {
 			File file = new File(paths[i]);
 			if(file.exists()) {
 				try {
-					urls.add( file.toURL() );
-					db.p("file.toURL() " + file.toURL() );
+					urls.add(file.toURI().toURL());
+					if (RuntimeProperties.isLogDebugEnabled())
+						db.p("file.toURI().toURL() " + file.toURI().toURL());
 				} catch (MalformedURLException e) {
-					e.printStackTrace();
+					db.p(e);
 				}
 			}
 		}
@@ -363,7 +364,8 @@ public class CCL extends URLClassLoader {
         this.compileDir = compileDir;
     }
 
-    public void addURL(URL url) {
+    @Override
+	public void addURL(URL url) {
         super.addURL(url);
     }
 }

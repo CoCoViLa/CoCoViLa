@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.ccl.CompileException;
@@ -120,8 +121,8 @@ public class Canvas extends JPanel implements ActionListener {
 		drawingArea.addKeyListener(keyListener);
 
 		JScrollPane areaScrollPane = new JScrollPane(drawingArea,
-			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+			ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		setLayout(new BorderLayout());
 		add(areaScrollPane, BorderLayout.CENTER);
 		infoPanel.add(posInfo);
@@ -144,7 +145,8 @@ public class Canvas extends JPanel implements ActionListener {
         CCL classLoader = new CCL();
         classLoader.setCompileDir(workDir);
         try {
-            classLoader.addURL(new File(vPackage.getPath()).getParentFile().toURL());
+            classLoader.addURL(new File(vPackage.getPath())
+            	.getParentFile().toURI().toURL());
         } catch (MalformedURLException e1) {
             // TODO Clean up this class loading mess
             e1.printStackTrace();
