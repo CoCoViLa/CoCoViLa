@@ -245,9 +245,9 @@ public class EditorActionListener implements ActionListener {
             } else if ( e.getActionCommand().equals( Menu.SETTINGS ) ) {
                 Editor.getInstance().openOptionsDialog();
             } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
-                new AboutDialog( null, Editor.getInstance() );
+                new AboutDialog(Editor.getInstance());
             } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
-                new LicenseDialog( null, Editor.getInstance() );
+                new LicenseDialog(Editor.getInstance());
             } else if ( e.getActionCommand().equals( Look.LOOK_WINDOWS ) ) {
                 try {
                     Look.changeLayout( Look.LOOK_WINDOWS );

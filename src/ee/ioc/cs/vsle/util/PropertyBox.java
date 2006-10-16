@@ -12,9 +12,9 @@ import ee.ioc.cs.vsle.editor.*;
 public class PropertyBox {
 
 	public static final String APP_PROPS_FILE_NAME = "application";
-	public static final String GPL_EN_SHORT_LICENSE_FILE_NAME = "gpl_en_short.txt";
-	public static final String GPL_EN_LICENSE_FILE_NAME = "gpl_en.txt";
-	public static final String GPL_EE_LICENSE_FILE_NAME = "gpl_ee.txt";
+	public static final String GPL_EN_SHORT_LICENSE_FILE_NAME = "resources/gpl_en_short.txt";
+	public static final String GPL_EN_LICENSE_FILE_NAME = "resources/gpl_en.txt";
+	public static final String GPL_EE_LICENSE_FILE_NAME = "resources/gpl_ee.txt";
 
 	/**
 	 * Property names (keys) found in the application properties file.

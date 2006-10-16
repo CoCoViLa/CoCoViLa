@@ -857,9 +857,9 @@ class IconMouseOps
 						"No documentation URL defined in properties.");
 				}
 			} else if (e.getActionCommand().equals(Menu.LICENSE)) {
-				new LicenseDialog(editor, null);
+				new LicenseDialog(editor);
 			} else if (e.getActionCommand().equals(Menu.ABOUT)) {
-				new AboutDialog(editor, null);
+				new AboutDialog(editor);
 			} else if (e.getActionCommand().equals(Menu.OBJECT_DELETE)) {
 				editor.deleteObjects();
 			} else if (e.getActionCommand().equals(Menu.BACKWARD)) {
