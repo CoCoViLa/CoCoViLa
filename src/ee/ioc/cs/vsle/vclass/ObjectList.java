@@ -2,13 +2,32 @@ package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.util.*;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 
-public class ObjectList extends ArrayList<GObj>
-	implements Serializable {
+/**
+ * A <tt>List</tt> for storing and organizing scheme objects.
+ */
+public class ObjectList extends ArrayList<GObj> {
+
+	private static final long serialVersionUID = 1L;
+
 	public ObjectList() {
 		super();
+	}
+
+	/**
+	 * Constructs an <tt>ObjectList</tt> containing the elements
+	 * of the specified collection, in the order they are returned
+	 * by the collection's iterator.
+	 *  
+	 * @param collection the collection whose elements are to be placed
+	 * 		  into this list.
+	 */
+	public ObjectList(Collection<? extends GObj> collection) {
+		super(collection.size());
+		for (GObj obj : collection)
+			this.add(obj);
 	}
 
 	public void sendToBack(GObj obj) {

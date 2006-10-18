@@ -1,12 +1,15 @@
 package ee.ioc.cs.vsle.vclass;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
-
+ * A <tt>list</tt> for storing and manipulating connections
+ * between scheme objects.
  */
-public class ConnectionList extends ArrayList<Connection> implements Serializable {
+public class ConnectionList extends ArrayList<Connection> {
+
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Class constructor.
@@ -14,6 +17,20 @@ public class ConnectionList extends ArrayList<Connection> implements Serializabl
 	public ConnectionList() {
 		super();
 	} // ee.ioc.cs.editor.vclass.ConnectionList
+
+	/**
+	 * Constructs a <tt>ConnectionList</tt> containing the elements
+	 * of the specified collection, in the order they are returned
+	 * by the collection's iterator.
+	 *  
+	 * @param collection the collection whose elements are to be placed
+	 * 		  into this list.
+	 */
+	public ConnectionList(Collection<? extends Connection> collection) {
+		super(collection.size());
+		for (Connection conn : collection)
+			this.add(conn);
+	}
 
 	/**
 	 * Returns a connection if the distance of a pointer location is closer than
