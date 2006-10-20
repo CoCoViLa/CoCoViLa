@@ -409,32 +409,6 @@ public class Editor extends JFrame implements ChangeListener {
 				PropertyBox.LAST_PATH, path);
 	}
 
-	public static void setMultyProperty(String propertyName, String path,
-			boolean add) {
-		String propertyValue = PropertyBox.getProperty(
-				PropertyBox.APP_PROPS_FILE_NAME, propertyName);
-
-		if (propertyValue == null) {
-			propertyValue = "";
-		}
-
-		int index = propertyValue.indexOf(path);
-		if (index == -1 && add) {
-
-			propertyValue = propertyValue + ";" + path;
-
-			PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
-					propertyName, propertyValue);
-		} else if (index != -1 && !add) {
-			propertyValue = propertyValue.substring(0, index - 1).concat(
-					propertyValue.substring(index + path.length(),
-							propertyValue.length()));
-
-			PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
-					propertyName, propertyValue);
-		}
-	}
-
 	void makeRecentSubMenu(JMenu menu) {
 		String recentPackages = PropertyBox.getProperty(
 				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.RECENT_PACKAGES);
@@ -456,7 +430,7 @@ public class Editor extends JFrame implements ChangeListener {
 
 				menuItem.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						Editor.setMultyProperty(PropertyBox.PALETTE_FILE, f
+						PropertyBox.setMultiProperty(PropertyBox.PALETTE_FILE, f
 								.getAbsolutePath(), true);
 						loadPackage(f);
 					}

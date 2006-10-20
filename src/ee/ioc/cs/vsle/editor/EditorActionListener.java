@@ -100,20 +100,20 @@ public class EditorActionListener implements ActionListener {
                     File pack = fc.getSelectedFile();
 
                     Editor.setLastPath( pack.getAbsolutePath() );
-                    Editor.setMultyProperty( PropertyBox.RECENT_PACKAGES, pack.getAbsolutePath(), true );
-                    Editor.setMultyProperty( PropertyBox.PALETTE_FILE, pack.getAbsolutePath(), true );
+                    PropertyBox.setMultiProperty( PropertyBox.RECENT_PACKAGES, pack.getAbsolutePath(), true );
+                    PropertyBox.setMultiProperty( PropertyBox.PALETTE_FILE, pack.getAbsolutePath(), true );
                     db.p( "Loading package: " + pack.getName() );
                     Editor.getInstance().loadPackage( pack );
                     //Editor.getInstance().validate();
                 }
             } else if ( e.getActionCommand().equals( Menu.CLOSE ) ) {
                 if ( Editor.getInstance().getCurrentPackage() != null ) {
-                    Editor.setMultyProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
+                    PropertyBox.setMultiProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
                     Editor.getInstance().clearPane();
                 }
             } else if ( e.getActionCommand().equals( Menu.CLOSE_ALL ) ) {
                 while ( Editor.getInstance().getCurrentPackage() != null ) {
-                    Editor.setMultyProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
+                    PropertyBox.setMultiProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
                     Editor.getInstance().clearPane();
                 }
             } else if ( e.getActionCommand().equals( Menu.RELOAD ) ) {

@@ -199,4 +199,46 @@ public class PropertyBox {
 	public static String getProperty(String propName) {
 		return getProperty(APP_PROPS_FILE_NAME, propName);
 	}
+
+	/**
+	 * Add or remove the subvalue <code>value</code> from 
+	 * the value of the property <code>propertyName</code>.
+	 * 
+	 * Internally these properties are stored as a semicolon separated
+	 * string. Therefore, in current implementation it is not possible
+	 * to store values that contain semicolons.
+	 * 
+	 * @param propertyName the name of the property to be changed
+	 * @param value the subvalue to add or remove
+	 * @param add add the value if <code>true</code>, remove otherwise
+	 */
+	public static void setMultiProperty(String propertyName, String value,
+			boolean add) {
+		String propertyValue = getProperty(propertyName);
+	
+		int index = -1; // the index of not found string
+		
+		if (propertyValue == null)
+			propertyValue = "";
+		else
+			index = propertyValue.indexOf(value);
+		
+		if (index == -1 && add) {
+			propertyValue += ";" + value;
+			setProperty(propertyName, propertyValue);
+		} else if (index != -1 && !add) {
+			// The value of index can be 0 if there is no semicolon
+			// at the beginning of the propertyValue for some reason.
+			// Although there should always be one, let's make sure
+			// that a StringIndexOutOfBounds error will not happen.
+			String prefix = "";
+			if (index > 0)
+				prefix = propertyValue.substring(0, index - 1);
+
+			String suffix = propertyValue.substring(index + value.length(),
+								propertyValue.length());
+	
+			setProperty(propertyName, prefix + suffix);
+		}
+	}
 }
