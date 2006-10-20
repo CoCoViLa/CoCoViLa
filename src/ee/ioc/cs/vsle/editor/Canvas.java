@@ -378,12 +378,14 @@ public class Canvas extends JPanel implements ActionListener {
 	} // selectAllObjects
 
 	/**
-	 * Removes all objects.
+	 * Remove all objects, connections and classpainters.
 	 */
 	public void clearObjects() {
 		mListener.setState(State.selection);
 		objects.removeAll(objects);
 		connections.removeAll(connections);
+		if (classPainters != null)
+			classPainters.clear();
 		drawingArea.repaint();
 	}
 
