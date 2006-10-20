@@ -39,7 +39,7 @@ public class PropertyBox {
     private static final Properties s_defaultProperties = new Properties();
     
     static {
-    	s_defaultProperties.put( DOCUMENTATION_URL, "http://vsledit.sourceforge.net" );
+    	s_defaultProperties.put( DOCUMENTATION_URL, "http://www.cs.ioc.ee/~cocovila/" );
     	String gp = RuntimeProperties.isFromWebstart() 
 	    			? RuntimeProperties.getWorkingDirectory() + "generated" 
 	    			: "generated";
@@ -111,6 +111,16 @@ public class PropertyBox {
 	} // setProperty
 
 	/**
+	 * Store property value to the default location.
+	 * 
+	 * @param propName property name to be saved
+	 * @param propValue saved property value
+	 */
+	public static void setProperty(String propName, String propValue) {
+		setProperty(APP_PROPS_FILE_NAME, propName, propValue);
+	}
+	
+	/**
 	 * Read application properties.
 	 * @param propFile - name of the properties file (without an extension .properties).
 	 * @param propName - property name to be read from the properties file.
@@ -118,7 +128,8 @@ public class PropertyBox {
 	 */
 	public static String getProperty(String propFile, String propName) {
 		
-		if( propFile == null || propName == null || ( propName.trim().length() == 0 ) ) { return null; }
+		if (propFile == null || propName == null || (propName.trim().length() == 0))
+			return null;
 		
 		String wd = RuntimeProperties.getWorkingDirectory();
 		
@@ -130,7 +141,7 @@ public class PropertyBox {
 			File file;
 			
 			{
-				if ( ( propFile != null ) && !propFile.endsWith(".xml") ) {
+				if (!propFile.endsWith(".xml")) {
 					fileName = propFile + ".xml";
 				}
 				
@@ -151,7 +162,7 @@ public class PropertyBox {
 			}
 			//if there is no XML, try to use .properties (later delete the following block)
 			{
-				if ( propFile != null && !propFile.endsWith(".properties") ) {
+				if (!propFile.endsWith(".properties")) {
 					fileName = propFile + ".properties";
 				}
 				
@@ -174,9 +185,18 @@ public class PropertyBox {
 			return s_defaultProperties.getProperty( propName );
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			db.p(e);
 		}
 		return null;
 	} // getProperty
 
+	/**
+	 * Read property value from the default source.
+	 * 
+	 * @param propName property name to be read from the default properties file
+	 * @return the value of the property <code>propName</code>
+	 */
+	public static String getProperty(String propName) {
+		return getProperty(APP_PROPS_FILE_NAME, propName);
+	}
 }
