@@ -31,13 +31,16 @@ class MouseOps
 
 	public void setState(String state) {
 		this.state = state;
+		
+		canvas.firstPort = null;
+		canvas.currentCon = null;
+		canvas.currentObj = null;
         
         if (State.addRelation.equals(state))
             canvas.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
         else if (State.selection.equals(state)) {
             canvas.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             canvas.palette.resetButtons();
-            canvas.currentObj = null;
         } else if (State.magnifier.equals(state))
             canvas.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 	}
@@ -51,6 +54,7 @@ class MouseOps
 	 * Mouse entered event from the MouseMotionListener. Invoked when the mouse enters a component.
 	 * @param e MouseEvent - Mouse event performed.
 	 */
+	@Override
 	public void mouseEntered(MouseEvent e) {
 		mouseOver = true;
 	}
@@ -59,6 +63,7 @@ class MouseOps
 	 * Mouse exited event from the MouseMotionListener. Invoked when the mouse exits a component.
 	 * @param e MouseEvent - Mouse event performed.
 	 */
+	@Override
 	public void mouseExited(MouseEvent e) {
         mouseOver = false;
         canvas.drawingArea.repaint();
@@ -115,6 +120,7 @@ class MouseOps
 		}
 	}
 
+	@Override
 	public void mouseClicked(MouseEvent e) {
 		int x, y;
 
@@ -228,8 +234,7 @@ class MouseOps
 				if (obj == null) {
 					canvas.objects.clearSelected();
 				} else {
-					if (e.isShiftDown()) {
-					} else {
+					if (!e.isShiftDown()) {
 						canvas.objects.clearSelected();
 						obj.setSelected(true);
 					}
@@ -293,6 +298,7 @@ class MouseOps
 		}
 	}
 
+	@Override
 	public void mousePressed(MouseEvent e) {
 		if (state.equals(State.selection)) {
 			canvas.mouseX = e.getX();
@@ -334,6 +340,7 @@ class MouseOps
 		}
 	}
 
+	@Override
 	public void mouseDragged(MouseEvent e) {
 
 		if( !SwingUtilities.isLeftMouseButton(e) ) {
@@ -457,6 +464,7 @@ class MouseOps
 		}
 	}
 
+	@Override
 	public void mouseMoved(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
@@ -561,6 +569,7 @@ class MouseOps
 		}
 	}
 
+	@Override
 	public void mouseReleased(MouseEvent e) {
 		if (state.equals(State.dragBreakPoint)) {
 			state = State.selection;
