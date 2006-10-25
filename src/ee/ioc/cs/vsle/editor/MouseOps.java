@@ -151,7 +151,17 @@ class MouseOps
 				canvas.drawingArea.revalidate();
 				canvas.connections.calcAllBreakPoints();
                 canvas.setScale(canvas.getScale() * 0.8f);
-			} else if (!State.addRelation.equals(state)) {
+			} else if (State.addRelation.equals(state)) {
+				// remove last breakpoint or stop adding the relation
+				// when only the first breakpoints is left
+				if (canvas.currentCon != null) {
+					ArrayList<Point> bps = canvas.currentCon.breakPoints;
+					if (bps != null && bps.size() > 1)
+						bps.remove(bps.size() - 1);
+					else
+						canvas.stopRelationAdding();
+				}
+			} else {
                 setState(State.selection);
                 // if adding relation class and first port was connected
                 if (canvas.firstPort != null) {
