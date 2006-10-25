@@ -317,32 +317,36 @@ class Rel implements Serializable {
             String left = "";
             String left2 = "";
             String right = "";
-            ArrayList<AjutHack> ajut = new ArrayList<AjutHack>();
+            
+            //this collection maps tokens to real var names
+            Map<String, String> map = new TreeMap<String, String>();
+            
             for (int i = 0; i < inputs.size(); i++) {
                 var = inputs.get(i);
                 pattern = Pattern.compile("([^a-zA-Z_])(([a-zA-Z_0-9]+\\.)*)?"
                         + var.getName() + "([^a-zA-Z0-9_])");
                 matcher = pattern.matcher(rightside);
 
-                if (matcher.find()) {
+                map.put( "#" + i, var.getName() );
+                
+                while (matcher.find()) {
                     left = matcher.group(1);
                     left2 = matcher.group(2);
                     right = matcher.group(4);
 
-                    ajut.add(new AjutHack(var.getName(), "#"
-                            + Integer.toString(i)));
                     rightside = rightside.replaceFirst("([^a-zA-Z_]" + left2
                             + var.getName() + "[^a-zA-Z0-9_])", left
                             + getObject(var.getObject()) + "#"
                             + Integer.toString(i) + right);
+                    
+                    matcher = pattern.matcher(rightside);
                 }
 
             }
 
-            for (int i = 0; i < ajut.size(); i++) {
-                AjutHack paar = ajut.get(i);
-                rightside = rightside.replaceAll(paar.repl, paar.var);
-            }
+            for ( String key : map.keySet() ) {
+            	rightside = rightside.replaceAll( key, map.get(key) );
+			}
 
             left2 = "";
             var = outputs.get(0);
@@ -527,16 +531,4 @@ class Rel implements Serializable {
     public int hashCode() {
         return RelType.REL_HASH + relNumber;
     }
-
-    private class AjutHack {
-        String var;
-
-        String repl;
-
-        private AjutHack(String name, String s) {
-            var = name;
-            repl = s;
-        }
-    }
-
 }

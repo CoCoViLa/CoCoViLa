@@ -511,7 +511,7 @@ public class SpecParser {
                         EquationSolver.solve( lt.getSpecLine() );
                         next: 
                         for ( String result : EquationSolver.getRelations() ) {
-                        	if ( RuntimeProperties.isLogDebugEnabled() ) db.p( result );
+                        	if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "equation: " + result );
                             String[] pieces = result.split( ":" );
 
                             //cannot assign new values for constants
@@ -525,6 +525,9 @@ public class SpecParser {
                             String[] in = pieces[ 1 ].trim().split( " " );
                             for (int j = 0; j < in.length; j++) {
 								if( in[j].equals(out) ) {
+									if ( RuntimeProperties.isLogDebugEnabled() ) 
+										db.p( " - unable use this equation because variable " 
+												+ out + " appears on both sides of =" );
 									continue next;
 								}
 							}
