@@ -30,24 +30,14 @@ public class Editor extends JFrame implements ChangeListener {
 
 	JMenuBar menuBar;
 
-	JPanel infoPanel; // Panel for runtime information, mouse coordinates,
-						// selected objects etc.
-
-	public JPanel mainPanel = new JPanel();
-
-	JLabel posInfo; // Mouse position.
-
-	Dimension drawAreaSize = new Dimension(600, 500);
-
-	KeyOps keyListener;
-
 	public static final String WINDOW_TITLE = "CoCoViLa - Scheme Editor";
+
+	private JCheckBoxMenuItem gridCheckBox;
 
 	/**
 	 * Class constructor [1].
 	 */
 	private Editor() {
-		//enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 		initialize();
 		validate();
 	} // Editor
@@ -59,7 +49,6 @@ public class Editor extends JFrame implements ChangeListener {
 	 *            package file name.
 	 */
 	private Editor(String fileName) {
-		//enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 		initialize();
 		File file = new File(fileName);
 		loadPackage(file);
@@ -71,46 +60,16 @@ public class Editor extends JFrame implements ChangeListener {
 	 */
 	private void initialize() {
 		setLocationByPlatform( true );
-		
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(final WindowEvent e) {
-				System.exit(0);
-			}
-		});
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		tabbedPane.addChangeListener(this);
-		infoPanel = new JPanel(new GridLayout(1, 2));
-		posInfo = new JLabel();
-		// keyListener = new KeyOps(this);
 		aListener = new EditorActionListener();
-
-		mainPanel.setLayout(new BorderLayout());
-		// mainPanel.add(areaScrollPane, BorderLayout.CENTER);
-		infoPanel.add(posInfo);
-		mainPanel.add(infoPanel, BorderLayout.SOUTH);
-		posInfo.setText("-");
 		makeMenu();
-		getContentPane().add(mainPanel);
 		getContentPane().add(tabbedPane);
 		Look look = new Look();
 		look.setGUI(this);
 		Look.changeLayout(PropertyBox.getProperty(
 				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT));
 	} // initialize
-
-	/**
-	 * Check if the grid should be visible or not.
-	 * 
-	 * @return boolean - grid visibility from the properties file.
-	 */
-	public boolean getGridVisibility() {
-		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
-				PropertyBox.SHOW_GRID);
-		if (vis != null) {
-			int v = Integer.parseInt(vis);
-			return v >= 1;
-		}
-		return false;
-	} // getGridVisibility
 
 	/**
 	 * Build menu.
@@ -176,34 +135,34 @@ public class Editor extends JFrame implements ChangeListener {
 		if (sShowGrid != null) {
 			showGrid = Boolean.valueOf(sShowGrid).booleanValue();
 		}
-		menuItem = new JCheckBoxMenuItem(Menu.GRID, showGrid);
-		menuItem.setMnemonic('G');
-		menuItem.addActionListener(aListener);
-		menu.add(menuItem);
+		gridCheckBox = new JCheckBoxMenuItem(Menu.GRID, showGrid);
+		gridCheckBox.setMnemonic('G');
+		gridCheckBox.addActionListener(aListener);
+		menu.add(gridCheckBox);
         
         final JCheckBoxMenuItem painterEnabled = new JCheckBoxMenuItem(Menu.CLASSPAINTER, true);
         painterEnabled.addActionListener(aListener);
         menu.add(painterEnabled);
         
-        menu.addMenuListener(new MenuListener() {
+        menu.getPopupMenu().addPopupMenuListener(new PopupMenuListener() {
 
-            public void menuCanceled(MenuEvent evt) {
-                // nothing to do
-            }
+			public void popupMenuCanceled(PopupMenuEvent e) {
+				// ignore
+			}
 
-            public void menuDeselected(MenuEvent evt) {
-                // nothing to do
-            }
-
-            public void menuSelected(MenuEvent evt) {
-                Canvas canvas = s_instance.getCurrentCanvas();
+			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+                Canvas canvas = Editor.getInstance().getCurrentCanvas();
                 if (canvas == null || !canvas.getCurrentPackage().hasPainters()) {
                     painterEnabled.setVisible(false);
                 } else {
                     painterEnabled.setVisible(true);
                     painterEnabled.setSelected(canvas.isEnableClassPainter());
                 }
-            }
+			}
+
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+				// ignore
+			}
             
         });
 
@@ -344,6 +303,7 @@ public class Editor extends JFrame implements ChangeListener {
 	 * @param e -
 	 *            Window Event.
 	 */
+	@Override
 	protected void processWindowEvent(WindowEvent e) {
 		// super.processWindowEvent(e); // automatic closing disabled,
 		// confirmation asked instead.
@@ -767,17 +727,11 @@ public class Editor extends JFrame implements ChangeListener {
 
 	}
 
-	public boolean isPackageOpen( String packageName ) {
-		
-		return tabbedPane.indexOfTab( packageName ) > -1;
-	}
-	
 	public void stateChanged(ChangeEvent e) {
-		if (getCurrentCanvas() != null) {
-			JCheckBoxMenuItem cb = (JCheckBoxMenuItem) menuBar.getMenu(1)
-					.getMenuComponent(2);
-			cb.setSelected(getCurrentCanvas().isGridVisible());
-			getCurrentCanvas().drawingArea.grabFocus();
+		Canvas canvas = getCurrentCanvas();
+		if (canvas != null) {
+			gridCheckBox.setSelected(canvas.isGridVisible());
+			canvas.drawingArea.requestFocusInWindow();
 		}
 	}
 
