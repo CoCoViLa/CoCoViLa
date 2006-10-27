@@ -12,7 +12,25 @@ import java.io.File;
 
 public class EditorActionListener implements ActionListener {
 	
-    public void actionPerformed( ActionEvent e ) {
+	static class DeleteAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+
+		public DeleteAction() {
+			putValue(Action.NAME, Menu.DELETE);
+			putValue(Action.MNEMONIC_KEY, Integer.valueOf(KeyEvent.VK_D));
+			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+					KeyEvent.VK_DELETE, 0));
+		}
+
+		public void actionPerformed(ActionEvent e) {
+			Canvas canvas = Editor.getInstance().getCurrentCanvas();
+			if (canvas != null)
+				canvas.deleteObjects();
+		}
+	}
+
+	public void actionPerformed( ActionEvent e ) {
 
         // JmenuItem chosen
         if ( e.getSource().getClass().getName() == "javax.swing.JMenuItem" ||

@@ -598,9 +598,7 @@ public class Canvas extends JPanel implements ActionListener {
 	 * @param e - Action Event.
 	 */
 	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals(Menu.OBJECT_DELETE)) {
-			deleteObjects();
-		} else if (e.getActionCommand().equals(Menu.PROPERTIES)) {
+		if (e.getActionCommand().equals(Menu.PROPERTIES)) {
 			openPropertiesDialog();
 		} else if (e.getActionCommand().equals(Menu.GROUP)) {
 			groupObjects();

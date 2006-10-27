@@ -41,12 +41,7 @@ public class ObjectPopupMenu extends JPopupMenu {
 				KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK));
 		this.add(itemClone);
 
-		itemDelete = new JMenuItem(Menu.DELETE, KeyEvent.VK_D);
-		itemDelete.addActionListener(canvas);
-		itemDelete.setActionCommand(Menu.OBJECT_DELETE);
-		itemDelete.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_DELETE, 0));
-		this.add(itemDelete);
+		this.add(Editor.getInstance().deleteAction);
 
 		itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
 		itemGroup.addActionListener(canvas);

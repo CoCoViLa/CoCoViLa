@@ -8,6 +8,7 @@ import java.util.*;
 import javax.swing.*;
 import javax.swing.event.*;
 
+import ee.ioc.cs.vsle.editor.EditorActionListener.DeleteAction;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -27,6 +28,7 @@ public class Editor extends JFrame implements ChangeListener {
     JTabbedPane tabbedPane = new JTabbedPane();
 
 	EditorActionListener aListener;
+	DeleteAction deleteAction;
 
 	JMenuBar menuBar;
 
@@ -63,12 +65,18 @@ public class Editor extends JFrame implements ChangeListener {
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		tabbedPane.addChangeListener(this);
 		aListener = new EditorActionListener();
+		deleteAction = new DeleteAction();
 		makeMenu();
 		getContentPane().add(tabbedPane);
 		Look look = new Look();
 		look.setGUI(this);
 		Look.changeLayout(PropertyBox.getProperty(
 				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT));
+		
+		getRootPane().getActionMap().put(DeleteAction.class, deleteAction);
+		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+				KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
+						DeleteAction.class);
 	} // initialize
 
 	/**

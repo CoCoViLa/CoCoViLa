@@ -18,9 +18,7 @@ public class KeyOps implements KeyListener {
 
 	public void keyReleased(KeyEvent e) {
 
-		if (e.getKeyCode() == 127) {        // event: delete object(s), key: del
-			canvas.deleteObjects();
-		} else if (e.getKeyCode() == 68) {   // event: clone object(s), key: ctrl+d
+		if (e.getKeyCode() == 68) {   // event: clone object(s), key: ctrl+d
 			canvas.cloneObject();
 		} else if (e.getKeyCode() == 71) { // event: group objects, key: ctrl+g
 			canvas.groupObjects();
