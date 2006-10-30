@@ -157,8 +157,8 @@ public class Canvas extends JPanel implements ActionListener {
             
             try {
                 if (classLoader.compile2(pclass.painterName)) {
-                    Class painterClass = classLoader.loadClass(pclass.painterName);
-                    pclass.painterPrototype = (ClassPainter) painterClass.newInstance();
+                    Class<?> painterClass = classLoader.loadClass(pclass.painterName);
+                    pclass.setPainterPrototype((ClassPainter) painterClass.newInstance());
                 } else {
                     success = false;
                 }
@@ -358,11 +358,10 @@ public class Canvas extends JPanel implements ActionListener {
 		
 		for (GObj obj : objects) {
 			PackageClass pc = vPackage.getClass(obj.getClassName());
-			if (pc != null && pc.painterPrototype != null) {
-				ClassPainter painter = pc.painterPrototype.clone();
-				painter.setClass(obj);
-				painter.setScheme(scheme);
-				classPainters.put(obj, painter);
+			if (pc != null) {
+				ClassPainter painter = pc.getPainterFor(scheme, obj);
+				if (painter != null)
+					classPainters.put(obj, painter);
 			}
 		}
 	}
@@ -399,12 +398,24 @@ public class Canvas extends JPanel implements ActionListener {
 		// objCount = objects.size();
 		ArrayList<GObj> newObjects = new ArrayList<GObj>();
 		GObj obj;
+		Map<GObj, ClassPainter> newPainters = null;
 		// clone every selected objects
 		for (int i = 0; i < selected.size(); i++) {
 			obj = selected.get(i);
 			GObj newObj = obj.clone();
 			newObj.setPosition(newObj.x + 20, newObj.y + 20);
 			newObjects.add(newObj);
+
+			// create new and fresh class painters for cloned object
+			if (vPackage.hasPainters()) {
+				PackageClass pc = vPackage.getClass(obj.getClassName());
+				ClassPainter painter = pc.getPainterFor(scheme, newObj);
+				if (painter != null) {
+					if (newPainters == null)
+						newPainters = new HashMap<GObj, ClassPainter>();
+					newPainters.put(newObj, painter);
+				}
+			}
 		}
 		// some of these objects might have been groups, so ungroup everything
 		ObjectList objects2 = new ObjectList();
@@ -489,6 +500,10 @@ public class Canvas extends JPanel implements ActionListener {
 			obj.setSelected(false);
 		}
 		objects.addAll(newObjects);
+
+		if (classPainters != null && newPainters != null)
+			classPainters.putAll(newPainters);
+
 		drawingArea.repaint();
 	}
 

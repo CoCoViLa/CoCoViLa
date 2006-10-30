@@ -6,7 +6,6 @@ import java.awt.*;
 
 public class PackageClass implements Serializable {
     private static final long serialVersionUID = 1L;
-    int x, y;
 	public String name;
 	public String icon;
 	public ArrayList<ClassField> fields = new ArrayList<ClassField>();
@@ -15,7 +14,7 @@ public class PackageClass implements Serializable {
 	public String description;
 	public boolean relation = false;
     public String painterName;
-    public ClassPainter painterPrototype;
+    private ClassPainter painterPrototype;
 
 	public PackageClass(String name) {
 		this.name = name;
@@ -25,6 +24,7 @@ public class PackageClass implements Serializable {
 		super();
 	}
 
+	@Override
 	public String toString() {
 		return name;
 	}
@@ -50,5 +50,32 @@ public class PackageClass implements Serializable {
 
 			g.setColor(Color.black);
 		}
+	}
+
+	/**
+	 * Sets the {@code ClassPainter} instance that is used to create
+	 * new instances by cloning the first instacne.
+	 * @param painter the painter prototype for this visual class
+	 */
+	public void setPainterPrototype(ClassPainter painter) {
+		this.painterPrototype = painter;
+	}
+	
+	/**
+	 * Creates and returns a new {@code ClassPainter} instace.
+	 * The returned instance is initialized with given arguments.
+	 * @param scheme reference to the scheme
+	 * @param obj the object the new painter is bound to
+	 * @return new {@code ClassPainter} instance; {@code null} if there
+	 * is no painter for this class
+	 */
+	public ClassPainter getPainterFor(Scheme scheme, GObj obj) {
+		ClassPainter painter = null;
+		if (painterPrototype != null) {
+			painter = painterPrototype.clone();
+			painter.setVClass(obj);
+			painter.setScheme(scheme);
+		}
+		return painter;
 	}
 }

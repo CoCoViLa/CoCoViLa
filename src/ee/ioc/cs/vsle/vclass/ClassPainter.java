@@ -87,7 +87,7 @@ public abstract class ClassPainter implements Cloneable {
      * 
      * @param vclass the instance of a visual class the painter is responsible for
      */
-    public void setClass(final GObj vclass) {
+    public void setVClass(final GObj vclass) {
         this.vclass = vclass;
     }
     
@@ -104,7 +104,8 @@ public abstract class ClassPainter implements Cloneable {
     /**
      * Used internally for creating new instances from a prototype.
      */
-    public ClassPainter clone() {
+    @Override
+	public ClassPainter clone() {
         ClassPainter clone = null;
         try {
             clone = (ClassPainter) super.clone();

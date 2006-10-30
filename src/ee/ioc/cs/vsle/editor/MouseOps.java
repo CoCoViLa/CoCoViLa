@@ -644,12 +644,9 @@ class MouseOps
             obj = new GObj(0, 0, pClass.graphics.getWidth(), pClass.graphics.getHeight(), pClass.toString());
         }
 
-        if (pClass.painterPrototype != null) {
-            ClassPainter painter = pClass.painterPrototype.clone();
-            painter.setClass(obj);
-            painter.setScheme(canvas.scheme);
+        ClassPainter painter = pClass.getPainterFor(canvas.scheme, obj);
+        if (painter != null)
             canvas.classPainters.put(obj, painter);
-        }
 
         obj.shapes = new ArrayList<Shape>(pClass.graphics.shapes.size());
         for (Shape shape: pClass.graphics.shapes)
