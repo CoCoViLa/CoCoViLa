@@ -119,30 +119,20 @@ public class ObjectList extends ArrayList<GObj> {
 		for (GObj o: this) {
 			if (o instanceof RelObj) {
                 obj = (RelObj) o;
-				if (!obj.startPort.isArea()) {
-					obj.x = obj.startPort.getAbsoluteX();
-					obj.y = obj.startPort.getAbsoluteY();
-				} else {
-					endPoint = VMath.nearestPointOnRectangle
-						(obj.startPort.getStartX(), obj.startPort.getStartY(),
-							obj.startPort.getWidth(), obj.startPort.getHeight(),
-							obj.endPort.getAbsoluteX(), obj.endPort.getAbsoluteY());
-					obj.x = endPoint.x;
-					obj.y = endPoint.y;
+                
+                endPoint = VMath.getRelClassStartPoint(obj.startPort,
+                		obj.endPort);
+                
+                obj.x = endPoint.x;
+                obj.y = endPoint.y;
 
-				}
+                endPoint = VMath.getRelClassStartPoint(obj.endPort,
+                		obj.startPort);
+                
+                obj.endX = endPoint.x;
+                obj.endY = endPoint.y;
 
-				if (!obj.endPort.isArea()) {
-					obj.endX = obj.endPort.getAbsoluteX();
-					obj.endY = obj.endPort.getAbsoluteY();
-				} else {
-					endPoint = VMath.nearestPointOnRectangle
-						(obj.endPort.getStartX(), obj.endPort.getStartY(),
-							obj.endPort.getWidth(), obj.endPort.getHeight(), obj.x, obj.y);
-					obj.endX = endPoint.x;
-					obj.endY = endPoint.y;
-				}
-				obj.Xsize = (float) Math.sqrt(Math.pow((obj.x - obj.endX), 2.0) + Math.pow((obj.y - obj.endY), 2.0)) / obj.width;
+                obj.Xsize = (float) Math.sqrt(Math.pow((obj.x - obj.endX), 2.0) + Math.pow((obj.y - obj.endY), 2.0)) / obj.width;
 				obj.angle = VMath.calcAngle(obj.x, obj.y, obj.endX, obj.endY);
 			}
 		}
