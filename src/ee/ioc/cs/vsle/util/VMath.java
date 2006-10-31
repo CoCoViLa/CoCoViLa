@@ -1,6 +1,9 @@
 package ee.ioc.cs.vsle.util;
 
+import java.awt.geom.Line2D;
+
 import ee.ioc.cs.vsle.vclass.Point;
+import ee.ioc.cs.vsle.vclass.Port;
 
 /**
  * Created by IntelliJ IDEA.
@@ -96,7 +99,7 @@ public class VMath {
 	 * @param y2
 	 * @param pointX
 	 * @param pointY
-	 * @return
+	 * @return distance
 	 */
 	public static float pointDistanceFromLine(int x1, int y1, int x2, int y2, int pointX, int pointY) {
 		Point p = nearestPointOnLine(x1, y1, x2, y2, pointX, pointY);
@@ -122,7 +125,7 @@ public class VMath {
 	 * @param startY
 	 * @param x
 	 * @param y
-	 * @return
+	 * @return angle
 	 */
 	public static double calcAngle(int startX, int startY, int x, int y) {
 		int realX = x - startX;
@@ -149,4 +152,108 @@ public class VMath {
 		return 0.0;
 	}
 
+	/**
+	 * Calculates the intersection point of two line segments.
+	 * 
+	 * If the two line segments intersect then {@code true} is returned
+	 * and the X and Y coordinates of the intersection point are stored in
+	 * the point {@code p}. Otherwise, {@code false} is returned and
+	 * the point {@code p} is not modified.
+	 * @param point the point where the calculated values are stored
+     * @param x1 the X coordinate of the start point of the first
+     * 			 line segment
+     * @param y1 the Y coordinate of the start point of the first
+     * 			 line segment
+     * @param x2 the X coordinate of the end point of the first
+     *           line segment
+     * @param y2 the Y coordinate of the end point of the first
+     *           line segment
+     * @param x3 the X coordinate of the start point of the second
+     *           line segment
+     * @param y3 the Y coordinate of the start point of the second
+     *           line segment
+     * @param x4 the X coordinate of the end point of the second
+     *           line segment
+     * @param y4 the Y coordinate of the end point of the second
+     *           line segment
+	 * @return <code>true</code> if the line segments intersect,
+	 * 			<code>false</code> otherwise.
+	 */
+	public static boolean calcLineLineIntersection(Point point,
+			double x1, double y1, double x2, double y2,
+			double x3, double y3, double x4, double y4) {
+		
+		if (!Line2D.linesIntersect(x1, y1, x2, y2, x3, y3, x4, y4))
+			return false;
+		
+		double x12 = x1 - x2;
+		double x34 = x3 - x4;
+		double y12 = y1 - y2;
+		double y34 = y3 - y4;
+
+		double d3 = x12 * y34 - y12 * x34;
+		
+		if (d3 == 0.0)
+			return false;
+		
+		double d1 = x1 * y2 - y1 * x2;
+		double d2 = x3 * y4 - y3 * x4;
+		
+		point.x = (int) ((d1 * x34 - x12 * d2) / d3 + 0.5);
+		point.y = (int) ((d1 * y34 - y12 * d2) / d3 + 0.5);
+		
+		return true;
+	}
+
+	/**
+	 * Calculates end point coordinates for relation classes.
+	 * 
+	 * @param sp start port of the relation class
+	 * @param ep end point of the relation class
+	 * @return point containing the coordinate values of the end point of the 
+	 * 		   relation class at the start port end.
+	 */
+	public static Point getRelClassStartPoint(Port sp, Port ep) {
+		Point endPoint = new Point(0, 0);
+
+		if (!sp.isArea()) {
+			endPoint.x = sp.getAbsoluteX();
+			endPoint.y = sp.getAbsoluteY();
+		} else {
+			// Find the intersection point of the line segment connecting
+			// the center points of the connected objects and the bounding
+			// box of the first object. There is no such point when the
+			// center point of the second object is inside the second object.
+			int px1 = sp.getObject().getX() + sp.getObject().getWidth() / 2;
+			int py1 = sp.getObject().getY() + sp.getObject().getHeight() / 2;
+			int px2 = ep.getObject().getX() + ep.getObject().getWidth() / 2;
+			int py2 = ep.getObject().getY() + ep.getObject().getHeight() / 2;
+		
+			int x1 = sp.getObject().getX();
+			int y1 = sp.getObject().getY();
+			int x2 = x1 + sp.getObject().getRealWidth();
+			int y2 = y1 + sp.getObject().getRealHeight();
+		
+			if (calcLineLineIntersection(endPoint,
+						px1, py1, px2, py2,
+						x1, y1, x2, y1)
+					|| calcLineLineIntersection(endPoint,
+						px1, py1, px2, py2,
+						x2, y1, x2, y2)
+					|| calcLineLineIntersection(endPoint,
+						px1, py1, px2, py2,
+						x2, y2, x1, y2)
+					|| calcLineLineIntersection(endPoint,
+						px1, py1, px2, py2,
+						x1, y2, x1, y1)) {
+
+				// the value is now in endPoint
+			} else {
+				endPoint = VMath.nearestPointOnRectangle(
+						x1, y1, x2 - x1, y2 - y1,
+						ep.getAbsoluteX(), ep.getAbsoluteY());
+			}
+		}
+		return endPoint;
+	}
 }
