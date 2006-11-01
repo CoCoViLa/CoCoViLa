@@ -5,12 +5,20 @@ import ee.ioc.cs.vsle.util.StringUtil;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.awt.Graphics;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Stroke;
 
 /**
 
  */
 public class Connection implements Serializable {
+
+	/**
+	 * The stroke used for selected connections.
+	 */
+	public static final Stroke SELECTED_STROKE = new BasicStroke(3.0f);
 
 	public Port beginPort;
 	public Port endPort;
@@ -219,18 +227,37 @@ public class Connection implements Serializable {
 	 * Draw the connection line.
 	 * @param g Graphics
 	 */
-	public void drawRelation
-		(Graphics
-		g) {
+	public void drawRelation(Graphics2D g) {
 		Point p1, p2;
+
+		// hilight selected connections
+		if (selected) {
+			Stroke origStroke = g.getStroke();
+			Color origColor = g.getColor();
+			g.setStroke(SELECTED_STROKE);
+			g.setColor(Color.cyan);
+
+			for (int i = 0; i < breakPoints.size() - 1; i++) {
+				p1 = breakPoints.get(i);
+				p2 = breakPoints.get(i + 1);
+				g.drawLine(p1.x, p1.y, p2.x, p2.y);
+			}
+
+			g.setStroke(origStroke);
+			g.setColor(origColor);
+		}
 
 		for (int i = 0; i < breakPoints.size() - 1; i++) {
 			p1 = breakPoints.get(i);
 			p2 = breakPoints.get(i + 1);
-			if (i != 0 && selected) {
+			g.drawLine(p1.x, p1.y, p2.x, p2.y);
+		}
+		
+		if (selected) {
+			for (int i = 0; i < breakPoints.size(); i++) {
+				p1 = breakPoints.get(i);
 				g.drawRect(p1.x - 2, p1.y - 2, 4, 4);
 			}
-			g.drawLine(p1.x, p1.y, p2.x, p2.y);
 		}
 	} // drawRelation
 
