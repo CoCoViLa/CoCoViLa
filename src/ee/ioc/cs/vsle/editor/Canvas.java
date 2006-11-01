@@ -539,12 +539,13 @@ public class Canvas extends JPanel implements ActionListener {
 		Map<GObj, ClassPainter> rmPainters = new HashMap<GObj, ClassPainter>();
 		Connection con;
 
-		for (int i = 0; i < connections.size(); i++) {
+		for (int i = 0; i < connections.size();) {
 			con = connections.get(i);
 			if (con.isSelected()) {
 				removableConns.add(con);
 				connections.remove(con);
-			}
+			} else
+				i++;
 		}
 		GObj obj;
 		for (int i = 0; i < objects.size(); i++) {
