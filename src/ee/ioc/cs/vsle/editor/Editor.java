@@ -159,6 +159,10 @@ public class Editor extends JFrame implements ChangeListener {
 			}
 
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+				// ignore
+			}
+
+			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
                 Canvas canvas = Editor.getInstance().getCurrentCanvas();
                 if (canvas == null || !canvas.getCurrentPackage().hasPainters()) {
                     painterEnabled.setVisible(false);
@@ -166,10 +170,6 @@ public class Editor extends JFrame implements ChangeListener {
                     painterEnabled.setVisible(true);
                     painterEnabled.setSelected(canvas.isEnableClassPainter());
                 }
-			}
-
-			public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
-				// ignore
 			}
             
         });
