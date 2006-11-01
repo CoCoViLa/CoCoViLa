@@ -24,6 +24,13 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.event.UndoableEditEvent;
+import javax.swing.event.UndoableEditListener;
+import javax.swing.undo.AbstractUndoableEdit;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
+import javax.swing.undo.UndoableEditSupport;
 
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.ccl.CompileException;
@@ -48,6 +55,7 @@ import ee.ioc.cs.vsle.vclass.VPackage;
 /**
  */
 public class Canvas extends JPanel implements ActionListener {
+	private static final long serialVersionUID = 1L;
 	int mouseX; // Mouse X coordinate.
 	int mouseY; // Mouse Y coordinate.
 	private String workDir;
@@ -58,23 +66,209 @@ public class Canvas extends JPanel implements ActionListener {
 	ConnectionList connections;
 	ObjectList objects;
     Map<GObj, ClassPainter> classPainters;
+    ClassPainter currentPainter;
 	GObj currentObj;
 	Port firstPort;
 	Port currentPort;
 	Connection currentCon;
 	public MouseOps mListener;
 	public KeyOps keyListener;
-	private boolean showGrid = false;
+	boolean showGrid = false;
 	Dimension drawAreaSize = new Dimension(600, 500);
 	JPanel infoPanel;
 	JLabel posInfo;
 	DrawingArea drawingArea;
     BufferedImage backgroundImage;
     ExecutorService executor;
-    private float scale = 1.0f;
-    private boolean enableClassPainter = true;
+    float scale = 1.0f;
+    boolean enableClassPainter = true;
+    UndoManager undoManager;
+    UndoableEditSupport undoSupport;
 
-	public Canvas(File f) {
+    /**
+     * Undoable edit for adding objects.
+     */
+    private static class AddObjectEdit extends AbstractUndoableEdit {
+
+		private static final long serialVersionUID = 1L;
+		
+		private GObj object;
+		private ClassPainter painter;
+		private Canvas canvas;
+
+		public AddObjectEdit(Canvas canvas, GObj currentObj,
+				ClassPainter currentPainter) {
+			this.canvas = canvas;
+			this.object = currentObj;
+			this.painter = currentPainter;
+		}
+
+		@Override
+		public String getPresentationName() {
+			return "Insert " + object.className;
+		}
+
+		@Override
+		public void redo() throws CannotRedoException {
+			super.redo();
+			canvas.objects.add(object);
+			if (painter != null && canvas.classPainters != null)
+				canvas.classPainters.put(object, painter);
+		}
+
+		@Override
+		public void undo() throws CannotUndoException {
+			super.undo();
+			canvas.objects.remove(object);
+			if (painter != null && canvas.classPainters != null)
+				canvas.classPainters.remove(object);
+		}
+    }
+
+    /**
+     * Undoable edit for removing selected objects from the scheme.
+     */
+    private static class DeleteEdit extends AbstractUndoableEdit {
+
+    	private static final long serialVersionUID = 1L;
+
+    	private Canvas canvas;
+    	private Collection<GObj> removedObjs;
+    	private Collection<Connection> removedConns;
+    	private Map<GObj, ClassPainter> removedPainters;
+    	
+		public DeleteEdit(Canvas canvas, Collection<GObj> removedObjs,
+				Collection<Connection> removedConns,
+				Map<GObj, ClassPainter> removedPainters) {
+
+			this.canvas = canvas;
+			this.removedObjs = removedObjs;
+			this.removedConns = removedConns;
+			this.removedPainters = removedPainters;
+		}
+
+		@Override
+		public String getPresentationName() {
+			return Menu.DELETE;
+		}
+
+		@Override
+		public void redo() throws CannotRedoException {
+			super.redo();
+			canvas.objects.removeAll(removedObjs);
+			canvas.connections.removeAll(removedConns);
+			if (canvas.classPainters != null && removedPainters != null) {
+				canvas.classPainters.entrySet().removeAll(
+						removedPainters.entrySet());
+			}
+		}
+
+		@Override
+		public void undo() throws CannotUndoException {
+			super.undo();
+			canvas.objects.addAll(removedObjs);
+			canvas.connections.addAll(removedConns);
+			if (canvas.classPainters != null && removedPainters != null)
+				canvas.classPainters.putAll(removedPainters);
+		}
+    }
+
+    /**
+     * Undoable edit for cloning scheme objects.
+     */
+    private static class CloneEdit extends AbstractUndoableEdit {
+
+		private static final long serialVersionUID = 1L;
+    	
+		private Canvas canvas;
+		private Collection<GObj> newObjects;
+		private Collection<Connection> newConnections;
+		private Map<GObj, ClassPainter> newPainters;
+		
+		public CloneEdit(Canvas canvas, Collection<GObj> newObjects,
+				Collection<Connection> newConnections,
+				Map<GObj, ClassPainter> newPainters) {
+			
+			this.canvas = canvas;
+			this.newObjects = newObjects;
+			this.newConnections = newConnections;
+			this.newPainters = newPainters;
+		}
+
+		@Override
+		public String getPresentationName() {
+			return Menu.CLONE;
+		}
+
+		@Override
+		public void redo() throws CannotRedoException {
+			super.redo();
+			canvas.objects.addAll(newObjects);
+			canvas.connections.addAll(newConnections);
+			if (canvas.classPainters != null && newPainters != null)
+				canvas.classPainters.putAll(newPainters);
+		}
+
+		@Override
+		public void undo() throws CannotUndoException {
+			super.undo();
+			canvas.objects.removeAll(newObjects);
+			canvas.connections.removeAll(newConnections);
+			if (canvas.classPainters != null && newPainters != null) {
+				canvas.classPainters.entrySet().removeAll(
+						newPainters.entrySet());
+			}
+		}
+    }
+
+    /**
+     * Undoable edit for removing all objects from the scheme.
+     */
+    private static class ClearAllEdit extends AbstractUndoableEdit {
+
+		private static final long serialVersionUID = 1L;
+
+		private Canvas canvas;
+		
+		private ConnectionList connCopy;
+		private ObjectList objCopy;
+		private Map<GObj, ClassPainter> painterCopy;
+		
+		public ClearAllEdit(Canvas canvas) {
+			this.canvas = canvas;
+
+			objCopy = new ObjectList(canvas.objects);
+			connCopy = new ConnectionList(canvas.connections);
+			if (canvas.classPainters != null)
+				painterCopy = new HashMap<GObj,ClassPainter>(
+						canvas.classPainters);
+		}
+
+		@Override
+		public String getPresentationName() {
+			return Menu.CLEAR_ALL;
+		}
+
+		@Override
+		public void redo() throws CannotRedoException {
+			super.redo();
+			canvas.objects.clear();
+			canvas.connections.clear();
+			if (canvas.classPainters != null)
+				canvas.classPainters.clear();
+		}
+
+		@Override
+		public void undo() throws CannotUndoException {
+			super.undo();
+			canvas.objects.addAll(objCopy);
+			canvas.connections.addAll(connCopy);
+			if (canvas.classPainters != null)
+				canvas.classPainters.putAll(painterCopy);
+		}
+    }
+
+    public Canvas(File f) {
 		super();
 		if (f.exists()) {
 			setWorkDir(f.getParent() + RuntimeProperties.FS);
@@ -137,6 +331,15 @@ public class Canvas extends JPanel implements ActionListener {
                         "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
+
+        undoManager = new UndoManager();
+		undoSupport = new UndoableEditSupport();
+		undoSupport.addUndoableEditListener(undoManager);
+		undoSupport.addUndoableEditListener(new UndoableEditListener() {
+			public void undoableEditHappened(UndoableEditEvent e) {
+				Editor.getInstance().refreshUndoRedo();
+			}
+		});
 	}
 
     private boolean createPainterPrototypes() {
@@ -231,8 +434,9 @@ public class Canvas extends JPanel implements ActionListener {
 	 * @param moveY int - object y coordinate change.
 	 */
 	public void moveObject(int moveX, int moveY) {
-		for (int i = 0; i < objects.getSelected().size(); i++) {
-			GObj obj = objects.getSelected().get(i);
+		ArrayList<GObj> selectedObjs = objects.getSelected();
+		for (int i = 0; i < selectedObjs.size(); i++) {
+			GObj obj = selectedObjs.get(i);
 			if (!(obj instanceof RelObj))
 				obj.setPosition(obj.getX() + moveX, obj.getY() + moveY);
 
@@ -309,14 +513,36 @@ public class Canvas extends JPanel implements ActionListener {
 	}
 
 	/**
+	 * Adds the current object to the scheme.
+	 */
+	public void addCurrentObject() {
+		if (currentObj == null)
+			throw new IllegalStateException("Current object is null");
+		
+		objects.add(currentObj);
+		if (classPainters != null && currentPainter != null)
+			classPainters.put(currentObj, currentPainter);
+		
+		undoSupport.postEdit(new AddObjectEdit(this, currentObj,
+				currentPainter));
+		
+		currentObj = null;
+		currentPainter = null;
+	}
+
+	/**
 	 * Method for deleting selected objects.
 	 */
 	public void deleteObjects() {
-		ArrayList<GObj> removableObjs = new ArrayList<GObj>();
+		Collection<GObj> removableObjs = new ArrayList<GObj>();
+		Collection<Connection> removableConns = new ArrayList<Connection>();
+		Map<GObj, ClassPainter> rmPainters = new HashMap<GObj, ClassPainter>();
 		Connection con;
+
 		for (int i = 0; i < connections.size(); i++) {
 			con = connections.get(i);
 			if (con.isSelected()) {
+				removableConns.add(con);
 				connections.remove(con);
 			}
 		}
@@ -324,26 +550,71 @@ public class Canvas extends JPanel implements ActionListener {
 		for (int i = 0; i < objects.size(); i++) {
 			obj = objects.get(i);
 			if (obj.isSelected()) {
-				connections.removeAll(obj.getConnections());
+				Collection<Connection> cs = obj.getConnections();
+				// Sometimes object have references to connections that
+				// have been already removed. Is it a bug? Anyway,
+				// we do not want to undelete a connection more that once.
+				for (Connection c : cs) {
+					if (connections.contains(c))
+						removableConns.add(c);
+				}
+				connections.removeAll(cs);
 				removableObjs.add(obj);
-				deleteClassPainters(obj);
+				deleteClassPainters(obj, rmPainters);
 			}
 		}
 		objects.removeAll(removableObjs);
-		objects.deleteExcessRels(connections);
-		currentObj = null;
+
+		// remove dangling relation objects
+		for (RelObj ro : objects.getExcessRels()) {
+			Collection<Connection> cs = ro.getConnections();
+			// again: do not undelete a connection more than once 
+			for (Connection c : cs) {
+				if (connections.contains(c))
+					removableConns.add(c);
+			}
+			removableObjs.add(ro);
+			deleteClassPainters(ro, rmPainters);
+			objects.remove(ro);
+		}
+		
+		// Avoid dangling connections: there might be a connection that is
+		// being added and is connected to only one object that is selected
+		// and will be removed here.
+		stopRelationAdding();
+		
+		if (removableObjs.size() > 0 || removableConns.size() > 0) {
+			DeleteEdit edit = new DeleteEdit(this, removableObjs,
+					removableConns,	rmPainters);
+			undoSupport.postEdit(edit);
+		}
+		
 		drawingArea.repaint();
 	}
 
-	private void deleteClassPainters(GObj obj) {
+	/**
+	 * Removes all classpainters associated to the object {@code obj}.
+	 * When the {@code obj} is an object group then classpainters are
+	 * removed recursively. All the removed classpainters are stored
+	 * in the collection {@code rmPainters} if it is not {@code null}.
+	 *  
+	 * @param obj The object whose classpainters are to be removed.
+	 * @param rmPainters The collection where removed classpainters are
+	 * stored if non-{@code null}. 
+	 */
+	private void deleteClassPainters(GObj obj, Map<GObj,
+			ClassPainter> rmPainters) {
+
 		if (classPainters == null)
 			return;
 		
 		if (obj.isGroup()) {
 			for (GObj component : obj.getComponents())
-				deleteClassPainters(component);
+				deleteClassPainters(component, rmPainters);
 		} else {
-			classPainters.remove(obj);
+			ClassPainter painter = classPainters.remove(obj);
+			if (painter != null && rmPainters != null)
+				rmPainters.put(obj, painter);
 		}
 	}
 
@@ -379,11 +650,15 @@ public class Canvas extends JPanel implements ActionListener {
 	 * Remove all objects, connections and classpainters.
 	 */
 	public void clearObjects() {
+		ClearAllEdit edit = new ClearAllEdit(this);
+		
 		mListener.setState(State.selection);
 		objects.removeAll(objects);
 		connections.removeAll(connections);
 		if (classPainters != null)
 			classPainters.clear();
+
+		undoSupport.postEdit(edit);
 		drawingArea.repaint();
 	}
 
@@ -503,7 +778,10 @@ public class Canvas extends JPanel implements ActionListener {
 
 		if (classPainters != null && newPainters != null)
 			classPainters.putAll(newPainters);
-
+			
+		undoSupport.postEdit(new CloneEdit(this, newObjects, newConnections,
+				newPainters));
+		
 		drawingArea.repaint();
 	}
 
@@ -660,6 +938,8 @@ public class Canvas extends JPanel implements ActionListener {
 
 
 	class DrawingArea extends JPanel {
+		private static final long serialVersionUID = 1L;
+
 		protected void drawGrid(Graphics g) {
             g.setColor(Color.lightGray);
 

@@ -113,10 +113,13 @@ public class ObjectList extends ArrayList<GObj> {
 		return a;
 	}
 
+	/**
+	 * Recalculates start and end points of relation objects and dimensions.
+	 */
 	public void updateRelObjs() {
         RelObj obj;
 		Point endPoint;
-		for (GObj o: this) {
+		for (GObj o : this) {
 			if (o instanceof RelObj) {
                 obj = (RelObj) o;
                 
@@ -138,18 +141,23 @@ public class ObjectList extends ArrayList<GObj> {
 		}
 	}
 
-
-	public void deleteExcessRels(ConnectionList con) {
-		ArrayList<GObj> toBeRemoved = new ArrayList<GObj>();
-		for (GObj obj: this) {
+	/**
+	 * Finds and returns relation objects that are not connected at both ends.
+	 *  
+	 * @return collections of excess relations
+	 */
+	public Collection<RelObj> getExcessRels() {
+		Collection<RelObj> toBeRemoved = new ArrayList<RelObj>();
+		for (GObj obj : this) {
 			if (obj instanceof RelObj) {
-				if (!(contains(((RelObj) obj).startPort.getObject()) && contains(((RelObj) obj).endPort.getObject()))) {
-					toBeRemoved.add(obj);
-					con.removeAll(obj.getConnections());
+				RelObj ro = (RelObj) obj;
+				if (!contains(ro.startPort.getObject()) 
+						|| !contains(ro.endPort.getObject())) {
+					toBeRemoved.add(ro);
 				}
 			}
 		}
-		removeAll(toBeRemoved);
+		return toBeRemoved;
 	}
 
 	public int controlRectContains(int x, int y) {

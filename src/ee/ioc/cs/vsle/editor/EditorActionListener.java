@@ -6,12 +6,91 @@ import ee.ioc.cs.vsle.iconeditor.AboutDialog;
 import ee.ioc.cs.vsle.iconeditor.LicenseDialog;
 
 import javax.swing.*;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
 
+import java.awt.Frame;
 import java.awt.event.*;
 import java.io.File;
 
 public class EditorActionListener implements ActionListener {
 	
+	/*
+	 * For more information about Swing Actions see:
+	 * "How to Use Actions"
+	 * http://java.sun.com/docs/books/tutorial/uiswing/misc/action.html
+	 */
+
+	/**
+	 * Undo Action. Invokes the undo() method on the active scheme.
+	 * By default this action is bound to CTRL-z keys. 
+	 */
+	static class UndoAction extends AbstractAction {
+	
+		private static final long serialVersionUID = 1L;
+
+		public UndoAction() {
+			putValue(Action.NAME, Menu.UNDO);
+			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+					KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK));
+			setEnabled(false);
+		}
+
+		public void actionPerformed(ActionEvent evt) {
+			Canvas canvas = Editor.getInstance().getCurrentCanvas();
+			if (canvas != null) {
+				try {
+					canvas.undoManager.undo();
+				} catch (CannotUndoException e) {
+					JOptionPane.showMessageDialog(Editor.getInstance(),
+							"Undo failed. Please report the steps to reproduce this error.",
+							"Cannot undo", JOptionPane.WARNING_MESSAGE);
+					db.p(e);
+				}
+				Editor.getInstance().refreshUndoRedo();
+				canvas.drawingArea.repaint();
+			}
+		}
+	}
+
+	/**
+	 * Redo Action. Invokes the redo() method on the active scheme.
+	 * By default this action is bound to CTRL-y keys.
+	 */
+	static class RedoAction extends AbstractAction {
+
+		private static final long serialVersionUID = 1L;
+
+		public RedoAction() {
+			putValue(Action.NAME, Menu.REDO);
+			putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+					KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK));
+			setEnabled(false);
+		}
+
+		public void actionPerformed(ActionEvent evt) {
+			Canvas canvas = Editor.getInstance().getCurrentCanvas();
+			if (canvas != null) {
+				try {
+					canvas.undoManager.redo();
+				} catch (CannotRedoException e) {
+					JOptionPane.showMessageDialog(Editor.getInstance(),
+						"Redo failed. Please report the steps to reproduce this error.",
+						"Cannot redo", JOptionPane.WARNING_MESSAGE);
+					db.p(e);
+				}
+
+				Editor.getInstance().refreshUndoRedo();
+				canvas.drawingArea.repaint();
+			}
+		}
+	}
+
+	/**
+	 * Delete Action. Used for removing currently selected objects/connections
+	 * from the scheme.
+	 * By default this action is bound to the Delete key.
+	 */
 	static class DeleteAction extends AbstractAction {
 
 		private static final long serialVersionUID = 1L;
@@ -173,8 +252,8 @@ public class EditorActionListener implements ActionListener {
                 	JFrame frame = ProgramTextEditor.getFrame( canv.getTitle() );
                 	if( frame != null ) {
                 		
-                		if( frame.getState() == JFrame.ICONIFIED ) {
-                			frame.setState( JFrame.NORMAL );
+                		if( frame.getState() == Frame.ICONIFIED ) {
+                			frame.setState( Frame.NORMAL );
                 		}
                 		
                 		frame.toFront();
@@ -187,7 +266,8 @@ public class EditorActionListener implements ActionListener {
             		
             		programEditor.addWindowListener( new WindowAdapter(){
 
-            			public void windowClosing(WindowEvent e) {
+            			@Override
+						public void windowClosing(WindowEvent evt) {
             				runner.destroy();
             			}
                     });

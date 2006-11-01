@@ -7,8 +7,11 @@ import java.util.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
+import javax.swing.undo.UndoManager;
 
 import ee.ioc.cs.vsle.editor.EditorActionListener.DeleteAction;
+import ee.ioc.cs.vsle.editor.EditorActionListener.RedoAction;
+import ee.ioc.cs.vsle.editor.EditorActionListener.UndoAction;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -29,6 +32,8 @@ public class Editor extends JFrame implements ChangeListener {
 
 	EditorActionListener aListener;
 	DeleteAction deleteAction;
+	UndoAction undoAction;
+	RedoAction redoAction;
 
 	JMenuBar menuBar;
 
@@ -64,8 +69,10 @@ public class Editor extends JFrame implements ChangeListener {
 		setLocationByPlatform( true );
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		tabbedPane.addChangeListener(this);
-		aListener = new EditorActionListener();
+		undoAction = new UndoAction();
+		redoAction = new RedoAction();
 		deleteAction = new DeleteAction();
+		aListener = new EditorActionListener();
 		makeMenu();
 		getContentPane().add(tabbedPane);
 		Look look = new Look();
@@ -121,6 +128,8 @@ public class Editor extends JFrame implements ChangeListener {
 		menu = new JMenu(Menu.MENU_EDIT);
 		menu.setMnemonic(KeyEvent.VK_E);
 
+		menu.add(undoAction);
+		menu.add(redoAction);
 		// as it is already defined in the object popup menu and
 		// otherwise would require implementing all the object
 		// popup items in the current menu as well.
@@ -575,8 +584,7 @@ public class Editor extends JFrame implements ChangeListener {
 	/**
 	 * Main method for module unit-testing.
 	 * 
-	 * @param args -
-	 *            command line arguments
+	 * @param args command line arguments
 	 */
 	public static void main(String[] args) {
 		
@@ -690,6 +698,7 @@ public class Editor extends JFrame implements ChangeListener {
 				window.setVisible(true);
 			}
 		} catch (Exception e) {
+			db.p(e);
 			window = new Editor();
 			window.setTitle(WINDOW_TITLE);
 			window.setSize(getWinWidth(), getWinHeight());
@@ -738,6 +747,7 @@ public class Editor extends JFrame implements ChangeListener {
 	public void stateChanged(ChangeEvent e) {
 		Canvas canvas = getCurrentCanvas();
 		if (canvas != null) {
+			refreshUndoRedo();
 			gridCheckBox.setSelected(canvas.isGridVisible());
 			canvas.drawingArea.requestFocusInWindow();
 		}
@@ -747,4 +757,26 @@ public class Editor extends JFrame implements ChangeListener {
 		return s_instance;
 	}
 
+	/**
+	 * Updates Undo and Redo actions.
+	 * When a new scheme tab is selected/opened or an action that
+	 * modifies the scheme is performed the undo and redo action
+	 * objects have to be updated to reflect the current state,
+	 * this includes presentation name and enabled/disabled status.
+	 */
+	public void refreshUndoRedo() {
+		Canvas canvas = getCurrentCanvas();
+		if (canvas != null) {
+			UndoManager um = canvas.undoManager;
+			undoAction.setEnabled(um.canUndo());
+			redoAction.setEnabled(um.canRedo());
+			undoAction.putValue(Action.NAME, um.getUndoPresentationName());
+			redoAction.putValue(Action.NAME, um.getRedoPresentationName());
+		} else {
+			undoAction.setEnabled(false);
+			redoAction.setEnabled(false);
+			undoAction.putValue(Action.NAME, Menu.UNDO);
+			redoAction.putValue(Action.NAME, Menu.REDO);
+		}
+	}
 }

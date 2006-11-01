@@ -35,6 +35,7 @@ class MouseOps
 		canvas.firstPort = null;
 		canvas.currentCon = null;
 		canvas.currentObj = null;
+		canvas.currentPainter = null;
         
         if (State.addRelation.equals(state))
             canvas.setCursor(new Cursor(Cursor.CROSSHAIR_CURSOR));
@@ -43,11 +44,6 @@ class MouseOps
             canvas.palette.resetButtons();
         } else if (State.magnifier.equals(state))
             canvas.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-	}
-
-	void addObj() {
-		canvas.objects.add(canvas.currentObj);
-		canvas.currentObj = null;
 	}
 
 	/**
@@ -254,7 +250,7 @@ class MouseOps
 				if (state.startsWith("??")) { // if class is of type relation
 					addingSpecialRelation(y, x);
 				} else if (canvas.currentObj != null) {
-					addObj();
+					canvas.addCurrentObject();
 					setState(State.selection);
 				}
 			}
@@ -297,7 +293,7 @@ class MouseOps
 					thisObj.startPort = canvas.firstPort;
 					thisObj.endPort = port;
 					canvas.firstPort = null;
-					addObj();
+					canvas.addCurrentObject();
 					startAddingObject();
 					//setState(State.selection);
 					canvas.objects.updateRelObjs();
@@ -646,7 +642,7 @@ class MouseOps
 
         ClassPainter painter = pClass.getPainterFor(canvas.scheme, obj);
         if (painter != null)
-            canvas.classPainters.put(obj, painter);
+            canvas.currentPainter = painter;
 
         obj.shapes = new ArrayList<Shape>(pClass.graphics.shapes.size());
         for (Shape shape: pClass.graphics.shapes)
