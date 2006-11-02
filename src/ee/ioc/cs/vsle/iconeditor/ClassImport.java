@@ -63,6 +63,7 @@ public class ClassImport {
 		boolean inPort = false;
 		boolean inDesc = false;
 		boolean inIcon = false;
+		boolean isRelation = false;
 		
 		
 		public InputSource resolveEntity(java.lang.String publicId, java.lang.String systemId) throws SAXException {
@@ -98,20 +99,18 @@ public class ClassImport {
 				ports = new ArrayList<IconPort>();
 				fields = new ArrayList<ClassField>();
 				shapeList = new ShapeGroup(new ArrayList<Shape>());
-			}
-			if(element.equals("name") && inClass){
+				if ((attrs.getValue("type")).equals("relation")) {
+					isRelation = true;
+				}
+			} else if(element.equals("name") && inClass){
 				inName = true;
-			}
-			if(element.equals("description") && inClass){
+			} else if(element.equals("description") && inClass){
 				inDesc = true;
-			}
-			if(element.equals("graphics")){
+			} else if(element.equals("graphics")){
 				inGraphics = true;
-			}
-			if(element.equals("icon")){
+			} else if(element.equals("icon")){
 				inIcon = true;
-			}
-			if (element.equals("rect")){
+			} else if (element.equals("rect")){
 				x = getCoordinate(attrs.getValue("x"));
 				y = getCoordinate(attrs.getValue("y"));
 				w = Integer.parseInt(attrs.getValue("width"));
@@ -304,6 +303,10 @@ public class ClassImport {
 				classIcon.setDescription(new String(ch,start,length));
 			if (inIcon)
 				classIcon.setIconName(new String(ch,start,length));
+			if (isRelation) {
+				classIcon.isRelation = true;
+			}
+				
 		   
 		}
 		/*
