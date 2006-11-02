@@ -3,8 +3,11 @@ package ee.ioc.cs.vsle.vclass;
 import java.io.Serializable;
 import java.util.ArrayList;
 
+import ee.ioc.cs.vsle.util.TypeUtil;
+
 public class Port implements Cloneable, Serializable {
 
+	private static final long serialVersionUID = 1L;
 	private String id;
 	private GObj obj;
 	//private int width, height;
@@ -125,6 +128,7 @@ public class Port implements Cloneable, Serializable {
 		return name;
 	}
 
+	@Override
 	public String toString() {
 		if (id!=null)
 			return id;
@@ -231,6 +235,7 @@ public class Port implements Cloneable, Serializable {
 		return connections;
 	}
 
+	@Override
 	public Port clone() {
 		try {
 			return (Port) super.clone();
@@ -285,4 +290,44 @@ public class Port implements Cloneable, Serializable {
 		return isMulti;
 	}
 
+	/**
+	 * Checks whether the specified port can be connected to {@code this} port.
+	 * 
+	 * @param port a port
+ 	 * @return <code>true</code> if {@code this} port and {@code port} 
+ 	 * 		   can be connected.
+	 */
+	public boolean canBeConnectedTo(Port port) {
+		return Port.canBeConnected(this, port);
+	}
+
+	/**
+	 * Checks whether the specified ports can be connected by a connection.
+	 * 
+	 * @param port1 first port
+	 * @param port2 second port
+	 * @return <code>true</code> if {@code port1} and {@code port2} can be connected.
+	 */
+	public static boolean canBeConnected(Port port1, Port port2) {
+		if (port1.isMulti() && port2.isMulti())
+			return false;
+		else if (port1.isMulti() && port1.getType().equals(port2.getType())
+				|| port2.isMulti() && port2.getType().equals(port1.getType())) 
+			return true;
+		else if (port1.getType().equals(port2.getType()))
+			return true;
+		else if ((port1.isAny() || port2.isAny()) 
+				&& !(port1.isAny() || port2.isAny()))
+			return true;
+		else if (TypeUtil.TYPE_ALIAS.equals(port2.getType()) 
+				&& port1.getType().substring(port1.getType().length() - 2,
+						port1.getType().length()).equals("[]"))
+			return true;
+		else if (TypeUtil.TYPE_ALIAS.equals(port1.getType()) 
+				&& port2.getType().substring(port2.getType().length() - 2,
+						port2.getType().length()).equals("[]"))
+			return true;
+		else 
+			return false;
+	}
 }
