@@ -100,7 +100,7 @@ public class ClassImport {
 				fields = new ArrayList<ClassField>();
 				shapeList = new ShapeGroup(new ArrayList<Shape>());
 				if ((attrs.getValue("type")).equals("relation")) {
-					isRelation = true;
+					classIcon.isRelation = true;
 				}
 			} else if(element.equals("name") && inClass){
 				inName = true;
@@ -290,7 +290,7 @@ public class ClassImport {
 			if(element.equals("icon")){
 				inIcon = false;
 			}
-				
+							
 		}
 		
 		public void characters(char[] ch, int start, int length)
@@ -303,9 +303,7 @@ public class ClassImport {
 				classIcon.setDescription(new String(ch,start,length));
 			if (inIcon)
 				classIcon.setIconName(new String(ch,start,length));
-			if (isRelation) {
-				classIcon.isRelation = true;
-			}
+			
 				
 		   
 		}
