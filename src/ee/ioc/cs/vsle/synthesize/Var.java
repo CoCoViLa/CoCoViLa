@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.synthesize;
 import java.io.Serializable;
 import java.util.*;
 
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**
@@ -95,6 +96,10 @@ public class Var implements //Cloneable,
         return object;
     } // getObj
 
+    public String getDeclaration() {
+    	return TypeUtil.getDeclaration( field, "" );
+    }
+    
     /**
      * <UNCOMMENTED>
      * @return String

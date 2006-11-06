@@ -14,21 +14,13 @@ class Rel implements Serializable {
 
     private List<Var> inputs = new ArrayList<Var>();
 
-    private List<Rel> subtasks = new ArrayList<Rel>();
+    private List<SubtaskRel> subtasks = new ArrayList<SubtaskRel>();
 
     private ArrayList<Var> exceptions = new ArrayList<Var>();
-
-    private List<Rel> algorithm = new ArrayList<Rel>();
-
-    // only for subtasks
-    private Rel parentRel = null;
-
-    // parent axiom containing this subtask
+    
     private int relNumber = 0;
 
     private int unknownInputs;
-
-    private int subtaskCounter;
 
     private String object;
 
@@ -48,48 +40,8 @@ class Rel implements Serializable {
         return unknownInputs;
     }
 
-    int getSubtaskCounter() {
-        return subtaskCounter;
-    }
-
-    void setSubtaskCounter(int value) {
-        subtaskCounter = value;
-    }
-
     List<Var> getExceptions() {
         return exceptions;
-    }
-
-    void setParentRel(Rel rel) {
-        if (type != RelType.TYPE_SUBTASK)
-            throw new IllegalStateException(
-                    "Only subtasks can contain parent rels");
-
-        parentRel = rel;
-    }
-
-    Rel getParentRel() {
-        if (type != RelType.TYPE_SUBTASK)
-            throw new IllegalStateException(
-                    "Only subtasks can contain parent rels");
-
-        return parentRel;
-    }
-
-    void addRelToAlgorithm(Rel rel) {
-        if (type != RelType.TYPE_SUBTASK)
-            throw new IllegalStateException(
-                    "Only subtasks can contain algorithms");
-
-        algorithm.add(rel);
-    }
-
-    List<Rel> getAlgorithm() {
-        if (type != RelType.TYPE_SUBTASK)
-            throw new IllegalStateException(
-                    "Only subtasks can contain algorithms");
-
-        return algorithm;
     }
 
     List<Var> getOutputs() {
@@ -100,16 +52,12 @@ class Rel implements Serializable {
         return inputs;
     }
 
-    List<Rel> getSubtasks() {
+    List<SubtaskRel> getSubtasks() {
         return subtasks;
     }
 
     void setUnknownInputs(int f) {
         unknownInputs = f;
-    }
-
-    void setSubtaskFlag(int f) {
-        subtaskCounter = f;
     }
 
     void setObj(String s) {
@@ -227,7 +175,7 @@ class Rel implements Serializable {
         outputs.add(var);
     }
 
-    void addSubtask(Rel rel) {
+    void addSubtask(SubtaskRel rel) {
         subtasks.add(rel);
     }
 

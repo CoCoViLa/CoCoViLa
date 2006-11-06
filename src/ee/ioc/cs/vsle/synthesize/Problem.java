@@ -11,7 +11,7 @@ class Problem implements Serializable {
 
 	private List<Var> assumptions = new ArrayList<Var>();
 
-	private Set<Var> targetVars = new HashSet<Var>();
+	private Set<Var> goals = new HashSet<Var>();
 
 	private Map<String, Var> allVars = new HashMap<String, Var>();
 
@@ -19,28 +19,24 @@ class Problem implements Serializable {
 
 	private Set<Rel> relWithSubtasks = new HashSet<Rel>();
 
-	private Set<Rel> subtasks = new HashSet<Rel>();
+	private Set<SubtaskRel> subtasks = new HashSet<SubtaskRel>();
 
 	private Vector<Rel> subGoal = null;
 
 	private HashSet<Var> foundVars = new HashSet<Var>();
 
-	Var getVarByFullName(String field) {
-		for (Iterator it = allVars.values().iterator(); it.hasNext();) {
-			Var var = (Var) it.next();
+	Var getVarByFullName( String field ) {
+		
+		for (Var var : allVars.values() ) {
 
-			if (var.toString().equals(field)) {
+			if ( var.toString().equals( field ) ) {
 				return var;
 			}
 		}
 		return null;
 	}
 
-	Set<Rel> getSubtasks() {
-		return subtasks;
-	}
-
-	void addSubtask(Rel rel) {
+	void addSubtask(SubtaskRel rel) {
 		subtasks.add(rel);
 	}
 
@@ -60,8 +56,8 @@ class Problem implements Serializable {
 		return foundVars;
 	}
 
-	Set<Var> getTargetVars() {
-		return targetVars;
+	Set<Var> getGoals() {
+		return goals;
 	}
 
 	Set<Rel> getAllRels() {
@@ -76,8 +72,8 @@ class Problem implements Serializable {
 		axioms.add(rel);
 	}
 
-	void addTarget(Var var) {
-		targetVars.add(var);
+	void addGoal(Var var) {
+		goals.add(var);
 	}
 
 	void addRel(Rel rel) {
@@ -96,9 +92,9 @@ class Problem implements Serializable {
 		allVars.put(var.getObject() + "." + var.getName(), var);
 	}
 
-	Rel getSubtask(Rel subt) {
-		for (Iterator<Rel> iter = subtasks.iterator(); iter.hasNext();) {
-			Rel subtask = iter.next();
+	SubtaskRel getSubtask(SubtaskRel subt) {
+		for (Iterator<SubtaskRel> iter = subtasks.iterator(); iter.hasNext();) {
+			SubtaskRel subtask = iter.next();
 			if (subtask.equals(subt))
 				return subtask;
 		}
@@ -116,8 +112,7 @@ class Problem implements Serializable {
 			oos.writeObject(this);
 			oos.flush();
 
-			ByteArrayInputStream bis = new ByteArrayInputStream(bos
-					.toByteArray());
+			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
 
 			oos.close();
 
@@ -136,7 +131,7 @@ class Problem implements Serializable {
 
 	public String toString() {
 		return ("All: " + allVars + "\n Rels: " + allRels + "\n Known: "
-				+ knownVars + "\n Targets:" + targetVars + "\n Axioms:"
+				+ knownVars + "\n Targets:" + goals + "\n Axioms:"
 				+ axioms + "\n Subtasks:" + relWithSubtasks + "\n subGoal:"
 				+ subGoal + "\n");
 	}

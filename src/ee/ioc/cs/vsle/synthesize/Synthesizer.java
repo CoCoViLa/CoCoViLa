@@ -57,7 +57,7 @@ public class Synthesizer {
 
         // run the planner on the obtained problem
         ArrayList algorithmList = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
-        String algorithm = CodeGenerator.getInstance().generate( algorithmList, problem.getAssumptions() );
+        String algorithm = new CodeGenerator( algorithmList, problem, mainClassName ).generate();
 
         if( assumptions != null ) {
         	assumptions.addAll( problem.getAssumptions() );
@@ -71,7 +71,7 @@ public class Synthesizer {
         // check all the fields and make declarations accordingly
         for ( int i = 0; i < ac.getFields().size(); i++ ) {
 
-        	String dec = TypeUtil.getDeclaration( ac.getFields().get( i ) );
+        	String dec = TypeUtil.getDeclaration( ac.getFields().get( i ), "public" );
         	
         	if( dec != null && dec.length() > 0 ) {
         		prog += CodeGenerator.OT_TAB + dec;
@@ -155,7 +155,7 @@ public class Synthesizer {
                 String declars = "";
 
                 for ( ClassField field : pClass.getFields() ) {
-                	declars += CodeGenerator.OT_TAB + TypeUtil.getDeclaration( field );
+                	declars += CodeGenerator.OT_TAB + TypeUtil.getDeclaration( field, "public" );
 				}
                 
                 /*

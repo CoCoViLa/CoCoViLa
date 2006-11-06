@@ -4,15 +4,14 @@
 package ee.ioc.cs.vsle.synthesize;
 
 import java.awt.*;
-import java.util.List;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * @author pavelg
@@ -33,7 +32,7 @@ public class DepthFirstPlanner implements IPlanner {
     }
 
     public String getDescription() {
-    	return "Depth First (Experimental)";
+    	return "Depth First";
     }
     
     public ArrayList invokePlaning( Problem problem, boolean computeAll ) {
@@ -43,10 +42,8 @@ public class DepthFirstPlanner implements IPlanner {
         ArrayList<Rel> algorithm = new ArrayList<Rel>();
         
         //manage axioms
-        for ( Iterator axiomIter = problem.getAxioms().iterator(); axiomIter
-                                   .hasNext(); ) {
-            Rel rel = ( Rel ) axiomIter.next();
-            problem.getKnownVars().addAll( rel.getOutputs() );
+        for ( Iterator<Rel> axiomIter = problem.getAxioms().iterator(); axiomIter.hasNext(); ) {
+            Rel rel = axiomIter.next();
             algorithm.add( rel );
             axiomIter.remove();
         }
@@ -54,18 +51,25 @@ public class DepthFirstPlanner implements IPlanner {
         problem.getFoundVars().addAll(problem.getKnownVars());
         
         //invoke linear planning
-        if ( linearForwardSearch( problem, algorithm, problem.getTargetVars(), 
+        if ( linearForwardSearch( problem, algorithm, problem.getGoals(), 
         		// do not optimize yet if subtasks exist
-        		( computeAll || !problem.getRelsWithSubtasks().isEmpty() ) ) 
-        		&& !computeAll ) {
+        		( computeAll || !problem.getRelsWithSubtasks().isEmpty() ) ) && !computeAll ) {
+        	
         	if ( RuntimeProperties.isLogInfoEnabled() )
     			db.p( "Problem solved without subtasks");
+        	
         } else if ( !problem.getRelsWithSubtasks().isEmpty() ) {
+        	
         	subtaskPlanning( problem, algorithm );
-        	linearForwardSearch( problem, algorithm, problem.getTargetVars(), computeAll );
+        	
+        	linearForwardSearch( problem, algorithm, problem.getGoals(), computeAll );
+        	
         }
 		if ( RuntimeProperties.isLogInfoEnabled() )
 			db.p( "Planning time: " + ( System.currentTimeMillis() - startTime ) + "ms.");
+		
+		ProgramRunner.addAllFoundVars( problem.getFoundVars() );
+		
         return algorithm;
     }
     
@@ -194,8 +198,6 @@ public class DepthFirstPlanner implements IPlanner {
 			Optimizer.optimize( algorithm, new HashSet<Var>( allTargetVars ) );
 		}
 
-		ProgramRunner.addAllFoundVars(foundVars);
-
 		return targetVars.isEmpty() || problem.getFoundVars().containsAll( allTargetVars );
 	}
 
@@ -206,14 +208,6 @@ public class DepthFirstPlanner implements IPlanner {
 		
 		if (RuntimeProperties.isLogDebugEnabled()) {
 			db.p( "!!!--------- Starting Planning With Subtasks ---------!!!" );
-		}
-		
-		for ( Rel relWithSubtask : problem.getRelsWithSubtasks() ) {
-			for ( Rel subtask : relWithSubtask.getSubtasks() ) {
-				
-				problem.addSubtask( subtask );
-				subtask.setParentRel( relWithSubtask );
-			}
 		}
 		
 		int maxDepthBackup = maxDepth;
@@ -257,13 +251,13 @@ public class DepthFirstPlanner implements IPlanner {
 			// this is true if all subtasks are solvable
 			boolean allSolved = true;
 			// and
-			AND: for (Rel subtask : subtaskRel.getSubtasks()) {
+			AND: for (SubtaskRel subtask : subtaskRel.getSubtasks()) {
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "AND: subtask - " + subtask );
 				// lets clone the environment
 				Problem problemNew = problem.getCopy();
 				// we need fresh cloned subtask instance
-				Rel subtaskNew = problemNew.getSubtask(subtask);
+				SubtaskRel subtaskNew = problemNew.getSubtask(subtask);
 
 				prepareSubtask( problemNew, subtaskNew );
 				

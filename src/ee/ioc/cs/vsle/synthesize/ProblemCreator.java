@@ -27,7 +27,7 @@ public class ProblemCreator {
         AnnotatedClass ac = classes.getType( type );
         ClassField cf = null;
         ClassRelation classRelation;
-        Var var, var1, var2;
+        Var var;
         Rel rel;
         HashSet<Rel> relSet = new HashSet<Rel>();
 
@@ -68,11 +68,11 @@ public class ProblemCreator {
              a relation for each component of the alias structure*/
             if ( classRelation.getInputs().size() == 1 && classRelation.getOutputs().size() == 1 &&
                  ( classRelation.getType() == RelType.TYPE_ALIAS || classRelation.getType() == RelType.TYPE_EQUATION ) ) {
-                ClassField cf1 = classRelation.getInputs().get( 0 );
-                ClassField cf2 = classRelation.getOutputs().get( 0 );
+                ClassField inpField = classRelation.getInputs().get( 0 );
+                ClassField outpField = classRelation.getOutputs().get( 0 );
 
                 //if we have a relation alias = *.sth, we need to find out what it actually is
-                if ( cf1.getName().startsWith( "*." ) ) {
+                if ( inpField.getName().startsWith( "*." ) ) {
                     String s = checkIfAliasWildcard( classRelation );
                     if ( s != null ) {
                         relSet = makeAliasWildcard( ac, classes, classRelation, problem, obj, s );
@@ -83,34 +83,32 @@ public class ProblemCreator {
 
                 //the following is for x = y, not x -> y relation where both x and y are aliases
                 if ( ( classRelation.getType() == RelType.TYPE_EQUATION ) 
-                		&& problem.getAllVars().containsKey( obj + "." + cf1.getName() ) ) {
+                		&& problem.getAllVars().containsKey( obj + "." + inpField.getName() ) ) {
                 	
-                    Var v1 = problem.getAllVars().get( obj + "." + cf1.getName() );
-                    Var v2 = problem.getAllVars().get( obj + "." + cf2.getName() );
+                    Var inpVar = problem.getAllVars().get( obj + "." + inpField.getName() );
+                    Var outpVar = problem.getAllVars().get( obj + "." + outpField.getName() );
 
-                    if ( v1.getField().isAlias() && v2.getField().isAlias() ) {
-//                        if ( RuntimeProperties.isLogDebugEnabled() )
-//                            db.p( ( ( Alias ) v1.getField() ).getAliasType() + " " +
-//                                  ( ( Alias ) v2.getField() ).getAliasType() );
-                        if ( !( ( Alias ) v1.getField() ).equalsByTypes( ( Alias ) v2.
+                    if ( inpVar.getField().isAlias() && outpVar.getField().isAlias() ) {
+
+                        if ( !( ( Alias ) inpVar.getField() ).equalsByTypes( ( Alias ) outpVar.
                                 getField() ) ) {
                             throw new AliasException( "Differently typed aliases connected: " + obj +
-                                    "." + cf1.getName() + " and " + obj + "." + cf2.getName() );
+                                    "." + inpField.getName() + " and " + obj + "." + outpField.getName() );
                         }
                         isAliasRel = true;
-                        for ( int i = 0; i < v1.getChildVars().size(); i++ ) {
-                        	var1 = v1.getChildVars().get( i );
-                        	var2 = v2.getChildVars().get( i );
+                        Var inpChildVar, outpChildVar;
+                        for ( int i = 0; i < inpVar.getChildVars().size(); i++ ) {
+                        	inpChildVar = inpVar.getChildVars().get( i );
+                        	outpChildVar = outpVar.getChildVars().get( i );
 
                             rel = new Rel();
                             rel.setUnknownInputs( classRelation.getInputs().size() );
-                            rel.setSubtaskFlag( classRelation.getSubtasks().size() );
                             rel.setObj( obj );
-                            rel.setType( RelType.TYPE_SUBTASK );
+                            rel.setType( RelType.TYPE_ALIAS );
 
-                            rel.addInput( var2 );
-                            rel.addOutput( var1 );
-                            var2.addRel( rel );
+                            rel.addInput( outpChildVar );
+                            rel.addOutput( inpChildVar );
+                            outpChildVar.addRel( rel );
                             problem.addRel( rel );
                         }
                     }
@@ -119,28 +117,29 @@ public class ProblemCreator {
 
             if ( !isAliasRel ) {
             	
-                String s = checkIfRightWildcard( classRelation );
-                if ( s != null ) {
-                    relSet = makeRightWildcardRel( ac, classes, classRelation, problem, obj, s );
-                    rel = null;
-                } else {
-                	rel = makeRel( classRelation, problem, obj );
-                }
+//                String s = checkIfRightWildcard( classRelation );
+//                if ( s != null ) {
+//                    relSet = makeRightWildcardRel( ac, classes, classRelation, problem, obj, s );
+//                    rel = null;
+//                } else {
+                	rel = makeRel( new Rel(), classRelation, problem, obj );
+//                }
                 if ( classRelation.getSubtasks().size() > 0 ) {
-                    Rel subtaskRel = new Rel();
 
-                    for ( int l = 0; l < classRelation.getSubtasks().size(); l++ ) {
-                        ClassRelation subtask = classRelation.getSubtasks().get( l );
-                        subtaskRel = makeRel( subtask, problem, obj );
-                        if ( rel != null ) {
-                            rel.addSubtask( subtaskRel );
-                        } else {
-                            Iterator varsIter = relSet.iterator();
-                            while ( varsIter.hasNext() ) {
-                                Rel r = ( Rel ) varsIter.next();
-                                r.addSubtask( subtaskRel );
-                            }
-                        }
+                    for ( ClassRelation subtask : classRelation.getSubtasks() ) {
+                    	
+                        SubtaskRel subtaskRel = new SubtaskRel( rel );
+                        
+                        makeRel( subtaskRel, subtask, problem, obj );
+                        
+                        rel.addSubtask( subtaskRel );
+                        
+                        problem.addSubtask( subtaskRel );
+//                        else {
+//                            for ( Rel r : relSet ) {
+//                                r.addSubtask( subtaskRel );
+//                            }
+//                        }
                     }
                 }
             }
@@ -148,14 +147,17 @@ public class ProblemCreator {
             // if it is not a "real" relation (type 7), we just set the result as target, and inputs as known variables
             if ( classRelation.getType() == RelType.TYPE_UNIMPLEMENTED ) {
                 setTargets( problem, classRelation, obj );
-            } else if ( rel != null && classRelation.getInputs().isEmpty() &&
-                        rel.getSubtaskCounter() == 0 ) { // if class relation doesnt have inputs, its an axiom
+            } 
+            // if class relation doesnt have inputs, its an axiom
+            else if ( rel != null && classRelation.getInputs().isEmpty() &&
+                        rel.getSubtasks().size() == 0 ) { 
                 problem.addAxiom( rel );
+                problem.getKnownVars().addAll( rel.getOutputs() );
             }
             else if ( rel != null ) {
             	problem.addRel( rel );
             	
-            	if( rel.getSubtaskCounter() > 0 ) {
+            	if( rel.getSubtasks().size() > 0 ) {
             		problem.addRelWithSubtask( rel );
             	}
             	
@@ -328,10 +330,9 @@ public class ProblemCreator {
     @param obj the name of the object where the goal specification was declared.
     */
 
-   private static Rel makeRel( ClassRelation classRelation, Problem problem, String obj ) throws
+   private static Rel makeRel( Rel rel, ClassRelation classRelation, Problem problem, String obj ) throws
            UnknownVariableException {
        Var var;
-       Rel rel = new Rel();
 
        rel.setMethod( classRelation.getMethod() );
        int constants = 0;
@@ -347,7 +348,6 @@ public class ProblemCreator {
 		}
        
        rel.setUnknownInputs( getUniqueInputCount( classRelation.getInputs() ) - constants );
-       rel.setSubtaskFlag( classRelation.getSubtasks().size() );
        rel.setObj( obj );
        rel.setType( classRelation.getType() );
        ClassField cf;
@@ -417,7 +417,6 @@ public class ProblemCreator {
 				   
 				   rel.setMethod( classRelation.getMethod() );
 				   rel.setUnknownInputs( classRelation.getInputs().size() );
-				   rel.setSubtaskFlag( classRelation.getSubtasks().size() );
 				   rel.setObj( obj );
 				   rel.setType( classRelation.getType() );
 				   ClassField cf;
@@ -488,7 +487,7 @@ public class ProblemCreator {
           cf = classRelation.getOutputs().get( k );
           if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
               var = problem.getAllVars().get( obj + "." + cf.getName() );
-              problem.addTarget( var );
+              problem.addGoal( var );
           } else {
               throw new UnknownVariableException( cf.getName() );
           }

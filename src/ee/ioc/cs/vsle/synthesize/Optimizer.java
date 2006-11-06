@@ -51,7 +51,7 @@ public class Optimizer {
 				
 				if( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
 					HashSet<Var> tmpSbtInputs = new HashSet<Var>();
-					for (Rel subtask : rel.getSubtasks() ) {
+					for (SubtaskRel subtask : rel.getSubtasks() ) {
 						if (RuntimeProperties.isLogDebugEnabled())
 							db.p( p + "Optimizing subtask: " + subtask );
 						HashSet<Var> subGoals = new HashSet<Var>( subtask.getOutputs() );

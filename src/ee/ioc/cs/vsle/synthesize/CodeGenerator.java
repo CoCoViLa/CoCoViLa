@@ -19,16 +19,16 @@ public class CodeGenerator {
 
     public static int ALIASTMP_NR = 0;
 
-    private static CodeGenerator s_codeGen = null;
-
-    private CodeGenerator() {}
-
-    public static CodeGenerator getInstance() {
-        if ( s_codeGen == null ) {
-            s_codeGen = new CodeGenerator();
-        }
-        
-        return s_codeGen;
+    private ArrayList algRelList;
+    private Problem problem;
+    private String className; 
+    
+    public CodeGenerator( ArrayList algRelList, Problem problem, String className ) {
+    	
+    	this.algRelList = algRelList;
+    	this.problem = problem;
+    	this.className = className;
+    	
     }
 
     public static void reset() {
@@ -37,11 +37,11 @@ public class CodeGenerator {
         ALIASTMP_NR = 0;
     }
     
-    public String generate( ArrayList algRelList, List<Var> assumptions ) {
+    public String generate() {
         StringBuffer alg = new StringBuffer();
         cOT( OT_INC, 2 );
 
-        genAssumptions( alg, assumptions );
+        genAssumptions( alg, problem.getAssumptions() );
         
         for ( int i = 0; i < algRelList.size(); i++ ) {
             Rel rel = ( Rel ) algRelList.get( i );
@@ -51,7 +51,7 @@ public class CodeGenerator {
             }
 
             else if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
-                genSubTasks( rel, alg, false );
+                genSubTasks( rel, alg, false, className );
             }
 
         }
@@ -84,16 +84,39 @@ public class CodeGenerator {
     	alg.append( result );
     }
     
-    private void genSubTasks( Rel rel, StringBuffer alg, boolean isNestedSubtask ) {
+    private void genSubTasks( Rel rel, StringBuffer alg, boolean isNestedSubtask, String parentClassName ) {
         int subNum;
         int start = subCount;
 
-        for ( Rel subtask : rel.getSubtasks() ) {
+        for ( SubtaskRel subtask : rel.getSubtasks() ) {
             subNum = subCount++;
-
-            alg.append( "\n" + cOT( OT_NOC, 0 ) + "class " + Synthesizer.SUBTASK_INTERFACE_NAME + "_" + subNum
-                        + " implements " + Synthesizer.SUBTASK_INTERFACE_NAME + " {\n" );
-            alg.append( cOT( OT_INC, 1 ) + "public Object[] run(Object[] in) throws Exception {\n" );
+            
+            String sbName = Synthesizer.SUBTASK_INTERFACE_NAME + "_" + subNum;
+            
+            alg.append( "\n" + cOT( OT_NOC, 0 ) + "class " + sbName
+                        + " implements " + Synthesizer.SUBTASK_INTERFACE_NAME + " {\n\n" );
+            
+            cOT( OT_INC, 1 );
+            /*TODO//field declaration
+            for ( Var var : problem.getAllVars().values() ) {
+            	if( var.getObject().equals( "this" ) ) {
+            		alg.append( cOT( OT_NOC, 0 ) + var.getDeclaration() );
+            	}
+			}
+            
+            //constructor
+            alg.append( "\n" + cOT( OT_NOC, 0 ) + sbName + "() {\n\n" );
+            cOT( OT_INC, 1 );
+            
+            for ( Var var : problem.getFoundVars() ) {
+            	if( var.getField().isPrimitive() ) {
+            		alg.append( cOT( OT_NOC, 0 ) + var + " = " + parentClassName + ".this." + var + ";\n\n" );
+            	}
+            }
+            alg.append( cOT( OT_DEC, 1 ) + "}\n\n" );*/
+            
+            //start generating run()
+            alg.append( cOT( OT_NOC, 0 ) + "public Object[] run(Object[] in) throws Exception {\n" );
 
             List<Var> subInputs = subtask.getInputs();
             List<Var> subOutputs = subtask.getOutputs();
@@ -108,7 +131,7 @@ public class CodeGenerator {
 					db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs());
                 if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                     //recursion
-                    genSubTasks( trel, alg, true );
+                    genSubTasks( trel, alg, true, sbName );
 
                 } else {
                     appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );

@@ -30,28 +30,34 @@ public class TypeUtil {
 		return type.equals("String") || isPrimitive( type );
 	}
     
-    public static String getDeclaration( ClassField field ) {
+    public static String getDeclaration( ClassField field, String prx ) {
 
     	String value = field.isConstant() ? field.getValue() : "";
-		return getDeclaration( field.getName(), field.getType(), field.isAlias(), field.isSpecField(), value );
+		return getDeclaration( field.getName(), field.getType(), field.isAlias(), field.isSpecField(), value, prx );
 
     }
     
     public static String getDeclaration( String varName, String type, boolean isAlias, boolean isClass, 
-    									/*for constant*/String value ) {
+    									/*for constant*/String value, String prx ) {
+    	
+    	if( prx == null ) 
+    		prx = "";
+    	else if ( prx.length() > 0 )
+    		prx += " ";
+    	
     	if ( TypeUtil.TYPE_VOID.equals( type ) || TypeUtil.TYPE_ANY.equals( type ) 
     			|| isAlias ) {
     		return "";
     	} else if ( value != null && value.length() > 0 ) {
-    		return "final public " + type + " " + varName + " = " + value + ";\n";
+    		return prx + "final " + type + " " + varName + " = " + value + ";\n";
     	} else if ( TypeUtil.isPrimitive( type ) ) {
-    		return "public " + type + " " + varName + ";\n";
+    		return prx + type + " " + varName + ";\n";
     	} else if ( TypeUtil.isArray( type ) ) {
-    		return "public " + type + " " + varName + ";\n";
+    		return prx + type + " " + varName + ";\n";
     	} else if ( isClass ) {
-    		return "public " + type + " " + varName + " = new " + type + "();\n";
+    		return prx + type + " " + varName + " = new " + type + "();\n";
     	} else {
-    		return "public " + type + " " + varName + " = new " + type + "();\n";
+    		return prx + type + " " + varName + " = new " + type + "();\n";
     	}
     }
 }
