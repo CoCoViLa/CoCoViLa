@@ -314,6 +314,7 @@ class IconMouseOps
 	 * @param e MouseEvent - Mouse event performed. In the method a distinction
 	 *                       is made between left and right mouse clicks.
 	 */
+	@Override
 	public void mouseClicked(MouseEvent e) {
 		int x, y;
 		x = e.getX();
@@ -436,6 +437,7 @@ class IconMouseOps
 	 * @param e MouseEvent - Mouse event performed. In the method a distinction
 	 *                       is made between different states of the application.
 	 */
+	@Override
 	public void mousePressed(MouseEvent e) {
 		editor.mouseX = e.getX();
 		editor.mouseY = e.getY();
@@ -500,6 +502,7 @@ class IconMouseOps
 	 * @param e MouseEvent - Mouse event performed. In the method a distinction
 	 *                       is made between different states of the application.
 	 */
+	@Override
 	public void mouseDragged(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
@@ -527,10 +530,10 @@ class IconMouseOps
 				}
 			}
 
-			ArrayList selectedShapes = editor.shapeList.getSelected();
+			ArrayList<Shape> selectedShapes = editor.shapeList.getSelected();
 
 			for (int i = 0; i < selectedShapes.size(); i++) {
-				shape = (Shape) selectedShapes.get(i);
+				shape = selectedShapes.get(i);
 				if (shape instanceof ShapeGroup) {
 					shape.setPosition(x - editor.mouseX, y - editor.mouseY);
 				} else {
@@ -631,6 +634,7 @@ class IconMouseOps
 	 * @param e MouseEvent - Mouse event performed. In the method a distinction
 	 *                       is made between right and left mouse clicks.
 	 */
+	@Override
 	public void mouseMoved(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
@@ -694,6 +698,7 @@ class IconMouseOps
 	 * @param e MouseEvent - Mouse event performed. In the method a distinction
 	 *                       is made between different states of the application.
 	 */
+	@Override
 	public void mouseReleased(MouseEvent e) {
 		int x = e.getX();
 		int y = e.getY();
@@ -783,6 +788,7 @@ class IconMouseOps
 	 * Mouse entered event from the MouseMotionListener. Invoked when the mouse enters a component.
 	 * @param e MouseEvent - Mouse event performed.
 	 */
+	@Override
 	public void mouseEntered(MouseEvent e) {
 		Cursor cursor = new Cursor(Cursor.DEFAULT_CURSOR);
 		editor.setCursor(cursor);
@@ -792,6 +798,7 @@ class IconMouseOps
 	 * Mouse exited event from the MouseMotionListener. Invoked when the mouse exits a component.
 	 * @param e MouseEvent - Mouse event performed.
 	 */
+	@Override
 	public void mouseExited(MouseEvent e) {
 		Cursor cursor = new Cursor(Cursor.HAND_CURSOR);
 		editor.setCursor(cursor);
@@ -836,7 +843,7 @@ class IconMouseOps
 				}
 				IconEditor.drawingArea.setGridVisible(isGridVisible);
 			} else if (e.getActionCommand().equals(Menu.CLASS_PROPERTIES)) {
-				new ClassPropertiesDialog(true);
+				new ClassPropertiesDialog(editor.getClassFieldModel(), true);
 			} else if (e.getActionCommand().equals(Menu.CLONE)) {
 				editor.cloneObject();
 			} else if (e.getActionCommand().equals(Menu.SELECT_ALL)) {

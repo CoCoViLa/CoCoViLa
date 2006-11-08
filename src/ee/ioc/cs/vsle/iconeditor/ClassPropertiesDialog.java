@@ -8,6 +8,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
+import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.*;
 
 /**
  * Dialog for specifying class properties. The class (class or relation)
@@ -21,6 +22,8 @@ import ee.ioc.cs.vsle.editor.*;
  */
 
 public class ClassPropertiesDialog extends JDialog {
+
+	private static final long serialVersionUID = 1L;
 
 	////////////////////////////
 	// Dialog layout components.
@@ -71,21 +74,31 @@ public class ClassPropertiesDialog extends JDialog {
 	ListSelectionListener listListener;
 
 	// Table for class fields.
-	public ClassFieldsTable tblClassFields = new ClassFieldsTable();
+	private JTable tblClassFields;
+	private ClassFieldsTableModel dbrClassFields;
 
 	// Table selection model.
-	ListSelectionModel selectionModel = tblClassFields.getSelectionModel();
+	ListSelectionModel selectionModel;
 
 	// Scrollpanes.
-	private JScrollPane spTableScrollPane = new JScrollPane(tblClassFields, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+	private JScrollPane spTableScrollPane;
 
 	/**
 	 * Class constructor.
 	 */
-	public ClassPropertiesDialog(boolean emptyValid) {
+	public ClassPropertiesDialog(ClassFieldsTableModel dbrClassFields,
+			boolean emptyValid) {
 		this.setTitle("Class Properties");
+		this.dbrClassFields = dbrClassFields;
 		setEmptyValuesValid(emptyValid);
 
+		// create class fields table
+		tblClassFields = new JTable(dbrClassFields);
+		selectionModel = tblClassFields.getSelectionModel();
+		spTableScrollPane = new JScrollPane(tblClassFields,
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		
 		// add the table panel a border.
 		pnlTable.setBorder(pnlTableTitle);
 
@@ -210,27 +223,26 @@ public class ClassPropertiesDialog extends JDialog {
 		// and refresh the table.
 		bttnDelField.addActionListener(new ActionListener() {
 			public void actionPerformed(final ActionEvent evt) {
+				stopCellEditing();
 				delClassField();
 			}
 		});
 
 		/**
-		 * Mouse event listener at table column headers.
-		 */
-		MouseAdapter listMouseListener = new MouseAdapter() {
-			public void mouseClicked(MouseEvent e) {
-				int column = tblClassFields.convertColumnIndexToModel(tblClassFields.getColumnModel().getColumnIndexAtX(e.getX()));
-				if (e.getClickCount() == 1 && column != -1) {
-					RuntimeProperties.dbrClassFields = ((ClassFieldsTableModel) tblClassFields.getModel()).sort(column);
-				}
-			}
-		};
-
-		/**
 		 * Add listener for mouse clicks on table headers.
 		 * A click on a column header fires a column sorting method
 		 */
-		tblClassFields.getTableHeader().addMouseListener(listMouseListener);
+		tblClassFields.getTableHeader().addMouseListener(new MouseAdapter() {
+					@Override
+					public void mouseClicked(MouseEvent e) {
+						stopCellEditing();
+						int column = tblClassFields.convertColumnIndexToModel(tblClassFields.getColumnModel().getColumnIndexAtX(e.getX()));
+						if (e.getClickCount() == 1 && column != -1) {
+							sortByField(column);
+						}
+					}
+				});
+
 		/**
 		 * tabeli ridade peal liikumist kuulav funktsioon
 		 */
@@ -244,6 +256,7 @@ public class ClassPropertiesDialog extends JDialog {
 				}
 			}
 		}); // end selectionModel ListSelectionListener
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setVisible(true);
 	} // ClassPropertiesDialog
 
@@ -264,8 +277,7 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private void addEmptyClassField() {
 		String[] emptyRow = {"", "", "", ""};
-		RuntimeProperties.dbrClassFields.appendRow(emptyRow);
-		tblClassFields.setData(RuntimeProperties.dbrClassFields);
+		dbrClassFields.addRow(emptyRow);
 		if (tblClassFields.getRowCount() < 2) {
 			tblClassFields.setRowSelectionInterval(0, tblClassFields.getRowCount() - 1);
 		} else {
@@ -274,37 +286,17 @@ public class ClassPropertiesDialog extends JDialog {
 	} // addEmptyClassField
 
 	/**
-	 * Delete selected rows from the dbresult. Adds a temporary column to the dbresult for marking
-	 * rows to be deleted. Loop over the table, check if the row is selected or not and mark it to the
-	 * temporary column in the dbresult. Loop over the dbresult and delete all rows marked for deletion.
-	 * Refresh table with a "cleaned" dbresult.
+	 * Deletes selected rows from the table.
 	 */
 	private void delClassField() {
-		if (tblClassFields.getRowCount() > 0 && tblClassFields.getSelectedRowCount() > 0) {
-			RuntimeProperties.dbrClassFields.addColumn("DEL");
+		if (tblClassFields.getRowCount() > 0 
+				&& tblClassFields.getSelectedRowCount() > 0) {
 
-			// Loop over table rows to mark rows in the dbresult deleted.
-			for (int i = 0; i < tblClassFields.getRowCount(); i++) {
-				RuntimeProperties.dbrClassFields.setField("DEL", i + 1, String.valueOf(tblClassFields.isRowSelected(i)));
+			int selected = tblClassFields.getSelectedRow();
+			while (selected > -1) {
+				dbrClassFields.removeRow(selected);
+				selected = tblClassFields.getSelectedRow();
 			}
-
-			// delete marked rows from the dbresult.
-			boolean removed = true;
-			while (removed) {
-				removed = false;
-				for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
-					if (Boolean.valueOf(RuntimeProperties.dbrClassFields.getFieldAsString("DEL", i)).booleanValue()) {
-						RuntimeProperties.dbrClassFields.removeRow(i);
-						removed = true;
-						break;
-					}
-				}
-			}
-			// Remove the temporary column from the DBResult.
-			RuntimeProperties.dbrClassFields.removeColumn("DEL");
-
-			// refresh table.
-			tblClassFields.setData(RuntimeProperties.dbrClassFields);
 		}
 	} // delClassField
 
@@ -316,8 +308,6 @@ public class ClassPropertiesDialog extends JDialog {
 		if (RuntimeProperties.classDescription != null) fldClassDesc.setText(RuntimeProperties.classDescription);
 		if (RuntimeProperties.classIcon != null) fldClassIcon.setText(RuntimeProperties.classIcon);
 		chkRelation.setSelected(RuntimeProperties.classIsRelation);
-		removeEmptyRows();
-		tblClassFields.setData(RuntimeProperties.dbrClassFields);
 	} // initialize
 
 	/**
@@ -418,47 +408,12 @@ public class ClassPropertiesDialog extends JDialog {
 		if (valid) {
 			if (classFieldsValid()) {
 				// Class fields valid. Remove empty rows from the DBResult.
-				removeEmptyRows();
+				dbrClassFields.removeEmptyRows();
 			}
 		}
 		return valid;
 	} // valuesValid
 
-	public static void removeEmptyRows() {
-		boolean removed = true;
-		while (removed) {
-			removed = false;
-			for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
-				String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(
-					RuntimeProperties.classDbrFields[0], i);
-				String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(
-					RuntimeProperties.classDbrFields[1], i);
-				String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(
-					RuntimeProperties.classDbrFields[2], i);
-
-				boolean bFieldNameDefined = false;
-				boolean bFieldTypeDefined = false;
-				boolean bFieldValueDefined = false;
-
-				if (fieldName != null) {
-					if (fieldName.trim().length() > 0) bFieldNameDefined = true;
-				}
-				if (fieldType != null) {
-					if (fieldType.trim().length() > 0) bFieldTypeDefined = true;
-				}
-				if (fieldValue != null) {
-					if (fieldValue.trim().length() > 0) bFieldValueDefined = true;
-				}
-				System.out.println("NameDef: " + bFieldNameDefined + " TypeDef: " + bFieldTypeDefined + " ValueDef: " + bFieldValueDefined);
-				if (!bFieldNameDefined & !bFieldTypeDefined & !bFieldValueDefined) {
-					RuntimeProperties.dbrClassFields.removeRow(i);
-					removed = true;
-					break;
-				}
-			}
-			System.out.println(RuntimeProperties.dbrClassFields.getRowCount());
-		}
-	} // removeEmptyRows
 
 	/**
 	 * Validate class fields. Field name cannot be undefined if field
@@ -468,11 +423,10 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private boolean classFieldsValid() {
 		boolean valid = true;
-
-		for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
-			String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], i);
-			String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], i);
-			String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], i);
+		for (int i = 0; i < dbrClassFields.getRowCount(); i++) {
+			String fieldName = dbrClassFields.getValueAt(i, iNAME);
+			String fieldType = dbrClassFields.getValueAt(i, iTYPE);
+			String fieldValue = dbrClassFields.getValueAt(i, iVALUE);
 
 			boolean bFieldNameDefined = false;
 			boolean bFieldTypeDefined = false;
@@ -480,24 +434,24 @@ public class ClassPropertiesDialog extends JDialog {
 
 			if (fieldName != null) {
 				fieldName = fieldName.trim();
-				RuntimeProperties.dbrClassFields.setField(RuntimeProperties.classDbrFields[0], i, fieldName);
+				dbrClassFields.setValueAt(fieldName, i, iNAME);
 				if (fieldName.length() > 0) bFieldNameDefined = true;
 			}
 
 			if (fieldType != null) {
 				fieldType = fieldType.trim();
-				RuntimeProperties.dbrClassFields.setField(RuntimeProperties.classDbrFields[1], i, fieldType);
+				dbrClassFields.setValueAt(fieldType, i, iTYPE);
 				if (fieldType.length() > 0) bFieldTypeDefined = true;
 			}
 
 			if (fieldValue != null) {
 				fieldValue = fieldValue.trim();
-				RuntimeProperties.dbrClassFields.setField(RuntimeProperties.classDbrFields[2], i, fieldValue);
+				dbrClassFields.setValueAt(fieldValue, i, iVALUE);
 				if (fieldValue.length() > 0) bFieldValueDefined = true;
 			}
 
 			if (bFieldNameDefined) {
-				if (fieldName.indexOf(":") > -1) {
+				if (fieldName != null && fieldName.indexOf(":") > -1) {
 					valid = false;
 					tblClassFields.setRowSelectionInterval(i - 1, i - 1);
 					JOptionPane.showMessageDialog(null, "Field name cannot contain \":\"." + "\n" +
@@ -507,7 +461,7 @@ public class ClassPropertiesDialog extends JDialog {
 			}
 
 			if (bFieldTypeDefined) {
-				if (fieldType.indexOf(":") > -1) {
+				if (fieldType != null && fieldType.indexOf(":") > -1) {
 					valid = false;
 					tblClassFields.setRowSelectionInterval(i - 1, i - 1);
 					JOptionPane.showMessageDialog(null, "Field type cannot contain \":\"." + "\n" +
@@ -525,7 +479,6 @@ public class ClassPropertiesDialog extends JDialog {
 				break;
 			}
 		}
-
 		return valid;
 	} // classFieldsValid
 
@@ -539,12 +492,12 @@ public class ClassPropertiesDialog extends JDialog {
 	public void setEmptyValuesValid(boolean b) {
 		this.emptyValuesValid = b;
 	} // setEmptyValuesValid
-
+	
 	/**
-	 * Main method for module unit testing and debugging.
+	 * Sort the table by {@code column}.
+	 * @param column index of the sort column
 	 */
-	public static void main(String[] args) {
-		new ClassPropertiesDialog(false);
-	} // main
-
+	void sortByField(int column) {
+		dbrClassFields.sort(column);
+	}
 } // end of class.

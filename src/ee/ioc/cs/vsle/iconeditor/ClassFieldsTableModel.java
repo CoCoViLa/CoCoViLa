@@ -1,143 +1,138 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import ee.ioc.cs.vsle.util.queryutil.DBResult;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Vector;
+
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
-import javax.swing.table.AbstractTableModel;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * Title:        ClassFieldsTableModel.
- * Description:  Model for the Class Fields Table used in the Class Properties dialog of
- the Icon Editor application.
+ * Description:  Model for the Class Fields Table used in the Class Properties
+ *  			 dialog of the Icon Editor application.
  * Copyright:    Copyright (c) 2004.
- * author:      Aulo Aasmaa.
+ * author:       Aulo Aasmaa.
  * @version 1.0
  */
 
-public class ClassFieldsTableModel extends AbstractTableModel {
+public class ClassFieldsTableModel extends DefaultTableModel {
 
-	// DBResult sorting direction.
-	private String direction = "ascending";
+	private static final long serialVersionUID = 1L;
 
-	// dbresult column indexes for a sorting method.
-	private static final int iNAME = 0;
-	private static final int iTYPE = 1;
-	private static final int iVALUE = 2;
+	// table model column indexes
+	public static final int iNAME = 0;
+	public static final int iTYPE = 1;
+	public static final int iVALUE = 2;
+
+	// Shadow the parent field with a vector of more specific type.
+	// this.dataVector and super.dataVector refer to the same instance.
+	private Vector<Vector<String>> dataVector;
+
+	private RowComparator comparator;
 
 	/**
-	 * Class constructor
-	 *  @param dbr DBResult
+	 * Default class constructor
 	 **/
-	public ClassFieldsTableModel(DBResult dbr) {
-		RuntimeProperties.dbrClassFields = dbr;
+	public ClassFieldsTableModel() {
+		dataVector = new Vector<Vector<String>>();
+		super.dataVector = dataVector;
 	} // ClassFieldsTableModel
 
-	/* Sorts values displayed in a table by a specified column.
-	 * Uses class global variable "direction" with values "ascending" and "descending"
-	 * to switch between sorting directions.
+	/**
+	 * Sorts values displayed in a table by a specified column.
 	 *
-	 * @param column - column index.
-	 * @return DBResult - sorted DBResult.
+	 * @param column column index
 	 */
-	public DBResult sort(int column) {
-		// switch the default sorting direction
-		if (direction.equals("ascending")) {
-			direction = "descending";
-			RuntimeProperties.dbrClassFields = RuntimeProperties.dbrClassFields.orderBy(getDbrColumnName(column), DBResult.ASC);
-		} else if (direction.equals("descending")) {
-			direction = "ascending";
-			RuntimeProperties.dbrClassFields = RuntimeProperties.dbrClassFields.orderBy(getDbrColumnName(column), DBResult.DESC);
-		}
-		fill(); // fill table with a sorted DBResult.
-		return RuntimeProperties.dbrClassFields;
+	public void sort(int column) {
+		if (comparator == null)
+			comparator = new RowComparator();
+		
+		comparator.setSortColumn(column);
+		Collections.sort(dataVector, comparator);
 	} // sort
 
 	/**
-	 * Täidab tabeli väärtustega varem leitud result set'i põhjal.
+	 * Returns the number of columns in the class field table.
+	 * @return the number of columns
 	 */
-	private void fill() {
-		Object[] row;
-		int colCount = getColumnCount();
-		for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
-			row = new Object[colCount];
-			row[iNAME] = RuntimeProperties.dbrClassFields.getField(RuntimeProperties.classDbrFields[0], i);
-			row[iTYPE] = RuntimeProperties.dbrClassFields.getField(RuntimeProperties.classDbrFields[1], i);
-			row[iVALUE] = RuntimeProperties.dbrClassFields.getField(RuntimeProperties.classDbrFields[2], i);
-		}
-		fireTableDataChanged();
-	} // fill
-
-	/**
-	 * Tagastab päringu veergude arvu.
-	 * @return int - päringu veergude arv.
-	 */
+	@Override
 	public int getColumnCount() {
 		return RuntimeProperties.classDbrFields.length;
 	} // getColumnCount
 
 	/**
-	 * Tagastab päringu ridade arvu.
-	 * @return int - päringu ridade arv.
+	 * {@inheritDoc}
 	 */
-	public int getRowCount() {
-		return RuntimeProperties.dbrClassFields.getRowCount();
-	} // getRowCount
+	@Override
+	public String getValueAt(int row, int column) {
+		return dataVector.get(row).get(column);
+	}
 
 	/**
-	 * Tagastab aplikatsiooni runtime properties klassis määratud tabeli veergude pealkirjad.
-	 * @param col - veeru number, mille pealkirja küsitakse.
-	 * @return String - küsitud veeru pealkiri.
+	 * Returns the title of the specified table column defined
+	 * in RuntimeProperties.
+	 * @param col column index
+	 * @return the title of the specified column
 	 */
+	@Override
 	public String getColumnName(int col) {
 		return RuntimeProperties.classTblFields[col];
 	} // getColumnName
 
 	/**
-	 * Tagastab aplikatsiooni runtime properties klassis määratud dbresult-i veergude pealkirjad.
-	 * @param col - veeru number, mille pealkirja küsitakse.
-	 * @return String - küsitud veeru pealkiri.
-	 */
-	public String getDbrColumnName(int col) {
-		return RuntimeProperties.dbrClassFields.getColumnName(col + 1);
-	} // getDbrColumnName
-
-	/**
-	 * Päringu tulemusena ning muudel põhjustel tabeli refreshimist toetav meetod.
-	 * @param o - tabeli lahtrisse paigutatav objekt.
-	 * @param row - tabelis uuendatav rida
-	 * @param col - tabelis uuendatav veerg
-	 */
-	public void setValueAt(Object o, int row, int col) {
-		RuntimeProperties.dbrClassFields.setField(col + 1, row + 1, o);
-	} // setValueAt
-
-	/** Päringu tulemuste redigeerimine tabelis esitamiseks sobivaks.
-	 *
-	 * @param row - row index of an object requested. row index of row to be populated with additional values.
-	 * @param col - column index of an object requested.
-	 * @return Object - object found at row'th row and column'th column.
-	 */
-	public Object getValueAt(int row, int col) {
-		return RuntimeProperties.dbrClassFields.getFieldAsObject(col + 1, row + 1);
-	} // getValueAt
-
-	/**
 	 * Returns class of table column.
 	 * @param i number of column
-	 * @return Object column class
+	 * @return String column class
 	 */
+	@Override
 	public Class<?> getColumnClass(int i) {
-		return Object.class;
+		return String.class;
 	} // getColumnClass
 
 	/**
-	 * Specify if the cell is editable or not. No need to specify if your table is generally not editable.
-	 * @param row number of row
-	 * @param col number of column
-	 * @return boolean if cell editable or not
+	 * Removes empty rows from the table and notifies listeners.
 	 */
-	public boolean isCellEditable(int row, int col) {
-		return true;
-	} // isCellEditable
+	public void removeEmptyRows() {
+		for (int i = 0; i < dataVector.size(); i++) {
+			Vector<String> row = dataVector.get(i);
+			boolean empty = true;
+			for (String cell : row) {
+				// Search for non-empty strings, no need to check for null
+				// as values are initialized to "".
+				if (!"".equals(cell)) {
+					empty = false;
+					break;
+				}
+			}
+			if (empty)
+				dataVector.remove(i);
+		}
+		fireTableDataChanged();
+	}
 
+	/**
+	 * Comparator for sorting row vectors by a column.
+	 * The natural ordering of Strings is used.
+	 */
+	static final class RowComparator implements Comparator<Vector<String>> {
+
+		private int sortDirection = 1; // 1 - asc, -1 - desc
+		private int sortColumn = -1; // -1 for not sorted
+
+		public void setSortColumn(int column) {
+			if (sortColumn == column) {
+				sortDirection *= -1;
+			} else {
+				sortDirection = 1;
+				sortColumn = column;
+			}
+		}
+
+		public int compare(Vector<String> row1, Vector<String> row2) {
+			return sortDirection 
+				* row1.get(sortColumn).compareTo(row2.get(sortColumn));
+		}
+	}
 } // end of class

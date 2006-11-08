@@ -66,7 +66,8 @@ public class ClassImport {
 		boolean isRelation = false;
 		
 		
-		public InputSource resolveEntity(java.lang.String publicId, java.lang.String systemId) throws SAXException {
+		@Override
+		public InputSource resolveEntity(String publicId, String systemId) {
 			InputSource is = null;
 			if (systemId != null && systemId.endsWith("dtd")) {
 				is = new InputSource( FileFuncs.getResource( RuntimeProperties.PACKAGE_DTD, false ).toString() );
@@ -74,8 +75,9 @@ public class ClassImport {
 			return is;
 		}
 	
+		@Override
 		public void startElement(String namespaceURI, String lName, String qName,
-			 Attributes attrs) throws SAXException {
+			 Attributes attrs) {
 			String element = qName;
 			
 			int x, y, w, h, col; // x, y, width, height, colour 
@@ -99,9 +101,8 @@ public class ClassImport {
 				ports = new ArrayList<IconPort>();
 				fields = new ArrayList<ClassField>();
 				shapeList = new ShapeGroup(new ArrayList<Shape>());
-				if ((attrs.getValue("type")).equals("relation")) {
+				if ("relation".equals(attrs.getValue("type")))
 					classIcon.isRelation = true;
-				}
 			} else if(element.equals("name") && inClass){
 				inName = true;
 			} else if(element.equals("description") && inClass){
@@ -268,8 +269,9 @@ public class ClassImport {
 			}
 			
 		}
-		public void endElement(String namespaceURI, String sName, String qName) throws
-		SAXException {
+
+		@Override
+		public void endElement(String namespaceURI, String sName, String qName) {
 			String element = qName;
 			if (element.equals("class")){
 				inClass = false;
@@ -293,8 +295,8 @@ public class ClassImport {
 							
 		}
 		
-		public void characters(char[] ch, int start, int length)
-		throws SAXException {
+		@Override
+		public void characters(char[] ch, int start, int length) {
 			if (inName) {
 				pc.add(new String(ch,start,length));
 				classIcon.setName(new String(ch,start,length));
@@ -303,9 +305,6 @@ public class ClassImport {
 				classIcon.setDescription(new String(ch,start,length));
 			if (inIcon)
 				classIcon.setIconName(new String(ch,start,length));
-			
-				
-		   
 		}
 		/*
 		 * Removes either r or f or both from the end of the

@@ -13,6 +13,7 @@ import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
+import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.*;
 
 public class IconEditor
 	extends JFrame {
@@ -43,6 +44,10 @@ public class IconEditor
 	IconKeyOps keyListener;
 	ArrayList<String> packageClasses = new ArrayList<String>();
 	boolean newClass = true;
+	/**
+	 * Table model for storing class fields
+	 */
+	private ClassFieldsTableModel dbrClassFields = new ClassFieldsTableModel();
 	
 	ChooseClassDialog ccd = new ChooseClassDialog(packageClasses);
 	DeleteClassDialog dcd = new DeleteClassDialog(packageClasses);
@@ -68,12 +73,10 @@ public class IconEditor
 	 * Application initializer.
 	 */
 	public void initialize() {
+		dbrClassFields = new ClassFieldsTableModel();
+
 		setLocationByPlatform( true );
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(final WindowEvent e) {
-				System.exit(0);
-			}
-		});
+		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		keyListener = new IconKeyOps(this);
 		scheme = new Scheme();
 		scheme.packageName = "IconEditor";
@@ -94,9 +97,8 @@ public class IconEditor
 		drawingArea.addMouseMotionListener(mListener);
 		drawingArea.setPreferredSize(drawAreaSize);
 		JScrollPane areaScrollPane = new JScrollPane(drawingArea,
-			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.
-			HORIZONTAL_SCROLLBAR_AS_NEEDED);
+			ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+			ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		mainPanel.setLayout(new BorderLayout());
 		mainPanel.add(areaScrollPane, BorderLayout.CENTER);
@@ -397,7 +399,7 @@ public class IconEditor
 			(RuntimeProperties.className != null && RuntimeProperties.className.trim().length() == 0) ||
 			(RuntimeProperties.classDescription != null && RuntimeProperties.classDescription.trim().length() == 0) ||
 			(RuntimeProperties.classIcon != null && RuntimeProperties.classIcon.trim().length() == 0)) {
-			new ClassPropertiesDialog(false);
+			new ClassPropertiesDialog(dbrClassFields, false);
 		}
 	} // validateClassParams
 
@@ -461,13 +463,13 @@ public class IconEditor
 	} // appendPorts
 
 	public StringBuffer appendClassFields(StringBuffer buf) {
-		ClassPropertiesDialog.removeEmptyRows();
-		if (RuntimeProperties.dbrClassFields != null && RuntimeProperties.dbrClassFields.getRowCount() > 0) {
+		dbrClassFields.removeEmptyRows();
+		if (dbrClassFields != null && dbrClassFields.getRowCount() > 0) {
 			buf.append("	<fields>\n");
-			for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
-				String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], i);
-				String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], i);
-				String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], i);
+			for (int i = 0; i < dbrClassFields.getRowCount(); i++) {
+				Object fieldName = dbrClassFields.getValueAt(i, 0);
+				Object fieldType = dbrClassFields.getValueAt(i, 1);
+				Object fieldValue = dbrClassFields.getValueAt(i, 2);
 
 				if (fieldType == null) fieldType = "";
 				if (fieldValue == null) fieldValue = "";
@@ -1089,13 +1091,14 @@ public class IconEditor
 						icons.get(i).shiftPorts(classX,classY);
 						icons.get(i).setShapeList(shapeList);
 						
-						if (RuntimeProperties.dbrClassFields != null && RuntimeProperties.dbrClassFields.getRowCount() > 0) {
+						if (dbrClassFields != null && dbrClassFields.getRowCount() > 0) {
 							fields.clear();
-							for (int j = 1; j <= RuntimeProperties.dbrClassFields.getRowCount(); j++) {
-								String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], j);
-								String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], j);
-								String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], j);
-								ClassField field = new ClassField (fieldName, fieldType, fieldValue);
+							for (int j = 0; j < dbrClassFields.getRowCount(); j++) {
+								String fieldName = dbrClassFields.getValueAt(j, iNAME);
+								String fieldType = dbrClassFields.getValueAt(j, iTYPE);
+								String fieldValue = dbrClassFields.getValueAt(j, iVALUE);
+								ClassField field = new ClassField(fieldName,
+										fieldType, fieldValue);
 								fields.add(field);
 							} 
 						}
@@ -1170,9 +1173,9 @@ public class IconEditor
 							String fileText = "class " + className + " {";
 							fileText += "\n    /*@ specification " + className + " {\n";
 
-							for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
-								String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], i);
-								String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], i);
+							for (int i = 0; i < dbrClassFields.getRowCount(); i++) {
+								String fieldName = dbrClassFields.getValueAt(i, iNAME);
+								String fieldType = dbrClassFields.getValueAt(i, iTYPE);
 								//String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], i);
 								
 								if (fieldType != null) {
@@ -1195,10 +1198,7 @@ public class IconEditor
 		
 		
 	} // saveToPackage
-	
-	public void copyFilesToNewDir() {
-		
-	}
+
 	/**
 	 * Sets all objects selected or unselected, depending on the method parameter value.
 	 * @param b - select or unselect shapes.
@@ -1320,14 +1320,11 @@ public class IconEditor
 	} // loadGraphicsFromFile
 	
 	/**
-	 * Empty the class fields DBResult.
+	 * Empty the class fields table.
 	 */
 	private void emptyClassFields() {
-		if (RuntimeProperties.dbrClassFields != null && RuntimeProperties.dbrClassFields.getRowCount() > 0) {
-			while (RuntimeProperties.dbrClassFields.getRowCount() > 0) {
-				RuntimeProperties.dbrClassFields.removeRow(RuntimeProperties.dbrClassFields.getRowCount());
-			}
-		}
+		if (dbrClassFields != null)
+			dbrClassFields.setRowCount(0);
 	} // emptyClassFields
 
 	/**
@@ -1354,13 +1351,13 @@ public class IconEditor
 
 		// Add boolean value representing if the class is a relation.
 		sb.append("CLASSISRELATION:" + RuntimeProperties.classIsRelation + "\n");
-		ClassPropertiesDialog.removeEmptyRows();
+		dbrClassFields.removeEmptyRows();
 		// Add class fields.
-		if (RuntimeProperties.dbrClassFields != null && RuntimeProperties.dbrClassFields.getRowCount() > 0) {
-			for (int i = 1; i <= RuntimeProperties.dbrClassFields.getRowCount(); i++) {
-				String fieldName = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[0], i);
-				String fieldType = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[1], i);
-				String fieldValue = RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2], i);
+		if (dbrClassFields != null && dbrClassFields.getRowCount() > 0) {
+			for (int i = 0; i < dbrClassFields.getRowCount(); i++) {
+				String fieldName = dbrClassFields.getValueAt(i, iNAME);
+				String fieldType = dbrClassFields.getValueAt(i, iTYPE);
+				String fieldValue = dbrClassFields.getValueAt(i, iVALUE);
 
 				if (fieldType == null) fieldType = "";
 				if (fieldValue == null) fieldValue = "";
@@ -1581,9 +1578,7 @@ public class IconEditor
 				RuntimeProperties.classIcon = str.substring(10);
 			} else if (str.startsWith("CLASSISRELATION:")) {
 				str = str.substring(16);
-				if (str != null && str.equalsIgnoreCase("true") || str.equalsIgnoreCase("false")) {
-					RuntimeProperties.classIsRelation = Boolean.valueOf(str).booleanValue();
-				}
+				RuntimeProperties.classIsRelation = Boolean.valueOf(str).booleanValue();
 			} else if (str.startsWith("CLASSFIELD:")) {
 				str = str.substring(11);
 				String fieldName = str.substring(0, str.indexOf(":"));
@@ -1592,7 +1587,7 @@ public class IconEditor
 				str = str.substring(str.indexOf(":") + 1);
 				String fieldValue = str;
 				String[] classFields = {fieldName, fieldType, fieldValue};
-				RuntimeProperties.dbrClassFields.appendRow(classFields);
+				dbrClassFields.addRow(classFields);
 			}
 		}
 		repaint();
@@ -1678,10 +1673,7 @@ public class IconEditor
 				mListener.state = State.selection;
 				shapeCount = 0;
 				shapeList = new ShapeGroup(new ArrayList<Shape>());
-				
-				for (int i = RuntimeProperties.dbrClassFields.getRowCount(); i > 0; i--){
-					RuntimeProperties.dbrClassFields.removeRow(i);	
-				}
+				dbrClassFields.setRowCount(0);
 				ports.clear();
 				fields.clear();
 				palette.boundingbox.setEnabled(true);
@@ -1729,7 +1721,7 @@ public class IconEditor
 		for (int i = 0; i < fields.size(); i++) {
 			
 			String[] row = {(fields.get(i)).getName() , (fields.get(i)).getType(), (fields.get(i)).getValue()};
-			RuntimeProperties.dbrClassFields.appendRow(row);
+			dbrClassFields.addRow(row);
 		}
 		RuntimeProperties.className = icon.getName();
 		RuntimeProperties.classDescription = icon.getDescription();
@@ -1823,6 +1815,14 @@ public class IconEditor
         }
 
     }
+
+    /**
+     * Returns the class field table model
+     * @return the class field table model
+     */
+	public ClassFieldsTableModel getClassFieldModel() {
+		return dbrClassFields;
+	}
 
 		
 } // end of class
