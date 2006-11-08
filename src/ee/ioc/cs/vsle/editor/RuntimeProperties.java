@@ -1,7 +1,5 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.util.queryutil.DBResult;
-
 import java.awt.*;
 import java.io.*;
 
@@ -42,10 +40,6 @@ public class RuntimeProperties {
 	public static String packageName;
 	public static String packageDesc;
 	public static String packageDtd;
-	
-	// Class fields stored in a DBResult (a virtual representation of a database table).
-	// The DBResult is displayed out in a table where all fields of if can be modified.
-	public static DBResult dbrClassFields = new DBResult("", classDbrFields);
 	
 	public static Font font = new Font("Courier New", Font.PLAIN, 12);
 	
