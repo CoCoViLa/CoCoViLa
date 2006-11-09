@@ -194,7 +194,11 @@ class Rel implements Serializable {
         Matcher matcher;
 
         if (type == RelType.TYPE_ALIAS) {
-            // db.p( "alias inputs " + inputs + " outputs " + outputs );
+        	
+        	if ((outputs.size() == 1) && (inputs.size() == 1)) {
+                return outputs.get(0) + " = " + inputs.get(0);
+            }
+
             return "";
         }
         if (type == RelType.TYPE_JAVAMETHOD) {
@@ -320,9 +324,7 @@ class Rel implements Serializable {
                 m = leftside + "=" + rightside;
             return m;
         } else if (type == RelType.TYPE_SUBTASK) {
-            if ((outputs.size() == 1) && (inputs.size() == 1)) {
-                return outputs.get(0) + " = " + inputs.get(0);
-            }
+
             // this should not be used in code generation
             return inputs + " -> " + outputs;
 
