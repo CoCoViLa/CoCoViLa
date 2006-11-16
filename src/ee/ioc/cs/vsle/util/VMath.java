@@ -224,10 +224,14 @@ public class VMath {
 			// the center points of the connected objects and the bounding
 			// box of the first object. There is no such point when the
 			// center point of the second object is inside the second object.
-			int px1 = sp.getObject().getX() + sp.getObject().getWidth() / 2;
-			int py1 = sp.getObject().getY() + sp.getObject().getHeight() / 2;
-			int px2 = ep.getObject().getX() + ep.getObject().getWidth() / 2;
-			int py2 = ep.getObject().getY() + ep.getObject().getHeight() / 2;
+			int px1 = sp.getObject().getX()
+					+ sp.getObject().getRealWidth() / 2;
+			int py1 = sp.getObject().getY()
+					+ sp.getObject().getRealHeight() / 2;
+			int px2 = ep.getObject().getX()
+					+ ep.getObject().getRealWidth() / 2;
+			int py2 = ep.getObject().getY()
+					+ ep.getObject().getRealHeight() / 2;
 		
 			int x1 = sp.getObject().getX();
 			int y1 = sp.getObject().getY();
