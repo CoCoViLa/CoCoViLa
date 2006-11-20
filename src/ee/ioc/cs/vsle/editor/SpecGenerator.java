@@ -7,6 +7,7 @@ import ee.ioc.cs.vsle.factoryStorage.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -21,7 +22,6 @@ public class SpecGenerator implements ISpecGenerator {
 	
 	public String generateSpec(ObjectList objects, ArrayList<Connection> relations, VPackage pack) {
 		GObj obj;
-		ClassField field;
 		File methF = new File( pack.getPath().substring( 0, pack.getPath().length() - "xml".length() ) + "meth" );
 		File specF = new File( pack.getPath().substring( 0, pack.getPath().length() - "xml".length() ) + "spec" );
 		String method = "";
@@ -60,10 +60,9 @@ public class SpecGenerator implements ISpecGenerator {
 			obj = objects.get(i);
 			s.append(
 					"    " + obj.getClassName() + " " + obj.getName() + ";\n");
-			for (int j = 0; j < obj.fields.size(); j++) {
-				field = obj.fields.get(j);
-				if (field.getValue() != null) {
-					if (field.getType().equals("String")) {
+			for ( ClassField field : obj.fields ) {
+				if ( ( field.getValue() != null ) && !field.isGoal() ) {
+					if (field.getType().equals(TYPE_STRING)) {
 						s.append("        " + obj.getName() + "." + field.getName()
 								+ " = \"" + field.getValue() + "\";\n");
 					} else if (field.isPrimitiveArray()) {

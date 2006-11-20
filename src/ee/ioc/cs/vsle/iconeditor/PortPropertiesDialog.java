@@ -1,19 +1,10 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
+import java.awt.*;
+import java.awt.event.*;
 
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JLabel;
-import javax.swing.JTextField;
-import javax.swing.JCheckBox;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
+import javax.swing.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 public class PortPropertiesDialog extends JDialog implements ActionListener {
 
@@ -63,10 +54,10 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 
 		cbPortType.setEditable(true);
 		cbPortType.addItem("");
-		cbPortType.addItem("int");
-		cbPortType.addItem("double");
-		cbPortType.addItem("Object");
-		cbPortType.addItem("String");
+		cbPortType.addItem(TYPE_INT);
+		cbPortType.addItem(TYPE_DOUBLE);
+		cbPortType.addItem(TYPE_OBJECT);
+		cbPortType.addItem(TYPE_STRING);
 
 		pnlButtons.add(bttnOk);
 		pnlButtons.add(bttnCancel);

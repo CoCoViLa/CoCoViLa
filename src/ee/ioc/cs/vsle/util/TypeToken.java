@@ -1,15 +1,17 @@
 package ee.ioc.cs.vsle.util;
 
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
+
 public class TypeToken implements Comparable<TypeToken> {
 
-    public static final TypeToken TOKEN_INT = new TypeToken( 3, "int", Integer.class, int.class, "intValue" );
-    public static final TypeToken TOKEN_DOUBLE = new TypeToken( 6, "double", Double.class, double.class, "doubleValue" );
-    public static final TypeToken TOKEN_FLOAT = new TypeToken( 5, "float", Float.class, float.class, "floatValue" );
-    public static final TypeToken TOKEN_CHAR = new TypeToken( 0, "char", Character.class, char.class, "charValue" );
-    public static final TypeToken TOKEN_BYTE = new TypeToken( 1, "byte", Byte.class, byte.class, "byteValue" );
-    public static final TypeToken TOKEN_SHORT = new TypeToken( 2, "short", Short.class, short.class, "shortValue" );
-    public static final TypeToken TOKEN_LONG = new TypeToken( 4, "long", Long.class, long.class, "longValue" );
-    public static final TypeToken TOKEN_BOOLEAN = new TypeToken( 0, "boolean", Boolean.class, boolean.class, "booleanValue" );
+    public static final TypeToken TOKEN_INT = new TypeToken( 3, TYPE_INT, Integer.class, int.class, "intValue" );
+    public static final TypeToken TOKEN_DOUBLE = new TypeToken( 6, TYPE_DOUBLE, Double.class, double.class, "doubleValue" );
+    public static final TypeToken TOKEN_FLOAT = new TypeToken( 5, TYPE_FLOAT, Float.class, float.class, "floatValue" );
+    public static final TypeToken TOKEN_CHAR = new TypeToken( 0, TYPE_CHAR, Character.class, char.class, "charValue" );
+    public static final TypeToken TOKEN_BYTE = new TypeToken( 1, TYPE_BYTE, Byte.class, byte.class, "byteValue" );
+    public static final TypeToken TOKEN_SHORT = new TypeToken( 2, TYPE_SHORT, Short.class, short.class, "shortValue" );
+    public static final TypeToken TOKEN_LONG = new TypeToken( 4, TYPE_LONG, Long.class, long.class, "longValue" );
+    public static final TypeToken TOKEN_BOOLEAN = new TypeToken( 0, TYPE_BOOLEAN, Boolean.class, boolean.class, "booleanValue" );
     public static final TypeToken TOKEN_OBJECT = new TypeToken( 0, null, null, null, "" );
     
     private String m_type;

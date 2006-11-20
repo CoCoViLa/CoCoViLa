@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.vclass;
 import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 public class GObjGroup extends GObj
 	implements Serializable {
@@ -285,7 +286,7 @@ public class GObjGroup extends GObj
 			for (int j = 0; j < obj.fields.size(); j++) {
 				field = obj.fields.get(j);
 				if (field.value != null) {
-					if (field.type.equals("String")) {
+					if (field.type.equals(TYPE_STRING)) {
 						s.append("        " + obj.getName() + "." + field.name
 							+ " = \"" + field.value + "\";\n");
 					} else if (field.isPrimitiveArray()) {

@@ -12,6 +12,7 @@ import javax.swing.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 public class ProgramAssumptionsDialog extends JDialog 
 implements ActionListener, KeyListener {
@@ -209,7 +210,7 @@ implements ActionListener, KeyListener {
 				Object o = meth.invoke( null, new Object[]{ value });
 				//db.p( "createObject " + o.getClass().getName() + " " + o );
 				return o;
-		} else if ( var.getType().equals( "String" ) ) {
+		} else if ( var.getType().equals( TYPE_STRING ) ) {
 			return value;
 		} else if( var.getField().isPrimOrStringArray() ) {
 			String type = var.getField().arrayType();

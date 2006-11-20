@@ -7,6 +7,7 @@ import java.io.Serializable;
 import java.util.*;
 import java.util.regex.*;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 class Rel implements Serializable {
 
@@ -26,7 +27,8 @@ class Rel implements Serializable {
 
     private String method;
 
-    private int type; /* 1 - equals, 2 - method */
+    //see RelType
+    private int type;
 
     Rel() {
         relNumber = RelType.relCounter++;
@@ -81,11 +83,11 @@ class Rel implements Serializable {
 
         for (int i = 0; i < inputs.size(); i++) {
             var = inputs.get(i);
-            if (!var.getType().equals("int")) {
-                return "double";
+            if (!var.getType().equals(TYPE_INT)) {
+                return TYPE_DOUBLE;
             }
         }
-        return "int";
+        return TYPE_INT;
     }
 
     String getOutput() {
@@ -180,9 +182,9 @@ class Rel implements Serializable {
     }
 
     static String getObject(String obj) {
-        if (obj.equals("this")) {
+        if (obj.equals(TYPE_THIS)) {
             return "";
-        } else if (obj.startsWith("this")) {
+        } else if (obj.startsWith(TYPE_THIS)) {
             return obj.substring(5) + ".";
         } else {
             return obj + ".";
@@ -314,11 +316,10 @@ class Rel implements Serializable {
             leftside = leftside.replaceFirst("([^a-zA-Z_]?" + left2
                     + var.getName() + "[^a-zA-Z0-9_])", left + var + right );
 
-            if (outputs.get(0).getType().equals("int")
-                    && (!getMaxType(inputs).equals("int") || method
-                            .indexOf(".") >= 0)) {
-                m = leftside + "= (int)(" + rightside + ")";
-                // m = m.replaceFirst("=", "= (int)(") + ")";
+            //TODO - add casting to other types as well
+            if ( outputs.get(0).getType().equals(TYPE_INT)
+                    && ( !getMaxType(inputs).equals(TYPE_INT) || method.indexOf(".") >= 0 ) ) {
+                m = leftside + "= (" + TYPE_INT + ")(" + rightside + ")";
 
             } else
                 m = leftside + "=" + rightside;

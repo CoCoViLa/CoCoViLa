@@ -7,6 +7,7 @@ import java.util.regex.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 /**
  This class is responsible for managing the planning and code generation process.
@@ -66,7 +67,7 @@ public class Synthesizer {
         String prog = "";
         
         // start building the main source file.
-        AnnotatedClass ac = classList.getType( "this" );
+        AnnotatedClass ac = classList.getType( TYPE_THIS );
 
         // check all the fields and make declarations accordingly
         for ( int i = 0; i < ac.getFields().size(); i++ ) {
@@ -133,7 +134,7 @@ public class Synthesizer {
 
         for ( int h = 0; h < classes.size(); h++ ) {
             pClass = ( AnnotatedClass ) classes.get( h );
-            if ( !pClass.getName().equals( "this" ) && !generated.contains( pClass.getName() ) ) {
+            if ( !pClass.getName().equals( TYPE_THIS ) && !generated.contains( pClass.getName() ) ) {
             	generated.add( pClass.getName() );
                 fileString = "";
                 try {

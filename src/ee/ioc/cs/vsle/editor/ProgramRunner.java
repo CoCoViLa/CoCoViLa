@@ -5,6 +5,7 @@ import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.synthesize.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 import java.lang.reflect.*;
 import java.util.*;
@@ -205,6 +206,7 @@ public class ProgramRunner {
 				foundVars.add(var);
 			}
 		}
+		printFoundVars();
 	}
 
 	public static boolean isFoundVar(Var var) {
@@ -224,79 +226,86 @@ public class ProgramRunner {
 
 	private void propagate() {
 		try {
-			
-			if( genObject == null || isWorking ) return;
-			
-			Class clasType;
-			Class clas = genObject.getClass();
 
-			Field f, f2;
+			if( genObject == null || isWorking() ) return;
+
+			final Class clas = genObject.getClass();
+
+			Field fieldOfGobj, fieldOfCf;
 			Object lastObj;
-			GObj obj;
-			ClassField field;
 
-			String fullName;
-			Var var;
-			boolean varIsComputed;
 			db.p("runPropagate() foundVars: " + foundVars);
-			for (int i = 0; i < objects.size(); i++) {
-				obj = objects.get(i);
-				f = clas.getDeclaredField(obj.getName());
-				lastObj = f.get(genObject);
-				for (int j = 0; j < obj.fields.size(); j++) {
-					field = obj.fields.get(j);
-					if ( !field.isAlias() ) {
-						clasType = f.getType();
-						f2 = clasType.getDeclaredField(field.getName());
-						Class c = f2.getType();
-						fullName = obj.getName() + "." + field.getName();
-						varIsComputed = false;
-						if (foundVars != null) {
-							Iterator allVarsIter = foundVars.iterator();
-							while (allVarsIter.hasNext()) {
-								var = (Var) allVarsIter.next();
 
-								if (fullName.equals((var.getObject().toString()
-										+ "." + var.getField()).substring(5))) {
-									varIsComputed = true;
-									break;
-								}
-							}
+			for ( GObj gObj : objects ) {
+
+				fieldOfGobj = clas.getDeclaredField(gObj.getName());
+				lastObj = fieldOfGobj.get(genObject);
+
+				for ( ClassField cf : gObj.fields ) {
+
+					if ( cf.isAlias() || cf.isInput() ) {
+						continue;
+					}
+
+					fieldOfCf = fieldOfGobj.getType().getDeclaredField(cf.getName());
+
+					boolean varIsComputed = false;
+
+					for ( Var var : foundVars ) {
+
+						if ( var.toString().equals( gObj.getName() + "." + cf.getName() ) ) {
+							varIsComputed = true;
+							break;
 						}
-						if (varIsComputed) {
-							
-							if (c.toString().equals("int")) {
-								
-								field.setValue(Integer.toString(f2.getInt(lastObj)));
-								
-							} else if (c.toString().equals("double")) {
-								
-								field.setValue(Double.toString(f2.getDouble(lastObj)));
-								
-							} else if (c.toString().equals("boolean")) {
-								
-								field.setValue(Boolean.toString(f2.getBoolean(lastObj)));
-								
-							} else if (c.toString().equals("char")) {
-								
-								field.setValue(Character.toString(f2.getChar(lastObj)));
-								
-							} else if (c.toString().equals("float")) {
-								
-								field.setValue(Float.toString(f2.getFloat(lastObj)));
-								
-							} else {// it is type object
-								Object o = f2.get(lastObj);
-								if( o instanceof String[] ) {
-									String[] sar = (String[])o;
-									String result = "";
-									for(int k = 0; k < sar.length; k++ ) {
-										result += sar[k] + ClassField.ARRAY_TOKEN;
-									}
-									field.setValue(result);
-								} else {
-									field.setValue(o.toString());
+					}
+
+					if ( varIsComputed ) {
+
+						String typeOfCf = fieldOfCf.getType().toString();
+
+						if (typeOfCf.equals(TYPE_INT)) {
+
+							cf.setValue(Integer.toString(fieldOfCf.getInt(lastObj)));
+
+						} else if (typeOfCf.equals(TYPE_DOUBLE)) {
+
+							cf.setValue(Double.toString(fieldOfCf.getDouble(lastObj)));
+
+						} else if (typeOfCf.equals(TYPE_BOOLEAN)) {
+
+							cf.setValue(Boolean.toString(fieldOfCf.getBoolean(lastObj)));
+
+						} else if (typeOfCf.equals(TYPE_CHAR)) {
+
+							cf.setValue(Character.toString(fieldOfCf.getChar(lastObj)));
+
+						} else if (typeOfCf.equals(TYPE_FLOAT)) {
+
+							cf.setValue(Float.toString(fieldOfCf.getFloat(lastObj)));
+
+						} else if (typeOfCf.equals(TYPE_LONG)) {
+
+							cf.setValue(Long.toString(fieldOfCf.getLong(lastObj)));
+
+						} else if (typeOfCf.equals(TYPE_SHORT)) {
+
+							cf.setValue(Short.toString(fieldOfCf.getShort(lastObj)));
+
+						} else if (typeOfCf.equals(TYPE_BYTE)) {
+
+							cf.setValue(Byte.toString(fieldOfCf.getByte(lastObj)));
+
+						} else {// it is type object
+							Object o = fieldOfCf.get(lastObj);
+							if( o instanceof String[] ) {
+								String[] sar = (String[])o;
+								String result = "";
+								for(int k = 0; k < sar.length; k++ ) {
+									result += sar[k] + ClassField.ARRAY_TOKEN;
 								}
+								cf.setValue(result);
+							} else {
+								cf.setValue(o.toString());
 							}
 						}
 					}
@@ -318,8 +327,6 @@ public class ProgramRunner {
 			{
 				Thread.currentThread().setName( "RunningThread" + System.currentTimeMillis() );
 				
-				StringBuffer result = new StringBuffer();
-
 				try {
 					Object[] args = getArguments();
 					for (int i = 0; i < args.length; i++) {
@@ -349,70 +356,84 @@ public class ProgramRunner {
 					
 					db.p( "--> Finished!!! " + Thread.currentThread().getName() );
 
-					Field f;
-					StringTokenizer st;
-					Object lastObj;
-
-					ArrayList<String> watchFields = watchableFields();
-
-					for (int i = 0; i < watchFields.size(); i++) {
-						lastObj = genObject;
-						clas = genObject.getClass();
-						st = new StringTokenizer( watchFields.get(i), ".");
-						while (st.hasMoreElements()) {
-							String s = st.nextToken();
-
-							f = clas.getDeclaredField(s);
-							if (st.hasMoreElements()) {
-								clas = f.getType();
-								lastObj = f.get(lastObj);
-							} else {
-								Class c = f.getType();
-
-								if (c.toString().equals("int")) {
-									result.append(watchFields.get(i)
-											+ ": " + f.getInt(lastObj) + "\n");
-								} else if (c.toString().equals("double")) {
-									result.append(watchFields.get(i)
-											+ ": " + f.getDouble(lastObj) + "\n");
-								} else if (c.toString().equals("boolean")) {
-									result.append(watchFields.get(i)
-											+ ": " + f.getBoolean(lastObj) + "\n");
-								} else if (c.toString().equals("char")) {
-									result.append(watchFields.get(i)
-											+ ": " + f.getChar(lastObj) + "\n");
-								} else if (c.toString().equals("float")) {
-									result.append(watchFields.get(i)
-											+ ": " + f.getFloat(lastObj) + "\n");
-								} else {
-									result.append(watchFields.get(i)
-											+ ": " + f.get(lastObj) + "\n");
-								}
-							}
-
-						}
+					if( sendFeedback ) {
+						
+						ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, id,
+								ProgramRunnerFeedbackEvent.TEXT_RESULT, printWatchFields() );
+						
+						EventSystem.queueEvent( evt );
 					}
-					result.append("----------------------\n");
+					
+					if( doPropagate ) {
+						propagate();
+					}
 
 				} catch (Exception e) {
 					ErrorWindow.showErrorMessage( e.getMessage() );
 				}
-				if( sendFeedback ) {
-					
-					ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, id,
-							ProgramRunnerFeedbackEvent.TEXT_RESULT, result.toString() );
-					
-					EventSystem.queueEvent( evt );
-				}
 				
-				if( doPropagate ) {
-					propagate();
-				}
 			}
 		}.start();
 
 	}
-	
+
+	private String printWatchFields() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+
+		StringBuffer result = new StringBuffer();
+
+		Object obj; 
+		Class clas;
+		Field f;
+		StringTokenizer st;
+
+		ArrayList<String> watchFields = watchableFields();
+
+		for ( String wf : watchFields ) {
+
+			st = new StringTokenizer( wf, ".");
+			obj = genObject;
+			clas = genObject.getClass();
+
+			while (st.hasMoreElements()) {
+
+				String s = st.nextToken();
+
+				f = clas.getDeclaredField(s);
+				if (st.hasMoreElements()) {
+					clas = f.getType();
+					obj = f.get(obj);
+				} else {
+					Class c = f.getType();
+
+					if (c.toString().equals(TYPE_INT)) {
+						result.append(wf + ": " + f.getInt(obj) + "\n");
+					} else if (c.toString().equals(TYPE_LONG)) {
+						result.append(wf + ": " + f.getLong(obj) + "\n");
+					} else if (c.toString().equals(TYPE_DOUBLE)) {
+						result.append(wf + ": " + f.getDouble(obj) + "\n");
+					} else if (c.toString().equals(TYPE_BOOLEAN)) {
+						result.append(wf + ": " + f.getBoolean(obj) + "\n");
+					} else if (c.toString().equals(TYPE_CHAR)) {
+						result.append(wf + ": " + f.getChar(obj) + "\n");
+					} else if (c.toString().equals(TYPE_FLOAT)) {
+						result.append(wf + ": " + f.getFloat(obj) + "\n");
+					} else if (c.toString().equals(TYPE_SHORT)) {
+						result.append(wf + ": " + f.getShort(obj) + "\n");
+					} else if (c.toString().equals(TYPE_BYTE)) {
+						result.append(wf + ": " + f.getByte(obj) + "\n");
+					} else {
+						result.append(wf + ": " + f.get(obj) + "\n");
+					}
+				}
+
+			}
+		}
+
+		result.append("----------------------\n");
+
+		return result.toString();
+	}
+
 	public long getId() {
 		return m_id;
 	}

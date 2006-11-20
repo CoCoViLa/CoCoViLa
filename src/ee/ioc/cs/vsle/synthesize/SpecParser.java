@@ -10,6 +10,7 @@ import ee.ioc.cs.vsle.vclass.*;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.equations.EquationSolver;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 /**
  * This class takes care of parsing the specification and translating it into a graph on which planning can be run.
@@ -254,7 +255,7 @@ public class SpecParser {
     										SpecParseException, EquationException {
     	s_parseErrors.clear();
     	HashSet<String> hs = new HashSet<String>();
-    	return parseSpecificationImpl( refineSpec( fullSpec ), "this", path, hs );
+    	return parseSpecificationImpl( refineSpec( fullSpec ), TYPE_THIS, path, hs );
     }
     
     /**
@@ -650,11 +651,11 @@ public class SpecParser {
     private static void checkAnyType( String output, String[] inputs, ArrayList<ClassField> vars ) throws UnknownVariableException {
     	ClassField out = ClassRelation.getVar( output, vars );
     	
-    	if( out == null || !out.getType().equals("any") ) {
+    	if( out == null || !out.getType().equals(TYPE_ANY) ) {
     		return;
     	}
     	
-    	String newType = "any";
+    	String newType = TYPE_ANY;
     	
     	for (int i = 0; i < inputs.length; i++) {
     		ClassField in = ClassRelation.getVar( inputs[i], vars );
@@ -662,18 +663,18 @@ public class SpecParser {
     		if( in == null ) {
     			try {
     				Integer.parseInt( inputs[i] );
-    				newType = "int";
+    				newType = TYPE_INT;
     				continue;
     			} catch( NumberFormatException ex ) {}
     			
     			try {
     				Double.parseDouble( inputs[i] );
-    				newType = "double";
+    				newType = TYPE_DOUBLE;
     				continue;
     			} catch( NumberFormatException ex ) {}
     			
     			if( inputs[i] != null && inputs[i].trim().equals("") ) {
-    				newType = "double";//TODO - tmp
+    				newType = TYPE_DOUBLE;//TODO - tmp
     				continue;
     			}
     			
@@ -719,7 +720,7 @@ public class SpecParser {
     			
     			int length = alias.getVars().size();
     			
-    			ClassField var = new ClassField( aliasLengthName, "int", "" + length, true );
+    			ClassField var = new ClassField( aliasLengthName, TYPE_INT, "" + length, true );
     			
     			vars.add( var );
     			

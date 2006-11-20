@@ -3,13 +3,14 @@ package ee.ioc.cs.vsle.synthesize;
 import java.util.*;
 
 import ee.ioc.cs.vsle.vclass.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 public class ProblemCreator {
 
 	private ProblemCreator() {}
 	
 	static Problem makeProblem( ClassList classes ) throws SpecParseException{
-    	return makeProblemImpl( classes, "this", "this", new Problem() );
+    	return makeProblemImpl( classes, TYPE_THIS, TYPE_THIS, new Problem() );
     }
     /**
      Creates the problem - a graph-like data structure on which planning can be applied. The method is recursively
@@ -22,19 +23,12 @@ public class ProblemCreator {
      */
     private static Problem makeProblemImpl( ClassList classes, String type, String caller, Problem problem ) throws
             SpecParseException {
-        // ee.ioc.cs.editor.util.db.p("CLASSES: "+classes);
-        // ee.ioc.cs.editor.util.db.p("TYPE: "+type);
-        AnnotatedClass ac = classes.getType( type );
-        ClassField cf = null;
-        ClassRelation classRelation;
-        Var var;
-        Rel rel;
-        HashSet<Rel> relSet = new HashSet<Rel>();
 
-        for ( int j = 0; j < ac.getFields().size(); j++ ) {
+    	AnnotatedClass ac = classes.getType( type );
+
+        for ( ClassField cf : ac.getFields() ) {
         	if( ac.isOnlyForSuperclassGeneration() ) continue;
         	
-            cf = ac.getFields().get( j );
             if ( classes.getType( cf.getType() ) != null ) {
                 problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
             }
@@ -47,7 +41,8 @@ public class ProblemCreator {
             	cf.setName( cf.getName().substring( 1 ) );
             	cf.setValue( "" + alias.getVars().size() );
             }
-            var = new Var( cf, caller );
+            
+            Var var = new Var( cf, caller );
             
             problem.addVar( var );
             if( cf.isConstant() ) {
@@ -56,12 +51,13 @@ public class ProblemCreator {
             }
         }
 
-        for ( int j = 0; j < ac.getClassRelations().size(); j++ ) {
-            classRelation = ac.getClassRelations().get( j );
-            cf = null;
+        for ( ClassRelation classRelation : ac.getClassRelations() ) {
+
             String obj = caller;
 
-            rel = new Rel();
+            Rel rel = new Rel();
+            HashSet<Rel> relSet = null;
+            
             boolean isAliasRel = false;
 
             /* If we have a relation alias = alias, we rewrite it into new relations, ie we create
@@ -161,7 +157,8 @@ public class ProblemCreator {
             		problem.addRelWithSubtask( rel );
             	}
             	
-            } else {
+            } 
+            else if( relSet != null ) {
             	problem.addAllRels( relSet );
             }
 

@@ -54,6 +54,10 @@ public class ClassField implements Cloneable, Serializable {
 
 	protected ClassGraphics defaultGraphics;
 
+	protected boolean isInput = false;
+	
+	protected boolean isGoal = false;
+	
 	/**
 	 * Class constructor.
 	 */
@@ -297,5 +301,21 @@ public class ClassField implements Cloneable, Serializable {
 	
 	public boolean isVoid() {
 		return TYPE_VOID.equals( getType() );
+	}
+
+	public boolean isGoal() {
+		return isGoal;
+	}
+
+	public void setGoal(boolean isGoal) {
+		this.isGoal = isGoal;
+	}
+
+	public boolean isInput() {
+		return isInput;
+	}
+
+	public void setInput(boolean isInput) {
+		this.isInput = isInput;
 	}
 }
