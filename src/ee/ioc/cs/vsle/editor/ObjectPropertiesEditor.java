@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.editor;
 
 import java.awt.*;
+import java.awt.Point;
 import java.awt.event.*;
 import java.util.*;
 
@@ -13,32 +14,99 @@ import static ee.ioc.cs.vsle.util.TypeUtil.*;
  */
 public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		KeyListener {
-	ArrayList<JTextField> textFields = new ArrayList<JTextField>();
-
-	ArrayList<JCheckBox> watchFields = new ArrayList<JCheckBox>();
-
-	ArrayList<JCheckBox> inputs = new ArrayList<JCheckBox>();
 	
-	ArrayList<JCheckBox> goals = new ArrayList<JCheckBox>();
+	private ArrayList<JTextField> textFields = new ArrayList<JTextField>();
+
+	private ArrayList<JCheckBox> watchFields = new ArrayList<JCheckBox>();
+
+	private ArrayList<JCheckBox> inputs = new ArrayList<JCheckBox>();
 	
-	ArrayList<JComboBox> comboBoxes = new ArrayList<JComboBox>();
+	private ArrayList<JCheckBox> goals = new ArrayList<JCheckBox>();
+	
+	private ArrayList<JComboBox> comboBoxes = new ArrayList<JComboBox>();
 
-	ArrayList<ClassField> primitiveNameList = new ArrayList<ClassField>();
+	private ArrayList<ClassField> primitiveNameList = new ArrayList<ClassField>();
 
-	ArrayList<ClassField> arrayNameList = new ArrayList<ClassField>();
+	private ArrayList<ClassField> arrayNameList = new ArrayList<ClassField>();
 
-	GObj controlledObject;
+	private GObj controlledObject;
 
-	JTextField nameTextField;
+	private JTextField nameTextField;
 
-	JButton clear, ok;
+	private JButton clear, ok;
 
-	Canvas canvas;
+	private Canvas canvas;
 
-	public ObjectPropertiesEditor(GObj object, Canvas canvas) {
-		super(object.getName());
+	//key - class name, value - last width
+	private static Map<String, Integer> s_widths = new HashMap<String, Integer>();
+	
+	public static void show( GObj object, Canvas canvas ) {
+		
+		ObjectPropertiesEditor prop = new ObjectPropertiesEditor( object, canvas );
+		prop.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
+		
+		Point loc = new Point( object.getX(), object.getY() );
+		SwingUtilities.convertPointToScreen( loc, canvas );
+		
+		prop.setLocation( loc );
+		
+		Dimension preferred = prop.getLayout().preferredLayoutSize( prop );
+		
+		if( s_widths.get( object.getClassName() ) == null ) {
+			
+			prop.pack();
+			
+			s_widths.put( object.getClassName(), preferred.width );
+		}
+		else
+		{
+			int width = s_widths.get( object.getClassName() );
+			
+			if( preferred.width > width ) {
+				width = preferred.width;
+			}
+			prop.setSize( width, preferred.height );
+		}
+		
+		prop.setVisible(true);
+	}
+	
+	private ObjectPropertiesEditor(GObj object, Canvas canvas) {
+		super( object.getName() + " - " + canvas.getTitle() );
 		this.canvas = canvas;
 		controlledObject = object;
+		
+		addComponentListener(new ComponentAdapter() {
+
+			public void componentResized(ComponentEvent e) {
+				
+				Dimension d = getLayout().preferredLayoutSize( ObjectPropertiesEditor.this );
+				
+				Dimension resized = getSize();
+				
+				if( d.width > resized.width && d.height > resized.height ) {
+					resized.setSize( d.width, d.height );
+				} else if ( d.width > resized.width ) {
+					resized.setSize( d.width, resized.height );
+				} else if ( d.height > resized.height ) {
+					resized.setSize( resized.width, d.height );
+				}
+				
+				s_widths.put( controlledObject.getClassName(), resized.width );
+				
+				ObjectPropertiesEditor.this.setSize( resized );
+			}
+		});
+		
+		JPanel westPanel = new JPanel();
+		westPanel.setLayout( new BoxLayout( westPanel, BoxLayout.X_AXIS ) );
+		
+		JPanel centerPanel = new JPanel();
+		centerPanel.setLayout( new BoxLayout( centerPanel, BoxLayout.X_AXIS ) );
+		
+		JPanel eastPanel = new JPanel();
+		eastPanel.setLayout( new BoxLayout( eastPanel, BoxLayout.X_AXIS ) );
+		
 		JPanel buttonPane = new JPanel();
 		JPanel fullPane = new JPanel();
 
@@ -56,7 +124,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		typePane.setLayout(new GridLayout(0, 1));
 		textFieldPane.setLayout(new GridLayout(0, 1));
 
-		JLabel label = new JLabel("Object name");
+		JLabel label = new JLabel( "Object name", SwingConstants.CENTER );
 
 		nameTextField = new JTextField(object.getName(), 6);
 		labelPane.add(label);
@@ -64,13 +132,13 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		label = new JLabel("(String)");
 		typePane.add(label);
 
-		label = new JLabel("  Input  ");
+		label = new JLabel( "  Input  ", SwingConstants.CENTER );
 		inputPane.add(label);
 		
-		label = new JLabel("  Goal  ");
+		label = new JLabel( "  Goal  ", SwingConstants.CENTER );
 		goalsPane.add(label);
 		
-		label = new JLabel("  Watch");
+		label = new JLabel( "  Watch", SwingConstants.CENTER );
 		watchPane.add(label);
 
 		JTextField textField;
@@ -169,13 +237,16 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 
 		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		fullPane.setLayout(new BorderLayout());
-		contentPane.setLayout( new BoxLayout( contentPane, BoxLayout.X_AXIS ) );
-		contentPane.add(labelPane);
-		contentPane.add(textFieldPane);
-		contentPane.add(typePane);
-		contentPane.add(inputPane);
-		contentPane.add(goalsPane);
-		contentPane.add(watchPane);
+		contentPane.setLayout( new BorderLayout() );
+		westPanel.add(labelPane);
+		centerPanel.add(textFieldPane);
+		eastPanel.add(typePane);
+		eastPanel.add(inputPane);
+		eastPanel.add(goalsPane);
+		eastPanel.add(watchPane);
+		contentPane.add( westPanel, BorderLayout.WEST );
+		contentPane.add( centerPanel, BorderLayout.CENTER );
+		contentPane.add( eastPanel, BorderLayout.EAST );
 		ok = new JButton("OK");
 		ok.addActionListener(this);
 		buttonPane.add(ok);
@@ -328,7 +399,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		//TODO - add other types
 	}
 
-	JComboBox getComboBox(JTextField jtf) {
+	private JComboBox getComboBox(JTextField jtf) {
 		for (JComboBox jcb : comboBoxes) {
 			if (jtf == jcb.getEditor().getEditorComponent()) {
 				return jcb;

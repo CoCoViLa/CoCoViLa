@@ -854,13 +854,12 @@ public class Canvas extends JPanel implements ActionListener {
 		}
 	}
 
-
+	/**
+	 * TODO - what is this method for?
+	 * @param classText
+	 */
 	public void saveSchemeAsClass(String classText) {
-		ObjectPropertiesEditor prop = new ObjectPropertiesEditor(objects.getSelected().get(0), this);
-		prop.pack();
-		prop.setVisible(true);
-		prop.setLocationRelativeTo(this);
-
+		ObjectPropertiesEditor.show( objects.getSelected().get(0), this );
 	}
 
 	/**
@@ -868,11 +867,7 @@ public class Canvas extends JPanel implements ActionListener {
 	 */
 	public void openPropertiesDialog() {
 		if (objects.getSelected().size() == 1) {
-			ObjectPropertiesEditor prop = new ObjectPropertiesEditor(objects.getSelected().get(0), this);
-			prop.pack();
-			prop.setLocationRelativeTo(this);
-			prop.setVisible(true);
-
+			ObjectPropertiesEditor.show( objects.getSelected().get(0), this );
 		}
 	} // openPropertiesDialog
 
