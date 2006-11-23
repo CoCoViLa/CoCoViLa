@@ -33,7 +33,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 
 	private JTextField nameTextField;
 
-	private JButton clear, ok;
+	private JButton clear, ok, close;
 
 	private Canvas canvas;
 
@@ -42,19 +42,14 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 	
 	public static void show( GObj object, Canvas canvas ) {
 		
-		ObjectPropertiesEditor prop = new ObjectPropertiesEditor( object, canvas );
-		prop.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
+		final ObjectPropertiesEditor frame = new ObjectPropertiesEditor( object, canvas );
+		frame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
 		
-		Point loc = new Point( object.getX(), object.getY() );
-		SwingUtilities.convertPointToScreen( loc, canvas );
-		
-		prop.setLocation( loc );
-		
-		Dimension preferred = prop.getLayout().preferredLayoutSize( prop );
+		Dimension preferred = frame.getLayout().preferredLayoutSize( frame );
 		
 		if( s_widths.get( object.getClassName() ) == null ) {
 			
-			prop.pack();
+			frame.pack();
 			
 			s_widths.put( object.getClassName(), preferred.width );
 		}
@@ -65,10 +60,27 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			if( preferred.width > width ) {
 				width = preferred.width;
 			}
-			prop.setSize( width, preferred.height );
+			frame.setSize( width, preferred.height );
 		}
 		
-		prop.setVisible(true);
+		//frame positioning
+		Point loc = new Point( object.getX(), object.getY() );
+		SwingUtilities.convertPointToScreen( loc, canvas );
+		
+		//Dimension display = Toolkit.getDefaultToolkit().getScreenSize();
+		Rectangle display = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+
+		if( ( loc.x + frame.getWidth() ) > display.width ) {
+			loc.x = loc.x - ( frame.getWidth() - ( display.width - loc.x ) );
+		}
+		
+		if( ( loc.y + frame.getHeight() ) > display.height ) {
+			loc.y = loc.y - ( frame.getHeight() - ( display.height - loc.y ) );
+		}
+		
+		frame.setLocation( loc );
+
+		frame.setVisible(true);
 	}
 	
 	private ObjectPropertiesEditor(GObj object, Canvas canvas) {
@@ -258,7 +270,9 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			clear.setEnabled(true);
 		}
 		buttonPane.add(clear);
-		// contentPane.setPreferredSize(new Dimension(300,200));
+		close = new JButton("Close");
+		close.addActionListener(this);
+		//buttonPane.add(close);
 		fullPane.add(areaScrollPane, BorderLayout.CENTER);
 		fullPane.add(buttonPane, BorderLayout.SOUTH);
 		setContentPane(fullPane);
@@ -352,7 +366,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 				canvas.repaint();
 			}
 		}
-		if (e.getSource() == clear) {
+		else if (e.getSource() == clear) {
 			// Clears object properties except the object name.
 			for (int i = 0; i < textFields.size(); i++) {
 				textField = textFields.get(i);
@@ -368,6 +382,9 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 				JComboBox comboBox = comboBoxes.get(i);
 				comboBox.removeAllItems();
 			}
+		}
+		else if (e.getSource() == close) {
+			dispose();
 		}
 	}
 
