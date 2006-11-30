@@ -3,13 +3,12 @@ package ee.ioc.cs.vsle.vclass;
 import java.io.Serializable;
 
 /**
-
+ * The scheme description
  */
 public class Scheme implements Serializable {
 
     private static final long serialVersionUID = 1L;
     public String packageName;
-	public int objCount;
 	public ObjectList objects = new ObjectList();
 	public ConnectionList connections = new ConnectionList();
 	public String name;
@@ -20,8 +19,10 @@ public class Scheme implements Serializable {
 	}
 
 	public Scheme() {
+		// conctruct an empty scheme
 	}
 
+	@Override
 	public String toString() {
 		return "Objects: " + objects + " Connections: " + connections;
 	}
