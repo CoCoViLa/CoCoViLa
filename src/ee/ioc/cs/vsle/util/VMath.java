@@ -10,7 +10,6 @@ import ee.ioc.cs.vsle.vclass.Port;
  * User: Ando
  * Date: 30.03.2004
  * Time: 0:08:38
- * To change this template use Options | File Templates.
  */
 public class VMath {
 
@@ -208,12 +207,22 @@ public class VMath {
 	/**
 	 * Calculates end point coordinates for relation classes.
 	 * 
-	 * @param sp start port of the relation class
-	 * @param ep end point of the relation class
-	 * @return point containing the coordinate values of the end point of the 
-	 * 		   relation class at the start port end.
+	 * @param sp
+	 *            start port of the relation class
+	 * @param ep
+	 *            end point of the relation class, can be null
+	 * @param ex
+	 *            alternative X coordinate of the end port if the real end port
+	 *            is not known yet
+	 * @param ey
+	 *            alternative Y coordinate of the end port if the real end port
+	 *            is not known yet
+	 * @return point containing the coordinate values of the end point of the
+	 *         relation class at the start port end.
 	 */
-	public static Point getRelClassStartPoint(Port sp, Port ep) {
+	private static Point getRelClassStartPoint(Port sp, Port ep,
+			int ex, int ey) {
+
 		Point endPoint = new Point(0, 0);
 
 		if (!sp.isArea()) {
@@ -223,14 +232,14 @@ public class VMath {
 			// Find the intersection point of the line segment connecting
 			// the center points of the connected objects and the bounding
 			// box of the first object. There is no such point when the
-			// center point of the second object is inside the second object.
+			// center point of the second object is inside the first object.
 			int px1 = sp.getObject().getX()
 					+ sp.getObject().getRealWidth() / 2;
 			int py1 = sp.getObject().getY()
 					+ sp.getObject().getRealHeight() / 2;
-			int px2 = ep.getObject().getX()
+			int px2 = ep == null ? ex : ep.getObject().getX()
 					+ ep.getObject().getRealWidth() / 2;
-			int py2 = ep.getObject().getY()
+			int py2 = ep == null ? ey : ep.getObject().getY()
 					+ ep.getObject().getRealHeight() / 2;
 		
 			int x1 = sp.getObject().getX();
@@ -255,9 +264,35 @@ public class VMath {
 			} else {
 				endPoint = VMath.nearestPointOnRectangle(
 						x1, y1, x2 - x1, y2 - y1,
-						ep.getAbsoluteX(), ep.getAbsoluteY());
+						ep == null ? ex : ep.getAbsoluteX(),
+						ep == null ? ey : ep.getAbsoluteY());
 			}
 		}
 		return endPoint;
+	}
+
+	/**
+	 * Calculates start point coordinates for a relation class
+	 * connecting ports startPort and endPort.
+	 * @param startPort the start port of the relation class
+	 * @param endPort the end port of the relation class
+	 * @return point containing the coordinates of the start point
+	 */
+	public static Point getRelClassStartPoint(Port startPort, Port endPort) {
+		return getRelClassStartPoint(startPort, endPort, 0, 0);
+	}
+
+	/**
+	 * Calculates start point coordinates for a relation class
+	 * connected to startPort and not yet connected to an endPort.
+	 * Temporary endPort coordinates are specified by the point (ex, ey)
+	 * which can be for example the location of the mouse cursor.
+	 * @param startPort the start port of the relation class
+	 * @param ex the X coordinate of the end point of the relation class
+	 * @param ey the Y coordinate of the end point of the relation class
+	 * @return point containing the coordinates of the start point 
+	 */
+	public static Point getRelClassStartPoint(Port startPort, int ex, int ey) {
+		return getRelClassStartPoint(startPort, null, ex, ey);
 	}
 }
