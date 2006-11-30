@@ -129,11 +129,11 @@ class Problem implements Serializable {
 
 		} catch (Exception e) {
 			
-			db.p( "Unable to get the Copy of Problem, due to: " );
+			db.p( "\nUnable to get the copy of Problem, due to: " );
 			
 			if( RuntimeProperties.isLogDebugEnabled() ) {
 				e.printStackTrace();
-				db.p( "Problem:\n" + "Unable to get the Copy of Problem:\n" + this.toString() );
+				db.p( "\nProblem:\n" + this.toString() );
 			} else {
 				db.p( e.getClass().getName() + " " + e.getMessage() );
 			}
