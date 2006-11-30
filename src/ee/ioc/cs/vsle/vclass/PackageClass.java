@@ -2,7 +2,7 @@ package ee.ioc.cs.vsle.vclass;
 
 import java.util.ArrayList;
 import java.io.Serializable;
-import java.awt.*;
+import ee.ioc.cs.vsle.graphics.Shape;
 
 public class PackageClass implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -15,6 +15,7 @@ public class PackageClass implements Serializable {
 	public boolean relation = false;
     public String painterName;
     private ClassPainter painterPrototype;
+    private int sequence;
 
 	public PackageClass(String name) {
 		this.name = name;
@@ -35,21 +36,6 @@ public class PackageClass implements Serializable {
 
 	public void addGraphics(ClassGraphics gr) {
 		graphics = gr;
-	}
-
-	void drawClassGraphics(int x, int y, Graphics2D g) {
-		graphics.draw(x, y, 1, 1, g);
-		for (int i = 0; i < ports.size(); i++) {
-			Port port = ports.get(i);
-
-			if (port.getType().equals("in")) {
-				g.setColor(Color.blue);
-			} else if (port.getType().equals("out")) {
-				g.setColor(Color.red);
-			}
-
-			g.setColor(Color.black);
-		}
 	}
 
 	/**
@@ -77,5 +63,71 @@ public class PackageClass implements Serializable {
 			painter.setScheme(scheme);
 		}
 		return painter;
+	}
+
+	/**
+	 * Creates a new visual class instance from this package class.
+	 * A new name is assigned to each instance. 
+	 * 
+	 * @return a new visual instance of this package class
+	 */
+	public GObj getNewInstance() {
+		GObj obj = relation ? new RelObj() : new GObj();
+
+		obj.setWidth(graphics.getWidth());
+		obj.setHeight(graphics.getHeight());
+		obj.setClassName(name);
+		obj.setName(name + "_" + Integer.toString(sequence++));
+
+		obj.shapes = new ArrayList<Shape>(graphics.shapes.size());
+		for (Shape shape : graphics.shapes)
+			obj.shapes.add(shape.clone());
+
+		ArrayList<Port> newPorts = new ArrayList<Port>(ports.size());
+		for (Port port : ports) {
+			port = port.clone();
+			port.setObject(obj);
+			newPorts.add(port);
+
+			if (port.x + port.getOpenGraphics().boundX < obj.portOffsetX1) {
+				obj.portOffsetX1 = port.x + port.getOpenGraphics().boundX;
+			}
+
+			if (port.y + port.getOpenGraphics().boundY < obj.portOffsetY1) {
+				obj.portOffsetY1 = port.y + port.getOpenGraphics().boundY;
+			}
+
+			if (port.x + port.getOpenGraphics().boundWidth > obj.width
+					+ obj.portOffsetX2) {
+				obj.portOffsetX2 = Math.max((port.x
+						+ port.getOpenGraphics().boundX 
+						+ port.getOpenGraphics().boundWidth) - obj.width, 0);
+			}
+
+			if (port.y + port.getOpenGraphics().boundHeight > obj.height
+					+ obj.portOffsetY2) {
+				obj.portOffsetY2 = Math.max((port.y
+						+ port.getOpenGraphics().boundY 
+						+ port.getOpenGraphics().boundHeight) - obj.height, 0);
+			}
+
+			port.setConnections(new ArrayList<Connection>());
+		}
+		obj.setPorts(newPorts);
+
+		// deep clone fields list
+		obj.fields = new ArrayList<ClassField>(fields.size());
+		for (ClassField field : fields)
+			obj.fields.add(field.clone());
+		
+		return obj;
+	}
+
+	/**
+	 * Returns the next serial number for this class.
+	 * @return the next serial number
+	 */
+	public int getNextSerial() {
+		return sequence++;
 	}
 }

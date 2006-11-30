@@ -18,7 +18,7 @@ public class Port implements Cloneable, Serializable {
 	private boolean strict, area;
 	private ClassGraphics openGraphics, closedGraphics;
 	private ArrayList<Connection> connections = new ArrayList<Connection>();
-	private boolean selected = false, connected = false;
+	private boolean selected = false;
 	private boolean known = false, target = false;
 	private boolean watched = false;
 	private boolean hilighted = false;
@@ -43,20 +43,14 @@ public class Port implements Cloneable, Serializable {
 		}
 	}
 
-	public Port getStrictConnected() {
-		Connection con;
+	public ArrayList<Port> getStrictConnected() {
+		ArrayList<Port> ports = new ArrayList<Port>();
 
-		for (int i = 0; i < connections.size(); i++) {
-			con = connections.get(i);
-
-			if (con.beginPort.isStrict()) {
-				if (con.beginPort == this) {
-					return con.endPort;
-				}
-				return con.beginPort;
-			}
+		for (Connection con : connections) {
+			if (con.isStrict())
+				ports.add(con.beginPort == this ? con.endPort : con.beginPort);
 		}
-		return null;
+		return ports;
 	}
 
 	public int getX() {
@@ -86,13 +80,13 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public int getRealCenterX() {
-		return (int) (obj.getXsize()
-			* (obj.getX() + x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
+		return (int) (obj.getX() + obj.getXsize() 
+				* (x + openGraphics.boundX + (openGraphics.boundWidth / 2)));
 	}
 
 	public int getRealCenterY() {
-		return (int) (obj.getYsize()
-			* (obj.getY() + y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
+		return (int) (obj.getY() + obj.getYsize()
+				* (y + openGraphics.boundY + (openGraphics.boundHeight / 2)));
 	}
 
 	public int getStartX() {
@@ -139,16 +133,12 @@ public class Port implements Cloneable, Serializable {
 		selected = b;
 	}
 
-	public void setConnected(boolean b) {
-		connected = b;
-	}
-
 	public boolean isSelected() {
 		return selected;
 	}
 
 	public boolean isConnected() {
-		return connected;
+		return connections.size() > 0;
 	}
 
 	public void setKnown(boolean b) {
@@ -171,17 +161,36 @@ public class Port implements Cloneable, Serializable {
 		return watched;
 	}
 
+	/**
+	 * <p>Returns {@code true} if this port is a strict port.</p>
+	 * <p>Strict ports are connected automatically when one port is placed
+	 * above or close to the other port on the scheme. The connection
+	 * between strictly connected ports is deleted implicitly when the
+	 * ports are detached.</p>
+	 * <p>Strict ports can also be connected with normal connections.
+	 * It might make sense to prohibit this but currently some pakcages
+	 * (gearbox: 1.syn) depend on this feature.</p>
+	 * @return true if this port is a strict port, {@code false} otherwise
+	 */
 	public boolean isStrict() {
 		return strict;
 	}
 
+	/**
+	 * Returns true if this port has a strict connection.
+	 * @see #isStrict()
+	 * @return true if this port has a strict connection, false otherwise
+	 */
+	public boolean isStrictConnected() {
+		for (Connection con : connections) {
+			if (con.isStrict())
+				return true;
+		}
+		return false;
+	}
+
 	public String getType() {
 		return type;
-//        for (ClassField field: obj.getFields()) {
-//			if (field.getName().equals(name))
-//				return field.type;
-//		}
-//		return null;
 	}
 
 	public ClassField getField() {
@@ -207,6 +216,7 @@ public class Port implements Cloneable, Serializable {
 	public GObj getObject() {
 		return obj;
 	}
+
 	public int getNumber() {
 		Port port;
 
@@ -221,6 +231,10 @@ public class Port implements Cloneable, Serializable {
 
 	public void addConnection(Connection con) {
 		connections.add(con);
+	}
+
+	public boolean removeConnection(Connection con) {
+		return connections.remove(con);
 	}
 
 	public void setHilighted(boolean b) {
@@ -291,11 +305,29 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	/**
+	 * Returns true if this port is directly connected to the specified port.
+	 * Directly connected means that there exists a {@code Connection} instance
+	 * having the end ports the {@code port} and {@code this} port.
+	 * 
+	 * @param port
+	 *            the port
+	 * @return true, if this port is directly connected to the {@code port},
+	 *         {@code false otherwise}
+	 */
+	public boolean isConnectedTo(Port port) {
+		for (Connection conn : connections) {
+			if (conn.beginPort == port || conn.endPort == port)
+				return true;
+		}
+		return false;
+	}
+
+	/**
 	 * Checks whether the specified port can be connected to {@code this} port.
 	 * 
-	 * @param port a port
- 	 * @return <code>true</code> if {@code this} port and {@code port} 
- 	 * 		   can be connected.
+	 * @param port
+	 *            a port
+	 * @return true if {@code this} port and {@code port} can be connected
 	 */
 	public boolean canBeConnectedTo(Port port) {
 		return Port.canBeConnected(this, port);
@@ -329,5 +361,19 @@ public class Port implements Cloneable, Serializable {
 			return true;
 		else 
 			return false;
+	}
+
+	/**
+	 * Returns true if this port contains the center point of the specified
+	 * port.
+	 * 
+	 * @param port
+	 *            the port
+	 * @return true, if this port contains the center point of the port, false
+	 *         otherwise
+	 */
+	public boolean contains(Port port) {
+		return inBoundsX(port.getRealCenterX())
+				&& inBoundsY(port.getRealCenterY());
 	}
 }

@@ -9,6 +9,11 @@ package ee.ioc.cs.vsle.util;
 
 public class StringUtil {
 
+	/*
+	 * Constants for XML data types
+	 */
+	public static final String CDATA = "CDATA";
+
     public static String indent(int size) {
         StringBuffer sb = new StringBuffer();
 		for (int i = 0; i < size; i++) {

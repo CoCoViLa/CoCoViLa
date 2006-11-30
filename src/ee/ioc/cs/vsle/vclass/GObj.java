@@ -7,7 +7,14 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.awt.*;
 
+import javax.xml.transform.sax.TransformerHandler;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
+
 public class GObj implements Serializable, Cloneable {
+
+	private static final long serialVersionUID = 1L;
 
 	public float Xsize = 1; // percentage for resizing, 1 means real size
 	public float Ysize = 1;
@@ -21,16 +28,13 @@ public class GObj implements Serializable, Cloneable {
 	public String className;
 	protected String name;
 
-	public ArrayList<Port> ports = new ArrayList<Port>();
+	private ArrayList<Port> ports = new ArrayList<Port>();
 	public ArrayList<ClassField> fields = new ArrayList<ClassField>();
 	public ArrayList<Shape> shapes = new ArrayList<Shape>();
 
-	// public ArrayList classRelations;
-	public boolean draggable;
-	public boolean selected;
+	private boolean selected;
 	public boolean group = false;
-	public boolean strict;
-//	public ClassGraphics graphics;
+	private boolean strict;
 
 	public int portOffsetX1 = 0;
 	public int portOffsetX2 = 0;
@@ -38,6 +42,7 @@ public class GObj implements Serializable, Cloneable {
 	public int portOffsetY2 = 0;
 
 	public GObj() {
+		// default constructor
 	}
 
 	public GObj(int x, int y, int width, int height, String name) {
@@ -162,6 +167,7 @@ public class GObj implements Serializable, Cloneable {
 		return 0;
 	}
 
+	@Override
 	public String toString() {
 		return getName();
 	}
@@ -213,14 +219,6 @@ public class GObj implements Serializable, Cloneable {
 
 	public String getClassName() {
 		return className;
-	}
-
-	public void setDraggable(boolean set) {
-		draggable = set;
-	}
-
-	public boolean isDraggable() {
-		return draggable;
 	}
 
 	public void setSelected(boolean set) {
@@ -283,28 +281,27 @@ public class GObj implements Serializable, Cloneable {
 		}
 	} // draw
 
-	public void drawClassGraphics(Graphics2D g2) {
+	public void drawClassGraphics(Graphics2D g2, float scale) {
 		draw(getX(), getY(), getXsize(), getYsize(), g2);
 
 		int xModifier = getX();
 		int yModifier = getY();
         g2.setColor(Color.black);
 		for (int i = 0; i < getPorts().size(); i++) {
+			ClassGraphics graphics;
 			Port port = getPorts().get(i);
 
-			if (port.isSelected()) {
-				port.getClosedGraphics().draw(xModifier + (int) (getXsize() * port.x),
-					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
-			} else if (port.isConnected()) {
-				port.getClosedGraphics().draw(xModifier + (int) (getXsize() * port.x),
-					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
-			} else if (port.isHilighted()) {
-				port.getClosedGraphics().draw(xModifier + (int) (getXsize() * port.x),
-					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
-			} else {
-				port.getOpenGraphics().draw(xModifier + (int) (getXsize() * port.x),
-					yModifier + (int) (getYsize() * port.y), getXsize(), getYsize(), g2);
-			}
+			if (port.isSelected() || port.isConnected() 
+					|| port.isHilighted()) {
+
+				graphics = port.getClosedGraphics();
+
+			} else 
+				graphics = port.getOpenGraphics();
+			
+			graphics.draw(xModifier + (int) (getXsize() * port.x),
+					yModifier + (int) (getYsize() * port.y),
+					getXsize(), getYsize(), g2);
 		}
 
 		for (int i = 0; i < fields.size(); i++) { //print all field values
@@ -337,31 +334,39 @@ public class GObj implements Serializable, Cloneable {
 
 		g2.setColor(Color.black);
 		if (isSelected() == true) {
-			drawSelectionMarks(g2);
+			drawSelectionMarks(g2, scale);
 		}
 	}
 
-	private void drawSelectionMarks(Graphics g) {
-		g.fillRect(getX() + portOffsetX1 - CORNER_SIZE -1, getY() + portOffsetY1 - CORNER_SIZE - 1,  CORNER_SIZE,  CORNER_SIZE);
-		g.fillRect(getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) + 1,
-			getY() + portOffsetY1  - CORNER_SIZE -1,  CORNER_SIZE,  CORNER_SIZE);
+	private void drawSelectionMarks(Graphics g, float scale) {
 		g.fillRect(getX() + portOffsetX1 - CORNER_SIZE -1,
-			getY() + (int) (getYsize() * (portOffsetY2 + getHeight())) + 1, CORNER_SIZE, CORNER_SIZE);
-		g.fillRect(getX() + (int) (getXsize() * (portOffsetX2 + getWidth())) + 1,
-			getY() + (int) (getYsize() * (+portOffsetY2 + getHeight())) + 1, CORNER_SIZE, CORNER_SIZE);
+				getY() + portOffsetY1 - CORNER_SIZE - 1,
+				CORNER_SIZE,  CORNER_SIZE);
+
+		g.fillRect(getX() + (int) (getXsize() * (getWidth()
+				+ portOffsetX2)) + 1, getY() + portOffsetY1
+				- CORNER_SIZE -1,  CORNER_SIZE,  CORNER_SIZE);
+
+		g.fillRect(getX() + portOffsetX1 - CORNER_SIZE -1,
+				getY() + (int) (getYsize() * (portOffsetY2 
+				+ getHeight())) + 1, CORNER_SIZE, CORNER_SIZE);
+
+		g.fillRect(getX() + (int) (getXsize() * (portOffsetX2 
+				+ getWidth())) + 1, getY() + (int) (getYsize()
+				* (portOffsetY2 + getHeight())) + 1, CORNER_SIZE, CORNER_SIZE);
 	}
 
+	@Override
 	public GObj clone() {
 		try {
 			GObj obj = (GObj) super.clone();
 
             obj.setPorts(new ArrayList<Port>());
-			for (Port port: getPorts()) {
+			for (Port port : getPorts()) {
 				port = port.clone();
-				port.setConnected(false);
 				obj.getPorts().add(port);
-				port.setObject( obj );
-				port.setConnections( new ArrayList<Connection>() );
+				port.setObject(obj);
+				port.setConnections(new ArrayList<Connection>());
 			}
 
 			obj.setFields(new ArrayList<ClassField>());
@@ -412,8 +417,34 @@ public class GObj implements Serializable, Cloneable {
 		this.height = height;
 	}
 
+	/**
+	 * Replaces the current port list with the specified one.
+	 * Further modifications of the list might not be reflected correctly
+	 * in the state of this object. Therefore, it is recommended that the
+	 * list is not modified directly. New ports can be added through the
+	 * {@code addPort()} method.
+	 * 
+	 * @param ports list of the ports
+	 */
 	public void setPorts(ArrayList<Port> ports) {
 		this.ports = ports;
+		for (Port port : ports) {
+			if (port.isStrict()) {
+				this.strict = true;
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Appends the specified port at the end of the list of the ports.
+	 * 
+	 * @param port a port
+	 */
+	public void addPort(Port port) {
+		ports.add(port);
+		if (!strict && port.isStrict())
+			strict = true;
 	}
 
 	public ArrayList<ClassField> getFields() {
@@ -424,44 +455,64 @@ public class GObj implements Serializable, Cloneable {
 		this.fields = fields;
 	}
 
-    /*
-	public ArrayList getClassRelations() {
-		return classRelations;
-	}
-
-	public void setClassRelations(ArrayList classRelations) {
-		this.classRelations = classRelations;
-	}
-    */
-
 	public void setGroup(boolean group) {
 		this.group = group;
 	}
 
-	public void setStrict(boolean strict) {
-		this.strict = strict;
+	/**
+	 * Generates SAX events that are necessary to serialize this object to XML.
+	 * @param th the receiver of events
+	 * @throws SAXException 
+	 */
+	public void toXML(TransformerHandler th) throws SAXException {
+		AttributesImpl attrs = new AttributesImpl();
+		
+		attrs.addAttribute(null, null, "name", StringUtil.CDATA, name);
+		attrs.addAttribute(null, null, "type", StringUtil.CDATA, className);
+
+		th.startElement(null, null, "object", attrs);
+
+		attrs.clear();
+		attrs.addAttribute(null, null, "x", StringUtil.CDATA,
+				Integer.toString(x));
+		attrs.addAttribute(null, null, "y", StringUtil.CDATA,
+				Integer.toString(y));
+		attrs.addAttribute(null, null, "width", StringUtil.CDATA,
+				Integer.toString(width));
+		attrs.addAttribute(null, null, "height", StringUtil.CDATA,
+				Integer.toString(height));
+		attrs.addAttribute(null, null, "xsize", StringUtil.CDATA,
+				Double.toString(Xsize));
+		attrs.addAttribute(null, null, "ysize", StringUtil.CDATA,
+				Double.toString(Ysize));
+		attrs.addAttribute(null, null, "strict", StringUtil.CDATA,
+				Boolean.toString(isStrict()));
+
+		th.startElement(null, null, "properties", attrs);
+		th.endElement(null, null, "properties");
+		
+		th.startElement(null, null, "fields", null);
+
+		for (ClassField field: fields)
+			field.toXML(th);
+
+		th.endElement(null, null, "fields");
+		th.endElement(null, null, "object");
 	}
 
-	/*
-	public ClassGraphics getGraphics() {
-		return graphics;
-	}
-
-	public void setGraphics(ClassGraphics graphics) {
-		this.graphics = graphics;
-	}*/
-
-	public String toXML() {
-		String xml = "<object name=\""+name+"\" type=\""+className+"\" >\n";
-        xml += "  <properties x=\""+ x+"\" y=\""+y+"\" width=\""+ width+"\" height=\""+height+"\" xsize=\""+Xsize+"\" ysize=\""+Ysize+"\" strict=\""+strict+"\" />\n";
-		xml += "  <fields>\n";
-		for (int i = 0; i < fields.size(); i++) {
-			ClassField field = fields.get(i);
-            xml += StringUtil.indent(4) + field.toXML();
+	/**
+	 * Returns {@code true} if one or more ports are strictly connected.
+	 * 
+	 * @return true if this object is strictly connected, {@code false}
+	 *         otherwise
+	 */
+	public boolean isStrictConnected() {
+		for (Port port : ports) {
+			for (Connection con : port.getConnections()) {
+				if (con.isStrict())
+					return true;
+			}
 		}
-		xml += "  </fields>\n";
-        xml += "</object>\n";
-		return xml;
-
+		return false;
 	}
 }

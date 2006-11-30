@@ -3,8 +3,12 @@ package ee.ioc.cs.vsle.vclass;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ANY;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_VOID;
 
-import java.io.*;
 import java.util.*;
+
+import javax.xml.transform.sax.TransformerHandler;
+
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.AttributesImpl;
 
 import ee.ioc.cs.vsle.util.*;
 
@@ -25,7 +29,7 @@ import ee.ioc.cs.vsle.util.*;
  * @author Ando Saabas
  * @version 1.0
  */
-public class ClassField implements Cloneable, Serializable {
+public class ClassField implements Cloneable {
 
 	public final static String ARRAY_TOKEN = "%%";
 	
@@ -174,6 +178,7 @@ public class ClassField implements Cloneable, Serializable {
 	 * 
 	 * @return ClassField
 	 */
+	@Override
 	public ClassField clone() {
 		try {
 			return (ClassField) super.clone();
@@ -183,9 +188,10 @@ public class ClassField implements Cloneable, Serializable {
 	} // clone
 
 	/**
-	 * <UNCOMMENTED>
+	 * Returns true if the user is interested in seeing the value of this
+	 * field after each invokation of the generated program.
 	 * 
-	 * @return boolean -
+	 * @return true if this field is watched, false otherwise
 	 */
 	public boolean isWatched() {
 		return watched;
@@ -196,6 +202,7 @@ public class ClassField implements Cloneable, Serializable {
 	 * 
 	 * @return String - name of the class.
 	 */
+	@Override
 	public String toString() {
 		return getName();
 	} // toString
@@ -213,12 +220,22 @@ public class ClassField implements Cloneable, Serializable {
 		return value != null;
 	}
 
-	public String toXML() {
-		String xml = "<field name=\"" + getName() + "\" type=\"" + type + "\"";
+	/**
+	 * Generates SAX events that are necessary to serialize this object to XML.
+	 * @param th the receiver of events
+	 * @throws SAXException 
+	 */
+	public void toXML(TransformerHandler th) throws SAXException {
+		AttributesImpl attrs = new AttributesImpl();
+		
+		attrs.addAttribute(null, null, "name", StringUtil.CDATA, getName());
+		attrs.addAttribute(null, null, "type", StringUtil.CDATA, getType());
+		
 		if (value != null)
-			xml += " value=\"" + value + "\"";
-		xml += "/>\n";
-		return xml;
+			attrs.addAttribute(null, null, "value", StringUtil.CDATA, value);
+
+		th.startElement(null, null, "field", attrs);
+		th.endElement(null, null, "field");
 	}
 
 	public String getName() {

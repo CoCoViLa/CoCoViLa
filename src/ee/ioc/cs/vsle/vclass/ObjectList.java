@@ -60,19 +60,12 @@ public class ObjectList extends ArrayList<GObj> {
 
 
 	public GObj checkInside(int x, int y) {
-		GObj obj;
-
-		for (int i = this.size() - 1; i >= 0; i--) {
-			obj = this.get(i);
-			if (obj.contains(x, y)) {
-				return obj;
-			}
-		}
-		return null;
+		return checkInside(x, y, null);
 	}
 
 	public GObj checkInside(int x, int y, GObj asker) {
-        for (GObj obj: this) {
+		for (int i = this.size() - 1; i >= 0; i--) {
+			GObj obj = this.get(i);
 			if (obj.contains(x, y) && obj != asker) {
 				return obj;
 			}
@@ -81,7 +74,7 @@ public class ObjectList extends ArrayList<GObj> {
 	}
 
 	public void selectObjectsInsideBox(int x1, int y1, int x2, int y2) {
-		for (GObj obj: this) {
+		for (GObj obj : this) {
 			if (obj.isInside(x1, y1, x2, y2)) {
 				obj.setSelected(true);
 			}
@@ -98,14 +91,14 @@ public class ObjectList extends ArrayList<GObj> {
 	}
 
 	public void clearSelected() {
-		for (GObj obj: this) {
+		for (GObj obj : this) {
 			obj.setSelected(false);
 		}
 	}
 
 	public ArrayList<GObj> getSelected() {
 		ArrayList<GObj> a = new ArrayList<GObj>();
-		for (GObj obj: this) {
+		for (GObj obj : this) {
 			if (obj.isSelected()) {
 				a.add(obj);
 			}
@@ -118,25 +111,17 @@ public class ObjectList extends ArrayList<GObj> {
 	 */
 	public void updateRelObjs() {
         RelObj obj;
-		Point endPoint;
 		for (GObj o : this) {
 			if (o instanceof RelObj) {
                 obj = (RelObj) o;
-                
-                endPoint = VMath.getRelClassStartPoint(obj.startPort,
+
+                Point start = VMath.getRelClassStartPoint(obj.startPort,
                 		obj.endPort);
                 
-                obj.x = endPoint.x;
-                obj.y = endPoint.y;
-
-                endPoint = VMath.getRelClassStartPoint(obj.endPort,
+                Point end = VMath.getRelClassStartPoint(obj.endPort,
                 		obj.startPort);
-                
-                obj.endX = endPoint.x;
-                obj.endY = endPoint.y;
 
-                obj.Xsize = (float) Math.sqrt(Math.pow((obj.x - obj.endX), 2.0) + Math.pow((obj.y - obj.endY), 2.0)) / obj.width;
-				obj.angle = VMath.calcAngle(obj.x, obj.y, obj.endX, obj.endY);
+                obj.setEndPoints(start, end);
 			}
 		}
 	}
@@ -172,11 +157,9 @@ public class ObjectList extends ArrayList<GObj> {
 	}
 
 	public Port getPort(String objName, String portId) {
-		Port port;
-		for (GObj obj: this) {
+		for (GObj obj : this) {
 			if (obj.getName().equals(objName)) {
-				for (int j = 0; j < obj.ports.size(); j++) {
-					port = obj.ports.get(j);
+				for (Port port : obj.getPorts()) {
 					if (port.getId() != null) {
 						if (port.getId().equals(portId)) {
 							return port;
@@ -189,5 +172,39 @@ public class ObjectList extends ArrayList<GObj> {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Returns the topmost port that contains the specified point.
+	 * 
+	 * @param x
+	 *            X coordinate
+	 * @param y
+	 *            Y coordinate
+	 * @return a port or null if there is no port
+	 */
+	public Port getPort(int x, int y) {
+		return getPort(x, y, null);
+	}
+	
+	/**
+	 * Returns the topmost port not belonging to the object asker that contains
+	 * the specified point.
+	 * 
+	 * @param x
+	 *            X coordinate
+	 * @param y
+	 *            Y coordinate
+	 * @param asker
+	 *            the owner of the ports which are ignored, null if all ports
+	 *            should be checked
+	 * @return a port or null if there is no port not belonging to the asker
+	 */
+	public Port getPort(int x, int y, GObj asker) {
+		Port port = null;
+		GObj obj = checkInside(x, y, asker);
+		if (obj != null)
+			port = obj.portContains(x, y);
+		return port;
 	}
 }
