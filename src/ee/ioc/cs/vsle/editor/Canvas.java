@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.editor;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -10,12 +11,13 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.PrintWriter;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -30,15 +32,28 @@ import javax.swing.undo.AbstractUndoableEdit;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
+import javax.swing.undo.UndoableEdit;
 import javax.swing.undo.UndoableEditSupport;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamResult;
+
+import org.xml.sax.helpers.AttributesImpl;
+
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.ccl.CompileException;
-import ee.ioc.cs.vsle.event.*;
+import ee.ioc.cs.vsle.event.EventSystem;
 import ee.ioc.cs.vsle.packageparse.PackageParser;
 import ee.ioc.cs.vsle.util.PrintUtilities;
 import ee.ioc.cs.vsle.util.PropertyBox;
+import ee.ioc.cs.vsle.util.StringUtil;
 import ee.ioc.cs.vsle.util.VMath;
+import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.ClassPainter;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.ConnectionList;
@@ -59,17 +74,14 @@ public class Canvas extends JPanel implements ActionListener {
 	int mouseX; // Mouse X coordinate.
 	int mouseY; // Mouse Y coordinate.
 	private String workDir;
-	int objCount;
 	VPackage vPackage;
 	Palette palette;
 	Scheme scheme;
-	ConnectionList connections;
+	private ConnectionList connections;
 	ObjectList objects;
     Map<GObj, ClassPainter> classPainters;
     ClassPainter currentPainter;
 	GObj currentObj;
-	Port firstPort;
-	Port currentPort;
 	Connection currentCon;
 	public MouseOps mListener;
 	public KeyOps keyListener;
@@ -84,6 +96,193 @@ public class Canvas extends JPanel implements ActionListener {
     boolean enableClassPainter = true;
     UndoManager undoManager;
     UndoableEditSupport undoSupport;
+    private boolean actionInProgress = false;
+    private JScrollPane areaScrollPane;
+
+    /*
+     * The Edit classes implementing undo-redo could be moved somewhere
+     * else but as they need to touch the internal state of the Canvas
+     * object then maybe there is no better place right now. 
+     */
+
+    /**
+     * Undoable edit for moving objects on the scheme.
+     * Multiple subsequent move edits of the same set of objects are merged
+     * into one movement. The effect of undoing the merged edit is to move the
+     * objects back to the positions they had before the first move edit.
+     * The edit keeps track and takes care of strict connections created or
+     * breaked during the movements.
+     */
+    private static class MoveEdit extends AbstractUndoableEdit {
+
+		private static final long serialVersionUID = 1L;
+
+		private Canvas canvas;
+		private int moveX;
+		private int moveY;
+		private Collection<GObj> selected;
+		private Collection<Connection> newConns;
+		private Collection<Connection> delConns;
+
+		public MoveEdit(Canvas canvas, int moveX, int moveY,
+				Collection<GObj> selectedObjs, Collection<Connection> created,
+				Collection<Connection> deleted) {
+			
+			this.canvas = canvas;
+			this.moveX = moveX;
+			this.moveY = moveY;
+			this.selected = selectedObjs;
+			
+			// remember to create copies before modifying
+			this.newConns = created;
+			this.delConns = deleted;
+		}
+
+		@Override
+		public boolean addEdit(UndoableEdit anEdit) {
+			if (anEdit instanceof MoveEdit) {
+				MoveEdit ne = (MoveEdit) anEdit;
+				
+				if (ne.selected.equals(selected)) {
+					moveX += ne.moveX;
+					moveY += ne.moveY;
+
+					if (newConns == null && ne.newConns != null)
+						newConns = new ArrayList<Connection>(ne.newConns);
+
+					// Add all removed connections that were not created
+					// in previous move edits to the deleted list. Forget
+					// about connections which were created and deleted.
+					if (ne.delConns != null) {
+						for (Connection con : ne.delConns) {
+							if (newConns == null || !newConns.remove(con)) {
+								if (delConns == null)
+									delConns = new ArrayList<Connection>();
+								
+								delConns.add(con);
+							}
+						}
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public String getPresentationName() {
+			return "Move";
+		}
+
+		@Override
+		public void redo() throws CannotRedoException {
+			super.redo();
+
+			moveSelected(moveX, moveY);
+
+			if (delConns != null)
+				canvas.connections.removeAll(delConns);
+			if (newConns != null)
+				canvas.connections.addAll(newConns);
+			
+			canvas.objects.updateRelObjs();
+		}
+
+		@Override
+		public void undo() throws CannotUndoException {
+			super.undo();
+
+			moveSelected(-moveX, -moveY);
+
+			if (newConns != null)
+				canvas.connections.removeAll(newConns);
+			if (delConns != null)
+				canvas.connections.addAll(delConns);
+
+			canvas.objects.updateRelObjs();
+		}
+
+		private void moveSelected(int dx, int dy) {
+			for (GObj obj : selected) {
+				obj.setX(obj.getX() + dx);
+				obj.setY(obj.getY() + dy);
+				
+				for (Connection con : obj.getConnections()) {
+					if (selected.contains(con.beginPort.getObject())
+							&& selected.contains(con.endPort.getObject())) {
+						
+						con.move(dx, dy);
+					}
+				}
+			}
+		}
+    }
+
+    /**
+     * Undoable edit for deleting a connection.
+     */
+    private static class DeleteConnectionEdit extends AbstractUndoableEdit {
+
+		private static final long serialVersionUID = 1L;
+
+		private Canvas canvas;
+		private Connection connection;
+		
+		public DeleteConnectionEdit(Canvas canvas, Connection connection) {
+			this.canvas = canvas;
+			this.connection = connection;
+		}
+
+		@Override
+		public String getPresentationName() {
+			return "Delete relation";
+		}
+
+		@Override
+		public void redo() throws CannotRedoException {
+			super.redo();
+			canvas.getConnections().remove(connection);
+		}
+
+		@Override
+		public void undo() throws CannotUndoException {
+			super.undo();
+			canvas.getConnections().add(connection);
+		}
+    }
+
+    /**
+     * Undoable edit for adding a connection.
+     */
+    private static class AddConnectionEdit extends AbstractUndoableEdit {
+
+		private static final long serialVersionUID = 1L;
+
+		private Canvas canvas;
+		private Connection connection;
+		
+		public AddConnectionEdit(Canvas canvas, Connection connection) {
+			this.canvas = canvas;
+			this.connection = connection;
+		}
+
+		@Override
+		public String getPresentationName() {
+			return "Add relation";
+		}
+
+		@Override
+		public void redo() throws CannotRedoException {
+			super.redo();
+			canvas.getConnections().add(connection);
+		}
+
+		@Override
+		public void undo() throws CannotUndoException {
+			super.undo();
+			canvas.getConnections().remove(connection);
+		}
+    }
 
     /**
      * Undoable edit for adding objects.
@@ -95,12 +294,14 @@ public class Canvas extends JPanel implements ActionListener {
 		private GObj object;
 		private ClassPainter painter;
 		private Canvas canvas;
+		private Collection<Connection> newConns;
 
 		public AddObjectEdit(Canvas canvas, GObj currentObj,
-				ClassPainter currentPainter) {
+				ClassPainter currentPainter, ArrayList<Connection> newConns) {
 			this.canvas = canvas;
 			this.object = currentObj;
 			this.painter = currentPainter;
+			this.newConns = newConns;
 		}
 
 		@Override
@@ -112,6 +313,9 @@ public class Canvas extends JPanel implements ActionListener {
 		public void redo() throws CannotRedoException {
 			super.redo();
 			canvas.objects.add(object);
+			canvas.objects.updateRelObjs();
+			if (newConns != null)
+				canvas.connections.addAll(newConns);
 			if (painter != null && canvas.classPainters != null)
 				canvas.classPainters.put(object, painter);
 		}
@@ -120,6 +324,8 @@ public class Canvas extends JPanel implements ActionListener {
 		public void undo() throws CannotUndoException {
 			super.undo();
 			canvas.objects.remove(object);
+			if (newConns != null)
+				canvas.connections.removeAll(newConns);
 			if (painter != null && canvas.classPainters != null)
 				canvas.classPainters.remove(object);
 		}
@@ -167,6 +373,7 @@ public class Canvas extends JPanel implements ActionListener {
 		public void undo() throws CannotUndoException {
 			super.undo();
 			canvas.objects.addAll(removedObjs);
+			canvas.objects.updateRelObjs();
 			canvas.connections.addAll(removedConns);
 			if (canvas.classPainters != null && removedPainters != null)
 				canvas.classPainters.putAll(removedPainters);
@@ -230,15 +437,15 @@ public class Canvas extends JPanel implements ActionListener {
 
 		private Canvas canvas;
 		
-		private ConnectionList connCopy;
-		private ObjectList objCopy;
+		private Collection<Connection> connCopy;
+		private Collection<GObj> objCopy;
 		private Map<GObj, ClassPainter> painterCopy;
 		
 		public ClearAllEdit(Canvas canvas) {
 			this.canvas = canvas;
 
-			objCopy = new ObjectList(canvas.objects);
-			connCopy = new ConnectionList(canvas.connections);
+			objCopy = new ArrayList<GObj>(canvas.objects);
+			connCopy = new ArrayList<Connection>(canvas.connections);
 			if (canvas.classPainters != null)
 				painterCopy = new HashMap<GObj,ClassPainter>(
 						canvas.classPainters);
@@ -301,6 +508,7 @@ public class Canvas extends JPanel implements ActionListener {
         mListener = new MouseOps(this);
 		keyListener = new KeyOps(this);
 		drawingArea = new DrawingArea();
+		drawingArea.setOpaque(true);
 		drawingArea.setBackground(Color.white);
 		setGridVisible(getGridVisibility());
 		drawingArea.setFocusable(true);
@@ -313,15 +521,18 @@ public class Canvas extends JPanel implements ActionListener {
 		// Initializes key listeners, for keyboard shortcuts.
 		drawingArea.addKeyListener(keyListener);
 
-		JScrollPane areaScrollPane = new JScrollPane(drawingArea,
+		areaScrollPane = new JScrollPane(drawingArea,
 			ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
 			ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		setLayout(new BorderLayout());
 		add(areaScrollPane, BorderLayout.CENTER);
+		
 		infoPanel.add(posInfo);
-		add(infoPanel, BorderLayout.SOUTH);
 		posInfo.setText("-");
-        executor = Executors.newSingleThreadExecutor();
+
+		add(infoPanel, BorderLayout.SOUTH);
+
+		executor = Executors.newSingleThreadExecutor();
         
         if (vPackage.hasPainters()) {
             classPainters = new HashMap<GObj, ClassPainter>();
@@ -367,10 +578,10 @@ public class Canvas extends JPanel implements ActionListener {
                 }
             } catch (CompileException e) {
                 success = false;
-                e.printStackTrace();
+                db.p(e); // print compiler generated message
             } catch (Exception e) {
                 success = false;
-                e.printStackTrace();
+                db.p(e);
             }
         }
         return success;
@@ -393,25 +604,17 @@ public class Canvas extends JPanel implements ActionListener {
 		return vPackage;
 	}
 
-	public void stopRelationAdding() {
-		currentObj = null;
-		currentPort = null;
-		currentCon = null;
-		if (firstPort != null) {
-			if (firstPort.getConnections().size() < 1)
-				firstPort.setConnected(false);
-			firstPort = null;
-		}
-
-		mListener.setState(State.selection);
-		drawingArea.repaint();
-	}
-
-
     /**
 	 * Method for grouping objects.
 	 */
 	public void groupObjects() {
+		throw new NotImplementedException();
+		/*
+		 * This function is broken and was hidden in the GUI.
+		 * If this is something useful then it should be specified and
+		 * reimplemented or something.
+		 */
+		/*
 		ArrayList<GObj> selected = objects.getSelected();
 		if (selected.size() > 1) {
 			GObj obj;
@@ -420,77 +623,67 @@ public class Canvas extends JPanel implements ActionListener {
 				obj.setSelected(false);
 			}
 			GObjGroup og = new GObjGroup(selected);
-			og.strict = true;
 			og.setAsGroup(true);
 			objects.removeAll(selected);
 			objects.add(og);
 			drawingArea.repaint();
 		}
+		*/
 	} // groupObjects
 
 	/**
-	 * Move object with keys, executed by the KeyOps.
-	 * @param moveX int - object x coordinate change.
-	 * @param moveY int - object y coordinate change.
+	 * Moves selected objects on the scheme.
+	 * @param moveX X coordinate change
+	 * @param moveY Y coordinate change
 	 */
-	public void moveObject(int moveX, int moveY) {
+	public void moveObjects(int moveX, int moveY) {
 		ArrayList<GObj> selectedObjs = objects.getSelected();
+		ArrayList<Connection> created = null;
+		ArrayList<Connection> deleted = null;
+		
 		for (int i = 0; i < selectedObjs.size(); i++) {
 			GObj obj = selectedObjs.get(i);
 			if (!(obj instanceof RelObj))
 				obj.setPosition(obj.getX() + moveX, obj.getY() + moveY);
 
-			// check if a strict port exists on the object
-
 			if (obj.isStrict()) {
-				Port port, port2;
-				GObj obj2;
-				ArrayList<Port> ports = obj.getPorts();
+				// remove broken strict connections
+				ArrayList<Connection> rc = getBrokenStrictConnections(obj);
 
-				for (int j = 0; j < ports.size(); j++) {
-					port = ports.get(j);
-					if (port.isStrict()) {
-						port2 = port.getStrictConnected();
-						// if the port is connected to another port, and they are not both selected, we might
-						// wanna remove the connection
-						if (port2 != null && !port2.getObject().isSelected()) {
-							// We dont want to remove the connection, if the objects belong to the same group
-							if (!(obj.isGroup() && obj.includesObject(port2.getObject()))) {
-								if (Math.abs(port.getRealCenterX() - port2.getRealCenterX()) > 1 || Math.abs(port.getRealCenterY() - port2.getRealCenterY()) > 1) {
-									connections.remove(port, port2);
-								}
-							}
-						}
+				if (rc != null) {
+					if (deleted == null)
+						deleted = new ArrayList<Connection>();
+					
+					deleted.addAll(rc);
+					connections.removeAll(rc);
+				}
 
-						obj2 = objects.checkInside(port.getObject().getX() + moveX + port.getCenterX(), port.getObject().getY() + moveY + port.getCenterY(), obj);
-						if (obj2 != null && !obj2.isSelected()) {
-							port2 = obj2.portContains(port.getObject().getX() + moveX + port.getCenterX(), port.getObject().getY() + moveY + port.getCenterY());
+				// create new strict connections
+				ArrayList<Connection> nc = getNewStrictConnections(obj);
 
-							if (port2 != null && port2.isStrict()) {
-								if (!port.isConnected()) {
-									port.setConnected(true);
-									port2.setConnected(true);
-									Connection con = new Connection(port, port2);
+				if (nc != null) {
+					if (created == null)
+						created = new ArrayList<Connection>();
 
-									port2.addConnection(con);
-									port.addConnection(con);
-									connections.add(con);
-								}
-								obj.setPosition(port2.getObject().x + port2.getCenterX() - ((port.getObject().x - obj.x) + port.getCenterX()), port2.getObject().y + port2.getCenterY() - ((port.getObject().y - obj.y) + port.getCenterY()));
-							}
-						}
-					}
+					created.addAll(nc);
+					connections.addAll(nc);
 				}
 			}
-
-			for (int j = 0; j < connections.size(); j++) {
-				Connection relation = connections.get(j);
-				if (obj.includesObject(relation.endPort.getObject()) || obj.includesObject(relation.beginPort.getObject())) {
-					relation.calcEndBreakPoints();
-				}
-			}
-
 		}
+
+		// if both endpoints of a connection are moved 
+		// then move the breakpoints also
+		for (Connection con : connections) {
+			if (selectedObjs.contains(con.beginPort.getObject())
+					&& selectedObjs.contains(con.endPort.getObject())) {
+				con.move(moveX, moveY);
+			}
+		}
+
+		MoveEdit edit = new MoveEdit(this, moveX, moveY, selectedObjs, created,
+				deleted);
+		undoSupport.postEdit(edit);
+		
 		objects.updateRelObjs();
 		drawingArea.repaint();
 	} // moveObject
@@ -499,6 +692,11 @@ public class Canvas extends JPanel implements ActionListener {
 	 * Method for ungrouping objects.
 	 */
 	public void ungroupObjects() {
+		throw new NotImplementedException();
+		/*
+		 * See groupObjects() 
+		 */
+		/*
 		GObj obj;
 		for (int i = 0; i < objects.getSelected().size(); i++) {
 			obj = objects.getSelected().get(i);
@@ -510,12 +708,17 @@ public class Canvas extends JPanel implements ActionListener {
 			}
 		}
 		drawingArea.repaint();
+		*/
 	}
 
+	public void addCurrentObject() {
+		addCurrentObject(null);
+	}
+	
 	/**
 	 * Adds the current object to the scheme.
 	 */
-	public void addCurrentObject() {
+	public void addCurrentObject(Port endPort) {
 		if (currentObj == null)
 			throw new IllegalStateException("Current object is null");
 		
@@ -523,11 +726,119 @@ public class Canvas extends JPanel implements ActionListener {
 		if (classPainters != null && currentPainter != null)
 			classPainters.put(currentObj, currentPainter);
 		
+		ArrayList<Connection> newConns = null;
+
+		if (currentObj instanceof RelObj) {
+			RelObj obj = (RelObj) currentObj;
+
+			obj.endPort = endPort;
+
+			obj.startPort.setSelected(false);
+			obj.endPort.setSelected(false);
+
+			ArrayList<Port> ports = currentObj.getPorts();
+			
+			newConns = new ArrayList<Connection>(2);
+			newConns.add(new Connection(obj.startPort, ports.get(0)));
+			newConns.add(new Connection(ports.get(1), endPort));
+			connections.addAll(newConns);
+			
+			objects.updateRelObjs();
+		} else if (currentObj.isStrict()) {
+			newConns = getNewStrictConnections(currentObj);
+			if (newConns != null)
+				connections.addAll(newConns);
+		}
+
 		undoSupport.postEdit(new AddObjectEdit(this, currentObj,
-				currentPainter));
+				currentPainter, newConns));
 		
 		currentObj = null;
 		currentPainter = null;
+		setActionInProgress(false);
+	}
+
+	/**
+	 * Examines the strict ports of the object and creates new connections where
+	 * necessary. Connections are created when the center point of one strict
+	 * port is inside another strict port and there is no direct connection
+	 * between these ports yet an the types of the ports are compatible.
+	 * 
+	 * @param object
+	 *            a strict object
+	 * @return a list of new connections, {@code null} if no new connections
+	 *         will be created
+	 */
+	private ArrayList<Connection> getNewStrictConnections(GObj object) {
+		ArrayList<Connection> conns = null;
+		for (Port port : object.getPorts()) {
+			if (port.isStrict()) {
+				port.setSelected(false);
+
+				Port p2 = objects.getPort(port.getRealCenterX(),
+						port.getRealCenterY(), object);
+
+				if (p2 != null && p2.isStrict()
+						&& port.canBeConnectedTo(p2) 
+						&& !port.isConnectedTo(p2)) {
+
+					// do not create more than one connection to a strict port
+					boolean ignore = false;
+
+					for (Connection c : object.getConnections()) {
+						if (c.isStrict() 
+								&& (c.beginPort == p2 || c.endPort == p2)) {
+							ignore = true;
+							break;
+						}
+						
+					}
+
+					if (!ignore && conns != null) {
+						for (Connection c : conns) {
+							if (c.beginPort == p2 || c.endPort == p2) {
+								ignore = true;
+								break;
+							}
+						}
+					}
+
+					if (!ignore) {
+						if (conns == null)
+							conns = new ArrayList<Connection>();
+
+						conns.add(new Connection(port, p2, true));
+					}
+				}
+			}
+		}
+		return conns;
+	}
+
+	/**
+	 * Returns the list of strict connections that should be removed because
+	 * the ports of the specified object are not close enough to the
+	 * corresponding strictly connected port.  
+	 * @param object the owner of the strict ports to be examined
+	 * @return the list of strict connections that should be removed
+	 */
+	private ArrayList<Connection> getBrokenStrictConnections(GObj object) {
+		ArrayList<Connection> removed = null;
+		
+		for (Port port : object.getPorts()) {
+			for (Connection con : port.getConnections()) {
+				if (con.isStrict() && !(con.beginPort.contains(con.endPort)
+						|| con.endPort.contains(con.beginPort))) {
+
+					if (removed == null)
+						removed = new ArrayList<Connection>();
+					
+					removed.add(con);
+				}
+			}
+		}
+		
+		return removed;
 	}
 
 	/**
@@ -539,6 +850,22 @@ public class Canvas extends JPanel implements ActionListener {
 		Map<GObj, ClassPainter> rmPainters = new HashMap<GObj, ClassPainter>();
 		Connection con;
 
+		// remove selected objects and related connections and
+		// accumulate for undo
+		GObj obj;
+		for (int i = 0; i < objects.size(); i++) {
+			obj = objects.get(i);
+			if (obj.isSelected()) {
+				Collection<Connection> cs = obj.getConnections();
+				removableConns.addAll(cs);
+				connections.removeAll(cs);
+				removableObjs.add(obj);
+				deleteClassPainters(obj, rmPainters);
+			}
+		}
+		objects.removeAll(removableObjs);
+
+		// remove selected connections and accumulate them for undo
 		for (int i = 0; i < connections.size();) {
 			con = connections.get(i);
 			if (con.isSelected()) {
@@ -547,46 +874,25 @@ public class Canvas extends JPanel implements ActionListener {
 			} else
 				i++;
 		}
-		GObj obj;
-		for (int i = 0; i < objects.size(); i++) {
-			obj = objects.get(i);
-			if (obj.isSelected()) {
-				Collection<Connection> cs = obj.getConnections();
-				// Sometimes object have references to connections that
-				// have been already removed. Is it a bug? Anyway,
-				// we do not want to undelete a connection more that once.
-				for (Connection c : cs) {
-					if (connections.contains(c))
-						removableConns.add(c);
-				}
-				connections.removeAll(cs);
-				removableObjs.add(obj);
-				deleteClassPainters(obj, rmPainters);
-			}
-		}
-		objects.removeAll(removableObjs);
 
 		// remove dangling relation objects
 		for (RelObj ro : objects.getExcessRels()) {
 			Collection<Connection> cs = ro.getConnections();
-			// again: do not undelete a connection more than once 
+			// do not undelete a connection more than once 
 			for (Connection c : cs) {
 				if (connections.contains(c))
 					removableConns.add(c);
 			}
+			connections.removeAll(cs);
 			removableObjs.add(ro);
 			deleteClassPainters(ro, rmPainters);
 			objects.remove(ro);
 		}
 		
-		// Avoid dangling connections: there might be a connection that is
-		// being added and is connected to only one object that is selected
-		// and will be removed here.
-		stopRelationAdding();
-		
 		if (removableObjs.size() > 0 || removableConns.size() > 0) {
 			DeleteEdit edit = new DeleteEdit(this, removableObjs,
 					removableConns,	rmPainters);
+
 			undoSupport.postEdit(edit);
 		}
 		
@@ -665,24 +971,19 @@ public class Canvas extends JPanel implements ActionListener {
 
 
 	/**
-	 * Method for cloning objects, currently invoked either
-	 * from the Edit menu Clone selection or from the Object popup
-	 * menu Clone selection.
+	 * Clones selected objects.
 	 */
 	public void cloneObject() {
-		ArrayList<GObj> selected = objects.getSelected();
-		// objCount = objects.size();
 		ArrayList<GObj> newObjects = new ArrayList<GObj>();
-		GObj obj;
 		Map<GObj, ClassPainter> newPainters = null;
-		// clone every selected objects
-		for (int i = 0; i < selected.size(); i++) {
-			obj = selected.get(i);
+
+		// clone every selected object
+		for (GObj obj : objects.getSelected()) {
 			GObj newObj = obj.clone();
 			newObj.setPosition(newObj.x + 20, newObj.y + 20);
-			newObjects.add(newObj);
+			newObjects.addAll(newObj.getComponents());
 
-			// create new and fresh class painters for cloned object
+			// create new and fresh class painter for cloned object
 			if (vPackage.hasPainters()) {
 				PackageClass pc = vPackage.getClass(obj.getClassName());
 				ClassPainter painter = pc.getPainterFor(scheme, newObj);
@@ -692,90 +993,63 @@ public class Canvas extends JPanel implements ActionListener {
 					newPainters.put(newObj, painter);
 				}
 			}
-		}
-		// some of these objects might have been groups, so ungroup everything
-		ObjectList objects2 = new ObjectList();
-		for (int i = 0; i < newObjects.size(); i++) {
-			obj = newObjects.get(i);
-			objects2.addAll(obj.getComponents());
-		}
 
-		GObj obj2;
-		for (int i = 0; i < objects2.size(); i++) {
-			obj = objects2.get(i);
-			if (obj instanceof RelObj) {
-				for (int j = 0; j < objects2.size(); j++) {
-					obj2 = objects2.get(j);
-					if (((RelObj) obj).startPort.getObject().getName().equals(obj2.getName()))
-						((RelObj) obj).startPort.setObject( obj2 );
-					if (((RelObj) obj).endPort.getObject().getName().equals(obj2.getName()))
-						((RelObj) obj).endPort.setObject( obj2 );
-				}
-			}
-		}
-
-
-		// now the hard part - we have to clone all the connections
-		Connection con;
-		GObj beginObj;
-		GObj endObj;
-		ConnectionList newConnections = new ConnectionList();
-		for (int i = 0; i < connections.size(); i++) {
-			con = connections.get(i);
-			int beginNum = con.beginPort.getNumber();
-			int endNum = con.endPort.getNumber();
-			beginObj = null;
-			endObj = null;
-			for (int j = 0; j < objects2.size(); j++) {
-				obj = objects2.get(j);
-				if (obj.getName().equals(con.beginPort.getObject().getName())) {
-					beginObj = obj;
-					if (endObj != null) {
-						Port beginPort = beginObj.ports.get(beginNum);
-						Port endPort = endObj.ports.get(endNum);
-						beginPort.setConnected(true);
-						endPort.setConnected(true);
-						Connection con2 = new Connection(beginPort, endPort);
-						Point p;
-						for (int l = 0; l < con.breakPoints.size(); l++) {
-							p = con.breakPoints.get(l);
-							con2.addBreakPoint(new Point(p.x + 20, p.y + 20));
-						}
-						beginPort.addConnection(con2);
-						endPort.addConnection(con2);
-						newConnections.add(con2);
-					}
-				}
-				if (obj.getName().equals(con.endPort.getObject().getName())) {
-					endObj = obj;
-					if (beginObj != null) {
-						Port beginPort = beginObj.ports.get(beginNum);
-						Port endPort = endObj.ports.get(endNum);
-						beginPort.setConnected(true);
-						endPort.setConnected(true);
-						Connection con3 = new Connection(beginPort, endPort);
-						beginPort.addConnection(con3);
-						endPort.addConnection(con3);
-						newConnections.add(con3);
-					}
-				}
-			}
-		}
-		connections.addAll(newConnections);
-		for (int i = 0; i < connections.size(); i++) {
-			con = connections.get(i);
-		}
-		for (int i = 0; i < objects2.size(); i++) {
-			obj = objects2.get(i);
-			obj.setName(obj.className + "_" + Integer.toString(objCount));
-			objCount++;
-		}
-
-		for (int i = 0; i < selected.size(); i++) {
-			obj = selected.get(i);
 			obj.setSelected(false);
 		}
+
+		for (GObj obj : newObjects) {
+			if (obj instanceof RelObj) {
+				RelObj robj = (RelObj) obj;
+				for (GObj obj2 : newObjects) {
+					if (robj.startPort.getObject().getName().equals(
+							obj2.getName())) {
+						robj.startPort.setObject(obj2);
+					}
+					if (robj.endPort.getObject().getName().equals(
+							obj2.getName())) {
+						robj.endPort.setObject( obj2 );
+					}
+				}
+			}
+		}
+
+		// now the hard part - we have to clone all the connections
+		ArrayList<Connection> newConnections = new ArrayList<Connection>();
+		for (Connection con : connections) {
+			GObj beginObj = null;
+			GObj endObj = null;
+			
+			for (GObj obj : newObjects) {
+				if (obj.getName().equals(con.beginPort.getObject().getName()))
+					beginObj = obj;
+				if (obj.getName().equals(con.endPort.getObject().getName()))
+					endObj = obj;
+				
+				if (beginObj != null && endObj != null) {
+					Connection newCon = new Connection(
+							beginObj.getPorts().get(con.beginPort.getNumber()),
+							endObj.getPorts().get(con.endPort.getNumber()),
+							con.isStrict());
+
+					for (Point p : con.getBreakPoints())
+						newCon.addBreakPoint(new Point(p.x + 20, p.y + 20));
+					
+					newConnections.add(newCon);
+					break;
+				}
+			}
+		}
+
+		for (GObj obj : newObjects) {
+			obj.setName(obj.className + "_" 
+					+ Integer.toString(vPackage.getNextSerial(obj.className)));
+		}
+
 		objects.addAll(newObjects);
+
+		// New connections have to be added after the new objects have been
+		// committed or new ports will not get connected properly.
+		connections.addAll(newConnections);
 
 		if (classPainters != null && newPainters != null)
 			classPainters.putAll(newPainters);
@@ -785,16 +1059,6 @@ public class Canvas extends JPanel implements ActionListener {
 		
 		drawingArea.repaint();
 	}
-
-	/**
-	 * Draw object connections.
-
-	 public void drawConnections() {
-	 for (int i = 0; i < connections.size(); i++) {
-	 Connection con = (Connection) connections.get(i);
-	 con.drawRelation(getGraphics());
-	 }
-	 }*/
 
 	/**
 	 * Hilight ports of the object.
@@ -833,33 +1097,36 @@ public class Canvas extends JPanel implements ActionListener {
 
 	public void saveScheme(File file) {
 		try {
-			PrintWriter out = new PrintWriter(
-				new BufferedWriter(new FileWriter(file)));
-			out.println("<?xml version='1.0' encoding='utf-8'?>");
+			StreamResult result = new StreamResult(file);
+			SAXTransformerFactory tf = (SAXTransformerFactory)
+					TransformerFactory.newInstance();
 
-			out.println("<!DOCTYPE scheme SYSTEM \"" + RuntimeProperties.SCHEME_DTD + "\">");
-            out.println("<scheme package=\""+vPackage.getName()+"\">");
-			for (int i = 0; i < objects.size(); i++) {
-				GObj obj = objects.get(i);
-				out.print(obj.toXML());
-			}
-			for (int i = 0; i < connections.size(); i++) {
-				Connection con = connections.get(i);
-				out.print(con.toXML());
-			}
-			out.println("</scheme>");
-			out.close();
+			TransformerHandler th = tf.newTransformerHandler();
+			Transformer serializer = th.getTransformer();
+			serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+			serializer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
+					RuntimeProperties.SCHEME_DTD);
+			serializer.setOutputProperty(OutputKeys.INDENT,"yes");
+			th.setResult(result);
+			th.startDocument();
+
+			AttributesImpl attrs = new AttributesImpl();
+			attrs.addAttribute(null, null, "package", StringUtil.CDATA,
+					vPackage.getName());
+			
+			th.startElement(null, null, "scheme", attrs);
+
+			for (GObj obj : objects)
+				obj.toXML(th);
+
+			for (Connection con : connections)
+				con.toXML(th);
+			
+			th.endElement(null, null, "scheme");
+			th.endDocument();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	/**
-	 * TODO - what is this method for?
-	 * @param classText
-	 */
-	public void saveSchemeAsClass(String classText) {
-		ObjectPropertiesEditor.show( objects.getSelected().get(0), this );
 	}
 
 	/**
@@ -936,48 +1203,55 @@ public class Canvas extends JPanel implements ActionListener {
 	class DrawingArea extends JPanel {
 		private static final long serialVersionUID = 1L;
 
-		protected void drawGrid(Graphics g) {
-            g.setColor(Color.lightGray);
+		protected void drawGrid(Graphics2D g) {
 
-            Rectangle vr = getVisibleRect();
+            Rectangle vr = g.getClipBounds();
+
             int step = RuntimeProperties.gridStep;
             int bx = vr.x + vr.width;
             int by = vr.y + vr.height;
 
+            g.setColor(Color.lightGray);
+            g.setStroke(new BasicStroke(1.0f / scale));
+
             // draw vertical lines
-            for (int i = (vr.x + step - 1) / step * step; i < bx; i += step)
+            for (int i = (vr.x + step - 1) / step * step; i <= bx; i += step)
                 g.drawLine(i, vr.y, i, by);
 
             // draw horizontal lines
-            for (int i = (vr.y + step - 1) / step * step; i < by; i += step)
-				g.drawLine(vr.x, i, bx, i);
+            for (int i = (vr.y + step - 1) / step * step; i <= by; i += step)
+                g.drawLine(vr.x, i, bx, i);
 		}
 
 
         @Override
 		protected void paintComponent(Graphics g) {
+            Connection rel;
             Graphics2D g2 = (Graphics2D) g;
-			super.paintComponent(g2);
+
+            g2.setBackground(getBackground());
+
+            g2.scale(scale, scale);
+
+            Rectangle clip = g2.getClipBounds();
+            g2.clearRect(clip.x, clip.y, clip.width, clip.height);
 
             if (backgroundImage != null)
                 g2.drawImage(backgroundImage, 0, 0, null);
 
-            Connection rel;
-			if (showGrid) drawGrid(g2);
-			GObj obj;
-
+            // grid does not look good at really small scales
+			if (showGrid && scale >= .5f)
+				drawGrid(g2);
 
 			if (RuntimeProperties.isAntialiasingOn) {
 				g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
 					java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 			}
 
-
-			for (int i = 0; i < objects.size(); i++) {
-				obj = objects.get(i);
-				obj.drawClassGraphics(g2);
+			for (GObj obj : objects) {
+				obj.drawClassGraphics(g2, scale);
 			}
-
+			
 			g2.setColor(Color.blue);
 			for (int i = 0; i < connections.size(); i++) {
 				rel = connections.get(i);
@@ -989,35 +1263,31 @@ public class Canvas extends JPanel implements ActionListener {
                     painter.paint(g2, scale);
             }
 
-            if (firstPort != null && mListener.state.equals(State.addRelation)) {
-				currentCon.drawRelation(g2);
-				Point p = currentCon.breakPoints.get(
-					currentCon.breakPoints.size() - 1);
-				g2.drawLine(p.x, p.y, mouseX, mouseY);
-			} else if (firstPort != null && mListener.state.startsWith("??") && currentObj != null) {
-				Point p = VMath.nearestPointOnRectangle
-					(firstPort.getStartX(), firstPort.getStartY(),
-						firstPort.getWidth(), firstPort.getHeight(), mouseX, mouseY);
+            if (isConnectionBeingAdded()) {
+            	// adding connection, first port connected
+            	currentCon.drawRelation(g2, mouseX, mouseY);
+            } else if (isRelObjBeingAdded()) {
+            	// adding relation object, first port connected
 
-				double angle = VMath.calcAngle(p.x, p.y, mouseX, mouseY);
-				((RelObj) currentObj).angle = angle;
-				currentObj.Xsize = (float) Math.sqrt(Math.pow((mouseX - p.x) / (double) currentObj.width, 2.0) + Math.pow((mouseY - p.y) / (double) currentObj.width, 2.0));
-				currentObj.y = p.y;
-				currentObj.x = p.x;
-				currentObj.drawClassGraphics(g2);
-			} else if (currentObj != null && !mListener.state.startsWith("?") && mListener.mouseOver) {
-				g2.setColor(Color.black);
-				currentObj.drawClassGraphics(g2);
-			}
-			if (mListener.state.equals(State.dragBox)) {
-				g2.setColor(Color.gray);
-                // a shape width negative height or width cannot be drawn
-                int rectX = Math.min(mListener.startX, mouseX);
-                int rectY = Math.min(mListener.startY, mouseY);
-                int width = Math.abs(mouseX - mListener.startX);
-                int height = Math.abs(mouseY - mListener.startY);
-				g2.drawRect(rectX, rectY, width, height);
-			}
+            	RelObj obj = (RelObj) currentObj;
+            	Point point = VMath.getRelClassStartPoint(obj.startPort,
+            			mouseX, mouseY);
+            	obj.setEndPoints(point.x, point.y, mouseX, mouseY);
+
+            	currentObj.drawClassGraphics(g2, scale);
+            } else if (currentObj != null && mListener.mouseOver) {
+            	currentObj.drawClassGraphics(g2, scale);
+            } else if (mListener.state.equals(State.dragBox)) {
+            	g2.setColor(Color.gray);
+            	// a shape width negative height or width cannot be drawn
+            	int rectX = Math.min(mListener.startX, mouseX);
+            	int rectY = Math.min(mListener.startY, mouseY);
+            	int width = Math.abs(mouseX - mListener.startX);
+            	int height = Math.abs(mouseY - mListener.startY);
+            	g2.drawRect(rectX, rectY, width, height);
+            }
+
+            g2.scale(1.0f / scale, 1.0f / scale);
 		}
 	}
 
@@ -1038,9 +1308,14 @@ public class Canvas extends JPanel implements ActionListener {
         clearBackgroundImage();
         if (image != null) {
             backgroundImage = image;
-            drawAreaSize.height = Math.max(image.getHeight(), drawingArea.getHeight());
-            drawAreaSize.width = Math.max(image.getWidth(), drawingArea.getWidth());
-            drawingArea.repaint(0, 0, image.getWidth(), image.getHeight());
+
+            int imgw = Math.round(image.getWidth() * scale);
+            int imgh = Math.round(image.getHeight() * scale);
+ 
+            drawAreaSize.height = Math.max(imgh, drawingArea.getHeight());
+            drawAreaSize.width = Math.max(imgw, drawingArea.getWidth());
+
+            drawingArea.repaint(0, 0, imgw, imgh);
             drawingArea.revalidate();
         }
     }
@@ -1058,8 +1333,8 @@ public class Canvas extends JPanel implements ActionListener {
      */
     public void clearBackgroundImage() {
         if (backgroundImage != null) {
-            int width  = backgroundImage.getWidth();
-            int height = backgroundImage.getHeight();
+            int width  = Math.round(backgroundImage.getWidth() * scale);
+            int height = Math.round(backgroundImage.getHeight() * scale);
             backgroundImage.flush();
             backgroundImage = null;
             drawingArea.repaint(0, 0, width, height);
@@ -1085,7 +1360,32 @@ public class Canvas extends JPanel implements ActionListener {
     }
 
     public void setScale(float scale) {
-        this.scale = scale;
+    	int maxx = Integer.MIN_VALUE;
+    	int maxy = Integer.MIN_VALUE;
+    	
+    	for (GObj obj : objects) {
+    		int tmp = obj.getX() + obj.getRealWidth();
+    		if (tmp > maxx)
+    			maxx = tmp;
+
+    		tmp = obj.getY() + obj.getRealHeight();
+    		if (tmp > maxy)
+    			maxy = tmp;
+    	}
+
+   		drawAreaSize.width = Math.round(maxx > 0 
+   				? maxx * scale + RuntimeProperties.gridStep
+   				: scale	* drawAreaSize.width / this.scale);
+
+   		drawAreaSize.height = Math.round(maxy > 0 
+   				? maxy * scale + RuntimeProperties.gridStep 
+   				: scale	* drawAreaSize.height / this.scale);
+
+    	this.scale = scale;
+    	
+    	drawingArea.setPreferredSize(drawAreaSize);
+		drawingArea.revalidate();
+		drawingArea.repaint();
     }
 
     public boolean isEnableClassPainter() {
@@ -1116,4 +1416,219 @@ public class Canvas extends JPanel implements ActionListener {
     	m_runners.clear();
     	drawingArea = null;
     }
+
+    /**
+     * Returns a reference to the list of connections.
+     * @return list of connections
+     */
+	public ConnectionList getConnections() {
+		return connections;
+	}
+
+	public Connection getConnectionNearPoint(int x, int y) {
+		return connections.nearPoint(x, y);
+	}
+
+	public void removeConnection(Connection con) {
+		connections.remove(con);
+		undoSupport.postEdit(new DeleteConnectionEdit(this, con));
+	}
+
+	public void addConnection(Connection con) {
+		connections.add(con);
+		undoSupport.postEdit(new AddConnectionEdit(this, con));
+	}
+
+	public void addConnection(Port port1, Port port2) {
+		addConnection(new Connection(port1, port2));
+	}
+
+	/**
+	 * Creates a new connection between the port {@code currentCon.begnPort}
+	 * and the specified port. It is assumed that the ports can be connected
+	 * and that startAddingConnection() has been called.
+	 * @param endPort the end port of the connection
+	 */
+	public void addCurrentConnection(Port endPort) {
+		currentCon.endPort = endPort;
+		addConnection(currentCon);
+		endPort.setSelected(false);
+		currentCon.beginPort.setSelected(false);
+		currentCon = null;
+		setActionInProgress(false);
+	}
+
+	public void clearSelectedConnections() {
+		connections.clearSelected();
+	}
+
+	public void resizeObjects(int dx, int dy, int corner) {
+		for (GObj obj : objects) {
+			if (obj.isSelected())
+				obj.resize(dx, dy, corner);
+		}
+		objects.updateRelObjs();
+		drawingArea.repaint();
+	}
+
+	/**
+	 * Cancels connection adding action and clears the state.
+	 */
+	private void cancelAddingConnection() {
+		if (currentCon != null) {
+			currentCon.beginPort.setSelected(false);
+			currentCon = null;
+			drawingArea.repaint();
+		}
+		
+		setActionInProgress(false);
+	}
+
+	/**
+	 * Starts adding a new connection.
+	 * @param port the first port of the connection
+	 */
+	void startAddingConnection(Port port) {
+		setActionInProgress(true);
+		currentCon = new Connection(port);
+	}
+
+	/**
+	 * Starts adding a new relation object.
+	 * @param port the first port of the relation object
+	 */
+	void startAddingRelObject(Port port) {
+		assert currentObj == null;
+		assert currentCon == null;
+		assert currentPainter == null;
+
+		createAndInitNewObject(State.getClassName(mListener.state));
+		
+		((RelObj) currentObj).startPort = port;
+		port.setSelected(true);
+		
+		setActionInProgress(true);
+	}
+
+	public void startAddingObject() {
+		startAddingObject(mListener.state);
+	}
+
+	private void startAddingObject(String state) {
+		assert currentObj == null;
+		assert currentCon == null;
+		assert currentPainter == null;
+
+		if (!State.isAddRelClass(state))
+			createAndInitNewObject(State.getClassName(state));
+	}
+
+    /**
+	 * Sets actionInProgress. Actions that consist of more than one atomic
+	 * step that cannot be interleaved with other actions should set this
+	 * property and unset it after completion.
+	 * For example, consider this scenario:
+	 * <ol>
+	 * <li>a new object is created</li>
+	 * <li>a new connection is connected to the new object</li>
+	 * <li>before connecting a second object the addition of the object is
+	 * undone</li>
+	 * </ol>
+	 * This is a case when undo-redo should be disabled until either the
+	 * connection is cancelled or the second end is connected.
+	 * 
+	 * @param newValue
+	 *            the actionInProgress value
+	 */
+	public void setActionInProgress(boolean newValue) {
+		if (newValue != actionInProgress) {
+			Editor editor = Editor.getInstance();
+			editor.undoAction.setEnabled(!newValue);
+			editor.redoAction.setEnabled(!newValue);
+			editor.deleteAction.setEnabled(!newValue);
+			actionInProgress = newValue;
+		}
+	}
+
+	/**
+	 * Returns true if some non-atomic action that modifies the scheme 
+	 * is in progress. Other actions such as delete and undo that modify
+	 * the state should not be executed at the same time.
+	 * 
+	 * @return true if an action is in progress, false otherwise.
+	 */
+	public boolean isActionInProgress() {
+		return actionInProgress;
+	}
+
+	/**
+	 * Cancels the current action that would create a new object or connection. 
+	 */
+	public void cancelAdding() {
+		if (currentCon != null)
+			cancelAddingConnection();
+		else if (currentObj != null)
+			cancelAddingObject();
+	}
+
+	private void cancelAddingObject() {
+		if (currentObj != null) {
+			if (currentObj instanceof RelObj) {
+				RelObj obj = (RelObj) currentObj;
+				obj.startPort.setSelected(false);
+			}
+			currentObj = null;
+			drawingArea.repaint();
+		}
+
+		assert currentCon == null;
+		
+		setActionInProgress(false);
+	}
+
+	/**
+	 * Returns true if the first port of a connection or relation class is
+	 * connected and the second port is still disconnected.
+	 * 
+	 * @return true if a connection or a relation class is being added, false
+	 *         otherwise
+	 */
+	public boolean isRelationBeingAdded() {
+		return isConnectionBeingAdded() || isRelObjBeingAdded();
+	}
+
+	/**
+	 * Returns true if the first port of a relation class is
+	 * connected and the second port is still disconnected.
+	 * 
+	 * @return true if a relation class is being added, false otherwise
+	 */
+	public boolean isRelObjBeingAdded() {
+		return currentObj != null && currentObj instanceof RelObj 
+				&& ((RelObj) currentObj).startPort != null;
+	}
+
+	/**
+	 * Returns true if the first port of a connection is
+	 * connected and the second port is still disconnected.
+	 * 
+	 * @return true if a connection is being added, false otherwise
+	 */
+	public boolean isConnectionBeingAdded() {
+		return currentCon != null && currentCon.beginPort != null;
+	}
+
+	/**
+	 * Creates a new instace of the specified visual class. The class is
+	 * initialized and stored to the filed {@code currentObj}.
+	 * @param className the name of the visual class
+	 */
+	private void createAndInitNewObject(String className) {
+		PackageClass pClass = vPackage.getClass(className);
+		currentObj = pClass.getNewInstance();
+		
+		assert currentObj != null;
+		
+		currentPainter = pClass.getPainterFor(scheme, currentObj);
+	}
 }

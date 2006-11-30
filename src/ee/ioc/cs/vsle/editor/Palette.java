@@ -1,11 +1,14 @@
 package ee.ioc.cs.vsle.editor;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
+import javax.swing.Box;
 import javax.swing.ImageIcon;
+import javax.swing.JComboBox;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 
@@ -18,11 +21,18 @@ import ee.ioc.cs.vsle.vclass.VPackage;
  * and classes from the current package.
  */
 public class Palette implements ActionListener {
+	
+	/**
+	 * Allowed zoom levels of the scheme view
+	 */
+	public static final float[] ZOOM_LEVELS 
+			= { .1f, .2f, .5f, .75f, 1.0f, 1.5f, 2.0f, 4.0f };
+
 	public JToolBar toolBar;
 	Canvas canvas;
     ArrayList<JToggleButton> buttons;
 
-	public Palette(VPackage vPackage, Canvas canv) {
+	public Palette(VPackage vPackage, final Canvas canv) {
 		toolBar = new JToolBar();
         buttons = new ArrayList<JToggleButton>();
 		this.canvas = canv;
@@ -42,23 +52,14 @@ public class Palette implements ActionListener {
 		icon = FileFuncs.getImageIcon("images/rel.gif", false );
 		JToggleButton relation = new JToggleButton(icon);
 
-		relation.setActionCommand(State.relation);
+		relation.setActionCommand(State.addRelation);
 		relation.addActionListener(this);
 		relation.setToolTipText("Relation");
         buttons.add(relation);
 		toolBar.add(relation);
 
-		icon = FileFuncs.getImageIcon("images/magnifier.gif", false );
-		JToggleButton magnifier = new JToggleButton(icon);
-
-		magnifier.setActionCommand(State.magnifier);
-		magnifier.addActionListener(this);
-		magnifier.setToolTipText("Magnifier");
-        buttons.add(magnifier);
-		toolBar.add(magnifier);
-
         toolBar.addSeparator();
-        
+
 		// read package info and add it to tables
 		for (int i = 0; i < vPackage.classes.size(); i++) {
 			PackageClass pClass = vPackage.classes.get(i);
@@ -78,6 +79,37 @@ public class Palette implements ActionListener {
             buttons.add(button);
 			toolBar.add(button);
 		}
+
+		toolBar.addSeparator();
+		toolBar.add(Box.createGlue());
+
+		JComboBox zoom = new JComboBox();
+		for (int i = 0; i < ZOOM_LEVELS.length; i++) {
+			String label = Integer.toString((int) (ZOOM_LEVELS[i] * 100.0f));
+			zoom.addItem(label + "%");
+			
+			if (ZOOM_LEVELS[i] == 1.0f)
+				zoom.setSelectedIndex(i);
+		}
+
+		// Avoid stretching the combobox to fill the whole space.
+		// The width + 15 hack is needed because of GTK LnF
+		Dimension d = zoom.getPreferredSize();
+		d.width += 15;
+		zoom.setPreferredSize(d);
+		zoom.setMinimumSize(d);
+		zoom.setMaximumSize(d);
+
+		zoom.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				int i = ((JComboBox) e.getSource()).getSelectedIndex();
+				canvas.setScale(ZOOM_LEVELS[i]);
+			}
+			
+		});
+		toolBar.add(zoom);
+
 		canvas.add(toolBar, BorderLayout.NORTH);
 	}
 
@@ -97,18 +129,8 @@ public class Palette implements ActionListener {
 		        b.setSelected(false);
 		}
         
-        String cmd = e.getActionCommand();
-        
-        if (State.relation.equals(cmd))
-            canvas.mListener.setState(State.addRelation);
-        else if (State.selection.equals(cmd))
-            canvas.mListener.setState(State.selection);
-        else if (State.magnifier.equals(cmd))
-            canvas.mListener.setState(State.magnifier);
-        else {
-            canvas.mListener.setState(cmd);
-            canvas.mListener.startAddingObject();
-        }
+        canvas.mListener.setState(e.getActionCommand());
+
         canvas.drawingArea.grabFocus();
         canvas.drawingArea.repaint();
     }

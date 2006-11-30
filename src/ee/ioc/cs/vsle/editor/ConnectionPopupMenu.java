@@ -1,54 +1,59 @@
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.vclass.Connection;
-import ee.ioc.cs.vsle.vclass.ConnectionList;
+import ee.ioc.cs.vsle.vclass.Point;
 import ee.ioc.cs.vsle.editor.Menu;
 
-import java.awt.Container;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JPopupMenu;
 import javax.swing.JMenuItem;
 
 /**
- * <p>Title: ee.ioc.cs.editor.editor.ConnectionPopupMenu</p>
- * <p>Description: Popup menu opened if clicked on a connection line with a right mouse button.</p>
+ * <p>Popup menu opened if clicked on a connection line with a right mouse button.</p>
  * <p>Copyright: Copyright (c) 2004</p>
- * <p>Company: </p>
  * @author Ando Saabas
  * @version 1.0
  */
 public class ConnectionPopupMenu extends JPopupMenu implements ActionListener {
 
-	Connection connection;
-	ConnectionList connections;
-	Container contentPane;
+	private static final long serialVersionUID = 1L;
+
+	private Connection connection;
+	private Canvas canvas;
+
+	// coordinates of the clicked point
+	private int clickX;
+	private int clickY;
 
 	/**
 	 * Class constructor.
-	 * @param relation ee.ioc.cs.editor.vclass.Connection - selected connection.
-	 * @param relations ee.ioc.cs.editor.vclass.ConnectionList - list of all defined connections.
-	 * @param contentPane Container - editor's content pane.
+	 * @param relation selected connection
+	 * @param canvas editor's canvas
+	 * @param clickX X coordinate of the clicked point
+	 * @param clickY Y coordinate of the clicked point
 	 */
-	ConnectionPopupMenu(Connection relation, ConnectionList relations, Container contentPane) {
+	ConnectionPopupMenu(Connection relation, Canvas canvas, int clickX,
+			int clickY) {
 		super();
 
 		this.connection = relation;
-		this.connections = relations;
-		this.contentPane = contentPane;
+		this.canvas = canvas;
+		this.clickX = clickX;
+		this.clickY = clickY;
 
-		JMenuItem menuItem = new JMenuItem(Menu.DELETE);
+		JMenuItem menuItem = new JMenuItem(Menu.DELETE_REL);
 
 		menuItem.addActionListener(this);
 		menuItem.setActionCommand(Menu.RELATION_DELETE);
 		this.add(menuItem);
-		if (relation.numOfBreakPoints < 2) {
-			menuItem = new JMenuItem(Menu.ADD_BREAKPOINT);
-			menuItem.addActionListener(this);
-			menuItem.setActionCommand(Menu.ADDBREAKPOINT);
-			this.add(menuItem);
-		}
-		if (relation.numOfBreakPoints > 0) {
+
+		menuItem = new JMenuItem(Menu.ADD_BREAKPOINT);
+		menuItem.addActionListener(this);
+		menuItem.setActionCommand(Menu.ADDBREAKPOINT);
+		this.add(menuItem);
+
+		if (relation.breakPointContains(clickX, clickY) != null) {
 			menuItem = new JMenuItem(Menu.REMOVE_BREAKPOINT);
 			menuItem.addActionListener(this);
 			menuItem.setActionCommand(Menu.REMOVEBREAKPOINT);
@@ -62,13 +67,15 @@ public class ConnectionPopupMenu extends JPopupMenu implements ActionListener {
 	 */
 	public void actionPerformed(ActionEvent e) {
 		if (e.getActionCommand() == Menu.RELATION_DELETE) {
-			connections.remove(connection);
+			canvas.removeConnection(connection);
 		} else if (e.getActionCommand() == Menu.ADDBREAKPOINT) {
-			connection.addBreakPoint();
+			connection.addBreakPoint(connection.indexOf(clickX, clickY),
+					new Point(clickX, clickY));
+			// select the connection to make the new breakpoint visible
+			connection.setSelected(true);
 		} else {
-			connection.removeBreakPoint();
+			connection.removeBreakPoint(clickX, clickY);
 		}
-		contentPane.repaint();
+		canvas.drawingArea.repaint();
 	} // actionPerformed
-
 }

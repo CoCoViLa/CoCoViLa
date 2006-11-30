@@ -157,7 +157,6 @@ public class SchemeLoader {
 				String ysize = attrs.getValue("ysize");
 				String width = attrs.getValue("width");
 				String height = attrs.getValue("height");
-				String strict = attrs.getValue("strict");
 
 				obj.setX(Integer.parseInt(x));
 				obj.setY(Integer.parseInt(y));
@@ -178,7 +177,6 @@ public class SchemeLoader {
 				obj.setYsize(Float.parseFloat(ysize));
 				obj.setWidth(Integer.parseInt(width));
 				obj.setHeight(Integer.parseInt(height));
-				obj.setStrict(Boolean.valueOf(strict).booleanValue());
 			} else if (element.equals("field")) {
 				String name = new String(attrs.getValue("name"));
 				String type = new String(attrs.getValue("type"));
@@ -195,10 +193,6 @@ public class SchemeLoader {
 				Port beginPort = objects.getPort(obj1, port1);
 				Port endPort = objects.getPort(obj2, port2);
 				connection = new Connection(beginPort, endPort);
-				beginPort.addConnection(connection);
-				endPort.addConnection(connection);
-				beginPort.setConnected(true);
-				endPort.setConnected(true);
 				connections.add(connection);
 			} else if (element.equals("point")) {
 				String x = new String(attrs.getValue("x"));
@@ -231,7 +225,7 @@ public class SchemeLoader {
 						objField.setDefaultGraphics(field.getDefaultGraphics());
 					}
 
-					obj.ports = new ArrayList<Port>(pClass.ports);
+					ArrayList<Port> ports = new ArrayList<Port>(pClass.ports);
 					obj.shapes = new ArrayList<Shape>(pClass.graphics.shapes);
 
 					Shape shape;
@@ -241,15 +235,11 @@ public class SchemeLoader {
 					}
 
 					Port port;
-					for (int i = 0; i < obj.ports.size(); i++) {
-						port = obj.ports.get(i);
-						obj.ports.set(i, port.clone());
-						port = obj.ports.get(i);
+					for (int i = 0; i < ports.size(); i++) {
+						port = ports.get(i);
+						ports.set(i, port.clone());
+						port = ports.get(i);
 						port.setObject(obj);
-
-						if (port.isStrict()) {
-							obj.strict = true;
-						}
 
 						if (port.x + port.getOpenGraphics().boundX < obj.portOffsetX1) {
 							obj.portOffsetX1 = port.x 
@@ -279,6 +269,7 @@ public class SchemeLoader {
 
 						port.setConnections(new ArrayList<Connection>(port.getConnections()));
 					}
+					obj.setPorts(ports);
 				} else {
 					throw new SAXException("There is no class \"" + obj.getClassName()
 							+ "\" in the package \"" + vPackage.getName() + "\"");
@@ -290,11 +281,11 @@ public class SchemeLoader {
 				for (int i = 0; i < objects.size(); i++) {
 					obj = objects.get(i);
 					if (obj instanceof RelObj) {
-						Port port = obj.ports.get(0);
+						Port port = obj.getPorts().get(0);
 						Connection con = port.getConnections().get(0);
 						((RelObj) obj).startPort = con.beginPort;
 						// ((RelObj)obj).startPort.obj = con.beginPort.obj;
-						port = obj.ports.get(1);
+						port = obj.getPorts().get(1);
 						con = port.getConnections().get(0);
 						((RelObj) obj).endPort = con.endPort;
 

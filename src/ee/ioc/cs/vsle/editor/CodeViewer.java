@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.editor;
 import ee.ioc.cs.vsle.util.FileFuncs;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 
@@ -34,7 +35,7 @@ public class CodeViewer extends JFrame implements ActionListener{
                 JScrollPane areaScrollPane = new JScrollPane(textArea);
                 areaScrollPane.setRowHeaderView(new LineNumberView(textArea));
                 areaScrollPane.setVerticalScrollBarPolicy(
-                        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+                        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
                 specText = new JPanel();
                 specText.setLayout(new BorderLayout());
