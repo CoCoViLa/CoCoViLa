@@ -48,8 +48,8 @@ public class VPackage {
 
 	/**
 	 * Get a specified class from the package.
-	 * @param className String - name of the class to be retrieved from the package.
-	 * @return ee.ioc.cs.editor.vclass.PackageClass - specified class returned from the package.
+	 * @param className name of the class to be retrieved from the package
+	 * @return the specified class from the package.
 	 */
 	public PackageClass getClass(String className) {
 		PackageClass pClass;
@@ -113,4 +113,18 @@ public class VPackage {
         public void setPainters(boolean painters) {
             this.painters = painters;
         }
+
+        /**
+         * Returns the next serial number for the visual class used for
+         * generating unique names for instances.
+         * @param className the class name
+         * @return the next serial number >= 0, -1 if there is no such class
+         */
+		public int getNextSerial(String className) {
+			PackageClass pc = getClass(className);
+			if (pc != null)
+				return pc.getNextSerial();
+			
+			return -1;
+		}
 }
