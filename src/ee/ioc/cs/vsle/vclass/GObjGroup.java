@@ -5,8 +5,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
-public class GObjGroup extends GObj
-	implements Serializable {
+public class GObjGroup extends GObj implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 	public ArrayList<GObj> objects;
 
 	public GObjGroup(ArrayList<GObj> objects) {
@@ -15,7 +16,7 @@ public class GObjGroup extends GObj
 		setBounds();
 	}
 
-	public void setBounds() {
+	private void setBounds() {
 		int x1, x2, y1, y2;
 		GObj obj;
 
@@ -52,6 +53,7 @@ public class GObjGroup extends GObj
 		}
 	}
 
+	@Override
 	public boolean contains(int pointX, int pointY) {
 		if ((pointX > getX()) && (pointY > getY())) {
 			if ((pointX < getX() + (int) (getXsize() * getWidth()))
@@ -62,6 +64,7 @@ public class GObjGroup extends GObj
 		return false;
 	}
 
+	@Override
 	public boolean isInside(int x1, int y1, int x2, int y2) {
 		if ((x1 < getX()) && (y1 < getY())) {
 			if ((x2 > getX() + (int) (getXsize() * getWidth()))
@@ -72,6 +75,7 @@ public class GObjGroup extends GObj
 		return false;
 	}
 
+	@Override
 	public Port portContains(int pointX, int pointY) {
 		Port port;
 		GObj obj;
@@ -82,19 +86,11 @@ public class GObjGroup extends GObj
 			if (port != null) {
 				return port;
 			}
-
-			/* for (int i = 0; i<obj.ports.size(); i++) {
-			 port = (ee.ioc.cs.editor.vclass.Port)obj.ports.get(i);
-			 if ((pointX > obj.x + (int)(size*port.getX())-obj.PORTSIZE) && (pointY > obj.y + (int)(size*port.getY()) -PORTSIZE)) {
-			 if ((pointX < obj.x + (int)(size*port.getX()) + PORTSIZE) && (pointY < obj.y + (int)(size*port.getY()) + PORTSIZE)) {
-			 return port;
-			 }
-			 }
-			 }*/
 		}
 		return null;
 	}
 
+	@Override
 	public void setPosition(int x, int y) {
 		GObj obj;
 		int changeX = x - this.getX();
@@ -109,6 +105,7 @@ public class GObjGroup extends GObj
 
 	}
 
+	@Override
 	public ArrayList<Connection> getConnections() {
 		ArrayList<Connection> c = new ArrayList<Connection>();
 		GObj obj;
@@ -120,6 +117,7 @@ public class GObjGroup extends GObj
 		return c;
 	}
 
+	@Override
 	public ArrayList<GObj> getComponents() {
 		ArrayList<GObj> c = new ArrayList<GObj>();
 		GObj obj;
@@ -132,6 +130,7 @@ public class GObjGroup extends GObj
 
 	}
 
+	@Override
 	public boolean includesObject(GObj checkObj) {
 		GObj obj;
 
@@ -145,6 +144,7 @@ public class GObjGroup extends GObj
 
 	}
 
+	@Override
 	public ArrayList<Port> getPorts() {
 		ArrayList<Port> c = new ArrayList<Port>();
 		GObj obj;
@@ -157,7 +157,8 @@ public class GObjGroup extends GObj
 
 	}
 
-	public void drawClassGraphics(Graphics2D g) {
+	@Override
+	public void drawClassGraphics(Graphics2D g, float scale) {
 		g.setColor(Color.gray);
 		g.drawRect(getX(), getY(), (int) (getWidth() * getXsize()), (int) (getHeight() * getYsize()));
 		g.setColor(Color.black);
@@ -165,9 +166,9 @@ public class GObjGroup extends GObj
 
 		for (int j = 0; j < objects.size(); j++) {
 			obj = objects.get(j);
-			obj.drawClassGraphics(g);
+			obj.drawClassGraphics(g, scale);
 		}
-		if (isSelected() == true) {
+		if (isSelected()) {
 			g.fillRect(getX() - GObj.CORNER_SIZE - 1, getY() - GObj.CORNER_SIZE - 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
 			g.fillRect(getX() + (int) (getXsize() * getWidth()) + 1,
 				getY() - GObj.CORNER_SIZE - 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
@@ -175,18 +176,11 @@ public class GObjGroup extends GObj
 				getY() + (int) (getYsize() * (getHeight())) + 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
 			g.fillRect(getX() + (int) (getXsize() * (getWidth())) + 1,
 				getY() + (int) (getYsize() * (getHeight())) + 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE);
-
-			/*
-			old code for selection drawinng
-			g.drawRect(getX() - 2, getY() - 2, 4, 4);
-			g.drawRect(getX() + (int) (getXsize() * getWidth()) - 2, getY() - 2, 4, 4);
-			g.drawRect(getX() - 2, getY() + (int) (getYsize() * getHeight()) - 2, 4, 4);
-			g.drawRect(getX() + (int) (getXsize() * getWidth()) - 2,
-				getY() + (int) (getYsize() * getHeight()) - 2, 4, 4);*/
 		}
 	}
 
 
+	@Override
 	public void setXsize(float s) {
 		float change = s / getXsize();
 
@@ -203,6 +197,7 @@ public class GObjGroup extends GObj
 	}
 
 
+	@Override
 	public void setYsize(float s) {
 		float change = s / getYsize();
 
@@ -218,6 +213,7 @@ public class GObjGroup extends GObj
 		}
 	}
 
+	@Override
 	public void setMultYSize(float s) {
 		setYsize(s * getYsize());
 
@@ -233,6 +229,7 @@ public class GObjGroup extends GObj
 		}
 	}
 
+	@Override
 	public void setMultXSize(float s) {
 		setXsize(s * getXsize());
 
@@ -248,6 +245,7 @@ public class GObjGroup extends GObj
 		}
 	}
 
+	@Override
 	public String toString() {
 		GObj obj;
 		String s = getName();
@@ -259,6 +257,7 @@ public class GObjGroup extends GObj
 		return s;
 	}
 
+	@Override
 	public GObjGroup clone() {
 		GObjGroup g = (GObjGroup) super.clone();
 		GObj obj;
