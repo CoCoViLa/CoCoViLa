@@ -3,6 +3,9 @@ package ee.ioc.cs.vsle.synthesize;
 import java.io.*;
 import java.util.*;
 
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
+
 class Problem implements Serializable {
 
 	private Set<Rel> axioms = new HashSet<Rel>();
@@ -125,6 +128,16 @@ class Problem implements Serializable {
 			return problem;
 
 		} catch (Exception e) {
+			
+			db.p( "Unable to get the Copy of Problem, due to: " );
+			
+			if( RuntimeProperties.isLogDebugEnabled() ) {
+				e.printStackTrace();
+				db.p( "Problem:\n" + "Unable to get the Copy of Problem:\n" + this.toString() );
+			} else {
+				db.p( e.getClass().getName() + " " + e.getMessage() );
+			}
+			
 			return null;
 		}
 	}
