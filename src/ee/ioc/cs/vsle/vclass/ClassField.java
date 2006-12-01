@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.vclass;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ANY;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_VOID;
 
+import java.io.Serializable;
 import java.util.*;
 
 import javax.xml.transform.sax.TransformerHandler;
@@ -29,7 +30,9 @@ import ee.ioc.cs.vsle.util.*;
  * @author Ando Saabas
  * @version 1.0
  */
-public class ClassField implements Cloneable {
+public class ClassField implements Cloneable, Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	public final static String ARRAY_TOKEN = "%%";
 	
