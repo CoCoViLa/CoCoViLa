@@ -80,29 +80,28 @@ class MouseOps extends MouseInputAdapter {
         canvas.drawingArea.repaint();
 	}
 
-	private void openObjectPopupMenu(int x, int y) {
-		ObjectPopupMenu popupMenu = new ObjectPopupMenu(canvas);
+	private void openObjectPopupMenu(GObj obj, int x, int y) {
+		ObjectPopupMenu popupMenu = new ObjectPopupMenu(obj, canvas);
 
-		if (canvas.currentObj.className == null) {
+		if (obj.className == null) {
 			popupMenu.remove(popupMenu.itemViewCode);
 		} else {
 			popupMenu.remove(popupMenu.itemMakeClass);
 		}
-		popupMenu.show(canvas, x, y);
-
-
 
 		if (canvas.objects.getSelected().size() < 2) {
-			if (canvas.currentObj.isGroup()) {
+			/*
+			if (obj.isGroup()) {
 				popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, true);
 			} else {
 				popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
 			}
+			*/
+			// popupMenu.enableDisableMenuItem(popupMenu.itemGroup, false);
 			popupMenu.enableDisableMenuItem(popupMenu.itemProperties, true);
-			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, false);
 
 			// Enable or disable order changing menu items.
-			if (canvas.objects.indexOf(canvas.currentObj) == canvas.objects.size() - 1) {
+			if (canvas.objects.indexOf(obj) == canvas.objects.size() - 1) {
 				popupMenu.enableDisableMenuItem(popupMenu.itemForward, false);
 				popupMenu.enableDisableMenuItem(popupMenu.itemToFront, false);
 			} else {
@@ -110,7 +109,7 @@ class MouseOps extends MouseInputAdapter {
 				popupMenu.enableDisableMenuItem(popupMenu.itemToFront, true);
 			}
 
-			if (canvas.objects.indexOf(canvas.currentObj) == 0) {
+			if (canvas.objects.indexOf(obj) == 0) {
 				popupMenu.enableDisableMenuItem(popupMenu.itemBackward, false);
 				popupMenu.enableDisableMenuItem(popupMenu.itemToBack, false);
 			} else {
@@ -123,12 +122,13 @@ class MouseOps extends MouseInputAdapter {
 			popupMenu.enableDisableMenuItem(popupMenu.itemForward, false);
 			popupMenu.enableDisableMenuItem(popupMenu.itemToFront, false);
 			popupMenu.enableDisableMenuItem(popupMenu.itemToBack, false);
-			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
-			popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
+			// popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
+			//popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
 			popupMenu.enableDisableMenuItem(popupMenu.itemProperties, false);
-			popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
-			popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
+			//popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
+			//popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
 		}
+		popupMenu.show(canvas, x, y);
 	}
 
 	@Override
@@ -154,12 +154,12 @@ class MouseOps extends MouseInputAdapter {
                     popupMenu.show(canvas, e.getX() + canvas.drawingArea.getX(),
                     		e.getY() + canvas.drawingArea.getY());
                 } else {
-                    canvas.currentObj = canvas.objects.checkInside(x, y);
-                    if (canvas.currentObj != null) {
-                        openObjectPopupMenu(e.getX() + canvas.drawingArea.getX(),
+                    GObj obj = canvas.objects.checkInside(x, y);
+                    if (obj != null) {
+                        openObjectPopupMenu(obj,
+                        		e.getX() + canvas.drawingArea.getX(),
                         		e.getY() + canvas.drawingArea.getY());
                     }
-                    canvas.currentObj = null;
                 }
 			} else if (State.addRelation.equals(state)) {
 				// remove last breakpoint or stop adding the relation

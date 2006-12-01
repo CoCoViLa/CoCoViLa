@@ -8,8 +8,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -58,7 +56,6 @@ import ee.ioc.cs.vsle.vclass.ClassPainter;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.ConnectionList;
 import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.vclass.GObjGroup;
 import ee.ioc.cs.vsle.vclass.ObjectList;
 import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.Point;
@@ -69,7 +66,7 @@ import ee.ioc.cs.vsle.vclass.VPackage;
 
 /**
  */
-public class Canvas extends JPanel implements ActionListener {
+public class Canvas extends JPanel {
 	private static final long serialVersionUID = 1L;
 	int mouseX; // Mouse X coordinate.
 	int mouseY; // Mouse Y coordinate.
@@ -1131,13 +1128,21 @@ public class Canvas extends JPanel implements ActionListener {
 
 	/**
 	 * Open the object properties dialog.
+	 * @param obj the object
+	 */
+	public void openPropertiesDialog(GObj obj) {
+		ObjectPropertiesEditor.show(obj, this);
+	}
+
+	/**
+	 * Opens the object properties dialog on the first selected object
+	 * if there is one.
 	 */
 	public void openPropertiesDialog() {
-		if (objects.getSelected().size() == 1) {
-			ObjectPropertiesEditor.show( objects.getSelected().get(0), this );
-		}
-	} // openPropertiesDialog
-
+		ArrayList<GObj> selected = objects.getSelected();
+		if (selected != null && selected.size() > 0)
+			openPropertiesDialog(selected.get(0));
+	}
 
 	public boolean isGridVisible() {
 		return this.showGrid;
@@ -1147,58 +1152,6 @@ public class Canvas extends JPanel implements ActionListener {
 		this.showGrid = b;
 		drawingArea.repaint();
 	}
-
-	/**
-	 * Open application options dialog.
-	 * @param e - Action Event.
-	 */
-	public void actionPerformed(ActionEvent e) {
-		if (e.getActionCommand().equals(Menu.PROPERTIES)) {
-			openPropertiesDialog();
-		} else if (e.getActionCommand().equals(Menu.GROUP)) {
-			groupObjects();
-		} else if (e.getActionCommand().equals(Menu.UNGROUP)) {
-			ungroupObjects();
-		} else if (e.getActionCommand().equals(Menu.CLONE)) {
-			cloneObject();
-		} else if (e.getActionCommand().equals(Menu.HLPORTS)) {
-			hilightPorts();
-		} else if (e.getActionCommand().equals(Menu.GRID)) {
-			this.setGridVisible(!this.isGridVisible());
-		} else if (e.getActionCommand().equals(Menu.BACKWARD)) {
-			// MOVE OBJECT BACKWARD IN THE LIST
-			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-			objects.sendBackward(currentObj, 1);
-			drawingArea.repaint();
-		} else if (e.getActionCommand().equals(Menu.FORWARD)) {
-			// MOVE OBJECT FORWARD IN THE LIST
-			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-			objects.bringForward(currentObj, 1);
-			drawingArea.repaint();
-		} else if (e.getActionCommand().equals(Menu.TOFRONT)) {
-			// MOVE OBJECT TO THE FRONT IN THE LIST,
-			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-			objects.bringToFront(currentObj);
-			drawingArea.repaint();
-		} else if (e.getActionCommand().equals(Menu.TOBACK)) {
-			// MOVE OBJECT TO THE BACK IN THE LIST
-			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-			objects.sendToBack(currentObj);
-			drawingArea.repaint();
-		} else if (e.getActionCommand().equals(Menu.MAKECLASS)) {
-			ClassSaveDialog csd = new ClassSaveDialog(((GObjGroup)currentObj).getSpec(connections), this);
-            csd.pack();
-
-			csd.setLocationRelativeTo(this);
-			csd.setVisible(true);
-
-		} else if (e.getActionCommand().equals(Menu.VIEWCODE)) {
-            CodeViewer cv = new CodeViewer( currentObj.getClassName(), getWorkDir() );
-			cv.setSize(550, 450);
-			cv.setVisible(true);
-		}
-	}
-
 
 	class DrawingArea extends JPanel {
 		private static final long serialVersionUID = 1L;
@@ -1210,17 +1163,18 @@ public class Canvas extends JPanel implements ActionListener {
             int step = RuntimeProperties.gridStep;
             int bx = vr.x + vr.width;
             int by = vr.y + vr.height;
+            int unit = Math.round(1.0f / scale);
 
             g.setColor(Color.lightGray);
-            g.setStroke(new BasicStroke(1.0f / scale));
+            g.setStroke(new BasicStroke(unit));
 
             // draw vertical lines
-            for (int i = (vr.x + step - 1) / step * step; i <= bx; i += step)
+            for (int i = (vr.x + step - unit) / step * step; i <= bx; i += step)
                 g.drawLine(i, vr.y, i, by);
 
             // draw horizontal lines
-            for (int i = (vr.y + step - 1) / step * step; i <= by; i += step)
-                g.drawLine(vr.x, i, bx, i);
+            for (int i = (vr.y + step - unit) / step * step; i <= by; i += step)
+            	g.drawLine(vr.x, i, bx, i);
 		}
 
 

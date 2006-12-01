@@ -1,19 +1,23 @@
 package ee.ioc.cs.vsle.editor;
 
 import java.awt.event.*;
-import javax.swing.*;
-import java.awt.*;
 
+import javax.swing.*;
+
+import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.GObjGroup;
 
 /**
+ * Popup menu that contains actions that can be performed on a scheme object.
  */
-public class ObjectPopupMenu extends JPopupMenu {
+public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
+
+	private static final long serialVersionUID = 1L;
 
 	// ee.ioc.cs.editor.editor.Menu items displayed in the menu.
-	JMenuItem itemDelete;
 	JMenuItem itemProperties;
-	JMenuItem itemGroup;
-	JMenuItem itemUngroup;
+	//JMenuItem itemGroup;
+	//JMenuItem itemUngroup;
 	JMenuItem itemClone;
 	JMenuItem itemHLPorts;
 	JMenuItem itemShowGrid;
@@ -24,87 +28,98 @@ public class ObjectPopupMenu extends JPopupMenu {
 	JMenuItem itemMakeClass;
 	JMenuItem itemViewCode;
 
-	JMenu submenuOrder;
+	private JMenu submenuOrder;
+
+	private Canvas canvas;
+	private GObj object;
 
 	/**
 	 * Build the popup menu by adding menu items and action listeners for the menu items in it.
-	 * @param canvas - ee.ioc.cs.editor.editor.Editor mouse listener.
+	 * @param object the object that was clicked
+	 * @param canvas the canvas
 	 */
-	ObjectPopupMenu(Canvas canvas) {
+	ObjectPopupMenu(GObj object, Canvas canvas) {
 		super();
+		
+		this.canvas = canvas;
+		this.object = object;
 
 		submenuOrder = new JMenu(Menu.MENU_ORDER);
 
 		itemClone = new JMenuItem(Menu.CLONE, KeyEvent.VK_C);
-		itemClone.addActionListener(canvas);
+		itemClone.addActionListener(this);
 		itemClone.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_D, KeyEvent.CTRL_DOWN_MASK));
+				KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK));
 		this.add(itemClone);
 
 		this.add(Editor.getInstance().deleteAction);
 
+		/*
+		 * See canvas.groupObjects()
+		 */
+		/*
 		itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
-		itemGroup.addActionListener(canvas);
+		itemGroup.addActionListener(this);
 		itemGroup.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_G, KeyEvent.CTRL_DOWN_MASK));
+				KeyEvent.VK_G, InputEvent.CTRL_DOWN_MASK));
 		this.add(itemGroup);
 
 		itemUngroup = new JMenuItem(Menu.UNGROUP, KeyEvent.VK_U);
-		itemUngroup.addActionListener(canvas);
+		itemUngroup.addActionListener(this);
 		itemUngroup.setAccelerator(KeyStroke.getKeyStroke(
-				KeyEvent.VK_U, KeyEvent.CTRL_DOWN_MASK));
+				KeyEvent.VK_U, InputEvent.CTRL_DOWN_MASK));
 		this.add(itemUngroup);
+		*/
 
 		itemProperties = new JMenuItem(Menu.PROPERTIES, KeyEvent.VK_R);
-		itemProperties.addActionListener(canvas);
-		itemProperties.setAccelerator(KeyStroke.getKeyStroke(
-        KeyEvent.VK_R, KeyEvent.CTRL_DOWN_MASK));
+		itemProperties.addActionListener(this);
+		itemProperties.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_R,
+				InputEvent.CTRL_DOWN_MASK));
 		this.add(itemProperties);
 
 		itemHLPorts = new JMenuItem(Menu.HLPORTS, KeyEvent.VK_H);
-		itemHLPorts.addActionListener(canvas);
+		itemHLPorts.addActionListener(this);
 		itemHLPorts.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_H, KeyEvent.CTRL_DOWN_MASK));
+                KeyEvent.VK_H, InputEvent.CTRL_DOWN_MASK));
 		this.add(itemHLPorts);
 
 		itemViewCode = new JMenuItem(Menu.VIEWCODE);
-		itemViewCode.addActionListener(canvas);
+		itemViewCode.addActionListener(this);
 		itemViewCode.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK));
+                KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK));
 		this.add(itemViewCode);
 
 		itemMakeClass = new JMenuItem(Menu.MAKECLASS);
-		itemMakeClass.addActionListener(canvas);
+		itemMakeClass.addActionListener(this);
 		itemMakeClass.setAccelerator(KeyStroke.getKeyStroke(
-                KeyEvent.VK_M, KeyEvent.CTRL_DOWN_MASK));
+                KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK));
 		this.add(itemMakeClass);
-
 
 		itemShowGrid = new JCheckBoxMenuItem(Menu.GRID, canvas.isGridVisible());
 		itemShowGrid.setMnemonic('G');
-		itemShowGrid.addActionListener(canvas);
+		itemShowGrid.addActionListener(this);
 		this.add(itemShowGrid);
 
-
-
         itemBackward = new JMenuItem(Menu.BACKWARD, KeyEvent.VK_B);
-		itemBackward.addActionListener(canvas);
+		itemBackward.addActionListener(this);
 		itemBackward.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0));
 		submenuOrder.add(itemBackward);
 
 		itemForward = new JMenuItem(Menu.FORWARD, KeyEvent.VK_F);
-		itemForward.addActionListener(canvas);
+		itemForward.addActionListener(this);
 		itemForward.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, 0));
 		submenuOrder.add(itemForward);
 
 		itemToFront = new JMenuItem(Menu.TOFRONT, KeyEvent.VK_R);
-		itemToFront.addActionListener(canvas);
-		itemToFront.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, KeyEvent.CTRL_DOWN_MASK));
+		itemToFront.addActionListener(this);
+		itemToFront.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS,
+				InputEvent.CTRL_DOWN_MASK));
 		submenuOrder.add(itemToFront);
 
 		itemToBack = new JMenuItem(Menu.TOBACK, KeyEvent.VK_A);
-		itemToBack.addActionListener(canvas);
-		itemToBack.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, KeyEvent.CTRL_DOWN_MASK));
+		itemToBack.addActionListener(this);
+		itemToBack.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS,
+				InputEvent.CTRL_DOWN_MASK));
 		submenuOrder.add(itemToBack);
 		submenuOrder.setMnemonic('O');
 
@@ -117,16 +132,62 @@ public class ObjectPopupMenu extends JPopupMenu {
 	 * @param b - enable or disable the menu item.
 	 */
 	void enableDisableMenuItem(JMenuItem item, boolean b) {
-	   if(item!=null) {
-		 Component[] components = submenuOrder.getMenuComponents();
-		 for (int i = 0; i < components.length; i++) {
-		   JMenuItem menuitem = (JMenuItem) components[i];
-		   if (menuitem == item) {
-			 submenuOrder.getMenuComponent(i).setEnabled(b);
-		   }
-		 }
-	   }
+		item.setEnabled(b);
 	} // enableDisableMenuItem
 
-
+	/**
+	 * Handles actions generated by object popup menu.
+	 * @param e Action Event
+	 */
+	public void actionPerformed(ActionEvent e) {
+		String cmd = e.getActionCommand();
+		
+		if (Menu.PROPERTIES.equals(cmd)) {
+			canvas.openPropertiesDialog(object);
+		/*
+		 * Disabled until needed and reimplemented
+		 */
+//		} else if (Menu.GROUP.equals(cmd)) {
+//			canvas.groupObjects();
+//		} else if (Menu.UNGROUP.equals(cmd)) {
+//			canvas.ungroupObjects();
+		} else if (Menu.CLONE.equals(cmd)) {
+			canvas.cloneObject();
+		} else if (Menu.HLPORTS.equals(cmd)) {
+			canvas.hilightPorts();
+		} else if (Menu.GRID.equals(cmd)) {
+			canvas.setGridVisible(!canvas.isGridVisible());
+		} else if (Menu.BACKWARD.equals(cmd)) {
+			// MOVE OBJECT BACKWARD IN THE LIST
+			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			canvas.objects.sendBackward(object, 1);
+			canvas.drawingArea.repaint();
+		} else if (Menu.FORWARD.equals(cmd)) {
+			// MOVE OBJECT FORWARD IN THE LIST
+			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			canvas.objects.bringForward(object, 1);
+			canvas.drawingArea.repaint();
+		} else if (Menu.TOFRONT.equals(cmd)) {
+			// MOVE OBJECT TO THE FRONT IN THE LIST,
+			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			canvas.objects.bringToFront(object);
+			canvas.drawingArea.repaint();
+		} else if (Menu.TOBACK.equals(cmd)) {
+			// MOVE OBJECT TO THE BACK IN THE LIST
+			// NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
+			canvas.objects.sendToBack(object);
+			canvas.drawingArea.repaint();
+		} else if (Menu.MAKECLASS.equals(cmd)) {
+			ClassSaveDialog csd = new ClassSaveDialog(((GObjGroup) object)
+					.getSpec(canvas.getConnections()), canvas);
+			csd.pack();
+			csd.setLocationRelativeTo(canvas);
+			csd.setVisible(true);
+		} else if (e.getActionCommand().equals(Menu.VIEWCODE)) {
+            CodeViewer cv = new CodeViewer(object.getClassName(),
+            		canvas.getWorkDir());
+			cv.setSize(550, 450);
+			cv.setVisible(true);
+		}
+	}
 }
