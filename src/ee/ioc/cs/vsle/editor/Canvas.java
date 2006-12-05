@@ -1163,10 +1163,10 @@ public class Canvas extends JPanel {
             int step = RuntimeProperties.gridStep;
             int bx = vr.x + vr.width;
             int by = vr.y + vr.height;
-            int unit = Math.round(1.0f / scale);
+            int unit = (int) Math.ceil(1.0f / scale);
 
             g.setColor(Color.lightGray);
-            g.setStroke(new BasicStroke(unit));
+            g.setStroke(new BasicStroke(1.0f / scale));
 
             // draw vertical lines
             for (int i = (vr.x + step - unit) / step * step; i <= bx; i += step)
@@ -1316,7 +1316,12 @@ public class Canvas extends JPanel {
     public void setScale(float scale) {
     	int maxx = Integer.MIN_VALUE;
     	int maxy = Integer.MIN_VALUE;
-    	
+
+    	if (backgroundImage != null) {
+    		maxx = backgroundImage.getWidth();
+    		maxy = backgroundImage.getHeight();
+    	}
+
     	for (GObj obj : objects) {
     		int tmp = obj.getX() + obj.getRealWidth();
     		if (tmp > maxx)
@@ -1327,13 +1332,13 @@ public class Canvas extends JPanel {
     			maxy = tmp;
     	}
 
-   		drawAreaSize.width = Math.round(maxx > 0 
-   				? maxx * scale + RuntimeProperties.gridStep
-   				: scale	* drawAreaSize.width / this.scale);
+   		drawAreaSize.width = Math.round(scale *
+   				(maxx > 0 ? maxx + RuntimeProperties.gridStep
+   						  : drawAreaSize.width / this.scale));
 
-   		drawAreaSize.height = Math.round(maxy > 0 
-   				? maxy * scale + RuntimeProperties.gridStep 
-   				: scale	* drawAreaSize.height / this.scale);
+   		drawAreaSize.height = Math.round(scale *
+   				(maxy > 0 ? maxy + RuntimeProperties.gridStep 
+   						  : drawAreaSize.height / this.scale));
 
     	this.scale = scale;
     	
