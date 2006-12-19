@@ -24,8 +24,10 @@ public class ProblemCreator {
     private static Problem makeProblemImpl( ClassList classes, String type, String caller, Problem problem ) throws
             SpecParseException {
 
+    	List<Alias> aliases = new ArrayList<Alias>();
+    	
     	AnnotatedClass ac = classes.getType( type );
-
+    	
         for ( ClassField cf : ac.getFields() ) {
         	if( ac.isOnlyForSuperclassGeneration() ) continue;
         	
@@ -33,7 +35,7 @@ public class ProblemCreator {
                 problem = makeProblemImpl( classes, cf.getType(), caller + "." + cf.getName(), problem );
             }
             if ( cf.isAlias() ) {
-                createAlias( (Alias)cf, ac, classes, problem, caller );
+            	aliases.add( (Alias)cf );
                 continue;
             } else if( cf.isConstant() && cf.getName().startsWith( "*" ) ) {
             	//this denotes for alias.length constant
@@ -50,7 +52,12 @@ public class ProblemCreator {
             	problem.getFoundVars().add( var );
             }
         }
-
+        
+        //make aliases when all other vars have been created
+        for ( Alias alias : aliases) {
+        	createAlias( alias, ac, classes, problem, caller );
+		}
+        
         for ( ClassRelation classRelation : ac.getClassRelations() ) {
 
             String obj = caller;
@@ -68,13 +75,10 @@ public class ProblemCreator {
                 ClassField outpField = classRelation.getOutputs().get( 0 );
 
                 //if we have a relation alias = *.sth, we need to find out what it actually is
-                if ( inpField.getName().startsWith( "*." ) ) {
-                    String s = checkIfAliasWildcard( classRelation );
-                    if ( s != null ) {
-                        relSet = makeAliasWildcard( ac, classes, classRelation, problem, obj, s );
-                        rel = null;
-                        isAliasRel = true;
-                    }
+                if ( isAliasWildcard( classRelation ) ) {
+                	relSet = makeAliasWildcard( ac, classes, classRelation, problem, obj );
+                	rel = null;
+                	isAliasRel = true;
                 }
 
                 //the following is for x = y, not x -> y relation where both x and y are aliases
@@ -235,88 +239,48 @@ public class ProblemCreator {
     	return size;
     }
 
-    private static String checkIfAliasWildcard( ClassRelation classRelation ) {
-        String s = classRelation.getInputs().get( 0 ).getName();
-        if ( s.startsWith( "*." ) )
-            return s.substring( 2 );
-        return null;
+    private static boolean isAliasWildcard( ClassRelation classRelation ) {
+    	
+    	return classRelation.getInputs().size() == 1 && classRelation.getInputs().get( 0 ).getName().startsWith( "*." );
     }
     
     /**
      * creates Rel for alias x = ( *.wildcardVar );
      */
     private static HashSet<Rel> makeAliasWildcard( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
-    		Problem problem, String obj, String wildcardVar ) throws
-    		UnknownVariableException {
+    		Problem problem, String obj ) throws UnknownVariableException {
+    	
+    	Var alias = problem.getAllVars().get( obj + "." + classRelation.getOutputs().get( 0 ).getName() );
+    	
+    	if( alias == null ) {
+    		throw new UnknownVariableException( obj + "." + classRelation.getOutputs().get( 0 ).getName() );
+    	}
+    	
+    	Rel relAliasOutp = new Rel();
+    	relAliasOutp.setMethod( classRelation.getMethod() );
+    	relAliasOutp.setObj( obj );
+    	relAliasOutp.setType( classRelation.getType() );
+    	relAliasOutp.getInputs().addAll( alias.getChildVars() );
+    	relAliasOutp.addOutput( alias );
+    	relAliasOutp.setUnknownInputs( relAliasOutp.getInputs().size() );
+    	alias.addRel(relAliasOutp);
+    	for ( Var childVar : alias.getChildVars() ) {
+    		childVar.addRel(relAliasOutp);
+		}
+    	
+    	Rel relAliasInp = new Rel();
+    	relAliasInp.setMethod( classRelation.getMethod() );
+    	relAliasInp.setObj( obj );
+    	relAliasInp.setType( classRelation.getType() );
+    	relAliasInp.getOutputs().addAll( alias.getChildVars() );
+    	relAliasInp.addInput( alias );
+    	relAliasInp.setUnknownInputs( relAliasInp.getInputs().size() );
+    	alias.addRel(relAliasInp);
+    	
     	HashSet<Rel> relset = new HashSet<Rel>();
-    	Rel rel = new Rel();
-    	rel.setMethod( classRelation.getMethod() );
-    	rel.setObj( obj );
-    	rel.setType( classRelation.getType() );
+    	relset.add( relAliasOutp );
+    	relset.add( relAliasInp );
     	
-    	ClassField clf;
-        
-    	for ( int i = 0; i < ac.getFields().size(); i++ ) {
-    		clf = ac.getFields().get( i );
-    		AnnotatedClass anc = classes.getType( clf.getType() );
-    		if ( anc != null ) {
-    			if ( anc.hasField( wildcardVar ) ) {
-    				String varName = obj + "." + clf.getName() + "." + wildcardVar;
-    				Var var;
-    				if ( problem.getAllVars().containsKey( varName ) ) {
-    					var = problem.getAllVars().get( varName );
-    					var.addRel( rel );
-    					rel.addInput( var );
-    				} else {
-    					throw new UnknownVariableException( varName );
-    				}
-    				
-    			}
-    		}
-    	}
-    	ClassField cf = classRelation.getOutputs().get( 0 );
-    	if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-    		rel.addOutput( problem.getAllVars().get( obj + "." + cf.getName() ) );
-    	}
-    	
-    	rel.setUnknownInputs( rel.getInputs().size() );
-    	
-    	relset.add( rel );
-    	
-    	rel = new Rel();
-    	rel.setMethod( classRelation.getMethod() );
-    	rel.setObj( obj );
-    	rel.setType( classRelation.getType() );
-    	for ( int i = 0; i < ac.getFields().size(); i++ ) {
-    		clf = ac.getFields().get( i );
-    		AnnotatedClass anc = classes.getType( clf.getType() );
-    		if ( anc != null ) {
-    			if ( anc.hasField( wildcardVar ) ) {
-    				Var var;
-    				if ( problem.getAllVars().containsKey( obj + "." + clf.getName() + "." +
-    						wildcardVar ) ) {
-    					var = problem.getAllVars().get( obj + "." + clf.getName() + "." +
-    							wildcardVar );
-    					//var.addRel( rel );//
-    					rel.addOutput( var );
-    				} else {
-    					throw new UnknownVariableException( obj + "." + clf.getName() + "." +
-    							wildcardVar );
-    				}
-    				
-    			}
-    		}
-    	}
-    	cf = classRelation.getOutputs().get( 0 );
-    	if ( problem.getAllVars().containsKey( obj + "." + cf.getName() ) ) {
-    		Var varWithWildcard = problem.getAllVars().get( obj + "." + cf.getName() );
-    		rel.addInput( varWithWildcard );
-    		varWithWildcard.addRel( rel );
-    	}
-    	
-    	rel.setUnknownInputs( rel.getInputs().size() );
-    	
-    	relset.add( rel );
     	return relset;
     }
     

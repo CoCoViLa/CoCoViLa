@@ -96,7 +96,7 @@ public class Synthesizer {
         }
 
         pattern = Pattern.compile(
-                "/\\*@.*specification[ \t\n]+[a-zA-Z_0-9-.]+[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *",
+                "/\\*@.*specification[ \t\n]+[a-zA-Z_0-9-.]+[ \t\n]*(super ([ a-zA-Z_0-9-,]+ ))?[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *",
                 Pattern.DOTALL );
         matcher = pattern.matcher( fileString );
 

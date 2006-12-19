@@ -312,7 +312,7 @@ public class SpecParser {
 	                                
 	                                for ( AnnotatedClass annCl : superClasses.getSuperClasses() ) {
 	                                	annClass.addSuperClass( annCl );
-	                                	annClass.getFields().addAll( annCl.getFields() );
+	                                	//annClass.getFields().addAll( annCl.getFields() );
 	                                	vars.addAll( annCl.getFields() );
 	                                	annClass.getClassRelations().addAll( annCl.getClassRelations() );
 	                                	annCl.getFields().clear();
