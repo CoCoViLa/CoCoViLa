@@ -15,6 +15,10 @@ import static ee.ioc.cs.vsle.util.TypeUtil.*;
  */
 public class Synthesizer {
 
+	public static final String RE_SPEC = "/\\*@.*specification[ \t\n]+" +
+			"[a-zA-Z_0-9-.]+[ \t\n]*(super ([ a-zA-Z_0-9-,]+ ))?" +
+			"[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *";
+
     public static final String GENERATED_INTERFACE_NAME = "IComputable";
     public static final String SUBTASK_INTERFACE_NAME = "Subtask";
 
@@ -86,18 +90,19 @@ public class Synthesizer {
         Pattern pattern;
         Matcher matcher;
 
-        pattern = Pattern.compile( "class[ \t\n]+" + mainClassName + "|" + "public class[ \t\n]+" +
-                                   mainClassName );
+        pattern = Pattern.compile("(?:public[ \t\n]+)?class[ \t\n]+" 
+        		+ mainClassName + "(?:[ \t\n]+extends[ \t\n]+([A-Za-z]\\w*))?");
+        
         matcher = pattern.matcher( fileString );
 
         if ( matcher.find() ) {
-            fileString = matcher.replaceAll( "public class " + mainClassName + " implements " +
-                                             GENERATED_INTERFACE_NAME );
+            fileString = matcher.replaceAll("public class " + mainClassName
+            		+ (matcher.start(1) < matcher.end(1) 
+            				? " extends " + matcher.group(1) : "")
+            		+ " implements " + GENERATED_INTERFACE_NAME);
         }
 
-        pattern = Pattern.compile(
-                "/\\*@.*specification[ \t\n]+[a-zA-Z_0-9-.]+[ \t\n]*(super ([ a-zA-Z_0-9-,]+ ))?[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *",
-                Pattern.DOTALL );
+        pattern = Pattern.compile(RE_SPEC, Pattern.DOTALL);
         matcher = pattern.matcher( fileString );
 
         if ( matcher.find() ) {
@@ -193,9 +198,7 @@ public class Synthesizer {
                 */
 
                 // find spec
-                pattern = Pattern.compile(
-                        "/\\*@.*specification[ \t\n]+[a-zA-Z_0-9-.]+[ \t\n]*(super ([ a-zA-Z_0-9-,]+ ))?[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *",
-                        Pattern.DOTALL );
+                pattern = Pattern.compile(RE_SPEC, Pattern.DOTALL);
                 matcher = pattern.matcher( fileString );
                 if ( matcher.find() ) {
                     fileString = matcher.replaceAll( "\n" + declars );
