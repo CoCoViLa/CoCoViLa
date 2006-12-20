@@ -341,6 +341,11 @@ public class Port implements Cloneable, Serializable {
 	 * @return <code>true</code> if {@code port1} and {@code port2} can be connected.
 	 */
 	public static boolean canBeConnected(Port port1, Port port2) {
+
+		// the ports of a superclass cannot be connected
+		if (port1.obj.isSuperClass() || port2.obj.isSuperClass())
+			return false;
+
 		if (port1.isMulti() && port2.isMulti())
 			return false;
 		else if (port1.isMulti() && port1.getType().equals(port2.getType())

@@ -35,6 +35,10 @@ public class GObj implements Serializable, Cloneable {
 	private boolean selected;
 	public boolean group = false;
 	private boolean strict;
+	/**
+	 * Is this object the superclass of the scheme?
+	 */
+	private boolean superClass;
 
 	public int portOffsetX1 = 0;
 	public int portOffsetX2 = 0;
@@ -282,6 +286,16 @@ public class GObj implements Serializable, Cloneable {
 	} // draw
 
 	public void drawClassGraphics(Graphics2D g2, float scale) {
+		// hilight superclass
+		if (superClass) {
+			Composite c = g2.getComposite();
+			g2.setColor(Color.GREEN);
+			g2.setComposite(AlphaComposite.getInstance(
+					AlphaComposite.SRC_OVER, .2f));
+			g2.fillRect(getX(), getY(), getRealWidth(), getRealHeight());
+			g2.setComposite(c);
+		}
+
 		draw(getX(), getY(), getXsize(), getYsize(), g2);
 
 		int xModifier = getX();
@@ -514,5 +528,22 @@ public class GObj implements Serializable, Cloneable {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Is this object the superclass of the scheme?
+	 * @return true, if the object is superclass, false otherwise
+	 */
+	public boolean isSuperClass() {
+		return superClass;
+	}
+
+	/**
+	 * Set or unset the object as a scheme superclass.
+	 * There should be only one superclass at a time.
+	 * @param superClass true to set the class as a superclass
+	 */
+	public void setSuperClass(boolean superClass) {
+		this.superClass = superClass;
 	}
 }
