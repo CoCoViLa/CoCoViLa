@@ -11,7 +11,8 @@
 <!ELEMENT point		EMPTY>
 
 <!ATTLIST scheme
-	package		CDATA	#REQUIRED>
+	package		CDATA	#REQUIRED
+	superclass  CDATA   #IMPLIED>
 
 <!ATTLIST connection
 	obj1		CDATA	#REQUIRED
