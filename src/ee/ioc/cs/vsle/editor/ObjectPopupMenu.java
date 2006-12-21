@@ -124,6 +124,17 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
 		submenuOrder.setMnemonic('O');
 
 		this.add(submenuOrder);
+
+		// superclass
+		if (canvas.canBeSetAsSuperClass(object)) {
+			JMenuItem tmp = new JMenuItem(Menu.SET_AS_SUPER, KeyEvent.VK_S);
+			tmp.addActionListener(this);
+			this.add(tmp);
+		} else if (object.isSuperClass()) {
+			JMenuItem tmp = new JMenuItem(Menu.UNSET_AS_SUPER, KeyEvent.VK_S);
+			tmp.addActionListener(this);
+			this.add(tmp);
+		}
 	}
 
 	/**
@@ -188,6 +199,10 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             		canvas.getWorkDir());
 			cv.setSize(550, 450);
 			cv.setVisible(true);
+		} else if (Menu.SET_AS_SUPER.equals(cmd)) {
+			canvas.setAsSuperClass(object, true);
+		} else if (Menu.UNSET_AS_SUPER.equals(cmd)) {
+			canvas.setAsSuperClass(object, false);
 		}
 	}
 }

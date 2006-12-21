@@ -436,37 +436,9 @@ public class Editor extends JFrame implements ChangeListener {
 		menuItem = new JMenuItem(Menu.RUNPROPAGATE, KeyEvent.VK_P);
 		menuItem.addActionListener(aListener);
 		menu.add(menuItem);
-
-		if (getCurrentPackage() != null) {
-			menu.add(new JSeparator());
-
-			final String packageName = getCurrentPackage().getName();
-			final String workDir = getCurrentCanvas().getWorkDir();
-			// <package>.meth
-			menuItem = new JMenuItem(packageName + ".meth", KeyEvent.VK_M);
-			menuItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					CodeViewer cv = new CodeViewer(packageName, workDir, ".meth");
-					cv.setSize(550, 450);
-					cv.setVisible(true);
-				}
-			});
-			menu.add(menuItem);
-
-			// <package>.spec
-			menuItem = new JMenuItem(packageName + ".spec", KeyEvent.VK_C);
-			menuItem.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					CodeViewer cv = new CodeViewer(packageName, workDir, ".spec");
-					cv.setSize(550, 450);
-					cv.setVisible(true);
-				}
-			});
-
-			menu.add(menuItem);
-		}
 		
 		menu.add(new JSeparator());
+
 		// Options
 		menuItem = new JMenuItem(Menu.SCHEMEOPTIONS, KeyEvent.VK_O);
 		menuItem.addActionListener(aListener);

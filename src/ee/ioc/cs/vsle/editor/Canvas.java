@@ -103,6 +103,43 @@ public class Canvas extends JPanel {
      */
 
     /**
+     * Undoable edit for setting scheme super class.
+     * This edit is trivial but undo support is needed to keep the
+     * state consistent. Otherwise it would be, for example, possible
+     * to accidentally add relations to the superclass or perform other
+     * actions that would cause problems later. 
+     */
+    private static class SetSuperClassEdit extends AbstractUndoableEdit {
+
+    	private static final long serialVersionUID = 1L;
+
+    	private GObj object;
+    	private boolean value;
+
+    	public SetSuperClassEdit(GObj obj, boolean value) {
+    		this.object = obj;
+    		this.value = value;
+		}
+
+		@Override
+		public String getPresentationName() {
+			return value ? "Set Superclass" : "Unset Superclass";
+		}
+
+		@Override
+		public void redo() throws CannotRedoException {
+			super.redo();
+			object.setSuperClass(value);
+		}
+
+		@Override
+		public void undo() throws CannotUndoException {
+			super.undo();
+			object.setSuperClass(!value);
+		}
+    }
+
+    /**
      * Undoable edit for moving objects on the scheme.
      * Multiple subsequent move edits of the same set of objects are merged
      * into one movement. The effect of undoing the merged edit is to move the
@@ -498,10 +535,9 @@ public class Canvas extends JPanel {
 	}
 	
     void initialize() {
-		scheme = new Scheme();
-		scheme.packageName = vPackage.getName();
-		objects = scheme.objects;
-		connections = scheme.connections;
+		scheme = new Scheme(vPackage);
+		objects = scheme.getObjects();
+		connections = scheme.getConnections();
         mListener = new MouseOps(this);
 		keyListener = new KeyOps(this);
 		drawingArea = new DrawingArea();
@@ -1038,6 +1074,7 @@ public class Canvas extends JPanel {
 		}
 
 		for (GObj obj : newObjects) {
+			// TODO Unique check
 			obj.setName(obj.className + "_" 
 					+ Integer.toString(vPackage.getNextSerial(obj.className)));
 		}
@@ -1085,8 +1122,8 @@ public class Canvas extends JPanel {
                     "Error loading scheme", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		connections = scheme.connections;
-		objects = scheme.objects;
+		connections = scheme.getConnections();
+		objects = scheme.getObjects();
 		initClassPainters();
 		mListener.setState(State.selection);
 		drawingArea.repaint();
@@ -1111,6 +1148,12 @@ public class Canvas extends JPanel {
 			attrs.addAttribute(null, null, "package", StringUtil.CDATA,
 					vPackage.getName());
 			
+			GObj superClass = scheme.getSuperClass();
+			if (superClass != null) {
+				attrs.addAttribute(null, null, "superclass", StringUtil.CDATA,
+						superClass.getName());
+			}
+
 			th.startElement(null, null, "scheme", attrs);
 
 			for (GObj obj : objects)
@@ -1589,5 +1632,48 @@ public class Canvas extends JPanel {
 		assert currentObj != null;
 		
 		currentPainter = pClass.getPainterFor(scheme, currentObj);
+	}
+
+	/**
+	 * Returns true if the object can be set as the superclass.
+	 * @param obj the object
+	 * @return true if the object can be set as superclass, false otherwise
+	 */
+	public boolean canBeSetAsSuperClass(GObj obj) {
+		/*
+		 * An object can be made a superclass only if it has no connections
+		 * and there is no superclass yet. The last restriction covers
+		 * the case when the object itself is already set as a superclass.
+		 */
+		if (obj.getConnections().size() > 0)
+			return false;
+		
+		for (GObj o : objects)
+			if (o.isSuperClass())
+				return false;
+		
+		return true;
+	}
+
+	/**
+	 * Sets or unsets the specified object as the superclass of the scheme.
+	 * This method generated an undoable edit and throws a runtime exception
+	 * if the specified object cannot be safely set as the superclass
+	 * (for exampe, the object has relations or there is a superclass already).
+	 * @param obj the object
+	 * @param value true to set, false to unset
+	 */
+	public void setAsSuperClass(GObj obj, boolean value) {
+		if (value && !canBeSetAsSuperClass(obj)) {
+			throw new IllegalStateException(
+					"The object cannot be set as superclass");
+		}
+			
+		obj.setSuperClass(value);
+		
+		undoSupport.postEdit(new SetSuperClassEdit(obj, value));
+
+		drawingArea.repaint(obj.getX(), obj.getY(),
+				obj.getRealWidth(), obj.getRealHeight());
 	}
 }

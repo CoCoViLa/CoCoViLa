@@ -70,7 +70,8 @@ public class SchemeLoader {
 						+ (System.currentTimeMillis() - startParsing)
 						+ "ms.\n" );
 			
-			scheme = new Scheme(handler.getObjects(), handler.getConnections());
+			scheme = new Scheme(vp, handler.getObjects(),
+					handler.getConnections());
 		} catch (Exception e) {
 			db.p(e);
 		}
@@ -86,6 +87,7 @@ public class SchemeLoader {
 		private ObjectList objects;
 		private ConnectionList connections;
 		private VPackage vPackage;
+		private String superClass;
 
 		private Connection connection;
 		private GObj obj;
@@ -123,6 +125,7 @@ public class SchemeLoader {
 		public void startDocument() {
 			connections = new ConnectionList();
 			objects = new ObjectList();
+			superClass = null;
 		}
 
 		@Override
@@ -144,6 +147,9 @@ public class SchemeLoader {
 				objects.add(obj);
 			} else if (element.equals("scheme")) {
 				String type = attrs.getValue("package");
+
+				superClass = attrs.getValue("superclass");
+
 				if (!type.equals(vPackage.getName())) {
 					throw new SAXException("Scheme was built with package \""
 							+ type + "\", load this package first");
@@ -270,6 +276,11 @@ public class SchemeLoader {
 						port.setConnections(new ArrayList<Connection>(port.getConnections()));
 					}
 					obj.setPorts(ports);
+
+					if (superClass != null 
+							&& superClass.equals(obj.getName())) {
+						obj.setSuperClass(true);
+					}
 				} else {
 					throw new SAXException("There is no class \"" + obj.getClassName()
 							+ "\" in the package \"" + vPackage.getName() + "\"");
