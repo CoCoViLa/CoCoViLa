@@ -1,11 +1,9 @@
 package ee.ioc.cs.vsle.editor;
 
-import java.io.*;
 import java.util.*;
 
 import ee.ioc.cs.vsle.factoryStorage.*;
 import ee.ioc.cs.vsle.synthesize.*;
-import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
@@ -14,61 +12,56 @@ import static ee.ioc.cs.vsle.util.TypeUtil.*;
  * User: Ando
  * Date: 3.05.2004
  * Time: 17:53:32
- * To change this template use Options | File Templates.
  */
 public class SpecGenerator implements ISpecGenerator {
 	
-	private SpecGenerator() {}
+	private SpecGenerator() {
+		// use the factory to get instances
+	}
 	
-	public String generateSpec(ObjectList objects, ArrayList<Connection> relations, VPackage pack) {
-		GObj obj;
-		File methF = new File( pack.getPath().substring( 0, pack.getPath().length() - "xml".length() ) + "meth" );
-		File specF = new File( pack.getPath().substring( 0, pack.getPath().length() - "xml".length() ) + "spec" );
-		String method = "";
-		String spec  = "";
-		try {
-			BufferedReader in;
-			String lineString;
-			
-			if( methF.exists() ) {
-				in = new BufferedReader(new FileReader(methF));
-				lineString = new String();
-				
-				while ( (lineString = in.readLine()) != null) {
-					method += lineString+"\n";
-				}
-				in.close();
-			}
-			
-			if( specF.exists() ) {
-				in = new BufferedReader(new FileReader(specF));
-				
-				while ( (lineString = in.readLine()) != null) {
-					spec += lineString+"\n";
-				}
-				in.close();
-			}
-		} catch (IOException ioe)     {
-			db.p( ioe.getMessage() );
-		}
-		
+	public String generateSpec(Scheme scheme) {
+    	VPackage pack = scheme.getVPackage();
+    	ObjectList objects = scheme.getObjects();
+    	ConnectionList relations = scheme.getConnections();
+
+    	GObj superClass = scheme.getSuperClass();
+    	
 		StringBuffer s = new StringBuffer();
-		s.append("public class " + pack.getPackageClassName() + " {");
-		s.append("\n    /*@ specification  " + pack.getPackageClassName() + " {\n");
 		
+		// construct class and spec declarations
+		s.append("public class " + pack.getPackageClassName());
+		if (superClass != null) {
+			s.append(" extends ");
+			s.append(superClass.getClassName());
+		}
+		s.append(" {");
+
+		s.append("\n    /*@ specification  ");
+		s.append(pack.getPackageClassName());
+		
+		if (superClass != null) {
+			s.append(" super ");
+			s.append(superClass.getClassName());
+		}
+		s.append(" {\n");
+
+		GObj obj;
 		for (int i = 0; i < objects.size(); i++) {
 			obj = objects.get(i);
-			s.append(
-					"    " + obj.getClassName() + " " + obj.getName() + ";\n");
+
+			if (!obj.isSuperClass()) {
+				s.append("    " + obj.getClassName() + " " 
+						+ obj.getName() + ";\n");
+			}
+
 			for ( ClassField field : obj.fields ) {
 				if ( ( field.getValue() != null ) && !field.isGoal() ) {
+					appendSpecFieldLHS(obj, field, s);
+
 					if (field.getType().equals(TYPE_STRING)) {
-						s.append("        " + obj.getName() + "." + field.getName()
-								+ " = \"" + field.getValue() + "\";\n");
+						s.append("\"" + field.getValue() + "\";\n");
 					} else if (field.isPrimitiveArray()) {
-						s.append(
-								"        " + obj.getName() + "." + field.getName()
-								+ " = {");
+						s.append("{");
 						String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
@@ -79,9 +72,7 @@ public class SpecGenerator implements ISpecGenerator {
 						s.append("};\n");
 						
 					} else if (field.isPrimOrStringArray()) {
-						s.append(
-								"        " + obj.getName() + "." + field.getName()
-								+ " = {");
+						s.append("{");
 						String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
@@ -91,9 +82,7 @@ public class SpecGenerator implements ISpecGenerator {
 						}
 						s.append("};\n");
 					} else {
-						s.append(
-								"        " + obj.getName() + "." + field.getName() + " = "
-								+ field.getValue() + ";\n");
+						s.append(field.getValue() + ";\n");
 					}
 				}
 			}
@@ -153,14 +142,31 @@ public class SpecGenerator implements ISpecGenerator {
 			s.append( CodeGenerator.OT_TAB + multiport + " = [ " + portarray + " ];\n");
 		}
 		
-		s.append(spec);
-		s.append("    }@*/\n");
-		s.append("\t"+method);
-		s.append("\n}");
+		s.append("    }@*/\n}\n");
 		
 		return s.toString();
 	}
-	
+
+	/**
+	 * Generates the left hand side of a specification assignment and
+	 * appends it to the buffer.
+	 * @param obj the owner of the field
+	 * @param field the field
+	 * @param buf accumulator
+	 */
+	private void appendSpecFieldLHS(GObj obj, ClassField field,
+			StringBuffer buf) {
+		buf.append("        ");
+
+		if (!obj.isSuperClass()) {
+			buf.append(obj.getName());
+			buf.append(".");
+		}
+
+		buf.append(field.getName());
+		buf.append(" = ");
+	}
+
 	public static void init() {
 		FactoryStorage.register( new Factory() );
 	}
