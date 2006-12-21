@@ -78,8 +78,7 @@ public class IconEditor
 		setLocationByPlatform( true );
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		keyListener = new IconKeyOps(this);
-		scheme = new Scheme();
-		scheme.packageName = "IconEditor";
+		scheme = new Scheme(null);
 		mListener = new IconMouseOps(this);
 
 		drawingArea = new DrawingArea();
