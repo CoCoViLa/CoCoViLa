@@ -1,12 +1,7 @@
-/*
- *
- */
 package ee.ioc.cs.vsle.editor;
 
-import java.util.ArrayList;
-
-import ee.ioc.cs.vsle.vclass.*;
+import ee.ioc.cs.vsle.vclass.Scheme;
 
 public interface ISpecGenerator {
-    public String generateSpec(ObjectList objects, ArrayList<Connection> relations, VPackage pack);
+    public String generateSpec(Scheme scheme);
 }

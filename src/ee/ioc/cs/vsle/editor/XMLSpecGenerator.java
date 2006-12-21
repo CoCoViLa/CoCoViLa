@@ -1,23 +1,22 @@
-/*
- *
- */
 package ee.ioc.cs.vsle.editor;
-
-import java.util.ArrayList;
 
 import ee.ioc.cs.vsle.factoryStorage.*;
 import ee.ioc.cs.vsle.vclass.*;
 
 public class XMLSpecGenerator implements ISpecGenerator {
 
-	private XMLSpecGenerator() {}
+	private XMLSpecGenerator() {
+		// use the factory
+	}
 	
-    public String generateSpec(ObjectList objects, ArrayList relations,
-            VPackage pack) {
+    public String generateSpec(Scheme scheme) {
         GObj obj;
         ClassField field;
-//        String method = "";
         String spec = "";
+
+    	VPackage pack = scheme.getVPackage();
+    	ObjectList objects = scheme.getObjects();
+    	ConnectionList relations = scheme.getConnections();
 
         StringBuffer s = new StringBuffer();
         s.append("<package name=\"" + pack.getPackageClassName() + "\">\n");
@@ -38,11 +37,8 @@ public class XMLSpecGenerator implements ISpecGenerator {
             s.append("  </fields>\n");
             s.append("</object>\n\n");
         }
-        Connection rel;
 
-        for (int i = 0; i < relations.size(); i++) {
-            rel = (Connection) relations.get(i);
-
+        for (Connection rel : relations) {
             if (rel.endPort.getName().equals("any")) {
                 s.append("<rel obj1 =\"" + rel.endPort.getObject().getName() 
                         + "\" port1 =\"" +rel.beginPort.getName() + "\""  

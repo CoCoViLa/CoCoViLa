@@ -66,7 +66,7 @@ public class ProgramRunner {
 		updateFromCanvas();
 		
         return SpecGenFactory.getInstance()
-        			.getCurrentSpecGen().generateSpec( objects, m_canvas.getConnections(), m_canvas.getCurrentPackage() );
+        			.getCurrentSpecGen().generateSpec(m_canvas.scheme);
 	}
 	
 	private Object[] getArguments() throws Exception {
