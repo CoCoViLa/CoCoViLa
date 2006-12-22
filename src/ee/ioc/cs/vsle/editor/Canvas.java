@@ -584,6 +584,7 @@ public class Canvas extends JPanel {
 				Editor.getInstance().refreshUndoRedo();
 			}
 		});
+		setScale(Palette.getDefaultZoom());
 	}
 
     private boolean createPainterPrototypes() {

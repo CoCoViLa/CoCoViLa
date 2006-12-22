@@ -35,6 +35,7 @@ public class PropertyBox {
 	public static final String SNAP_TO_GRID = "snapToGrid";
     public static final String RECENT_PACKAGES = "recentPackages";
     public static final String COMPILATION_CLASSPATH = "compilationClasspath";
+    public static final String ZOOM_LEVEL = "defaultzoom";
     
     private static final Properties s_defaultProperties = new Properties();
     
@@ -58,6 +59,7 @@ public class PropertyBox {
     	String cp = RuntimeProperties.isFromWebstart() 
     			    ? "" : "lib/jcommon.jar;lib/jfreechart.jar";
     	s_defaultProperties.put( COMPILATION_CLASSPATH, cp );
+    	s_defaultProperties.put(ZOOM_LEVEL, "1.0");
     }
     
 	/**

@@ -3,7 +3,6 @@ package ee.ioc.cs.vsle.editor;
 import ee.ioc.cs.vsle.util.PropertyBox;
 import ee.ioc.cs.vsle.iconeditor.Spinner;
 
-import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
@@ -18,9 +17,10 @@ import javax.swing.border.TitledBorder;
  * User: Administrator
  * Date: 10.1.2004
  * Time: 14:09:17
- * To change this template use Options | File Templates.
  */
 public class OptionsDialog extends JDialog {
+
+	private static final long serialVersionUID = 1L;
 
 	// Labels.
 	private static final JLabel lblGenFilesDir = new JLabel("Generated files:");
@@ -33,6 +33,7 @@ public class OptionsDialog extends JDialog {
 	private static final JLabel lblGridStep = new JLabel("Grid step:");
 	private static final JLabel lblNudgeStep = new JLabel("Nudge step:");
 	private static final JLabel lblSyntaxColor = new JLabel("Syntax Highlighting:");
+	private static final JLabel lblDefaultZoom = new JLabel("Default Zoom:");
 
 	// Text Fields.
 	private static final JTextField tfGenFilesDir = new JTextField(40);
@@ -51,6 +52,7 @@ public class OptionsDialog extends JDialog {
 
 	// Comboboxes.
 	public static final JComboBox cbDfltLayout = new JComboBox();
+	public static JComboBox cbDfltZoom;
 
 	// Buttons
 	private static final JButton bttnSave = new JButton("Save");
@@ -71,12 +73,12 @@ public class OptionsDialog extends JDialog {
 	 */
 	private void initialize() {
 
+		if (cbDfltZoom == null)
+			cbDfltZoom = Palette.getZoomComboBox(Palette.getDefaultZoom());
+
 		setLocationByPlatform( true );
-		// Specify smaller font for title and buttons.
-		Font f = new Font("Arial", Font.BOLD, 11);
 
 		TitledBorder mainBorder = BorderFactory.createTitledBorder("Program settings");
-		mainBorder.setTitleFont(f);
 
 		// See documentation at the "docs" folder for panel layout.
 		JPanel pnlMain = new JPanel(); // Dialog main panel holding all other panels.
@@ -98,7 +100,7 @@ public class OptionsDialog extends JDialog {
 		pnlLabels.setMinimumSize(pnlLabels.getPreferredSize());
 
 		// Set field labels on their panel.
-		pnlLabels.setLayout(new GridLayout(11, 1));
+		pnlLabels.setLayout(new GridLayout(12, 1));
 		pnlLabels.add(lblGenFilesDir);
 		pnlLabels.add(lblCompClasspath);
 		pnlLabels.add(lblPaletteFile);
@@ -109,6 +111,7 @@ public class OptionsDialog extends JDialog {
 		pnlLabels.add(lblGridStep);
 		pnlLabels.add(lblNudgeStep);
 		pnlLabels.add(lblSyntaxColor);
+		pnlLabels.add(lblDefaultZoom);
 		pnlLabels.add( new JLabel( "Unterminated threads:") );
 
 		// Set fields' panel size.
@@ -135,8 +138,12 @@ public class OptionsDialog extends JDialog {
 		pnlNudgeSpinner.setLayout(fl);
 		pnlNudgeSpinner.add(spinnerNudgeStep);
 
+		JPanel pnlDefaultZoom = new JPanel();
+		pnlDefaultZoom.setLayout(fl);
+		pnlDefaultZoom.add(cbDfltZoom);
+
 		// Set fields to their panel.
-		pnlFields.setLayout(new GridLayout(11, 1));
+		pnlFields.setLayout(new GridLayout(12, 1));
 		pnlFields.add(tfGenFilesDir);
 		pnlFields.add(tfCompClasspath);
 		pnlFields.add(tfPaletteFile);
@@ -147,6 +154,7 @@ public class OptionsDialog extends JDialog {
 		pnlFields.add(pnlGridSpinner);
 		pnlFields.add(pnlNudgeSpinner);
 		pnlFields.add(chbSyntaxColor);
+		pnlFields.add(pnlDefaultZoom);
 		JButton threads = new JButton( "View" );
 		
 		JPanel pan = new JPanel(new FlowLayout(FlowLayout.LEFT) );
@@ -180,10 +188,6 @@ public class OptionsDialog extends JDialog {
 			cbDfltLayout.addItem(Look.LOOK_MOTIF);
 			cbDfltLayout.addItem(Look.LOOK_WINDOWS);
 		}
-
-		// Specify smaller font for buttons.
-		bttnSave.setFont(f);
-		bttnCancel.setFont(f);
 
 		// Add buttons.
 		pnlBttns.add(bttnSave);
@@ -346,6 +350,8 @@ public class OptionsDialog extends JDialog {
 			PropertyBox.GRID_STEP, spinnerGridStep.getModel().getValue().toString());
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 			PropertyBox.NUDGE_STEP, spinnerNudgeStep.getModel().getValue().toString());
+		PropertyBox.setProperty(PropertyBox.ZOOM_LEVEL,
+			Float.toString(Palette.ZOOM_LEVELS[cbDfltZoom.getSelectedIndex()]));
 
 		RuntimeProperties.isSyntaxHighlightingOn = chbSyntaxColor.isSelected();
 		RuntimeProperties.isAntialiasingOn = chbAntiAlias.isSelected();

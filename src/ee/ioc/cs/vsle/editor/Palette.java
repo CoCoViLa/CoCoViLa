@@ -23,7 +23,8 @@ import ee.ioc.cs.vsle.vclass.VPackage;
 public class Palette implements ActionListener {
 	
 	/**
-	 * Allowed zoom levels of the scheme view
+	 * Allowed zoom levels of the scheme view. Should always contain
+	 * at least the value 1.0f.
 	 */
 	public static final float[] ZOOM_LEVELS 
 			= { .1f, .2f, .5f, .75f, 1.0f, 1.5f, 2.0f, 4.0f };
@@ -83,22 +84,7 @@ public class Palette implements ActionListener {
 		toolBar.addSeparator();
 		toolBar.add(Box.createGlue());
 
-		JComboBox zoom = new JComboBox();
-		for (int i = 0; i < ZOOM_LEVELS.length; i++) {
-			String label = Integer.toString((int) (ZOOM_LEVELS[i] * 100.0f));
-			zoom.addItem(label + "%");
-			
-			if (ZOOM_LEVELS[i] == 1.0f)
-				zoom.setSelectedIndex(i);
-		}
-
-		// Avoid stretching the combobox to fill the whole space.
-		// The width + 15 hack is needed because of GTK LnF
-		Dimension d = zoom.getPreferredSize();
-		d.width += 15;
-		zoom.setPreferredSize(d);
-		zoom.setMinimumSize(d);
-		zoom.setMaximumSize(d);
+		JComboBox zoom = getZoomComboBox(getDefaultZoom());
 
 		zoom.addActionListener(new ActionListener() {
 
@@ -113,7 +99,60 @@ public class Palette implements ActionListener {
 		canvas.add(toolBar, BorderLayout.NORTH);
 	}
 
-    public void actionPerformed(ActionEvent e) {
+	/**
+	 * Reads the saved default zoom value. The returned value is guaranteed
+	 * to exist in ZOOM_LEVELS. It is assumed that the value 1.0f is always
+	 * present in ZOOM_LEVELS.
+	 * @return default zoom
+	 */
+	public static float getDefaultZoom() {
+		float zoom;
+		
+		try {
+			zoom = Float.parseFloat(PropertyBox.getProperty(
+				PropertyBox.ZOOM_LEVEL));
+
+			// validate the value
+			for (float f : ZOOM_LEVELS) {
+				if (zoom == f)
+					break;
+			}
+		} catch (NumberFormatException e) {
+			db.p(e);
+			zoom = 1.0f;
+		}
+		
+		return zoom;
+	}
+
+	/**
+	 * Creates and returns a new combo box for selecting a zoom level from
+	 * predefined zoom values.
+	 * @param selectedZoom the zoom value that should be selected by default
+	 * @return zoom combo box
+	 */
+	public static JComboBox getZoomComboBox(float selectedZoom) {
+		JComboBox zoom = new JComboBox();
+		for (int i = 0; i < ZOOM_LEVELS.length; i++) {
+			String label = Integer.toString((int) (ZOOM_LEVELS[i] * 100.0f));
+			zoom.addItem(label + "%");
+			
+			if (ZOOM_LEVELS[i] == selectedZoom)
+				zoom.setSelectedIndex(i);
+		}
+
+		// Avoid stretching the combobox to fill the whole space.
+		// The width + 15 hack is needed because of GTK LnF
+		Dimension d = zoom.getPreferredSize();
+		d.width += 15;
+		zoom.setPreferredSize(d);
+		zoom.setMinimumSize(d);
+		zoom.setMaximumSize(d);
+
+		return zoom;
+	}
+
+	public void actionPerformed(ActionEvent e) {
         int i = buttons.lastIndexOf(e.getSource());
         if (i < 0)
             return;
