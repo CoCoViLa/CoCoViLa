@@ -672,7 +672,10 @@ public class PackageParser {
 			boolean fixed = false;
 			fixed = Boolean.valueOf(s).booleanValue();
 
-			int alpha = Integer.parseInt(attrs.getValue(ATR_TRANSPARENCY));
+			int alpha = 255;
+			try {
+				alpha = Integer.parseInt(attrs.getValue(ATR_TRANSPARENCY));
+			} catch (NumberFormatException e) {}
 			Text newText = new Text(x, y, font, new Color(colorInt), alpha,
 					str, fixed);
 			newText.fixedX = fixedX;

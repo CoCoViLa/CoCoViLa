@@ -515,25 +515,36 @@ public class Editor extends JFrame implements ChangeListener {
 	 *            package file to be loaded.
 	 */
 	void loadPackage(File f) {
-		if (f != null) {
-			Canvas canvas = new Canvas( f );
-			String packageName = f.getName().substring( 0, f.getName().indexOf(".") );
-			
-			int count = 0;
-			
-			for ( Component canv : tabbedPane.getComponents() ) {
-				if( packageName.equals( ((Canvas)canv).getCurrentPackage().getName() ) ) {
-					count++;
+		
+		if ( f != null ) {
+			try {
+
+				Canvas canvas = new Canvas( f );
+				String packageName = f.getName().substring( 0, f.getName().indexOf(".") );
+
+				int count = 0;
+
+				for ( Component canv : tabbedPane.getComponents() ) {
+					if( packageName.equals( ((Canvas)canv).getCurrentPackage().getName() ) ) {
+						count++;
+					}
 				}
+
+				if( count > 0 ) {
+					packageName = packageName + " (" + ( count + 1 ) + ")";
+					canvas.setTitle( packageName );
+				}
+
+				tabbedPane.addTab(packageName, canvas);
+				tabbedPane.setSelectedComponent(canvas);
+			} catch( Exception e ) {
+				String message = "Unable to load package \"" + f.getAbsolutePath() + "\"";
+				db.p( message );
+				if( RuntimeProperties.isLogDebugEnabled() ) {
+					e.printStackTrace( System.out );
+				}
+				JOptionPane.showMessageDialog( Editor.getInstance(), message, "Error", JOptionPane.ERROR_MESSAGE );
 			}
-			
-			if( count > 0 ) {
-				packageName = packageName + " (" + ( count + 1 ) + ")";
-				canvas.setTitle( packageName );
-			}
-			
-			tabbedPane.addTab(packageName, canvas);
-			tabbedPane.setSelectedComponent(canvas);
 		}
 	} // loadPackage
 
