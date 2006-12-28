@@ -8,10 +8,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.WindowConstants;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Font;
 import java.awt.Dimension;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
@@ -54,27 +54,29 @@ public class AboutDialog extends JDialog {
 		pnlMain.add(pnlButtons, BorderLayout.SOUTH);
 
 		taLicenseText.setText(getLicenseText());
-		taLicenseText.setLineWrap(true);
+		
+		String version = PropertyBox.getApplicationVersion();
+		taLicenseText.append("\nVersion: ");
+		taLicenseText.append(version == null ? "(development)" : version);
+		taLicenseText.append("\n");
+
 		taLicenseText.setEditable(false);
-		taLicenseText.setFont(new Font("Arial", Font.PLAIN, 10));
-		taLicenseText.setWrapStyleWord(true);
 		taLicenseText.setAutoscrolls(true);
 
 		getContentPane().add(pnlMain);
 		setSize(new Dimension(340, 360));
-		setResizable(false);
 		setLocationRelativeTo(parent);
-
-		setVisible(true);
 
 		bttnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				if (evt.getSource() == bttnOk) {
-					setVisible(false);
+					dispose();
 				}
 			} // end actionPerformed
 		}); // end bttnOk Action Listener
 
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		setVisible(true);
 	} // AboutDialog
 
 	/**
