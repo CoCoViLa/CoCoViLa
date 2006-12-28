@@ -36,7 +36,10 @@ public class PropertyBox {
     public static final String RECENT_PACKAGES = "recentPackages";
     public static final String COMPILATION_CLASSPATH = "compilationClasspath";
     public static final String ZOOM_LEVEL = "defaultzoom";
-    
+    public static final String VERSION = "version";
+
+    private static final String VERSION_UNKNOWN = "@project.version@";
+
     private static final Properties s_defaultProperties = new Properties();
     
     static {
@@ -242,5 +245,38 @@ public class PropertyBox {
 	
 			setProperty(propertyName, prefix + suffix);
 		}
+	}
+
+	/**
+	 * Returns the version string of the currently running version of
+	 * the application.
+	 * @return the version string, null if not known
+	 */
+	public static String getApplicationVersion() {
+		// The version information is added at build time by ANT so the
+		// version number is missing if the application was not compiled
+		// by ANT. We assume here that if the user is not running an
+		// "official" release then the user knows about CVS and other means
+		// to obtain that information. The version number read from the file
+		// application.properties distributed with the application should
+		// have the form x.y.z-dev in case it is a CVS snapshot release.
+		// Real releases should have version numbers without the -dev suffix.
+
+		String version = null;
+		URL url = FileFuncs.getResource(APP_PROPS_FILE_NAME + ".properties",
+				false);
+		
+		if (url != null) {
+			Properties props = new Properties();
+			try {
+				props.load(url.openStream());
+				version = (String) props.get(VERSION);
+				if (VERSION_UNKNOWN.equals(version))
+					version = null;
+			} catch (IOException e) {
+				db.p(e);
+			}
+		}
+		return version;
 	}
 }
