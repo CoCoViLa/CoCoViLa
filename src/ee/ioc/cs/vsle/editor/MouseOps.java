@@ -180,7 +180,8 @@ class MouseOps extends MouseInputAdapter {
 				Port port = canvas.objects.getPort(x, y);
 				if (port != null) {
 					if (canvas.currentCon == null) {
-						canvas.startAddingConnection(port);
+						if (port.canBeConnected())
+							canvas.startAddingConnection(port);
 					} else {
 						Port firstPort = canvas.currentCon.beginPort;
 						if (port.canBeConnectedTo(firstPort)) {
@@ -537,7 +538,7 @@ class MouseOps extends MouseInputAdapter {
 					port.setSelected(true);
 					currentPort = port;
 				}
-			} else {
+			} else if (port.canBeConnected()) {
 				port.setSelected(true);
 				currentPort = port;
 			}
