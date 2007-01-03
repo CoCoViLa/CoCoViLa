@@ -323,6 +323,18 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	/**
+	 * Checks if this port can be connected at all. For example, the syntax
+	 * rules of a visual language might disallow connecting some ports
+	 * in certain cases. These rules are implemented in auxiliary classes
+	 * such as a scheme daemon. Also, superclasses cannot be connected.
+	 * @return true, if this port can possibly be connected to some other port,
+	 * 		   false otherwise.
+	 */
+	public boolean canBeConnected() {
+		return !obj.isSuperClass();
+	}
+
+	/**
 	 * Checks whether the specified port can be connected to {@code this} port.
 	 * 
 	 * @param port
@@ -342,8 +354,7 @@ public class Port implements Cloneable, Serializable {
 	 */
 	public static boolean canBeConnected(Port port1, Port port2) {
 
-		// the ports of a superclass cannot be connected
-		if (port1.obj.isSuperClass() || port2.obj.isSuperClass())
+		if (!port1.canBeConnected() || !port2.canBeConnected())
 			return false;
 
 		if (port1.isMulti() && port2.isMulti())
