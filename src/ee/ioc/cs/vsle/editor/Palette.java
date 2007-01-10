@@ -2,17 +2,23 @@ package ee.ioc.cs.vsle.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 
 import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
+import javax.swing.border.EmptyBorder;
 
-import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.util.FileFuncs;
+import ee.ioc.cs.vsle.util.PropertyBox;
+import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.VPackage;
 
@@ -29,61 +35,72 @@ public class Palette implements ActionListener {
 	public static final float[] ZOOM_LEVELS 
 			= { .1f, .2f, .5f, .75f, 1.0f, 1.5f, 2.0f, 4.0f };
 
-	public JToolBar toolBar;
+	public static final Dimension BUTTON_SPACE = new Dimension(2, 0);
+	public static final Dimension PANEL_SPACE = new Dimension(5, 0);
+	public static final Insets BUTTON_BORDER = new Insets(0, 0, 0, 0);
+	
+	public JPanel toolBar;
 	Canvas canvas;
     ArrayList<JToggleButton> buttons;
 
 	public Palette(VPackage vPackage, final Canvas canv) {
-		toolBar = new JToolBar();
-        buttons = new ArrayList<JToggleButton>();
 		this.canvas = canv;
-		ImageIcon icon;
 
-		// add relation and selection tools
-		icon = FileFuncs.getImageIcon("images/mouse.gif", false );
-		JToggleButton selection = new JToggleButton(icon);
+		buttons = new ArrayList<JToggleButton>();
 
-		selection.setActionCommand(State.selection);
-        selection.setSelected(true);
-		selection.addActionListener(this);
-		selection.setToolTipText("Select / Drag");
-        buttons.add(selection);
-		toolBar.add(selection);
+		toolBar = new JPanel();
+		toolBar.setOpaque(false); // some lnf-s may use gradients for bg
+		toolBar.setLayout(new BoxLayout(toolBar, BoxLayout.LINE_AXIS));
+		toolBar.setBorder(new EmptyBorder(2, 0, 2, 0));
 
-		icon = FileFuncs.getImageIcon("images/rel.gif", false );
-		JToggleButton relation = new JToggleButton(icon);
+		toolBar.add(createToolPanel());
+		toolBar.add(Box.createRigidArea(PANEL_SPACE));
+		toolBar.add(new ScrollableBar(createClassPanel(vPackage)));
+		toolBar.add(Box.createRigidArea(PANEL_SPACE));
+		toolBar.add(createZoomPanel());
 
-		relation.setActionCommand(State.addRelation);
-		relation.addActionListener(this);
-		relation.setToolTipText("Relation");
-        buttons.add(relation);
-		toolBar.add(relation);
+		canvas.add(toolBar, BorderLayout.NORTH);
+	}
 
-        toolBar.addSeparator();
-
-		// read package info and add it to tables
+	private JComponent createClassPanel(VPackage vPackage) {
+		JPanel classPanel = new JPanel();
+		classPanel.setLayout(new BoxLayout(classPanel, BoxLayout.LINE_AXIS));
+		classPanel.setOpaque(false);
+        
+        // read package info and add it to the palette
 		for (int i = 0; i < vPackage.classes.size(); i++) {
 			PackageClass pClass = vPackage.classes.get(i);
-			if (pClass.icon.equals("default.gif")) {
-                icon = FileFuncs.getImageIcon("images/default.gif", false );
-			} else {
-				icon = FileFuncs.getImageIcon( canvas.getWorkDir() + pClass.icon, true );
-			}
-			JToggleButton button = new JToggleButton(icon);
-			button.setToolTipText(pClass.description);
-			if (pClass.relation == true)
-				button.setActionCommand("??" + pClass.name); //to denote a class which is a relation
+
+			ImageIcon icon;
+			if ("default.gif".equals(pClass.icon))
+				icon = FileFuncs.getImageIcon("images/default.gif", false);
 			else
-				button.setActionCommand(pClass.name);
+				icon = FileFuncs.getImageIcon(canvas.getWorkDir()
+						+ pClass.icon, true);
 
-            button.addActionListener(this);
-            buttons.add(button);
-			toolBar.add(button);
+			String actionCmd;
+			if (pClass.relation == true)
+				// to denote a class which is a relation
+				actionCmd = State.addRelObjPrefix + pClass.name; 
+			else
+				actionCmd = pClass.name;
+			
+			JToggleButton button = createButton(icon, pClass.description,
+					actionCmd);
+
+			classPanel.add(button);
+			
+			if (i < vPackage.classes.size() - 1)
+				classPanel.add(Box.createRigidArea(BUTTON_SPACE));
 		}
+		return classPanel;
+	}
 
-		toolBar.addSeparator();
-		toolBar.add(Box.createGlue());
-
+	private JComponent createZoomPanel() {
+		JPanel zoomPanel = new JPanel();
+		zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.LINE_AXIS));
+		zoomPanel.setOpaque(false);
+		
 		JComboBox zoom = getZoomComboBox(getDefaultZoom());
 
 		zoom.addActionListener(new ActionListener() {
@@ -94,9 +111,55 @@ public class Palette implements ActionListener {
 			}
 			
 		});
-		toolBar.add(zoom);
+		zoomPanel.add(zoom);
 
-		canvas.add(toolBar, BorderLayout.NORTH);
+		zoomPanel.setPreferredSize(zoomPanel.getMinimumSize());
+		zoomPanel.setMaximumSize(zoomPanel.getMinimumSize());
+
+		return zoom;
+	}
+
+	private JComponent createToolPanel() {
+        JPanel toolPanel = new JPanel();
+        toolPanel.setLayout(new BoxLayout(toolPanel, BoxLayout.LINE_AXIS));
+        toolPanel.setOpaque(false);
+
+		JToggleButton selection = createButton(
+				FileFuncs.getImageIcon("images/mouse.gif", false),
+				"Select / Drag", State.selection);
+
+		selection.setSelected(true);
+		toolPanel.add(selection);
+
+		toolPanel.add(Box.createRigidArea(BUTTON_SPACE));
+
+		JToggleButton relation = createButton(
+				FileFuncs.getImageIcon("images/rel.gif", false),
+				"Relation", State.addRelation);
+
+		toolPanel.add(relation);
+
+		toolPanel.setPreferredSize(toolPanel.getMinimumSize());
+		toolPanel.setMaximumSize(toolPanel.getMinimumSize());
+
+		return toolPanel;
+	}
+
+	private JToggleButton createButton(ImageIcon icon, String descr,
+			String actionCmd) {
+		
+		JToggleButton button = new JToggleButton(icon);
+
+		button.setActionCommand(actionCmd);
+		button.setToolTipText(descr);
+
+		// Palette buttons should be small, that's what JToolBar is doing
+		button.setMargin(BUTTON_BORDER);
+
+		button.addActionListener(this);
+        buttons.add(button);
+        
+        return button;
 	}
 
 	/**
@@ -142,10 +205,7 @@ public class Palette implements ActionListener {
 		}
 
 		// Avoid stretching the combobox to fill the whole space.
-		// The width + 15 hack is needed because of GTK LnF
 		Dimension d = zoom.getPreferredSize();
-		d.width += 15;
-		zoom.setPreferredSize(d);
 		zoom.setMinimumSize(d);
 		zoom.setMaximumSize(d);
 
