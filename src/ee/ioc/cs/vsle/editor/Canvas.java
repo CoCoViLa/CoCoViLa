@@ -994,8 +994,8 @@ public class Canvas extends JPanel {
 		ClearAllEdit edit = new ClearAllEdit(this);
 		
 		mListener.setState(State.selection);
-		objects.removeAll(objects);
-		connections.removeAll(connections);
+		objects.clear();
+		connections.clear();
 		if (classPainters != null)
 			classPainters.clear();
 
