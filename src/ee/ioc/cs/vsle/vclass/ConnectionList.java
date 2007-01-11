@@ -129,12 +129,15 @@ public class ConnectionList extends ArrayList<Connection> {
 		if (!super.contains(con)) {
 			super.add(con);
 
+			// the ports may already have the connection added
+			// because deleted objects and connections are not
+			// always disconnected (for example: clear all)
 			if (!con.beginPort.getConnections().contains(con))
 				con.beginPort.addConnection(con);
 
-			assert !con.endPort.getConnections().contains(con);
-			
-			con.endPort.addConnection(con);
+			if (!con.endPort.getConnections().contains(con))
+				con.endPort.addConnection(con);
+
 			modified = true;
 		}
 		return modified;
