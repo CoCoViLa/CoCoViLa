@@ -29,7 +29,6 @@ public class PropertyBox {
 	public static final String ANTI_ALIASING = "antiAliasing";
 	public static final String SHOW_GRID = "showGrid";
 	public static final String GRID_STEP = "gridStep";
-	public static final String CUSTOM_LAYOUT = "customLayout";
 	public static final String PACKAGE_DTD = "packageDtd";
 	public static final String NUDGE_STEP = "nudgeStep";
 	public static final String SNAP_TO_GRID = "snapToGrid";
@@ -50,11 +49,10 @@ public class PropertyBox {
     	s_defaultProperties.put( GENERATED_FILES_DIR, gp );
     	s_defaultProperties.put( PALETTE_FILE, "" );
     	s_defaultProperties.put( DEBUG_INFO, "0" );
-    	s_defaultProperties.put( DEFAULT_LAYOUT, "Custom" );
+    	s_defaultProperties.put( DEFAULT_LAYOUT, "javax.swing.plaf.metal.MetalLookAndFeel" );
     	s_defaultProperties.put( ANTI_ALIASING, "1" );
     	s_defaultProperties.put( SHOW_GRID, "1" );
     	s_defaultProperties.put( GRID_STEP, "15" );
-    	s_defaultProperties.put( CUSTOM_LAYOUT, "com.incors.plaf.kunststoff.KunststoffLookAndFeel" );
     	s_defaultProperties.put( PACKAGE_DTD, "package2.dtd" );
     	s_defaultProperties.put( NUDGE_STEP, "1" );
     	s_defaultProperties.put( SNAP_TO_GRID, "0" );

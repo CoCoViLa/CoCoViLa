@@ -27,7 +27,6 @@ public class OptionsDialog extends JDialog {
 	private static final JLabel lblCompClasspath = new JLabel("Compilation classpath:");
 	private static final JLabel lblPaletteFile = new JLabel("Palette file:");
 	private static final JLabel lblDebugInfo = new JLabel("Debug info:");
-	private static final JLabel lblDfltLayout = new JLabel("Default layout:");
 	private static final JLabel lblAntiAlias = new JLabel("Anti aliasing:");
 	private static final JLabel lblShowGrid = new JLabel("Show grid:");
 	private static final JLabel lblGridStep = new JLabel("Grid step:");
@@ -51,13 +50,11 @@ public class OptionsDialog extends JDialog {
 	Spinner spinnerNudgeStep = new Spinner(1, 100, 1, 1);
 
 	// Comboboxes.
-	public static final JComboBox cbDfltLayout = new JComboBox();
 	public static JComboBox cbDfltZoom;
 
 	// Buttons
 	private static final JButton bttnSave = new JButton("Save");
 	private static final JButton bttnCancel = new JButton("Cancel");
-	private static final JButton bttnCustomLook = new JButton("...");
 
 	/**
 	 * Class constructor.
@@ -86,13 +83,8 @@ public class OptionsDialog extends JDialog {
 		JPanel pnlLabels = new JPanel(); // Panel for field labels.
 		JPanel pnlFields = new JPanel(); // Panel for fields.
 		JPanel pnlBttns = new JPanel(); // Panel for buttons.
-		JPanel pnlLayout = new JPanel(); // Panel for layout combo box and custom layout dialog button.
 
 		pnlMain.setBorder(mainBorder);
-
-		pnlLayout.setLayout(new BorderLayout());
-		pnlLayout.add(cbDfltLayout, BorderLayout.CENTER);
-		pnlLayout.add(bttnCustomLook, BorderLayout.EAST);
 
 		// Set field labels' panel size.
 		//pnlLabels.setPreferredSize(new Dimension(100, 180));
@@ -104,7 +96,6 @@ public class OptionsDialog extends JDialog {
 		pnlLabels.add(lblGenFilesDir);
 		pnlLabels.add(lblCompClasspath);
 		pnlLabels.add(lblPaletteFile);
-		pnlLabels.add(lblDfltLayout);
 		pnlLabels.add(lblDebugInfo);
 		pnlLabels.add(lblAntiAlias);
 		pnlLabels.add(lblShowGrid);
@@ -147,7 +138,6 @@ public class OptionsDialog extends JDialog {
 		pnlFields.add(tfGenFilesDir);
 		pnlFields.add(tfCompClasspath);
 		pnlFields.add(tfPaletteFile);
-		pnlFields.add(pnlLayout);
 		pnlFields.add(chbDebugInfo);
 		pnlFields.add(chbAntiAlias);
 		pnlFields.add(chbShowGrid);
@@ -180,14 +170,6 @@ public class OptionsDialog extends JDialog {
 		pnlSettings.setLayout(new BorderLayout());
 		pnlSettings.add(pnlLabels, BorderLayout.WEST);
 		pnlSettings.add(pnlFields, BorderLayout.CENTER);
-
-		// Add items to the layout choices combobox.
-		if (cbDfltLayout.getItemCount() == 0) {
-			cbDfltLayout.addItem(Look.LOOK_CUSTOM);
-			cbDfltLayout.addItem(Look.LOOK_METAL);
-			cbDfltLayout.addItem(Look.LOOK_MOTIF);
-			cbDfltLayout.addItem(Look.LOOK_WINDOWS);
-		}
 
 		// Add buttons.
 		pnlBttns.add(bttnSave);
@@ -225,44 +207,7 @@ public class OptionsDialog extends JDialog {
 			}
 		});
 
-		/*
-		 * Opens the custom look definition dialog.
-		 */
-		bttnCustomLook.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
-				openCustomLookDialog();
-			}
-		});
-
-		/*
-		 * Changes layout.
-		 */
-		cbDfltLayout.addItemListener(
-			new ItemListener() {
-				public void itemStateChanged(final ItemEvent event) {
-					if (event.getSource() == cbDfltLayout
-						&& event.getStateChange() == ItemEvent.SELECTED) {
-						if (cbDfltLayout.getSelectedItem().toString() != null &&
-							cbDfltLayout.getSelectedItem().toString().equalsIgnoreCase(Look.LOOK_CUSTOM) &&
-							RuntimeProperties.customLayout == null) {
-							openCustomLookDialog();
-						} else {
-							Look.changeLayout(cbDfltLayout.getSelectedItem().toString());
-						}
-					}
-				}
-			});
-
 	} // End of initialize();
-
-	/**
-	 * Opens a new dialog where the user can specify a new path of the custom
-	 * application look and feel module.
-	 */
-	private void openCustomLookDialog() {
-		CustomLookDialog cd = new CustomLookDialog();
-		cd.setVisible(true);
-	} // openCustomLookDialog
 
 	/**
 	 * Initialize dialog with stored settings from the properties file.
@@ -282,7 +227,6 @@ public class OptionsDialog extends JDialog {
 		tfGenFilesDir.setText(sGenFilesDir);
 		tfCompClasspath.setText(sCompClpath);
 		tfPaletteFile.setText(sPaletteFile);
-		cbDfltLayout.setSelectedItem(sDfltLayout);
 		spinnerGridStep.getModel().setValue(sGridStep);
 		spinnerNudgeStep.getModel().setValue(sNudgeStep);
 
@@ -317,7 +261,6 @@ public class OptionsDialog extends JDialog {
 		String sGenFilesDir = tfGenFilesDir.getText();
 		String sCompClpath = tfCompClasspath.getText();
 		String sPaletteFile = tfPaletteFile.getText();
-		String sDfltLayout = String.valueOf(cbDfltLayout.getSelectedItem());
 		String sDebugOutput = "0";
 		String sAntiAliasing = "0";
 		String sShowGrid = "0";
@@ -338,8 +281,6 @@ public class OptionsDialog extends JDialog {
 				PropertyBox.COMPILATION_CLASSPATH, sCompClpath );
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 			PropertyBox.PALETTE_FILE, sPaletteFile);
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
-			PropertyBox.DEFAULT_LAYOUT, sDfltLayout);
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,
 			PropertyBox.DEBUG_INFO, sDebugOutput);
 		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME,

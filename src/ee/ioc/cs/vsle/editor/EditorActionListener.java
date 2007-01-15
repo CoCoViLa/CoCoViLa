@@ -346,26 +346,6 @@ public class EditorActionListener implements ActionListener {
                 new AboutDialog(Editor.getInstance());
             } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
                 new LicenseDialog(Editor.getInstance());
-            } else if ( e.getActionCommand().equals( Look.LOOK_WINDOWS ) ) {
-                try {
-                    Look.changeLayout( Look.LOOK_WINDOWS );
-                } catch ( Exception uie ) {
-                }
-            } else if ( e.getActionCommand().equals( Look.LOOK_METAL ) ) {
-                try {
-                    Look.changeLayout( Look.LOOK_METAL );
-                } catch ( Exception uie ) {
-                }
-            } else if ( e.getActionCommand().equals( Look.LOOK_MOTIF ) ) {
-                try {
-                    Look.changeLayout( Look.LOOK_MOTIF );
-                } catch ( Exception uie ) {
-                }
-            } else if ( e.getActionCommand().equals( Look.LOOK_CUSTOM ) ) {
-                try {
-                    Look.changeLayout( Look.LOOK_CUSTOM );
-                } catch ( Exception uie ) {
-                }
             } else if (e.getActionCommand().equals(Menu.CLASSPAINTER)) {
                 Canvas canvas = Editor.getInstance().getCurrentCanvas();
                 if (canvas != null) {

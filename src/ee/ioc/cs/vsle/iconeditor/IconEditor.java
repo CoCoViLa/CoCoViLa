@@ -113,10 +113,6 @@ public class IconEditor
 
 		getContentPane().add(mainPanel);
 
-		Look look = new Look();
-		look.setGUI(this);
-		Look.changeLayout(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
-			PropertyBox.DEFAULT_LAYOUT));
 	}
 
 	/**
@@ -248,23 +244,10 @@ public class IconEditor
 		menu = new JMenu(Menu.MENU_OPTIONS);
 		menu.setMnemonic(KeyEvent.VK_O);
 
-		submenu = new JMenu(Menu.MENU_LAYOUT);
+		submenu = new JMenu(Menu.MENU_LAF);
 		submenu.setMnemonic(KeyEvent.VK_L);
-		menuItem = new JMenuItem(Look.LOOK_CUSTOM, KeyEvent.VK_C);
-		menuItem.addActionListener(mListener);
-		submenu.add(menuItem);
-
-		menuItem = new JMenuItem(Look.LOOK_METAL, KeyEvent.VK_M);
-		menuItem.addActionListener(mListener);
-		submenu.add(menuItem);
-
-		menuItem = new JMenuItem(Look.LOOK_MOTIF, KeyEvent.VK_M);
-		menuItem.addActionListener(mListener);
-		submenu.add(menuItem);
-
-		menuItem = new JMenuItem(Look.LOOK_WINDOWS, KeyEvent.VK_W);
-		menuItem.addActionListener(mListener);
-		submenu.add(menuItem);
+		
+		Look.getInstance().createMenuItems( submenu, this );
 
 		menuItem = new JMenuItem(Menu.SETTINGS, KeyEvent.VK_S);
 		menuItem.addActionListener(mListener);
@@ -1597,7 +1580,6 @@ public class IconEditor
 		RuntimeProperties.zoomFactor = 100.0;
 		RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
 		RuntimeProperties.gridStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GRID_STEP));
-		RuntimeProperties.customLayout = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.CUSTOM_LAYOUT);
 		RuntimeProperties.packageDtd = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PACKAGE_DTD);
 		RuntimeProperties.genFileDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
 		RuntimeProperties.nudgeStep = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.NUDGE_STEP));
@@ -1608,6 +1590,9 @@ public class IconEditor
 		} else {
 			RuntimeProperties.isAntialiasingOn = true;
 		}
+		
+		Look.getInstance().initDefaultLnF();
+		
 	} // initializeRuntimeProperties
 
 

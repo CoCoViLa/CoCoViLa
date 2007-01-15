@@ -1,64 +1,107 @@
 package ee.ioc.cs.vsle.editor;
 
 import java.awt.Component;
+import java.awt.event.*;
 
-import javax.swing.UIManager;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
+import javax.swing.UIManager.*;
+
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * Look and feel handler.
- *
- * User: AASMAAUL
- * Date: 13.01.2004
- * Time: 13:01:50
  */
 public class Look {
 
-	private static Component component;
+//	static {
+//		try {
+//			if( Class.forName( "com.incors.plaf.kunststoff.KunststoffLookAndFeel" ) != null ) {
+//				UIManager.installLookAndFeel("Kunststoff",
+//					"com.incors.plaf.kunststoff.KunststoffLookAndFeel");
+//			}
+//		} catch (ClassNotFoundException e) {}
+//	}
 
-	// LAYOUT
-	public static final String LOOK_CUSTOM = "Custom";
-	public static final String LOOK_METAL = "Metal";
-	public static final String LOOK_MOTIF = "Motif";
-	public static final String LOOK_WINDOWS = "Windows";
+	private static Look s_instance;
 
-	public void setGUI(Component e) {
-		Look.component = component;
+	public static Look getInstance() {
+
+		if (s_instance == null) {
+			s_instance = new Look();
+		}
+
+		return s_instance;
 	}
 
-	/**
-	 * Change layout immediately as the layout selection changes.
-	 * @param selectedLayout - application layout selected from the menu.
-	 */
-	public static void changeLayout(String selectedLayout) {
-		if (selectedLayout.equalsIgnoreCase(LOOK_WINDOWS)) {
-			try {
-				UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-			} catch (Exception uie) {
+	public static void changeLookAndFeelForComponent(final Component component,
+			final String lnf, final boolean saveConfig) {
+
+		// make sure LnF is changed in AWT thread
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				try {
+
+					UIManager.setLookAndFeel(lnf);
+
+					SwingUtilities.updateComponentTreeUI(component);
+
+					if (saveConfig) {
+						PropertyBox.setProperty(
+								PropertyBox.APP_PROPS_FILE_NAME,
+								PropertyBox.DEFAULT_LAYOUT, lnf);
+					}
+
+				} catch (Exception e) {
+					db.p("Unable to change Look And Feel: " + lnf);
+				}
 			}
-		} else if (selectedLayout.equalsIgnoreCase(LOOK_METAL)) {
-			try {
-				UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-			} catch (Exception uie) {
-			}
-		} else if (selectedLayout.equalsIgnoreCase(LOOK_MOTIF)) {
-			try {
-				UIManager.setLookAndFeel("com.sun.java.swing.plaf.motif.MotifLookAndFeel");
-			} catch (Exception uie) {
-			}
-		} else if (selectedLayout.equalsIgnoreCase(LOOK_CUSTOM)) {
-			try {
-			  if(RuntimeProperties.customLayout!=null && RuntimeProperties.customLayout.trim().length()>0) {
-				UIManager.setLookAndFeel(RuntimeProperties.customLayout);
-			  } else {
-				changeLayout(LOOK_METAL);
-              }
-			} catch (Exception uie) {
-			}
+		});
+	}
+
+	public void initDefaultLnF() {
+
+		String lnf = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
+				PropertyBox.DEFAULT_LAYOUT);
+
+		try {
+
+			UIManager.setLookAndFeel(lnf);
+
+		} catch (Exception e) {
+			db.p("Unable to init default Look And Feel: " + lnf);
 		}
-		if (component != null) {
-			SwingUtilities.updateComponentTreeUI(component);
+	}
+
+	public void createMenuItems(JMenu menu, final Component root) {
+
+		LookAndFeel laf = UIManager.getLookAndFeel();
+
+		String lafName = (laf != null) ? laf.getName() : "";
+
+		ButtonGroup group = new ButtonGroup();
+
+		for (final LookAndFeelInfo lnfs : UIManager.getInstalledLookAndFeels()) {
+			
+			JRadioButtonMenuItem menuItem = new JRadioButtonMenuItem(lnfs.getName());
+
+			group.add(menuItem);
+
+			if ( lafName.equals( lnfs.getName() ) ) {
+				menuItem.setSelected(true);
+			}
+
+			menuItem.addActionListener(new ActionListener() {
+
+				public void actionPerformed(ActionEvent e) {
+					changeLookAndFeelForComponent( root, lnfs.getClassName(),
+							true );
+				}
+			});
+
+			menu.add(menuItem);
 		}
+
+		menu.setToolTipText("Set default Look And Feel");
 	}
 
 }

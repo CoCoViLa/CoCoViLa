@@ -28,7 +28,7 @@ public class Editor extends JFrame implements ChangeListener {
 
 	private static Editor s_instance;
 	
-    JTabbedPane tabbedPane = new JTabbedPane();
+    JTabbedPane tabbedPane;
 
 	EditorActionListener aListener;
 	DeleteAction deleteAction;
@@ -68,6 +68,7 @@ public class Editor extends JFrame implements ChangeListener {
 	private void initialize() {
 		setLocationByPlatform( true );
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		tabbedPane = new JTabbedPane();
 		tabbedPane.addChangeListener(this);
 		undoAction = new UndoAction();
 		redoAction = new RedoAction();
@@ -75,13 +76,6 @@ public class Editor extends JFrame implements ChangeListener {
 		aListener = new EditorActionListener();
 		makeMenu();
 		getContentPane().add(tabbedPane);
-		/*
-		Look look = new Look();
-		look.setGUI(this);
-		Look.changeLayout(PropertyBox.getProperty(
-				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT));
-				*/
-		
 		getRootPane().getActionMap().put(DeleteAction.class, deleteAction);
 		getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
 				KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
@@ -267,20 +261,11 @@ public class Editor extends JFrame implements ChangeListener {
 		menuBar.add(menuScheme);
 		menu = new JMenu(Menu.MENU_OPTIONS);
 		menu.setMnemonic(KeyEvent.VK_O);
-		submenu = new JMenu(Menu.MENU_LAYOUT);
+		submenu = new JMenu(Menu.MENU_LAF);
 		submenu.setMnemonic(KeyEvent.VK_L);
-		menuItem = new JMenuItem(Look.LOOK_CUSTOM, KeyEvent.VK_C);
-		menuItem.addActionListener(aListener);
-		submenu.add(menuItem);
-		menuItem = new JMenuItem(Look.LOOK_METAL, KeyEvent.VK_M);
-		menuItem.addActionListener(aListener);
-		submenu.add(menuItem);
-		menuItem = new JMenuItem(Look.LOOK_MOTIF, KeyEvent.VK_M);
-		menuItem.addActionListener(aListener);
-		submenu.add(menuItem);
-		menuItem = new JMenuItem(Look.LOOK_WINDOWS, KeyEvent.VK_W);
-		menuItem.addActionListener(aListener);
-		submenu.add(menuItem);
+		
+		Look.getInstance().createMenuItems( submenu, this );
+
 		menuItem = new JMenuItem(Menu.SETTINGS, KeyEvent.VK_S);
 		menuItem.addActionListener(aListener);
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_J,
@@ -607,8 +592,6 @@ public class Editor extends JFrame implements ChangeListener {
 			RuntimeProperties.isAntialiasingOn = true;
 		}
 
-		RuntimeProperties.customLayout = PropertyBox.getProperty(
-				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.CUSTOM_LAYOUT);
 		RuntimeProperties.snapToGrid = Integer.parseInt(PropertyBox
 				.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
 						PropertyBox.SNAP_TO_GRID));
@@ -632,6 +615,8 @@ public class Editor extends JFrame implements ChangeListener {
             RuntimeProperties.compilationClasspath = "";
         }
 
+        Look.getInstance().initDefaultLnF();
+        
 		Editor window = null;
 		try {
 			if ( !RuntimeProperties.isFromWebstart() && args.length > 0) {

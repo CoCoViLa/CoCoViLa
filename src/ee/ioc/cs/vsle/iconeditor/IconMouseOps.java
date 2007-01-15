@@ -904,30 +904,6 @@ class IconMouseOps
 				editor.openOptionsDialog();
 			} else if (e.getActionCommand().equals(Menu.CLEAR_ALL)) {
 				editor.clearObjects();
-			} else if (e.getActionCommand().equals(Look.LOOK_WINDOWS)) {
-				try {
-					Look.changeLayout(Look.LOOK_WINDOWS);
-				} catch (Exception uie) {
-					uie.printStackTrace();
-				}
-			} else if (e.getActionCommand().equals(Look.LOOK_METAL)) {
-				try {
-					Look.changeLayout(Look.LOOK_METAL);
-				} catch (Exception uie) {
-					uie.printStackTrace();
-				}
-			} else if (e.getActionCommand().equals(Look.LOOK_MOTIF)) {
-				try {
-					Look.changeLayout(Look.LOOK_MOTIF);
-				} catch (Exception uie) {
-					uie.printStackTrace();
-				}
-			} else if (e.getActionCommand().equals(Look.LOOK_CUSTOM)) {
-				try {
-					Look.changeLayout(Look.LOOK_CUSTOM);
-				} catch (Exception uie) {
-					uie.printStackTrace();
-				}
 			} else if (e.getActionCommand().equals(Menu.EXPORT_CLASS)) {
 				editor.exportShapesToXML(); // the class is not a relation
 			} else if (e.getActionCommand().equals(Menu.EXPORT_TO_PACKAGE)) {
