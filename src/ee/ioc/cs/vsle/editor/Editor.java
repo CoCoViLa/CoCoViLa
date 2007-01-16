@@ -618,18 +618,18 @@ public class Editor extends JFrame implements ChangeListener {
         Look.getInstance().initDefaultLnF();
         
 		Editor window = null;
+		
 		try {
-			if ( !RuntimeProperties.isFromWebstart() && args.length > 0) {
+			if ( !RuntimeProperties.isFromWebstart() && args.length > 0 ) {
 				
 				if (args[0].equals("-p")) {
 					
 					String dir = ( args.length == 3 ) ? directory + args[2] + RuntimeProperties.FS
 													: directory;
 					
-					Synthesizer.parseFromCommandLine( dir, args[1]);
+					Synthesizer.parseFromCommandLine( dir, args[1] );
 				} else {
-					// Esimeses hoos vaatame, kas moodulite fail on ette antud
-					// käsurealt.
+
 					db.p(args[0] + " read from command line.");
 					window = new Editor(directory + args[0]);
 					window.setTitle(WINDOW_TITLE);
@@ -645,22 +645,24 @@ public class Editor extends JFrame implements ChangeListener {
 					String[] paletteFile = paletteFiles.split(";");
 
 					window = new Editor();
-					// Leidsime vastava kirje.
+
 					for (int i = 0; i < paletteFile.length; i++) {
-						db.p("Found module file name " + paletteFile[i]
-								+ " from the "
-								+ PropertyBox.APP_PROPS_FILE_NAME
-								+ " properties file.");
+						
+						if( paletteFile[i].trim().length() == 0 ) 
+							continue;
+						
 						File f = new File(paletteFile[i]);
+						
 						if (f.exists()) {
+							db.p( "Found package file name " + paletteFile[i] + " from the "
+							     + PropertyBox.APP_PROPS_FILE_NAME + " configuration file." );
 							window.loadPackage(f);
 						}
 					}
 
 				} else {
-					// application.properties failis polnud vastavat kirjet
-					// vaikimisi laetava faili kohta.
-					db.p("Module file name was not specified in command line nor in the application.properties file. Starting without.");
+
+					//db.p("Module file name was not specified in command line nor in the configuration file. Starting without.");
 					window = new Editor();
 				}
 				window.setTitle(WINDOW_TITLE);

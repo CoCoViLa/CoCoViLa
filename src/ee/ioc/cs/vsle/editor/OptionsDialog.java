@@ -216,7 +216,6 @@ public class OptionsDialog extends JDialog {
 		String sGenFilesDir = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.GENERATED_FILES_DIR);
 		String sCompClpath = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.COMPILATION_CLASSPATH);
 		String sPaletteFile = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.PALETTE_FILE);
-		String sDfltLayout = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEFAULT_LAYOUT);
 		int iDebugOutput = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));
 		int iAntiAliasing = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.ANTI_ALIASING));
 		int iShowGrid = Integer.parseInt(PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID));

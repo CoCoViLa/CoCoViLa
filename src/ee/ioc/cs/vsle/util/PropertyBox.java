@@ -97,7 +97,7 @@ public class PropertyBox {
 			if( isFromProps ) {
 				properties.load(new FileInputStream( new File( url.getFile() ) ) );
 			} else {
-				properties.loadFromXML(new FileInputStream( new File( url.getFile() ) ) );
+				properties.loadFromXML(new FileInputStream( new File( url.toURI() ) ) );
 			}
 			
 			properties.put(propName, propValue);
