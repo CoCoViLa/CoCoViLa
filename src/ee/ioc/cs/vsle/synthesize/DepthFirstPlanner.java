@@ -13,6 +13,7 @@ import javax.swing.event.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 
+
 /**
  * @author pavelg
  * 
@@ -35,7 +36,7 @@ public class DepthFirstPlanner implements IPlanner {
     	return "Depth First";
     }
     
-    public ArrayList invokePlaning( Problem problem, boolean computeAll ) {
+    public ArrayList<Rel> invokePlaning( Problem problem, boolean computeAll ) {
     	long startTime = System.currentTimeMillis();
     	
         ProgramRunner.clearFoundVars();
@@ -216,17 +217,16 @@ public class DepthFirstPlanner implements IPlanner {
 			maxDepth = problem.getRelsWithSubtasks().size() - 1;
 		}
 		
-		if (RuntimeProperties.isLogDebugEnabled()) {
+		if (RuntimeProperties.isLogDebugEnabled()) 
 			db.p( "maxDepth: " + ( maxDepth + 1 ) );
-		}
 		
-		subtaskPlanningImpl( problem, algorithm, new ArrayList(), new HashSet<Rel>(), 0 );
+		subtaskPlanningImpl( problem, algorithm, new HashSet<Rel>(), null, 0 );
 		
 		maxDepth = maxDepthBackup;
 	}
 	
-	private boolean subtaskPlanningImpl(Problem problem, List<Rel> algorithm,
-			ArrayList subgoals, HashSet<Rel> subtaskRelsInPath, int depth) {
+	private void subtaskPlanningImpl(Problem problem, List<Rel> algorithm,
+			HashSet<Rel> subtaskRelsInPath, SubtaskRel parentSubtask, int depth) {
 
 		Set<Var> newVars = new HashSet<Var>();
 		
@@ -234,6 +234,10 @@ public class DepthFirstPlanner implements IPlanner {
 		OR: for (Rel subtaskRel : problem.getRelsWithSubtasks()) {
 			if (RuntimeProperties.isLogDebugEnabled())
 				db.p( "OR: rel with subtasks - " + subtaskRel + " depth: " + ( depth + 1 ) );
+			
+			if( newVars.containsAll( subtaskRel.getOutputs() ) ) {
+				continue OR;
+			}
 			
 			HashSet<Rel> newPath = new HashSet<Rel>();
 			
@@ -280,7 +284,7 @@ public class DepthFirstPlanner implements IPlanner {
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "Recursing deeper" );
 				
-				subtaskPlanningImpl( problemNew, subtaskNew.getAlgorithm(), subgoals, newPath, depth + 1 );
+				subtaskPlanningImpl( problemNew, subtaskNew.getAlgorithm(), newPath, subtaskNew, depth + 1 );
 				
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "Back to depth " + ( depth + 1 ) );
@@ -294,6 +298,7 @@ public class DepthFirstPlanner implements IPlanner {
 					db.p( "Subtask: " + subtaskNew + " solved: " + solved );
 				
 				allSolved &= solved;
+				//if at least one subtask is not solvable, try another branch
 				if( !allSolved ) {
 					continue OR;
 				}
@@ -303,25 +308,11 @@ public class DepthFirstPlanner implements IPlanner {
 			
 			if( allSolved ) {
 				algorithm.add( subtaskRel );
-				//newVars.addAll( subtaskRel.getOutputs() );
 				
-				addKnownVarsToSet( problem, subtaskRel.getOutputs(), newVars );
-//				for (Var output : subtaskRel.getOutputs() ) {
-//
-//					newVars.add(output);
-//					// if output var is alias then all its vars should be found as well
-//					if (output.getField().isAlias()) {
-//						for (ClassField field : output.getField().getVars()) {
-//							String object = (output.getObject().equals("this")) ? ""
-//									: output.getObject().substring(5) + ".";
-//							Var var = problem.getVarByFullName(object
-//									+ field.toString());
-//
-//							if (var != null) {
-//								newVars.add(var);
-//							}
-//						}
-//					}
+				addVarsToSet( subtaskRel.getOutputs(), newVars );
+				
+//				if( depth == 0 ) {
+//					addKnownVarsToSet( subtaskRel.getOutputs(), problem.getFoundVars() );
 //				}
 				
 			} else if( !m_isSubtaskRepetitionAllowed ) {
@@ -333,23 +324,31 @@ public class DepthFirstPlanner implements IPlanner {
 		
 		problem.getKnownVars().addAll( newVars );
 		problem.getFoundVars().addAll( newVars );
-		return false;
+		return;// false;
 	}
 
-	private void addKnownVarsToSet( Problem problem, List<Var> fromList, Set<Var> toSet ) {
-		for (Var topvar : fromList ) {
+	
+	/**
+	 * This method helps to copy Vars from one collection to another taking into account Aliases, 
+	 * i.e. it flattens the hierarchical structure of aliases.
+	 * 
+	 * @param from
+	 * @param to
+	 */
+	private void addVarsToSet( Collection<Var> from, Collection<Var> to ) {
+		for (Var topvar : from ) {
 
-			toSet.add(topvar);
-			// if output var is alias then all its vars should be found as well
+			to.add(topvar);
+			// if output var is alias then all its vars should be copied as well
 			if ( topvar.getField().isAlias() ) {
 				for ( Var var : topvar.getChildVars() ) {
 
-					toSet.add(var);
+					to.add(var);
 					if( var.getField().isAlias() ) {
 						//this is used if we have alias in alias structure
 						if (RuntimeProperties.isLogDebugEnabled())
 							db.p( "addVarsToList: alias " + var + " in alias " + topvar );
-						addKnownVarsToSet( problem, var.getChildVars(), toSet );//recursion
+						addVarsToSet( var.getChildVars(), to );//recursion
 					}
 				}
 			}
@@ -358,37 +357,22 @@ public class DepthFirstPlanner implements IPlanner {
 	
 	private void prepareSubtask(Problem problem, Rel subtask) {
 		// [x->y] assume x is known
-		addKnownVarsToSet( problem, subtask.getInputs(), problem.getKnownVars() );
+		Set<Var> flatVars = new HashSet<Var>();
+		addVarsToSet( subtask.getInputs(), flatVars );
+		problem.getKnownVars().addAll( flatVars );
+		problem.getFoundVars().addAll( flatVars );
 		
-//		for (Var input : subtask.getInputs()) {
+//		HashSet<Rel> removableRels = new HashSet<Rel>();
+//		// remove all rels with otputs same as subtask inputs
+//		for (Var subtaskInput : subtask.getInputs()) {
 //
-//			problem.getKnownVars().add(input);
-//			// if input var is alias then all its vars should be known as well
-//			if (input.getField().isAlias()) {
-//				for (ClassField field : input.getField().getVars()) {
-//					String object = (input.getObject().equals("this")) ? ""
-//							: input.getObject().substring(5) + ".";
-//					Var var = problem.getVarByFullName(object
-//							+ field.toString());
-//
-//					if (var != null) {
-//						problem.getKnownVars().add(var);
-//					}
+//			for (Rel rel : problem.getAllRels()) {
+//				if ( ( rel.getOutputs().size() > 0 ) 
+//						&& ( rel.getOutputs().get(0) == subtaskInput ) ) {
+//					removableRels.add( rel );
 //				}
 //			}
 //		}
-
-		HashSet<Rel> removableRels = new HashSet<Rel>();
-		// remove all rels with otputs same as subtask inputs
-		for (Var subtaskInput : subtask.getInputs()) {
-
-			for (Rel rel : problem.getAllRels()) {
-				if ( ( rel.getOutputs().size() > 0 ) 
-						&& ( rel.getOutputs().get(0) == subtaskInput ) ) {
-					removableRels.add( rel );
-				}
-			}
-		}
 		
 		/* Pavel[27Mar06]
 		 * probably we do not need the functionality commented below 
@@ -413,12 +397,12 @@ public class DepthFirstPlanner implements IPlanner {
 		}
 		*/
 		
-		problem.getAllRels().removeAll(removableRels);
-		removableRels.clear();
+//		problem.getAllRels().removeAll(removableRels);
+//		removableRels.clear();
 	}
 	
 	public Component getCustomOptionComponent() {
-		final JSpinner spinner = new JSpinner( new SpinnerNumberModel( maxDepth + 1, 1, 3, 1 ) );
+		final JSpinner spinner = new JSpinner( new SpinnerNumberModel( maxDepth + 1, 1, 10, 1 ) );
 		spinner.addChangeListener(new ChangeListener(){
 
 			public void stateChanged(ChangeEvent e) {

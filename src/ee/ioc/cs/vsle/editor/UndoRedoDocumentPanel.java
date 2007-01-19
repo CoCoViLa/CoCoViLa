@@ -26,6 +26,7 @@ public class UndoRedoDocumentPanel extends JPanel {
 
     private void init() {
         setLayout( new FlowLayout( FlowLayout.LEFT ) );
+        setOpaque(false);
         add( m_buttonUndo );
         add( m_buttonRedo );
 

@@ -676,6 +676,7 @@ public class PackageParser {
 			try {
 				alpha = Integer.parseInt(attrs.getValue(ATR_TRANSPARENCY));
 			} catch (NumberFormatException e) {}
+			
 			Text newText = new Text(x, y, font, new Color(colorInt), alpha,
 					str, fixed);
 			newText.fixedX = fixedX;

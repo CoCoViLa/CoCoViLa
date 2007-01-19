@@ -54,7 +54,7 @@ public class TypeUtil {
     	if( prx == null ) 
     		prx = "";
     	else if ( prx.length() > 0 )
-    		prx += " ";
+    		prx = prx.trim().concat( " " );
     	
     	if ( TypeUtil.TYPE_VOID.equals( type ) || TypeUtil.TYPE_ANY.equals( type ) 
     			|| isAlias ) {

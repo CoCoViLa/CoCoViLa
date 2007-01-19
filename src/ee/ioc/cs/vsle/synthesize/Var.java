@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.synthesize;
 
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
+
 import java.io.Serializable;
 import java.util.*;
 
@@ -21,21 +23,21 @@ public class Var implements //Cloneable,
     //the following is for alias only!!!
     private List<Var> vars = new ArrayList<Var>();
     private ClassField field;
-    private String object;
     private int varNumber;
-
+    private Var parent;
+    
     private Var() {
 
     	varNumber = RelType.varCounter++;
     }
     
-    public Var( ClassField cf, String object ) {
+    public Var( ClassField cf, Var parent ) {
     	
     	this();
         
         setField( cf );
         
-        this.object = object;
+        this.parent = parent;
     }
 
 
@@ -88,16 +90,40 @@ public class Var implements //Cloneable,
         return field.getName();
     } // getName
 
+    public Var getParent() {
+    	return parent;
+    }
+    
     /**
      * <UNCOMMENTED>
      * @return String
      */
     public String getObject() {
-        return object;
+    	if( parent != null ) {
+    		String obj = parent.getObject();
+    		return ( ( obj != null ) ? obj + "." : "" ) + parent.getName();
+    	} 
+    	return null;
     } // getObj
 
     public String getDeclaration() {
     	return TypeUtil.getDeclaration( field, "" );
+    }
+    
+    public String getFullName() {
+    	String obj = getObject();
+    	return ( ( ( obj != null ) ? ( obj + "." ).substring( 5 ) : "" ) + field.getName() );
+    }
+    
+    public String getFullNameForConcat() {
+    	String s = getFullName();
+        if ( TYPE_THIS.equals( s ) ) {
+            return "";
+        } else if ( s.startsWith( TYPE_THIS ) ) {
+            return s.substring(5) + ".";
+        } else {
+            return s + ".";
+        }
     }
     
     /**
@@ -106,7 +132,7 @@ public class Var implements //Cloneable,
      public
      */
     public String toString() {
-        return ( object + "." + field.getName() ).substring( 5 );
+        return "var:" + ( getObject() + "." + field.getName() );
     } // toString
 
     public boolean equals( Object e ) {

@@ -253,7 +253,7 @@ public class ProgramRunner {
 
 					for ( Var var : foundVars ) {
 
-						if ( var.toString().equals( gObj.getName() + "." + cf.getName() ) ) {
+						if ( var.getFullName().equals( gObj.getName() + "." + cf.getName() ) ) {
 							varIsComputed = true;
 							break;
 						}
@@ -312,7 +312,10 @@ public class ProgramRunner {
 				}
 			}
 		} catch (Exception e) {
-			e.printStackTrace(System.err);
+			db.p( "Error propagating value: " + e.getClass().getCanonicalName() + " : " + e.getMessage() );
+			if( RuntimeProperties.isLogDebugEnabled() ) {
+				e.printStackTrace( System.err );
+			}
 		} finally {
 			m_canvas.repaint();
 		}

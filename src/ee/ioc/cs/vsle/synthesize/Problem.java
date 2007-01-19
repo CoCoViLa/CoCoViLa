@@ -28,17 +28,27 @@ class Problem implements Serializable {
 
 	private HashSet<Var> foundVars = new HashSet<Var>();
 
+	private Var rootVarThis;
+	
 	Var getVarByFullName( String field ) {
 		
 		for (Var var : allVars.values() ) {
 
-			if ( var.toString().equals( field ) ) {
+			if ( var.getFullName().equals( field ) ) {
 				return var;
 			}
 		}
 		return null;
 	}
 
+	Problem( Var varThis ) {
+		rootVarThis = varThis;
+	}
+	
+	Var getRootVar() {
+		return rootVarThis;
+	}
+	
 	void addSubtask(SubtaskRel rel) {
 		subtasks.add(rel);
 	}
@@ -92,7 +102,7 @@ class Problem implements Serializable {
 	}
 
 	void addVar(Var var) {
-		allVars.put(var.getObject() + "." + var.getName(), var);
+		allVars.put(var.getFullName(), var);
 	}
 
 	SubtaskRel getSubtask(SubtaskRel subt) {
@@ -109,23 +119,9 @@ class Problem implements Serializable {
 	}
 
 	Problem getCopy() {
+		
 		try {
-			ByteArrayOutputStream bos = new ByteArrayOutputStream();
-			ObjectOutputStream oos = new ObjectOutputStream(bos);
-			oos.writeObject(this);
-			oos.flush();
-
-			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-
-			oos.close();
-
-			ObjectInputStream ois = new ObjectInputStream(bis);
-
-			Problem problem = (Problem) ois.readObject();
-
-			ois.close();
-
-			return problem;
+			return (Problem) DeepCopy.copy( this );
 
 		} catch (Exception e) {
 			

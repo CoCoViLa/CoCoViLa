@@ -424,6 +424,11 @@ public class Editor extends JFrame implements ChangeListener {
 		
 		menu.add(new JSeparator());
 
+		menuItem = new JCheckBoxMenuItem(Menu.SHOW_ALGORITHM, RuntimeProperties.showAlgorithm );
+		menuItem.setToolTipText( "If checked, after planning a window with the synthesized algorithm will be shown" );
+		menuItem.addActionListener(aListener);
+		menu.add(menuItem);
+		
 		// Options
 		menuItem = new JMenuItem(Menu.SCHEMEOPTIONS, KeyEvent.VK_O);
 		menuItem.addActionListener(aListener);
@@ -568,17 +573,19 @@ public class Editor extends JFrame implements ChangeListener {
 			}
 		}
 		
-		String directory = RuntimeProperties.getWorkingDirectory();
-		
-		System.err.println( "Working directory: " + directory );
-		
 		String version = System.getProperty("java.version");
+		
+		System.err.println( "Java Version: " + version );
 		
 		if( version.compareTo( "1.5.0" ) < 0 ) {
 			
 			System.err.println( "CoCoViLa requires at least Java 1.5.0 to run!");
 			System.exit( 1 );
 		}	
+		
+		String directory = RuntimeProperties.getWorkingDirectory();
+		
+		System.err.println( "Working directory: " + directory );
 		
 		RuntimeProperties.debugInfo = Integer.parseInt(PropertyBox.getProperty(
 				PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.DEBUG_INFO));

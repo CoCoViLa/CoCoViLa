@@ -4,6 +4,7 @@ import java.util.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 public class CodeGenerator {
 
@@ -11,50 +12,49 @@ public class CodeGenerator {
 
     public static final String OT_TAB = "    ";
 
-    private final static int OT_NOC = 0;
-    private final static int OT_INC = 1;
-    private final static int OT_DEC = 2;
+    private static enum OFFSET { OT_INC, OT_DEC }
 
-    private static int subCount = 0;
+    private int subCount = 0;
 
-    public static int ALIASTMP_NR = 0;
+    public static int ALIASTMP_NR;
 
-    private ArrayList algRelList;
+    private ArrayList<Rel> algRelList;
     private Problem problem;
     private String className; 
     
-    public CodeGenerator( ArrayList algRelList, Problem problem, String className ) {
+    public CodeGenerator( ArrayList<Rel> algRelList, Problem problem, String className ) {
     	
     	this.algRelList = algRelList;
     	this.problem = problem;
     	this.className = className;
     	
-    }
-
-    public static void reset() {
+    	ALIASTMP_NR = 0;
     	offset = "";
-        subCount = 0;
-        ALIASTMP_NR = 0;
     }
     
     public String generate() {
+    	
+    	db.p( "Starting code generation" );
+    	
         StringBuffer alg = new StringBuffer();
-        cOT( OT_INC, 2 );
+        cOT( OFFSET.OT_INC, 2 );
 
         genAssumptions( alg, problem.getAssumptions() );
         
-        for ( int i = 0; i < algRelList.size(); i++ ) {
-            Rel rel = ( Rel ) algRelList.get( i );
+        for ( Rel rel : algRelList ) {
 
             if ( rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) {
-                appendRelToAlg( cOT( OT_NOC, 0 ), rel, alg );
+                appendRelToAlg( same(), rel, alg );
             }
 
             else if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
-                genSubTasks( rel, alg, false, className );
+                genSubTasks( rel, alg, false, className, new HashSet<Var>() );
             }
 
         }
+        
+        db.p( "Finished code generation" );
+        
         return alg.toString();
     }
 
@@ -73,9 +73,9 @@ public class CodeGenerator {
     		result += offset;
     		
     		if ( token == TypeToken.TOKEN_OBJECT ) {
-    			result += var.toString() + " = (" + varType + ")args[" + i++ + "];\n";
+    			result += var.getFullName() + " = (" + varType + ")args[" + i++ + "];\n";
     		} else {
-    			result += var.toString()
+    			result += var.getFullName()
     			+ " = ((" + token.getObjType() + ")args[" + i++ + "])."
     			+ token.getMethod() + "();\n";
     		}
@@ -84,7 +84,7 @@ public class CodeGenerator {
     	alg.append( result );
     }
     
-    private void genSubTasks( Rel rel, StringBuffer alg, boolean isNestedSubtask, String parentClassName ) {
+    private void genSubTasks( Rel rel, StringBuffer alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars ) {
         int subNum;
         int start = subCount;
 
@@ -93,36 +93,23 @@ public class CodeGenerator {
             
             String sbName = Synthesizer.SUBTASK_INTERFACE_NAME + "_" + subNum;
             
-            alg.append( "\n" + cOT( OT_NOC, 0 ) + "class " + sbName
+            alg.append( "\n" + same() + "class " + sbName
                         + " implements " + Synthesizer.SUBTASK_INTERFACE_NAME + " {\n\n" );
             
-            cOT( OT_INC, 1 );
-            /*TODO//field declaration
-            for ( Var var : problem.getAllVars().values() ) {
-            	if( var.getObject().equals( "this" ) ) {
-            		alg.append( cOT( OT_NOC, 0 ) + var.getDeclaration() );
-            	}
-			}
-            
-            //constructor
-            alg.append( "\n" + cOT( OT_NOC, 0 ) + sbName + "() {\n\n" );
-            cOT( OT_INC, 1 );
-            
-            for ( Var var : problem.getFoundVars() ) {
-            	if( var.getField().isPrimitive() ) {
-            		alg.append( cOT( OT_NOC, 0 ) + var + " = " + parentClassName + ".this." + var + ";\n\n" );
-            	}
-            }
-            alg.append( cOT( OT_DEC, 1 ) + "}\n\n" );*/
+            right() ;
             
             //start generating run()
-            alg.append( cOT( OT_NOC, 0 ) + "public Object[] run(Object[] in) throws Exception {\n" );
+            alg.append( same() + "public Object[] run(Object[] in) throws Exception {\n" );
 
             List<Var> subInputs = subtask.getInputs();
             List<Var> subOutputs = subtask.getOutputs();
+            
+            usedVars.addAll( subInputs );
+            usedVars.addAll( subOutputs );
+            
             List<Rel> subAlg = subtask.getAlgorithm();
-            cOT( OT_INC, 1 );
-            alg.append( cOT( OT_NOC, 0 ) + "//Subtask: " + subtask + "\n" );
+            right() ;
+            alg.append( same() + "//Subtask: " + subtask + "\n" );
             // apend subtask inputs to algorithm
             alg.append( getSubtaskInputs( subInputs ) );
             for ( int i = 0; i < subAlg.size(); i++ ) {
@@ -131,43 +118,103 @@ public class CodeGenerator {
 					db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs());
                 if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                     //recursion
-                    genSubTasks( trel, alg, true, sbName );
+                    genSubTasks( trel, alg, true, sbName, usedVars );
 
                 } else {
-                    appendRelToAlg( cOT( OT_NOC, 0 ), trel, alg );
+                    appendRelToAlg( same(), trel, alg );
                 }
-
+                usedVars.addAll( trel.getInputs() );
+                usedVars.addAll( trel.getOutputs() );
             }
             // apend subtask outputs to algorithm
-            alg.append( getSubtaskOutputs( subOutputs, cOT( OT_NOC, 0 ) ) );
-            alg.append( cOT( OT_DEC, 1 ) + "}\n"
-                        + cOT( OT_DEC, 1 ) + "} //End of subtask: " + subtask + "\n" );
+            alg.append( getSubtaskOutputs( subOutputs, same() ) );
+            //end of run()
+            alg.append( left() + "}\n" );
+            
+            //variable declaration & constructor
+            //alg.append( generateFieldDeclaration( parentClassName, sbName, usedVars ) );
+            //end of class
+            alg.append( left() + "} //End of subtask: " + subtask + "\n" );
 
-            alg.append( cOT( OT_NOC, 0 ) + "Subtask_" + subNum + " subtask_" + subNum +
+            alg.append( same() + "Subtask_" + subNum + " subtask_" + subNum +
                         " = new Subtask_" + subNum + "();\n\n" );
         }
 
         appendSubtaskRelToAlg( rel, start, alg, isNestedSubtask );
     }
 
+    private String generateFieldDeclaration( String parentClassName, String sbName, Set<Var> usedVars ) {
+    	
+    	String declOT = same();
+    	String consOT = right();
+    	StringBuffer bufDecl = new StringBuffer();
+    	StringBuffer bufConstr = new StringBuffer();
+    	Set<String> topVars = new HashSet<String>();
+    	
+    	for ( Var var : usedVars ) {
+    		
+    		boolean allow = !var.getField().isAlias() && !var.getField().isConstant() && !var.getField().isVoid();
+    		
+    		if( var.getParent().equals( problem.getRootVar() ) ) {
+    			if( allow ) {
+    				bufDecl.append( declOT + var.getDeclaration() );
+    				bufConstr.append( consOT + var.getName() + " = " + parentClassName + "." + TYPE_THIS + "." + var.getName() + ";\n" );
+    			}
+    		} else {
+    			Var parent = var.getParent();
 
-    private String cOT( int incr, int times ) {
-        //0 - no change, 1 - increase, 2 - decrease
-        if ( incr == OT_INC ) {
-            for ( int i = 0; i < times; i++ ) {
+    			while( !parent.getParent().equals( problem.getRootVar() ) ) {
+    				parent = parent.getParent();
+    			}
+    			if( !topVars.contains( parent.getFullName() ) ) {
+    				topVars.add( parent.getFullName() );
+    				bufDecl.append( declOT + parent.getDeclaration() );
+    			}
+    			if( allow ) {
+    				bufConstr.append( consOT + var.getFullName() + " = " + parentClassName 
+    						+ "." + TYPE_THIS + "." + var.getFullName() + ";\n" );
+    			}
+    		}
+    	}
+        
+        return "\n" + bufDecl.toString() + "\n"
+        		+ left() + sbName + "() {\n\n"
+        		+ bufConstr.toString()
+        		+ same() + "}\n\n";
+    }
+    
+    private String cOT( OFFSET ot, int times ) {
+    	
+    	switch( ot )
+    	{
+    	case OT_INC :
+    		for ( int i = 0; i < times; i++ ) {
                 offset += OT_TAB;
             }
-            return offset;
-        } else if ( incr == OT_DEC ) {
-            for ( int i = 0; i < times; i++ ) {
+    		break;
+    	case OT_DEC :
+    		for ( int i = 0; i < times; i++ ) {
                 offset = offset.substring( OT_TAB.length() );
             }
-            return offset;
-        } else
-            return offset;
+    		break;
 
+    	}
+    	
+    	return offset;
     }
 
+    private String left() {
+    	return cOT( OFFSET.OT_DEC, 1 );
+    }
+    
+    private String right() {
+    	return cOT( OFFSET.OT_INC, 1 );
+    }
+    
+    private String same() {
+    	return offset;
+    }
+    
     private void appendRelToAlg( String offset, Rel rel, StringBuffer buf ) {
         String s = rel.toString();
         if ( !s.equals( "" ) ) {
@@ -187,7 +234,7 @@ public class CodeGenerator {
             relString = relString.replaceFirst( RelType.TAG_SUBTASK, "subtask_" + ( startInd + i ) );
         }
         if(rel.getExceptions().size() == 0 || isNestedSubtask ) {
-            buf.append(cOT( OT_NOC, 0 ) + relString + "\n" );
+            buf.append(same() + relString + "\n" );
         }
         else {
             buf.append( appendExceptions( rel, relString ) + "\n" );
@@ -196,16 +243,16 @@ public class CodeGenerator {
 
     private String appendExceptions( Rel rel, String s ) {
         StringBuffer buf = new StringBuffer();
-        buf.append( cOT( OT_NOC, 0 ) + "try {\n" +
-                    cOT( OT_INC, 1 ) + s + ";\n" +
-                    cOT( OT_DEC, 1 ) + "}\n" );
+        buf.append( same() + "try {\n" +
+                    right()  + s + ";\n" +
+                    left() + "}\n" );
         for ( int i = 0; i < rel.getExceptions().size(); i++ ) {
             String excp = rel.getExceptions().get( i ).getName();
             String instanceName = "ex" + i;
-            buf.append( cOT( OT_NOC, 0 ) + "catch( " + excp + " " + instanceName + " ) {\n" +
-                        cOT( OT_INC, 1 ) + instanceName + ".printStackTrace();\n" +
-                        cOT( OT_NOC, 0 ) + "return;\n" +
-                        cOT( OT_DEC, 1 ) + "}\n" );
+            buf.append( same() + "catch( " + excp + " " + instanceName + " ) {\n" +
+                        right()  + instanceName + ".printStackTrace();\n" +
+                        same() + "return;\n" +
+                        left() + "}\n" );
         }
 
         return buf.toString();
@@ -229,9 +276,9 @@ public class CodeGenerator {
     		result += offset;
     		
     		if ( token == TypeToken.TOKEN_OBJECT ) {
-    			result += var + " = (" + varType + ")in[" + i + "];\n";
+    			result += var.getFullName() + " = (" + varType + ")in[" + i + "];\n";
     		} else {
-    			result += var + " = ((" + token.getObjType() + ")in[" + i + "])." + token.getMethod() + "();\n";
+    			result += var.getFullName() + " = ((" + token.getObjType() + ")in[" + i + "])." + token.getMethod() + "();\n";
     		}
     	}
     	
@@ -260,9 +307,9 @@ public class CodeGenerator {
 				
 			} else if ( token == TypeToken.TOKEN_OBJECT ) {
 				
-    			out += offset + var + " = (" + varType + ")" + aliasTmp + "[" + i + "];\n";
+    			out += offset + var.getFullName() + " = (" + varType + ")" + aliasTmp + "[" + i + "];\n";
     		} else {
-    			out += offset + var + " = ((" + token.getObjType() + ")" 
+    			out += offset + var.getFullName() + " = ((" + token.getObjType() + ")" 
     					+ aliasTmp + "[" + i + "])." + token.getMethod() + "();\n";
     		}
 
@@ -289,7 +336,7 @@ public class CodeGenerator {
     	        varName = aliasTmp;
     	        
     		} else {
-    			varName = var.toString();
+    			varName = var.getFullName();
     		}
     		if( i == 0 ) {
     			varList += varName;
@@ -317,7 +364,7 @@ public class CodeGenerator {
         		varName = getAliasTmpName(aliasVar.getName());
         		before += getVarsToAlias( var, varName );
         	} else {
-        		varName = var.toString();
+        		varName = var.getFullName();
         	}
             if ( j == 0 ) {
                 out += varName;
@@ -334,7 +381,7 @@ public class CodeGenerator {
 		return offset;
 	}
 	
-	public static String getAliasTmpName(String varName) {
+	public static String getAliasTmpName( String varName ) {
 		varName = varName.replaceAll( "\\.", "_" );
         return TypeUtil.TYPE_ALIAS + "_" + varName + "_" + ALIASTMP_NR++;
     }

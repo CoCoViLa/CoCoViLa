@@ -16,10 +16,12 @@ public class LineType {
 
 	private int type;
 	private String specLine;
+	private String origSpecLine;
 
-	LineType(int i, String s) {
+	LineType(int i, String s, String o) {
 		type = i;
 		specLine = s;
+		origSpecLine = o;
 	}
 
 	public String toString() {
@@ -33,4 +35,8 @@ public class LineType {
         String getSpecLine() {
             return specLine;
         }
+
+		public String getOrigSpecLine() {
+			return origSpecLine;
+		}
 }

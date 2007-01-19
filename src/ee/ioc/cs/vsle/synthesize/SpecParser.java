@@ -10,6 +10,7 @@ import ee.ioc.cs.vsle.vclass.*;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.equations.EquationSolver;
+import ee.ioc.cs.vsle.equations.EquationSolver.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 /**
@@ -107,7 +108,7 @@ public class SpecParser {
                 return null;
             }
         }
-        String line = a.get( 0 );
+        final String line = a.get( 0 );
 
         a.remove( 0 );
         if ( line.indexOf( "alias " ) >= 0 ) {
@@ -122,7 +123,7 @@ public class SpecParser {
             						+ ":" + matcher.group( 4 )
             						+ ":" + ( matcher.group( 2 ) == null 
             								|| matcher.group( 2 ).equals("null")? "" : matcher.group( 2 ));
-                return new LineType( LineType.TYPE_ALIAS, returnLine );
+                return new LineType( LineType.TYPE_ALIAS, returnLine, line );
             }
             //allow empty alias declaration e.g. "alias x;"
             pattern = Pattern.compile( "alias *(\\(( *[^\\(\\) ]+ *)\\))* *([^= ]+) *" );
@@ -135,10 +136,10 @@ public class SpecParser {
             	String returnLine = matcher.group( 3 ) 
             						+ "::" + ( matcher.group( 2 ) == null 
             								|| matcher.group( 2 ).equals("null")? "" : matcher.group( 2 ));
-            	return new LineType( LineType.TYPE_ALIAS, returnLine );
+            	return new LineType( LineType.TYPE_ALIAS, returnLine, line );
             }
             
-			return new LineType( LineType.TYPE_ERROR, line );
+			return new LineType( LineType.TYPE_ERROR, line, line );
 			
         } else if ( line.indexOf( "super" ) >= 0 ) {
         	pattern = Pattern.compile( "super#([^ .]+)" );
@@ -146,17 +147,17 @@ public class SpecParser {
             if ( matcher.find() ) {
                 String returnLine = matcher.group( 1 );
 
-                return new LineType( LineType.TYPE_SUPERCLASSES, returnLine );
+                return new LineType( LineType.TYPE_SUPERCLASSES, returnLine, line );
             }
-			return new LineType( LineType.TYPE_ERROR, line );
+			return new LineType( LineType.TYPE_ERROR, line, line );
 			
         } else if ( line.trim().startsWith( "const" ) ) {
         	pattern = Pattern.compile( " *([a-zA-Z_$][0-9a-zA-Z_$]*[\\[\\]]*) +([a-zA-Z_$][0-9a-zA-Z_$]*) *= *([a-zA-Z0-9.{}\"]+|new [a-zA-Z0-9.{}\\[\\]]+) *" );
             matcher = pattern.matcher( line );
             if ( matcher.find() ) {
-                return new LineType( LineType.TYPE_CONST, matcher.group( 1 ) + ":" + matcher.group( 2 ) + ":" + matcher.group( 3 ) );
+                return new LineType( LineType.TYPE_CONST, matcher.group( 1 ) + ":" + matcher.group( 2 ) + ":" + matcher.group( 3 ), line );
             }
-			return new LineType( LineType.TYPE_ERROR, line );
+			return new LineType( LineType.TYPE_ERROR, line, line );
 			
         } else if ( line.indexOf( "=" ) >= 0 ) { // Extract on solve equations
         	//lets check if it's an alias
@@ -167,41 +168,41 @@ public class SpecParser {
             	//"true" means that this is an assignment, not declaration
             	String returnLine = matcher.group( 1 ) + ":" + matcher.group( 2 ) + "::true";
             	
-            	return new LineType( LineType.TYPE_ALIAS, returnLine );
+            	return new LineType( LineType.TYPE_ALIAS, returnLine, line );
             }
             
             pattern = Pattern.compile( " *([^= ]+) *= *((\".*\")|(new .*\\(.*\\))|(\\{.*\\})) *$" );
             matcher = pattern.matcher( line );
             if ( matcher.find() ) {
-                return new LineType( LineType.TYPE_ASSIGNMENT, matcher.group( 1 ) + ":" + matcher.group( 2 ) );
+                return new LineType( LineType.TYPE_ASSIGNMENT, matcher.group( 1 ) + ":" + matcher.group( 2 ), line );
             }
 			pattern = Pattern.compile( " *([^=]+) *= *([-_0-9a-zA-Z.()\\+\\*/^ ]+) *$" );
 			matcher = pattern.matcher( line );
 			if ( matcher.find() ) {
-			    return new LineType( LineType.TYPE_EQUATION, line );
+			    return new LineType( LineType.TYPE_EQUATION, line, line );
 			}
-			return new LineType( LineType.TYPE_ERROR, line );
+			return new LineType( LineType.TYPE_ERROR, line, line );
 
         } else if ( line.indexOf( "->" ) >= 0 ) {
             pattern = Pattern.compile( "(.*) *-> *(.+) *\\{(.+)\\}" );
             matcher = pattern.matcher( line );
             if ( matcher.find() ) {
-                return new LineType( LineType.TYPE_AXIOM, line );
+                return new LineType( LineType.TYPE_AXIOM, line, line );
             }
 			pattern = Pattern.compile( "(.*) *-> *([ -_a-zA-Z0-9.,]+) *$" );
 			matcher = pattern.matcher( line );
 			if ( matcher.find() ) {
-			    return new LineType( LineType.TYPE_SPECAXIOM, line );
+			    return new LineType( LineType.TYPE_SPECAXIOM, line, line );
 
 			}
-			return new LineType( LineType.TYPE_ERROR, line );
+			return new LineType( LineType.TYPE_ERROR, line, line );
         }  else {
             pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])*) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)" );
             matcher = pattern.matcher( line );
             if ( matcher.find() ) {
-                return new LineType( LineType.TYPE_DECLARATION, matcher.group( 1 ) + ":" + matcher.group( 3 ) );
+                return new LineType( LineType.TYPE_DECLARATION, matcher.group( 1 ) + ":" + matcher.group( 3 ), line );
             }
-			return new LineType( LineType.TYPE_ERROR, line );
+			return new LineType( LineType.TYPE_ERROR, line, line );
         }
     }
 
@@ -327,7 +328,7 @@ public class SpecParser {
 						}
                 	} else if ( lt.getType() == LineType.TYPE_ASSIGNMENT ) {
                         split = lt.getSpecLine().split( ":", -1 );
-                        ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION );
+                        ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, lt.getOrigSpecLine() );
 
                         classRelation.setOutput( split[ 0 ], vars );
                         classRelation.setMethod( split[ 0 ] + " = " + split[ 1 ] );
@@ -487,7 +488,7 @@ public class SpecParser {
 
                         a.addAll( list, vars, classList );
                         vars.add( a );
-                        ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS );
+                        ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS, lt.getOrigSpecLine() );
 
                         classRelation.addInputs( list, vars );
                         classRelation.setMethod( TypeUtil.TYPE_ALIAS );
@@ -498,7 +499,7 @@ public class SpecParser {
                         	db.p( classRelation );
                         
                         if ( !a.isWildcard() ) {
-                            classRelation = new ClassRelation( RelType.TYPE_ALIAS );
+                            classRelation = new ClassRelation( RelType.TYPE_ALIAS, lt.getOrigSpecLine() );
                             classRelation.addOutputs( list, vars );
                             classRelation.setMethod( TypeUtil.TYPE_ALIAS );
                             classRelation.setInput( name, vars );
@@ -511,21 +512,22 @@ public class SpecParser {
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {
                         EquationSolver.solve( lt.getSpecLine() );
                         next: 
-                        for ( String result : EquationSolver.getRelations() ) {
-                        	if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "equation: " + result );
-                            String[] pieces = result.split( ":" );
-
+                        for ( Relation rel : EquationSolver.getRelations() ) {
+                        	if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "equation: " + rel );
+                            String[] pieces = rel.getRel().split( ":" );
+                            String method = rel.getExp();
+                            String out = pieces[ 2 ].trim();
+                            
                             //cannot assign new values for constants
-                            ClassField tmp = ClassRelation.getVar( pieces[ 2 ].trim(), vars );
+                            ClassField tmp = ClassRelation.getVar( checkAliasLength( out, vars, className ), vars );
                             if( tmp != null && tmp.isConstant() ) {
                             	db.p( "Ignoring constant and equation output: " + tmp );
                             	continue;
                             }
                             //if one variable is used on both sides of "=", we cannot use such relation.
-                            String out = pieces[ 2 ].trim();
-                            String[] in = pieces[ 1 ].trim().split( " " );
-                            for (int j = 0; j < in.length; j++) {
-								if( in[j].equals(out) ) {
+                            String[] inputs = pieces[ 1 ].trim().split( " " );
+                            for (int j = 0; j < inputs.length; j++) {
+								if( inputs[j].equals(out) ) {
 									if ( RuntimeProperties.isLogDebugEnabled() ) 
 										db.p( " - unable use this equation because variable " 
 												+ out + " appears on both sides of =" );
@@ -533,22 +535,31 @@ public class SpecParser {
 								}
 							}
                             
-                            ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION );
+                            ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, lt.getOrigSpecLine() );
 
-                            classRelation.setOutput( pieces[ 2 ].trim(), vars );
-
-                            String[] inputs = pieces[ 1 ].trim().split( " " );
+                            classRelation.setOutput( out, vars );
 
                             //checkAliasLength( inputs, vars, className );
-                            checkAnyType( pieces[ 2 ].trim(), inputs, vars);
+                            for( int i = 0; i < inputs.length; i++ ) {
+                            	String initial = inputs[i];
+                            	inputs[i] = checkAliasLength( inputs[i], vars, className );
+                            	String name = inputs[i];
+                            	if( name.startsWith( "*" ) ) {
+                            		name = inputs[i].substring( 1 );
+                            	}
+                            	method = method.replaceAll( "\\$" + initial + "\\$", name );
+                        	}
+                            method = method.replaceAll( "\\$" + out + "\\$", out );
+                            
+                            checkAnyType( out, inputs, vars);
                             
                             if ( !inputs[ 0 ].equals( "" ) ) {
                                 classRelation.addInputs( inputs, vars );
                             }
-                            classRelation.setMethod( pieces[ 0 ] );
+                            classRelation.setMethod( method );
                             annClass.addClassRelation( classRelation );
-                            if ( RuntimeProperties.isLogDebugEnabled() ) db.p( "Equation: " +
-                                    classRelation );
+                            if ( RuntimeProperties.isLogDebugEnabled() ) 
+                            	db.p( "Equation: " + classRelation );
 
                         }
                     } else if ( lt.getType() == LineType.TYPE_AXIOM ) {
@@ -562,7 +573,7 @@ public class SpecParser {
                             subtasks.add( matcher2.group( 0 ) );
                         }
                         lt = new LineType( lt.getType(), lt.getSpecLine().replaceAll(
-                                "\\[([^\\]\\[]*) *-> *([^\\]\\[]*)\\]", "#" ) );
+                                "\\[([^\\]\\[]*) *-> *([^\\]\\[]*)\\]", "#" ), lt.getOrigSpecLine() );
 
                         pattern = Pattern.compile( "(.*) *-> ?(.*)\\{(.*)\\}" );
                         matcher2 = pattern.matcher( lt.getSpecLine() );
@@ -576,13 +587,13 @@ public class SpecParser {
                                 }
 
                             }
-                            ClassRelation classRelation = new ClassRelation( RelType.TYPE_JAVAMETHOD );
+                            ClassRelation classRelation = new ClassRelation( RelType.TYPE_JAVAMETHOD, lt.getOrigSpecLine() );
 
                             if ( matcher2.group( 2 ).trim().equals( "" ) ) {
-                            	s_parseErrors.add("Error in line \n" + lt.getSpecLine() +
+                            	s_parseErrors.add("Error in line \n" + lt.getOrigSpecLine() +
                                         "\nin class " + className +
                                         ".\nAn axiom can not have an empty output.");
-                                throw new SpecParseException( "Error in line \n" + lt.getSpecLine() +
+                                throw new SpecParseException( "Error in line \n" + lt.getOrigSpecLine() +
                                         "\nin class " + className +
                                         ".\nAn axiom can not have an empty output." );
                             }
@@ -612,7 +623,7 @@ public class SpecParser {
                         pattern = Pattern.compile( "(.*) *-> *([-_a-zA-Z0-9.,]+) *$" );
                         matcher2 = pattern.matcher( lt.getSpecLine() );
                         if ( matcher2.find() ) {
-                            ClassRelation classRelation = new ClassRelation( RelType.TYPE_UNIMPLEMENTED );
+                            ClassRelation classRelation = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, lt.getOrigSpecLine() );
                             String[] outputs = matcher2.group( 2 ).trim().split( " *, *", -1 );
 
                             if ( !outputs[ 0 ].equals( "" ) ) {
@@ -628,13 +639,12 @@ public class SpecParser {
                             annClass.addClassRelation( classRelation );
                         }
                     } else if ( lt.getType() == LineType.TYPE_ERROR ) {
-                        throw new LineErrorException( lt.getSpecLine() );
+                        throw new LineErrorException( lt.getOrigSpecLine() );
                     }
                 }
             }
         } catch ( UnknownVariableException uve ) {
         	
-            //uve.printStackTrace( System.out );
             throw new UnknownVariableException( className + "." + uve.excDesc );
 
         }

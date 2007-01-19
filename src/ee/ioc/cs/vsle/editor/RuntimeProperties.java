@@ -28,6 +28,7 @@ public class RuntimeProperties {
 	public static boolean isAntialiasingOn;
 	public static double zoomFactor;
 	public static boolean isSyntaxHighlightingOn = true;
+	public static boolean showAlgorithm = false;
 	
 	// Class properties.
 	public static String className;

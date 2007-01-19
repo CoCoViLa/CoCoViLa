@@ -23,7 +23,9 @@ public class FontResizePanel extends JPanel {
 	
 	private void jbInit() throws Exception {
 		this.setLayout(new FlowLayout(FlowLayout.LEFT));
+		setOpaque(false);
 		JPanel panel = new JPanel(new GridLayout(1, 3));
+		panel.setOpaque(false);
 		panel.add(new JLabel("Font Size: "));
 		m_spinner = new JSpinner();
 		m_spinner.setPreferredSize(new Dimension(50, 20));
@@ -31,7 +33,7 @@ public class FontResizePanel extends JPanel {
 		m_spinner.setModel(model);
 		panel.add(m_spinner);
 		m_checkboxBold = new JCheckBox("Bold", (m_area.getFont().isBold()) ? true : false);
-		
+		m_checkboxBold.setOpaque(false);
 		panel.add(m_checkboxBold);
 		this.add(panel);
 		

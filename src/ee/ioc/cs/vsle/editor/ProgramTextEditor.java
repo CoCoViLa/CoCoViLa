@@ -24,7 +24,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     private JPanel progText, specText, runResult;
     private JTextField invokeField;
     private JTabbedPane tabbedPane;
-    
+    private JCheckBox propagateOnRunNew;
     private long m_progRunnerID;
     
     //the title should be unique for each spec window because it is used as an ID for managing frames
@@ -114,6 +114,9 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         runProg = new JButton( "Compile & Run" );
         runProg.addActionListener( this );
         toolBar.add( runProg );
+        propagateOnRunNew = new JCheckBox( "Propagate", true );
+        propagateOnRunNew.setOpaque(false);
+        toolBar.add( propagateOnRunNew );
         toolBar.add( new UndoRedoDocumentPanel( jta_generatedCode.getDocument() ) );
         toolBar.add( new FontResizePanel( jta_generatedCode ) );
         JScrollPane programAreaScrollPane = new JScrollPane( jta_generatedCode );
@@ -214,6 +217,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         	
         	op = ProgramRunnerEvent.RUN_NEW;
 
+        	if( propagateOnRunNew.isSelected() ) {
+        		op |= ProgramRunnerEvent.PROPAGATE;
+        	}
+        	
         	evt = new ProgramRunnerEvent( this, m_progRunnerID, op );
 
         	evt.setProgramText( jta_generatedCode.getText() );

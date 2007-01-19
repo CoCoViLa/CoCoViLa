@@ -72,7 +72,7 @@ implements ActionListener, KeyListener {
 				
 				
 				comboBoxes.add(comboBox);
-				label = new JLabel(var.toString(), SwingConstants.CENTER);
+				label = new JLabel(var.getFullName(), SwingConstants.CENTER);
 				label.setToolTipText(var.getField().getDescription());
 				arrayNameList.add(var);
 				labelPane.add(label);
@@ -83,11 +83,11 @@ implements ActionListener, KeyListener {
 			} else if (var.getField().isPrimitiveOrString()) {
 				textField = new JTextField();
 				textField.addKeyListener(this);
-				textField.setName(var.toString());
+				textField.setName(var.getFullName());
 				primitiveNameList.add(var);
 				textField.setText(var.getField().getValue());
 				textFields.add(textField);
-				label = new JLabel(var.toString(), SwingConstants.CENTER);
+				label = new JLabel(var.getFullName(), SwingConstants.CENTER);
 				label.setToolTipText(var.getField().getDescription());
 				labelPane.add(label);
 				textFieldPane.add(textField);

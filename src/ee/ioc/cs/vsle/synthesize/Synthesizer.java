@@ -57,11 +57,14 @@ public class Synthesizer {
         } catch ( Exception e ) {
             e.printStackTrace();
             
-            problem = new Problem();
+            problem = new Problem( null );
         }
 
         // run the planner on the obtained problem
-        ArrayList algorithmList = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
+        ArrayList<Rel> algorithmList = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
+        if( RuntimeProperties.showAlgorithm ) {
+        	AlgorithmVisualizer.getInstance().addNewTab( mainClassName, algorithmList );
+        }
         String algorithm = new CodeGenerator( algorithmList, problem, mainClassName ).generate();
 
         if( assumptions != null ) {
@@ -112,8 +115,6 @@ public class Synthesizer {
         createGeneratedInterface();
         createSubtaskInterface();
 
-        CodeGenerator.reset();
-        
         return fileString;
 
     }

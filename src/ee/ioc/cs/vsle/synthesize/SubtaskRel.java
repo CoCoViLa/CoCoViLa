@@ -19,8 +19,8 @@ public class SubtaskRel extends Rel {
 	/**
 	 * 
 	 */
-	public SubtaskRel( Rel rel ) {
-		super();
+	public SubtaskRel( Rel rel, Var parent, String decl ) {
+		super( parent, decl );
 		
 		parentRel = rel;
 	}
@@ -39,5 +39,5 @@ public class SubtaskRel extends Rel {
 
         return algorithm;
     }
-    
+
 }

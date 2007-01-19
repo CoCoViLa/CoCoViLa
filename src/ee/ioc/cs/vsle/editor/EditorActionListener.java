@@ -311,6 +311,9 @@ public class EditorActionListener implements ActionListener {
             	} else {
             		JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
             	}
+            } else if ( e.getActionCommand().equals( Menu.SHOW_ALGORITHM ) ) {
+            	JCheckBoxMenuItem check = (JCheckBoxMenuItem)e.getSource();
+            	RuntimeProperties.showAlgorithm = check.isSelected();
             } else if ( e.getActionCommand().equals( Menu.SCHEMEOPTIONS ) ) {
             	new SchemeSettingsDialog(Editor.getInstance());
             }

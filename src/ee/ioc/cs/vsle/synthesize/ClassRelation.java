@@ -34,13 +34,15 @@ class ClassRelation
 	 */
         private int type;
 	private String method;
+	private String specLine;
 
 	/**
 	 * Class constructor.
 	 * @param i int - relation type.
 	 */
-        ClassRelation(int i) {
+        ClassRelation(int i, String specLine ) {
 		type = i;
+		this.specLine = specLine;
 	} // ee.ioc.cs.editor.synthesize.ClassRelation
 
         int getType() {
@@ -220,7 +222,7 @@ class ClassRelation
 			pattern = Pattern.compile("\\[(.*) *-> ?(.*)\\]");
 			matcher2 = pattern.matcher(subtaskString);
 			if (matcher2.find()) {
-				subtask = new ClassRelation(RelType.TYPE_SUBTASK);
+				subtask = new ClassRelation( RelType.TYPE_SUBTASK, subtaskString );
 				
 				String[] inputs = matcher2.group(1).trim().split(" *, *", -1);
 				String[] outputs = matcher2.group(2).trim().split(" *, *", -1);
@@ -282,5 +284,9 @@ class ClassRelation
 		}
 		return "[Inputs: " + inputs + "][Output: " + outputs + "][Method: " + method + "][Type: " + type + "]";
 	} // toString
+
+	public String getSpecLine() {
+		return specLine;
+	}
 
 }
