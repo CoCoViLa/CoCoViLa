@@ -74,17 +74,17 @@ public class DepthFirstPlanner implements IPlanner {
         return algorithm;
     }
     
-	private boolean linearForwardSearch(Problem problem, List<Rel> algorithm, 
+	private boolean linearForwardSearch(Problem p, List<Rel> algorithm, 
 			Set<Var> targetVars,
 			boolean computeAll) {
 		
-		Set<Var> foundVars = problem.getFoundVars();
 		/*
 		 * while iterating through hashset, items cant be removed from/added to
 		 * that set. Theyre collected into these sets and added/removedall
 		 * together after iteration is finished
 		 */
 		HashSet<Var> newVars = new HashSet<Var>();
+		HashSet<Var> relOutputs = new HashSet<Var>();
 		HashSet<Var> removableVars = new HashSet<Var>();
 		// backup goals for later optimization
 		HashSet<Var> allTargetVars = new HashSet<Var>( targetVars );
@@ -109,18 +109,17 @@ public class DepthFirstPlanner implements IPlanner {
 			counter++;
 			changed = false;
 			// remove targets if they're already known
-			for (Iterator<Var> targetIter = targetVars.iterator(); targetIter
-					.hasNext();) {
+			for (Iterator<Var> targetIter = targetVars.iterator(); targetIter.hasNext();) {
 				Var targetVar = targetIter.next();
-				if (problem.getKnownVars().contains(targetVar)) {
+				if (p.getFoundVars().contains(targetVar)) {
 					targetIter.remove();
 				}
 			}
 			// iterate through all knownvars
 			if (RuntimeProperties.isLogDebugEnabled())
-				db.p("Known:" + problem.getKnownVars());
+				db.p("Known:" + p.getKnownVars());
 			
-			for (Var var : problem.getKnownVars() ) {
+			for (Var var : p.getKnownVars() ) {
 				
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p("Current Known: " + var);
@@ -128,7 +127,7 @@ public class DepthFirstPlanner implements IPlanner {
 				for (Rel rel : var.getRels() ) {
 					if (RuntimeProperties.isLogDebugEnabled())
 						db.p("And its rel: " + rel);
-					if (problem.getAllRels().contains(rel)) {
+					if (p.getAllRels().contains(rel)) {
 						if( !var.getField().isConstant() ) {
 							rel.setUnknownInputs(rel.getUnknownInputs() - 1);
 						}
@@ -153,7 +152,7 @@ public class DepthFirstPlanner implements IPlanner {
 
 							for (Var relVar : rel.getOutputs() ) {
 
-								if (!foundVars.contains(relVar)) {
+								if (!p.getFoundVars().contains(relVar)) {
 									relIsNeeded = true;
 								}
 							}
@@ -170,15 +169,17 @@ public class DepthFirstPlanner implements IPlanner {
 									db.p("ja vajati " + rel);
 
 								if (!rel.getOutputs().isEmpty()) {
-									newVars.addAll(rel.getOutputs());
-									foundVars.addAll(rel.getOutputs());
+									relOutputs.clear();
+									addVarsToSet( rel.getOutputs(), relOutputs );
+									newVars.addAll( relOutputs );
+									p.getFoundVars().addAll( relOutputs );
 								}
 								algorithm.add(rel);
 								if (RuntimeProperties.isLogDebugEnabled())
 									db.p("algorithm " + algorithm);
 							}
 
-							problem.getAllRels().remove(rel);
+							p.getAllRels().remove(rel);
 							changed = true;
 						}
 					}
@@ -186,10 +187,10 @@ public class DepthFirstPlanner implements IPlanner {
 			}
 
 			if (RuntimeProperties.isLogDebugEnabled())
-				db.p("foundvars " + foundVars);
+				db.p("foundvars " + p.getFoundVars());
 
-			problem.getKnownVars().addAll(newVars);
-			problem.getKnownVars().removeAll(removableVars);
+			p.getKnownVars().addAll(newVars);
+			p.getKnownVars().removeAll(removableVars);
 			newVars.clear();
 		}
 		if (RuntimeProperties.isLogDebugEnabled())
@@ -199,7 +200,7 @@ public class DepthFirstPlanner implements IPlanner {
 			Optimizer.optimize( algorithm, new HashSet<Var>( allTargetVars ) );
 		}
 
-		return targetVars.isEmpty() || problem.getFoundVars().containsAll( allTargetVars );
+		return targetVars.isEmpty() || p.getFoundVars().containsAll( allTargetVars );
 	}
 
 	private static int maxDepth = 2;//0..2, i.e. 3
@@ -265,10 +266,13 @@ public class DepthFirstPlanner implements IPlanner {
 
 				prepareSubtask( problemNew, subtaskNew );
 				
+				Set<Var> goals = new HashSet<Var>();
+				addVarsToSet( subtaskNew.getOutputs(), goals );
+				
 				boolean solved = 
 					linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
 							// never optimize here
-							new HashSet<Var>(subtaskNew.getOutputs()), true );
+							goals, true );
 				
 				if( solved ) {
 					if (RuntimeProperties.isLogDebugEnabled())
@@ -292,7 +296,7 @@ public class DepthFirstPlanner implements IPlanner {
 				solved = linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
 						// always optimize here in order to get rid of unnecessary subtask instances
 						// temporary true while optimization does not work correctly
-						new HashSet<Var>(subtaskNew.getOutputs()), true );
+						goals, true );
 				
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "Subtask: " + subtaskNew + " solved: " + solved );
