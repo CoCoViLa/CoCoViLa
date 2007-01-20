@@ -13,10 +13,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Administrator
- * Date: 10.1.2004
- * Time: 14:09:17
+ * Application Options dialog
  */
 public class OptionsDialog extends JDialog {
 
@@ -46,8 +43,8 @@ public class OptionsDialog extends JDialog {
 	private static final JCheckBox chbSyntaxColor = new JCheckBox();
 
 	// Spinners.
-	Spinner spinnerGridStep = new Spinner(1, 100, 1, 1);
-	Spinner spinnerNudgeStep = new Spinner(1, 100, 1, 1);
+	private Spinner spinnerGridStep = new Spinner(1, 100, 1, 1);
+	private Spinner spinnerNudgeStep = new Spinner(1, 100, 1, 1);
 
 	// Comboboxes.
 	public static JComboBox cbDfltZoom;
@@ -74,6 +71,7 @@ public class OptionsDialog extends JDialog {
 			cbDfltZoom = Palette.getZoomComboBox(Palette.getDefaultZoom());
 
 		setLocationByPlatform( true );
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		TitledBorder mainBorder = BorderFactory.createTitledBorder("Program settings");
 
@@ -150,16 +148,13 @@ public class OptionsDialog extends JDialog {
 		JPanel pan = new JPanel(new FlowLayout(FlowLayout.LEFT) );
 		pan.add(threads);
 		pnlFields.add(pan);
-		threads.addActionListener( new ActionListener(){
+		threads.addActionListener(new ActionListener(){
 
 			public void actionPerformed(ActionEvent e) {
-				SwingUtilities.invokeLater(new Runnable() {
-					public void run() {
-						OptionsDialog.this.dispose();
-						RunningThreadKillerDialog.getInstance();
-					}
-				});
-			}});
+			    closeDialog();
+			    RunningThreadKillerDialog.getInstance();
+			}
+		});
 		
 		// Set settings panel size.
 		//pnlSettings.setPreferredSize(new Dimension(300, 180));
@@ -307,17 +302,6 @@ public class OptionsDialog extends JDialog {
 	 * Close the dialog window.
 	 */
 	private void closeDialog() {
-		setVisible(false);
-	}
-
-	/**
-	 * Main method for class unit-testing.
-	 * @param args - command line arguments.
-	 */
-	public static void main(String[] args) {
-		OptionsDialog o = new OptionsDialog( null );
-
-		o.setVisible(true);
-	}
-
+        dispose();
+    }
 }
