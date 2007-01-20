@@ -331,7 +331,10 @@ public class Port implements Cloneable, Serializable {
 	 * 		   false otherwise.
 	 */
 	public boolean canBeConnected() {
-		return !obj.isSuperClass();
+        // obj can be null when adding a relation class and the object is not
+        // created yet. A relation class can never be a superclass and 
+        // should always be connected.
+		return (obj == null) || !obj.isSuperClass();
 	}
 
 	/**
