@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.editor;
 
 import java.awt.Component;
+import java.awt.Window;
 import java.awt.event.*;
 
 import javax.swing.*;
@@ -33,32 +34,33 @@ public class Look {
 		return s_instance;
 	}
 
-	public static void changeLookAndFeelForComponent(final Component component,
-			final String lnf, final boolean saveConfig) {
+    /**
+     * Updates the L'n'F of the application at run-time.
+     * @param lnf the class name of the new Look and Feel
+     * @param saveConfig true to save the LnF as default
+     */
+	public static void changeLookAndFeelForApp(final String lnf,
+            final boolean saveConfig) {
 
-		// make sure LnF is changed in AWT thread
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				try {
+	    try {
+	        UIManager.setLookAndFeel(lnf);
 
-					UIManager.setLookAndFeel(lnf);
+            for (Window window : SystemUtils.getAllWindows()) {
+                SwingUtilities.updateComponentTreeUI(window);
+                window.pack();
+            }
 
-					SwingUtilities.updateComponentTreeUI(component);
+            if (saveConfig)
+                PropertyBox.setProperty(PropertyBox.DEFAULT_LAYOUT, lnf);
 
-					if (saveConfig) {
-						PropertyBox.setProperty(
-								PropertyBox.APP_PROPS_FILE_NAME,
-								PropertyBox.DEFAULT_LAYOUT, lnf);
-					}
-
-				} catch (Exception e) {
-					db.p("Unable to change Look And Feel: " + lnf);
-				}
-			}
-		});
+        } catch (Exception e) {
+	        db.p("Unable to change Look And Feel: " + lnf);
+	    }
 	}
 
-	public void initDefaultLnF() {
+
+
+    public void initDefaultLnF() {
 
 		String lnf = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
 				PropertyBox.DEFAULT_LAYOUT);
@@ -72,7 +74,7 @@ public class Look {
 		}
 	}
 
-	public void createMenuItems(JMenu menu, final Component root) {
+	public void createMenuItems(JMenu menu) {
 
 		LookAndFeel laf = UIManager.getLookAndFeel();
 
@@ -93,8 +95,7 @@ public class Look {
 			menuItem.addActionListener(new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
-					changeLookAndFeelForComponent( root, lnfs.getClassName(),
-							true );
+					changeLookAndFeelForApp(lnfs.getClassName(), true);
 				}
 			});
 
