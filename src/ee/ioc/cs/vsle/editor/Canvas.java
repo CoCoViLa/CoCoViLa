@@ -1581,6 +1581,7 @@ public class Canvas extends JPanel {
 				obj.startPort.setSelected(false);
 			}
 			currentObj = null;
+            currentPainter = null;
 			drawingArea.repaint();
 		}
 
