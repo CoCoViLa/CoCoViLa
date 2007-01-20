@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.util;
 
+import java.awt.Frame;
+import java.awt.Window;
 import java.io.*;
 import java.net.*;
 import java.util.*;
@@ -69,7 +71,7 @@ public class SystemUtils {
 			JarFile jarF = new JarFile( new File( jarFn ) );
 
 			// loop through the jar file entries and copy them to files
-			for ( Enumeration e = jarF.entries(); e.hasMoreElements(); )
+			for (Enumeration<JarEntry> e = jarF.entries(); e.hasMoreElements(); )
 			{
 				String entryName   = e.nextElement().toString();
 				String newFileName = RuntimeProperties.getWorkingDirectory() 
@@ -235,5 +237,31 @@ public class SystemUtils {
 
 		return totalBytesRead;
 	}    // end readBlocking
-	
+
+    /**
+     * Attempts to find all windows the application has created.
+     * Java 1.6 has Window.getWindows() which should be used instead of
+     * this method.
+     * @return an probably empty array of windows
+     */
+    public static List<Window> getAllWindows() {
+        List<Window> list = new ArrayList<Window>();
+
+        for (Window window : Frame.getFrames())
+            addAllOwnedWindows(window, list);
+
+        return list;
+    }
+
+    /**
+     * Adds recursively all owned windows of the specified window to the list
+     * including the specified parent window.
+     * @param window parent window
+     * @param list accumulator
+     */
+    private static void addAllOwnedWindows(Window window, List<Window> list) {
+        list.add(window);
+        for (Window w : window.getOwnedWindows())
+            addAllOwnedWindows(w, list);
+    }
 }
