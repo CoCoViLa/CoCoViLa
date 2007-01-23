@@ -65,12 +65,17 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
     private void initUI() {
     	
+    	addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
+    	
     	tabbedPane = new JTabbedPane();
 
         if( RuntimeProperties.isSyntaxHighlightingOn ) {
         	jta_spec = new JavaColoredTextPane();
         } else {
-        	jta_spec = new JTextArea();
+        	JTextArea ta = new JTextArea();
+        	ta.setLineWrap( true );
+        	ta.setWrapStyleWord( true );
+        	jta_spec = ta;
         }
         
         jta_spec.addKeyListener( new CommentKeyListener() );
@@ -104,7 +109,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         if( RuntimeProperties.isSyntaxHighlightingOn ) {
         	jta_generatedCode = new JavaColoredTextPane();
         } else {
-        	jta_generatedCode = new JTextArea();
+        	JTextArea ta = new JTextArea();
+        	ta.setLineWrap( true );
+        	ta.setWrapStyleWord( true );
+        	jta_generatedCode = ta;
         }
         
         jta_generatedCode.addKeyListener( new CommentKeyListener() );

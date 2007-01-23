@@ -77,6 +77,9 @@ public class IconEditor
 
 		setLocationByPlatform( true );
 		setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		
+		addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
+		
 		keyListener = new IconKeyOps(this);
 		scheme = new Scheme(null);
 		mListener = new IconMouseOps(this);

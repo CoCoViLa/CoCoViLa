@@ -68,6 +68,7 @@ public class Editor extends JFrame implements ChangeListener {
 	private void initialize() {
 		setLocationByPlatform( true );
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
 		tabbedPane = new JTabbedPane();
 		tabbedPane.addChangeListener(this);
 		undoAction = new UndoAction();

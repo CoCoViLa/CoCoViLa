@@ -25,6 +25,9 @@ public class CodeViewer extends JFrame implements ActionListener{
             super(name + extension);
                 this.fileName = name + extension;
                 this.path = path;
+                
+                addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
+                
                 String fileText = FileFuncs.getFileContents(path + fileName);
 
                 textArea = new JavaColoredTextPane();

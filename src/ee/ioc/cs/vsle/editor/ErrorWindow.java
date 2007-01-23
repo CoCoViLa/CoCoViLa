@@ -16,6 +16,8 @@ public class ErrorWindow extends JFrame implements ActionListener {
         private ErrorWindow() {
             super( "Error" );
 
+            addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
+            
             textArea = new JTextArea();
             textArea.setFont( RuntimeProperties.font );
             JScrollPane areaScrollPane = new JScrollPane( textArea );
