@@ -26,6 +26,7 @@ public class ScrollableBar extends JComponent {
 	@Override
 	public void updateUI() {
 		setUI(UIManager.getUI(this));
+		invalidate();
 	}
 
 	@Override

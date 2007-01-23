@@ -2,6 +2,8 @@ package ee.ioc.cs.vsle.editor;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -27,18 +29,18 @@ import ee.ioc.cs.vsle.vclass.VPackage;
  * and classes from the current package.
  */
 public class Palette implements ActionListener {
-	
+
 	/**
 	 * Allowed zoom levels of the scheme view. Should always contain
 	 * at least the value 1.0f.
 	 */
-	public static final float[] ZOOM_LEVELS 
+	public static final float[] ZOOM_LEVELS
 			= { .1f, .2f, .5f, .75f, 1.0f, 1.5f, 2.0f, 4.0f };
 
-	public static final Dimension BUTTON_SPACE = new Dimension(2, 0);
+	public static final Dimension BUTTON_SPACE = new Dimension(1, 0);
 	public static final Dimension PANEL_SPACE = new Dimension(5, 0);
-	public static final Insets BUTTON_BORDER = new Insets(0, 0, 0, 0);
-	
+	public static final Insets BUTTON_BORDER = new Insets(2, 2, 2, 2);
+
 	public JPanel toolBar;
 	Canvas canvas;
     ArrayList<JToggleButton> buttons;
@@ -48,25 +50,32 @@ public class Palette implements ActionListener {
 
 		buttons = new ArrayList<JToggleButton>();
 
-		toolBar = new JPanel();
-		toolBar.setOpaque(false); // some lnf-s may use gradients for bg
-		toolBar.setLayout(new BoxLayout(toolBar, BoxLayout.LINE_AXIS));
+		toolBar = new JPanel(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+		toolBar.setOpaque(false); // there is transparent space between buttons
 		toolBar.setBorder(new EmptyBorder(2, 0, 2, 0));
 
-		toolBar.add(createToolPanel());
-		toolBar.add(Box.createRigidArea(PANEL_SPACE));
-		toolBar.add(new ScrollableBar(createClassPanel(vPackage)));
-		toolBar.add(Box.createRigidArea(PANEL_SPACE));
-		toolBar.add(createZoomPanel());
+		c.gridx = 0;
+		toolBar.add(createToolPanel(), c);
 
-		canvas.add(toolBar, BorderLayout.NORTH);
+		c.gridx = 2;
+		toolBar.add(createZoomPanel(), c);
+
+		c.gridx = 1;
+		c.anchor = GridBagConstraints.LINE_START;
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.weightx = 1.0;
+		c.insets = new Insets(0, PANEL_SPACE.width, 0, PANEL_SPACE.width);
+		toolBar.add(new ScrollableBar(createClassPanel(vPackage)), c);
+
+		canvas.add(toolBar, BorderLayout.PAGE_START);
 	}
 
 	private JComponent createClassPanel(VPackage vPackage) {
 		JPanel classPanel = new JPanel();
 		classPanel.setLayout(new BoxLayout(classPanel, BoxLayout.LINE_AXIS));
 		classPanel.setOpaque(false);
-        
+
         // read package info and add it to the palette
 		for (int i = 0; i < vPackage.classes.size(); i++) {
 			PackageClass pClass = vPackage.classes.get(i);
@@ -81,15 +90,15 @@ public class Palette implements ActionListener {
 			String actionCmd;
 			if (pClass.relation == true)
 				// to denote a class which is a relation
-				actionCmd = State.addRelObjPrefix + pClass.name; 
+				actionCmd = State.addRelObjPrefix + pClass.name;
 			else
 				actionCmd = pClass.name;
-			
+
 			JToggleButton button = createButton(icon, pClass.description,
 					actionCmd);
 
 			classPanel.add(button);
-			
+
 			if (i < vPackage.classes.size() - 1)
 				classPanel.add(Box.createRigidArea(BUTTON_SPACE));
 		}
@@ -100,7 +109,7 @@ public class Palette implements ActionListener {
 		JPanel zoomPanel = new JPanel();
 		zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.LINE_AXIS));
 		zoomPanel.setOpaque(false);
-		
+
 		JComboBox zoom = getZoomComboBox(getDefaultZoom());
 
 		zoom.addActionListener(new ActionListener() {
@@ -109,14 +118,11 @@ public class Palette implements ActionListener {
 				int i = ((JComboBox) e.getSource()).getSelectedIndex();
 				canvas.setScale(ZOOM_LEVELS[i]);
 			}
-			
+
 		});
 		zoomPanel.add(zoom);
 
-		zoomPanel.setPreferredSize(zoomPanel.getMinimumSize());
-		zoomPanel.setMaximumSize(zoomPanel.getMinimumSize());
-
-		return zoom;
+		return zoomPanel;
 	}
 
 	private JComponent createToolPanel() {
@@ -139,15 +145,12 @@ public class Palette implements ActionListener {
 
 		toolPanel.add(relation);
 
-		toolPanel.setPreferredSize(toolPanel.getMinimumSize());
-		toolPanel.setMaximumSize(toolPanel.getMinimumSize());
-
 		return toolPanel;
 	}
 
 	private JToggleButton createButton(ImageIcon icon, String descr,
 			String actionCmd) {
-		
+
 		JToggleButton button = new JToggleButton(icon);
 
 		button.setActionCommand(actionCmd);
@@ -158,7 +161,7 @@ public class Palette implements ActionListener {
 
 		button.addActionListener(this);
         buttons.add(button);
-        
+
         return button;
 	}
 
@@ -170,7 +173,7 @@ public class Palette implements ActionListener {
 	 */
 	public static float getDefaultZoom() {
 		float zoom;
-		
+
 		try {
 			zoom = Float.parseFloat(PropertyBox.getProperty(
 				PropertyBox.ZOOM_LEVEL));
@@ -184,7 +187,7 @@ public class Palette implements ActionListener {
 			db.p(e);
 			zoom = 1.0f;
 		}
-		
+
 		return zoom;
 	}
 
@@ -199,15 +202,10 @@ public class Palette implements ActionListener {
 		for (int i = 0; i < ZOOM_LEVELS.length; i++) {
 			String label = Integer.toString((int) (ZOOM_LEVELS[i] * 100.0f));
 			zoom.addItem(label + "%");
-			
+
 			if (ZOOM_LEVELS[i] == selectedZoom)
 				zoom.setSelectedIndex(i);
 		}
-
-		// Avoid stretching the combobox to fill the whole space.
-		Dimension d = zoom.getPreferredSize();
-		zoom.setMinimumSize(d);
-		zoom.setMaximumSize(d);
 
 		return zoom;
 	}
@@ -227,7 +225,7 @@ public class Palette implements ActionListener {
 		    if (b != button)
 		        b.setSelected(false);
 		}
-        
+
         canvas.mListener.setState(e.getActionCommand());
 
         canvas.drawingArea.grabFocus();
