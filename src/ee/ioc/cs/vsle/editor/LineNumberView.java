@@ -39,16 +39,16 @@ import javax.swing.text.JTextComponent;
  */
 public class LineNumberView extends JComponent
 {
-    // This is for the border to the right of the line numbers.
+	private static final long serialVersionUID = 1L;
+
+	// This is for the border to the right of the line numbers.
     // There's probably a UIDefaults value that could be used for this.
     private static final Color BORDER_COLOR = Color.GRAY;
  
-    private static final int WIDTH_TEMPLATE = 99999;
     private static final int MARGIN = 5;
  
     private FontMetrics viewFontMetrics;
-    private int maxNumberWidth;
-    private int componentWidth;
+    private int componentWidth = -1;
  
     private int textTopInset;
     private int textFontAscent;
@@ -58,6 +58,7 @@ public class LineNumberView extends JComponent
     private SizeSequence sizes;
     private int startLine = 0;
     private boolean structureChanged = true;
+    private int adjustedLineCount;
  
     /**
      * Construct a LineNumberView and attach it to the given text component.
@@ -111,10 +112,10 @@ public class LineNumberView extends JComponent
  
         if ( structureChanged )
         {
-            int count = getAdjustedLineCount();
-//            System.out.println( "lines: " + count );
-            sizes = new SizeSequence( count );
-            for ( int i = 0; i < count; i++ )
+        	adjustedLineCount = getAdjustedLineCount();
+            //System.out.println( "lines: " + adjustedLineCount );
+            sizes = new SizeSequence( adjustedLineCount );
+            for ( int i = 0; i < adjustedLineCount; i++ )
             {
                 sizes.setSize( i, getLineHeight( i ) );
             }
@@ -198,9 +199,12 @@ public class LineNumberView extends JComponent
         }
  
         viewFontMetrics = getFontMetrics( viewFont );
-        maxNumberWidth = 15; //viewFontMetrics.stringWidth( String.valueOf( WIDTH_TEMPLATE ) );
-        componentWidth = 25; //2 * MARGIN + maxNumberWidth;
- 
+        
+        if( componentWidth == -1 )
+        {
+        	componentWidth = MARGIN;
+        }
+        
         if ( changed )
         {
             super.setFont( viewFont );
@@ -221,18 +225,30 @@ public class LineNumberView extends JComponent
     public void paintComponent( Graphics g )
     {
         updateSizes();
+        
+        int maxNumberWidth = viewFontMetrics.stringWidth( String.valueOf( adjustedLineCount + 1 ) );
+        int tmpW = MARGIN*2 + maxNumberWidth;
+        if( tmpW != componentWidth ) {
+        	componentWidth = tmpW;
+        }
+        
         Rectangle clip = g.getClipBounds();
  
+        if( clip.width != componentWidth ) {
+        	revalidate();
+        	repaint();
+        	return;
+        }
         g.setColor( getBackground() );
-        g.fillRect( clip.x, clip.y, clip.width, clip.height );
-         g.setColor( getForeground() );
-        int base = clip.y - textTopInset;
+        g.fillRect( clip.x, clip.y, Math.max(clip.width, componentWidth), clip.height );
+        g.setColor( getForeground() );
+        int base = Math.max( clip.y - textTopInset, 0 );
         int first = sizes.getIndex( base );
         int last = sizes.getIndex( base + clip.height );
  
         String text = "";
  
-        for ( int i = first; i < last; i++ )
+        for ( int i = first; i < last + 1; i++ )
         {
             text = String.valueOf( i + 1 );
             int x = MARGIN + maxNumberWidth - viewFontMetrics.stringWidth( text );
@@ -241,6 +257,7 @@ public class LineNumberView extends JComponent
             g.drawString( text, x, y );
  
         }
+        
     }
  
     class UpdateHandler extends ComponentAdapter implements PropertyChangeListener, DocumentListener
