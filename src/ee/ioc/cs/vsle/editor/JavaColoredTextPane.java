@@ -47,7 +47,8 @@ public class JavaColoredTextPane extends JTextPane {
 		setStyledDocument(document);
 		setCaretPosition(0);
         setMargin(new Insets(5,5,5,5));
-		
+        setOpaque(false);
+
 //      Start the thread that does the coloring
         colorer = new Colorer();
         colorer.start();
