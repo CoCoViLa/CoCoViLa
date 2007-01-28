@@ -5,7 +5,9 @@ import java.io.*;
 import java.util.*;
 
 import javax.swing.JTextPane;
+import javax.swing.SwingUtilities;
 import javax.swing.event.*;
+import javax.swing.plaf.ComponentUI;
 import javax.swing.text.*;
 
 import ee.ioc.cs.vsle.util.syntax.*;
@@ -47,7 +49,7 @@ public class JavaColoredTextPane extends JTextPane {
 		setStyledDocument(document);
 		setCaretPosition(0);
         setMargin(new Insets(5,5,5,5));
-        setOpaque(false);
+        setOpaque(true);
 
 //      Start the thread that does the coloring
         colorer = new Colorer();
@@ -77,6 +79,19 @@ public class JavaColoredTextPane extends JTextPane {
 			}});
 	}
 
+	@Override
+	public void updateUI()
+	{
+		super.updateUI();
+		
+		SwingUtilities.invokeLater( new Runnable() {
+			public void run() {
+				setStyleBackground( getBackground() );
+				colorAll();
+			}
+		});
+	}
+	
 	public void append( String s ) {
 		try {
 			document.insertString( document.getLength(), s, getStyles("text") );
@@ -416,7 +431,9 @@ public class JavaColoredTextPane extends JTextPane {
      * Color or recolor the entire document
      */
     public void colorAll(){
-        color(0, document.getLength());
+    	if( document != null ) {
+    		color(0, document.getLength());
+    	}
     }
 
     /**
@@ -459,7 +476,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.black);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -468,7 +484,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.blue);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -477,7 +492,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.blue);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -486,7 +500,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.black);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -495,7 +508,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, new Color(0xB03060)/*Color.maroon*/);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -504,7 +516,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, new Color(0xB03060)/*Color.maroon*/);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, true);
@@ -513,7 +524,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.black);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -522,7 +532,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.blue);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -531,7 +540,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.black);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -540,7 +548,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, new Color(0xB03060)/*Color.maroon*/);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -549,7 +556,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, new Color(0x000080)/*Color.navy*/);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -558,7 +564,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.black);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -567,7 +572,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.green.darker());
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -576,7 +580,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, new Color(0xA020F0).darker()/*Color.purple*/);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -585,7 +588,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.black);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -594,7 +596,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.red);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -603,7 +604,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.orange);
         StyleConstants.setBold(style, m_font.isBold());
         StyleConstants.setItalic(style, false);
@@ -612,7 +612,6 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.GREEN.darker());
         StyleConstants.setBold(style, true);
         StyleConstants.setItalic(style, false);
@@ -621,14 +620,20 @@ public class JavaColoredTextPane extends JTextPane {
         style = new SimpleAttributeSet();
         StyleConstants.setFontFamily(style, m_font.getFamily());
         StyleConstants.setFontSize(style, m_font.getSize());
-        StyleConstants.setBackground(style, Color.white);
         StyleConstants.setForeground(style, Color.blue);
         StyleConstants.setBold(style, true);
         StyleConstants.setItalic(style, false);
         styles.put("specReservedWord", style);
         
+        setStyleBackground( getBackground() );
     }
 
+    private void setStyleBackground( Color bg ) {
+    	for( SimpleAttributeSet style : styles.values() ) {
+    		StyleConstants.setBackground( style, bg );
+    	}
+    }
+    
     /**
      * Just like a DefaultStyledDocument but intercepts inserts and
      * removes to color them.
