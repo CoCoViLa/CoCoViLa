@@ -238,6 +238,11 @@ public class ProgramRunner {
 
 			for ( GObj gObj : objects ) {
 
+				// superclass object is a special case that has no field
+				// declaration in the generated code so we have to skip it here
+				if (gObj.isSuperClass())
+					continue;
+
 				fieldOfGobj = clas.getDeclaredField(gObj.getName());
 				lastObj = fieldOfGobj.get(genObject);
 
