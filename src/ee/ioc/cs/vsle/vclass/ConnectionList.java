@@ -34,27 +34,39 @@ public class ConnectionList extends ArrayList<Connection> {
 
 	/**
 	 * Returns a connection if the distance of a pointer location is closer than
-	 * four pixels of the line.
+	 * Connection.NEAR_DISTANCE pixels from the line. Selected connections
+	 * are preferred to not selected connections.
 	 * @param x int - x coordinate of the pointer.
 	 * @param y int - y coordinate of the pointer.
-	 * @return ee.ioc.cs.editor.vclass.Connection - ee.ioc.cs.editor.vclass.Connection returned if the pointer is located close enough
-	 *                      to the line. Null returned if the pointer is not close enough.
+	 * @return the first selected connection located close enough to the
+	 * pointer. If there is no such selected connections then not selected
+	 * connections are considered. Returns null if there is no connection
+	 * near the pointer.
 	 */
 	public Connection nearPoint(int x, int y) {
-		Connection relation;
+		Connection relation = null;
 
 		for (int i = 0; i < this.size(); i++) {
-			relation = this.get(i);
-			if (relation.distanceFromPoint(x, y) < Connection.NEAR_DISTANCE
+			Connection rel = this.get(i);
+			if (rel.distanceFromPoint(x, y) < Connection.NEAR_DISTANCE
 					// ignore implicit connections, otherwise connections
 					// between strict ports or between relation class endport
 					// and the connected objects's port could get selected
 					// and deleted.
-					&& !relation.isImplicit()) {
-				return relation;
+					&& !rel.isImplicit()) {
+
+				// Prefer the first selected connection to the not selected
+				// connections coming earlier in the list. This way it should
+				// be more intuitive for the user to manipulate overlapping
+				// connections.
+				if (rel.isSelected()) {
+					relation = rel;
+					break;
+				} else if (relation == null)
+					relation = rel;
 			}
 		}
-		return null;
+		return relation;
 	} // nearPoint
 
 	/**
