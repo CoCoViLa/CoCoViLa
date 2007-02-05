@@ -112,7 +112,11 @@ public class LicenseDialog extends JDialog {
 					&& cbLang.getSelectedItem().toString().equalsIgnoreCase("Eesti")) {
 				fileName = PropertyBox.GPL_EE_LICENSE_FILE_NAME;
 			}
-			InputStream is = ClassLoader.getSystemResourceAsStream(fileName);
+			
+			InputStream is = this.getClass().getClassLoader().getResourceAsStream(fileName);
+
+			if( is == null ) return "";
+			
 			BufferedReader in = new BufferedReader(new InputStreamReader(is));
 			String str;
 			while ((str = in.readLine()) != null) {

@@ -87,9 +87,11 @@ public class AboutDialog extends JDialog {
 	public String getLicenseText() {
 		StringBuffer textBuffer = new StringBuffer();
 		try {
-			InputStream is = ClassLoader.getSystemResourceAsStream(
+			InputStream is = this.getClass().getClassLoader().getResourceAsStream(
 					PropertyBox.GPL_EN_SHORT_LICENSE_FILE_NAME);
 
+			if( is == null ) return "";
+			
 			BufferedReader in = new BufferedReader(new InputStreamReader(is));
 			String str;
 			while ((str = in.readLine()) != null) {
