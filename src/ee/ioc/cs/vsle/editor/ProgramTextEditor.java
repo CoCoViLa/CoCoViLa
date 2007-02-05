@@ -65,7 +65,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
 
     private void initUI() {
     	
-    	addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
+    	//addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
     	
     	tabbedPane = new JTabbedPane();
 
