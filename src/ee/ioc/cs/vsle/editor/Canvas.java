@@ -4,10 +4,13 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
@@ -15,15 +18,21 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.AbstractUndoableEdit;
@@ -95,6 +104,7 @@ public class Canvas extends JPanel {
     UndoableEditSupport undoSupport;
     private boolean actionInProgress = false;
     private JScrollPane areaScrollPane;
+    private ArrayList<String> diagnostics;
 
     /*
      * The Edit classes implementing undo-redo could be moved somewhere
@@ -1116,19 +1126,99 @@ public class Canvas extends JPanel {
 	} // print
 
 	public void loadScheme(File file) {
-		scheme = SchemeLoader.getScheme(file, vPackage);
-		if (scheme == null) {
-			JOptionPane.showMessageDialog(this,
-                    "See the error log for details.",
-                    "Error loading scheme", JOptionPane.ERROR_MESSAGE);
-			return;
+		scheme = null;
+
+		SchemeLoader loader = new SchemeLoader();
+		loader.setVPackage(vPackage);
+		if (loader.load(file)) {
+			if (loader.hasProblems()) {
+				if (promptLoad(loader.getDiagnostics())) {
+					scheme = new Scheme(vPackage, loader.getObjectList(),
+							loader.getConnectionList());
+				}
+			} else {
+				scheme = new Scheme(vPackage, loader.getObjectList(),
+						loader.getConnectionList());
+			}
+		} else {
+			List<String> msgs = loader.getDiagnostics();
+			String msg;
+			if (msgs != null && msgs.size() > 0)
+				msg = msgs.get(0);
+			else
+				msg = "An error occured. See the log for details.";
+
+			JOptionPane.showMessageDialog(this, msg,
+					"Error loading scheme", JOptionPane.ERROR_MESSAGE);
 		}
+
+		if (scheme == null)
+			return;
+
 		connections = scheme.getConnections();
 		objects = scheme.getObjects();
 		initClassPainters();
 		mListener.setState(State.selection);
 		drawingArea.repaint();
 	} // loadScheme
+
+	private boolean promptLoad(List<String> messages) {
+		final JDialog dialog = new JDialog(Editor.getInstance());
+		dialog.setModal(true);
+		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+		dialog.setTitle("Warning: Inconcistent scheme");
+		
+		JLabel topLabel = new JLabel("The following problems occured "
+				+ "while loading the scheme:");
+		topLabel.setBorder(new EmptyBorder(20, 5, 5, 5));
+		
+		dialog.add(topLabel, BorderLayout.NORTH);
+
+		JTextArea txt = new JTextArea(5, 40);
+		txt.setBorder(new EmptyBorder(5, 5, 5, 5));
+		txt.setLineWrap(true);
+		txt.setWrapStyleWord(true);
+		txt.setEditable(false);
+		for (String s : messages) {
+			txt.append(" - ");
+			txt.append(s);
+			txt.append("\n");
+		}
+		txt.setCaretPosition(0);
+		JScrollPane scrollPane = new JScrollPane(txt,
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		dialog.add(scrollPane, BorderLayout.CENTER);
+
+		JButton btnContinue = new JButton("Continue");
+		JButton btnCancel = new JButton("Cancel");
+
+		final boolean[] result = new boolean[1];
+		result[0] = false;
+		
+		btnCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dialog.setVisible(false);
+			}
+		});
+
+		btnContinue.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				dialog.setVisible(false);
+				result[0] = true;
+			}
+		});
+
+		JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		btnPanel.add(btnContinue);
+		btnPanel.add(btnCancel);
+		dialog.add(btnPanel, BorderLayout.SOUTH);
+		dialog.pack();
+		dialog.setVisible(true);
+		dialog.dispose();
+
+		return result[0];
+	}
 
 	public void saveScheme(File file) {
 		try {

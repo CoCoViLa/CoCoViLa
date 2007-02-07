@@ -7,43 +7,54 @@ import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.graphics.Shape;
 
 /**
- * Loads stored schemes from .syn files.
+ * Loads stored schemes from .syn files. Instances of this scheme loader
+ * should be safely reusable as long as it is not used in parallel.
+ *
+ * This loader tries to solve minor mismatches between the package
+ * description and saved scheme. For example, new fields are quietly
+ * accepted. On the other hand, warnings are generated in case of missing
+ * fields of classes. The user should be notified about any warnings generated.
  * 
  * @see ee.ioc.cs.vsle.editor.RuntimeProperties#SCHEME_DTD
  */
 public class SchemeLoader {
 
-	private static SAXParser parser;
-	private static PackageHandler handler;
+	private SAXParser parser;
+	private PackageHandler handler;
+	private VPackage vpackage;
 
-	private SchemeLoader() {
-		// the SchemeLoader should be used statically
+	/**
+	 * Sets the package description
+	 * @param vpackage package description
+	 */
+	public void setVPackage(VPackage vpackage) {
+		this.vpackage = vpackage;
 	}
 
 	/**
-	 * Creates scheme description from a .syn file.
-	 * 
-	 * Incorrect syntax in the input or inconcistencies between
-	 * the stored scheme and the package description are consired
-	 * as errors. In other words this method should return a
-	 * valid scheme or no scheme at all.
-	 * 
-	 * This method is not thread safe.
+	 * Reads in the scheme description from a .syn file.
+	 * The setPackage() method must be called with a non-null argument
+	 * before attempting to load any schemes. The results can be asked
+	 * with get*() methods after this method returns.
 	 * 
 	 * @param file scheme file
-	 * @param vp package description
-	 * @return scheme description, or null when exceptions occur
+	 * @return true, if there were no fatal errors, false otherwise
 	 */
-	public static Scheme getScheme(File file, VPackage vp) {
+	public boolean load(File file) {
+		if (vpackage == null)
+			throw new IllegalStateException("Package must be set to a "
+					+ "non-null value!");
+
 		if (parser == null) {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
-			
+
 			// Use the validating parser
 			factory.setValidating(true);
 
@@ -51,17 +62,15 @@ public class SchemeLoader {
 				parser = factory.newSAXParser();
 			} catch (Exception e) {
 				db.p(e);
-				return null;
+				return false;
 			}
-			
 			handler = new PackageHandler();
 		}
-		
+
+		handler.setVPackage(vpackage);
+
 		long startParsing = System.currentTimeMillis();
 		
-		handler.setVPackage(vp);
-
-		Scheme scheme = null;
 		try {
 			parser.parse(file, handler);
 
@@ -69,17 +78,53 @@ public class SchemeLoader {
 				db.p("Scheme parsing completed in "
 						+ (System.currentTimeMillis() - startParsing)
 						+ "ms.\n" );
-			
-			scheme = new Scheme(vp, handler.getObjects(),
-					handler.getConnections());
 		} catch (Exception e) {
-			db.p(e);
+			handler.collectDiagnostic(e.getMessage());
+			return false;
 		}
-
-		return scheme;
+		return true;
 	}
 
+	public ObjectList getObjectList() {
+		if (handler != null)
+			return handler.getObjects();
 
+		return null;
+	}
+
+	public ConnectionList getConnectionList() {
+		if (handler != null)
+			return handler.getConnections();
+
+		return null;
+	}
+
+	/**
+	 * Returns the list of diagnostic messages generated.
+	 * @return diagnostic messages
+	 */
+	public List<String> getDiagnostics() {
+		if (handler == null)
+			return null;
+		
+		List<String> list = handler.getDiagnostics();
+		
+		if (list == null || list.isEmpty())
+			return null;
+		
+		return list;
+	}
+
+	/**
+	 * This method should be consulted after loading a scheme to see if 
+	 * there might have been gone anything wrong.
+	 * Invoking load() method resets this value.
+	 * @return true, if there were problems, false otherwise.
+	 */
+	public boolean hasProblems() {
+		return getDiagnostics() != null;
+	}
+	
 	// ===========================================================
 	// SAX DocumentHandler methods
 	// ===========================================================
@@ -88,24 +133,30 @@ public class SchemeLoader {
 		private ConnectionList connections;
 		private VPackage vPackage;
 		private String superClass;
+		private List<String> messages;
 
 		private Connection connection;
 		private GObj obj;
+		private PackageClass pclass;
+		private boolean ignoreCurrent;
 
 		@Override
 		public InputSource resolveEntity(String publicId, String systemId) {
 			InputSource is = null;
 			// order the DTD to be specified externally.
 			if (systemId != null && systemId.endsWith("dtd")) {
-				is = new InputSource(FileFuncs.getResource(RuntimeProperties.SCHEME_DTD, false).toString());
+				is = new InputSource(FileFuncs.getResource(
+						RuntimeProperties.SCHEME_DTD, false).toString());
 			}
 			return is;
 		}
 
 		@Override
 		public void error(SAXParseException spe) {
-			db.p("\n** Parsing error, line " + spe.getLineNumber() + ", uri "
-					+ spe.getSystemId());
+			String msg = "Parsing error, line " + spe.getLineNumber()
+				+ ", uri " + spe.getSystemId();
+			db.p(msg);
+			collectDiagnostic(msg);
 
 			// Use the contained exception, if any
 			Exception x = spe;
@@ -125,7 +176,13 @@ public class SchemeLoader {
 		public void startDocument() {
 			connections = new ConnectionList();
 			objects = new ObjectList();
+
+			// the parser may be reused
 			superClass = null;
+			ignoreCurrent = false;
+			messages = null;
+			pclass = null;
+			obj = null;
 		}
 
 		@Override
@@ -136,11 +193,34 @@ public class SchemeLoader {
 		@Override
 		public void startElement(String namespaceURI, String lName,
 				String qName, Attributes attrs) throws SAXException {
+
+			// skip to the end of current broken entry
+			if (ignoreCurrent)
+				return;
+
 			String element = qName;
 
 			if (element.equals("object") || element.equals("relobject")) {
 				String name = attrs.getValue("name");
+
+				// catch duplicate names
+				if (objects.getByName(name) != null) {
+					collectDiagnostic("Duplicate class name: " + name
+							+ ". Discarding second instance.");
+					ignoreCurrent = true;
+					return;
+				}
+
 				String type = attrs.getValue("type");
+				pclass = vPackage.getClass(type);
+				
+				if (pclass == null) {
+					collectDiagnostic("The type " + type + " not found in "
+							+ "the package. Discarding class " + name + ".");
+					ignoreCurrent = true;
+					return;
+				}
+
 				obj = (element.equals("relobject")) ? new RelObj() : new GObj();
 				obj.setName(name);
 				obj.setClassName(type);
@@ -188,8 +268,15 @@ public class SchemeLoader {
 				String type = new String(attrs.getValue("type"));
 				String value = attrs.getValue("value");
 
+				if (!pclass.hasField(name, type)) {
+					collectDiagnostic("The class " + obj.getName()
+							+ " has saved field " + name + "(" + type + ")"
+							+ " = " + value
+							+ " but there is no corresponding field in the"
+							+ " package. Discarding field value.");
+					return;
+				}
 				ClassField cf = new ClassField(name, type, value);
-
 				obj.fields.add(cf);
 			} else if (element.equals("connection")) {
 				String obj1 = new String(attrs.getValue("obj1"));
@@ -198,9 +285,26 @@ public class SchemeLoader {
 				String port2 = new String(attrs.getValue("port2"));
 				Port beginPort = objects.getPort(obj1, port1);
 				Port endPort = objects.getPort(obj2, port2);
+
+				if (beginPort == null || endPort == null) {
+					collectDiagnostic("Discarding connection "
+							+ obj1 + "." + port1 + " = " 
+							+ obj2 + "." + port2
+							+ " because of missing object(s) or port(s): "
+							+ (beginPort == null ? (obj1 + "." + port1) : "")
+							+ (beginPort == null && endPort == null ? ", " : "")
+							+ (endPort == null ? obj2 + "." + port2 : "")
+							+ ".");
+					return;
+				}
+
 				connection = new Connection(beginPort, endPort);
 				connections.add(connection);
 			} else if (element.equals("point")) {
+				// quietly ignore breakpoints if the connection is not valid
+				if (connection == null)
+					return;
+
 				String x = new String(attrs.getValue("x"));
 				String y = new String(attrs.getValue("y"));
 				connection.addBreakPoint(new Point(Integer.parseInt(x),
@@ -212,21 +316,38 @@ public class SchemeLoader {
 		@Override
 		public void endElement(String namespaceURI, String sName, String qName)
 				throws SAXException {
+
 			if (qName.equals("object") || qName.equals("relobject")) {
+				
+				if (ignoreCurrent) {
+					ignoreCurrent = false;
+					return;
+				}
+
 				PackageClass pClass = vPackage.getClass(obj.className);
 				
 				if (pClass != null) {
 					// deep clone each separate field
 					ClassField field;
 					ClassField objField;
-					if (pClass.fields.size() != obj.fields.size())
-						throw new SAXException("Mismatch between the number of "
-								+ "fields in the package description and "
-								+ "the scheme file for object " + obj.getName());
 						
 					for (int i = 0; i < pClass.fields.size(); i++) {
 						field = pClass.fields.get(i);
-						objField = obj.fields.get(i);
+						
+						// match object by name because the order of
+						// the ports might have changed
+						objField = obj.getField(field.getName());
+
+						if (objField == null) {
+							collectDiagnostic("Missing field created: "
+									+ obj.getName() + "." + field.getName());
+
+							objField = new ClassField(field.getName(),
+									field.getType(), field.getValue());
+
+							obj.fields.add(objField);
+						}
+							
 						objField.setKnownGraphics(field.getKnownGraphics());
 						objField.setDefaultGraphics(field.getDefaultGraphics());
 					}
@@ -285,6 +406,8 @@ public class SchemeLoader {
 					throw new SAXException("There is no class \"" + obj.getClassName()
 							+ "\" in the package \"" + vPackage.getName() + "\"");
 				}
+			} else if ("connection".equals(qName)) {
+				connection = null;
 			} else if (qName.equals("scheme")) {
 				// create proper references to start and endports in all
 				// RelObjects
@@ -323,13 +446,26 @@ public class SchemeLoader {
 		public void setVPackage(VPackage vp) {
 			vPackage = vp;
 		}
-		
+
 		public ConnectionList getConnections() {
 			return connections;
 		}
-		
+
 		public ObjectList getObjects() {
 			return objects;
+		}
+
+		void collectDiagnostic(String msg) {
+			if (RuntimeProperties.isLogDebugEnabled())
+				db.p(msg);
+
+			if (messages == null)
+				messages = new ArrayList<String>();
+			messages.add(msg);
+		}
+
+		public List<String> getDiagnostics() {
+			return messages;
 		}
 	}
 }
