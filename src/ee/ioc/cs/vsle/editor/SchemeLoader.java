@@ -152,7 +152,7 @@ public class SchemeLoader {
 		}
 
 		@Override
-		public void error(SAXParseException spe) {
+		public void error(SAXParseException spe) throws SAXParseException {
 			String msg = "Parsing error, line " + spe.getLineNumber()
 				+ ", uri " + spe.getSystemId();
 			db.p(msg);
@@ -165,6 +165,8 @@ public class SchemeLoader {
 				x = spe.getException();
 
 			db.p(x);
+
+			throw spe; // One error is enough, abort.
 		}
 
 		@Override
@@ -187,7 +189,12 @@ public class SchemeLoader {
 
 		@Override
 		public void endDocument() {
-			// ignored
+			if (superClass != null 
+					&& objects.getByName(superClass) == null) {
+				collectDiagnostic("Superclass " + superClass 
+						+ " not found.");
+				superClass = null;
+			}
 		}
 
 		@Override
@@ -229,7 +236,7 @@ public class SchemeLoader {
 				String type = attrs.getValue("package");
 
 				superClass = attrs.getValue("superclass");
-
+				
 				if (!type.equals(vPackage.getName())) {
 					throw new SAXException("Scheme was built with package \""
 							+ type + "\", load this package first");
