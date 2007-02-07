@@ -247,6 +247,10 @@ class Rel implements Serializable {
                 }
             }
 
+            /*
+             * TODO the following ~70 lines of code can be simplified, 
+             * just need to add the value of parent.getFullNameForConcat() before each member of equation 
+             */
             Var var;
             String m = new String(method + " ");
             String[] parts = m.split("=");
@@ -259,10 +263,19 @@ class Rel implements Serializable {
             //this collection maps tokens to real var names
             Map<String, String> map = new TreeMap<String, String>();
             
+            String relParentFullName = parent.getFullNameForConcat();
+            
             for (int i = 0; i < inputs.size(); i++) {
                 var = inputs.get(i);
-                pattern = Pattern.compile("([^a-zA-Z_])(([a-zA-Z_0-9]+\\.)*)?"
-                        + var.getName() + "([^a-zA-Z0-9_])");
+                
+                String varName = var.getFullName();
+                
+                if( varName.startsWith( relParentFullName ) )
+                {
+                	varName = varName.substring( relParentFullName.length() );
+                }
+                
+                pattern = Pattern.compile("([^a-zA-Z_])(([a-zA-Z_0-9]+\\.)*)?" + varName + "([^a-zA-Z0-9_])");
                 matcher = pattern.matcher(rightside);
 
                 map.put( "#" + i, var.getName() );
@@ -272,12 +285,15 @@ class Rel implements Serializable {
                     left2 = matcher.group(2);
                     right = matcher.group(4);
 
-                    rightside = rightside.replaceFirst("([^a-zA-Z_]" + left2
-                            + var.getName() + "[^a-zA-Z0-9_])", left
-                            + var.getParent().getFullNameForConcat() + "#"
-                            + Integer.toString(i) + right);
-                    
-                    matcher = pattern.matcher(rightside);
+                    if( left2.trim().equals( "" ) )
+                    {
+                    	rightside = rightside.replaceFirst("([^a-zA-Z_]" + left2
+                    			+ varName + "[^a-zA-Z0-9_])", left
+                    			+ var.getParent().getFullNameForConcat() + "#"
+                    			+ Integer.toString(i) + right);
+                    	
+                    	matcher = pattern.matcher(rightside);
+                    }
                 }
 
             }
