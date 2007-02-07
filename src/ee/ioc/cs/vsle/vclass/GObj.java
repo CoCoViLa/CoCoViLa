@@ -546,4 +546,20 @@ public class GObj implements Serializable, Cloneable {
 	public void setSuperClass(boolean superClass) {
 		this.superClass = superClass;
 	}
+
+	/**
+	 * Returns fields by name.
+	 * @param fldName the name of the field
+	 * @return the field with the specified name or null
+	 */
+	public ClassField getField(String fldName) {
+		if (fields == null || fldName == null)
+			return null;
+		
+		for (ClassField f : fields) {
+			if (fldName.equals(f.getName()))
+				return f;
+		}
+		return null;
+	}
 }

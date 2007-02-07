@@ -207,4 +207,21 @@ public class ObjectList extends ArrayList<GObj> {
 			port = obj.portContains(x, y);
 		return port;
 	}
+
+	/**
+	 * Finds and returns an object by name.
+	 * @param name the name to be searched
+	 * @return object named name or null
+	 */
+	public GObj getByName(String name) {
+		if (name == null)
+			return null;
+
+		for (int i = 0; i < size(); i++) {
+			GObj obj = get(i);
+			if (name.equals(obj.getName()))
+				return obj;
+		}
+		return null;
+	}
 }

@@ -130,4 +130,23 @@ public class PackageClass implements Serializable {
 	public int getNextSerial() {
 		return sequence++;
 	}
+
+	/**
+	 * Checks whether there is a field in this class with the specified
+	 * name and type.
+	 * @param fieldName the name of the field
+	 * @param fieldType the type of the field
+	 * @return true, if there is a field with the specified name and exact type,
+	 * false otherwise
+	 */
+	public boolean hasField(String fieldName, String fieldType) {
+		if (fields == null)
+			return false;
+		
+		for (ClassField f : fields) {
+			if (f.getName().equals(fieldName) && f.getType().equals(fieldType))
+				return true;
+		}
+		return false;
+	}
 }
