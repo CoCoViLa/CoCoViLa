@@ -247,10 +247,45 @@ class Rel implements Serializable {
                 }
             }
 
+            
+            Set<String> varNames = new HashSet<String>();
+            for( Var out : getOutputs() ) {
+            	varNames.add( out.getFullName() );
+            }
+            for( Var inps : getInputs() ) {
+            	varNames.add( inps.getFullName() );
+            }
+            
+            pattern = Pattern.compile("[^a-zA-Z_]*([a-zA-Z_]{1}[a-zA-Z_0-9\\.]*)");
+            matcher = pattern.matcher( method );
+            
+            StringBuffer sb = new StringBuffer();
+            //take each variable and replace it with the real instance name
+            while( matcher.find() ) {
+            	
+            	String var = parent.getFullNameForConcat() + matcher.group(1);
+            	
+            	matcher.appendReplacement( sb, 
+            			method.substring( matcher.start(), matcher.start(1) ) //
+            			+ ( ( varNames.contains( var ) ) ? var : "$1" ) // var or some method call
+            			+ method.substring( matcher.end(1), matcher.end() ) ); //
+            }
+            
+            matcher.appendTail( sb );
+
+            // TODO - add casting to other types as well
+            if ( outputs.get(0).getType().equals(TYPE_INT)
+                    && ( !getMaxType(inputs).equals(TYPE_INT) /*|| method.indexOf(".") >= 0 */) ) {
+            	
+            	String[] eq = sb.toString().split( "=" );
+            	return eq[0] + " = (" + TYPE_INT + ") " + eq[1];
+            } 
+            
+            return sb.toString();
+            
             /*
-             * TODO the following ~70 lines of code can be simplified, 
-             * just need to add the value of parent.getFullNameForConcat() before each member of equation 
-             */
+             * TODO - cleanup when the time comes (keep this just in case the code above starts to fail).
+             * 
             Var var;
             String m = new String(method + " ");
             String[] parts = m.split("=");
@@ -315,15 +350,17 @@ class Rel implements Serializable {
 
             leftside = leftside.replaceFirst("([^a-zA-Z_]?" + left2
                     + var.getName() + "[^a-zA-Z0-9_])", left + var.getFullName() + right );
-
-            //TODO - add casting to other types as well
+                    
+            //add casting to other types as well
             if ( outputs.get(0).getType().equals(TYPE_INT)
                     && ( !getMaxType(inputs).equals(TYPE_INT) || method.indexOf(".") >= 0 ) ) {
                 m = leftside + "= (" + TYPE_INT + ")(" + rightside + ")";
 
             } else
                 m = leftside + "=" + rightside;
-            return m;
+            
+            return m;*/
+            
         } else if (type == RelType.TYPE_SUBTASK) {
 
             // this should not be used in code generation
