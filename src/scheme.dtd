@@ -26,7 +26,8 @@
 
 <!ATTLIST object
 	name		CDATA	#REQUIRED
-	type		CDATA	#IMPLIED>
+	type		CDATA	#IMPLIED
+	static 		CDATA 	#IMPLIED>
 <!ATTLIST properties
 	x		CDATA	#IMPLIED
 	y		CDATA	#IMPLIED

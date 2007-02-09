@@ -197,10 +197,13 @@ public class SpecParser {
 			}
 			return new LineType( LineType.TYPE_ERROR, line, line );
         }  else {
-            pattern = Pattern.compile( "^ *([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])*) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)" );
+            pattern = Pattern.compile( "^ *(static )?([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])*) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)" );
             matcher = pattern.matcher( line );
             if ( matcher.find() ) {
-                return new LineType( LineType.TYPE_DECLARATION, matcher.group( 1 ) + ":" + matcher.group( 3 ), line );
+            	return new LineType( LineType.TYPE_DECLARATION, matcher.group( 2 ) 
+            							+ ":" + matcher.group( 4 ) 
+            							+ ":" + ( matcher.group( 1 ) != null ), // true if static
+            						 line );
             }
 			return new LineType( LineType.TYPE_ERROR, line, line );
         }
@@ -368,7 +371,8 @@ public class SpecParser {
                         split = lt.getSpecLine().split( ":", -1 );
                         String[] vs = split[ 1 ].trim().split( " *, *", -1 );
                         String type = split[ 0 ].trim();
-
+                        boolean isStatic = Boolean.parseBoolean( split[ 2 ] );
+                        
                         if ( RuntimeProperties.isLogDebugEnabled() ) 
                         	db.p( "Checking existence of " + path + type + ".java" );
                         if ( checkedClasses.contains( type ) ) {
@@ -398,7 +402,8 @@ public class SpecParser {
                                         " declared more than once in class " + className );
                             }
                             ClassField var = new ClassField( vs[ i ], type, specClass );
-
+                            var.setStatic( isStatic );
+                            
                             vars.add( var );
                         }
 

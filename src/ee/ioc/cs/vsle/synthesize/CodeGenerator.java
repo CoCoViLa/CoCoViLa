@@ -132,7 +132,7 @@ public class CodeGenerator {
             alg.append( left() + "}\n" );
             
             //variable declaration & constructor
-            //alg.append( generateFieldDeclaration( parentClassName, sbName, usedVars ) );
+            alg.append( generateFieldDeclaration( parentClassName, sbName, usedVars ) );
             //end of class
             alg.append( left() + "} //End of subtask: " + subtask + "\n" );
 
@@ -153,7 +153,8 @@ public class CodeGenerator {
     	
     	for ( Var var : usedVars ) {
     		
-    		boolean allow = !var.getField().isAlias() && !var.getField().isConstant() && !var.getField().isVoid();
+    		boolean allow = !var.getField().isAlias() && !var.getField().isConstant() 
+    						&& !var.getField().isVoid() && !var.getField().isStatic();
     		
     		if( var.getParent().equals( problem.getRootVar() ) ) {
     			if( allow ) {
@@ -166,6 +167,9 @@ public class CodeGenerator {
     			while( !parent.getParent().equals( problem.getRootVar() ) ) {
     				parent = parent.getParent();
     			}
+    			
+    			if( parent.getField().isStatic() ) continue;
+    			
     			if( !topVars.contains( parent.getFullName() ) ) {
     				topVars.add( parent.getFullName() );
     				bufDecl.append( declOT + parent.getDeclaration() );

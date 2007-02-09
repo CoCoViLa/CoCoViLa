@@ -27,7 +27,8 @@ public class GObj implements Serializable, Cloneable {
 	public int width, height;
 	public String className;
 	protected String name;
-
+	private boolean isStatic = false;
+	
 	private ArrayList<Port> ports = new ArrayList<Port>();
 	public ArrayList<ClassField> fields = new ArrayList<ClassField>();
 	public ArrayList<Shape> shapes = new ArrayList<Shape>();
@@ -301,6 +302,12 @@ public class GObj implements Serializable, Cloneable {
 		int xModifier = getX();
 		int yModifier = getY();
         g2.setColor(Color.black);
+        
+        if( isStatic() ) {
+        	g2.setFont( new Font( "Times New Roman", Font.ITALIC, 20 ) );
+			g2.drawString( "s", xModifier, yModifier );
+		}
+
 		for (int i = 0; i < getPorts().size(); i++) {
 			ClassGraphics graphics;
 			Port port = getPorts().get(i);
@@ -483,7 +490,8 @@ public class GObj implements Serializable, Cloneable {
 		
 		attrs.addAttribute(null, null, "name", StringUtil.CDATA, name);
 		attrs.addAttribute(null, null, "type", StringUtil.CDATA, className);
-
+		attrs.addAttribute(null, null, "static", StringUtil.CDATA, Boolean.toString( isStatic() ));
+		
 		th.startElement(null, null, "object", attrs);
 
 		attrs.clear();
@@ -561,5 +569,13 @@ public class GObj implements Serializable, Cloneable {
 				return f;
 		}
 		return null;
+	}
+
+	public boolean isStatic() {
+		return isStatic;
+	}
+
+	public void setStatic(boolean isStatic) {
+		this.isStatic = isStatic;
 	}
 }

@@ -36,6 +36,8 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 	private JButton clear, ok, close;
 
 	private Canvas canvas;
+	
+	private JCheckBox isStatic;
 
 	//key - class name, value - last width
 	private static Map<String, Integer> s_widths = new HashMap<String, Integer>();
@@ -242,6 +244,14 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			goal.addActionListener(lst);
 		}
 		
+		isStatic = new JCheckBox( "Static", object.isStatic() );
+		textFieldPane.add(isStatic);
+		labelPane.add( new JLabel() );
+		watchPane.add( new JLabel() );
+		inputPane.add( new JLabel() );
+		goalsPane.add( new JLabel() );
+		typePane.add( new JLabel() );
+		
 		JPanel contentPane = new JPanel();
 		JScrollPane areaScrollPane = new JScrollPane(contentPane,
 				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -361,6 +371,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 					}
 				}
 				controlledObject.setName(nameTextField.getText());
+				controlledObject.setStatic( isStatic.isSelected() );
 				controlledObject = null;
 				this.dispose();
 				canvas.repaint();

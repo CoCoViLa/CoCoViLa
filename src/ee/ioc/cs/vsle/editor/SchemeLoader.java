@@ -231,6 +231,7 @@ public class SchemeLoader {
 				obj = (element.equals("relobject")) ? new RelObj() : new GObj();
 				obj.setName(name);
 				obj.setClassName(type);
+				obj.setStatic( Boolean.parseBoolean( attrs.getValue("static") ) );
 				objects.add(obj);
 			} else if (element.equals("scheme")) {
 				String type = attrs.getValue("package");

@@ -65,6 +65,8 @@ public class ClassField implements Cloneable, Serializable {
 	
 	protected boolean isGoal = false;
 	
+	protected boolean isStatic = false;
+	
 	/**
 	 * Class constructor.
 	 */
@@ -337,5 +339,13 @@ public class ClassField implements Cloneable, Serializable {
 
 	public void setInput(boolean isInput) {
 		this.isInput = isInput;
+	}
+
+	public boolean isStatic() {
+		return isStatic;
+	}
+
+	public void setStatic(boolean isStatic) {
+		this.isStatic = isStatic;
 	}
 }

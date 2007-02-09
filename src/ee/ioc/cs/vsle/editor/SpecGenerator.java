@@ -50,8 +50,8 @@ public class SpecGenerator implements ISpecGenerator {
 			obj = objects.get(i);
 
 			if (!obj.isSuperClass()) {
-				s.append("    " + obj.getClassName() + " " 
-						+ obj.getName() + ";\n");
+				s.append("    " + ( obj.isStatic() ? "static " : "" ) 
+						+ obj.getClassName() + " " + obj.getName() + ";\n");
 			}
 
 			for ( ClassField field : obj.fields ) {

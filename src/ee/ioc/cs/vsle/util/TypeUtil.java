@@ -44,17 +44,22 @@ public class TypeUtil {
     public static String getDeclaration( ClassField field, String prx ) {
 
     	String value = field.isConstant() ? field.getValue() : "";
-		return getDeclaration( field.getName(), field.getType(), field.isAlias(), field.isSpecField(), value, prx );
+		return getDeclaration( field.getName(), field.getType(), field.isAlias(), 
+				field.isSpecField(), field.isStatic(), value, prx );
 
     }
     
-    public static String getDeclaration( String varName, String type, boolean isAlias, boolean isClass, 
+    public static String getDeclaration( String varName, String type, boolean isAlias, boolean isClass, boolean isStatic,
     									/*for constant*/String value, String prx ) {
     	
     	if( prx == null ) 
     		prx = "";
     	else if ( prx.length() > 0 )
     		prx = prx.trim().concat( " " );
+    	
+    	if( isStatic ) {
+    		prx += "static ";
+    	}
     	
     	if ( TypeUtil.TYPE_VOID.equals( type ) || TypeUtil.TYPE_ANY.equals( type ) 
     			|| isAlias ) {
