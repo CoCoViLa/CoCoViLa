@@ -8,60 +8,58 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * Created by IntelliJ IDEA.
- * User: Ando
- * Date: 28.03.2005
- * Time: 21:12:15
- * To change this template use Options | File Templates.
+ * Created by IntelliJ IDEA. User: Ando Date: 28.03.2005 Time: 21:12:15 To
+ * change this template use Options | File Templates.
  */
-public class CodeViewer extends JFrame implements ActionListener{
-	JavaColoredTextPane textArea;
-	JPanel specText;
-	JButton saveBtn;
-        String fileName;
-        String path;
+public class CodeViewer extends JFrame implements ActionListener {
 
-        public CodeViewer(String name, String path, String extension ) {
-            super(name + extension);
-                this.fileName = name + extension;
-                this.path = path;
-                
-                addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
-                
-                String fileText = FileFuncs.getFileContents(path + fileName);
+	JavaColoredTextPane	textArea;
+	JPanel				specText;
+	JButton				saveBtn;
+	String				fileName;
+	String				path;
 
-                textArea = new JavaColoredTextPane();
-                textArea.addKeyListener( new ProgramTextEditor.CommentKeyListener() );
-                textArea.setFont(RuntimeProperties.font);
-                textArea.append(fileText);
-               
-                JScrollPane areaScrollPane = new JScrollPane(textArea);
-                areaScrollPane.setRowHeaderView(new LineNumberView(textArea));
-                areaScrollPane.setVerticalScrollBarPolicy(
-                        ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+	public CodeViewer(String name, String path, String extension) {
+		super(name + extension);
+		this.fileName = name + extension;
+		this.path = path;
 
-                specText = new JPanel();
-                specText.setLayout(new BorderLayout());
-                specText.add(areaScrollPane, BorderLayout.CENTER);
-                JToolBar toolBar = new JToolBar();
-                toolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
-                saveBtn = new JButton("Save");
-                saveBtn.addActionListener(this);
-                toolBar.add(saveBtn);
-                toolBar.add(new FontResizePanel(textArea));
-                toolBar.add(new UndoRedoDocumentPanel(textArea.getDocument()) );
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
+		addComponentListener(new ComponentResizer(ComponentResizer.CARE_FOR_MINIMUM));
 
-                specText.setLayout(new BorderLayout());
-                specText.add(areaScrollPane, BorderLayout.CENTER);
-                specText.add(toolBar, BorderLayout.NORTH);
+		String fileText = FileFuncs.getFileContents(path + fileName);
 
-                getContentPane().add(specText);
-                validate();
-        }
+		textArea = new JavaColoredTextPane();
+		textArea.addKeyListener(new ProgramTextEditor.CommentKeyListener());
+		textArea.setFont(RuntimeProperties.font);
+		textArea.append(fileText);
 
-	public CodeViewer(String name, String path ) {
-		this( name, path, ".java" );
+		JScrollPane areaScrollPane = new JScrollPane(textArea);
+		areaScrollPane.setRowHeaderView(new LineNumberView(textArea));
+		areaScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+
+		specText = new JPanel();
+		specText.setLayout(new BorderLayout());
+		specText.add(areaScrollPane, BorderLayout.CENTER);
+		JToolBar toolBar = new JToolBar();
+		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
+		saveBtn = new JButton("Save");
+		saveBtn.addActionListener(this);
+		toolBar.add(saveBtn);
+		toolBar.add(new FontResizePanel(textArea));
+		toolBar.add(new UndoRedoDocumentPanel(textArea.getDocument()));
+
+		specText.setLayout(new BorderLayout());
+		specText.add(areaScrollPane, BorderLayout.CENTER);
+		specText.add(toolBar, BorderLayout.NORTH);
+
+		getContentPane().add(specText);
+		validate();
+	}
+
+	public CodeViewer(String name, String path) {
+		this(name, path, ".java");
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -70,4 +68,11 @@ public class CodeViewer extends JFrame implements ActionListener{
 		}
 	}
 
+	public void dispose() {
+		if (textArea != null) {
+			textArea.destroy();
+
+			textArea = null;
+		}
+	}
 }
