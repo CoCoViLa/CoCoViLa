@@ -70,12 +70,12 @@ public class ProgramRunner {
 	}
 	
 	private Object[] getArguments() throws Exception {
-    	if( assumptions.isEmpty() ) {
+    	if( getAssumptions().isEmpty() ) {
     		return new Object[0];
     	}
     	
     	if( arguments == null ) {
-    		ProgramAssumptionsDialog ass = new ProgramAssumptionsDialog( null, mainClassName, assumptions );
+    		ProgramAssumptionsDialog ass = new ProgramAssumptionsDialog( null, mainClassName, getAssumptions() );
     		
     		if( ass.isOK )
     		{
@@ -132,9 +132,9 @@ public class ProgramRunner {
     			db.p( "Computing " + mainClassName );
             
             classList = SpecParser.parseSpecification( fullSpec, m_canvas.getWorkDir() );
-            assumptions.clear();
+            getAssumptions().clear();
             
-            return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, assumptions );
+            return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, this );
             
         } catch ( UnknownVariableException uve ) {
 
@@ -187,43 +187,90 @@ public class ProgramRunner {
         return watchFields;
     }
     
-	private static HashSet<Var> foundVars = new HashSet<Var>();
+	private HashSet<Var> foundVars = new HashSet<Var>();
 
-	public static void clearFoundVars() {
-		foundVars.clear();
+	public void addFoundVars(Collection<Var> col) {
+		foundVars.addAll( col );
 	}
 
-	public static void addFoundVar(Var var) {
-		if (isFoundVar(var)) {
-			return;
-		}
-		foundVars.add(var);
-	}
+	private String printFoundVars() {
+		
+		StringBuilder result = new StringBuilder( "----------- Found Vars -----------\n" );
 
-	public static void addAllFoundVars(Collection<Var> col) {
-		for (Var var : col ) {
-			if( !foundVars.contains(var) ) {
-				foundVars.add(var);
+		for ( Var var : foundVars ) {
+
+			if( var.getField().isAlias() || var.getField().isVoid() ) {
+				continue;
 			}
+			
+			try {
+				appendVarStringValue( var.getFullName(), result );
+			} catch (Exception e) {
+			} 
 		}
-		printFoundVars();
-	}
 
-	public static boolean isFoundVar(Var var) {
-		for (Iterator iter = foundVars.iterator(); iter.hasNext();) {
-			Var in = (Var) iter.next();
-			if (in.toString().equals(var.toString())) {
-				return true;
+		result.append( "----------------------------------\n" );
+		result.append( "\n" );
+		
+		return result.toString();
+	}
+	
+	private void appendVarStringValue( String fullName, StringBuilder result ) throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+		
+		Class clas;
+		Field f;
+		
+		StringTokenizer st = new StringTokenizer( fullName, ".");
+		Object obj = genObject;
+		clas = genObject.getClass();
+
+		while (st.hasMoreElements()) {
+
+			String s = st.nextToken();
+
+			f = clas.getDeclaredField(s);
+			if (st.hasMoreElements()) {
+				clas = f.getType();
+				obj = f.get(obj);
+			} else {
+				Class c = f.getType();
+
+				result.append( fullName );
+				result.append( ": " );
+
+				if (c.toString().equals(TYPE_INT)) {
+					result.append( f.getInt(obj) );
+				} else if (c.toString().equals(TYPE_LONG)) {
+					result.append( f.getLong(obj) );
+				} else if (c.toString().equals(TYPE_DOUBLE)) {
+					result.append( f.getDouble(obj) );
+				} else if (c.toString().equals(TYPE_BOOLEAN)) {
+					result.append( f.getBoolean(obj) );
+				} else if (c.toString().equals(TYPE_CHAR)) {
+					result.append( f.getChar(obj) );
+				} else if (c.toString().equals(TYPE_FLOAT)) {
+					result.append( f.getFloat(obj) );
+				} else if (c.toString().equals(TYPE_SHORT)) {
+					result.append( f.getShort(obj) );
+				} else if (c.toString().equals(TYPE_BYTE)) {
+					result.append( f.getByte(obj) );
+				} else {
+					Object o = f.get(obj);
+					if( o instanceof Object[] ) {
+
+						result.append( Arrays.deepToString( (Object[])o ) );
+					} else {
+						result.append( o );
+					}
+				}
+
+				result.append( "\n" );
 			}
+
 		}
-		return false;
+		
 	}
-
-	public static void printFoundVars() {
-		if (RuntimeProperties.isLogDebugEnabled())
-			System.err.println("foundVars: " + foundVars);
-	}
-
+	
 	private void propagate() {
 		try {
 
@@ -233,8 +280,6 @@ public class ProgramRunner {
 
 			Field fieldOfGobj, fieldOfCf;
 			Object lastObj;
-
-			db.p("runPropagate() foundVars: " + foundVars);
 
 			for ( GObj gObj : objects ) {
 
@@ -367,7 +412,7 @@ public class ProgramRunner {
 					if( sendFeedback ) {
 						
 						ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, id,
-								ProgramRunnerFeedbackEvent.TEXT_RESULT, printWatchFields() );
+								ProgramRunnerFeedbackEvent.TEXT_RESULT, printFoundVars() + printWatchFields() );
 						
 						EventSystem.queueEvent( evt );
 					}
@@ -385,60 +430,23 @@ public class ProgramRunner {
 
 	}
 
-	private String printWatchFields() throws SecurityException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+	private String printWatchFields() {
 
-		StringBuffer result = new StringBuffer();
-
-		Object obj; 
-		Class clas;
-		Field f;
-		StringTokenizer st;
+		StringBuilder result = new StringBuilder( "---------- Watch Fields ----------\n" );
 
 		ArrayList<String> watchFields = watchableFields();
 
 		for ( String wf : watchFields ) {
 
-			st = new StringTokenizer( wf, ".");
-			obj = genObject;
-			clas = genObject.getClass();
-
-			while (st.hasMoreElements()) {
-
-				String s = st.nextToken();
-
-				f = clas.getDeclaredField(s);
-				if (st.hasMoreElements()) {
-					clas = f.getType();
-					obj = f.get(obj);
-				} else {
-					Class c = f.getType();
-
-					if (c.toString().equals(TYPE_INT)) {
-						result.append(wf + ": " + f.getInt(obj) + "\n");
-					} else if (c.toString().equals(TYPE_LONG)) {
-						result.append(wf + ": " + f.getLong(obj) + "\n");
-					} else if (c.toString().equals(TYPE_DOUBLE)) {
-						result.append(wf + ": " + f.getDouble(obj) + "\n");
-					} else if (c.toString().equals(TYPE_BOOLEAN)) {
-						result.append(wf + ": " + f.getBoolean(obj) + "\n");
-					} else if (c.toString().equals(TYPE_CHAR)) {
-						result.append(wf + ": " + f.getChar(obj) + "\n");
-					} else if (c.toString().equals(TYPE_FLOAT)) {
-						result.append(wf + ": " + f.getFloat(obj) + "\n");
-					} else if (c.toString().equals(TYPE_SHORT)) {
-						result.append(wf + ": " + f.getShort(obj) + "\n");
-					} else if (c.toString().equals(TYPE_BYTE)) {
-						result.append(wf + ": " + f.getByte(obj) + "\n");
-					} else {
-						result.append(wf + ": " + f.get(obj) + "\n");
-					}
-				}
-
-			}
+			try {
+				appendVarStringValue( wf, result );
+			} catch (Exception e) {
+			} 
 		}
 
-		result.append("----------------------\n");
-
+		result.append( "----------------------------------\n" );
+		result.append( "\n" );
+		
 		return result.toString();
 	}
 
@@ -533,6 +541,20 @@ public class ProgramRunner {
 		synchronized( s_lock ) {
 			this.isWorking = isWorking;
 		}
+	}
+
+	/**
+	 * @param assumptions the assumptions to set
+	 */
+	public void setAssumptions(List<Var> assumptions) {
+		this.assumptions = assumptions;
+	}
+
+	/**
+	 * @return the assumptions
+	 */
+	public List<Var> getAssumptions() {
+		return assumptions;
 	}
 
 }

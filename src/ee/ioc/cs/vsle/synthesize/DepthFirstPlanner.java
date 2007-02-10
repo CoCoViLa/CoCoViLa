@@ -39,7 +39,6 @@ public class DepthFirstPlanner implements IPlanner {
     public ArrayList<Rel> invokePlaning( Problem problem, boolean computeAll ) {
     	long startTime = System.currentTimeMillis();
     	
-        ProgramRunner.clearFoundVars();
         ArrayList<Rel> algorithm = new ArrayList<Rel>();
         
         //manage axioms
@@ -68,8 +67,6 @@ public class DepthFirstPlanner implements IPlanner {
         }
 		if ( RuntimeProperties.isLogInfoEnabled() )
 			db.p( "Planning time: " + ( System.currentTimeMillis() - startTime ) + "ms.");
-		
-		ProgramRunner.addAllFoundVars( problem.getFoundVars() );
 		
         return algorithm;
     }
@@ -236,7 +233,8 @@ public class DepthFirstPlanner implements IPlanner {
 			if (RuntimeProperties.isLogDebugEnabled())
 				db.p( "OR: rel with subtasks - " + subtaskRel + " depth: " + ( depth + 1 ) );
 			
-			if( newVars.containsAll( subtaskRel.getOutputs() ) ) {
+			if( newVars.containsAll( subtaskRel.getOutputs() ) 
+					|| problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
 				continue OR;
 			}
 			

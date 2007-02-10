@@ -243,10 +243,6 @@ public class GObj implements Serializable, Cloneable {
 		return selected;
 	}
 
-	public void setAsGroup(boolean b) {
-		setGroup(b);
-	}
-
 	public boolean isGroup() {
 		return group;
 	}

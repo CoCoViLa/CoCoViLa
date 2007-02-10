@@ -47,7 +47,7 @@ public class Synthesizer {
      * @throws SpecParseException -
      */
     public static String makeProgramText( String fileString, boolean computeAll, ClassList classList,
-                                   String mainClassName, List<Var> assumptions ) throws SpecParseException {
+                                   String mainClassName, ProgramRunner runner ) throws SpecParseException {
 
         Problem problem = null;
         // call the packageParser to create a problem from the specification
@@ -67,9 +67,8 @@ public class Synthesizer {
         }
         String algorithm = new CodeGenerator( algorithmList, problem, mainClassName ).generate();
 
-        if( assumptions != null ) {
-        	assumptions.addAll( problem.getAssumptions() );
-        }
+        runner.addFoundVars( problem.getFoundVars() );
+        runner.setAssumptions( problem.getAssumptions() );
         
         String prog = "";
         

@@ -35,6 +35,7 @@ public class CodeGenerator {
     public String generate() {
     	
     	db.p( "Starting code generation" );
+    	long start = System.currentTimeMillis();
     	
         StringBuffer alg = new StringBuffer();
         cOT( OFFSET.OT_INC, 2 );
@@ -53,7 +54,7 @@ public class CodeGenerator {
 
         }
         
-        db.p( "Finished code generation" );
+        db.p( "Finished code generation in " + ( System.currentTimeMillis() - start ) + "ms" );
         
         return alg.toString();
     }
