@@ -156,7 +156,7 @@ public class SchemeLoader {
 			String msg = "Parsing error, line " + spe.getLineNumber()
 				+ ", uri " + spe.getSystemId();
 			db.p(msg);
-			collectDiagnostic(msg);
+			collectDiagnostic(msg + "\n" + spe.getMessage());
 
 			// Use the contained exception, if any
 			Exception x = spe;
@@ -285,6 +285,15 @@ public class SchemeLoader {
 					return;
 				}
 				ClassField cf = new ClassField(name, type, value);
+				
+				String nature = attrs.getValue("nature");
+				if ("input".equals(nature))
+					cf.setInput(true);
+				else if ("goal".equals(nature))
+					cf.setGoal(true);
+
+				cf.setWatched(Boolean.parseBoolean(attrs.getValue("watch")));
+
 				obj.fields.add(cf);
 			} else if (element.equals("connection")) {
 				String obj1 = new String(attrs.getValue("obj1"));

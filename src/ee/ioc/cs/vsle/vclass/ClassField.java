@@ -235,7 +235,15 @@ public class ClassField implements Cloneable, Serializable {
 		
 		attrs.addAttribute(null, null, "name", StringUtil.CDATA, getName());
 		attrs.addAttribute(null, null, "type", StringUtil.CDATA, getType());
-		
+
+		if (isInput && !isGoal) {
+			attrs.addAttribute(null, null, "nature", StringUtil.CDATA,
+					"input");
+		} else if (!isInput && isGoal)
+			attrs.addAttribute(null, null, "nature", StringUtil.CDATA, "goal");
+
+		if (watched)
+			attrs.addAttribute(null, null, "watch", StringUtil.CDATA, "true");
 		if (value != null)
 			attrs.addAttribute(null, null, "value", StringUtil.CDATA, value);
 
