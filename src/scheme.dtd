@@ -54,6 +54,8 @@
 <!ATTLIST field 
         name		CDATA   #REQUIRED
         type		CDATA   #IMPLIED
+        nature		(normal|input|goal)	"normal"
+        watch		CDATA	#IMPLIED
         value		CDATA   #IMPLIED>
 <!ATTLIST point
         x		CDATA   #REQUIRED
