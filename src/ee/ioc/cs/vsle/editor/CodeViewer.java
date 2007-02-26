@@ -8,8 +8,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 /**
- * Created by IntelliJ IDEA. User: Ando Date: 28.03.2005 Time: 21:12:15 To
- * change this template use Options | File Templates.
+ * Created by IntelliJ IDEA. User: Ando Date: 28.03.2005 Time: 21:12:15
  */
 public class CodeViewer extends JFrame implements ActionListener {
 
@@ -68,11 +67,13 @@ public class CodeViewer extends JFrame implements ActionListener {
 		}
 	}
 
+	@Override
 	public void dispose() {
 		if (textArea != null) {
 			textArea.destroy();
 
 			textArea = null;
 		}
+		super.dispose();
 	}
 }
