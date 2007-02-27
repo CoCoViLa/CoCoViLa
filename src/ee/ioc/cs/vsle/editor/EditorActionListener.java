@@ -151,7 +151,7 @@ public class EditorActionListener implements ActionListener {
                         CustomFileFilter.descriptionSyn );
                 fc.setFileFilter( synFilter );
 
-                int returnVal = fc.showOpenDialog( null );
+                int returnVal = fc.showOpenDialog(Editor.getInstance());
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File file = fc.getSelectedFile();
                     Editor.setLastPath( file.getAbsolutePath() );
