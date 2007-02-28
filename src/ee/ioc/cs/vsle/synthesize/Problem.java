@@ -121,7 +121,7 @@ class Problem implements Serializable {
 	Problem getCopy() {
 		
 		try {
-			return (Problem) DeepCopy.copy( this );
+			return DeepCopy.copy( this );
 
 		} catch (Exception e) {
 			

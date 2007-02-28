@@ -37,7 +37,7 @@ public class CodeGenerator {
     	db.p( "Starting code generation" );
     	long start = System.currentTimeMillis();
     	
-        StringBuffer alg = new StringBuffer();
+        StringBuilder alg = new StringBuilder();
         cOT( OFFSET.OT_INC, 2 );
 
         genAssumptions( alg, problem.getAssumptions() );
@@ -59,7 +59,7 @@ public class CodeGenerator {
         return alg.toString();
     }
 
-    private void genAssumptions( StringBuffer alg, List<Var> assumptions ) {
+    private void genAssumptions( StringBuilder alg, List<Var> assumptions ) {
     	if( assumptions.isEmpty() ) {
     		return;
     	}
@@ -85,7 +85,7 @@ public class CodeGenerator {
     	alg.append( result );
     }
     
-    private void genSubTasks( Rel rel, StringBuffer alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars ) {
+    private void genSubTasks( Rel rel, StringBuilder alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars ) {
         int subNum;
         int start = subCount;
 
@@ -94,14 +94,23 @@ public class CodeGenerator {
             
             String sbName = Synthesizer.SUBTASK_INTERFACE_NAME + "_" + subNum;
             
-            alg.append( "\n" + same() + "class " + sbName
-                        + " implements " + Synthesizer.SUBTASK_INTERFACE_NAME + " {\n\n" );
+            alg.append( "\n");
+            alg.append( same() );
+            alg.append( "class " );
+            alg.append( sbName );
+            alg.append( " implements " );
+            alg.append( Synthesizer.SUBTASK_INTERFACE_NAME );
+            alg.append( " {\n\n" );
             
             right() ;
             
             //start generating run()
-            alg.append( same() + "public Object[] run(Object[] in) throws Exception {\n" );
-
+            
+            StringBuilder bufSbtBody = new StringBuilder();
+            
+            bufSbtBody.append( same() );
+            bufSbtBody.append( "public Object[] run(Object[] in) throws Exception {\n" );
+            
             List<Var> subInputs = subtask.getInputs();
             List<Var> subOutputs = subtask.getOutputs();
             
@@ -110,46 +119,64 @@ public class CodeGenerator {
             
             List<Rel> subAlg = subtask.getAlgorithm();
             right() ;
-            alg.append( same() + "//Subtask: " + subtask + "\n" );
+            bufSbtBody.append( same() );
+            bufSbtBody.append( "//Subtask: " );
+            bufSbtBody.append( subtask );
+            bufSbtBody.append( "\n" );
             // apend subtask inputs to algorithm
-            alg.append( getSubtaskInputs( subInputs ) );
+            bufSbtBody.append( getSubtaskInputs( subInputs ) );
             for ( int i = 0; i < subAlg.size(); i++ ) {
                 Rel trel = subAlg.get( i );
                 if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs());
                 if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                     //recursion
-                    genSubTasks( trel, alg, true, sbName, usedVars );
+                    genSubTasks( trel, bufSbtBody, true, sbName, usedVars );
 
                 } else {
-                    appendRelToAlg( same(), trel, alg );
+                    appendRelToAlg( same(), trel, bufSbtBody );
                 }
                 usedVars.addAll( trel.getInputs() );
                 usedVars.addAll( trel.getOutputs() );
             }
             // apend subtask outputs to algorithm
-            alg.append( getSubtaskOutputs( subOutputs, same() ) );
+            bufSbtBody.append( getSubtaskOutputs( subOutputs, same() ) );
             //end of run()
-            alg.append( left() + "}\n" );
+            bufSbtBody.append( left() );
+            bufSbtBody.append( "}\n" );
             
             //variable declaration & constructor
             alg.append( generateFieldDeclaration( parentClassName, sbName, usedVars ) );
+            
+            //append run() after subtasks' constructor
+            alg.append( bufSbtBody );
             //end of class
-            alg.append( left() + "} //End of subtask: " + subtask + "\n" );
-
-            alg.append( same() + "Subtask_" + subNum + " subtask_" + subNum +
-                        " = new Subtask_" + subNum + "();\n\n" );
+            alg.append( left() );
+            alg.append( "} //End of subtask: " );
+            alg.append( subtask );
+            alg.append( "\n" );
+            
+            alg.append( same() );
+            alg.append( "Subtask_" );
+            alg.append( subNum );
+            alg.append( " subtask_" );
+            alg.append( subNum );
+            alg.append( " = new Subtask_" );
+            alg.append( subNum );
+            alg.append( "();\n\n" );
         }
 
         appendSubtaskRelToAlg( rel, start, alg, isNestedSubtask );
     }
 
+    private static String _this_ = "." + TYPE_THIS + ".";
+    
     private String generateFieldDeclaration( String parentClassName, String sbName, Set<Var> usedVars ) {
     	
     	String declOT = same();
     	String consOT = right();
-    	StringBuffer bufDecl = new StringBuffer();
-    	StringBuffer bufConstr = new StringBuffer();
+    	StringBuilder bufDecl = new StringBuilder();
+    	StringBuilder bufConstr = new StringBuilder();
     	Set<String> topVars = new HashSet<String>();
     	
     	for ( Var var : usedVars ) {
@@ -159,8 +186,45 @@ public class CodeGenerator {
     		
     		if( var.getParent().equals( problem.getRootVar() ) ) {
     			if( allow ) {
-    				bufDecl.append( declOT + var.getDeclaration() );
-    				bufConstr.append( consOT + var.getName() + " = " + parentClassName + "." + TYPE_THIS + "." + var.getName() + ";\n" );
+    				bufDecl.append( declOT );
+    				bufDecl.append( var.getDeclaration() );
+    				
+    				if( var.getField().isArray() ) {
+    					if( var.getField().isPrimitiveArray() ) {
+    						bufConstr.append( consOT );
+    	    				bufConstr.append( var.getName() );
+    	    				bufConstr.append( " = " );
+    						bufConstr.append( "(" );
+    						bufConstr.append( var.getType() );
+    						bufConstr.append( ") " );
+    						bufConstr.append( parentClassName );
+    						bufConstr.append( _this_ );
+    						bufConstr.append( var.getName() );
+    						bufConstr.append( ".clone();\n" );
+    					} else {
+    						bufConstr.append( consOT );
+    						bufConstr.append( "try {\n" );
+    						bufConstr.append( consOT );
+    						bufConstr.append( OT_TAB );
+    	    				bufConstr.append( var.getName() );
+    	    				bufConstr.append( " = " );
+    						bufConstr.append( "DeepCopy.copy( " );
+        					bufConstr.append( parentClassName );
+        					bufConstr.append( _this_ );
+        					bufConstr.append( var.getName() );
+        					bufConstr.append( " );\n" );
+        					bufConstr.append( consOT );
+        					bufConstr.append( "} catch( Exception e ) { e.printStackTrace(); }\n" );
+    					}
+    				} else {
+    					bufConstr.append( consOT );
+        				bufConstr.append( var.getName() );
+        				bufConstr.append( " = " );
+    					bufConstr.append( parentClassName );
+    					bufConstr.append( _this_ );
+    					bufConstr.append( var.getName() );
+    					bufConstr.append( ";\n" );
+    				}
     			}
     		} else {
     			Var parent = var.getParent();
@@ -173,19 +237,35 @@ public class CodeGenerator {
     			
     			if( !topVars.contains( parent.getFullName() ) ) {
     				topVars.add( parent.getFullName() );
-    				bufDecl.append( declOT + parent.getDeclaration() );
+    				
+    				bufDecl.append( declOT );
+    				bufDecl.append( parent.getDeclaration() );
     			}
     			if( allow ) {
-    				bufConstr.append( consOT + var.getFullName() + " = " + parentClassName 
-    						+ "." + TYPE_THIS + "." + var.getFullName() + ";\n" );
+    				bufConstr.append( consOT );
+    				bufConstr.append( var.getFullName() );
+    				bufConstr.append( " = " );
+    				bufConstr.append( parentClassName );
+    				bufConstr.append( _this_ );
+    				bufConstr.append( var.getFullName() );
+    				bufConstr.append( ";\n" );
     			}
     		}
     	}
         
-        return "\n" + bufDecl.toString() + "\n"
-        		+ left() + sbName + "() {\n\n"
-        		+ bufConstr.toString()
-        		+ same() + "}\n\n";
+    	StringBuilder result = new StringBuilder();
+    	
+    	result.append( "\n" );
+    	result.append( bufDecl );
+    	result.append( "\n" );
+    	result.append( left() );
+    	result.append( sbName );
+    	result.append( "() {\n\n" );
+    	result.append( bufConstr );
+    	result.append( same() );
+    	result.append( "}\n\n" );
+    	
+        return result.toString();
     }
     
     private String cOT( OFFSET ot, int times ) {
@@ -220,11 +300,13 @@ public class CodeGenerator {
     	return offset;
     }
     
-    private void appendRelToAlg( String offset, Rel rel, StringBuffer buf ) {
+    private void appendRelToAlg( String offset, Rel rel, StringBuilder buf ) {
         String s = rel.toString();
         if ( !s.equals( "" ) ) {
             if(rel.getExceptions().size() == 0 ) {
-                buf.append( offset + s + ";\n" );
+                buf.append( offset );
+                buf.append( s );
+                buf.append( ";\n" );
             }
             else {
                 buf.append( appendExceptions( rel, s ) );
@@ -232,7 +314,7 @@ public class CodeGenerator {
         }
     }
 
-    private void appendSubtaskRelToAlg( Rel rel, int startInd, StringBuffer buf, boolean isNestedSubtask ) {
+    private void appendSubtaskRelToAlg( Rel rel, int startInd, StringBuilder buf, boolean isNestedSubtask ) {
 
         String relString = rel.toString();
         for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
@@ -247,7 +329,7 @@ public class CodeGenerator {
     }
 
     private String appendExceptions( Rel rel, String s ) {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         buf.append( same() + "try {\n" +
                     right()  + s + ";\n" +
                     left() + "}\n" );

@@ -233,8 +233,11 @@ public class DepthFirstPlanner implements IPlanner {
 			if (RuntimeProperties.isLogDebugEnabled())
 				db.p( "OR: rel with subtasks - " + subtaskRel + " depth: " + ( depth + 1 ) );
 			
-			if( newVars.containsAll( subtaskRel.getOutputs() ) 
+			if( ( subtaskRel.getUnknownInputs() > 0 ) 
+					|| newVars.containsAll( subtaskRel.getOutputs() ) 
 					|| problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
+				if (RuntimeProperties.isLogDebugEnabled())
+					db.p( "skipped" );
 				continue OR;
 			}
 			

@@ -18,7 +18,7 @@ public class DeepCopy {
      * Returns a copy of the object, or throws exception if the object cannot
      * be serialized.
      */
-	public static Object copy(Object orig) throws Exception {
+	public static <T> T copy( T orig ) throws Exception {
 		// Write the object out to a byte array
 		FastByteArrayOutputStream fbos = 
 			new FastByteArrayOutputStream();
@@ -29,7 +29,7 @@ public class DeepCopy {
 
 		// Retrieve an input stream from the byte array and read
 		// a copy of the object back in. 
-		return new ObjectInputStream(fbos.getInputStream()).readObject();
+		return (T) new ObjectInputStream( fbos.getInputStream() ).readObject();
 	}
 
 }

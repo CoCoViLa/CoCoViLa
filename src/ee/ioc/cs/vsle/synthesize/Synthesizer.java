@@ -114,7 +114,7 @@ public class Synthesizer {
         createGeneratedInterface();
         createSubtaskInterface();
 
-        return fileString;
+        return "import ee.ioc.cs.vsle.util.*;\n\n" + fileString;
 
     }
 
