@@ -19,17 +19,35 @@ public class DeepCopy {
      * be serialized.
      */
 	public static <T> T copy( T orig ) throws Exception {
-		// Write the object out to a byte array
-		FastByteArrayOutputStream fbos = 
-			new FastByteArrayOutputStream();
-		ObjectOutputStream out = new ObjectOutputStream(fbos);
-		out.writeObject(orig);
-		out.flush();
-		out.close();
+		
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		ObjectOutputStream oos = new ObjectOutputStream( bos );
+		oos.writeObject( orig );
+		oos.flush();
 
-		// Retrieve an input stream from the byte array and read
-		// a copy of the object back in. 
-		return (T) new ObjectInputStream( fbos.getInputStream() ).readObject();
+		ByteArrayInputStream bis = new ByteArrayInputStream( bos.toByteArray() );
+
+		oos.close();
+
+		ObjectInputStream ois = new ObjectInputStream( bis );
+
+		T copy = (T) ois.readObject();
+
+		ois.close();
+
+		return copy;
+		
+//		// Write the object out to a byte array
+//		FastByteArrayOutputStream fbos = 
+//			new FastByteArrayOutputStream();
+//		ObjectOutputStream out = new ObjectOutputStream(fbos);
+//		out.writeObject(orig);
+//		out.flush();
+//		out.close();
+//
+//		// Retrieve an input stream from the byte array and read
+//		// a copy of the object back in. 
+//		return (T) new ObjectInputStream( fbos.getInputStream() ).readObject();
 	}
 
 }
