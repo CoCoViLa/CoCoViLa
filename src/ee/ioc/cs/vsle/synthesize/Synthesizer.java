@@ -197,11 +197,29 @@ public class Synthesizer {
                 }
                 */
 
+                // Before emitting the code for object name field and
+                // constructor we could check that the code is not already
+                // present...
+                if (!pClass.isOnlyForSuperclassGeneration())
+                	declars += CodeGenerator.OT_TAB 
+                		+ "private final String objectName;\n";
+
+                // Constructor that assigns the object name
+                String constructor = pClass.isOnlyForSuperclassGeneration() 
+                		? ""
+                		: "\n" + CodeGenerator.OT_TAB 
+                			+ "public " + pClass.getName() 
+                			+ "(String objectName) {\n"
+                			+ CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
+                			+ "this.objectName = objectName;\n"
+                			+ CodeGenerator.OT_TAB + "}\n";
+
                 // find spec
                 pattern = Pattern.compile(RE_SPEC, Pattern.DOTALL);
                 matcher = pattern.matcher( fileString );
                 if ( matcher.find() ) {
-                    fileString = matcher.replaceAll( "\n" + declars );
+                    fileString = matcher.replaceAll("\n" + declars 
+                    		+ constructor);
                 } else {
                 	throw new SpecParseException( "Unable to parse " + pClass.getName() + " specification" );
                 }
