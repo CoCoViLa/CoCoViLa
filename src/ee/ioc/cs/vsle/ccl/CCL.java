@@ -107,6 +107,25 @@ public class CCL extends URLClassLoader {
 		return classpath;
 	}
 	
+	@Override
+	public Class<?> loadClass(String name) throws ClassNotFoundException {
+		// Make sure ProgramContext gets loaded by the right classloader
+		// as the static fields must have different values for different
+		// programs.
+		if ("ee.ioc.cs.vsle.vclass.ProgramContext".equals(name)) {
+			try {
+				String resName = name.replace('.', '/').concat(".class");
+				URL u = getResource(resName);
+				addURL(new URL(u.toString().replace(resName, "")));
+				return findClass(name);
+			} catch (Exception e) {
+				throw new ClassNotFoundException(
+						"Loading of ProgramContext failed", e);
+			}
+		}
+
+		return super.loadClass(name);
+	}
 	
 	/**
 	 * Another implementation which uses internal compiler.
