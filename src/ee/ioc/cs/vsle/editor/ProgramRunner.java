@@ -100,9 +100,14 @@ public class ProgramRunner {
 			genObject = null;
 
 			if (classLoader.compile2(mainClassName)) {				
-				Class clas = classLoader.loadClass(mainClassName);
+				Class<?> clas = classLoader.loadClass(mainClassName);
 				genObject = clas.newInstance();
 			}
+			Class<?> pc = classLoader.loadClass(
+					"ee.ioc.cs.vsle.vclass.ProgramContext");
+			pc.getMethod("setScheme", Scheme.class).invoke(null,
+					m_canvas.scheme);
+			
 		} catch (NoClassDefFoundError e) { 
 			JOptionPane.showMessageDialog(null, "Class not found:\n" + e.getMessage(),
 					"Execution error", JOptionPane.ERROR_MESSAGE);
