@@ -67,7 +67,7 @@ public class PackageClass implements Serializable {
 
 	/**
 	 * Creates a new visual class instance from this package class.
-	 * A new name is assigned to each instance. 
+	 * A new name must be assigned to each instance. 
 	 * 
 	 * @return a new visual instance of this package class
 	 */
@@ -77,7 +77,6 @@ public class PackageClass implements Serializable {
 		obj.setWidth(graphics.getWidth());
 		obj.setHeight(graphics.getHeight());
 		obj.setClassName(name);
-		obj.setName(name + "_" + Integer.toString(sequence++));
 
 		obj.shapes = new ArrayList<Shape>(graphics.shapes.size());
 		for (Shape shape : graphics.shapes)

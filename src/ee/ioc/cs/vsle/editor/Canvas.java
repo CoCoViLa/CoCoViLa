@@ -1715,13 +1715,20 @@ public class Canvas extends JPanel {
 	/**
 	 * Creates a new instace of the specified visual class. The class is
 	 * initialized and stored to the filed {@code currentObj}.
+	 * The new object is also assigned a fresh name.
 	 * @param className the name of the visual class
 	 */
 	private void createAndInitNewObject(String className) {
 		PackageClass pClass = vPackage.getClass(className);
 		currentObj = pClass.getNewInstance();
-		
+
 		assert currentObj != null;
+
+		String freshName;
+		do {
+			freshName = className + "_" + pClass.getNextSerial();
+		} while (!objects.isUniqueName(freshName, null));
+		currentObj.setName(freshName);
 		
 		currentPainter = pClass.getPainterFor(scheme, currentObj);
 	}
