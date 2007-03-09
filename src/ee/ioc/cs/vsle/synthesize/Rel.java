@@ -12,29 +12,19 @@ import static ee.ioc.cs.vsle.util.TypeUtil.*;
 class Rel implements Serializable {
 
     private List<Var> outputs = new ArrayList<Var>();
-
     private List<Var> inputs = new ArrayList<Var>();
-
     private List<SubtaskRel> subtasks = new ArrayList<SubtaskRel>();
-
     private ArrayList<Var> exceptions = new ArrayList<Var>();
-    
-    private int relNumber = 0;
-
-    private int unknownInputs;
-
+    private int relID = 0;
     private Var parent;
-    
     private String method;
-
     //declaration in specification
     private String declaration;
-    
     //see RelType
     private int type;
 
     Rel( Var parent, String declaration ) {
-        relNumber = RelType.relCounter++;
+        relID = RelType.relCounter++;
         this.parent = parent;
         this.declaration = declaration;
     }
@@ -43,28 +33,74 @@ class Rel implements Serializable {
         return type;
     }
 
-    int getUnknownInputs() {
-        return unknownInputs;
+    void setType(int t) {
+        type = t;
+    }
+    
+    int getUnknownInputCount() {
+        return unknownInputs.size();
     }
 
+    void removeUnknownInput( Var var ) {
+    	unknownInputs.remove( var );
+    }
+
+    Set<Var> unknownInputs = new HashSet<Var>();
+    
+    void addInput(Var var) {
+        inputs.add( var );
+        if( !var.getField().isConstant() ) {
+        	unknownInputs.add( var );
+        }
+    }
+
+    void addInputs( Collection<Var> vars ) {
+    	for (Var var : vars) {
+			addInput( var );
+		}
+    }
+    
+    /**
+     * NB! inputs set cannot be managed outside, that is why have to return copy of this list
+     * @return inputs copy
+     */
+    List<Var> getInputs() {
+        return new ArrayList<Var>( inputs );
+    }
+    
+    void addOutput(Var var) {
+        outputs.add(var);
+    }
+
+    void addOutputs( Collection<Var> vars ) {
+    	outputs.addAll( vars );
+//    	for (Var var : vars) {
+//			addOutput(var);
+//		}
+    }
+    
+    /**
+     * NB! outputs set cannot be managed outside, that is why have to return copy of this list
+     * @return outputs copy
+     */
+    List<Var> getOutputs() {
+        return new ArrayList<Var>( outputs );
+    }
+    
+    void addSubtask(SubtaskRel rel) {
+        subtasks.add(rel);
+    }
+    
+    boolean isUnknownInputsExist( Collection<Var> vars ) {
+    	return vars.containsAll( inputs );
+    }
+    
     List<Var> getExceptions() {
         return exceptions;
     }
 
-    List<Var> getOutputs() {
-        return outputs;
-    }
-
-    List<Var> getInputs() {
-        return inputs;
-    }
-
     List<SubtaskRel> getSubtasks() {
         return subtasks;
-    }
-
-    void setUnknownInputs(int f) {
-        unknownInputs = f;
     }
 
     void setMethod(String m) {
@@ -75,10 +111,17 @@ class Rel implements Serializable {
         return method;
     }
 
-    void setType(int t) {
-        type = t;
+    public boolean equals(Object e) {
+        return this.relID == ((Rel) e).relID;
     }
 
+    public int hashCode() {
+        return RelType.REL_HASH + relID;
+    }
+    
+    
+    /**************** The code below is related to the code generation ************************************/
+    
     String getMaxType(List<Var> inputs) {
         Var var;
 
@@ -91,7 +134,7 @@ class Rel implements Serializable {
         return TYPE_INT;
     }
 
-    String getOutput() {
+    private String getOutputString() {
 
         String outputString = "";
         Var var = outputs.get(0);
@@ -117,10 +160,10 @@ class Rel implements Serializable {
 
     private String getAliasTmpName( Var var ) {
     	String varName = var.getFullNameForConcat().replaceAll( "\\.", "_" );
-        return TypeUtil.TYPE_ALIAS + "_" + varName + relNumber;
+        return TypeUtil.TYPE_ALIAS + "_" + varName + relID;
     }
 
-    String getParameters(boolean useBrackets) {
+    String getParametersString(boolean useBrackets) {
         String params = "";
         if (useBrackets)
             params += "(";
@@ -152,7 +195,7 @@ class Rel implements Serializable {
 
     }
 
-    String getSubtaskParameters() {
+    String getSubtaskParametersString() {
         String params = "(";
         boolean subExist = false;
         for (int i = 0; i < subtasks.size(); i++) {
@@ -166,20 +209,8 @@ class Rel implements Serializable {
         if (subExist && inputs.size() > 0) {
             params += ", ";
         }
-        params += getParameters(false);
+        params += getParametersString(false);
         return params += ")";
-    }
-
-    void addInput(Var var) {
-        inputs.add(var);
-    }
-
-    void addOutput(Var var) {
-        outputs.add(var);
-    }
-
-    void addSubtask(SubtaskRel rel) {
-        subtasks.add(rel);
     }
 
     String getParentObjectName() {
@@ -228,17 +259,17 @@ class Rel implements Serializable {
                 else if (op.getField().isArray() && ip.getField().isAlias()) {
 
                     assigns += op.getField().getType() + " TEMP"
-                            + Integer.toString(relNumber) + " = new "
+                            + Integer.toString(relID) + " = new "
                             + op.getField().arrayType() + "["
                             + ip.getChildVars().size() + "];\n";
                     for (int i = 0; i < ip.getChildVars().size(); i++) {
                         s1 = ip.getChildVars().get(i).toString();
                         assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
-                                + " TEMP" + Integer.toString(relNumber) + "["
+                                + " TEMP" + Integer.toString(relID) + "["
                                 + Integer.toString(i) + "] = " + s1 + ";\n";
                     }
                     assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB + op.getFullName()
-                            + " = " + " TEMP" + Integer.toString(relNumber);
+                            + " = " + " TEMP" + Integer.toString(relID);
                     // RelType.auxVarCounter++;
                     return assigns;
                 }
@@ -376,8 +407,8 @@ class Rel implements Serializable {
         } else if ( ( type == RelType.TYPE_JAVAMETHOD )
         		|| ( type == RelType.TYPE_METHOD_WITH_SUBTASK )) {
 
-        	String output = getOutput();
-        	String params = ( type == RelType.TYPE_JAVAMETHOD ) ? getParameters(true) : getSubtaskParameters();
+        	String output = getOutputString();
+        	String params = ( type == RelType.TYPE_JAVAMETHOD ) ? getParametersString(true) : getSubtaskParametersString();
         	return ( checkAliasInputs()
         			+ ( output.length() > 0 ? output + " = " : "" ) 
         			+ parent.getFullNameForConcat() + method + params )
@@ -518,14 +549,6 @@ class Rel implements Serializable {
         }
 
         return assigns;
-    }
-
-    public boolean equals(Object e) {
-        return this.relNumber == ((Rel) e).relNumber;
-    }
-
-    public int hashCode() {
-        return RelType.REL_HASH + relNumber;
     }
 
 	public String getDeclaration() {

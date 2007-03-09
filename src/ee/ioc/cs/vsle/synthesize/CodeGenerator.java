@@ -49,7 +49,12 @@ public class CodeGenerator {
             }
 
             else if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
-                genSubTasks( rel, alg, false, className, new HashSet<Var>() );
+            	
+            	HashSet<Var> usedVars = new HashSet<Var>();
+            	usedVars.addAll( rel.getInputs() );
+            	usedVars.addAll( rel.getOutputs() );
+            	
+                genSubTasks( rel, alg, false, className, usedVars );
             }
 
         }
@@ -64,28 +69,39 @@ public class CodeGenerator {
     		return;
     	}
     	
-    	String result = "";
+    	StringBuilder result = new StringBuilder( "" );
     	int i = 0;
     	for (Var var : assumptions) {
     		
     		String varType = var.getType();
     		TypeToken token = TypeToken.getTypeToken( varType );
     		
-    		result += offset;
-    		
-    		if ( token == TypeToken.TOKEN_OBJECT ) {
-    			result += var.getFullName() + " = (" + varType + ")args[" + i++ + "];\n";
-    		} else {
-    			result += var.getFullName()
-    			+ " = ((" + token.getObjType() + ")args[" + i++ + "])."
-    			+ token.getMethod() + "();\n";
-    		}
+    		result.append(offset);
+
+			if (token == TypeToken.TOKEN_OBJECT) {
+				result.append(var.getFullName());
+				result.append(" = (");
+				result.append(varType);
+				result.append(")args[");
+				result.append(i++);
+				result.append("];\n");
+			} else {
+				result.append(var.getFullName());
+				result.append(" = ((");
+				result.append(token.getObjType());
+				result.append(")args[");
+				result.append(i++);
+				result.append("]).");
+				result.append(token.getMethod());
+				result.append("();\n");
+			}
 		}
     	
     	alg.append( result );
     }
     
-    private void genSubTasks( Rel rel, StringBuilder alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars ) {
+    private void genSubTasks( Rel rel, StringBuilder alg, boolean isNestedSubtask, String parentClassName, 
+    		Set<Var> usedVars ) {
         int subNum;
         int start = subCount;
 
@@ -314,36 +330,52 @@ public class CodeGenerator {
         }
     }
 
-    private void appendSubtaskRelToAlg( Rel rel, int startInd, StringBuilder buf, boolean isNestedSubtask ) {
+    private void appendSubtaskRelToAlg(Rel rel, int startInd, StringBuilder buf, boolean isNestedSubtask) {
 
-        String relString = rel.toString();
-        for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
-            relString = relString.replaceFirst( RelType.TAG_SUBTASK, "subtask_" + ( startInd + i ) );
-        }
-        if(rel.getExceptions().size() == 0 || isNestedSubtask ) {
-            buf.append(same() + relString + "\n" );
-        }
-        else {
-            buf.append( appendExceptions( rel, relString ) + "\n" );
-        }
-    }
+		String relString = rel.toString();
+		for (int i = 0; i < rel.getSubtasks().size(); i++) {
+			relString = relString.replaceFirst(RelType.TAG_SUBTASK, "subtask_" + (startInd + i));
+		}
+		if (rel.getExceptions().size() == 0 || isNestedSubtask) {
+			buf.append(same());
+			buf.append(relString);
+			buf.append("\n");
+		} else {
+			buf.append(appendExceptions(rel, relString));
+			buf.append("\n");
+		}
+	}
 
-    private String appendExceptions( Rel rel, String s ) {
-        StringBuilder buf = new StringBuilder();
-        buf.append( same() + "try {\n" +
-                    right()  + s + ";\n" +
-                    left() + "}\n" );
-        for ( int i = 0; i < rel.getExceptions().size(); i++ ) {
-            String excp = rel.getExceptions().get( i ).getName();
-            String instanceName = "ex" + i;
-            buf.append( same() + "catch( " + excp + " " + instanceName + " ) {\n" +
-                        right()  + instanceName + ".printStackTrace();\n" +
-                        same() + "return;\n" +
-                        left() + "}\n" );
-        }
+    private String appendExceptions(Rel rel, String s) {
+		StringBuilder buf = new StringBuilder();
+		buf.append(same());
+		buf.append("try {\n");
+		buf.append(right());
+		buf.append(s);
+		buf.append(";\n");
+		buf.append(left());
+		buf.append("}\n");
+		
+		for (int i = 0; i < rel.getExceptions().size(); i++) {
+			String excp = rel.getExceptions().get(i).getName();
+			String instanceName = "ex" + i;
+			buf.append(same());
+			buf.append("catch( ");
+			buf.append(excp);
+			buf.append(" ");
+			buf.append(instanceName);
+			buf.append(" ) {\n");
+			buf.append(right());
+			buf.append(instanceName);
+			buf.append(".printStackTrace();\n");
+			buf.append(same());
+			buf.append("return;\n");
+			buf.append(left());
+			buf.append("}\n");
+		}
 
-        return buf.toString();
-    }
+		return buf.toString();
+	}
 
     private String getSubtaskInputs( List<Var> vars ) {
     	

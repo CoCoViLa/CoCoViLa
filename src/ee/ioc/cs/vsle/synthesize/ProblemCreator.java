@@ -120,7 +120,6 @@ public class ProblemCreator {
                         	outpChildVar = outpVar.getChildVars().get( i );
 
                             rel = new Rel( parent, classRelation.getSpecLine() );
-                            rel.setUnknownInputs( classRelation.getInputs().size() );
                             rel.setType( RelType.TYPE_EQUATION );
 
                             rel.addInput( outpChildVar );
@@ -263,9 +262,8 @@ public class ProblemCreator {
     	Rel relAliasOutp = new Rel( parentObj, classRelation.getSpecLine() );
     	relAliasOutp.setMethod( classRelation.getMethod() );
     	relAliasOutp.setType( classRelation.getType() );
-    	relAliasOutp.getInputs().addAll( alias.getChildVars() );
+    	relAliasOutp.addInputs( alias.getChildVars() );
     	relAliasOutp.addOutput( alias );
-    	relAliasOutp.setUnknownInputs( relAliasOutp.getInputs().size() );
     	alias.addRel(relAliasOutp);
     	for ( Var childVar : alias.getChildVars() ) {
     		childVar.addRel(relAliasOutp);
@@ -274,9 +272,8 @@ public class ProblemCreator {
     	Rel relAliasInp = new Rel( parentObj, classRelation.getSpecLine() );
     	relAliasInp.setMethod( classRelation.getMethod() );
     	relAliasInp.setType( classRelation.getType() );
-    	relAliasInp.getOutputs().addAll( alias.getChildVars() );
+    	relAliasInp.addOutputs( alias.getChildVars() );
     	relAliasInp.addInput( alias );
-    	relAliasInp.setUnknownInputs( relAliasInp.getInputs().size() );
     	alias.addRel(relAliasInp);
     	
     	HashSet<Rel> relset = new HashSet<Rel>();
@@ -298,19 +295,13 @@ public class ProblemCreator {
        Var var;
 
        rel.setMethod( classRelation.getMethod() );
-       int constants = 0;
-       //fist, count constants
-       //second, if we deal with equation and one variable is used on both sides of "=", we cannot use it.
+       //if we deal with equation and one variable is used on both sides of "=", we cannot use it.
        for (ClassField field : classRelation.getInputs() ) {
-			if( field.isConstant() ) {
-				constants++;
-			}
 			if( classRelation.getType() == RelType.TYPE_EQUATION && classRelation.getOutputs().contains( field ) ) {
 				return null;
 			}
 		}
        
-       rel.setUnknownInputs( getUniqueInputCount( classRelation.getInputs() ) - constants );
        rel.setType( classRelation.getType() );
        ClassField cf;
        

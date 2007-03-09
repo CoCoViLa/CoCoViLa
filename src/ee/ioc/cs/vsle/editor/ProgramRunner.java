@@ -130,6 +130,7 @@ public class ProgramRunner {
     private String compute( String fullSpec, boolean computeAll ) {
     	
         try {
+        	foundVars.clear();
         	
             mainClassName = SpecParser.getClassName( fullSpec );
             

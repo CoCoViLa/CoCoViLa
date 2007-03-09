@@ -214,21 +214,33 @@ public class AlgorithmVisualizer extends JFrame {
 					obj = "spec";
 				}
 				
-				alg.append( same() + obj + " : " + rel.getDeclaration() + "\n" );
+				alg.append(same());
+				alg.append(obj);
+				alg.append(" : ");
+				alg.append(rel.getDeclaration());
+				alg.append("\n");
 
-				if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
-					
-					for ( SubtaskRel subtask : rel.getSubtasks() ) {
+				if (rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK) {
+
+					for (SubtaskRel subtask : rel.getSubtasks()) {
 						right();
-						alg.append( same() + "!Subtask " + subtask.getDeclaration() + " :\n" );
-						alg.append( generateAlgorithmText( subtask.getAlgorithm() ) );
+						alg.append(same());
+						alg.append("!Subtask ");
+						alg.append(subtask.getDeclaration());
+						alg.append(" :\n");
+						alg.append(generateAlgorithmText(subtask.getAlgorithm()));
 						left();
 					}
-					
-					alg.append( same() + "!end of: " + obj + " : " + rel.getDeclaration() + "\n\n" );
+
+					alg.append(same());
+					alg.append("!end of: ");
+					alg.append(obj);
+					alg.append(" : ");
+					alg.append(rel.getDeclaration());
+					alg.append("\n\n");
 				}
 			}
-	        
+
 			return alg.toString();
 		}
 		
