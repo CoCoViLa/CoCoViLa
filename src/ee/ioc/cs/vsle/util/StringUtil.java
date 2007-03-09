@@ -21,4 +21,23 @@ public class StringUtil {
 		}
 		return sb.toString();
 	}
+
+    /**
+     * Checks if the specified string is a valid Java identifier.
+     * @param name the string to validate
+     * @return true if the name is a valid Java identifier, false otherwise
+     */
+    public static boolean isJavaIdentifier(String name) {
+    	if (name == null || name.length() < 1)
+    		return false;
+    	
+    	if (!Character.isJavaIdentifierStart(name.charAt(0)))
+    		return false;
+    	
+    	for (int i = 1; i < name.length(); i++)
+    		if (!Character.isJavaIdentifierPart(name.charAt(i)))
+    			return false;
+    	
+    	return true;
+    }
 }
