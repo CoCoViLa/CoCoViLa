@@ -7,6 +7,7 @@ import java.util.*;
 
 import javax.swing.*;
 
+import ee.ioc.cs.vsle.util.StringUtil;
 import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
@@ -33,7 +34,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 
 	private JTextField nameTextField;
 
-	private JButton clear, ok, close;
+	private JButton clear, ok;
 
 	private Canvas canvas;
 	
@@ -280,9 +281,6 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			clear.setEnabled(true);
 		}
 		buttonPane.add(clear);
-		close = new JButton("Close");
-		close.addActionListener(this);
-		//buttonPane.add(close);
 		fullPane.add(areaScrollPane, BorderLayout.CENTER);
 		fullPane.add(buttonPane, BorderLayout.SOUTH);
 		setContentPane(fullPane);
@@ -319,6 +317,26 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		ClassField field;
 		boolean inputError = false;
 		if (e.getSource() == ok) {
+			
+			// Validate object name: must be unique and valid Java identifier
+			String objectName = nameTextField.getText();
+			if (!StringUtil.isJavaIdentifier(objectName)) {
+				inputError = true;
+				JOptionPane.showMessageDialog(this, "The name of the object"
+						+ " is not a valid Java identifier.",
+						"Input error",
+						JOptionPane.ERROR_MESSAGE);
+			} else {
+				if (!canvas.objects.isUniqueName(objectName,
+						controlledObject)) {
+					inputError = true;
+					JOptionPane.showMessageDialog(this, "The name of the"
+							+ " object is not unique.",
+							"Input error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+
 			for (int i = 0; i < textFields.size(); i++) {
 				textField = textFields.get(i);
 				field = primitiveNameList.get(i);
@@ -370,7 +388,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 						field.setValue(null);
 					}
 				}
-				controlledObject.setName(nameTextField.getText());
+				controlledObject.setName(objectName);
 				controlledObject.setStatic( isStatic.isSelected() );
 				controlledObject = null;
 				this.dispose();
@@ -393,9 +411,6 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 				JComboBox comboBox = comboBoxes.get(i);
 				comboBox.removeAllItems();
 			}
-		}
-		else if (e.getSource() == close) {
-			dispose();
 		}
 	}
 
