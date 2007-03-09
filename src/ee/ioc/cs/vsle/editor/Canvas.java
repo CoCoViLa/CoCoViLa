@@ -50,8 +50,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import org.xml.sax.helpers.AttributesImpl;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
-
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.event.EventSystem;
@@ -104,12 +102,12 @@ public class Canvas extends JPanel {
     UndoableEditSupport undoSupport;
     private boolean actionInProgress = false;
     private JScrollPane areaScrollPane;
-    private ArrayList<String> diagnostics;
 
     /*
      * The Edit classes implementing undo-redo could be moved somewhere
      * else but as they need to touch the internal state of the Canvas
-     * object then maybe there is no better place right now. 
+     * object then maybe there is no better place right now.
+     * Limitations: Should preserve uniqueness of the object names somehow.
      */
 
     /**
@@ -652,7 +650,7 @@ public class Canvas extends JPanel {
 	 * Method for grouping objects.
 	 */
 	public void groupObjects() {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 		/*
 		 * This function is broken and was hidden in the GUI.
 		 * If this is something useful then it should be specified and
@@ -736,7 +734,7 @@ public class Canvas extends JPanel {
 	 * Method for ungrouping objects.
 	 */
 	public void ungroupObjects() {
-		throw new NotImplementedException();
+		throw new UnsupportedOperationException();
 		/*
 		 * See groupObjects() 
 		 */
@@ -1084,11 +1082,8 @@ public class Canvas extends JPanel {
 			}
 		}
 
-		for (GObj obj : newObjects) {
-			// TODO Unique check
-			obj.setName(obj.className + "_" 
-					+ Integer.toString(vPackage.getNextSerial(obj.className)));
-		}
+		for (GObj obj : newObjects)
+			obj.setName(genObjectName(vPackage.getClass(obj.className), obj));
 
 		objects.addAll(newObjects);
 
@@ -1724,11 +1719,7 @@ public class Canvas extends JPanel {
 
 		assert currentObj != null;
 
-		String freshName;
-		do {
-			freshName = className + "_" + pClass.getNextSerial();
-		} while (!objects.isUniqueName(freshName, null));
-		currentObj.setName(freshName);
+		currentObj.setName(genObjectName(pClass, currentObj));
 		
 		currentPainter = pClass.getPainterFor(scheme, currentObj);
 	}
@@ -1774,5 +1765,19 @@ public class Canvas extends JPanel {
 
 		drawingArea.repaint(obj.getX(), obj.getY(),
 				obj.getRealWidth(), obj.getRealHeight());
+	}
+
+	/**
+	 * Generates and returns a new name for the specified object.
+	 * @param pClass the class of the object
+	 * @param obj the object
+	 * @return the generated name
+	 */
+	private String genObjectName(PackageClass pClass, GObj obj) {
+		String name;
+		do {
+			name = pClass.name + "_" + pClass.getNextSerial();
+		} while (!objects.isUniqueName(name, obj));
+		return name;
 	}
 }
