@@ -224,4 +224,19 @@ public class ObjectList extends ArrayList<GObj> {
 		}
 		return null;
 	}
+
+	/**
+	 * Checks uniqueness of an object name.
+	 * @param name the name to be ckecked
+	 * @param asker the object to be ignored, can be null
+	 * @return true, if there is no object but the asker having the
+	 * specified name; false otherwise.
+	 */
+	public boolean isUniqueName(String name, GObj asker) {
+		for (GObj obj : this)
+			if (obj != asker && name.equals(obj.getName()))
+				return false;
+
+		return true;
+	}
 }
