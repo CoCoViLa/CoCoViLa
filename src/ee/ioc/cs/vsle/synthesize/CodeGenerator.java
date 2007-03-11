@@ -51,8 +51,9 @@ public class CodeGenerator {
             else if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
             	
             	HashSet<Var> usedVars = new HashSet<Var>();
-            	usedVars.addAll( rel.getInputs() );
-            	usedVars.addAll( rel.getOutputs() );
+            	
+            	addVarsToSet( rel.getInputs(), usedVars );
+            	addVarsToSet( rel.getOutputs(), usedVars );
             	
                 genSubTasks( rel, alg, false, className, usedVars );
             }
@@ -130,8 +131,8 @@ public class CodeGenerator {
             List<Var> subInputs = subtask.getInputs();
             List<Var> subOutputs = subtask.getOutputs();
             
-            usedVars.addAll( subInputs );
-            usedVars.addAll( subOutputs );
+            addVarsToSet( subInputs, usedVars );
+            addVarsToSet( subOutputs, usedVars );
             
             List<Rel> subAlg = subtask.getAlgorithm();
             right() ;
@@ -152,8 +153,8 @@ public class CodeGenerator {
                 } else {
                     appendRelToAlg( same(), trel, bufSbtBody );
                 }
-                usedVars.addAll( trel.getInputs() );
-                usedVars.addAll( trel.getOutputs() );
+                addVarsToSet( trel.getInputs(), usedVars );
+            	addVarsToSet( trel.getOutputs(), usedVars );
             }
             // apend subtask outputs to algorithm
             bufSbtBody.append( getSubtaskOutputs( subOutputs, same() ) );
@@ -496,6 +497,31 @@ public class CodeGenerator {
         return before + out;
     }
     
+    /**
+	 * This method helps to copy Vars from one collection to another taking into account Aliases, 
+	 * i.e. it flattens the hierarchical structure of aliases.
+	 * 
+	 * @param from
+	 * @param to
+	 */
+	public static void addVarsToSet( Collection<Var> from, Collection<Var> to ) {
+		for (Var topvar : from ) {
+
+			to.add(topvar);
+			// if output var is alias then all its vars should be copied as well
+			if ( topvar.getField().isAlias() ) {
+				for ( Var var : topvar.getChildVars() ) {
+
+					to.add(var);
+					if( var.getField().isAlias() ) {
+						//this is used if we have alias in alias structure
+						addVarsToSet( var.getChildVars(), to );//recursion
+					}
+				}
+			}
+		}
+	}
+	
 	public static String getOffset() {
 		return offset;
 	}

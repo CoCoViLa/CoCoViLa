@@ -12,7 +12,7 @@ import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
-
+import static ee.ioc.cs.vsle.synthesize.CodeGenerator.*;
 
 /**
  * @author pavelg
@@ -345,34 +345,6 @@ public class DepthFirstPlanner implements IPlanner {
 		return;// false;
 	}
 
-	
-	/**
-	 * This method helps to copy Vars from one collection to another taking into account Aliases, 
-	 * i.e. it flattens the hierarchical structure of aliases.
-	 * 
-	 * @param from
-	 * @param to
-	 */
-	private void addVarsToSet( Collection<Var> from, Collection<Var> to ) {
-		for (Var topvar : from ) {
-
-			to.add(topvar);
-			// if output var is alias then all its vars should be copied as well
-			if ( topvar.getField().isAlias() ) {
-				for ( Var var : topvar.getChildVars() ) {
-
-					to.add(var);
-					if( var.getField().isAlias() ) {
-						//this is used if we have alias in alias structure
-						if (RuntimeProperties.isLogDebugEnabled())
-							db.p( "addVarsToList: alias " + var + " in alias " + topvar );
-						addVarsToSet( var.getChildVars(), to );//recursion
-					}
-				}
-			}
-		}
-	}
-	
 	private void prepareSubtask(Problem problem, Rel subtask) {
 		// [x->y] assume x is known
 		Set<Var> flatVars = new HashSet<Var>();
