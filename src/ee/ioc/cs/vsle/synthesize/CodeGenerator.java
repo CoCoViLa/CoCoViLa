@@ -206,40 +206,35 @@ public class CodeGenerator {
     				bufDecl.append( declOT );
     				bufDecl.append( var.getDeclaration() );
     				
+    				String parent = parentClassName.concat( _this_).concat( var.getName() );
+    				bufConstr.append( consOT );
+    				
     				if( var.getField().isArray() ) {
     					if( var.getField().isPrimitiveArray() ) {
-    						bufConstr.append( consOT );
+    						bufConstr.append( "if( " ).append( parent ).append( " != null )\n").append( consOT ).append( OT_TAB );
     	    				bufConstr.append( var.getName() );
     	    				bufConstr.append( " = " );
     						bufConstr.append( "(" );
     						bufConstr.append( var.getType() );
     						bufConstr.append( ") " );
-    						bufConstr.append( parentClassName );
-    						bufConstr.append( _this_ );
-    						bufConstr.append( var.getName() );
+    						bufConstr.append( parent );
     						bufConstr.append( ".clone();\n" );
     					} else {
-    						bufConstr.append( consOT );
     						bufConstr.append( "try {\n" );
     						bufConstr.append( consOT );
     						bufConstr.append( OT_TAB );
     	    				bufConstr.append( var.getName() );
     	    				bufConstr.append( " = " );
     						bufConstr.append( "DeepCopy.copy( " );
-        					bufConstr.append( parentClassName );
-        					bufConstr.append( _this_ );
-        					bufConstr.append( var.getName() );
+        					bufConstr.append( parent );
         					bufConstr.append( " );\n" );
         					bufConstr.append( consOT );
         					bufConstr.append( "} catch( Exception e ) { e.printStackTrace(); }\n" );
     					}
     				} else {
-    					bufConstr.append( consOT );
         				bufConstr.append( var.getName() );
         				bufConstr.append( " = " );
-    					bufConstr.append( parentClassName );
-    					bufConstr.append( _this_ );
-    					bufConstr.append( var.getName() );
+    					bufConstr.append( parent );
     					bufConstr.append( ";\n" );
     				}
     			}
