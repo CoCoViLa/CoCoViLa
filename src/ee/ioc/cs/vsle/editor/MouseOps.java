@@ -170,6 +170,9 @@ class MouseOps extends MouseInputAdapter {
 					else 
 						canvas.mListener.setState(State.selection);
 				}
+			} else if (State.isAddRelClass(state)) {
+				if (canvas.currentObj != null)
+					canvas.mListener.setState(State.selection);
 			} else {
 				canvas.mListener.setState(State.selection);
 			}
