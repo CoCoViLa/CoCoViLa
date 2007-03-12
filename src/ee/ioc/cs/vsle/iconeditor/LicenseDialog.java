@@ -11,6 +11,7 @@ import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
 import javax.swing.JButton;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.WindowConstants;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -77,12 +78,12 @@ public class LicenseDialog extends JDialog {
 		setResizable(false);
 		setLocationRelativeTo(parent);
 
-		setVisible(true);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		bttnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				if (evt.getSource() == bttnOk) {
-					setVisible(false);
+					dispose();
 				}
 			} // end actionPerformed
 		}); // end bttnOk Action Listener
@@ -97,6 +98,8 @@ public class LicenseDialog extends JDialog {
 				}
 			}
 		}); // end cbLang item listener
+
+		setVisible(true);
 	} // PortPropertiesDialog
 
 	/**

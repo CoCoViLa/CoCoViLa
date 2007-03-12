@@ -24,13 +24,13 @@ public class SchemeSettingsDialog extends JDialog {
 
 	public SchemeSettingsDialog( JFrame owner ) {
 		super( owner, "Scheme Options", true );
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		
 		init();
 		
     	pack();
     	setResizable( false );
     	setVisible( true );
-    	setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 	}
 
 	private void init() {
