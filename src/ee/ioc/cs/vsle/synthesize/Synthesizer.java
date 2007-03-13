@@ -70,25 +70,28 @@ public class Synthesizer {
         runner.addFoundVars( problem.getFoundVars() );
         runner.setAssumptions( problem.getAssumptions() );
         
-        String prog = "";
+        StringBuilder prog = new StringBuilder();
         
         // start building the main source file.
         AnnotatedClass ac = classList.getType( TYPE_THIS );
 
         // check all the fields and make declarations accordingly
-        for ( int i = 0; i < ac.getFields().size(); i++ ) {
+        for ( ClassField field : ac.getFields() ) {
 
-        	String dec = TypeUtil.getDeclaration( ac.getFields().get( i ), "public" );
+        	if( AnnotatedClass.SPEC_OBJECT_NAME.equals( field.getName() ) && ac.getSuperClasses().size() > 0 )
+        		continue;
         	
+            String dec = TypeUtil.getDeclaration( field, "public" );
+           
         	if( dec != null && dec.length() > 0 ) {
-        		prog += CodeGenerator.OT_TAB + dec;
+                prog.append( CodeGenerator.OT_TAB ).append( dec );
         	}
             
         }
-
-        prog += "\n" + CodeGenerator.OT_TAB + getComputeMethodSignature() + " {\n";
-        prog += algorithm;
-        prog += CodeGenerator.OT_TAB + "}";
+       
+        prog.append( "\n" ).append(  CodeGenerator.OT_TAB ).append( getComputeMethodSignature() ).append( " {\n" );
+        prog.append( algorithm );
+        prog.append( CodeGenerator.OT_TAB ).append( "}" );
         Pattern pattern;
         Matcher matcher;
 
@@ -108,13 +111,10 @@ public class Synthesizer {
         matcher = pattern.matcher( fileString );
 
         if ( matcher.find() ) {
-            fileString = matcher.replaceAll( "\n" + prog );
+            fileString = matcher.replaceAll( "\n" + prog.toString() );
         }
 
-        createGeneratedInterface();
-        createSubtaskInterface();
-
-        return "import ee.ioc.cs.vsle.util.*;\n\n" + fileString;
+        return "import ee.ioc.cs.vsle.util.*;\nimport ee.ioc.cs.vsle.api.*;\n\n" + fileString;
 
     }
 
@@ -134,7 +134,7 @@ public class Synthesizer {
         Pattern pattern;
         Matcher matcher;
 
-        HashSet<String> generated = new HashSet<String>();
+        Set<String> generated = new LinkedHashSet<String>();
         // for each class generate new one used in synthesis
 
         for ( int h = 0; h < classes.size(); h++ ) {
@@ -161,69 +161,23 @@ public class Synthesizer {
                 String declars = "";
 
                 for ( ClassField field : pClass.getFields() ) {
+                	if( AnnotatedClass.SPEC_OBJECT_NAME.equals( field.getName() ) && pClass.getSuperClasses().size() > 0 )
+                		continue;
+                	
                 	declars += CodeGenerator.OT_TAB + TypeUtil.getDeclaration( field, "public" );
 				}
-                
-                /*
-                 * The line above does the same thing faster ;-)
-                 * TODO - delete the following code
-                try {
-                    ArrayList<String> specLines = SpecParser.getSpec( fileString, false );
-
-                    while ( !specLines.isEmpty() ) {
-                        LineType lt = SpecParser.getLine( specLines );
-                        if( lt == null ) {
-                        	continue;
-                        } else if ( lt.getType() == LineType.TYPE_DECLARATION ) {
-                            String[] split = lt.getSpecLine().split( ":", -1 );
-                            String[] vs = split[ 1 ].trim().split( " *, *", -1 );
-                            String type = split[ 0 ].trim();
-
-                                for ( int i = 0; i < vs.length; i++ ) {
-                                	declars += CodeGenerator.OT_TAB 
-                                			+ TypeUtil.getDeclaration( vs[ i ], type, false, classes.getType( type ) != null, "" );
-                                }
-                        } else if ( lt.getType() == LineType.TYPE_CONST ) {
-                        	String[] split = lt.getSpecLine().split( ":", -1 );
-                        	String type  = split[ 0 ].trim();
-                        	String name  = split[ 1 ].trim();
-                        	String value = split[ 2 ].trim();
-                        	declars += CodeGenerator.OT_TAB 
-                					+ TypeUtil.getDeclaration( name, type, false, false, value );
-                        }
-                    }
-                } catch ( Exception e ) {
-                	e.printStackTrace();
-                }
-                */
-
-                // Before emitting the code for object name field and
-                // constructor we could check that the code is not already
-                // present...
-                if (!pClass.isOnlyForSuperclassGeneration())
-                	declars += CodeGenerator.OT_TAB 
-                		+ "private final String objectName;\n";
-
-                // Constructor that assigns the object name
-                String constructor = pClass.isOnlyForSuperclassGeneration() 
-                		? ""
-                		: "\n" + CodeGenerator.OT_TAB 
-                			+ "public " + pClass.getName() 
-                			+ "(String objectName) {\n"
-                			+ CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
-                			+ "this.objectName = objectName;\n"
-                			+ CodeGenerator.OT_TAB + "}\n";
 
                 // find spec
                 pattern = Pattern.compile(RE_SPEC, Pattern.DOTALL);
                 matcher = pattern.matcher( fileString );
                 if ( matcher.find() ) {
-                    fileString = matcher.replaceAll("\n" + declars 
-                    		+ constructor);
+                    fileString = matcher.replaceAll( "\n" + declars );
                 } else {
                 	throw new SpecParseException( "Unable to parse " + pClass.getName() + " specification" );
                 }
 
+                fileString = "import ee.ioc.cs.vsle.api.*;\n\n" + fileString;
+               
                 FileFuncs.writeFile( fileString, pClass.getName(), "java", RuntimeProperties.genFileDir, false );
             }
         }
@@ -239,7 +193,7 @@ public class Synthesizer {
 
             String mainClassName = SpecParser.getClassName( file );
             
-            ClassList classList = SpecParser.parseSpecification( path, file );
+            ClassList classList = SpecParser.parseSpecification( path, mainClassName, null, file );
             String prog = makeProgramText( file, true, classList, mainClassName, null ); //changed to true
 
             makeProgram( prog, classList, mainClassName, path );
@@ -257,44 +211,12 @@ public class Synthesizer {
             ex.printStackTrace();
         }
     }
-
-    private static void createSubtaskInterface() {
-        File file = new File( RuntimeProperties.genFileDir
-                              + RuntimeProperties.FS
-                              + SUBTASK_INTERFACE_NAME + ".java" );
-
-        if ( !file.exists() ) {
-            try {
-                FileWriter fw = new FileWriter( file );
-                String in = "public interface Subtask {\n"
-                            + "\tObject[] run(Object[] in) throws Exception;\n}\n";
-                fw.write( in );
-                fw.close();
-            } catch ( IOException ex ) {
-                System.err.println( "Unable to create " + file.getAbsolutePath() );
-            }
-        }
-    }
-
-    private static void createGeneratedInterface() {
-        File file = new File( RuntimeProperties.genFileDir
-                              + RuntimeProperties.FS
-                              + GENERATED_INTERFACE_NAME + ".java" );
-
-        if ( !file.exists() ) {
-            try {
-                FileWriter fw = new FileWriter( file );
-                String in = "public interface IComputable {\n"
-                            + "\t" + getComputeMethodSignature() + ";\n}\n";
-                fw.write( in );
-                fw.close();
-            } catch ( IOException ex ) {
-                System.err.println( "Unable to create " + file.getAbsolutePath() );
-            }
-        }
+   
+    public static String getRunMethodSignature() {
+        return "public Object[] run(Object[] in) throws Exception";
     }
     
-    private static String getComputeMethodSignature() {
+    public static String getComputeMethodSignature() {
     	return "public void compute( Object... args )";
-    }
+    }   
 }

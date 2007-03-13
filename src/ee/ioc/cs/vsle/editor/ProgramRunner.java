@@ -137,7 +137,13 @@ public class ProgramRunner {
             if ( RuntimeProperties.isLogInfoEnabled() )
     			db.p( "Computing " + mainClassName );
             
-            classList = SpecParser.parseSpecification( fullSpec, m_canvas.getWorkDir() );
+            Set<String> schemeObjects = new HashSet<String>();
+            
+            for( GObj gObj : m_canvas.objects ) {
+            	schemeObjects.add( gObj.getName() );
+            }
+            
+            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, m_canvas.getWorkDir() );
             getAssumptions().clear();
             
             return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, this );

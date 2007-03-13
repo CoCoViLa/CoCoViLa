@@ -3,7 +3,7 @@ package ee.ioc.cs.vsle.synthesize;
 import ee.ioc.cs.vsle.vclass.ClassField;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
@@ -87,7 +87,7 @@ class ClassRelation
 	 * @param vars ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void setOutput(String s, ArrayList<ClassField> vars) throws UnknownVariableException {
+	void setOutput(String s, Collection<ClassField> vars) throws UnknownVariableException {
 		ClassField f = getVar(s, vars);
 
 		if (f != null) {
@@ -113,7 +113,7 @@ class ClassRelation
 	 * @param vars ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void setInput(String s, ArrayList<ClassField> vars) throws UnknownVariableException {
+	void setInput(String s, Collection<ClassField> vars) throws UnknownVariableException {
 		if (!s.equals("")) {
 			ClassField f = getVar(s, vars);
 
@@ -145,7 +145,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addInputs(String[] input, ArrayList<ClassField> varList) throws UnknownVariableException {
+	void addInputs(String[] input, Collection<ClassField> varList) throws UnknownVariableException {
 		for (int i = 0; i < input.length; i++) {
 			if (!input[i].equals("#")) {
 				ClassField var = getVar(input[i], varList);
@@ -171,7 +171,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-        void addOutputs( String[] output, ArrayList<ClassField> varList ) throws UnknownVariableException {
+        void addOutputs( String[] output, Collection<ClassField> varList ) throws UnknownVariableException {
             for ( int i = 0; i < output.length; i++ ) {
                 //we must have at least one output, others will be considered as exceptions
                 String s = output[ i ];
@@ -211,7 +211,7 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addSubtasks(ArrayList<String> subtaskList, ArrayList<ClassField> varList) throws UnknownVariableException {
+	void addSubtasks(ArrayList<String> subtaskList, Collection<ClassField> varList) throws UnknownVariableException {
 		ClassRelation subtask;
 		String subtaskString;
 		Pattern pattern;
@@ -263,11 +263,9 @@ class ClassRelation
 	 * @param varList ArrayList
 	 * @return ClassField
 	 */
-	static ClassField getVar(String varName, ArrayList<ClassField> varList) {
-		ClassField var;
+	static ClassField getVar(String varName, Collection<ClassField> varList) {
 
-		for (int i = 0; i < varList.size(); i++) {
-			var = varList.get(i);
+		for ( ClassField var : varList ) {
 			if (var.getName().equals(varName)) {
 				return var;
 			}

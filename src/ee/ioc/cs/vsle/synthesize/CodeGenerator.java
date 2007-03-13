@@ -5,6 +5,7 @@ import java.util.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
+import static ee.ioc.cs.vsle.synthesize.Synthesizer.*;
 
 public class CodeGenerator {
 
@@ -50,7 +51,7 @@ public class CodeGenerator {
 
             else if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
             	
-            	HashSet<Var> usedVars = new HashSet<Var>();
+            	Set<Var> usedVars = new HashSet<Var>();
             	
             	addVarsToSet( rel.getInputs(), usedVars );
             	addVarsToSet( rel.getOutputs(), usedVars );
@@ -109,14 +110,14 @@ public class CodeGenerator {
         for ( SubtaskRel subtask : rel.getSubtasks() ) {
             subNum = subCount++;
             
-            String sbName = Synthesizer.SUBTASK_INTERFACE_NAME + "_" + subNum;
+            String sbName = SUBTASK_INTERFACE_NAME + "_" + subNum;
             
             alg.append( "\n");
             alg.append( same() );
             alg.append( "class " );
             alg.append( sbName );
             alg.append( " implements " );
-            alg.append( Synthesizer.SUBTASK_INTERFACE_NAME );
+            alg.append( SUBTASK_INTERFACE_NAME );
             alg.append( " {\n\n" );
             
             right() ;
@@ -126,7 +127,7 @@ public class CodeGenerator {
             StringBuilder bufSbtBody = new StringBuilder();
             
             bufSbtBody.append( same() );
-            bufSbtBody.append( "public Object[] run(Object[] in) throws Exception {\n" );
+            bufSbtBody.append( getRunMethodSignature() ).append( " {\n" );
             
             List<Var> subInputs = subtask.getInputs();
             List<Var> subOutputs = subtask.getOutputs();

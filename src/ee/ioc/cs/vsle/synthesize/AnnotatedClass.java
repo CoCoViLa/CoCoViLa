@@ -2,7 +2,7 @@ package ee.ioc.cs.vsle.synthesize;
 
 import ee.ioc.cs.vsle.vclass.ClassField;
 
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * <p>Title: ee.ioc.cs.editor.synthesize.AnnotatedClass</p>
@@ -15,15 +15,18 @@ import java.util.ArrayList;
  */
 public class AnnotatedClass {
 
+	public static final String SPEC_OBJECT_NAME = "cocovilaSpecObjectName";
+	
 	private String name;
-	private ArrayList<AnnotatedClass> superClasses = new ArrayList<AnnotatedClass>();
-	private ArrayList<ClassRelation> classRelations = new ArrayList<ClassRelation>();
-	private ArrayList<ClassField> fields = new ArrayList<ClassField>();
+	private Collection<AnnotatedClass> superClasses = new LinkedHashSet<AnnotatedClass>();
+	private Collection<ClassRelation> classRelations = new LinkedHashSet<ClassRelation>();
+	private Collection<ClassField> fields = new LinkedHashSet<ClassField>();
 	private boolean isOnlyForSuperclassGeneration = false;
 	/**
 	 * Class constructor.
 	 * @param s String
-	 */ AnnotatedClass(String s) {
+	 */ 
+	AnnotatedClass(String s) {
 		name = s;
 	} // ee.ioc.cs.editor.synthesize.AnnotatedClass
 
@@ -33,7 +36,8 @@ public class AnnotatedClass {
 	/**
 	 * Adds a new field to the ArrayList of fields.
 	 * @param field ClassField - a field to be appended to the list of fields.
-	 */ void addField(ClassField field) {
+	 */ 
+	 void addField(ClassField field) {
 		fields.add(field);
 	} // addField
 
@@ -41,7 +45,7 @@ public class AnnotatedClass {
 	 * Adds a list of variables to the ArrayList of fields.
 	 * @param v ArrayList - list of variables to be appended to the list of fields.
 	 */
-	void addVars(ArrayList<ClassField> v) {
+	void addFields(Collection<ClassField> v) {
 		fields.addAll(v);
 	} // addVars
 
@@ -73,9 +77,7 @@ public class AnnotatedClass {
 	}
 
 	public ClassField getFieldByName(String fieldName) {
-		ClassField f;
-		for (int j = 0; j < fields.size(); j++){
-            f = fields.get(j);
+		for ( ClassField f : fields ){
 			if (f.getName().equals(fieldName))
 				return f;
 		}
@@ -86,15 +88,15 @@ public class AnnotatedClass {
 		return name;
 	}
 
-	ArrayList<ClassRelation> getClassRelations() {
+	Collection<ClassRelation> getClassRelations() {
 		return classRelations;
 	}
 
-	ArrayList<ClassField> getFields() {
+	Collection<ClassField> getFields() {
 		return fields;
 	}
 
-	public ArrayList<AnnotatedClass> getSuperClasses() {
+	public Collection<AnnotatedClass> getSuperClasses() {
 		return superClasses;
 	}
 

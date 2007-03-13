@@ -81,7 +81,7 @@ public class ProblemCreator {
         for ( ClassRelation classRelation : ac.getClassRelations() ) {
 
             Rel rel = new Rel( parent, classRelation.getSpecLine() );
-            HashSet<Rel> relSet = null;
+            Set<Rel> relSet = null;
             
             boolean isAliasRel = false;
 
@@ -197,10 +197,7 @@ public class ProblemCreator {
     	
     	String wildcardVar = ((Alias)aliasVar.getField()).getWildcardVar();
 
-    	ClassField clf;
-
-    	for ( int i = 0; i < ac.getFields().size(); i++ ) {
-    		clf = ac.getFields().get( i );
+    	for ( ClassField clf : ac.getFields() ) {
     		//in the following AnnotatedClass we look for vars that match wildcard
     		AnnotatedClass anc = classes.getType( clf.getType() );
     		if ( anc != null ) {
@@ -224,23 +221,6 @@ public class ProblemCreator {
     		}
     	}
     }
-    
-    private static int getUniqueInputCount( ArrayList<ClassField> inputs ) {
-    	
-    	HashSet<ClassField> inps = new HashSet<ClassField>();
-    	
-    	int size = 0;
-    	
-    	for ( ClassField object : inputs ) {
-			if( inps.contains( object ) ) {
-				continue;
-			}
-			size++;
-			inps.add( object );
-		}
-    	
-    	return size;
-    }
 
     private static boolean isAliasWildcard( ClassRelation classRelation ) {
     	
@@ -250,7 +230,7 @@ public class ProblemCreator {
     /**
      * creates Rel for alias x = ( *.wildcardVar );
      */
-    private static HashSet<Rel> makeAliasWildcard( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
+    private static Set<Rel> makeAliasWildcard( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
     		Problem problem, Var parentObj ) throws UnknownVariableException {
     	
     	Var alias = problem.getAllVars().get( parentObj.getFullNameForConcat() + classRelation.getOutputs().get( 0 ).getName() );
@@ -276,7 +256,7 @@ public class ProblemCreator {
     	relAliasInp.addInput( alias );
     	alias.addRel(relAliasInp);
     	
-    	HashSet<Rel> relset = new HashSet<Rel>();
+    	Set<Rel> relset = new LinkedHashSet<Rel>();
     	relset.add( relAliasOutp );
     	relset.add( relAliasInp );
     	
@@ -351,7 +331,7 @@ public class ProblemCreator {
     * creates set of Rels for x -> *.y { impl }; - does not work currently
     * @deprecated
     */
-   private static HashSet<Rel> makeRightWildcardRel( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
+   private static Set<Rel> makeRightWildcardRel( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
 		   Problem problem, Var parentVar, String wildcardVar ) throws
 		   UnknownVariableException {
 	   
@@ -360,7 +340,7 @@ public class ProblemCreator {
 		   throw new UnknownVariableException( "*." + wildcardVar );
 	   }
 	   ClassField clf;
-	   HashSet<Rel> set = new HashSet<Rel>();
+	   Set<Rel> set = new LinkedHashSet<Rel>();
 	   /*for ( int i = 0; i < ac.getFields().size(); i++ ) {
 		   clf = ac.getFields().get( i );
 		   AnnotatedClass anc = classes.getType( clf.getType() );

@@ -19,7 +19,7 @@ import ee.ioc.cs.vsle.vclass.ClassField;
 public class Var implements //Cloneable,
         Serializable {
 
-    private Set<Rel> rels = new HashSet<Rel>();
+    private Set<Rel> rels = new LinkedHashSet<Rel>();
     //the following is for alias only!!!
     private List<Var> vars = new ArrayList<Var>();
     private ClassField field;

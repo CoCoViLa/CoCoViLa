@@ -45,7 +45,7 @@ class Rel implements Serializable {
     	unknownInputs.remove( var );
     }
 
-    Set<Var> unknownInputs = new HashSet<Var>();
+    Set<Var> unknownInputs = new LinkedHashSet<Var>();
     
     void addInput(Var var) {
         inputs.add( var );
@@ -279,7 +279,7 @@ class Rel implements Serializable {
             }
 
             
-            Set<String> varNames = new HashSet<String>();
+            Set<String> varNames = new LinkedHashSet<String>();
             for( Var out : getOutputs() ) {
             	varNames.add( out.getFullName() );
             }

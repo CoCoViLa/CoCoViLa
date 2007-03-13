@@ -8,26 +8,16 @@ import ee.ioc.cs.vsle.util.*;
 
 class Problem implements Serializable {
 
-	private Set<Rel> axioms = new HashSet<Rel>();
-
-	private Set<Var> knownVars = new HashSet<Var>();
-
+	private Set<Rel> axioms = new LinkedHashSet<Rel>();
+	private Set<Var> knownVars = new LinkedHashSet<Var>();
 	private List<Var> assumptions = new ArrayList<Var>();
-
-	private Set<Var> goals = new HashSet<Var>();
-
-	private Map<String, Var> allVars = new HashMap<String, Var>();
-
-	private Set<Rel> allRels = new HashSet<Rel>();
-
-	private Set<Rel> relWithSubtasks = new HashSet<Rel>();
-
-	private Set<SubtaskRel> subtasks = new HashSet<SubtaskRel>();
-
+	private Set<Var> goals = new LinkedHashSet<Var>();
+	private Map<String, Var> allVars = new LinkedHashMap<String, Var>();
+	private Set<Rel> allRels = new LinkedHashSet<Rel>();
+	private Set<Rel> relWithSubtasks = new LinkedHashSet<Rel>();
+	private Set<SubtaskRel> subtasks = new LinkedHashSet<SubtaskRel>();
 	private Vector<Rel> subGoal = null;
-
-	private HashSet<Var> foundVars = new HashSet<Var>();
-
+	private Set<Var> foundVars = new LinkedHashSet<Var>();
 	private Var rootVarThis;
 	
 	Var getVarByFullName( String field ) {
@@ -93,7 +83,7 @@ class Problem implements Serializable {
 		allRels.add(rel);
 	}
 
-	void addAllRels(HashSet<Rel> set) {
+	void addAllRels(Set<Rel> set) {
 		allRels.addAll(set);
 	}
 

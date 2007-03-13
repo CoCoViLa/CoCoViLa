@@ -110,13 +110,13 @@ public class ClassField implements Cloneable, Serializable {
 	 *            String
 	 * @param type
 	 *            String
-	 * @param b
+     * @param isSpecField
 	 *            boolean
 	 */
-	public ClassField(String name, String type, boolean b) {
+    public ClassField(String name, String type, boolean isSpecField) {
 		setName( name );
 		this.type = type;
-		specField = b;
+        specField = isSpecField;
 	} // ee.ioc.cs.editor.vclass.ClassField
 
 	public ClassField(String name, String type, String value, String desc) {

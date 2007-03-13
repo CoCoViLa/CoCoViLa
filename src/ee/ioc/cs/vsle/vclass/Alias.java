@@ -4,7 +4,7 @@ import ee.ioc.cs.vsle.synthesize.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ALIAS;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_OBJECT;
 
-import java.util.ArrayList;
+import java.util.*;
 
 
 public class Alias extends ClassField {
@@ -52,7 +52,7 @@ public class Alias extends ClassField {
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException - exception thrown if the variable added is null.
 	 * @throws AliasException 
 	 */
-	public void addAll(String[] input, ArrayList<ClassField> varList, ClassList classList) throws UnknownVariableException, AliasException {
+    public void addAll(String[] input, Collection<ClassField> varList, ClassList classList) throws UnknownVariableException, AliasException {
 		for (int i = 0; i < input.length; i++) {
 			if( i > 0 && isWildcard() ) {
 				throw new AliasException( "Alias structure can only contain one wildcard OR variables that are not wildcards" );
@@ -145,11 +145,9 @@ public class Alias extends ClassField {
 	 * @param varList ArrayList - list of variables to be checked through.
 	 * @return ClassField - ClassField variable found from the varList by the name "varName".
 	 */
-	ClassField getVar(String varName, ArrayList<ClassField> varList) {
-		ClassField var;
+    ClassField getVar(String varName, Collection<ClassField> varList) {
 
-		for (int i = 0; i < varList.size(); i++) {
-			var = varList.get(i);
+        for ( ClassField var : varList ) {
 			if (var.name.equals(varName)) {
 				return var;
 			}

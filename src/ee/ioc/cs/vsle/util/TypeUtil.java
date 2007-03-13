@@ -71,8 +71,7 @@ public class TypeUtil {
     	} else if ( TypeUtil.isArray( type ) ) {
     		return prx + type + " " + varName + ";\n";
     	} else if ( isClass ) {
-    		return prx + type + " " + varName + " = new " + type 
-    			+ "(\"" + varName + "\");\n";
+            return prx + type + " " + varName + " = new " + type + "();\n";
     	} else {
     		return prx + type + " " + varName + " = new " + type + "();\n";
     	}

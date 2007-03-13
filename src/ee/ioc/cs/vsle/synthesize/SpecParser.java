@@ -255,11 +255,24 @@ public class SpecParser {
 
     private static ArrayList<String> s_parseErrors = new ArrayList<String>();
     
-    public static ClassList parseSpecification( String fullSpec, String path ) throws IOException,
+    public static ClassList parseSpecification( String fullSpec, String mainClassName, Set<String> schemeObjects, String path ) throws IOException,
     										SpecParseException, EquationException {
     	s_parseErrors.clear();
-    	HashSet<String> hs = new HashSet<String>();
-    	return parseSpecificationImpl( refineSpec( fullSpec ), TYPE_THIS, path, hs );
+    	ClassList<AnnotatedClass> classes = parseSpecificationImpl( refineSpec( fullSpec ), TYPE_THIS, schemeObjects, path, new LinkedHashSet<String>() );
+    	
+    	/* ****** SPEC_OBJECT_NAME for scheme spec ? ****** */
+//    	AnnotatedClass _this = classes.getType( TYPE_THIS );
+//    	
+//    	String meth = AnnotatedClass.SPEC_OBJECT_NAME + " = " + "\"" + mainClassName + "\"";
+//    	
+//    	ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, meth );
+//
+//    	classRelation.getOutputs().add( _this.getFieldByName( AnnotatedClass.SPEC_OBJECT_NAME ) );
+//        classRelation.setMethod( meth );
+//        _this.addClassRelation( classRelation );
+        /* ****** SPEC_OBJECT_NAME ****** */
+        
+    	return classes;
     }
     
     /**
@@ -272,15 +285,22 @@ public class SpecParser {
      @param	checkedClasses the list of classes that parser has started to check. Needed to prevent infinite loop
      in case of mutual declarations.
      */
-    private static ClassList<AnnotatedClass> parseSpecificationImpl( String spec, String className, String path,
-                                         HashSet<String> checkedClasses ) throws IOException,
+    private static ClassList<AnnotatedClass> parseSpecificationImpl( String spec, String className, Set<String> schemeObjects, String path,
+                                         Set<String> checkedClasses ) throws IOException,
             SpecParseException, EquationException {
         Matcher matcher2;
         Pattern pattern;
         String[] split;
-        ArrayList<ClassField> vars = new ArrayList<ClassField>();
+        Collection<ClassField> vars = new LinkedHashSet<ClassField>();
         ArrayList<String> subtasks = new ArrayList<String>();
         AnnotatedClass annClass = new AnnotatedClass( className );
+        
+        /* ****** SPEC_OBJECT_NAME ****** */
+        ClassField specObjectName = new ClassField( AnnotatedClass.SPEC_OBJECT_NAME, "String" );
+        annClass.addField( specObjectName );
+        vars.add( specObjectName );
+        /* ****** SPEC_OBJECT_NAME ****** */
+        
         ClassList<AnnotatedClass> classList = new ClassList<AnnotatedClass>();
 
         ArrayList<String> specLines = getSpec( spec, true );
@@ -308,22 +328,23 @@ public class SpecParser {
 	                                checkedClasses.add( name );
 	                                String s = new String( getStringFromFile( path + name + ".java" ) );
 
-	                                ClassList<AnnotatedClass> superClasses = parseSpecificationImpl( refineSpec( s ), name,
+	                                ClassList<AnnotatedClass> superClasses = parseSpecificationImpl( refineSpec( s ), name, null,
 	                                		path, checkedClasses );
 	                                checkedClasses.remove( name );
 	                                
 	                                superClasses.getType( name ).setOnlyForSuperclassGeneration( true );
 	                                
-	                                for ( AnnotatedClass annCl : superClasses.getSuperClasses() ) {
-	                                	annClass.addSuperClass( annCl );
-	                                	//annClass.getFields().addAll( annCl.getFields() );
-	                                	vars.addAll( annCl.getFields() );
-	                                	annClass.getClassRelations().addAll( annCl.getClassRelations() );
-	                                	annCl.getFields().clear();
-	                                	annCl.getClassRelations().clear();
+	                                for ( AnnotatedClass superClass : superClasses.getSuperClasses() ) {
+	                                	annClass.addSuperClass( superClass );
+	                                	vars.addAll( superClass.getFields() );
+	                                	annClass.getClassRelations().addAll( superClass.getClassRelations() );
+	                                	ClassField specName = superClass.getFieldByName( AnnotatedClass.SPEC_OBJECT_NAME );
+	                                	superClass.getFields().clear();
+	                                	superClass.getFields().add( specName );
+	                                	superClass.getClassRelations().clear();
 	                                	
-	                                	if( !classList.contains(annCl) ) {
-	                                		classList.add( annCl );
+	                                	if( !classList.contains(superClass) ) {
+	                                		classList.add( superClass );
 	                                	}
 									}
 	                            }
@@ -388,7 +409,7 @@ public class SpecParser {
                                 checkedClasses.add( type );
                                 String s = new String( getStringFromFile( path + type + ".java" ) );
 
-                                classList.addAll( parseSpecificationImpl( refineSpec( s ), type, path,
+                                classList.addAll( parseSpecificationImpl( refineSpec( s ), type, null, path,
                                         checkedClasses ) );
                                 checkedClasses.remove( type );
                                 specClass = true;
@@ -403,6 +424,20 @@ public class SpecParser {
                             }
                             ClassField var = new ClassField( vs[ i ], type, specClass );
                             var.setStatic( isStatic );
+                            
+                            /* ****** SPEC_OBJECT_NAME ****** */
+                            //add the following relation only if the object exists on a given scheme
+                            if( schemeObjects != null && specClass && ( className == TYPE_THIS ) && schemeObjects.contains( vs[ i ] ) ) {
+                            	String s = vs[ i ] + "." + AnnotatedClass.SPEC_OBJECT_NAME;
+                            	String meth = s + " = " + "\"" + vs[ i ] + "\"";
+                            	
+                            	ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, meth );
+
+                                classRelation.setOutput( s, vars );
+                                classRelation.setMethod( meth );
+                                annClass.addClassRelation( classRelation );
+                            }
+                            /* ****** SPEC_OBJECT_NAME ****** */
                             
                             vars.add( var );
                         }
@@ -455,8 +490,7 @@ public class SpecParser {
                         				String parent = name.substring( 0, ind );
                         				String leftFromName = name.substring( ind + 1, name.length() );
                         				
-                        				ArrayList<ClassField> varsFromClass = vars;
-                        				ClassField parentVar = ClassRelation.getVar( parent, varsFromClass );
+                        				ClassField parentVar = ClassRelation.getVar( parent, vars );
                         				String parentType = parentVar.getType();
                         				
                         				AnnotatedClass parentClass = classList.getType( parentType );
@@ -653,17 +687,17 @@ public class SpecParser {
             throw new UnknownVariableException( className + "." + uve.excDesc );
 
         }
-        annClass.addVars( vars );
+        annClass.addFields( vars );
         classList.add( annClass );
         return classList;
     }
 
-    private static void checkAnyType( String output, String input, ArrayList<ClassField> vars ) throws UnknownVariableException {
+    private static void checkAnyType( String output, String input, Collection<ClassField> vars ) throws UnknownVariableException {
     	checkAnyType( output, new String[]{ input }, vars );
     }
     
     //TODO - implement _any_!!!
-    private static void checkAnyType( String output, String[] inputs, ArrayList<ClassField> vars ) throws UnknownVariableException {
+    private static void checkAnyType( String output, String[] inputs, Collection<ClassField> vars ) throws UnknownVariableException {
     	ClassField out = ClassRelation.getVar( output, vars );
     	
     	if( out == null || !out.getType().equals(TYPE_ANY) ) {
@@ -711,14 +745,14 @@ public class SpecParser {
     	out.setType( newType );
     }
     
-    private static void checkAliasLength( String inputs[], ArrayList<ClassField> vars, String className ) 
+    private static void checkAliasLength( String inputs[], Collection<ClassField> vars, String className ) 
     				throws UnknownVariableException {
     	for( int i = 0; i < inputs.length; i++ ) {
         	inputs[i] = checkAliasLength( inputs[i], vars, className ) ;
     	}
     }
     
-    private static String checkAliasLength( String input, ArrayList<ClassField> vars, String className ) 
+    private static String checkAliasLength( String input, Collection<ClassField> vars, String className ) 
     				throws UnknownVariableException {
     	//check if inputs contain <alias>.lenth variable
     	if( input.endsWith( ".length" ) ) {
@@ -815,11 +849,9 @@ public class SpecParser {
         return false;
     }
   
-    private static boolean varListIncludes( ArrayList<ClassField> vars, String varName ) {
-        ClassField cf;
+    private static boolean varListIncludes( Collection<ClassField> vars, String varName ) {
 
-        for ( int i = 0; i < vars.size(); i++ ) {
-            cf = vars.get( i );
+        for ( ClassField cf : vars ) {
             if ( cf.getName().equals( varName ) ) {
                 return true;
             }

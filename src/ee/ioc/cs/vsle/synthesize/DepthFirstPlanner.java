@@ -80,11 +80,11 @@ public class DepthFirstPlanner implements IPlanner {
 		 * that set. Theyre collected into these sets and added/removedall
 		 * together after iteration is finished
 		 */
-		HashSet<Var> newVars = new HashSet<Var>();
-		HashSet<Var> relOutputs = new HashSet<Var>();
-		HashSet<Var> removableVars = new HashSet<Var>();
+		Set<Var> newVars = new LinkedHashSet<Var>();
+		Set<Var> relOutputs = new LinkedHashSet<Var>();
+		Set<Var> removableVars = new LinkedHashSet<Var>();
 		// backup goals for later optimization
-		HashSet<Var> allTargetVars = new HashSet<Var>( targetVars );
+		Set<Var> allTargetVars = new LinkedHashSet<Var>( targetVars );
 		
 		boolean changed = true;
 
@@ -224,15 +224,15 @@ public class DepthFirstPlanner implements IPlanner {
 		if (RuntimeProperties.isLogDebugEnabled()) 
 			db.p( "maxDepth: " + ( maxDepth + 1 ) );
 		
-		subtaskPlanningImpl( problem, algorithm, new HashSet<Rel>(), 0, computeAll );
+		subtaskPlanningImpl( problem, algorithm, new LinkedHashSet<Rel>(), 0, computeAll );
 		
 		maxDepth = maxDepthBackup;
 	}
 	
 	private void subtaskPlanningImpl(Problem problem, List<Rel> algorithm,
-			HashSet<Rel> subtaskRelsInPath, int depth, boolean computeAll ) {
+			Set<Rel> subtaskRelsInPath, int depth, boolean computeAll ) {
 
-		Set<Var> newVars = new HashSet<Var>();
+		Set<Var> newVars = new LinkedHashSet<Var>();
 		
 		// or
 		OR: for (Rel subtaskRel : problem.getRelsWithSubtasks()) {
@@ -247,7 +247,7 @@ public class DepthFirstPlanner implements IPlanner {
 				continue OR;
 			}
 			
-			HashSet<Rel> newPath = new HashSet<Rel>();
+			Set<Rel> newPath = new LinkedHashSet<Rel>();
 			
 			if( !m_isSubtaskRepetitionAllowed && subtaskRelsInPath.contains(subtaskRel) ) {
 				if (RuntimeProperties.isLogDebugEnabled())
@@ -273,7 +273,7 @@ public class DepthFirstPlanner implements IPlanner {
 
 				prepareSubtask( problemNew, subtaskNew );
 				
-				Set<Var> goals = new HashSet<Var>();
+				Set<Var> goals = new LinkedHashSet<Var>();
 				addVarsToSet( subtaskNew.getOutputs(), goals );
 				
 				boolean solved = 
@@ -347,48 +347,10 @@ public class DepthFirstPlanner implements IPlanner {
 
 	private void prepareSubtask(Problem problem, Rel subtask) {
 		// [x->y] assume x is known
-		Set<Var> flatVars = new HashSet<Var>();
+		Set<Var> flatVars = new LinkedHashSet<Var>();
 		addVarsToSet( subtask.getInputs(), flatVars );
 		problem.getKnownVars().addAll( flatVars );
 		problem.getFoundVars().addAll( flatVars );
-		
-//		HashSet<Rel> removableRels = new HashSet<Rel>();
-//		// remove all rels with otputs same as subtask inputs
-//		for (Var subtaskInput : subtask.getInputs()) {
-//
-//			for (Rel rel : problem.getAllRels()) {
-//				if ( ( rel.getOutputs().size() > 0 ) 
-//						&& ( rel.getOutputs().get(0) == subtaskInput ) ) {
-//					removableRels.add( rel );
-//				}
-//			}
-//		}
-		
-		/* Pavel[27Mar06]
-		 * probably we do not need the functionality commented below 
-		 * because sometimes we want to compute something else 
-		 * when subtask's output is known, e.g. -
-		 * 
-		 * double a,b,c,d,x,y;
-		 * y=sin(x);
-		 * a = x;
-		 * b = y;
-		 * c=a+b;
-		 * [x->y]->d{f};
-		 * 
-		// remove all rels with inputs same as subtask outputs
-		for (Var subtaskOutput : subtask.getOutputs()) {
-			for (Rel rel : problem.getAllRels()) {
-				if (rel.getType() == RelType.TYPE_EQUATION
-						&& rel.getInputs().get(0) == subtaskOutput) {
-					removableRels.add( rel );
-				}
-			}
-		}
-		*/
-		
-//		problem.getAllRels().removeAll(removableRels);
-//		removableRels.clear();
 	}
 	
 	public Component getCustomOptionComponent() {
