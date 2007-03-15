@@ -474,6 +474,9 @@ class Rel implements Serializable {
                     
                     for (int k = 0; k < input.getChildVars().size(); k++) {
                     	Var var = input.getChildVars().get(k);
+                    	
+                    	if( var.getField().isVoid() ) continue;
+                    	
                     	String varName;
                 		
                 		if ( var.getField().isAlias() ) {
@@ -525,6 +528,8 @@ class Rel implements Serializable {
                 for (int k = 0; k < output.getChildVars().size(); k++) {
                 	Var varFromAlias = output.getChildVars().get(k);
                     
+                	if( varFromAlias.getField().isVoid() ) continue;
+                	
                 	String varType = varFromAlias.getType();
             		TypeToken token = TypeToken.getTypeToken( varType );
             		

@@ -413,6 +413,8 @@ public class CodeGenerator {
         for ( int i = 0; i < aliasVar.getChildVars().size(); i++ ) {
             var = aliasVar.getChildVars().get( i );
             
+            if( var.getField().isVoid() ) continue;
+            
             String varType = var.getType();
     		TypeToken token = TypeToken.getTypeToken( varType );
     		
@@ -472,9 +474,11 @@ public class CodeGenerator {
         String before = "";
         String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
 
-        Var var;
-        for ( int j = 0; j < aliasVar.getChildVars().size(); j++ ) {
-        	var = aliasVar.getChildVars().get( j );
+        int count = 0;
+        for ( Var var : aliasVar.getChildVars() ) {
+        	
+        	if( var.getField().isVoid() ) continue;
+        	
         	String varName;
         	if( var.getField().isAlias() ) {
         		varName = getAliasTmpName(aliasVar.getName());
@@ -482,7 +486,7 @@ public class CodeGenerator {
         	} else {
         		varName = var.getFullName();
         	}
-            if ( j == 0 ) {
+            if ( count++ == 0 ) {
                 out += varName;
             } else {
                 out += ", " + varName;
