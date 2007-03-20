@@ -316,88 +316,10 @@ class Rel implements Serializable {
                     && ( methodCallExist || !getMaxType(inputs).equals(TYPE_INT) ) ) {
             	
             	String[] eq = sb.toString().split( "=" );
-            	return eq[0] + " = (" + TYPE_INT + ") " + eq[1];
+            	return eq[0] + " = (" + TYPE_INT + ") (" + eq[1] + " )";
             } 
             
             return sb.toString();
-            
-            /*
-             * TODO - cleanup when the time comes (keep this just in case the code above starts to fail).
-             * 
-            Var var;
-            String m = new String(method + " ");
-            String[] parts = m.split("=");
-            String leftside = parts[0]+" ";
-            String rightside = parts[1];
-            String left = "";
-            String left2 = "";
-            String right = "";
-            
-            //this collection maps tokens to real var names
-            Map<String, String> map = new TreeMap<String, String>();
-            
-            String relParentFullName = parent.getFullNameForConcat();
-            
-            for (int i = 0; i < inputs.size(); i++) {
-                var = inputs.get(i);
-                
-                String varName = var.getFullName();
-                
-                if( varName.startsWith( relParentFullName ) )
-                {
-                	varName = varName.substring( relParentFullName.length() );
-                }
-                
-                pattern = Pattern.compile("([^a-zA-Z_])(([a-zA-Z_0-9]+\\.)*)?" + varName + "([^a-zA-Z0-9_])");
-                matcher = pattern.matcher(rightside);
-
-                map.put( "#" + i, var.getName() );
-                
-                while (matcher.find()) {
-                    left = matcher.group(1);
-                    left2 = matcher.group(2);
-                    right = matcher.group(4);
-
-                    if( left2.trim().equals( "" ) )
-                    {
-                    	rightside = rightside.replaceFirst("([^a-zA-Z_]" + left2
-                    			+ varName + "[^a-zA-Z0-9_])", left
-                    			+ var.getParent().getFullNameForConcat() + "#"
-                    			+ Integer.toString(i) + right);
-                    	
-                    	matcher = pattern.matcher(rightside);
-                    }
-                }
-
-            }
-
-            for ( String key : map.keySet() ) {
-            	rightside = rightside.replaceAll( key, map.get(key) );
-			}
-
-            left2 = "";
-            var = outputs.get(0);
-            pattern = Pattern.compile("([^a-zA-Z_]?)(([a-zA-Z_0-9]+\\.)*)"
-                    + var.getName() + "([^a-zA-Z0-9_])");
-            matcher = pattern.matcher(leftside);
-            if (matcher.find()) {
-                left = matcher.group(1);
-                left2 = matcher.group(2);
-                right = matcher.group(4);
-            }
-
-            leftside = leftside.replaceFirst("([^a-zA-Z_]?" + left2
-                    + var.getName() + "[^a-zA-Z0-9_])", left + var.getFullName() + right );
-                    
-            //add casting to other types as well
-            if ( outputs.get(0).getType().equals(TYPE_INT)
-                    && ( !getMaxType(inputs).equals(TYPE_INT) || method.indexOf(".") >= 0 ) ) {
-                m = leftside + "= (" + TYPE_INT + ")(" + rightside + ")";
-
-            } else
-                m = leftside + "=" + rightside;
-            
-            return m;*/
             
         } else if (type == RelType.TYPE_SUBTASK) {
 
