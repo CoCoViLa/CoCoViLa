@@ -732,6 +732,26 @@ public class Editor extends JFrame implements ChangeListener {
 			canvas.drawingArea.repaint();
 			canvas.drawingArea.requestFocusInWindow();
 		}
+		
+		updateWindowTitle();
+	}
+
+	/**
+	 * Updates the title of the window to reflect current scheme name.
+	 */
+	public void updateWindowTitle() {
+		String windowTitle = null;
+		
+		Canvas canvas = getCurrentCanvas();
+		if (canvas != null)
+			windowTitle = canvas.getSchemeTitle();
+
+		if (windowTitle == null)
+			windowTitle = WINDOW_TITLE;
+		else
+			windowTitle += " - " + WINDOW_TITLE;
+			
+		setTitle(windowTitle);
 	}
 
 	public static Editor getInstance() {

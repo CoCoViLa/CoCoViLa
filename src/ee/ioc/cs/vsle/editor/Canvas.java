@@ -541,8 +541,29 @@ public class Canvas extends JPanel {
 	public String getTitle() {
 		return m_canvasTitle;
 	}
-	
-    void initialize() {
+
+	/**
+	 * Returns the filename part of package's last scheme path.
+	 * @return file name without path and suffix which may be empty string,
+	 * or null if the scheme is not saved to or loaded from a file.
+	 */
+	public String getSchemeTitle() {
+		String lastFile = vPackage.getLastScheme();
+		String title = null;
+		if (lastFile != null && lastFile.length() > 0) {
+			int is = lastFile.lastIndexOf(File.separatorChar);
+			int ip = lastFile.lastIndexOf('.');
+
+			is = is > 0 ? is + 1 : 0;
+			ip = ip > 0 ? ip : lastFile.length() - 1;
+
+			if (is <= ip)
+				title = lastFile.substring(is, ip);
+		}
+		return title;
+	}
+
+	void initialize() {
 		scheme = new Scheme(vPackage);
 		objects = scheme.getObjects();
 		connections = scheme.getConnections();
@@ -1333,6 +1354,12 @@ public class Canvas extends JPanel {
 
 			for (GObj obj : objects) {
 				obj.drawClassGraphics(g2, scale);
+
+				if (enableClassPainter && classPainters != null) {
+					ClassPainter p = classPainters.get(obj);
+					if (p != null)
+						p.paint(g2, scale);
+				}
 			}
 			
 			g2.setColor(Color.blue);
@@ -1340,11 +1367,6 @@ public class Canvas extends JPanel {
 				rel = connections.get(i);
 				rel.drawRelation(g2);
 			}
-            
-            if (enableClassPainter && classPainters != null) {
-                for (ClassPainter painter : classPainters.values())
-                    painter.paint(g2, scale);
-            }
 
             if (isConnectionBeingAdded()) {
             	// adding connection, first port connected

@@ -140,6 +140,7 @@ public class EditorActionListener implements ActionListener {
                     db.p( "Saving scheme: " + file.getName() );
                     Editor.getInstance().getCurrentCanvas().saveScheme( file );
                     Editor.getInstance().getCurrentPackage().setLastScheme( file.getAbsolutePath() );
+                    Editor.getInstance().updateWindowTitle();
                 }
             } else if ( e.getActionCommand().equals( Menu.LOAD_SCHEME ) ) {
                 if( Editor.getInstance().getCurrentPackage() == null ) {
@@ -160,6 +161,7 @@ public class EditorActionListener implements ActionListener {
                     try {
                         Editor.getInstance().getCurrentCanvas().loadScheme( file );
                         Editor.getInstance().getCurrentPackage().setLastScheme( file.getAbsolutePath() );
+                        Editor.getInstance().updateWindowTitle();
                     } catch ( Exception exc ) {
                         exc.printStackTrace();
                     }
@@ -202,6 +204,7 @@ public class EditorActionListener implements ActionListener {
                     db.p( "Loading package: " + pack.getName() );
                     Editor.getInstance().loadPackage( pack );
                     //Editor.getInstance().validate();
+                    Editor.getInstance().updateWindowTitle();
                 }
             } else if ( e.getActionCommand().equals( Menu.CLOSE ) ) {
                 if ( Editor.getInstance().getCurrentPackage() != null ) {
