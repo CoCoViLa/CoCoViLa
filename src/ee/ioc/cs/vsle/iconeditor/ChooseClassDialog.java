@@ -19,11 +19,11 @@ public class ChooseClassDialog extends JDialog {
 	private static final JPanel bttnPanel = new JPanel();
 	private static final JScrollPane scrollPane = new JScrollPane();
 	private static JList jl = new JList();
-	ArrayList pc;
+	ArrayList<String> pc;
 	String selectedValue;
 	
 	
-	public ChooseClassDialog(ArrayList pc) {
+	public ChooseClassDialog(ArrayList<String> pc) {
 		
 		this.setTitle("Import Class");
 		this.pc = pc;
@@ -69,10 +69,11 @@ public class ChooseClassDialog extends JDialog {
 			  }
 		});
 
+        pack();
 	}
 	
 	/* Refreshes list items */ 
-	public void newJList(ArrayList pc) {
+	public void newJList(ArrayList<String> pc) {
 		jl.setListData(pc.toArray());
 	}
 	public String getSelectedValue(){
