@@ -1,12 +1,8 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
-import ee.ioc.cs.vsle.vclass.ClassField;
-import ee.ioc.cs.vsle.vclass.Connection;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.awt.Graphics2D;
 import java.awt.Graphics;
 import java.awt.Color;
@@ -22,7 +18,6 @@ import java.awt.BasicStroke;
  */
 public class IconPort implements Cloneable, Serializable {
 
-	GObj obj;
 	int width = 10;
 	int height = 10;
 	String name;
@@ -34,7 +29,6 @@ public class IconPort implements Cloneable, Serializable {
 	ClassGraphics openGraphics;
 	ClassGraphics closedGraphics;
 	Graphics2D graphics;
-	ArrayList<Connection> connections = new ArrayList<Connection>();
 	boolean selected = false;
 	boolean connected = false;
 	boolean known = false;
@@ -107,36 +101,13 @@ public class IconPort implements Cloneable, Serializable {
 
 	/**
 	 * Set size using zoom multiplication.
-	 * @param s float - set size using zoom multiplication.
+	 * @param s1 X zoom size multiplication
+	 * @param s2 Y zoom size multiplication
 	 */
 	public void setMultSize(float s1, float s2) {
 		x = (int) (x * s1 / s2);
 		y = (int) (y * s1 / s2);
 	} // setMultSize
-
-	/**
-	 * Returns center y coordinate of the port.
-	 * @return int - port center y coordinate.
-	 */
-	int getCenterY() {
-		return (y + openGraphics.boundY + (openGraphics.boundHeight) / 2);
-	} // getCenterY
-
-	/**
-	 * Returns center x coordinate of the port calculated from object bounds.
-	 * @return int - center x coordinate of the port calculated from object bounds.
-	 */
-	int getRealCenterX() {
-		return (obj.x + x + openGraphics.boundX + (openGraphics.boundWidth) / 2);
-	} // getRealCenterX
-
-	/**
-	 * Returns center y coordinate of the port calculated from object bounds.
-	 * @return int - center y coordinate of the port calculated from object bounds.
-	 */
-	int getRealCenterY() {
-		return (obj.y + y + openGraphics.boundY + (openGraphics.boundHeight) / 2);
-	} // getRealCenterY
 
 	/**
 	 * Returns port width.
@@ -174,6 +145,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * Returns port name.
 	 * @return String - port name.
 	 */
+	@Override
 	public String toString() {
 		return name;
 	} // toString
@@ -296,82 +268,7 @@ public class IconPort implements Cloneable, Serializable {
 	 */
 	String getType() {
 		return type;
-		
-		//TODO - obj is always null because no one calls setObject, why???
-		
-//		for (int i = 0; i < obj.fields.size(); i++) {
-//			if (obj.fields.get(i).getName().equals(name)) {
-//				return obj.fields.get(i).getType();
-//			}
-//		}
-//		return null;
 	} // getType
-
-	/**
-	 * Returns class field of the port.
-	 * @return ClassField - class field of the port.
-	 */
-	ClassField getField() {
-		for (int i = 0; i < obj.fields.size(); i++) {
-			if (obj.fields.get(i).getName().equals(name)) {
-				return obj.fields.get(i);
-			}
-		}
-		return null;
-	} // getField
-
-	/**
-	 * Set port object.
-	 * @param obj GObj - port object.
-	 */
-	void setObject(GObj obj) {
-		this.obj = obj;
-	} // setObject
-
-	/**
-	 * Returns port number.
-	 * @return int - port number.
-	 */
-    /*
-	int getNumber() {
-		IconPort port;
-		for (int j = 0; j < obj.ports.size(); j++) {
-			port = (IconPort) obj.ports.get(j);
-			if (port == this) {
-				return j;
-			}
-		}
-		return -1;
-	} // getNumber
-    */
-
-	/**
-	 * Add connection to the port.
-	 * @param con Connection - connection added to the port.
-	 */
-	void addConnection(Connection con) {
-		connections.add(con);
-	} // addConnection
-
-	/**
-	 * Returns a list of connections for the current port.
-	 * @return ArrayList - list of connections for the current port.
-	 */
-	ArrayList getConnections() {
-		return connections;
-	} // getConnections
-
-	/**
-	 * Clone the port.
-	 * @return Object - cloned port.
-	 */
-	public Object clone() {
-		try {
-			return super.clone();
-		} catch (CloneNotSupportedException e) {
-			return null;
-		}
-	} // clone
 
 	/**
 	 * Set the port a new position.
