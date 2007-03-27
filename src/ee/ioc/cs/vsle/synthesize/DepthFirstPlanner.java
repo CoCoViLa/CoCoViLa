@@ -266,58 +266,82 @@ public class DepthFirstPlanner implements IPlanner {
 			AND: for (SubtaskRel subtask : subtaskRel.getSubtasks()) {
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( "AND: subtask - " + subtask );
-				// lets clone the environment
-				Problem problemNew = problem.getCopy();
-				// we need fresh cloned subtask instance
-				SubtaskRel subtaskNew = problemNew.getSubtask(subtask);
+				
+				if( subtask.isIndependent() ) {
+					if( subtask.isSolvable() == null ) {
+						//independent subtask is solved only once
+						Problem context = subtask.getContext();
+						ArrayList<Rel> alg = invokePlaning( context, false );
+						boolean solved = context.getFoundVars().containsAll( context.getGoals() );
+						if( solved ) {
+							subtask.setSolvable( Boolean.TRUE );
+							subtask.getAlgorithm().addAll( alg );
+						} else {
+							subtask.setSolvable( Boolean.FALSE );
+						}
+						allSolved &= solved;
+					} else if( subtask.isSolvable() == Boolean.TRUE ) {
+						allSolved &= true;
+					} else {
+						allSolved &= false;
+					}
+					
+				} else {
+					// lets clone the environment
+					Problem problemNew = problem.getCopy();
+					// we need fresh cloned subtask instance
+					SubtaskRel subtaskNew = problemNew.getSubtask(subtask);
 
-				prepareSubtask( problemNew, subtaskNew );
-				
-				Set<Var> goals = new LinkedHashSet<Var>();
-				addVarsToSet( subtaskNew.getOutputs(), goals );
-				
-				boolean solved = 
-					linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
-							// never optimize here
+					prepareSubtask( problemNew, subtaskNew );
+
+					Set<Var> goals = new LinkedHashSet<Var>();
+					addVarsToSet( subtaskNew.getOutputs(), goals );
+
+					boolean solved = 
+						linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
+								// never optimize here
+								goals, true );
+
+					if( solved ) {
+						if (RuntimeProperties.isLogDebugEnabled())
+							db.p( "Subtask: " + subtaskNew + " solved" );
+						subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
+						allSolved &= solved;
+						continue AND;
+					} else if( !solved && ( depth == maxDepth ) ) {
+						if (RuntimeProperties.isLogDebugEnabled())
+							db.p( "Subtask: " + subtaskNew + " not solved and cannot go any deeper" );
+						continue OR;
+					}
+
+					if (RuntimeProperties.isLogDebugEnabled())
+						db.p( "Recursing deeper" );
+
+					List<Rel> newAlg = new ArrayList<Rel>( subtaskNew.getAlgorithm() );
+
+					subtaskPlanningImpl( problemNew, newAlg, newPath, depth + 1, false );
+
+					if (RuntimeProperties.isLogDebugEnabled())
+						db.p( "Back to depth " + ( depth + 1 ) );
+
+					solved = linearForwardSearch( problemNew, newAlg, 
+							// always optimize here in order to get rid of unnecessary subtask instances
+							// temporary true while optimization does not work correctly
 							goals, true );
-				
-				if( solved ) {
+
 					if (RuntimeProperties.isLogDebugEnabled())
-						db.p( "Subtask: " + subtaskNew + " solved" );
-					subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
+						db.p( "Subtask: " + subtaskNew + " solved: " + solved );
+
 					allSolved &= solved;
-					continue AND;
-				} else if( !solved && ( depth == maxDepth ) ) {
-					if (RuntimeProperties.isLogDebugEnabled())
-						db.p( "Subtask: " + subtaskNew + " not solved and cannot go any deeper" );
-					continue OR;
+
+					// if at least one subtask is not solvable, try another branch
+					if( !allSolved ) {
+						continue OR;
+					}
+					// copy algorithm from cloned subtask to old
+					subtask.getAlgorithm().addAll( newAlg );
 				}
 				
-				if (RuntimeProperties.isLogDebugEnabled())
-					db.p( "Recursing deeper" );
-				
-				List<Rel> newAlg = new ArrayList<Rel>( subtaskNew.getAlgorithm() );
-				
-				subtaskPlanningImpl( problemNew, newAlg, newPath, depth + 1, false );
-				
-				if (RuntimeProperties.isLogDebugEnabled())
-					db.p( "Back to depth " + ( depth + 1 ) );
-				
-				solved = linearForwardSearch( problemNew, newAlg, 
-						// always optimize here in order to get rid of unnecessary subtask instances
-						// temporary true while optimization does not work correctly
-						goals, true );
-				
-				if (RuntimeProperties.isLogDebugEnabled())
-					db.p( "Subtask: " + subtaskNew + " solved: " + solved );
-				
-				allSolved &= solved;
-				//if at least one subtask is not solvable, try another branch
-				if( !allSolved ) {
-					continue OR;
-				}
-				// copy algorithm from cloned subtask to old
-				subtask.getAlgorithm().addAll( newAlg );
 			}
 			
 			if( allSolved ) {

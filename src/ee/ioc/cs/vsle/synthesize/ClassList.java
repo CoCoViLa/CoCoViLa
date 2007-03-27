@@ -10,8 +10,8 @@ import java.util.ArrayList;
  * @author Ando Saabas
  * @version 1.0
  */
-public class ClassList<E>
-	extends ArrayList<E> {
+public class ClassList
+	extends ArrayList<AnnotatedClass> {
 
 	/**
 	 * Class constructor.
@@ -27,8 +27,7 @@ public class ClassList<E>
 	 */
 
 	public AnnotatedClass getType(String type) {
-		for (int i = 0; i < this.size(); i++) {
-			AnnotatedClass ac = (AnnotatedClass)this.get(i);
+		for (AnnotatedClass ac : this ) {
 
 			if (ac.getName().equals(type) && !ac.isOnlyForSuperclassGeneration() ) {
 				return ac;
@@ -37,11 +36,14 @@ public class ClassList<E>
 		return null;
 	} // getType
 
-
+	public boolean containsType( String type ) {
+		return true;
+	}
+	
 	public ArrayList<AnnotatedClass> getSuperClasses() {
 		ArrayList<AnnotatedClass> a = new ArrayList<AnnotatedClass>();
-		for (int i = 0; i < this.size(); i++) {
-			AnnotatedClass ac = (AnnotatedClass)this.get(i);
+		
+		for (AnnotatedClass ac : this ) {
 
 			if ( ac.isOnlyForSuperclassGeneration() ) {
 				a.add( ac );

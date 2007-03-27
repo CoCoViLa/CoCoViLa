@@ -24,10 +24,10 @@ public class AnnotatedClass {
 	private boolean isOnlyForSuperclassGeneration = false;
 	/**
 	 * Class constructor.
-	 * @param s String
+	 * @param name String
 	 */ 
-	AnnotatedClass(String s) {
-		name = s;
+	AnnotatedClass(String name) {
+		this.name = name;
 	} // ee.ioc.cs.editor.synthesize.AnnotatedClass
 
 	 void addSuperClass( AnnotatedClass clas ) {

@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.synthesize;
 
 import ee.ioc.cs.vsle.vclass.ClassField;
+import static ee.ioc.cs.vsle.synthesize.SpecParser.*;
 
 import java.io.Serializable;
 import java.util.*;
@@ -18,10 +19,10 @@ import java.util.regex.Matcher;
 class ClassRelation
 	implements Serializable {
 
-	private ArrayList<ClassField> inputs = new ArrayList<ClassField>();
-	private ArrayList<ClassRelation> subtasks = new ArrayList<ClassRelation>();
-	private ArrayList<ClassField> outputs = new ArrayList<ClassField>();
-	private ArrayList<ClassField> exceptions = new ArrayList<ClassField>();
+    private Collection<ClassField> inputs = new LinkedHashSet<ClassField>();
+    private Collection<SubtaskClassRelation> subtasks = new LinkedHashSet<SubtaskClassRelation>();
+    private Collection<ClassField> outputs = new LinkedHashSet<ClassField>();
+    private Collection<ClassField> exceptions = new LinkedHashSet<ClassField>();
 
 	/**
 	 * Type of the relation.
@@ -38,10 +39,10 @@ class ClassRelation
 
 	/**
 	 * Class constructor.
-	 * @param i int - relation type.
+	 * @param type int - relation type.
 	 */
-        ClassRelation(int i, String specLine ) {
-		type = i;
+        ClassRelation(int type, String specLine ) {
+		this.type = type;
 		this.specLine = specLine;
 	} // ee.ioc.cs.editor.synthesize.ClassRelation
 
@@ -57,224 +58,142 @@ class ClassRelation
             return method;
         }
 
-        ArrayList<ClassField> getInputs() {
+        /**
+         * @return first input
+         */
+        ClassField getInput() {
+            return inputs.iterator().next();
+        }
+        
+        Collection<ClassField> getInputs() {
             return inputs;
         }
 
-        ArrayList<ClassField> getOutputs() {
+        /**
+         * @return first output
+         */
+        ClassField getOutput() {
+            return outputs.iterator().next();
+        }
+        
+        Collection<ClassField> getOutputs() {
             return outputs;
         }
 
-        ArrayList<ClassRelation> getSubtasks() {
+        Collection<SubtaskClassRelation> getSubtasks() {
             return subtasks;
         }
 
-        ArrayList<ClassField> getExceptions() {
+        Collection<ClassField> getExceptions() {
             return exceptions;
         }
 
-	/**
-	 * Adds a new input to the list of inputs.
-	 * @param field ClassField - a new input to be added to the list of inputs.
-	 */
-        void addInput(ClassField field) {
-		inputs.add(field);
-	} // addInput
-
-	/**
-	 * Specify output.
-	 * @param s String
-	 * @param vars ArrayList
-	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
-	 */
-	void setOutput(String s, Collection<ClassField> vars) throws UnknownVariableException {
-		ClassField f = getVar(s, vars);
-
-		if (f != null) {
-			outputs.add(f);
-		}
-		else if (s.indexOf(".") >= 1) {
-			ClassField cf = new ClassField( s );
-
-			outputs.add(cf);
-		} else if (s.startsWith("*.")) {
-			ClassField cf = new ClassField( s );
-
-			outputs.add(cf);
-		}
-		else {
-			throw new UnknownVariableException(s);
-		}
-	} // setOutput
-
-	/**
-	 * Specify input.
-	 * @param s String
-	 * @param vars ArrayList
-	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
-	 */
-	void setInput(String s, Collection<ClassField> vars) throws UnknownVariableException {
-		if (!s.equals("")) {
-			ClassField f = getVar(s, vars);
-
-			if (f != null) {
-				inputs.add(f);
-			}
-			else if (s.indexOf(".") >= 1) {
-				ClassField cf = new ClassField( s );
-
-				inputs.add(cf);
-			}
-			else {
-				throw new UnknownVariableException(s);
-			}
-		}
-	} // setInput
-
-	/**
-	 * <UNCOMMENTED>
-	 * @param method String
-	 */
-	void setMethod(String method) {
-		this.method = method;
-	} // setMethod
-
-	/**
-	 * <UNCOMMENTED>
-	 * @param input String[]
-	 * @param varList ArrayList
-	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
-	 */
-	void addInputs(String[] input, Collection<ClassField> varList) throws UnknownVariableException {
-		for (int i = 0; i < input.length; i++) {
-			if (!input[i].equals("#")) {
-				ClassField var = getVar(input[i], varList);
+        /**
+         * Adds a new input to the list of inputs.
+         * @param input String
+         * @param vars ArrayList
+         * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
+         */
+        void addInput(String input, Collection<ClassField> vars) throws UnknownVariableException {
+        	
+        	if (!input.equals("#")) {
+				ClassField var = getVar(input, vars);
 
 				if (var != null) {
 					inputs.add(var);
 				}
-				else if (input[i].indexOf(".") >= 1) {
-					ClassField cf = new ClassField( input[i] );
+				else if ( input.indexOf(".") >= 1 ) {
+					ClassField cf = new ClassField( input );
 
 					inputs.add(cf);
 				}
 				else {
-					throw new UnknownVariableException(input[i]);
+					throw new UnknownVariableException( input );
 				}
 			}
+        } // setInput
+
+    	/**
+    	 * @param input String[]
+    	 * @param varList ArrayList
+    	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
+    	 */
+    	void addInputs(String[] input, Collection<ClassField> varList) throws UnknownVariableException {
+    		for (int i = 0; i < input.length; i++) {
+    			addInput( input[i], varList );
+    		}
+    	} // addInputs
+	/**
+	 * Specify output.
+	 * @param output String
+	 * @param vars ArrayList
+	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
+	 */
+	void addOutput(String output, Collection<ClassField> vars) throws UnknownVariableException {
+		ClassField f = getVar(output, vars);
+
+		if (f != null) {
+			outputs.add(f);
 		}
-	} // addInputs
+		else if (output.indexOf(".") >= 1) {
+			ClassField cf = new ClassField( output );
+
+			outputs.add(cf);
+		} else if (output.startsWith("*.")) {
+			ClassField cf = new ClassField( output );
+
+			outputs.add(cf);
+		}
+		else {
+			throw new UnknownVariableException(output);
+		}
+	} // setOutput
 
 	/**
-	 * <UNCOMMENTED>
-	 * @param output String[]
+	 * @param outputs String[]
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-        void addOutputs( String[] output, Collection<ClassField> varList ) throws UnknownVariableException {
-            for ( int i = 0; i < output.length; i++ ) {
+        void addOutputs( String[] outputs, Collection<ClassField> varList ) throws UnknownVariableException {
+            for ( int i = 0; i < outputs.length; i++ ) {
                 //we must have at least one output, others will be considered as exceptions
-                String s = output[ i ];
+                String output = outputs[ i ];
                 Pattern pattern = Pattern.compile( ".*\\([ .A-Za-z0-9]+\\).*" );
-                Matcher matcher = pattern.matcher( s );
+                Matcher matcher = pattern.matcher( output );
                 if ( matcher.find() ) {
                 	
-                	String ex = s.replaceAll( "[ ()]+", "" );
+                	String ex = output.replaceAll( "[ ()]+", "" );
                     ClassField cf = new ClassField( ex, "exception" );
 
                     exceptions.add( cf );
 
                 } else {
-
-                    ClassField var = getVar( output[ i ], varList );
-
-                    if ( var != null ) {
-                        outputs.add( var );
-                    } else if ( output[ i ].indexOf( "." ) >= 1 ) {
-                        ClassField cf = new ClassField( output[ i ] );
-
-                        outputs.add( cf );
-                    } else if ( output[ i ].startsWith( "*." ) ) {
-                        ClassField cf = new ClassField( output[ i ] );
-
-                        outputs.add( cf );
-                    } else {
-                        throw new UnknownVariableException( output[ i ] );
-                    }
+                	addOutput(output, varList);
                 }
             }
         } // addOutputs
 
 	/**
-	 * <UNCOMMENTED>
 	 * @param subtaskList ArrayList
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-	void addSubtasks(ArrayList<String> subtaskList, Collection<ClassField> varList) throws UnknownVariableException {
-		ClassRelation subtask;
-		String subtaskString;
-		Pattern pattern;
-		Matcher matcher2;
-
-		for (int i = 0; i < subtaskList.size(); i++) {
-			subtaskString = subtaskList.get(i);
-			pattern = Pattern.compile("\\[(.*) *-> ?(.*)\\]");
-			matcher2 = pattern.matcher(subtaskString);
-			if (matcher2.find()) {
-				subtask = new ClassRelation( RelType.TYPE_SUBTASK, subtaskString );
-				
-				String[] inputs = matcher2.group(1).trim().split(" *, *", -1);
-				String[] outputs = matcher2.group(2).trim().split(" *, *", -1);
-				for (int j = 0; j < outputs.length; j++) {
-					subtask.setOutput(outputs[j], varList);
-				}
-				
-				if (!inputs[0].equals("")) {
-					subtask.addInputs(inputs, varList);
-				}
-				subtasks.add(subtask);
-			}
-		}
+	void addSubtask( SubtaskClassRelation subtask ) {
+		subtasks.add( subtask );
 	} // addSubtasks
 
 	/**
-	 * <UNCOMMENTED>
-	 * @param input String[]
-	 * @param varList ArrayList
-	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
+	 * @param method String
 	 */
-	void addAll(String[] input, ArrayList<ClassField> varList) throws UnknownVariableException {
-		for (int i = 0; i < input.length; i++) {
-			ClassField var = getVar(input[i], varList);
-
-			if (var != null) {
-				inputs.add(var);
-			}
-			else {
-				throw new UnknownVariableException(input[i]);
-			}
-		}
-	} // addAll
-
+	void setMethod(String method) {
+		this.method = method;
+	} // setMethod
+	
+	public String getSpecLine() {
+		return specLine;
+	}
+	
 	/**
-	 * <UNCOMMENTED>
-	 * @param varName String
-	 * @param varList ArrayList
-	 * @return ClassField
-	 */
-	static ClassField getVar(String varName, Collection<ClassField> varList) {
-
-		for ( ClassField var : varList ) {
-			if (var.getName().equals(varName)) {
-				return var;
-			}
-		}
-		return null;
-	} // getVar
-
-	/**
-	 * <UNCOMMENTED>
 	 * @return String
 	 */ public String toString() {
 		if (type == RelType.TYPE_METHOD_WITH_SUBTASK) {
@@ -282,9 +201,5 @@ class ClassRelation
 		}
 		return "[Inputs: " + inputs + "][Output: " + outputs + "][Method: " + method + "][Type: " + type + "]";
 	} // toString
-
-	public String getSpecLine() {
-		return specLine;
-	}
 
 }

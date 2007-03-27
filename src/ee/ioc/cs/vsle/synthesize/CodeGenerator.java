@@ -110,15 +110,17 @@ public class CodeGenerator {
         for ( SubtaskRel subtask : rel.getSubtasks() ) {
             subNum = subCount++;
             
-            String sbName = SUBTASK_INTERFACE_NAME + "_" + subNum;
+            String sbName = ( subtask.isIndependent() ? "Independent" : "" ) + SUBTASK_INTERFACE_NAME + "_" + subNum;
             
-            alg.append( "\n");
-            alg.append( same() );
-            alg.append( "class " );
-            alg.append( sbName );
-            alg.append( " implements " );
-            alg.append( SUBTASK_INTERFACE_NAME );
-            alg.append( " {\n\n" );
+            StringBuilder bufSbtClass = new StringBuilder();
+            
+            bufSbtClass.append( "\n");
+            bufSbtClass.append( same() );
+            bufSbtClass.append( "class " );
+            bufSbtClass.append( sbName );
+            bufSbtClass.append( " implements " );
+            bufSbtClass.append( SUBTASK_INTERFACE_NAME );
+            bufSbtClass.append( " {\n\n" );
             
             right() ;
             
@@ -163,24 +165,28 @@ public class CodeGenerator {
             bufSbtBody.append( left() );
             bufSbtBody.append( "}\n" );
             
-            //variable declaration & constructor
-            alg.append( generateFieldDeclaration( parentClassName, sbName, usedVars ) );
+            if( !subtask.isIndependent() ) {
+            	//variable declaration & constructor
+            	bufSbtClass.append( generateFieldDeclaration( parentClassName, sbName, usedVars ) );
+            } else {
+            	bufSbtClass.append( same() ).append( getDeclaration( subtask.getContextCF(), "private" ) );
+            }
             
             //append run() after subtasks' constructor
-            alg.append( bufSbtBody );
+            bufSbtClass.append( bufSbtBody );
             //end of class
-            alg.append( left() );
-            alg.append( "} //End of subtask: " );
-            alg.append( subtask );
-            alg.append( "\n" );
+            bufSbtClass.append( left() );
+            bufSbtClass.append( "} //End of subtask: " );
+            bufSbtClass.append( subtask );
+            bufSbtClass.append( "\n" );
             
+            alg.append(bufSbtClass);
             alg.append( same() );
-            alg.append( "Subtask_" );
-            alg.append( subNum );
+            alg.append( sbName );
             alg.append( " subtask_" );
             alg.append( subNum );
-            alg.append( " = new Subtask_" );
-            alg.append( subNum );
+            alg.append( " = new " );
+            alg.append( sbName );
             alg.append( "();\n\n" );
         }
 
@@ -353,8 +359,9 @@ public class CodeGenerator {
 		buf.append(left());
 		buf.append("}\n");
 		
-		for (int i = 0; i < rel.getExceptions().size(); i++) {
-			String excp = rel.getExceptions().get(i).getName();
+        int i = 0;
+        for ( Var ex : rel.getExceptions() ) {
+            String excp = ex.getName();
 			String instanceName = "ex" + i;
 			buf.append(same());
 			buf.append("catch( ");

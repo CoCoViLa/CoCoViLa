@@ -11,10 +11,10 @@ import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 class Rel implements Serializable {
 
-    private List<Var> outputs = new ArrayList<Var>();
-    private List<Var> inputs = new ArrayList<Var>();
-    private List<SubtaskRel> subtasks = new ArrayList<SubtaskRel>();
-    private ArrayList<Var> exceptions = new ArrayList<Var>();
+    private Collection<Var> outputs = new LinkedHashSet<Var>();
+    private Collection<Var> inputs = new LinkedHashSet<Var>();
+    private Collection<SubtaskRel> subtasks = new LinkedHashSet<SubtaskRel>();
+    private Collection<Var> exceptions = new LinkedHashSet<Var>();
     private int relID = 0;
     private Var parent;
     private String method;
@@ -95,11 +95,11 @@ class Rel implements Serializable {
     	return vars.containsAll( inputs );
     }
     
-    List<Var> getExceptions() {
+    Collection<Var> getExceptions() {
         return exceptions;
     }
 
-    List<SubtaskRel> getSubtasks() {
+    Collection<SubtaskRel> getSubtasks() {
         return subtasks;
     }
 
@@ -119,14 +119,39 @@ class Rel implements Serializable {
         return RelType.REL_HASH + relID;
     }
     
+    Var getFirstInput() {
+        return inputs.iterator().next();
+    }
     
+    Var getFirstOutput() {
+        return outputs.iterator().next();
+    }
+//    Var input;
+//    
+//    Var getFirstInput() {
+//    	
+//    	if( input == null ) {
+//    		input = inputs.iterator().next();
+//    	}
+//    	
+//        return input;
+//    }
+//    
+//    Var output;
+//    
+//    Var getFirstOutput() {
+//        
+//    	if( output == null ) {
+//    		output = outputs.iterator().next();
+//    	}
+//    	
+//        return output;
+//    }
     /**************** The code below is related to the code generation ************************************/
     
-    String getMaxType(List<Var> inputs) {
-        Var var;
+    String getMaxType(Collection<Var> inputs) {
 
-        for (int i = 0; i < inputs.size(); i++) {
-            var = inputs.get(i);
+        for ( Var var : inputs ) {
             if (!var.getType().equals(TYPE_INT)) {
                 return TYPE_DOUBLE;
             }
@@ -137,7 +162,7 @@ class Rel implements Serializable {
     private String getOutputString() {
 
         String outputString = "";
-        Var var = outputs.get(0);
+        Var var = getFirstOutput();
 
         if (!TypeUtil.TYPE_VOID.equals( var.getType() )) {
             if (var.getField().isAlias()) {
@@ -167,13 +192,10 @@ class Rel implements Serializable {
         String params = "";
         if (useBrackets)
             params += "(";
-        Var var;
         int j = 0;
 
         String paramString = "";
-        for (int i = 0; i < inputs.size(); i++) {
-
-            var = inputs.get(i);
+        for ( Var var : inputs ) {
 
             if (!TypeUtil.TYPE_VOID.equals( var.getType() ) ) {
                 if ( var.getField().isAlias() ) {
@@ -228,7 +250,7 @@ class Rel implements Serializable {
             // if its an array assingment
             if (inputs.size() == 0 && outputs.size() == 1) {
                 String assign;
-                Var op = outputs.get(0);
+                Var op = getFirstOutput();
 
                 if (op.getField().isPrimOrStringArray()) {
                     String[] split = method.split("=");
@@ -245,12 +267,12 @@ class Rel implements Serializable {
 
             if (inputs.size() == 1 && outputs.size() == 1) {
                 String s1, assigns = "";
-                Var ip = inputs.get(0);
-                Var op = outputs.get(0);
+                Var ip = getFirstInput();
+                Var op = getFirstOutput();
 
                 if (ip.getField().isArray() && op.getField().isAlias()) {
 
-                    for (int i = 0; i < outputs.get(0).getChildVars().size(); i++) {
+                    for (int i = 0; i < getFirstOutput().getChildVars().size(); i++) {
                         s1 = op.getChildVars().get(i).toString();
                         assigns += s1 + " = " + ip.getFullName() + "[" + Integer.toString(i) + "];\n";
                     }
@@ -312,7 +334,7 @@ class Rel implements Serializable {
             matcher.appendTail( sb );
 
             // TODO - add casting to other types as well
-            if ( outputs.get(0).getType().equals(TYPE_INT)
+            if ( getFirstOutput().getType().equals(TYPE_INT)
                     && ( methodCallExist || !getMaxType(inputs).equals(TYPE_INT) ) ) {
             	
             	String[] eq = sb.toString().split( "=" );
@@ -339,33 +361,28 @@ class Rel implements Serializable {
         } else {
             if (RuntimeProperties.isLogDebugEnabled())
                 db.p(method);
-            String s1, s2, assigns = "";
-            Var ip = inputs.get(0);
-            Var op = outputs.get(0);
-
+            Var ip = getFirstInput();
+            Var op = getFirstOutput();
+            String assigns = "";
+            int i = 0;
+            
             if (ip.getField().isArray() && op.getField().isAlias()) {
-
-                for (int i = 0; i < outputs.get(0).getChildVars().size(); i++) {
-                    s1 = outputs.get(0).getChildVars().get(i).toString();
-                    assigns += CodeGenerator.OT_TAB + s1 
-                            + " = " + ip.getFullName() + "[" + Integer.toString(i) + "];\n";
+                for ( Var childVar : op.getChildVars() ) {
+                    assigns += CodeGenerator.OT_TAB + childVar 
+                            + " = " + ip.getFullName() + "[" + Integer.toString(i++) + "];\n";
                 }
                 return assigns;
             }
-            if (op.getField().isArray() && ip.getField().isAlias()) {
-                for (int i = 0; i < ip.getChildVars().size(); i++) {
-                    s1 = ip.getChildVars().get(i).toString();
+            else if (op.getField().isArray() && ip.getField().isAlias()) {
+                for ( Var childVar : ip.getChildVars() ) {
                     assigns += CodeGenerator.OT_TAB + op.getFullName() + "["
-                            + Integer.toString(i) + "] = " + s1 + ";\n";
+                            + Integer.toString(i++) + "] = " + childVar + ";\n";
                 }
                 return assigns;
             }
-            if (op.getField().isAlias() && ip.getField().isAlias()) {
-                for (int i = 0; i < ip.getChildVars().size(); i++) {
-                    s1 = ip.getChildVars().get(i).toString();
-                    s2 = op.getChildVars().get(i).toString();
-
-                    assigns += CodeGenerator.OT_TAB + s2 + " = " + s1 + ";\n";
+            else if (op.getField().isAlias() && ip.getField().isAlias()) {
+                for ( Var inpChildVar : ip.getChildVars() ) {
+                    assigns += CodeGenerator.OT_TAB + op.getChildVars().get(i++) + " = " + inpChildVar + ";\n";
                 }
                 return assigns;
             }
@@ -375,10 +392,8 @@ class Rel implements Serializable {
     }
 
     private String checkAliasInputs() {
-        Var input;
         String assigns = "";
-        for (int i = 0; i < inputs.size(); i++) {
-            input = inputs.get(i);
+        for ( Var input : inputs ) {
             if (input.getField().isAlias()) {
             	
             	String alias_tmp = getAliasTmpName( input );
@@ -439,7 +454,7 @@ class Rel implements Serializable {
 
     private String checkAliasOutputs() {
         String assigns = "";
-        Var output = outputs.get(0);
+        Var output = getFirstOutput();
         if (output.getField().isAlias()) {
         	
             String alias_tmp = getAliasTmpName( output );

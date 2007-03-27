@@ -89,8 +89,8 @@ public class ProblemCreator {
              a relation for each component of the alias structure*/
             if ( classRelation.getInputs().size() == 1 && classRelation.getOutputs().size() == 1 &&
                  ( classRelation.getType() == RelType.TYPE_ALIAS || classRelation.getType() == RelType.TYPE_EQUATION ) ) {
-                ClassField inpField = classRelation.getInputs().get( 0 );
-                ClassField outpField = classRelation.getOutputs().get( 0 );
+                ClassField inpField = classRelation.getInput();
+                ClassField outpField = classRelation.getOutput();
 
                 //if we have a relation alias = *.sth, we need to find out what it actually is
                 if ( isAliasWildcard( classRelation ) ) {
@@ -136,11 +136,45 @@ public class ProblemCreator {
             	
                 if ( classRelation.getSubtasks().size() > 0 ) {
 
-                    for ( ClassRelation subtask : classRelation.getSubtasks() ) {
+                    for ( SubtaskClassRelation subtask : classRelation.getSubtasks() ) {
                     	
                         SubtaskRel subtaskRel = new SubtaskRel( rel, parent, subtask.getSpecLine() );
                         
-                        makeRel( subtaskRel, subtask, problem, parent );
+                        if( subtask.isIndependent() ) {
+                        	ClassField context = subtask.getContext();
+                        	
+                        	ClassList newClassList = new ClassList();
+                        	newClassList.addAll( classes );
+                        	newClassList.remove( classes.getType( TYPE_THIS ) );
+                        	
+                        	AnnotatedClass newAnnClass = new AnnotatedClass( "IndependentSubtask" );
+                        	newAnnClass.addField( context );
+                        	ClassRelation newCR = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, subtask.getSpecLine() );
+                        	
+                        	List<ClassField> empty = new ArrayList<ClassField>();
+                        	
+                        	for( ClassField input : subtask.getInputs() ) {
+                        		newCR.addInput( context + "." + input, empty );
+                        	}
+                        	
+                        	for( ClassField output : subtask.getOutputs() ) {
+                        		newCR.addOutput( context + "." + output, empty );
+                        	}
+                        	
+                        	newAnnClass.addClassRelation( newCR );
+                        	newClassList.add(newAnnClass);
+                        	Problem contextProblem 
+                        		= new Problem( new Var( new ClassField( TYPE_THIS, "IndependentSubtask" ), null ) );
+                    		
+                        	makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem );
+                        	
+                        	makeRel( subtaskRel, subtask, contextProblem, contextProblem.getVarByFullName(context.getName()) );
+                        	
+                        	subtaskRel.setContextCF( context );
+                        	subtaskRel.setContext( contextProblem );
+                        } else {
+                        	makeRel( subtaskRel, subtask, problem, parent );
+                        }
                         
                         rel.addSubtask( subtaskRel );
                         
@@ -224,7 +258,7 @@ public class ProblemCreator {
 
     private static boolean isAliasWildcard( ClassRelation classRelation ) {
     	
-    	return classRelation.getInputs().size() == 1 && classRelation.getInputs().get( 0 ).getName().startsWith( "*." );
+        return classRelation.getInputs().size() == 1 && classRelation.getInput().getName().startsWith( "*." );
     }
     
     /**
@@ -233,10 +267,10 @@ public class ProblemCreator {
     private static Set<Rel> makeAliasWildcard( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
     		Problem problem, Var parentObj ) throws UnknownVariableException {
     	
-    	Var alias = problem.getAllVars().get( parentObj.getFullNameForConcat() + classRelation.getOutputs().get( 0 ).getName() );
+        Var alias = problem.getAllVars().get( parentObj.getFullNameForConcat() + classRelation.getOutput().getName() );
     	
     	if( alias == null ) {
-    		throw new UnknownVariableException( parentObj.getFullNameForConcat() + classRelation.getOutputs().get( 0 ).getName() );
+            throw new UnknownVariableException( parentObj.getFullNameForConcat() + classRelation.getOutput().getName() );
     	}
     	
     	Rel relAliasOutp = new Rel( parentObj, classRelation.getSpecLine() );
@@ -274,20 +308,13 @@ public class ProblemCreator {
            UnknownVariableException {
        Var var;
 
-       rel.setMethod( classRelation.getMethod() );
-       //if we deal with equation and one variable is used on both sides of "=", we cannot use it.
-       for (ClassField field : classRelation.getInputs() ) {
-			if( classRelation.getType() == RelType.TYPE_EQUATION && classRelation.getOutputs().contains( field ) ) {
+       for ( ClassField input : classRelation.getInputs() ) {
+           //if we deal with equation and one variable is used on both sides of "=", we cannot use it.
+           if( classRelation.getType() == RelType.TYPE_EQUATION && classRelation.getOutputs().contains( input ) ) {
 				return null;
 			}
-		}
-       
-       rel.setType( classRelation.getType() );
-       ClassField cf;
-       
-       for ( int k = 0; k < classRelation.getInputs().size(); k++ ) {
-           cf = classRelation.getInputs().get( k );
-           String varName = parentVar.getFullNameForConcat() + cf.getName();
+           
+           String varName = parentVar.getFullNameForConcat() + input.getName();
            if ( problem.getAllVars().containsKey( varName ) ) {
                var = problem.getAllVars().get( varName );
                var.addRel( rel );
@@ -296,9 +323,9 @@ public class ProblemCreator {
                throw new UnknownVariableException( varName );
            }
        }
-       for ( int k = 0; k < classRelation.getOutputs().size(); k++ ) {
-           cf = classRelation.getOutputs().get( k );
-           String varName = parentVar.getFullNameForConcat() + cf.getName();
+       
+       for ( ClassField output : classRelation.getOutputs() ) {
+           String varName = parentVar.getFullNameForConcat() + output.getName();
            if ( problem.getAllVars().containsKey( varName ) ) {
                var = problem.getAllVars().get( varName );
                rel.addOutput( var );
@@ -306,12 +333,16 @@ public class ProblemCreator {
                throw new UnknownVariableException( varName );
            }
        }
-       for ( int k = 0; k < classRelation.getExceptions().size(); k++ ) {
-           cf = classRelation.getExceptions().get( k );
-           Var ex = new Var( cf, null );
+       
+       for ( ClassField exception : classRelation.getExceptions() ) {
+           Var ex = new Var( exception, null );
            rel.getExceptions().add( ex );
        }
 
+       rel.setMethod( classRelation.getMethod() );
+       
+       rel.setType( classRelation.getType() );
+       
        return rel;
    }
    
@@ -321,7 +352,7 @@ public class ProblemCreator {
     * @return
     */
    private static String checkIfRightWildcard( ClassRelation classRelation ) {
-       String s = classRelation.getOutputs().get( 0 ).getName();
+       String s = classRelation.getOutput().getName();
        if ( s.startsWith( "*." ) )
            return s.substring( 2 );
        return null;
