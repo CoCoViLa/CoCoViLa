@@ -27,13 +27,19 @@ public class CodeViewer extends JFrame implements ActionListener {
 
 		addComponentListener(new ComponentResizer(ComponentResizer.CARE_FOR_MINIMUM));
 
-		String fileText = FileFuncs.getFileContents(path + fileName);
+		final String fileText = FileFuncs.getFileContents(path + fileName);
 
 		textArea = new JavaColoredTextPane();
 		textArea.addKeyListener(new ProgramTextEditor.CommentKeyListener());
 		textArea.setFont(RuntimeProperties.font);
-		textArea.append(fileText);
-
+		
+		SwingUtilities.invokeLater( new Runnable() {
+			public void run() {
+				textArea.append(fileText);
+				textArea.setCaretPosition( 0 );
+			}
+		} );
+		
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 		areaScrollPane.setRowHeaderView(new LineNumberView(textArea));
 		areaScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);

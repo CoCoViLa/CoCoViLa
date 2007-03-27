@@ -274,16 +274,19 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     					if( type == ProgramRunnerFeedbackEvent.TEXT_SPECIFICATION ) {
 
     						jta_spec.setText( text );
+    						jta_spec.setCaretPosition( 0 );
     						tabbedPane.setSelectedComponent( specText );
 
     					} else if( type == ProgramRunnerFeedbackEvent.TEXT_PROGRAM ) {
 
     						jta_generatedCode.setText( text );
+    						jta_generatedCode.setCaretPosition( 0 );
     						tabbedPane.setSelectedComponent( progText );
 
     					} else if( type == ProgramRunnerFeedbackEvent.TEXT_RESULT ) {
 
     						jta_runResult.append( text );
+    						jta_runResult.setCaretPosition( jta_runResult.getDocument().getLength() );
     						tabbedPane.setSelectedComponent( runResult );
     					} else if( type == ProgramRunnerFeedbackEvent.DISPOSE ) {
     						dispose();
