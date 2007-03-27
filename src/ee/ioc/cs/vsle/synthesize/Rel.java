@@ -480,7 +480,7 @@ class Rel implements Serializable {
             						CodeGenerator.getAliasTmpName( varFromAlias.getName() ),
             						alias_tmp, k );
             			} else {
-            				assigns += CodeGenerator.getOffset() + varFromAlias + " = (" + varType + ")" 
+            				assigns += CodeGenerator.getOffset() + varFromAlias.getFullName() + " = (" + varType + ")" 
             						+ alias_tmp + "[" + k + "];\n";
             			}
             		} else {
