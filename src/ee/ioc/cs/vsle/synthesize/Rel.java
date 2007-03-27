@@ -22,7 +22,8 @@ class Rel implements Serializable {
     private String declaration;
     //see RelType
     private int type;
-
+    private Set<Var> unknownInputs = new LinkedHashSet<Var>();
+    
     Rel( Var parent, String declaration ) {
         relID = RelType.relCounter++;
         this.parent = parent;
@@ -37,6 +38,11 @@ class Rel implements Serializable {
         type = t;
     }
     
+    //for debug!!!
+    String printUnknownInputs() {
+		return unknownInputs.toString();
+	}
+    
     int getUnknownInputCount() {
         return unknownInputs.size();
     }
@@ -45,8 +51,6 @@ class Rel implements Serializable {
     	unknownInputs.remove( var );
     }
 
-    Set<Var> unknownInputs = new LinkedHashSet<Var>();
-    
     void addInput(Var var) {
         inputs.add( var );
         if( !var.getField().isConstant() ) {
