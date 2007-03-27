@@ -56,7 +56,7 @@ public class CodeGenerator {
             	addVarsToSet( rel.getInputs(), usedVars );
             	addVarsToSet( rel.getOutputs(), usedVars );
             	
-                genSubTasks( rel, alg, false, className, usedVars );
+                genSubTasks( rel, alg, false, className, usedVars, problem );
             }
 
         }
@@ -103,11 +103,15 @@ public class CodeGenerator {
     }
     
     private void genSubTasks( Rel rel, StringBuilder alg, boolean isNestedSubtask, String parentClassName, 
-    		Set<Var> usedVars ) {
+    		Set<Var> usedVars, Problem problem ) {
         int subNum;
         int start = subCount;
 
         for ( SubtaskRel subtask : rel.getSubtasks() ) {
+        	
+        	Problem currentProblem = subtask.isIndependent() ? subtask.getContext() : problem;
+        	Set<Var> currentUsedVars = subtask.isIndependent() ? new HashSet<Var>() : usedVars;
+        	
             subNum = subCount++;
             
             String sbName = ( subtask.isIndependent() ? "Independent" : "" ) + SUBTASK_INTERFACE_NAME + "_" + subNum;
@@ -134,8 +138,8 @@ public class CodeGenerator {
             List<Var> subInputs = subtask.getInputs();
             List<Var> subOutputs = subtask.getOutputs();
             
-            addVarsToSet( subInputs, usedVars );
-            addVarsToSet( subOutputs, usedVars );
+            addVarsToSet( subInputs, currentUsedVars );
+            addVarsToSet( subOutputs, currentUsedVars );
             
             List<Rel> subAlg = subtask.getAlgorithm();
             right() ;
@@ -151,13 +155,13 @@ public class CodeGenerator {
 					db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs());
                 if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                     //recursion
-                    genSubTasks( trel, bufSbtBody, true, sbName, usedVars );
+                    genSubTasks( trel, bufSbtBody, true, sbName, currentUsedVars, currentProblem );
 
                 } else {
                     appendRelToAlg( same(), trel, bufSbtBody );
                 }
-                addVarsToSet( trel.getInputs(), usedVars );
-            	addVarsToSet( trel.getOutputs(), usedVars );
+                addVarsToSet( trel.getInputs(), currentUsedVars );
+            	addVarsToSet( trel.getOutputs(), currentUsedVars );
             }
             // apend subtask outputs to algorithm
             bufSbtBody.append( getSubtaskOutputs( subOutputs, same() ) );
@@ -167,9 +171,9 @@ public class CodeGenerator {
             
             if( !subtask.isIndependent() ) {
             	//variable declaration & constructor
-            	bufSbtClass.append( generateFieldDeclaration( parentClassName, sbName, usedVars ) );
+            	bufSbtClass.append( generateFieldDeclaration( parentClassName, sbName, currentUsedVars, currentProblem ) );
             } else {
-            	bufSbtClass.append( same() ).append( getDeclaration( subtask.getContextCF(), "private" ) );
+            	bufSbtClass.append( same() ).append( getDeclaration( subtask.getContextCF(), "private" ) ).append( "\n" );
             }
             
             //append run() after subtasks' constructor
@@ -195,7 +199,7 @@ public class CodeGenerator {
 
     private static String _this_ = "." + TYPE_THIS + ".";
     
-    private String generateFieldDeclaration( String parentClassName, String sbName, Set<Var> usedVars ) {
+    private String generateFieldDeclaration( String parentClassName, String sbName, Set<Var> usedVars, Problem problem ) {
     	
     	String declOT = same();
     	String consOT = right();
@@ -248,7 +252,7 @@ public class CodeGenerator {
     		} else {
     			Var parent = var.getParent();
 
-    			while( !parent.getParent().equals( problem.getRootVar() ) ) {
+    			while( parent.getParent() != null && !parent.getParent().equals( problem.getRootVar() ) ) {
     				parent = parent.getParent();
     			}
     			
