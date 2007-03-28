@@ -1141,7 +1141,7 @@ public class Canvas extends JPanel {
 		PrintUtilities.printComponent(this);
 	} // print
 
-	public void loadScheme(File file) {
+	public boolean loadScheme(File file) {
 		scheme = null;
 
 		SchemeLoader loader = new SchemeLoader();
@@ -1169,20 +1169,21 @@ public class Canvas extends JPanel {
 		}
 
 		if (scheme == null)
-			return;
+			return false;
 
 		connections = scheme.getConnections();
 		objects = scheme.getObjects();
 		initClassPainters();
 		mListener.setState(State.selection);
 		drawingArea.repaint();
+		return true;
 	} // loadScheme
 
 	private boolean promptLoad(List<String> messages) {
 		final JDialog dialog = new JDialog(Editor.getInstance());
 		dialog.setModal(true);
-		dialog.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		dialog.setTitle("Warning: Inconcistent scheme");
+		dialog.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
+		dialog.setTitle("Warning: Inconsistent scheme");
 		
 		JLabel topLabel = new JLabel("The following problems occured "
 				+ "while loading the scheme:");
@@ -1210,7 +1211,7 @@ public class Canvas extends JPanel {
 		JButton btnCancel = new JButton("Cancel");
 
 		final boolean[] result = new boolean[1];
-		result[0] = false;
+		result[0] = false; // close is Cancel
 		
 		btnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
