@@ -159,9 +159,10 @@ public class EditorActionListener implements ActionListener {
                     if ( RuntimeProperties.isLogDebugEnabled() ) 
                     	db.p( "Loading scheme: " + file.getName() );
                     try {
-                        Editor.getInstance().getCurrentCanvas().loadScheme( file );
-                        Editor.getInstance().getCurrentPackage().setLastScheme( file.getAbsolutePath() );
-                        Editor.getInstance().updateWindowTitle();
+                        if (Editor.getInstance().getCurrentCanvas().loadScheme(file)) {
+                        	Editor.getInstance().getCurrentPackage().setLastScheme(file.getAbsolutePath());
+                        	Editor.getInstance().updateWindowTitle();
+                        }
                     } catch ( Exception exc ) {
                         exc.printStackTrace();
                     }
