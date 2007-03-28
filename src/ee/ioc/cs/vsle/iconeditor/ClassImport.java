@@ -281,7 +281,7 @@ public class ClassImport {
 				classIcon.fields = fields;
 				icons.add(classIcon);
 			}
-			if(element.equals("name")){
+			if(element.equals("name") && inClass){
 				String name = charBuf.toString();
 				pc.add(name);
 				classIcon.setName(name);
