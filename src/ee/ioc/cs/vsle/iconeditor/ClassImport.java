@@ -64,6 +64,7 @@ public class ClassImport {
 		boolean inDesc = false;
 		boolean inIcon = false;
 		boolean isRelation = false;
+		private StringBuilder charBuf = new StringBuilder(); 
 		
 		
 		@Override
@@ -281,31 +282,30 @@ public class ClassImport {
 				icons.add(classIcon);
 			}
 			if(element.equals("name")){
+				String name = charBuf.toString();
+				pc.add(name);
+				classIcon.setName(name);
 				inName = false;
 			}
 			if(element.equals("graphics")){
 				inGraphics = false;
 			}
 			if(element.equals("description") && inClass){
+				classIcon.setDescription(charBuf.toString());
 				inDesc = false;
 			}
 			if(element.equals("icon")){
+				classIcon.setIconName(charBuf.toString());
 				inIcon = false;
 			}
-							
+			charBuf.delete(0, charBuf.length());
 		}
 		
 		@Override
 		public void characters(char[] ch, int start, int length) {
-			if (inName) {
-				pc.add(new String(ch,start,length));
-				classIcon.setName(new String(ch,start,length));
-			}
-			if (inDesc) 
-				classIcon.setDescription(new String(ch,start,length));
-			if (inIcon)
-				classIcon.setIconName(new String(ch,start,length));
+			charBuf.append(ch, start, length);
 		}
+
 		/*
 		 * Removes either r or f or both from the end of the
 		 * coordinate
