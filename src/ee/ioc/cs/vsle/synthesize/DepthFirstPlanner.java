@@ -15,6 +15,7 @@ import ee.ioc.cs.vsle.util.*;
 import static ee.ioc.cs.vsle.synthesize.CodeGenerator.*;
 
 /**
+ * This is a singleton class responsible for the whole planning
  * @author pavelg
  * 
  */
@@ -22,9 +23,14 @@ public class DepthFirstPlanner implements IPlanner {
 
 	private static DepthFirstPlanner s_planner = null;
 
-    private DepthFirstPlanner() {
-    }
+	/**
+	 * private constructor
+	 */
+    private DepthFirstPlanner() {}
 
+    /**
+     * @return DepthFirstPlanner singleton
+     */
     public static DepthFirstPlanner getInstance() {
         if ( s_planner == null ) {
             s_planner = new DepthFirstPlanner();
@@ -32,10 +38,20 @@ public class DepthFirstPlanner implements IPlanner {
         return s_planner;
     }
 
+    /**
+     * @return description of this planner
+     */
     public String getDescription() {
     	return "Depth First";
     }
     
+    /**
+     * This method is the access point to the planning procedure.
+     * Initially, it adds all variables from axioms to the set of found vars, 
+     * then does the linear planning. If lp does not solve the problem and there are subtasks,
+     * goal-drived recursive planning with backtracking is invoked. Planning is performed until 
+     * no new variables are intoduced into the algorithm.
+     */
     public ArrayList<Rel> invokePlaning( Problem problem, boolean computeAll ) {
     	long startTime = System.currentTimeMillis();
     	
@@ -86,6 +102,15 @@ public class DepthFirstPlanner implements IPlanner {
         return algorithm;
     }
     
+    /**
+     * Linear forward search algorithm
+     * 
+     * @param p
+     * @param algorithm
+     * @param targetVars
+     * @param computeAll
+     * @return
+     */
 	private boolean linearForwardSearch(Problem p, List<Rel> algorithm, 
 			Set<Var> targetVars,
 			boolean computeAll) {
@@ -222,9 +247,6 @@ public class DepthFirstPlanner implements IPlanner {
 		return targetVars.isEmpty() || p.getFoundVars().containsAll( allTargetVars );
 	}
 
-	private static int maxDepth = 2;//0..2, i.e. 3
-	private static boolean m_isSubtaskRepetitionAllowed = false;
-	
 	private void subtaskPlanning( Problem problem, ArrayList<Rel> algorithm, boolean computeAll ) {
 		
 		if (isSubtaskLoggingOn()) 
@@ -244,162 +266,197 @@ public class DepthFirstPlanner implements IPlanner {
 		maxDepth = maxDepthBackup;
 	}
 	
+	/**
+	 * Goal-driven recursive (depth-first, exhaustive) search with backtracking
+	 * 
+	 * @param problem
+	 * @param algorithm
+	 * @param subtaskRelsInPath
+	 * @param depth
+	 * @param computeAll
+	 */
 	private void subtaskPlanningImpl(Problem problem, List<Rel> algorithm,
 			Set<Rel> subtaskRelsInPath, int depth, boolean computeAll ) {
 
-		Set<Var> newVars = new LinkedHashSet<Var>();
+		Set<Rel> relsWithSubtasks = new LinkedHashSet<Rel>( problem.getRelsWithSubtasks() );
 		
-		// or
-		OR: for (Rel subtaskRel : problem.getRelsWithSubtasks()) {
-			if (isSubtaskLoggingOn())
-				db.p( p(depth) + "OR: rel with subtasks - " + subtaskRel.getMethod() + " depth: " + ( depth + 1 ) );
-			if( ( subtaskRel.getUnknownInputCount() > 0 ) 
-					|| newVars.containsAll( subtaskRel.getOutputs() ) 
-					|| problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
-					
-				if (isSubtaskLoggingOn()) {
-					db.p( p(depth) + "skipped" );
-					if( subtaskRel.getUnknownInputCount() > 0 ) {
-						db.p( p(depth) + "because unknown inputs count = " + subtaskRel.getUnknownInputCount() 
-								+ " " + subtaskRel.printUnknownInputs() );
-					} else if( newVars.containsAll( subtaskRel.getOutputs() ) ) {
-						db.p( p(depth) + "because all outputs in newVars" );
-					} else if( problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
-						db.p( p(depth) + "because all outputs in FoundVars" );
-					}
+		//start building Maximal Linear Branch (MLB)
+		MLB: while( !relsWithSubtasks.isEmpty() ) {
+			
+			if (isSubtaskLoggingOn()) {
+				String print = p(depth) + "Starting new MLB with: ";
+				for (Rel rel : relsWithSubtasks) {
+					print += "\n" + p(depth) + "  " + rel.getParentObjectName() + " : " + rel.getDeclaration();
 				}
-				continue OR;
+				db.p( print );
 			}
-			
-			Set<Rel> newPath = new LinkedHashSet<Rel>();
-			
-			if( !m_isSubtaskRepetitionAllowed && subtaskRelsInPath.contains(subtaskRel) ) {
-				if (isSubtaskLoggingOn())
-					db.p( p(depth) + "This rel with subtasks is already in use, path: " + newPath );
-				continue;
-			} else if( !m_isSubtaskRepetitionAllowed ) {
-				if (isSubtaskLoggingOn())
-					db.p( p(depth) + "This rel with subtasks can be used, path: " + newPath );
-				newPath.addAll( subtaskRelsInPath );
-				newPath.add( subtaskRel );
-			}
-			
-			// this is true if all subtasks are solvable
-			boolean allSolved = true;
-			// and
-			AND: for (SubtaskRel subtask : subtaskRel.getSubtasks()) {
-				if (isSubtaskLoggingOn())
-					db.p( p(depth) + "AND: subtask - " + subtask );
 				
-				if( subtask.isIndependent() ) {
-					if (isSubtaskLoggingOn())
-						db.p( "Independent!!!" );
-					if( subtask.isSolvable() == null ) {
-						if (isSubtaskLoggingOn())
-							db.p( "Not solved yet" );
-						//independent subtask is solved only once
-						Problem context = subtask.getContext();
-						ArrayList<Rel> alg = invokePlaning( context, false );
-						boolean solved = context.getFoundVars().containsAll( context.getGoals() );
-						if( solved ) {
-							subtask.setSolvable( Boolean.TRUE );
-							subtask.getAlgorithm().addAll( alg );
-						} else {
-							subtask.setSolvable( Boolean.FALSE );
+			
+			Set<Var> newVars = new LinkedHashSet<Var>();
+
+			// or children
+			OR: for ( Iterator<Rel> subtaskRelIterator = relsWithSubtasks.iterator();
+						subtaskRelIterator.hasNext(); ) {
+				
+				Rel subtaskRel = subtaskRelIterator.next();
+				
+				if (isSubtaskLoggingOn())
+					db.p( p(depth) + "OR: depth: " + ( depth + 1 ) + " rel - " + subtaskRel.getParentObjectName() + " : " + subtaskRel.getDeclaration() );
+				if( ( subtaskRel.getUnknownInputCount() > 0 ) 
+						|| newVars.containsAll( subtaskRel.getOutputs() ) 
+						|| problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
+
+					if (isSubtaskLoggingOn()) {
+						db.p( p(depth) + "skipped" );
+						if( subtaskRel.getUnknownInputCount() > 0 ) {
+							db.p( p(depth) + "because unknown inputs count = " + subtaskRel.getUnknownInputCount() 
+									+ " " + subtaskRel.printUnknownInputs() );
+						} else if( newVars.containsAll( subtaskRel.getOutputs() ) ) {
+							db.p( p(depth) + "because all outputs in newVars" );
+						} else if( problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
+							db.p( p(depth) + "because all outputs in FoundVars" );
 						}
-						allSolved &= solved;
-					} else if( subtask.isSolvable() == Boolean.TRUE ) {
-						if (isSubtaskLoggingOn())
-							db.p( "Already solved" );
-						allSolved &= true;
-					} else {
-						if (isSubtaskLoggingOn())
-							db.p( "Not solvable" );
-						allSolved &= false;
 					}
+					continue OR;
+				}
+
+				Set<Rel> newPath = new LinkedHashSet<Rel>();
+
+				if( !m_isSubtaskRepetitionAllowed && subtaskRelsInPath.contains(subtaskRel) ) {
 					if (isSubtaskLoggingOn())
-						db.p( "End of independent subtask " + subtask );
-				} else {
-					// lets clone the environment
-					Problem problemNew = problem.getCopy();
-					// we need fresh cloned subtask instance
-					SubtaskRel subtaskNew = problemNew.getSubtask(subtask);
+						db.p( p(depth) + "This rel with subtasks is already in use, path: " + newPath );
+					continue;
+				} else if( !m_isSubtaskRepetitionAllowed ) {
+					if (isSubtaskLoggingOn())
+						db.p( p(depth) + "This rel with subtasks can be used, path: " + newPath );
+					newPath.addAll( subtaskRelsInPath );
+					newPath.add( subtaskRel );
+				}
 
-					prepareSubtask( problemNew, subtaskNew );
+				// this is true if all subtasks are solvable
+				boolean allSolved = true;
+				// and children
+				AND: for (SubtaskRel subtask : subtaskRel.getSubtasks()) {
+					if (isSubtaskLoggingOn())
+						db.p( p(depth) + "AND: subtask - " + subtask );
 
-					Set<Var> goals = new LinkedHashSet<Var>();
-					addVarsToSet( subtaskNew.getOutputs(), goals );
+					if( subtask.isIndependent() ) {
+						if (isSubtaskLoggingOn())
+							db.p( "Independent!!!" );
+						if( subtask.isSolvable() == null ) {
+							if (isSubtaskLoggingOn())
+								db.p( "Not solved yet" );
+							//independent subtask is solved only once
+							Problem context = subtask.getContext();
+							ArrayList<Rel> alg = invokePlaning( context, false );
+							boolean solved = context.getFoundVars().containsAll( context.getGoals() );
+							if( solved ) {
+								subtask.setSolvable( Boolean.TRUE );
+								subtask.getAlgorithm().addAll( alg );
+							} else {
+								subtask.setSolvable( Boolean.FALSE );
+							}
+							allSolved &= solved;
+						} else if( subtask.isSolvable() == Boolean.TRUE ) {
+							if (isSubtaskLoggingOn())
+								db.p( "Already solved" );
+							allSolved &= true;
+						} else {
+							if (isSubtaskLoggingOn())
+								db.p( "Not solvable" );
+							allSolved &= false;
+						}
+						if (isSubtaskLoggingOn())
+							db.p( "End of independent subtask " + subtask );
+					} else {
+						// lets clone the environment
+						Problem problemNew = problem.getCopy();
+						// we need fresh cloned subtask instance
+						SubtaskRel subtaskNew = problemNew.getSubtask(subtask);
 
-					boolean solved = 
-						linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
-								// never optimize here
+						prepareSubtask( problemNew, subtaskNew );
+
+						Set<Var> goals = new LinkedHashSet<Var>();
+						addVarsToSet( subtaskNew.getOutputs(), goals );
+
+						boolean solved = 
+							linearForwardSearch( problemNew, subtaskNew.getAlgorithm(), 
+									// never optimize here
+									goals, true );
+
+						if( solved ) {
+							if (isSubtaskLoggingOn())
+								db.p( p(depth) + "SOLVED subtask: " + subtaskNew );
+							subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
+							allSolved &= solved;
+							continue AND;
+						} else if( !solved && ( depth == maxDepth ) ) {
+							if (isSubtaskLoggingOn())
+								db.p( p(depth) + "NOT SOLVED and cannot go any deeper, subtask: " + subtaskNew );
+							continue OR;
+						}
+
+						if (isSubtaskLoggingOn())
+							db.p( p(depth) + "Recursing deeper" );
+
+						List<Rel> newAlg = new ArrayList<Rel>( subtaskNew.getAlgorithm() );
+
+						subtaskPlanningImpl( problemNew, newAlg, newPath, depth + 1, false );
+
+						if (isSubtaskLoggingOn())
+							db.p( p(depth) + "Back to depth " + ( depth + 1 ) );
+
+						solved = linearForwardSearch( problemNew, newAlg, 
+								// always optimize here in order to get rid of unnecessary subtask instances
+								// temporary true while optimization does not work correctly
 								goals, true );
 
-					if( solved ) {
 						if (isSubtaskLoggingOn())
-							db.p( p(depth) + "Subtask: " + subtaskNew + " solved" );
-						subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
+							db.p( p(depth) + ( solved ? "" : "NOT" ) + " SOLVED subtask: " + subtaskNew );
+
 						allSolved &= solved;
-						continue AND;
-					} else if( !solved && ( depth == maxDepth ) ) {
-						if (isSubtaskLoggingOn())
-							db.p( p(depth) + "Subtask: " + subtaskNew + " not solved and cannot go any deeper" );
-						continue OR;
+
+						// if at least one subtask is not solvable, try another branch
+						if( !allSolved ) {
+							continue OR;
+						}
+						// copy algorithm from cloned subtask to old
+						subtask.getAlgorithm().addAll( newAlg );
 					}
 
-					if (isSubtaskLoggingOn())
-						db.p( p(depth) + "Recursing deeper" );
-
-					List<Rel> newAlg = new ArrayList<Rel>( subtaskNew.getAlgorithm() );
-
-					subtaskPlanningImpl( problemNew, newAlg, newPath, depth + 1, false );
-
-					if (isSubtaskLoggingOn())
-						db.p( p(depth) + "Back to depth " + ( depth + 1 ) );
-
-					solved = linearForwardSearch( problemNew, newAlg, 
-							// always optimize here in order to get rid of unnecessary subtask instances
-							// temporary true while optimization does not work correctly
-							goals, true );
-
-					if (isSubtaskLoggingOn())
-						db.p( p(depth) + "Subtask: " + subtaskNew + " solved: " + solved );
-
-					allSolved &= solved;
-
-					// if at least one subtask is not solvable, try another branch
-					if( !allSolved ) {
-						continue OR;
-					}
-					// copy algorithm from cloned subtask to old
-					subtask.getAlgorithm().addAll( newAlg );
 				}
-				
+
+				if( allSolved ) {
+					algorithm.add( subtaskRel );
+
+					addVarsToSet( subtaskRel.getOutputs(), newVars );
+					
+					problem.getKnownVars().addAll( newVars );
+					problem.getFoundVars().addAll( newVars );
+					
+					subtaskRelIterator.remove();
+					
+					if (isSubtaskLoggingOn()) {
+						db.p( p(depth) + "SOLVED ALL SUBTASKS for " + subtaskRel.getParentObjectName() + " : " + subtaskRel.getDeclaration() );
+						db.p( p(depth) + "Updating the problem graph and continuing building new MLB" );
+					}
+					
+					continue MLB;
+
+				} else if( !m_isSubtaskRepetitionAllowed ) {
+					if (isSubtaskLoggingOn())
+						db.p( p(depth) + "NOT SOLVED ALL subtasks, removing from path " + subtaskRel.getParentObjectName() + " : " + subtaskRel.getDeclaration() );
+					newPath.remove( subtaskRel );
+				}
 			}
 			
-			if( allSolved ) {
-				algorithm.add( subtaskRel );
-				
-				addVarsToSet( subtaskRel.getOutputs(), newVars );
-				
-//				if( computeAll && ( depth == 0 ) ) {
-//					//if this branch has been solved, no need for another OR
-//					break OR;
-//				}
-//				if( depth == 0 ) {
-//					addKnownVarsToSet( subtaskRel.getOutputs(), problem.getFoundVars() );
-//				}
-				
-			} else if( !m_isSubtaskRepetitionAllowed ) {
-				if (isSubtaskLoggingOn())
-					db.p( p(depth) + "Subtasks not solved, removing rel from path " + subtaskRel );
-				newPath.remove( subtaskRel );
+			//exit loop because there are no more rels with subtasks to be applied
+			//(i.e. no more rels can introduce new variables into the algorithm)
+			if (isSubtaskLoggingOn()) {
+				db.p( p(depth) + "No more MLB can be constructed" ); 
 			}
+			break;
 		}
-		
-		problem.getKnownVars().addAll( newVars );
-		problem.getFoundVars().addAll( newVars );
-		return;// false;
 	}
 
 	private void prepareSubtask(Problem problem, Rel subtask) {
@@ -410,6 +467,8 @@ public class DepthFirstPlanner implements IPlanner {
 		problem.getFoundVars().addAll( flatVars );
 	}
 	
+	private static int maxDepth = 2;//0..2, i.e. 3
+	private static boolean m_isSubtaskRepetitionAllowed = false;
 	
 	private String p( int depth ) {
 		String s = "\t";
