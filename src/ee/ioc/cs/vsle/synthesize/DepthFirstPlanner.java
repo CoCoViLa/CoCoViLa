@@ -66,36 +66,48 @@ public class DepthFirstPlanner implements IPlanner {
 
         problem.getFoundVars().addAll(problem.getKnownVars());
         
-        //invoke linear planning
-        if ( linearForwardSearch( problem, algorithm, problem.getGoals(), 
-        		// do not optimize yet if subtasks exist
-        		( computeAll || !problem.getRelsWithSubtasks().isEmpty() ) ) && !computeAll ) {
-        	
+        if( problem.getRelsWithSubtasks().isEmpty() 
+        		&& linearForwardSearch( problem, algorithm, problem.getGoals(), computeAll ) ) {
         	if ( RuntimeProperties.isLogInfoEnabled() )
     			db.p( "Problem solved without subtasks");
-        	
         } else if ( !problem.getRelsWithSubtasks().isEmpty() ) {
-        	
-        	int foundVarsCount;
-        	//do planning until no new vars are computed
-        	do {
-        		foundVarsCount = problem.getFoundVars().size();
-//        		System.out.println( "Before sb " + foundVarsCount + " " + problem.getFoundVars() );
-        		subtaskPlanning( problem, algorithm, computeAll );
-//        		System.out.println( "After sb " + problem.getFoundVars().size() + " " + problem.getFoundVars() );
-        		if( foundVarsCount < problem.getFoundVars().size() )
-        		{
-        			foundVarsCount = problem.getFoundVars().size();
-        			
-        			linearForwardSearch( problem, algorithm, problem.getGoals(), computeAll );
-//        			System.out.println( "After lp " + problem.getFoundVars().size() + " " + problem.getFoundVars() );
-        			if( ( foundVarsCount == problem.getFoundVars().size() ) 
-        					|| problem.getFoundVars().containsAll( problem.getGoals() ) ) {
-        				break;
-        			}
-        		}
-        	} while( foundVarsCount < problem.getFoundVars().size() );
+        	subtaskPlanning( problem, algorithm, computeAll );
+        	linearForwardSearch( problem, algorithm, problem.getGoals(), computeAll );
+        } else {
+        	if ( RuntimeProperties.isLogInfoEnabled() )
+    			db.p( "Problem not solved" );
         }
+        
+//        //invoke linear planning
+//        if ( linearForwardSearch( problem, algorithm, problem.getGoals(), 
+//        		// do not optimize yet if subtasks exist
+//        		( computeAll || !problem.getRelsWithSubtasks().isEmpty() ) ) && !computeAll ) {
+//        	
+//        	if ( RuntimeProperties.isLogInfoEnabled() )
+//    			db.p( "Problem solved without subtasks");
+//        	
+//        } else if ( !problem.getRelsWithSubtasks().isEmpty() ) {
+//        	
+//        	int foundVarsCount;
+//        	//do planning until no new vars are computed
+//        	do {
+//        		foundVarsCount = problem.getFoundVars().size();
+////        		System.out.println( "Before sb " + foundVarsCount + " " + problem.getFoundVars() );
+//        		subtaskPlanning( problem, algorithm, computeAll );
+////        		System.out.println( "After sb " + problem.getFoundVars().size() + " " + problem.getFoundVars() );
+//        		if( foundVarsCount < problem.getFoundVars().size() )
+//        		{
+//        			foundVarsCount = problem.getFoundVars().size();
+//        			
+//        			linearForwardSearch( problem, algorithm, problem.getGoals(), computeAll );
+////        			System.out.println( "After lp " + problem.getFoundVars().size() + " " + problem.getFoundVars() );
+//        			if( ( foundVarsCount == problem.getFoundVars().size() ) 
+//        					|| problem.getFoundVars().containsAll( problem.getGoals() ) ) {
+//        				break;
+//        			}
+//        		}
+//        	} while( foundVarsCount < problem.getFoundVars().size() );
+//        }
 		if ( RuntimeProperties.isLogInfoEnabled() )
 			db.p( "Planning time: " + ( System.currentTimeMillis() - startTime ) + "ms.");
 		
@@ -288,12 +300,20 @@ public class DepthFirstPlanner implements IPlanner {
 				for (Rel rel : relsWithSubtasks) {
 					print += "\n" + p(depth) + "  " + rel.getParentObjectName() + " : " + rel.getDeclaration();
 				}
+//				print += "\n" + p(depth) + " All remaining rels in problem:";
+//				for (Rel rel : problem.getAllRels()) {
+//					print += "\n" + p(depth) + " " + rel.getParentObjectName() + " : " + rel.getDeclaration();
+//				}
+//				print += "\n" + p(depth) + "All found variables: ";
+//				for (Var var : problem.getFoundVars() ) {
+//					print += "\n" + p(depth) + " " + var.toString();
+//				}
 				db.p( print );
 			}
-				
 			
-			Set<Var> newVars = new LinkedHashSet<Var>();
-
+			//definitely know here that subtasks will be used after
+			linearForwardSearch( problem, algorithm, new LinkedHashSet<Var>(0), true );
+			
 			// or children
 			OR: for ( Iterator<Rel> subtaskRelIterator = relsWithSubtasks.iterator();
 						subtaskRelIterator.hasNext(); ) {
@@ -303,7 +323,6 @@ public class DepthFirstPlanner implements IPlanner {
 				if (isSubtaskLoggingOn())
 					db.p( p(depth) + "OR: depth: " + ( depth + 1 ) + " rel - " + subtaskRel.getParentObjectName() + " : " + subtaskRel.getDeclaration() );
 				if( ( subtaskRel.getUnknownInputCount() > 0 ) 
-						|| newVars.containsAll( subtaskRel.getOutputs() ) 
 						|| problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
 
 					if (isSubtaskLoggingOn()) {
@@ -311,8 +330,6 @@ public class DepthFirstPlanner implements IPlanner {
 						if( subtaskRel.getUnknownInputCount() > 0 ) {
 							db.p( p(depth) + "because unknown inputs count = " + subtaskRel.getUnknownInputCount() 
 									+ " " + subtaskRel.printUnknownInputs() );
-						} else if( newVars.containsAll( subtaskRel.getOutputs() ) ) {
-							db.p( p(depth) + "because all outputs in newVars" );
 						} else if( problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
 							db.p( p(depth) + "because all outputs in FoundVars" );
 						}
@@ -429,8 +446,12 @@ public class DepthFirstPlanner implements IPlanner {
 				if( allSolved ) {
 					algorithm.add( subtaskRel );
 
-					addVarsToSet( subtaskRel.getOutputs(), newVars );
+					Set<Var> newVars = new LinkedHashSet<Var>();
 					
+					addVarsToSet( subtaskRel.getOutputs(), newVars );
+//					System.err.println( "newVars " + newVars.size() + " " + newVars
+//							+ "\nproblem.getKnownVars() " + problem.getKnownVars().size() + " " + problem.getKnownVars()
+//							+ "\nproblem.getFoundVars() " + problem.getFoundVars().size() + " " + problem.getFoundVars() );
 					problem.getKnownVars().addAll( newVars );
 					problem.getFoundVars().addAll( newVars );
 					
