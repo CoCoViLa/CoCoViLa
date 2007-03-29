@@ -4,10 +4,8 @@ import java.awt.*;
 import java.io.*;
 import java.util.*;
 
-import javax.swing.JTextPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.plaf.ComponentUI;
 import javax.swing.text.*;
 
 import ee.ioc.cs.vsle.util.syntax.*;
@@ -45,7 +43,7 @@ public class JavaColoredTextPane extends JTextPane {
     
 	public JavaColoredTextPane() {
 		super();
-		
+		addCaretListener(new BracketMatcher());
 		setStyledDocument(document);
 		setCaretPosition(0);
         setMargin(new Insets(5,5,5,5));
@@ -129,7 +127,7 @@ public class JavaColoredTextPane extends JTextPane {
          * and we need to be able to retrieve ranges from it, it is stored in a
          * balanced tree.
          */
-        private TreeSet<DocPosition> iniPositions = new TreeSet<DocPosition>(new DocPositionComparator());
+        private TreeSet<Integer> iniPositions = new TreeSet<Integer>();
 
         /**
          * As we go through and remove invalid positions we will also be finding
@@ -138,7 +136,7 @@ public class JavaColoredTextPane extends JTextPane {
          * time, we will keep a list of the new positions and simply add it to the
          * list of positions once all the old positions have been removed.
          */
-    	private HashSet<DocPosition> newPositions = new HashSet<DocPosition>();
+    	private Set<Integer> newPositions = new HashSet<Integer>();
 
         /**
          * A simple wrapper representing something that needs to be colored.
@@ -156,7 +154,7 @@ public class JavaColoredTextPane extends JTextPane {
         /**
          * Vector that stores the communication between the two threads.
          */
-        private volatile Vector<RecolorEvent> v = new Vector<RecolorEvent>();
+        private volatile Queue<RecolorEvent> eventQueue = new LinkedList<RecolorEvent>();
 
         /**
          * The amount of change that has occurred before the place in the
@@ -195,10 +193,10 @@ public class JavaColoredTextPane extends JTextPane {
                 }
             }
             synchronized(lock){
-                v.add(new RecolorEvent(position, adjustment));
+                eventQueue.add(new RecolorEvent(position, adjustment));
                 if (asleep){
-                	//notifyAll();
-                    this.interrupt();
+//                	System.err.println("notifying");
+                	notifyAll();
                 }
             }
         }
@@ -219,10 +217,10 @@ public class JavaColoredTextPane extends JTextPane {
             // use try again to keep track of this.
             boolean tryAgain = false;
             while ( isRunning ){
+//            	System.err.println("running");
                 synchronized(lock){
-                    if (v.size() > 0){
-                        RecolorEvent re = v.elementAt(0);
-                        v.removeElementAt(0);
+                    if (!eventQueue.isEmpty()){
+                        RecolorEvent re = eventQueue.poll();
                         position = re.position;
                         adjustment = re.adjustment;
                     } else {
@@ -232,13 +230,13 @@ public class JavaColoredTextPane extends JTextPane {
                     }
                 }
                 if (position != -1){
-                    SortedSet<DocPosition> workingSet;
-                    Iterator<DocPosition> workingIt;
-                    DocPosition startRequest = new DocPosition(position);
-                    DocPosition endRequest = new DocPosition(position + ((adjustment>=0)?adjustment:-adjustment));
-                    DocPosition  dp;
-                    DocPosition dpStart = null;
-                    DocPosition dpEnd = null;
+                    SortedSet<Integer> workingSet;
+                    Iterator<Integer> workingIt;
+                    int startRequest = position;
+                    int endRequest = position + ( ( adjustment >= 0 ) ? adjustment : -adjustment );
+                    int dp;
+                    int dpStart = 0;
+                    int dpEnd = 0;
 
                     // find the starting position.  We must start at least one
                     // token before the current position
@@ -250,7 +248,7 @@ public class JavaColoredTextPane extends JTextPane {
                     } catch (NoSuchElementException x){
                         // if there were no good positions before the requested start,
                         // we can always start at the very beginning.
-                        dpStart = new DocPosition(0);
+                        dpStart = 0;
                     }
 
                     // if stuff was removed, take any removed positions off the list.
@@ -266,14 +264,17 @@ public class JavaColoredTextPane extends JTextPane {
                     // adjust the positions of everything after the insertion/removal.
                     workingSet = iniPositions.tailSet(startRequest);
                     workingIt = workingSet.iterator();
+                    SortedSet<Integer> adjusted = new TreeSet<Integer>();
                     while (workingIt.hasNext()){
-                        workingIt.next().adjustPosition(adjustment);
+                    	adjusted.add( workingIt.next() + adjustment );
+                    	workingIt.remove();
                     }
-
+                    iniPositions.addAll(adjusted);
+                    
                     // now go through and highlight as much as needed
                     workingSet = iniPositions.tailSet(dpStart);
                     workingIt = workingSet.iterator();
-                    dp = null;
+                    dp = 0;
                     if (workingIt.hasNext()){
                         dp = workingIt.next();
                     }
@@ -289,10 +290,10 @@ public class JavaColoredTextPane extends JTextPane {
                             // Reseting the lexer causes the close() method on the reader
                             // to be called but because the close() method has no effect on the
                             // DocumentReader, we can do this.
-                            syntaxLexer.reset(documentReader, 0, dpStart.getPosition(), 0);
+                            syntaxLexer.reset(documentReader, 0, dpStart, 0);
                             // After the lexer has been set up, scroll the reader so that it
                             // is in the correct spot as well.
-                            documentReader.seek(dpStart.getPosition());
+                            documentReader.seek(dpStart);
                             // we will highlight tokens until we reach a good stopping place.
                             // the first obvious stopping place is the end of the document.
                             // the lexer will return null at the end of the document and wee
@@ -314,7 +315,7 @@ public class JavaColoredTextPane extends JTextPane {
                                     );              
                                     //System.out.println(t.getDescription());
                                     // record the position of the last bit of text that we colored
-                                    dpEnd = new DocPosition(t.getCharEnd());
+                                    dpEnd = t.getCharEnd();
                                 }
                                 lastPosition = (t.getCharEnd() + change);
                             }
@@ -329,11 +330,11 @@ public class JavaColoredTextPane extends JTextPane {
                                 //System.out.println(t);
                                 // look at all the positions from last time that are less than or
                                 // equal to the current position
-                                while (dp != null && dp.getPosition() <= t.getCharEnd()){
-                                    if (dp.getPosition() == t.getCharEnd() && dp.getPosition() >= endRequest.getPosition()){
+                                while (dp != 0 && dp <= t.getCharEnd()){
+                                    if (dp == t.getCharEnd() && dp >= endRequest){
                                         // we have found a state that is the same
 										done = true;
-                                        dp = null;
+                                        dp = 0;
                                     } else if (workingIt.hasNext()){
                                         // didn't find it, try again.
                                         dp = workingIt.next();
@@ -341,7 +342,7 @@ public class JavaColoredTextPane extends JTextPane {
                                         // didn't find it, and there is no more info from last
                                         // time.  This means that we will just continue
                                         // until the end of the document.
-                                        dp = null;
+                                        dp = 0;
                                     }
                                 }
                                 // so that we can do this check next time, record all the
@@ -363,7 +364,7 @@ public class JavaColoredTextPane extends JTextPane {
                         }
                         
                         // Remove all the positions that are after the end of the file.:
-                        workingIt = iniPositions.tailSet(new DocPosition(document.getLength())).iterator();
+                        workingIt = iniPositions.tailSet(document.getLength()).iterator();
                         while (workingIt.hasNext()){
                             workingIt.next();
                             workingIt.remove();
@@ -393,10 +394,10 @@ public class JavaColoredTextPane extends JTextPane {
                 if (!tryAgain){
                 	synchronized ( this ){
                 		try {
-                			
+//                			System.err.println( "sleeping after " + ( System.currentTimeMillis() - time) + " ms of work :)");
                 			wait();
-                			
-                			//sleep (0xffffff);
+//                			System.err.println( "waking" );
+                			time = System.currentTimeMillis();
                 		} catch (InterruptedException x){
                 		}
                 	}
@@ -406,7 +407,7 @@ public class JavaColoredTextPane extends JTextPane {
             }
             
         }
-        
+        long time = 0;
         void resumeColoring() {
         	synchronized (doclock){
         		doclock.notifyAll();
@@ -702,100 +703,167 @@ public class JavaColoredTextPane extends JTextPane {
     		syntaxLexer = null;
     	}
     }
-}
-
-/**
- * A wrapper for a position in a document appropriate for storing
- * in a collection.
- */
-class DocPosition {
-
-    /**
-     * The actual position
-     */
-    private int position;
+    
+    public static void main(String[] args) {
+		JFrame frame = new JFrame();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		JScrollPane areaScrollPane = new JScrollPane(new JavaColoredTextPane());
+		frame.getContentPane().add( areaScrollPane );
+		frame.setSize( 500, 350 );
+		frame.setVisible( true );
+	}
+    
 
     /**
-     * Get the position represented by this DocPosition
+     * A class to support highlighting of parenthesis.  To use it, add it as a
+     * caret listener to your text component.
+     * 
+     * It listens for the location of the dot.  If the character before the dot
+     * is a close paren, it finds the matching start paren and highlights both
+     * of them.  Otherwise it clears the highlighting.
      *
-     * @return the position
-     */
-    int getPosition(){
-        return position;
-    }
+     * This object can be shared among multiple components.  It will only
+     * highlight one at a time.
+     **/
+    static class BracketMatcher implements CaretListener
+    {
+    	/** The tags returned from the highlighter, used for clearing the
+            current highlight. */
+    	Object start, end;
 
-    /**
-     * Construct a DocPosition from the given offset into the document.
-     *
-     * @param position The position this DocObject will represent
-     */
-    public DocPosition(int position){
-        this.position = position;
-    }
+    	/** The last highlighter used */
+    	Highlighter highlighter;
 
-    /**
-     * Adjust this position.
-     * This is useful in cases that an amount of text is inserted
-     * or removed before this position.
-     *
-     * @param adjustment amount (either positive or negative) to adjust this position.
-     * @return the DocPosition, adjusted properly.
-     */
-    public DocPosition adjustPosition(int adjustment){
-        position += adjustment;
-        return this;
-    }
+    	/** Used to paint good parenthesis matches */
+    	Highlighter.HighlightPainter goodPainter;
 
-    /**
-     * Two DocPositions are equal iff they have the same internal position.
-     *
-     * @return if this DocPosition represents the same position as another.
-     */
-    public boolean equals(Object obj){
-        if (obj instanceof DocPosition){
-            DocPosition d = (DocPosition)(obj);
-            if (this.position == d.position){
-                return true;
-            }
-        }
-		return false;
-    }
+    	/** Used to paint bad parenthesis matches */
+    	Highlighter.HighlightPainter badPainter;
 
-    /**
-     * A string representation useful for debugging.
-     *
-     * @return A string representing the position.
-     */
-    public String toString(){
-        return "" + position;
-    }
-}
+    	/** Highlights using a good painter for matched parens, and a bad
+            painter for unmatched parens */
+    	BracketMatcher(Highlighter.HighlightPainter goodHighlightPainter,
+    			Highlighter.HighlightPainter badHighlightPainter)
+    			{
+    		this.goodPainter = goodHighlightPainter;
+    		this.badPainter = badHighlightPainter;
+    			}
 
-/**
- * A comparator appropriate for use with Collections of
- * DocPositions.
- */
-class DocPositionComparator implements Comparator<DocPosition> {
-    /**
-     * Does this Comparator equal another?
-     * Since all DocPositionComparators are the same, they
-     * are all equal.
-     *
-     * @return true for DocPositionComparators, false otherwise.
-     */
-    public boolean equals(Object obj){
-    	return obj instanceof DocPositionComparator;
-    }
+    	/** A BracketMatcher with the default highlighters (cyan and magenta) */
+    	BracketMatcher()
+    	{
+    		this(new DefaultHighlighter.DefaultHighlightPainter(Color.cyan),
+    				new DefaultHighlighter.DefaultHighlightPainter(Color.magenta));
+    	}
 
-    /**
-     * Compare two DocPositions
-     *
-     * @param dp1 first DocPosition
-     * @param dp2 second DocPosition
-     * @return negative if first < second, 0 if equal, positive if first > second
-     */
-    public int compare(DocPosition dp1, DocPosition dp2){
-        return dp1.getPosition() - dp2.getPosition();
+    	public void clearHighlights()
+    	{
+    		if(highlighter != null) {
+    			if(start != null)
+    				highlighter.removeHighlight(start);
+    			if(end != null)
+    				highlighter.removeHighlight(end);
+    			start = end = null;
+    			highlighter = null;
+    		}
+    	}
+
+    	/** Returns the character at position p in the document*/
+    	public static char getCharAt(Document doc, int p) 
+    	throws BadLocationException
+    	{
+    		return doc.getText(p, 1).charAt(0);
+    	}
+
+    	/** Returns the position of the matching parenthesis (bracket,
+    	 * whatever) for the character at paren.  It counts all kinds of
+    	 * brackets, so the "matching" parenthesis might be a bad one.  For
+    	 * this demo, we're not going to take quotes or comments into account
+    	 * since that's not the point.
+    	 * 
+    	 * It's assumed that paren is the position of some parenthesis
+    	 * character
+    	 * 
+    	 * @return the position of the matching paren, or -1 if none is found 
+    	 **/
+    	public static int findMatchingParen(Document d, int paren) 
+    	throws BadLocationException
+    	{
+    		int parenCount = 1;
+    		int i = paren-1;
+    		for(; i >= 0; i--) {
+    			char c = getCharAt(d, i);
+    			switch(c) {
+    			case ')':
+    			case '}':
+    			case ']':
+    				parenCount++;
+    				break;
+    			case '(':
+    			case '{':
+    			case '[':
+    				parenCount--;
+    				break;
+    			}
+    			if(parenCount == 0)
+    				break;
+    		}
+    		return i;
+    	}
+
+    	/** Called whenever the caret moves, it updates the highlights */
+    	public void caretUpdate(CaretEvent e)
+    	{
+    		clearHighlights();
+    		JTextComponent source = (JTextComponent) e.getSource();
+    		highlighter = source.getHighlighter();
+    		Document doc = source.getDocument();
+    		if(e.getDot() == 0) {
+    			return;
+    		}
+
+    		// The character we want is the one before the current position
+    		int closeParen = e.getDot()-1;
+    		try {
+    			char c = getCharAt(doc, closeParen);
+    			if(c == ')' ||
+    					c == ']' ||
+    					c == '}') {
+    				int openParen = findMatchingParen(doc, closeParen);
+    				if(openParen >= 0) {
+    					char c2 = getCharAt(doc, openParen);
+    					if((c2 == '(' && c == ')') ||
+    							(c2 == '{' && c == '}') ||
+    							(c2 == '[' && c == ']')) {
+    						start = highlighter.addHighlight(openParen,
+    								openParen+1,
+    								goodPainter);
+    						end = highlighter.addHighlight(closeParen,
+    								closeParen+1,
+    								goodPainter);
+    					}
+    					else {
+    						start = highlighter.addHighlight(openParen,
+    								openParen+1,
+    								badPainter);
+    						end = highlighter.addHighlight(closeParen,
+    								closeParen+1,
+    								badPainter);
+    					}
+    				}
+    				else {
+    					end = highlighter.addHighlight(closeParen,
+    							closeParen+1,
+    							badPainter);		
+    				}
+
+    			}
+    		}
+    		catch(BadLocationException ex) {
+    			throw new Error(ex);
+    		}
+    	}
+
     }
 }
 
@@ -989,3 +1057,6 @@ class DocumentReader extends Reader {
         }
     }
 }
+
+
+
