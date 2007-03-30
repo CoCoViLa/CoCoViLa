@@ -273,7 +273,7 @@ public class DepthFirstPlanner implements IPlanner {
 		if (isSubtaskLoggingOn()) 
 			db.p( "maxDepth: " + ( maxDepth + 1 ) );
 		
-		subtaskPlanningImpl( problem, algorithm, new LinkedHashSet<Rel>(), 0, computeAll );
+		subtaskPlanningImpl( problem, algorithm, new LinkedHashSet<Rel>(), 0, new ArrayList<SubtaskRel>() );
 		
 		maxDepth = maxDepthBackup;
 	}
@@ -288,7 +288,7 @@ public class DepthFirstPlanner implements IPlanner {
 	 * @param computeAll
 	 */
 	private void subtaskPlanningImpl(Problem problem, List<Rel> algorithm,
-			Set<Rel> subtaskRelsInPath, int depth, boolean computeAll ) {
+			Set<Rel> subtaskRelsInPath, int depth, List<SubtaskRel> indSubtasks ) {
 
 		Set<Rel> relsWithSubtasks = new LinkedHashSet<Rel>( problem.getRelsWithSubtasks() );
 		
@@ -360,18 +360,43 @@ public class DepthFirstPlanner implements IPlanner {
 					if( subtask.isIndependent() ) {
 						if (isSubtaskLoggingOn())
 							db.p( "Independent!!!" );
+						
+						SubtaskRel initialSubtask;
+						
+						int ind;
+						
+						if( ( ind = indSubtasks.indexOf( subtask ) ) > -1 ) {
+							initialSubtask = indSubtasks.get( ind );
+							
+							if( subtask != initialSubtask ) {
+								subtask.getAlgorithm().addAll( initialSubtask.getAlgorithm() );
+								subtask = initialSubtask;
+							}
+						} else {
+							indSubtasks.add( subtask );
+						}
+						
 						if( subtask.isSolvable() == null ) {
 							if (isSubtaskLoggingOn())
 								db.p( "Not solved yet" );
 							//independent subtask is solved only once
 							Problem context = subtask.getContext();
+							if( RuntimeProperties.isLogInfoEnabled() ) {
+								db.p( "Start solving independent subtask " + subtask.getDeclaration() );
+							}
 							ArrayList<Rel> alg = invokePlaning( context, false );
 							boolean solved = context.getFoundVars().containsAll( context.getGoals() );
 							if( solved ) {
 								subtask.setSolvable( Boolean.TRUE );
 								subtask.getAlgorithm().addAll( alg );
+								if( RuntimeProperties.isLogInfoEnabled() ) {
+									db.p( "Solved " + subtask.getDeclaration() );
+								}
 							} else {
 								subtask.setSolvable( Boolean.FALSE );
+								if( RuntimeProperties.isLogInfoEnabled() ) {
+									db.p( "Unable to solve " + subtask.getDeclaration() );
+								}
 							}
 							allSolved &= solved;
 						} else if( subtask.isSolvable() == Boolean.TRUE ) {
@@ -418,7 +443,7 @@ public class DepthFirstPlanner implements IPlanner {
 
 						List<Rel> newAlg = new ArrayList<Rel>( subtaskNew.getAlgorithm() );
 
-						subtaskPlanningImpl( problemNew, newAlg, newPath, depth + 1, false );
+						subtaskPlanningImpl( problemNew, newAlg, newPath, depth + 1, indSubtasks );
 
 						if (isSubtaskLoggingOn())
 							db.p( p(depth) + "Back to depth " + ( depth + 1 ) );

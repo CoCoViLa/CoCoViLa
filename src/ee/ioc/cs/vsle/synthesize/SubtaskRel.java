@@ -13,10 +13,7 @@ import ee.ioc.cs.vsle.vclass.*;
  */
 public class SubtaskRel extends Rel {
 
-
     private List<Rel> algorithm = new ArrayList<Rel>();
-    //  parent axiom containing this subtask
-    private Rel parentRel = null;
     
     private Problem context;
     private ClassField contextCF;
@@ -31,16 +28,9 @@ public class SubtaskRel extends Rel {
 	/**
 	 * 
 	 */
-	public SubtaskRel( Rel rel, Var parent, String decl ) {
+	public SubtaskRel( Var parent, String decl ) {
 		super( parent, decl );
-		
-		parentRel = rel;
 	}
-
-    Rel getParentRel() {
-
-        return parentRel;
-    }
 
     void addRelToAlgorithm(Rel rel) {
 

@@ -138,41 +138,57 @@ public class ProblemCreator {
 
                     for ( SubtaskClassRelation subtask : classRelation.getSubtasks() ) {
                     	
-                        SubtaskRel subtaskRel = new SubtaskRel( rel, parent, subtask.getSpecLine() );
+                        SubtaskRel subtaskRel; 
                         
                         if( subtask.isIndependent() ) {
-                        	ClassField context = subtask.getContext();
                         	
-                        	ClassList newClassList = new ClassList();
-                        	newClassList.addAll( classes );
-                        	newClassList.remove( classes.getType( TYPE_THIS ) );
-                        	
-                        	AnnotatedClass newAnnClass = new AnnotatedClass( "IndependentSubtask" );
-                        	newAnnClass.addField( context );
-                        	ClassRelation newCR = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, subtask.getSpecLine() );
-                        	
-                        	List<ClassField> empty = new ArrayList<ClassField>();
-                        	
-                        	for( ClassField input : subtask.getInputs() ) {
-                        		newCR.addInput( context + "." + input, empty );
+                        	if( crToSubtaskRelMap.containsKey( subtask ) )
+                        	{
+                        		subtaskRel = crToSubtaskRelMap.get( subtask );
                         	}
-                        	
-                        	for( ClassField output : subtask.getOutputs() ) {
-                        		newCR.addOutput( context + "." + output, empty );
-                        	}
-                        	
-                        	newAnnClass.addClassRelation( newCR );
-                        	newClassList.add(newAnnClass);
-                        	Problem contextProblem 
+                        	else
+                        	{
+                        		ClassField context = subtask.getContext();
+
+                        		ClassList newClassList = new ClassList();
+                        		newClassList.addAll( classes );
+                        		newClassList.remove( classes.getType( TYPE_THIS ) );
+
+                        		AnnotatedClass newAnnClass = new AnnotatedClass( "IndependentSubtask" );
+                        		newAnnClass.addField( context );
+                        		ClassRelation newCR = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, subtask.getSpecLine() );
+
+                        		List<ClassField> empty = new ArrayList<ClassField>();
+
+                        		for( ClassField input : subtask.getInputs() ) {
+                        			newCR.addInput( context + "." + input, empty );
+                        		}
+
+                        		for( ClassField output : subtask.getOutputs() ) {
+                        			newCR.addOutput( context + "." + output, empty );
+                        		}
+
+                        		newAnnClass.addClassRelation( newCR );
+                        		newClassList.add(newAnnClass);
+                        		Problem contextProblem 
                         		= new Problem( new Var( new ClassField( TYPE_THIS, "IndependentSubtask" ), null ) );
-                    		
-                        	makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem );
-                        	
-                        	makeRel( subtaskRel, subtask, contextProblem, contextProblem.getVarByFullName(context.getName()) );
-                        	
-                        	subtaskRel.setContextCF( context );
-                        	subtaskRel.setContext( contextProblem );
+
+                        		makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem );
+
+                        		Var par = contextProblem.getVarByFullName(context.getName());
+
+                        		subtaskRel = new SubtaskRel( par, subtask.getSpecLine() );
+
+                        		makeRel( subtaskRel, subtask, contextProblem, par );
+
+                        		subtaskRel.setContextCF( context );
+                        		subtaskRel.setContext( contextProblem );
+                        		
+                        		crToSubtaskRelMap.put( subtask, subtaskRel );
+                        	}
                         } else {
+                        	subtaskRel = new SubtaskRel( parent, subtask.getSpecLine() );
+                        	
                         	makeRel( subtaskRel, subtask, problem, parent );
                         }
                         
@@ -207,6 +223,8 @@ public class ProblemCreator {
 
         }
     }
+    
+    private static Map<SubtaskClassRelation, SubtaskRel> crToSubtaskRelMap = new HashMap<SubtaskClassRelation, SubtaskRel>();
     
     private static void createAlias( Alias alias, AnnotatedClass ac, ClassList classes, Problem problem, Var parent ) throws AliasException {
     	
