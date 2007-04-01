@@ -1175,6 +1175,7 @@ public class Canvas extends JPanel {
 		objects = scheme.getObjects();
 		initClassPainters();
 		mListener.setState(State.selection);
+        recalcPreferredSize();
 		drawingArea.repaint();
 		return true;
 	} // loadScheme
@@ -1466,37 +1467,40 @@ public class Canvas extends JPanel {
     }
 
     public void setScale(float scale) {
-    	int maxx = Integer.MIN_VALUE;
-    	int maxy = Integer.MIN_VALUE;
-
-    	if (backgroundImage != null) {
-    		maxx = backgroundImage.getWidth();
-    		maxy = backgroundImage.getHeight();
-    	}
-
-    	for (GObj obj : objects) {
-    		int tmp = obj.getX() + obj.getRealWidth();
-    		if (tmp > maxx)
-    			maxx = tmp;
-
-    		tmp = obj.getY() + obj.getRealHeight();
-    		if (tmp > maxy)
-    			maxy = tmp;
-    	}
-
-   		drawAreaSize.width = Math.round(scale *
-   				(maxx > 0 ? maxx + RuntimeProperties.gridStep
-   						  : drawAreaSize.width / this.scale));
-
-   		drawAreaSize.height = Math.round(scale *
-   				(maxy > 0 ? maxy + RuntimeProperties.gridStep 
-   						  : drawAreaSize.height / this.scale));
-
     	this.scale = scale;
-    	
-    	drawingArea.setPreferredSize(drawAreaSize);
-		drawingArea.revalidate();
+    	recalcPreferredSize();
 		drawingArea.repaint();
+    }
+
+    private void recalcPreferredSize() {
+        int maxx = Integer.MIN_VALUE;
+        int maxy = Integer.MIN_VALUE;
+        
+        if (backgroundImage != null) {
+            maxx = backgroundImage.getWidth();
+            maxy = backgroundImage.getHeight();
+        }
+        
+        for (GObj obj : objects) {
+            int tmp = obj.getX() + obj.getRealWidth();
+            if (tmp > maxx)
+                maxx = tmp;
+            
+            tmp = obj.getY() + obj.getRealHeight();
+            if (tmp > maxy)
+                maxy = tmp;
+        }
+        
+        drawAreaSize.width = Math.round(scale *
+                (maxx > 0 ? maxx + RuntimeProperties.gridStep
+                        : drawAreaSize.width / this.scale));
+        
+        drawAreaSize.height = Math.round(scale *
+                (maxy > 0 ? maxy + RuntimeProperties.gridStep 
+                        : drawAreaSize.height / this.scale));
+
+        drawingArea.setPreferredSize(drawAreaSize);
+        drawingArea.revalidate();
     }
 
     public boolean isEnableClassPainter() {
