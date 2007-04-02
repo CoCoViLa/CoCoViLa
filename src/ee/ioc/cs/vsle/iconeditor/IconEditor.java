@@ -34,7 +34,6 @@ public class IconEditor
 	JLabel posInfo; // Label for displaying mouse position information.
 	VPackage vPackage;
 	IconPalette palette;
-	Scheme scheme;
 	Dimension drawAreaSize = new Dimension(700, 500);
 	ShapeGroup shapeList = new ShapeGroup(new ArrayList<Shape>());
 	ArrayList<IconClass> icons = new ArrayList<IconClass>();
@@ -81,7 +80,6 @@ public class IconEditor
 		addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
 		
 		keyListener = new IconKeyOps(this);
-		scheme = new Scheme(null);
 		mListener = new IconMouseOps(this);
 
 		drawingArea = new DrawingArea();
@@ -521,13 +519,11 @@ public class IconEditor
 			}
 		}
 
+		@Override
 		protected void paintComponent(Graphics g) {
 			Graphics2D g2 = (Graphics2D) g;
 			super.paintComponent(g2);
-			
-					
 
-			
 			if (this.showGrid) drawGrid(g2);
 
 			if (RuntimeProperties.isAntialiasingOn) {
@@ -540,19 +536,13 @@ public class IconEditor
 				//2 esimest parameetrit 0,0.0 on offset ehk palju me teda nihutame (oli vajalik kui shape on objekti graafika osa sest
 				//siis peame arvestama ka objekti asukohta, antud juhul pole oluline, aga ma ei viitsi meetodeid �mber
 				//kirjutada, tulevikus voib seda teha. Kolmas parameeter ehk 1 on suurenduskordaja
-				if (g2 != null) {
-					shape.draw(0, 0, 1f, 1f, g2);
-				}
+				shape.draw(0, 0, 1f, 1f, g2);
 			}
 
-
-			
 			IconPort port;
 			for (int i = 0; i < ports.size(); i++) {
 				port = ports.get(i);
-				if (g2 != null) {
-					port.draw(0, 0, 1, g2);
-				}
+				port.draw(0, 0, 1, g2);
 			}
 
 			if (mListener.state.equals(State.dragBox)) {
@@ -645,6 +635,7 @@ public class IconEditor
 	 * Overridden so we can exit when window is closed
 	 * @param e - Window Event.
 	 */
+	@Override
 	protected void processWindowEvent(WindowEvent e) {
 		// super.processWindowEvent(e); // automatic closing disabled, confirmation asked instead.
 		if (e.getID() == WindowEvent.WINDOW_CLOSING) {
@@ -943,10 +934,12 @@ public class IconEditor
 	public static javax.swing.filechooser.FileFilter getFileFilter(final String format) {
 		if (format != null && format.trim().length() > 0) {
 			javax.swing.filechooser.FileFilter filter = new javax.swing.filechooser.FileFilter() {
+				@Override
 				public String getDescription() {
 					return format.toUpperCase() + " files (*." + format.toLowerCase() + ")";
 				}
 
+				@Override
 				public boolean accept(java.io.File f) {
 					return f.isDirectory() || f.getName().toLowerCase().endsWith("." + format.toLowerCase());
 				}
@@ -1257,13 +1250,11 @@ public class IconEditor
 						shape.getFont(), shape.getColor(),
 						shape.getTransparency(), shape.getText());
 				}
-				if (shape != null) {
-					shape.setSelected(true);
-					shape.x = shape.getX() + 5;
-					shape.y = shape.getY() + 5;
-					shape.setFixed(isFixed);
-					sl.add(shape);
-				}
+				shape.setSelected(true);
+				shape.x = shape.getX() + 5;
+				shape.y = shape.getY() + 5;
+				shape.setFixed(isFixed);
+				sl.add(shape);
 			}
 
 		}
@@ -1793,8 +1784,7 @@ public class IconEditor
             	File javaFile = new File(f.getParent() + RuntimeProperties.FS + selection + ".java");
 				javaFile.delete();				
             }
-            if (selection != null)
-            	JOptionPane.showMessageDialog(null, "Deleted " + selection + " from package: " + f.getName(), "Deleted", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Deleted " + selection + " from package: " + f.getName(), "Deleted", JOptionPane.INFORMATION_MESSAGE);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } catch (IOException e) {
