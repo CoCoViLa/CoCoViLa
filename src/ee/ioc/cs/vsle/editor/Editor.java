@@ -225,9 +225,11 @@ public class Editor extends JFrame implements ChangeListener {
 					}
 
 					public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+						// ignore
 					}
 
 					public void popupMenuCanceled(PopupMenuEvent e) {
+						// ignore
 					}
 
 				});
@@ -244,9 +246,11 @@ public class Editor extends JFrame implements ChangeListener {
 			}
 
 			public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
+				// ignore
 			}
 
 			public void popupMenuCanceled(PopupMenuEvent e) {
+				// ignore
 			}
 
 		});
@@ -562,8 +566,27 @@ public class Editor extends JFrame implements ChangeListener {
 	 * 
 	 * @param args command line arguments
 	 */
-	public static void main(String[] args) {
-		
+	public static void main(final String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				createAndInitGUI(args);
+			}
+		});
+	}
+
+	/**
+	 * Creates and displays the main application window.
+	 * @param args the arguments from the command line
+	 */
+	static void createAndInitGUI(String[] args) {
+		assert SwingUtilities.isEventDispatchThread();
+
+		// Some of the stuff in this method could be run on the main thread,
+		// but running it in the EDT seems to not hurt. Creating new Canvas
+		// instances combined with PropertyChangeListeners is definitely
+		// unsafe in the main thread and has caused real problems.
+
 		for ( int i = 0; i < args.length; i++ )
 		{
 			if ( args[ i ].equals( "-webstart" ) )
