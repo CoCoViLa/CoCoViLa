@@ -70,7 +70,8 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     	tabbedPane = new JTabbedPane();
 
         if( RuntimeProperties.isSyntaxHighlightingOn ) {
-        	jta_spec = new JavaColoredTextPane();
+//        	jta_spec = new JavaColoredTextPane();
+        	jta_spec = SyntaxDocument.createEditor();
         } else {
         	JTextArea ta = new JTextArea();
         	ta.setLineWrap( true );
@@ -107,7 +108,8 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         tabbedPane.addTab( "Specification", specText );
 
         if( RuntimeProperties.isSyntaxHighlightingOn ) {
-        	jta_generatedCode = new JavaColoredTextPane();
+//        	jta_generatedCode = new JavaColoredTextPane();
+        	jta_generatedCode = SyntaxDocument.createEditor();
         } else {
         	JTextArea ta = new JTextArea();
         	ta.setLineWrap( true );

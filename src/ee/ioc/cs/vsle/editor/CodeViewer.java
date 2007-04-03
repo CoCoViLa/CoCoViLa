@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.editor;
 import ee.ioc.cs.vsle.util.FileFuncs;
 
 import javax.swing.*;
+import javax.swing.text.*;
 
 import java.awt.*;
 import java.awt.event.*;
@@ -12,7 +13,7 @@ import java.awt.event.*;
  */
 public class CodeViewer extends JFrame implements ActionListener {
 
-	JavaColoredTextPane	textArea;
+	JTextComponent		textArea;
 	JPanel				specText;
 	JButton				saveBtn;
 	String				fileName;
@@ -29,13 +30,22 @@ public class CodeViewer extends JFrame implements ActionListener {
 
 		final String fileText = FileFuncs.getFileContents(path + fileName);
 
-		textArea = new JavaColoredTextPane();
+		if( RuntimeProperties.isSyntaxHighlightingOn ) {
+			textArea = SyntaxDocument.createEditor();
+        } else {
+        	JTextArea ta = new JTextArea();
+        	ta.setLineWrap( true );
+        	ta.setWrapStyleWord( true );
+        	textArea = ta;
+        }
+		
+		//textArea = new JavaColoredTextPane();
 		textArea.addKeyListener(new ProgramTextEditor.CommentKeyListener());
 		textArea.setFont(RuntimeProperties.font);
 		
 		SwingUtilities.invokeLater( new Runnable() {
 			public void run() {
-				textArea.append(fileText);
+				textArea.setText(fileText);
 				textArea.setCaretPosition( 0 );
 			}
 		} );
@@ -76,7 +86,7 @@ public class CodeViewer extends JFrame implements ActionListener {
 	@Override
 	public void dispose() {
 		if (textArea != null) {
-			textArea.destroy();
+//			textArea.destroy();
 
 			textArea = null;
 		}
