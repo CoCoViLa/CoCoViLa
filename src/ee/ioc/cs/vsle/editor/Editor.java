@@ -568,7 +568,9 @@ public class Editor extends JFrame implements ChangeListener {
 	 */
 	public static void main(final String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
-			@Override
+			// Java 1.5 seems to not support @Override annotations for
+			// interface methods. bug_id=5008260
+			// @Override
 			public void run() {
 				createAndInitGUI(args);
 			}
