@@ -228,6 +228,10 @@
         <pathelement location="${build}"/>
         <path refid="build.classpath"/>
       </classpath>
+    	<jvmarg value="-Xss2048k"/>
+    	<jvmarg value="-Xms64m"/>
+    	<jvmarg value="-Xmx384m"/>
+    	<jvmarg value="-XX:+UseParallelGC"/>
     </java>
   </target>
 
@@ -249,7 +253,7 @@
       Distribution
   -->
 
-  <target name="dist" depends="runtime-dep,copy-resources,test"
+  <target name="dist" depends="runtime-dep,copy-resources"
           description="Generate distribution files" >
 
     <mkdir dir="${dist}/lib"/>
