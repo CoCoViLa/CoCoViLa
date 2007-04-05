@@ -369,7 +369,9 @@ public class DepthFirstPlanner implements IPlanner {
 							initialSubtask = indSubtasks.get( ind );
 							
 							if( subtask != initialSubtask ) {
-								subtask.getAlgorithm().addAll( initialSubtask.getAlgorithm() );
+								if( subtask.isSolvable() == null )
+									subtask.getAlgorithm().addAll( initialSubtask.getAlgorithm() );
+								subtask.setSolvable( initialSubtask.isSolvable() );
 								subtask = initialSubtask;
 							}
 						} else {
