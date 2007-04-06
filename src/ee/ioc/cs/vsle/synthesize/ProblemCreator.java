@@ -13,7 +13,7 @@ public class ProblemCreator {
 		
 		Problem problem = new Problem( new Var( new ClassField( TYPE_THIS, TYPE_THIS ), null ) );
 		
-    	makeProblemImpl( classes, problem.getRootVar(), problem );
+    	makeProblemImpl( classes, problem.getRootVar(), problem, new HashMap<SubtaskClassRelation, SubtaskRel>() );
     	
     	return problem;
     }
@@ -27,7 +27,7 @@ public class ProblemCreator {
      @param caller caller, or the "parent" of the current object. The objects name will be caller + . + obj.name
      @param problem the problem itself (needed because of recursion).
      */
-    private static void makeProblemImpl( ClassList classes, Var parent, Problem problem ) throws
+    private static void makeProblemImpl( ClassList classes, Var parent, Problem problem, Map<SubtaskClassRelation, SubtaskRel> indpSubtasks ) throws
             SpecParseException {
 
     	List<Alias> aliases = new ArrayList<Alias>();
@@ -49,7 +49,7 @@ public class ProblemCreator {
             
             if ( classes.getType( cf.getType() ) != null ) {
             	
-                makeProblemImpl( classes, var, problem );
+                makeProblemImpl( classes, var, problem, indpSubtasks );
                 continue;
             }
             else if( cf.isConstant() && cf.getName().startsWith( "*" ) ) {
@@ -142,9 +142,9 @@ public class ProblemCreator {
                         
                         if( subtask.isIndependent() ) {
                         	
-                        	if( crToSubtaskRelMap.containsKey( subtask ) )
+                        	if( indpSubtasks.containsKey( subtask ) )
                         	{
-                        		subtaskRel = crToSubtaskRelMap.get( subtask );
+                        		subtaskRel = indpSubtasks.get( subtask );
                         	}
                         	else
                         	{
@@ -170,10 +170,10 @@ public class ProblemCreator {
 
                         		newAnnClass.addClassRelation( newCR );
                         		newClassList.add(newAnnClass);
-                        		Problem contextProblem 
-                        		= new Problem( new Var( new ClassField( TYPE_THIS, "IndependentSubtask" ), null ) );
+                        		Problem contextProblem = 
+                        			new Problem( new Var( new ClassField( TYPE_THIS, "IndependentSubtask" ), null ) );
 
-                        		makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem );
+                        		makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem, indpSubtasks );
 
                         		Var par = contextProblem.getVarByFullName(context.getName());
 
@@ -184,7 +184,7 @@ public class ProblemCreator {
                         		subtaskRel.setContextCF( context );
                         		subtaskRel.setContext( contextProblem );
                         		
-                        		crToSubtaskRelMap.put( subtask, subtaskRel );
+                        		indpSubtasks.put( subtask, subtaskRel );
                         	}
                         } else {
                         	subtaskRel = new SubtaskRel( parent, subtask.getSpecLine() );
@@ -223,8 +223,6 @@ public class ProblemCreator {
 
         }
     }
-    
-    private static Map<SubtaskClassRelation, SubtaskRel> crToSubtaskRelMap = new HashMap<SubtaskClassRelation, SubtaskRel>();
     
     private static void createAlias( Alias alias, AnnotatedClass ac, ClassList classes, Problem problem, Var parent ) throws AliasException {
     	

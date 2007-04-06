@@ -65,7 +65,8 @@ public class Synthesizer {
         if( RuntimeProperties.showAlgorithm ) {
         	AlgorithmVisualizer.getInstance().addNewTab( mainClassName, algorithmList );
         }
-        String algorithm = new CodeGenerator( algorithmList, problem, mainClassName ).generate();
+        CodeGenerator cg = new CodeGenerator( algorithmList, problem, mainClassName );
+        String algorithm = cg.generate();
 
         runner.addFoundVars( problem.getFoundVars() );
         runner.setAssumptions( problem.getAssumptions() );
@@ -91,7 +92,7 @@ public class Synthesizer {
        
         prog.append( "\n" ).append(  CodeGenerator.OT_TAB ).append( getComputeMethodSignature() ).append( " {\n" );
         prog.append( algorithm );
-        prog.append( CodeGenerator.OT_TAB ).append( "}" );
+        prog.append( CodeGenerator.OT_TAB ).append( "}\n" );
         Pattern pattern;
         Matcher matcher;
 
@@ -114,7 +115,10 @@ public class Synthesizer {
             fileString = matcher.replaceAll( "\n" + prog.toString() );
         }
 
-        return "import ee.ioc.cs.vsle.util.*;\nimport ee.ioc.cs.vsle.api.*;\n\n" + fileString;
+        fileString = "import ee.ioc.cs.vsle.util.*;\nimport ee.ioc.cs.vsle.api.*;\n\n" + fileString 
+        			 + "\n" + cg.getIndependentSubtasks();
+        
+        return fileString;
 
     }
 

@@ -19,11 +19,13 @@ public class CodeGenerator {
 
     public static int ALIASTMP_NR;
 
-    private ArrayList<Rel> algRelList;
+    private List<Rel> algRelList;
     private Problem problem;
     private String className; 
     
-    public CodeGenerator( ArrayList<Rel> algRelList, Problem problem, String className ) {
+    private Map<SubtaskRel, IndSubt> independentSubtasks = new HashMap<SubtaskRel, IndSubt>();
+    
+    public CodeGenerator( List<Rel> algRelList, Problem problem, String className ) {
     	
     	this.algRelList = algRelList;
     	this.problem = problem;
@@ -66,6 +68,16 @@ public class CodeGenerator {
         return alg.toString();
     }
 
+    public String getIndependentSubtasks() {
+    	StringBuilder buf = new StringBuilder();
+    	
+    	for ( IndSubt code: independentSubtasks.values() ) {
+			buf.append( code.getCode() );
+		}
+    	
+    	return buf.toString();
+    }
+    
     private void genAssumptions( StringBuilder alg, List<Var> assumptions ) {
     	if( assumptions.isEmpty() ) {
     		return;
@@ -81,21 +93,10 @@ public class CodeGenerator {
     		result.append(offset);
 
 			if (token == TypeToken.TOKEN_OBJECT) {
-				result.append(var.getFullName());
-				result.append(" = (");
-				result.append(varType);
-				result.append(")args[");
-				result.append(i++);
-				result.append("];\n");
+				result.append(var.getFullName()).append(" = (").append(varType).append(")args[").append(i++).append("];\n");
 			} else {
-				result.append(var.getFullName());
-				result.append(" = ((");
-				result.append(token.getObjType());
-				result.append(")args[");
-				result.append(i++);
-				result.append("]).");
-				result.append(token.getMethod());
-				result.append("();\n");
+				result.append(var.getFullName()).append(" = ((").append(token.getObjType()).append(")args[")
+					.append(i++).append("]).").append(token.getMethod()).append("();\n");
 			}
 		}
     	
@@ -106,92 +107,90 @@ public class CodeGenerator {
     		Set<Var> usedVars, Problem problem ) {
         int subNum;
         int start = subCount;
-
+        
         for ( SubtaskRel subtask : rel.getSubtasks() ) {
         	
-        	Problem currentProblem = subtask.isIndependent() ? subtask.getContext() : problem;
-        	Set<Var> currentUsedVars = subtask.isIndependent() ? new HashSet<Var>() : usedVars;
-        	
-            subNum = subCount++;
+        	subNum = subCount++;
             
             String sbName = ( subtask.isIndependent() ? "Independent" : "" ) + SUBTASK_INTERFACE_NAME + "_" + subNum;
-            
-            StringBuilder bufSbtClass = new StringBuilder();
-            
-            bufSbtClass.append( "\n");
-            bufSbtClass.append( same() );
-            bufSbtClass.append( "class " );
-            bufSbtClass.append( sbName );
-            bufSbtClass.append( " implements " );
-            bufSbtClass.append( SUBTASK_INTERFACE_NAME );
-            bufSbtClass.append( " {\n\n" );
-            
-            right() ;
-            
-            //start generating run()
-            
-            StringBuilder bufSbtBody = new StringBuilder();
-            
-            bufSbtBody.append( same() );
-            bufSbtBody.append( getRunMethodSignature() ).append( " {\n" );
-            
-            List<Var> subInputs = subtask.getInputs();
-            List<Var> subOutputs = subtask.getOutputs();
-            
-            addVarsToSet( subInputs, currentUsedVars );
-            addVarsToSet( subOutputs, currentUsedVars );
-            
-            List<Rel> subAlg = subtask.getAlgorithm();
-            right() ;
-            bufSbtBody.append( same() );
-            bufSbtBody.append( "//Subtask: " );
-            bufSbtBody.append( subtask );
-            bufSbtBody.append( "\n" );
-            // apend subtask inputs to algorithm
-            bufSbtBody.append( getSubtaskInputs( subInputs ) );
-            for ( int i = 0; i < subAlg.size(); i++ ) {
-                Rel trel = subAlg.get( i );
-                if (RuntimeProperties.isLogDebugEnabled())
-					db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs());
-                if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
-                    //recursion
-                    genSubTasks( trel, bufSbtBody, true, sbName, currentUsedVars, currentProblem );
 
-                } else {
-                    appendRelToAlg( same(), trel, bufSbtBody );
-                }
-                addVarsToSet( trel.getInputs(), currentUsedVars );
-            	addVarsToSet( trel.getOutputs(), currentUsedVars );
-            }
-            // apend subtask outputs to algorithm
-            bufSbtBody.append( getSubtaskOutputs( subOutputs, same() ) );
-            //end of run()
-            bufSbtBody.append( left() );
-            bufSbtBody.append( "}\n" );
-            
-            if( !subtask.isIndependent() ) {
-            	//variable declaration & constructor
-            	bufSbtClass.append( generateFieldDeclaration( parentClassName, sbName, currentUsedVars, currentProblem ) );
-            } else {
-            	bufSbtClass.append( same() ).append( getDeclaration( subtask.getContextCF(), "private" ) ).append( "\n" );
-            }
-            
-            //append run() after subtasks' constructor
-            bufSbtClass.append( bufSbtBody );
-            //end of class
-            bufSbtClass.append( left() );
-            bufSbtClass.append( "} //End of subtask: " );
-            bufSbtClass.append( subtask );
-            bufSbtClass.append( "\n" );
-            
-            alg.append(bufSbtClass);
-            alg.append( same() );
-            alg.append( sbName );
-            alg.append( " subtask_" );
-            alg.append( subNum );
-            alg.append( " = new " );
-            alg.append( sbName );
-            alg.append( "();\n\n" );
+        	if( !subtask.isIndependent()
+        			|| ( subtask.isIndependent() && !independentSubtasks.containsKey( subtask ) ) ) {
+        		
+        		String offsetBak = offset;
+        		if( subtask.isIndependent() ) offset = "";
+        		
+        		Problem currentProblem = subtask.isIndependent() ? subtask.getContext() : problem;
+        		Set<Var> currentUsedVars = subtask.isIndependent() ? new HashSet<Var>() : usedVars;
+
+        		StringBuilder bufSbtClass = new StringBuilder();
+
+        		bufSbtClass.append( "\n").append( same() ).append( "class " ).append( sbName )
+        			.append( " implements " ).append( SUBTASK_INTERFACE_NAME ).append( " {\n\n" );
+
+        		right() ;
+
+        		//start generating run()
+
+        		StringBuilder bufSbtBody = new StringBuilder();
+
+        		bufSbtBody.append( same() ).append( getRunMethodSignature() ).append( " {\n" );
+
+        		List<Var> subInputs = subtask.getInputs();
+        		List<Var> subOutputs = subtask.getOutputs();
+
+        		addVarsToSet( subInputs, currentUsedVars );
+        		addVarsToSet( subOutputs, currentUsedVars );
+
+        		List<Rel> subAlg = subtask.getAlgorithm();
+        		right() ;
+        		bufSbtBody.append( same() ).append( "//Subtask: " ).append( subtask ).append( "\n" );
+        		// apend subtask inputs to algorithm
+        		bufSbtBody.append( getSubtaskInputs( subInputs ) );
+        		for ( int i = 0; i < subAlg.size(); i++ ) {
+        			Rel trel = subAlg.get( i );
+        			if (RuntimeProperties.isLogDebugEnabled())
+        				db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs());
+        			if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
+        				//recursion
+        				genSubTasks( trel, bufSbtBody, true, sbName, currentUsedVars, currentProblem );
+
+        			} else {
+        				appendRelToAlg( same(), trel, bufSbtBody );
+        			}
+        			addVarsToSet( trel.getInputs(), currentUsedVars );
+        			addVarsToSet( trel.getOutputs(), currentUsedVars );
+        		}
+        		// apend subtask outputs to algorithm
+        		bufSbtBody.append( getSubtaskOutputs( subOutputs, same() ) );
+        		//end of run()
+        		bufSbtBody.append( left() ).append( "}\n" );
+
+        		if( !subtask.isIndependent() ) {
+        			//variable declaration & constructor
+        			bufSbtClass.append( generateFieldDeclaration( parentClassName, sbName, currentUsedVars, currentProblem ) );
+        		} else {
+        			bufSbtClass.append( same() ).append( getDeclaration( subtask.getContextCF(), "private" ) ).append( "\n" );
+        		}
+
+        		//append run() after subtasks' constructor
+        		bufSbtClass.append( bufSbtBody );
+        		//end of class
+        		bufSbtClass.append( left() ).append( "} //End of subtask: " ).append( subtask ).append( "\n" );
+
+        		if( subtask.isIndependent() ) {
+        			independentSubtasks.put(subtask, new IndSubt( sbName, bufSbtClass.toString() ));
+        		} else {
+        			alg.append(bufSbtClass);
+        		}
+
+        		if( subtask.isIndependent() ) offset = offsetBak;
+        	} else {
+        		IndSubt sub = independentSubtasks.get( subtask );
+        		sbName = sub.getClassName();
+        	}
+            alg.append( same() ).append( sbName ).append( " subtask_" ).append( subNum ).append( " = new " )
+            	.append( sbName ).append( "();\n\n" );
         }
 
         appendSubtaskRelToAlg( rel, start, alg, isNestedSubtask );
@@ -223,30 +222,15 @@ public class CodeGenerator {
     				if( var.getField().isArray() ) {
     					if( var.getField().isPrimitiveArray() ) {
     						bufConstr.append( "if( " ).append( parent ).append( " != null )\n").append( consOT ).append( OT_TAB );
-    	    				bufConstr.append( var.getName() );
-    	    				bufConstr.append( " = " );
-    						bufConstr.append( "(" );
-    						bufConstr.append( var.getType() );
-    						bufConstr.append( ") " );
-    						bufConstr.append( parent );
-    						bufConstr.append( ".clone();\n" );
+    	    				bufConstr.append( var.getName() ).append( " = " ).append( "(" ).append( var.getType() )
+    							.append( ") " ).append( parent ).append( ".clone();\n" );
     					} else {
-    						bufConstr.append( "try {\n" );
-    						bufConstr.append( consOT );
-    						bufConstr.append( OT_TAB );
-    	    				bufConstr.append( var.getName() );
-    	    				bufConstr.append( " = " );
-    						bufConstr.append( "DeepCopy.copy( " );
-        					bufConstr.append( parent );
-        					bufConstr.append( " );\n" );
-        					bufConstr.append( consOT );
-        					bufConstr.append( "} catch( Exception e ) { e.printStackTrace(); }\n" );
+    						bufConstr.append( "try {\n" ).append( consOT ).append( OT_TAB ).append( var.getName() )
+    	    					.append( " = " ).append( "DeepCopy.copy( " ).append( parent ).append( " );\n" )
+        							.append( consOT ).append( "} catch( Exception e ) { e.printStackTrace(); }\n" );
     					}
     				} else {
-        				bufConstr.append( var.getName() );
-        				bufConstr.append( " = " );
-    					bufConstr.append( parent );
-    					bufConstr.append( ";\n" );
+        				bufConstr.append( var.getName() ).append( " = " ).append( parent ).append( ";\n" );
     				}
     			}
     		} else {
@@ -261,32 +245,19 @@ public class CodeGenerator {
     			if( !topVars.contains( parent.getFullName() ) ) {
     				topVars.add( parent.getFullName() );
     				
-    				bufDecl.append( declOT );
-    				bufDecl.append( parent.getDeclaration() );
+    				bufDecl.append( declOT ).append( parent.getDeclaration() );
     			}
     			if( allow ) {
-    				bufConstr.append( consOT );
-    				bufConstr.append( var.getFullName() );
-    				bufConstr.append( " = " );
-    				bufConstr.append( parentClassName );
-    				bufConstr.append( _this_ );
-    				bufConstr.append( var.getFullName() );
-    				bufConstr.append( ";\n" );
+    				bufConstr.append( consOT ).append( var.getFullName() ).append( " = " ).append( parentClassName )
+    					.append( _this_ ).append( var.getFullName() ).append( ";\n" );
     			}
     		}
     	}
         
     	StringBuilder result = new StringBuilder();
     	
-    	result.append( "\n" );
-    	result.append( bufDecl );
-    	result.append( "\n" );
-    	result.append( left() );
-    	result.append( sbName );
-    	result.append( "() {\n\n" );
-    	result.append( bufConstr );
-    	result.append( same() );
-    	result.append( "}\n\n" );
+    	result.append( "\n" ).append( bufDecl ).append( "\n" ).append( left() ).append( sbName ).append( "() {\n\n" )
+    		.append( bufConstr ).append( same() ).append( "}\n\n" );
     	
         return result.toString();
     }
@@ -327,9 +298,7 @@ public class CodeGenerator {
         String s = rel.toString();
         if ( !s.equals( "" ) ) {
             if(rel.getExceptions().size() == 0 ) {
-                buf.append( offset );
-                buf.append( s );
-                buf.append( ";\n" );
+                buf.append( offset ).append( s ).append( ";\n" );
             }
             else {
                 buf.append( appendExceptions( rel, s ) );
@@ -344,42 +313,23 @@ public class CodeGenerator {
 			relString = relString.replaceFirst(RelType.TAG_SUBTASK, "subtask_" + (startInd + i));
 		}
 		if (rel.getExceptions().size() == 0 || isNestedSubtask) {
-			buf.append(same());
-			buf.append(relString);
-			buf.append("\n");
+			buf.append(same()).append(relString).append("\n");
 		} else {
-			buf.append(appendExceptions(rel, relString));
-			buf.append("\n");
+			buf.append(appendExceptions(rel, relString)).append("\n");
 		}
 	}
 
     private String appendExceptions(Rel rel, String s) {
 		StringBuilder buf = new StringBuilder();
-		buf.append(same());
-		buf.append("try {\n");
-		buf.append(right());
-		buf.append(s);
-		buf.append(";\n");
-		buf.append(left());
-		buf.append("}\n");
+		buf.append(same()).append("try {\n").append(right()).append(s).append(";\n").append(left()).append("}\n");
 		
         int i = 0;
         for ( Var ex : rel.getExceptions() ) {
             String excp = ex.getName();
 			String instanceName = "ex" + i;
-			buf.append(same());
-			buf.append("catch( ");
-			buf.append(excp);
-			buf.append(" ");
-			buf.append(instanceName);
-			buf.append(" ) {\n");
-			buf.append(right());
-			buf.append(instanceName);
-			buf.append(".printStackTrace();\n");
-			buf.append(same());
-			buf.append("return;\n");
-			buf.append(left());
-			buf.append("}\n");
+			buf.append(same()).append("catch( ").append(excp).append(" ").append(instanceName).append(" ) {\n")
+				.append(right()).append(instanceName).append(".printStackTrace();\n").append(same())
+					.append("return;\n").append(left()).append("}\n");
 		}
 
 		return buf.toString();
@@ -540,5 +490,22 @@ public class CodeGenerator {
 	public static String getAliasTmpName( String varName ) {
 		varName = varName.replaceAll( "\\.", "_" );
         return TypeUtil.TYPE_ALIAS + "_" + varName + "_" + ALIASTMP_NR++;
+    }
+	
+	private class IndSubt {
+    	
+    	private String className;
+    	private String code;
+    	
+    	public IndSubt( String className, String code ) {
+    		this.className = className;
+    		this.code = code;
+    	}
+		public String getClassName() {
+			return className;
+		}
+		public String getCode() {
+			return code;
+		}
     }
 }
