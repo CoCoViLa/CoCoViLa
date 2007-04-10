@@ -122,18 +122,15 @@ public class EditorActionListener implements ActionListener {
                 }
 
                 JFileChooser fc = new JFileChooser( Editor.getInstance().getCurrentPackage().getPath() );
-                CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.extensionSyn,
-                        CustomFileFilter.descriptionSyn );
+                CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.EXT.SYN );
                 fc.setFileFilter( synFilter );
                 int returnVal = fc.showSaveDialog( null );
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
 
                     File file = fc.getSelectedFile();
 
-                    if ( !file.getAbsolutePath().toLowerCase().endsWith( CustomFileFilter.
-                            extensionSyn ) ) {
-                        file = new File( file.getAbsolutePath() + "." +
-                                         CustomFileFilter.extensionSyn );
+                    if ( !file.getAbsolutePath().toLowerCase().endsWith( CustomFileFilter.EXT.SYN.getExtension() ) ) {
+                        file = new File( file.getAbsolutePath() + "." + CustomFileFilter.EXT.SYN.getExtension() );
                     }
 
                     Editor.setLastPath( file.getAbsolutePath() );
@@ -148,8 +145,7 @@ public class EditorActionListener implements ActionListener {
                     return;
                 }
                 JFileChooser fc = new JFileChooser( Editor.getInstance().getCurrentPackage().getPath() );
-                CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.extensionSyn,
-                        CustomFileFilter.descriptionSyn );
+                CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.EXT.SYN );
                 fc.setFileFilter( synFilter );
 
                 int returnVal = fc.showOpenDialog(Editor.getInstance());
@@ -189,8 +185,7 @@ public class EditorActionListener implements ActionListener {
                 JFileChooser fc = new JFileChooser( 
                 		( Editor.getLastPath() != null && new File(Editor.getLastPath()).exists() )
                 		? Editor.getLastPath() : RuntimeProperties.getWorkingDirectory() );
-                CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.extensionXML,
-                        CustomFileFilter.descriptionXML );
+                CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.EXT.XML );
 
                 fc.setFileFilter( synFilter );
 

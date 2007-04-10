@@ -13,15 +13,33 @@ public class CustomFileFilter extends FileFilter {
 	private String description = "";
 	private String extension = "";
 
-	public static final String extensionSyn = "syn";
-	public static final String extensionXML = "xml";
-	public static final String extensionTxt = "txt";
+	public static enum EXT {
+		JAVA( "java", "Java Source Code (*.java)"), 
+		SYN( "syn", "Java Synthesizer Schemes (*.syn)" ),
+		XML( "xml", "Extensible Markup Language (*.xml)" ),
+		TXT( "txt", "Text Documents (*.txt)" );
+		
+		private String description = "";
+		private String extension = "";
+		
+		EXT( String ext, String desc ) {
+			extension = ext;
+			description = desc;
+		}
 
-	public static final String descriptionSyn = "Java Synthesizer Schemes (*." + extensionSyn + ")";
-	public static final String descriptionXML = "Extensible Markup Language (*." + extensionXML + ")";
-	public static final String descriptionTxt = "Text Documents (*." + extensionTxt + ")";
+		public String getDescription() {
+			return description;
+		}
 
-	public CustomFileFilter() {
+		public String getExtension() {
+			return extension;
+		}
+		
+		
+	}
+	
+	public CustomFileFilter( EXT extEnum ) {
+		this( extEnum.getExtension(), extEnum.getDescription() );
 	}
 
 	public CustomFileFilter(String extension) {

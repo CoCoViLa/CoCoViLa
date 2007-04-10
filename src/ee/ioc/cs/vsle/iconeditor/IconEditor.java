@@ -772,7 +772,7 @@ public class IconEditor
 	public void saveScheme() {
 
 		JFileChooser fc = new JFileChooser(getLastPath());
-		CustomFileFilter txtFilter = new CustomFileFilter(CustomFileFilter.extensionTxt, CustomFileFilter.descriptionTxt);
+		CustomFileFilter txtFilter = new CustomFileFilter(CustomFileFilter.EXT.TXT);
 
 		fc.setFileFilter(txtFilter);
 		int returnVal = fc.showSaveDialog(null);
@@ -783,8 +783,8 @@ public class IconEditor
 			// [Aulo] 11.02.2004
 			// Check if the file name ends with a required extension. If not,
 			// append the default extension to the file name.
-			if (!file.getAbsolutePath().toLowerCase().endsWith(CustomFileFilter.extensionTxt)) {
-				file = new File(file.getAbsolutePath() + "." + CustomFileFilter.extensionTxt);
+			if (!file.getAbsolutePath().toLowerCase().endsWith(CustomFileFilter.EXT.TXT.getExtension())) {
+				file = new File(file.getAbsolutePath() + "." + CustomFileFilter.EXT.TXT.getExtension());
 			}
 
 			// store the last open directory in system properties.
@@ -830,7 +830,7 @@ public class IconEditor
 	 */
 	public void loadScheme() {
 		JFileChooser fc = new JFileChooser(getLastPath());
-		CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.extensionTxt, CustomFileFilter.descriptionTxt);
+		CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.EXT.TXT);
 
 		fc.setFileFilter(filter);
 		int returnVal = fc.showOpenDialog(null);
@@ -1161,7 +1161,7 @@ public class IconEditor
 								}
 							}
 							fileText += "    }@*/\n \n}";
-							FileFuncs.writeFile(file.getParent() + RuntimeProperties.FS + className + ".java", fileText);
+							FileFuncs.writeFile( new File( file.getParent() + RuntimeProperties.FS + className + ".java" ), fileText);
 						}
 						
 						JOptionPane.showMessageDialog(null, "Saved to package: " + file.getName(), "Saved", JOptionPane.INFORMATION_MESSAGE);
@@ -1639,7 +1639,7 @@ public class IconEditor
 	
 	public void loadClass() {
 		JFileChooser fc = new JFileChooser(getLastPath());
-		CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.extensionXML, CustomFileFilter.descriptionXML);
+		CustomFileFilter filter = new CustomFileFilter(CustomFileFilter.EXT.XML);
 
 		fc.setFileFilter(filter);
 		int returnVal = fc.showOpenDialog(null);

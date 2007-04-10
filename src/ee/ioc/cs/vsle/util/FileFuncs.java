@@ -13,32 +13,35 @@ import ee.ioc.cs.vsle.editor.*;
  * Time: 21:45:37
  */
 public class FileFuncs {
-	public static String getFileContents(String fileName) {
+	public static String getFileContents(File file) {
 		String fileString = new String();
-		try {
-			BufferedReader in = new BufferedReader(new FileReader(fileName));
-			String lineString = new String();
+		if( file != null && file.exists() && !file.isDirectory() ) {
+			try {
+				BufferedReader in = new BufferedReader(new FileReader(file));
+				String lineString = new String();
 
-			while ((lineString = in.readLine()) != null) {
-				fileString += lineString+"\n";
+				while ((lineString = in.readLine()) != null) {
+					fileString += lineString+"\n";
+				}
+				in.close();
+			} catch (IOException ioe) {
+				db.p("Couldn't open file "+ file.getAbsolutePath());
 			}
-			in.close();
-		} catch (IOException ioe) {
-			db.p("Couldn't open file "+ fileName);
 		}
-
 		return fileString;
 	}
 
-	public static void writeFile(String fileName, String text) {
-		try {
-			PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(fileName)));
-			out.println(text);
-			out.close();
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			db.p("Couldn't write to file "+ fileName);
+	public static void writeFile(File file, String text) {
+		if( file != null && file.exists() && !file.isDirectory() ) {
+			try {
+				PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+				out.println(text);
+				out.close();
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+				db.p("Couldn't write to file "+ file.getAbsolutePath());
+			}
 		}
 	}
 
