@@ -386,7 +386,8 @@ public class DepthFirstPlanner implements IPlanner {
 							if( RuntimeProperties.isLogInfoEnabled() ) {
 								db.p( "Start solving independent subtask " + subtask.getDeclaration() );
 							}
-							ArrayList<Rel> alg = invokePlaning( context, false );
+							//TODO - fix optimization
+							ArrayList<Rel> alg = invokePlaning( context, true );
 							boolean solved = context.getFoundVars().containsAll( context.getGoals() );
 							if( solved ) {
 								subtask.setSolvable( Boolean.TRUE );
