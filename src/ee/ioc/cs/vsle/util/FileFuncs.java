@@ -31,18 +31,34 @@ public class FileFuncs {
 		return fileString;
 	}
 
-	public static void writeFile(File file, String text) {
-		if( file != null && file.exists() && !file.isDirectory() ) {
+	/**
+	 * Writes the text to the specified file. The file is created if it
+	 * does not exist yet. A newline is appended to the text.
+	 * @param file the output file
+	 * @param text the text to be written
+	 * @return true on success, false on error
+	 */
+	public static boolean writeFile(File file, String text) {
+		boolean status = false;
+		if (file != null && !file.isDirectory()) {
+			PrintWriter out = null;
 			try {
-				PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+				out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 				out.println(text);
 				out.close();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
+				out = null;
+				status = true;
+			} catch (Exception e) {
+				db.p(e);
 				db.p("Couldn't write to file "+ file.getAbsolutePath());
+			} finally {
+				if (out != null) {
+					out.close();
+					out = null;
+				}
 			}
 		}
+		return status;
 	}
 
 	public static void writeFile( String prog, String mainClassName, String ext, String dir, boolean append ) {
