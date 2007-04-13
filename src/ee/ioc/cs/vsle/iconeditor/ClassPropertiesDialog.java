@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.iconeditor;
 
 import java.io.*;
+import java.util.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.event.*;
@@ -75,7 +76,8 @@ public class ClassPropertiesDialog extends JDialog {
 
 	// Table for class fields.
 	private JTable tblClassFields;
-	private ClassFieldsTableModel dbrClassFields;
+	private ClassFieldsTableModel initialCfTableModel;
+	private ClassFieldsTableModel cfTableModel;
 
 	// Table selection model.
 	ListSelectionModel selectionModel;
@@ -86,14 +88,18 @@ public class ClassPropertiesDialog extends JDialog {
 	/**
 	 * Class constructor.
 	 */
-	public ClassPropertiesDialog(ClassFieldsTableModel dbrClassFields,
+	public ClassPropertiesDialog(ClassFieldsTableModel cfTblModel,
 			boolean emptyValid) {
 		this.setTitle("Class Properties");
-		this.dbrClassFields = dbrClassFields;
+		initialCfTableModel = cfTblModel;
+		//make a copy of model
+		cfTableModel = new ClassFieldsTableModel(); 
+		cfTableModel.setDataVector( new Vector<Vector<String>>( cfTblModel.getDataVector() ) );
+
 		setEmptyValuesValid(emptyValid);
 
 		// create class fields table
-		tblClassFields = new JTable(dbrClassFields);
+		tblClassFields = new JTable(cfTableModel);
 		selectionModel = tblClassFields.getSelectionModel();
 		spTableScrollPane = new JScrollPane(tblClassFields,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -172,6 +178,7 @@ public class ClassPropertiesDialog extends JDialog {
 
 		bttnDelField.setEnabled(false);
 
+		setDefaultCloseOperation( DISPOSE_ON_CLOSE );
 		// Specify dialog size, resizability and modality.
 		// The dialog is made visible by the calling application.
 		setSize(new Dimension(410, 350));
@@ -188,16 +195,17 @@ public class ClassPropertiesDialog extends JDialog {
                 stopCellEditing();
                 // Store the defined properties in runtime variables.
 				storeVariables();
-				// Close the dialog. The closing method validates variables.
-				closeDialog(true);
+				
+				if( valuesValid() ) {
+					dispose();
+				}
 			}
 		});
 
 		// Cancel button pressed, just close the dialog without updating any class parameters.
 		bttnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				// Close the dialog.
-				closeDialog(false);
+				dispose();
 			}
 		});
 
@@ -277,11 +285,20 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private void addEmptyClassField() {
 		String[] emptyRow = {"", "", "", ""};
-		dbrClassFields.addRow(emptyRow);
-		if (tblClassFields.getRowCount() < 2) {
-			tblClassFields.setRowSelectionInterval(0, tblClassFields.getRowCount() - 1);
-		} else {
-			tblClassFields.setRowSelectionInterval(tblClassFields.getRowCount() - 1, tblClassFields.getRowCount() - 1);
+		if (tblClassFields.getRowCount() > 1 
+				&& tblClassFields.getSelectedRowCount() > 0) {
+			
+			int rowIdx = tblClassFields.getSelectedRow() + tblClassFields.getSelectedRowCount();  
+			
+			cfTableModel.insertRow( rowIdx, emptyRow );
+			tblClassFields.setRowSelectionInterval( rowIdx, rowIdx );
+		}
+		else
+		{
+			cfTableModel.addRow(emptyRow);
+			int idx = Math.max(tblClassFields.getSelectedRowCount(), tblClassFields.getRowCount() - 1);
+
+			tblClassFields.setRowSelectionInterval( idx, idx );
 		}
 	} // addEmptyClassField
 
@@ -292,11 +309,18 @@ public class ClassPropertiesDialog extends JDialog {
 		if (tblClassFields.getRowCount() > 0 
 				&& tblClassFields.getSelectedRowCount() > 0) {
 
-			int selected = tblClassFields.getSelectedRow();
+			int firstSelected = tblClassFields.getSelectedRow();
+			
+			int selected = firstSelected;
 			while (selected > -1) {
-				dbrClassFields.removeRow(selected);
+				cfTableModel.removeRow(selected);
 				selected = tblClassFields.getSelectedRow();
 			}
+			
+			firstSelected = Math.min( firstSelected, tblClassFields.getRowCount() - 1 ); 
+
+			if( firstSelected > -1 )
+				tblClassFields.setRowSelectionInterval( firstSelected, firstSelected );
 		}
 	} // delClassField
 
@@ -349,22 +373,6 @@ public class ClassPropertiesDialog extends JDialog {
 	} // browseIcon
 
 	/**
-	 * Close the dialog window.
-	 * @param validate - validate values if called by the OK button, otherwise
-	 * just pass the validation section.
-	 */
-	private void closeDialog(boolean validate) {
-		if (validate) {
-			if (valuesValid()) {
-				setVisible(false);
-			}
-		} else {
-			IconEditor.classParamsOk = false;
-			setVisible(false);
-		}
-	} // closeDialog;
-
-	/**
 	 * Validate values.
 	 * @return boolean
 	 */
@@ -408,7 +416,9 @@ public class ClassPropertiesDialog extends JDialog {
 		if (valid) {
 			if (classFieldsValid()) {
 				// Class fields valid. Remove empty rows from the DBResult.
-				dbrClassFields.removeEmptyRows();
+				cfTableModel.removeEmptyRows();
+				
+				initialCfTableModel.setDataVector( new Vector<Vector<String>>( cfTableModel.getDataVector() ) );
 			}
 		}
 		return valid;
@@ -423,10 +433,10 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private boolean classFieldsValid() {
 		boolean valid = true;
-		for (int i = 0; i < dbrClassFields.getRowCount(); i++) {
-			String fieldName = dbrClassFields.getValueAt(i, iNAME);
-			String fieldType = dbrClassFields.getValueAt(i, iTYPE);
-			String fieldValue = dbrClassFields.getValueAt(i, iVALUE);
+		for (int i = 0; i < cfTableModel.getRowCount(); i++) {
+			String fieldName = cfTableModel.getValueAt(i, iNAME);
+			String fieldType = cfTableModel.getValueAt(i, iTYPE);
+			String fieldValue = cfTableModel.getValueAt(i, iVALUE);
 
 			boolean bFieldNameDefined = false;
 			boolean bFieldTypeDefined = false;
@@ -434,19 +444,19 @@ public class ClassPropertiesDialog extends JDialog {
 
 			if (fieldName != null) {
 				fieldName = fieldName.trim();
-				dbrClassFields.setValueAt(fieldName, i, iNAME);
+				cfTableModel.setValueAt(fieldName, i, iNAME);
 				if (fieldName.length() > 0) bFieldNameDefined = true;
 			}
 
 			if (fieldType != null) {
 				fieldType = fieldType.trim();
-				dbrClassFields.setValueAt(fieldType, i, iTYPE);
+				cfTableModel.setValueAt(fieldType, i, iTYPE);
 				if (fieldType.length() > 0) bFieldTypeDefined = true;
 			}
 
 			if (fieldValue != null) {
 				fieldValue = fieldValue.trim();
-				dbrClassFields.setValueAt(fieldValue, i, iVALUE);
+				cfTableModel.setValueAt(fieldValue, i, iVALUE);
 				if (fieldValue.length() > 0) bFieldValueDefined = true;
 			}
 
@@ -498,6 +508,11 @@ public class ClassPropertiesDialog extends JDialog {
 	 * @param column index of the sort column
 	 */
 	void sortByField(int column) {
-		dbrClassFields.sort(column);
+		cfTableModel.sort(column);
+	}
+	
+	public static void main(String[] args) {
+		JDialog d = new ClassPropertiesDialog(new ClassFieldsTableModel(), true );
+		d.setVisible( true );
 	}
 } // end of class.

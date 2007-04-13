@@ -91,6 +91,15 @@ public class ClassFieldsTableModel extends DefaultTableModel {
 		return String.class;
 	} // getColumnClass
 
+	public Vector<Vector<String>> getDataVector() {
+        return dataVector;
+    }
+	
+	public void setDataVector( Vector<Vector<String>> dataVector ) {
+		this.dataVector = ( dataVector != null ) ? dataVector : new Vector<Vector<String>>();
+		super.setDataVector( dataVector, null );
+	}
+	
 	/**
 	 * Removes empty rows from the table and notifies listeners.
 	 */
