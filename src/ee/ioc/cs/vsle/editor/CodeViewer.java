@@ -18,7 +18,6 @@ public class CodeViewer extends JFrame implements ActionListener {
 
 	JTextComponent		textArea;
 	JPanel				specText;
-	JButton				saveBtn;
 	File				file;
 
 	private CodeViewer(String name, String path, String extension) {
@@ -62,10 +61,6 @@ public class CodeViewer extends JFrame implements ActionListener {
 		specText.add(areaScrollPane, BorderLayout.CENTER);
 		JToolBar toolBar = new JToolBar();
 		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
-		saveBtn = new JButton("Save");
-		saveBtn.setActionCommand( "Save" );
-		saveBtn.addActionListener(this);
-		toolBar.add(saveBtn);
 		toolBar.add(new FontResizePanel(textArea));
 		toolBar.add(new UndoRedoDocumentPanel(textArea.getDocument()));
 
@@ -79,16 +74,27 @@ public class CodeViewer extends JFrame implements ActionListener {
 		
 		JMenu fileMenu = new JMenu("File");
 		
-		JMenuItem open = new JMenuItem( "Open" );
+		JMenuItem new_ = new JMenuItem( "New" );
+		new_.setActionCommand( "New" );
+		new_.addActionListener(this);
+		fileMenu.add(new_);
+		
+		JMenuItem open = new JMenuItem( "Open..." );
 		open.setActionCommand( "Open" );
 		open.addActionListener(this);
 		fileMenu.add(open);
 		
+		fileMenu.add( new JSeparator() );
 		
 		JMenuItem save = new JMenuItem( "Save" );
 		save.setActionCommand( "Save" );
 		save.addActionListener(this);
 		fileMenu.add(save);
+		
+		JMenuItem saveAs = new JMenuItem( "Save As..." );
+		saveAs.setActionCommand( "SaveAs" );
+		saveAs.addActionListener(this);
+		fileMenu.add(saveAs);
 		
 		fileMenu.add( new JSeparator() );
 		
@@ -116,11 +122,40 @@ public class CodeViewer extends JFrame implements ActionListener {
 		} );
 	}
 	
+	private void saveFile( boolean saveAs ) {
+		
+		if( saveAs ) {
+			JFileChooser fc = new JFileChooser( ( file != null ) ? file.getParent() : null );
+			fc.setSelectedFile( file );
+			fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.JAVA ) );
+
+			if ( fc.showSaveDialog( CodeViewer.this ) == JFileChooser.APPROVE_OPTION ) {
+				this.file = fc.getSelectedFile();
+				setTitle( file.getAbsolutePath() );
+			} else {
+				return;
+			}
+		}
+		
+		FileFuncs.writeFile( file, textArea.getText() );
+	}
+	
 	public void actionPerformed(ActionEvent e) {
-		if ( e.getActionCommand().equals( "Save" ) ) {
-			FileFuncs.writeFile(file, textArea.getText());
+		
+		if ( e.getActionCommand().equals( "New" ) ) {
+			textArea.setText("");
+			setTitle( "" );
+			JFileChooser fc = new JFileChooser( ( file != null ) ? file.getParent() : null );
+			file = null;
+			fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.JAVA ) );
+
+			if ( fc.showSaveDialog( CodeViewer.this ) == JFileChooser.APPROVE_OPTION ) {
+				this.file = fc.getSelectedFile();
+				setTitle( file.getAbsolutePath() );
+			}			
 		} else if ( e.getActionCommand().equals( "Open" ) ) {
-			JFileChooser fc = new JFileChooser(file.getParent());
+			
+			JFileChooser fc = new JFileChooser( ( file != null ) ? file.getParent() : null );
 			fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.JAVA ) );
 			fc.setDialogType(JFileChooser.OPEN_DIALOG);
 			
@@ -129,6 +164,15 @@ public class CodeViewer extends JFrame implements ActionListener {
                 File file = fc.getSelectedFile();
                 openFile( file );
 			}
+			
+		} else if ( e.getActionCommand().equals( "Save" ) ) {
+			
+			saveFile( false );
+			
+		} else if ( e.getActionCommand().equals( "SaveAs" ) ) {
+			
+			saveFile( true );
+			
 		} else if ( e.getActionCommand().equals( "Close" ) ) {
 			dispose();
 		}
