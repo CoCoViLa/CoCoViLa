@@ -22,12 +22,12 @@ public class DeleteClassDialog extends JDialog {
 	private static JLabel label = new JLabel();
 	private static final JPanel centerPanel = new JPanel();
 	private static JList jl = new JList();
-	ArrayList pc;
+	ArrayList<String> pc;
 	String selectedValue = null;
 	boolean deleteClass = false;
 	
 	
-	public DeleteClassDialog(ArrayList pc) {
+	public DeleteClassDialog(ArrayList<String> pc) {
 		
 		this.setTitle("Delete Class");
 		this.pc = pc;
@@ -76,14 +76,15 @@ public class DeleteClassDialog extends JDialog {
 		
 		bttnCancel.addActionListener(new ActionListener() {
 			  public void actionPerformed(ActionEvent evt) {
-				setVisible(false);
+				  selectedValue = null;
+				  setVisible(false);
 			  }
 		});
 
 	}
 	
 	/* Refreshes list items */ 
-	public void newJList(ArrayList pc) {
+	public void newJList(ArrayList<String> pc) {
 		jl.setListData(pc.toArray());
 	}
 	public String getSelectedValue(){
