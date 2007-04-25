@@ -180,12 +180,12 @@ public class ProgramRunner {
         return null;
     }
     
-    private ArrayList<String> watchableFields() {
+    private Collection<String> watchableFields() {
         ClassField field;
         GObj obj;
 
         objects = GroupUnfolder.unfold( objects );
-        ArrayList<String> watchFields = new ArrayList<String>();
+        Collection<String> watchFields = new TreeSet<String>();
 
         for ( int i = 0; i < objects.size(); i++ ) {
             obj = objects.get( i );
@@ -199,8 +199,15 @@ public class ProgramRunner {
         return watchFields;
     }
     
-	private HashSet<Var> foundVars = new HashSet<Var>();
+	private Set<Var> foundVars = new TreeSet<Var>( 
+			new Comparator<Var>() {
 
+		public int compare( Var v1, Var v2 ) {
+			
+			return v1.toString().compareTo( v2.toString() );
+		}
+	} );
+	
 	public void addFoundVars(Collection<Var> col) {
 		foundVars.addAll( col );
 	}
@@ -446,7 +453,7 @@ public class ProgramRunner {
 
 		StringBuilder result = new StringBuilder( "---------- Watch Fields ----------\n" );
 
-		ArrayList<String> watchFields = watchableFields();
+		Collection<String> watchFields = watchableFields();
 
 		for ( String wf : watchFields ) {
 

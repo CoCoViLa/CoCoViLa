@@ -131,7 +131,8 @@ public class Var implements //Cloneable,
      * @return String
      */
     public String toString() {
-        return getFullName();//"var:" + ( getObject() + "." + field.getName() );
+    	String obj = getObject();
+    	return ( ( ( obj != null ) ? ( obj + "." ) : "" ) + field.getName() );
     } // toString
 
     public boolean equals( Object e ) {
