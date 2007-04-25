@@ -196,6 +196,10 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     		m_lst = null;
     	}
     	
+    	ProgramRunnerEvent event = new ProgramRunnerEvent( this, m_progRunnerID, ProgramRunnerEvent.DESTROY );
+		
+		EventSystem.queueEvent( event );
+    	
     }
     
     public static JFrame getFrame( String packageName ) {

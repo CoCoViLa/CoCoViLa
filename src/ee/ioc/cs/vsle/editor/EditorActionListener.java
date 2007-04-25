@@ -263,14 +263,6 @@ public class EditorActionListener implements ActionListener {
                 	
             		ProgramTextEditor programEditor = new ProgramTextEditor( runner.getId(), canv.getTitle() );
             		
-            		programEditor.addWindowListener( new WindowAdapter(){
-
-            			@Override
-						public void windowClosing(WindowEvent evt) {
-            				runner.destroy();
-            			}
-                    });
-            		
                     programEditor.setSize( 700, 450 );
                     programEditor.setVisible( true );
                 } else {

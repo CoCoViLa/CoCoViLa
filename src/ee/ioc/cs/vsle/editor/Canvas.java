@@ -14,12 +14,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.net.MalformedURLException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -1512,7 +1507,7 @@ public class Canvas extends JPanel {
         drawingArea.repaint();
     }
     
-    private HashSet<Long> m_runners = new HashSet<Long>();
+    private LinkedList<Long> m_runners = new LinkedList<Long>();
     
     public void registerRunner( long id ) {
     	m_runners.add( id );
@@ -1520,6 +1515,11 @@ public class Canvas extends JPanel {
     
     public void unregisterRunner( long id ) {
     	m_runners.remove( id );
+    }
+    
+    public long getLastProgramRunnerID()
+    {
+    	return m_runners.size() > 0 ? m_runners.getLast() : 0;
     }
     
     public void destroy() {
