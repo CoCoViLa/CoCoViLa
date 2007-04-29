@@ -36,6 +36,7 @@
 	xsize		CDATA	#IMPLIED
 	ysize		CDATA	#IMPLIED
 	strict		CDATA	#IMPLIED
+	angle		CDATA	#IMPLIED
 	>
 
 <!ATTLIST relproperties

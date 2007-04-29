@@ -62,14 +62,19 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public int getAbsoluteX() {
-		return (int) (obj.getXsize() * x + obj.getX());
+        return getAbsoluteCenter().x;
 	}
 
 	public int getAbsoluteY() {
-		return (int) (obj.getYsize() * y + obj.getY());
+        return getAbsoluteCenter().y;
 	}
 
-	public int getCenterX() {
+    public Point getAbsoluteCenter() {
+        return obj.toCanvasSpace(Math.round(obj.getXsize() * x + obj.getX()),
+                Math.round(obj.getYsize() * y + obj.getY()));
+    }
+
+    public int getCenterX() {
 		return (int) (obj.getXsize()
 			* (x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
 	}

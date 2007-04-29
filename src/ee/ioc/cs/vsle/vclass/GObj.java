@@ -6,6 +6,7 @@ import ee.ioc.cs.vsle.graphics.Shape;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 
 import javax.xml.transform.sax.TransformerHandler;
 
@@ -46,6 +47,11 @@ public class GObj implements Serializable, Cloneable {
 	public int portOffsetY1 = 0;
 	public int portOffsetY2 = 0;
 
+    /**
+     * The rotation of the object in radians
+     */
+    protected double angle = 0d;
+
 	public GObj() {
 		// default constructor
 	}
@@ -59,10 +65,12 @@ public class GObj implements Serializable, Cloneable {
 	}
 
 	public boolean contains(int pointX, int pointY) {
-		if ((pointX > getX() + (int) (getXsize() * portOffsetX1))
-			&& (pointY > getY() + (int) (getYsize() * portOffsetY1))) {
-			if ((pointX < getX() + (int) (getXsize() * (getWidth() + portOffsetX2))
-				&& (pointY < getY() + (int) (getYsize() * (getHeight() + portOffsetY2))))) {
+        Point p = toObjectSpace(pointX, pointY);
+
+		if ((p.x > getX() + (int) (getXsize() * portOffsetX1))
+			&& (p.y > getY() + (int) (getYsize() * portOffsetY1))) {
+			if ((p.x < getX() + (int) (getXsize() * (getWidth() + portOffsetX2))
+				&& (p.y < getY() + (int) (getYsize() * (getHeight() + portOffsetY2))))) {
 				return true;
 			}
 		}
@@ -130,11 +138,12 @@ public class GObj implements Serializable, Cloneable {
 	}
 
 	public Port portContains(int pointX, int pointY) {
+        Point p = toObjectSpace(pointX, pointY);
 		Port port;
 
 		for (int i = 0; i < getPorts().size(); i++) {
 			port = getPorts().get(i);
-			if (port.inBoundsX(pointX) && port.inBoundsY(pointY)) {
+			if (port.inBoundsX(p.x) && port.inBoundsY(p.y)) {
 				return port;
 			}
 		}
@@ -142,30 +151,32 @@ public class GObj implements Serializable, Cloneable {
 	}
 
 	public int controlRectContains(int pointX, int pointY) {
-		if ((pointX >= getX() + portOffsetX1 - CORNER_SIZE - 1) && (pointY >= getY() + portOffsetY1 - CORNER_SIZE - 1)) {
-			if ((pointX <= getX() + portOffsetX1 - 1)
-				&& (pointY <= getY() + portOffsetY1 -1)) {
+        Point p = toObjectSpace(pointX, pointY);
+
+		if ((p.x >= getX() + portOffsetX1 - CORNER_SIZE - 1) && (p.y >= getY() + portOffsetY1 - CORNER_SIZE - 1)) {
+			if ((p.x <= getX() + portOffsetX1 - 1)
+				&& (p.y <= getY() + portOffsetY1 -1)) {
 				return 1;
 			}
 		}
-		if ((pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) + 1)
-			&& (pointY >= getY() + portOffsetY1 - CORNER_SIZE - 1)) {
-			if ((pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2) + CORNER_SIZE + 1))
-				&& (pointY <= getY() + portOffsetY1 +  CORNER_SIZE)) {
+		if ((p.x >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) + 1)
+			&& (p.y >= getY() + portOffsetY1 - CORNER_SIZE - 1)) {
+			if ((p.x <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2) + CORNER_SIZE + 1))
+				&& (p.y <= getY() + portOffsetY1 +  CORNER_SIZE)) {
 				return 2;
 			}
 		}
-		if ((pointX >= getX() + portOffsetX1 - CORNER_SIZE - 1)
-			&& (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) + 1)) {
-			if ((pointX <= getX() + portOffsetX1 - 1)
-				&& (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2) + CORNER_SIZE + 1))) {
+		if ((p.x >= getX() + portOffsetX1 - CORNER_SIZE - 1)
+			&& (p.y >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) + 1)) {
+			if ((p.x <= getX() + portOffsetX1 - 1)
+				&& (p.y <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2) + CORNER_SIZE + 1))) {
 				return 3;
 			}
 		}
-		if ((pointX >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) +1)
-			&& (pointY >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) + 1)) {
-			if ((pointX <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2) + CORNER_SIZE + 1))
-				&& (pointY <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2) + CORNER_SIZE + 1))) {
+		if ((p.x >= getX() + (int) (getXsize() * (getWidth() + portOffsetX2)) +1)
+			&& (p.y >= getY() + (int) (getYsize() * (getHeight() + portOffsetY2)) + 1)) {
+			if ((p.x <= getX() + (int) (getXsize() * (getWidth() + portOffsetX2) + CORNER_SIZE + 1))
+				&& (p.y <= getY() + (int) (getYsize() * (getHeight() + portOffsetY2) + CORNER_SIZE + 1))) {
 				return 4;
 			}
 		}
@@ -282,7 +293,18 @@ public class GObj implements Serializable, Cloneable {
 		}
 	} // draw
 
+    public double getCenterX() {
+        return getX() + getRealWidth() / 2.0;
+    }
+
+    public double getCenterY() {
+        return getY() + getRealHeight() / 2.0;
+    }
+    
 	public void drawClassGraphics(Graphics2D g2, float scale) {
+        AffineTransform origTransform = g2.getTransform();
+        g2.rotate(angle, getCenterX(), getCenterY());
+
 		// hilight superclass
 		if (superClass) {
 			Composite c = g2.getComposite();
@@ -353,6 +375,8 @@ public class GObj implements Serializable, Cloneable {
 		if (isSelected() == true) {
 			drawSelectionMarks(g2, scale);
 		}
+
+        g2.setTransform(origTransform);
 	}
 
 	private void drawSelectionMarks(Graphics g, float scale) {
@@ -505,6 +529,9 @@ public class GObj implements Serializable, Cloneable {
 				Double.toString(Ysize));
 		attrs.addAttribute(null, null, "strict", StringUtil.CDATA,
 				Boolean.toString(isStrict()));
+        if (angle != 0.0)
+            attrs.addAttribute(null, null, "angle", StringUtil.CDATA,
+                    Double.toString(angle));
 
 		th.startElement(null, null, "properties", attrs);
 		th.endElement(null, null, "properties");
@@ -574,4 +601,70 @@ public class GObj implements Serializable, Cloneable {
 	public void setStatic(boolean isStatic) {
 		this.isStatic = isStatic;
 	}
+
+    /**
+     * Transforms the specified point coordinates to the object coordinate
+     * space (inverse of toCanvasSpace()).
+     * @param pointX the x coordinate
+     * @param pointY the y coordinate
+     * @return transformed point
+     */
+    public Point toObjectSpace(int pointX, int pointY) {
+        Point p = new Point(pointX, pointY);
+        
+        if (angle != 0.0) {
+            double cx = getCenterX();
+            double cy = getCenterY();
+
+            double sin = Math.sin(angle);
+            double cos = Math.cos(angle);
+
+            p.x = (int) Math.round(pointX * cos + pointY * sin
+                    + cx - cx * cos - cy * sin);
+            p.y = (int) Math.round(-pointX * sin + pointY * cos
+                    + cy + cx * sin - cy * cos);
+        }
+        return p;
+    }
+
+    /**
+     * Transform the specified point coordinates to the canvas coordinate
+     * space (inverse of toObjectSpace()).
+     * @param pointX the x coordinate
+     * @param pointY the y coordinate
+     * @return transformed point
+     */
+    public Point toCanvasSpace(int pointX, int pointY) {
+        Point p = new Point(pointX, pointY);
+        
+        if (angle != 0.0) {
+            double cx = getCenterX();
+            double cy = getCenterY();
+
+            double sin = Math.sin(angle);
+            double cos = Math.cos(angle);
+
+            p.x = (int) Math.round(pointX * cos - pointY * sin
+                    + cx - cx * cos + cy * sin);
+            p.y = (int) Math.round(pointX * sin + pointY * cos
+                    + cy - cx * sin - cy * cos);
+        }
+        return p;
+    }
+
+    /**
+     * Sets the rotation of this object.
+     * @param theta the rotation in radians
+     */
+    public void setAngle(double theta) {
+        angle = theta;
+    }
+
+    /**
+     * Returns the rotation of this object.
+     * @return rotation in radians
+     */
+    public double getAngle() {
+        return angle;
+    }
 }

@@ -1,11 +1,13 @@
 package ee.ioc.cs.vsle.editor;
 
+import java.awt.Component;
 import java.awt.event.*;
 
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.GObjGroup;
+import ee.ioc.cs.vsle.vclass.RelObj;
 
 /**
  * Popup menu that contains actions that can be performed on a scheme object.
@@ -125,6 +127,9 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
 
 		this.add(submenuOrder);
 
+        if (!object.isStrictConnected() && !(object instanceof RelObj))
+            add(makeSubmenuRotation(object, canvas));
+
 		// superclass
 		if (canvas.canBeSetAsSuperClass(object)) {
 			JMenuItem tmp = new JMenuItem(Menu.SET_AS_SUPER, KeyEvent.VK_S);
@@ -137,7 +142,52 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
 		}
 	}
 
-	/**
+	private Component makeSubmenuRotation(final GObj obj, final Canvas canv) {
+        JMenu menu = new JMenu(Menu.ROTATION);
+
+        JMenuItem itemRotCw = new JMenuItem(Menu.ROTATE_CW);
+        itemRotCw.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                obj.setAngle(obj.getAngle() + Math.PI / 2.0);
+                canvas.drawingArea.repaint();
+            }
+            
+        });
+        menu.add(itemRotCw);
+
+        JMenuItem itemRotCcw = new JMenuItem(Menu.ROTATE_CCW);
+        itemRotCcw.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                obj.setAngle(obj.getAngle() - Math.PI / 2.0);
+                canvas.drawingArea.repaint();
+            }
+            
+        });
+        menu.add(itemRotCcw);
+
+        JMenuItem itemRotAngle = new JMenuItem(Menu.ROTATE_ANGLE);
+        itemRotAngle.addActionListener(new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                String value = JOptionPane.showInputDialog(
+                        "Input the angle in degrees:");
+                try {
+                    obj.setAngle(Math.toRadians(Double.parseDouble(value)));
+                    canv.drawingArea.repaint();
+                } catch (Exception ex) {
+                    // ignore NumberFormatException and do nothing
+                }
+            }
+            
+        });
+        menu.add(itemRotAngle);
+
+        return menu;
+    }
+
+    /**
 	 * Method for enabling or disabling menu items.
 	 * @param item - menu item to be enabled or disabled.
 	 * @param b - enable or disable the menu item.

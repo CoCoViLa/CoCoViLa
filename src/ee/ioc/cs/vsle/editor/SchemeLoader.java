@@ -251,6 +251,7 @@ public class SchemeLoader {
 				String ysize = attrs.getValue("ysize");
 				String width = attrs.getValue("width");
 				String height = attrs.getValue("height");
+                String angle = attrs.getValue("angle");
 
 				obj.setX(Integer.parseInt(x));
 				obj.setY(Integer.parseInt(y));
@@ -258,19 +259,21 @@ public class SchemeLoader {
 				if (element.equals("relproperties")) {
 					String endX = attrs.getValue("endX");
 					String endY = attrs.getValue("endY");
-					String angle = attrs.getValue("angle");
 
 					RelObj relObj = (RelObj) obj;
 					
 					relObj.endX = Integer.parseInt(endX);
 					relObj.endY = Integer.parseInt(endY);
-					relObj.angle = Double.parseDouble(angle);
-				}
+                }
 
 				obj.setXsize(Float.parseFloat(xsize));
 				obj.setYsize(Float.parseFloat(ysize));
 				obj.setWidth(Integer.parseInt(width));
 				obj.setHeight(Integer.parseInt(height));
+
+                if (angle != null)
+                    obj.setAngle(Double.valueOf(angle).doubleValue());
+
 			} else if (element.equals("field")) {
 				String name = new String(attrs.getValue("name"));
 				String type = new String(attrs.getValue("type"));

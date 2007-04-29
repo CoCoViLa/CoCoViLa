@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.vclass;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 
 import javax.xml.transform.sax.TransformerHandler;
 
@@ -17,7 +18,6 @@ import ee.ioc.cs.vsle.util.*;
  */
 public class RelObj extends GObj {
     private static final long serialVersionUID = 1L;
-    public double angle;
 	public Port startPort;
 	public Port endPort;
 	public int endX, endY;
@@ -41,16 +41,13 @@ public class RelObj extends GObj {
 
 	@Override
 	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
-		g2.translate(xPos, yPos);
-		g2.rotate(angle);
-		g2.translate(-1 * (xPos), -1 * (yPos));
+        AffineTransform origTransform = g2.getTransform();
+        g2.rotate(angle, xPos, yPos);
 
 		for (Shape s: shapes)
 			s.draw(xPos, yPos, Xsize, Ysize, g2);
 
-        g2.translate(xPos, yPos);
-		g2.rotate(-1 * angle);
-		g2.translate(-1 * (xPos), -1 * (yPos));
+		g2.setTransform(origTransform);
 	} // draw
 
 
