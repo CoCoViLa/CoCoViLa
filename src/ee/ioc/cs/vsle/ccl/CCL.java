@@ -112,7 +112,7 @@ public class CCL extends URLClassLoader {
 		// Make sure ProgramContext gets loaded by the right classloader
 		// as the static fields must have different values for different
 		// programs.
-		if ("ee.ioc.cs.vsle.vclass.ProgramContext".equals(name)) {
+		if ("ee.ioc.cs.vsle.api.ProgramContext".equals(name)) {
 			try {
 				String resName = name.replace('.', '/').concat(".class");
 				URL u = getResource(resName);

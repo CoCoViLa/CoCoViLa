@@ -104,7 +104,7 @@ public class ProgramRunner {
 				genObject = clas.newInstance();
 			}
 			Class<?> pc = classLoader.loadClass(
-					"ee.ioc.cs.vsle.vclass.ProgramContext");
+					"ee.ioc.cs.vsle.api.ProgramContext");
 			pc.getMethod("setScheme", Scheme.class).invoke(null,
 					m_canvas.scheme);
 			

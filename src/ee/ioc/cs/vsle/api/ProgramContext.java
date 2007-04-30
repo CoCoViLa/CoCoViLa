@@ -1,4 +1,8 @@
-package ee.ioc.cs.vsle.vclass;
+package ee.ioc.cs.vsle.api;
+
+import ee.ioc.cs.vsle.vclass.ClassField;
+import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.Scheme;
 
 /**
  * <p>This class is made available to each synthesized program instance.
