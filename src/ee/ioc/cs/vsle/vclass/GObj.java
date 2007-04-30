@@ -306,7 +306,7 @@ public class GObj implements Serializable, Cloneable {
         g2.rotate(angle, getCenterX(), getCenterY());
 
 		// hilight superclass
-		if (superClass) {
+		if (isSuperClass()) {
 			Composite c = g2.getComposite();
 			g2.setColor(Color.GREEN);
 			g2.setComposite(AlphaComposite.getInstance(

@@ -339,7 +339,7 @@ public class Port implements Cloneable, Serializable {
         // obj can be null when adding a relation class and the object is not
         // created yet. A relation class can never be a superclass and 
         // should always be connected.
-		return (obj == null) || !obj.isSuperClass();
+		return (obj != null) /*|| !obj.isSuperClass()*/;
 	}
 
 	/**

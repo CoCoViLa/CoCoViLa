@@ -1757,14 +1757,15 @@ public class Canvas extends JPanel {
 	 * @return true if the object can be set as superclass, false otherwise
 	 */
 	public boolean canBeSetAsSuperClass(GObj obj) {
-		/*
+		/* allowed connections to superclass
+		 * 
 		 * An object can be made a superclass only if it has no connections
 		 * and there is no superclass yet. The last restriction covers
 		 * the case when the object itself is already set as a superclass.
+		 *
+		 *if (obj.getConnections().size() > 0)
+		 * 	return false;
 		 */
-		if (obj.getConnections().size() > 0)
-			return false;
-		
 		for (GObj o : objects)
 			if (o.isSuperClass())
 				return false;

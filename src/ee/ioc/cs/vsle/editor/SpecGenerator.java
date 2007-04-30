@@ -119,10 +119,15 @@ public class SpecGenerator implements ISpecGenerator {
 				}
 				multiRels.put( multiport, list );
 			} else {
-				s.append(
-						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
-						+ " = " + rel.beginPort.getObject().getName() + "."
-						+ rel.beginPort.getName() + ";\n");
+				String startObjName = ( rel.beginPort.getObject().isSuperClass() ) 
+										? rel.beginPort.getName()
+										: rel.beginPort.getObject().getName() + "." + rel.beginPort.getName();
+										
+				String endObjName = ( rel.endPort.getObject().isSuperClass() )
+										? rel.endPort.getName()
+										: rel.endPort.getObject().getName() + "." + rel.endPort.getName();
+				
+				s.append( CodeGenerator.OT_TAB + endObjName + " = " + startObjName + ";\n" );
 			}
 			
 		}
