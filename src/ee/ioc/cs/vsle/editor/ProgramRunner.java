@@ -47,10 +47,13 @@ public class ProgramRunner {
 		objects = GroupUnfolder.unfold( m_canvas.objects );
 	}
 	
-	
 	public void destroy() {
 		
-		m_canvas.unregisterRunner( m_id );
+		SwingUtilities.invokeLater( new Runnable() {
+			public void run() {
+				m_canvas.unregisterRunner( m_id );
+			}
+		} );
 		
 		if( m_lst != null ) {
 			

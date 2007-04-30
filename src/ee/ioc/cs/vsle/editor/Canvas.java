@@ -1507,10 +1507,10 @@ public class Canvas extends JPanel {
         drawingArea.repaint();
     }
     
-    private LinkedList<Long> m_runners = new LinkedList<Long>();
+    private List<Long> m_runners = Collections.synchronizedList( new LinkedList<Long>() );
     
     public void registerRunner( long id ) {
-    	m_runners.add( id );
+    	m_runners.add( 0, id );
     }
     
     public void unregisterRunner( long id ) {
@@ -1519,7 +1519,7 @@ public class Canvas extends JPanel {
     
     public long getLastProgramRunnerID()
     {
-    	return m_runners.size() > 0 ? m_runners.getLast() : 0;
+    	return m_runners.size() > 0 ? m_runners.get( 0 ) : 0;
     }
     
     public void destroy() {
