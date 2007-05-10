@@ -34,7 +34,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 
 	private JTextField nameTextField;
 
-	private JButton clear, ok;
+	private JButton clear, ok, apply, close;
 
 	private Canvas canvas;
 	
@@ -273,6 +273,12 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		ok = new JButton("OK");
 		ok.addActionListener(this);
 		buttonPane.add(ok);
+		close = new JButton("Close");
+		close.addActionListener(this);
+		buttonPane.add(close);
+		apply = new JButton("Apply");
+		apply.addActionListener(this);
+		buttonPane.add(apply);
 		clear = new JButton("Clear all");
 		clear.addActionListener(this);
 		if (object.fields.size() == 0) {
@@ -312,88 +318,112 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		}
 	}
 
-	public void actionPerformed(ActionEvent e) {
+	private boolean validateAndApply() {
 		JTextField textField;
 		ClassField field;
 		boolean inputError = false;
-		if (e.getSource() == ok) {
-			
-			// Validate object name: must be unique and valid Java identifier
-			String objectName = nameTextField.getText();
-			if (!StringUtil.isJavaIdentifier(objectName)) {
+		
+		// Validate object name: must be unique and valid Java identifier
+		String objectName = nameTextField.getText();
+		if (!StringUtil.isJavaIdentifier(objectName)) {
+			inputError = true;
+			JOptionPane.showMessageDialog(this, "The name of the object"
+					+ " is not a valid Java identifier.",
+					"Input error",
+					JOptionPane.ERROR_MESSAGE);
+		} else {
+			if (!canvas.objects.isUniqueName(objectName,
+					controlledObject)) {
 				inputError = true;
-				JOptionPane.showMessageDialog(this, "The name of the object"
-						+ " is not a valid Java identifier.",
+				JOptionPane.showMessageDialog(this, "The name of the"
+						+ " object is not unique.",
 						"Input error",
 						JOptionPane.ERROR_MESSAGE);
-			} else {
-				if (!canvas.objects.isUniqueName(objectName,
-						controlledObject)) {
-					inputError = true;
-					JOptionPane.showMessageDialog(this, "The name of the"
-							+ " object is not unique.",
-							"Input error",
-							JOptionPane.ERROR_MESSAGE);
-				}
 			}
+		}
 
+		for (int i = 0; i < textFields.size(); i++) {
+			textField = textFields.get(i);
+			field = primitiveNameList.get(i);
+			if (!textField.getText().equals("")) {
+			try {
+				getValue(textField.getText(), field
+						.getType());
+				
+			} catch (NumberFormatException nfe) {
+				inputError = true;
+				JOptionPane.showMessageDialog(this,
+					    "The field "+field.getName()+" of type " +field.getType() + 
+					    		" cannot have the value \""+textField.getText()+"\"",
+					    "Input error",
+					    JOptionPane.ERROR_MESSAGE
+					    );
+				
+			}
+			}
+		}
+		if (!inputError) {
 			for (int i = 0; i < textFields.size(); i++) {
 				textField = textFields.get(i);
 				field = primitiveNameList.get(i);
-				if (!textField.getText().equals("")) {
-				try {
-					getValue(textField.getText(), field
-							.getType());
-					
-				} catch (NumberFormatException nfe) {
-					inputError = true;
-					JOptionPane.showMessageDialog(this,
-						    "The field "+field.getName()+" of type " +field.getType() + 
-						    		" cannot have the value \""+textField.getText()+"\"",
-						    "Input error",
-						    JOptionPane.ERROR_MESSAGE
-						    );
-					
-				}
+				field.setWatched( watchFields.get(i).isSelected() );
+				field.setInput( inputs.get(i).isSelected() );
+				field.setGoal( goals.get(i).isSelected() );
+				if (!textField.getText().trim().equals("")) {
+
+					field.setValue(textField.getText());
+				} else {
+					field.setValue(null);
 				}
 			}
-			if (!inputError) {
-				for (int i = 0; i < textFields.size(); i++) {
-					textField = textFields.get(i);
-					field = primitiveNameList.get(i);
-					field.setWatched( watchFields.get(i).isSelected() );
-					field.setInput( inputs.get(i).isSelected() );
-					field.setGoal( goals.get(i).isSelected() );
-					if (!textField.getText().trim().equals("")) {
-
-						field.setValue(textField.getText());
-					} else {
-						field.setValue(null);
-					}
+			for (int i = 0; i < comboBoxes.size(); i++) {
+				JComboBox comboBox = comboBoxes.get(i);
+				field = arrayNameList.get(i);
+				//field.setInput( inputs.get(i).isSelected() );
+				//field.setGoal( goals.get(i).isSelected() );
+				String s = "";
+				for (int j = 0; j < comboBox.getItemCount(); j++) {
+					s += (String) comboBox.getItemAt(j)
+							+ ClassField.ARRAY_TOKEN;
 				}
-				for (int i = 0; i < comboBoxes.size(); i++) {
-					JComboBox comboBox = comboBoxes.get(i);
-					field = arrayNameList.get(i);
-					//field.setInput( inputs.get(i).isSelected() );
-					//field.setGoal( goals.get(i).isSelected() );
-					String s = "";
-					for (int j = 0; j < comboBox.getItemCount(); j++) {
-						s += (String) comboBox.getItemAt(j)
-								+ ClassField.ARRAY_TOKEN;
-					}
-					if (!s.equals("")) {
-						field.setValue(s);
+				if (!s.equals("")) {
+					field.setValue(s);
 
-					} else {
-						field.setValue(null);
-					}
+				} else {
+					field.setValue(null);
 				}
-				controlledObject.setName(objectName);
-				controlledObject.setStatic( isStatic.isSelected() );
-				controlledObject = null;
+			}
+			controlledObject.setName(objectName);
+			controlledObject.setStatic( isStatic.isSelected() );
+			
+			canvas.repaint();
+		}
+		return !inputError;
+	}
+	
+	public void dispose() {
+		super.dispose();
+		
+		controlledObject = null;
+		canvas = null;
+	}
+
+	public void actionPerformed(ActionEvent e) {
+		JTextField textField;
+		ClassField field;
+		if (e.getSource() == ok) {
+			
+			if( validateAndApply() ) {
 				this.dispose();
-				canvas.repaint();
 			}
+		}
+		else if (e.getSource() == close) {
+			
+			this.dispose();
+		}
+		else if (e.getSource() == apply) {
+			
+			validateAndApply();
 		}
 		else if (e.getSource() == clear) {
 			// Clears object properties except the object name.
