@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowFocusListener;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -18,6 +20,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ImageIcon;
 import javax.swing.JColorChooser;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.WindowConstants;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.border.TitledBorder;
@@ -25,7 +29,7 @@ import javax.swing.BorderFactory;
 
 import ee.ioc.cs.vsle.util.*;
 
-public class TextDialog extends JDialog implements ActionListener {
+public class TextDialog extends JDialog {
 
 	private JLabel lblFont = new JLabel("Font:");
 	private JLabel lblSize = new JLabel("Size:");
@@ -51,9 +55,8 @@ public class TextDialog extends JDialog implements ActionListener {
 	int mouseX, mouseY;
 
 	JScrollPane textScrollPane = new JScrollPane(taText,
-		JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-		JScrollPane.
-		HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+		ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 	Spinner spinner = new Spinner(1, 100, 1, 1);
 
@@ -178,16 +181,27 @@ public class TextDialog extends JDialog implements ActionListener {
 		pnlMain.add(pnlButton, BorderLayout.SOUTH);
 
 		getContentPane().add(pnlMain);
-		setVisible(true);
 		setSize(new Dimension(pnlMain.getPreferredSize()));
 		setResizable(false);
 		setModal(true);
 		setLocationRelativeTo(editor);
 
-		// The default focus is automatically taken by the text area for
-		// enabling the user to immediately start typing, without a need
-		// to first position the cursor to the text area.
-		taText.requestFocus();
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+		addWindowFocusListener(new WindowFocusListener() {
+
+			public void windowGainedFocus(WindowEvent e) {
+				// The default focus is automatically taken by the text area for
+				// enabling the user to immediately start typing, without a need
+				// to first position the cursor to the text area.
+				taText.requestFocusInWindow();
+			}
+
+			public void windowLostFocus(WindowEvent e) {
+				// ingore
+			}
+
+		});
 
 		// ACTION LISTENERS AS ANONYMOUS CLASSES
 
@@ -233,7 +247,7 @@ public class TextDialog extends JDialog implements ActionListener {
 		bttnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				if (evt.getSource() == bttnCancel) {
-					setVisible(false);
+					dispose();
 				}
 			} // end actionPerformed
 		}); // end bttnCancel Action Listener
@@ -242,7 +256,7 @@ public class TextDialog extends JDialog implements ActionListener {
 			public void actionPerformed(ActionEvent evt) {
 				if (evt.getSource() == bttnOk) {
 					drawText(mouseX, mouseY);
-					setVisible(false);
+					dispose();
 				}
 			} // end actionPerformed
 		}); // end bttnOk Action Listener
@@ -272,6 +286,7 @@ public class TextDialog extends JDialog implements ActionListener {
 			}
 		}); // end spinner change listener
 
+		setVisible(true);
 	} // TextDialog
 
 	/**
@@ -375,20 +390,5 @@ public class TextDialog extends JDialog implements ActionListener {
 	private String[] getSystemFonts() {
 		return GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
 	} // getSystemFonts
-
-	/**
-	 * Action listener.
-	 * @param evt ActionEvent - action event.
-	 */
-	public void actionPerformed(ActionEvent evt) {
-	} // actionPerformed
-
-	/**
-	 * Main method for module unit testing.
-	 * @param args String[] - command line arguments.
-	 */
-	public static void main(String[] args) {
-		new TextDialog(new IconEditor(), 0, 0);
-	} // main
 
 } // end of class
