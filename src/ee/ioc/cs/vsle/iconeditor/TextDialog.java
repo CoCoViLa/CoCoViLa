@@ -286,7 +286,6 @@ public class TextDialog extends JDialog {
 			}
 		}); // end spinner change listener
 
-		setVisible(true);
 	} // TextDialog
 
 	/**

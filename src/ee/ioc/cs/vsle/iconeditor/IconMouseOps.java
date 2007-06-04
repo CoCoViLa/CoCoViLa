@@ -77,7 +77,7 @@ class IconMouseOps
 	 * is modal and aligned to the center of the open application window.
 	 */
 	private void openTextEditor(int x, int y) {
-		new TextDialog(editor, x, y);
+		new TextDialog(editor, x, y).setVisible(true);
 	} // openTextEditor
 
 	/**
@@ -354,6 +354,7 @@ class IconMouseOps
 							td.setText(shape.getText());
 							td.setFont(shape.getFont());
 							td.setColor(shape.getColor());
+							td.setVisible(true);
 						}
 					}
 				}
