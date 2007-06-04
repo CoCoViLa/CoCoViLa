@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
+
+import ee.ioc.cs.vsle.util.StringUtil;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 public class PortPropertiesDialog extends JDialog implements ActionListener {
@@ -39,6 +41,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 
 	PortPropertiesDialog(IconEditor editor, IconPort port) {
 		super(editor);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setModal(true);
 		this.editor = editor;
 		
@@ -58,6 +61,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		cbPortType.addItem(TYPE_DOUBLE);
 		cbPortType.addItem(TYPE_OBJECT);
 		cbPortType.addItem(TYPE_STRING);
+		cbPortType.addItem(TYPE_ALIAS);
 
 		pnlButtons.add(bttnOk);
 		pnlButtons.add(bttnCancel);
@@ -83,8 +87,6 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 
 		setLocationRelativeTo(editor);
 
-		//tfPortName.requestFocus();
-
 		bttnCancel.addActionListener(this); // end bttnCancel Action Listener
 
 		bttnOk.addActionListener(this);
@@ -96,55 +98,77 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	 */
 	private void setPortProperties() {
 		boolean valid = true;
-		String portName = tfPortName.getText();
 
-       // Check if the port name is defined. Otherwise display the
-	   // message dialog to the user informing that the port name is
-	   // a required parameter.
-		if (portName != null && portName.trim().length() > 0) {
-			portName = portName.trim();
-		} else {
+		// Check if the port name is defined. Otherwise display the
+		// message dialog to the user informing that the port name is
+		// a required parameter.
+		String name = tfPortName.getText();
+
+		if (name != null) {
+			name = name.trim();
+			setPortName(name);
+		}
+
+		if (name == null || name.length() < 1) {
 			// display information dialog to application user
-			JOptionPane.showMessageDialog(null, "Please define port name.");
-			tfPortName.requestFocus();
+			JOptionPane.showMessageDialog(this, "Please define port name.");
+			tfPortName.requestFocusInWindow();
+			valid = false;
+		} else if (!StringUtil.isJavaIdentifier(name)) {
+			JOptionPane.showMessageDialog(this, 
+					"The port name is not a valid identifier.");
+			tfPortName.requestFocusInWindow();
 			valid = false;
 		}
 
         // If the port name was defined, check if the port type is defined. Otherwise
 		// if the port type was not defined, display the message dialog to the user
 		// informing that the port type is a required parameter.
-		if(valid) {
-		  if (cbPortType != null && cbPortType.getSelectedItem() != null &&
-			  cbPortType.getSelectedItem().toString().trim().length() > 0) {
-			setPortType(cbPortType.getSelectedItem().toString().trim());
-		  }
-		  else {
-			JOptionPane.showMessageDialog(null, "Please define port type.");
-			cbPortType.requestFocus();
-			valid = false;
-		  }
+		if (valid) {
+			String type = null;
+			Object selected = cbPortType.getSelectedItem();
+
+			if (selected != null)
+				type = selected.toString();
+
+			if (type != null) {
+				type = type.trim();
+				setPortType(type);
+			}
+			
+			if (type == null || type.length() < 1) {
+				JOptionPane.showMessageDialog(null, "Please define port type.");
+				cbPortType.requestFocusInWindow();
+				valid = false;
+			} else if (!StringUtil.isJavaIdentifier(type)) {
+				JOptionPane.showMessageDialog(null,
+						"The type is not a valid identifier.");
+				cbPortType.requestFocusInWindow();
+				valid = false;
+			}
 		}
 
-        // Set other port properties.
-		setPortName(portName);
 		setAreaConn(checkAreaConn.isSelected());
 		setStrict(checkIsStrict.isSelected());
-
-        // The port was defined correctly and we are creating a new port (ie not editing
-		// an already existing one), draw the new port with its properties on the canvas.
-		if (port == null) {
-			if (valid) editor.mListener.drawPort(getPortName(), isAreaConn(), isStrict(), getPortType());
-		} else {
-		    port.setType(getPortType());
-			port.setName(getPortName());
-			port.area = isAreaConn();
-			port.strict = isStrict();
-		}
 
         // If the parameters were defined correctly, hide the dialog. Otherwise
 		// keep the dialog visible, allowing the user correct any noted errors in
 		// port parameters.
-		setVisible(!valid);
+		if (valid) {
+			// The port was defined correctly and we are creating a new port (ie not editing
+			// an already existing one), draw the new port with its properties on the canvas.
+			if (port == null) {
+				editor.mListener.drawPort(getPortName(), isAreaConn(), isStrict(),
+							getPortType());
+			} else {
+				port.setType(getPortType());
+				port.setName(getPortName());
+				port.area = isAreaConn();
+				port.strict = isStrict();
+			}
+			setVisible(false);
+			dispose();
+		}
 	} // setPortProperties
 
 	public String getPortType() {
@@ -192,22 +216,11 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	 * @param evt ActionEvent - action event.
 	 */
 	public void actionPerformed(ActionEvent evt) {
-		System.out.println("true");
 		if (evt.getSource() == bttnCancel) {
-			dispose();
 			setVisible(false);
-		}
-		if (evt.getSource() == bttnOk) {
+			dispose();
+		} else if (evt.getSource() == bttnOk) {
 			setPortProperties();
 		}
 	}
-
-	/**
-	 * Main method for module unit testing.
-	 * @param args String[] - command line arguments.
-	 */
-	public static void main(String[] args) {
-		new PortPropertiesDialog(new IconEditor(), null).setVisible( true );
-	} // main
-
 }
