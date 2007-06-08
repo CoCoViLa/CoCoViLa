@@ -101,6 +101,9 @@ public class Editor extends JFrame implements ChangeListener {
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
 				ActionEvent.CTRL_MASK));
 		menu.add(menuItem);
+		menuItem = new JMenuItem(Menu.SAVE_SCHEME_AS);
+		menuItem.addActionListener(aListener);
+		menu.add(menuItem);
 		menuItem = new JMenuItem(Menu.LOAD_SCHEME, KeyEvent.VK_O);
 		menuItem.addActionListener(aListener);
 		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,

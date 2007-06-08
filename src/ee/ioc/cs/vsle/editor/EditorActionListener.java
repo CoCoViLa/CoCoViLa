@@ -116,30 +116,10 @@ public class EditorActionListener implements ActionListener {
         if ( e.getSource().getClass().getName() == "javax.swing.JMenuItem" ||
              e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem" ) {
 
-            if ( e.getActionCommand().equals( Menu.SAVE_SCHEME ) ) {
-                if( Editor.getInstance().getCurrentPackage() == null ) {
-                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
-                    return;
-                }
-
-                JFileChooser fc = new JFileChooser( Editor.getInstance().getCurrentPackage().getPath() );
-                CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.EXT.SYN );
-                fc.setFileFilter( synFilter );
-                int returnVal = fc.showSaveDialog( null );
-                if ( returnVal == JFileChooser.APPROVE_OPTION ) {
-
-                    File file = fc.getSelectedFile();
-
-                    if ( !file.getAbsolutePath().toLowerCase().endsWith( CustomFileFilter.EXT.SYN.getExtension() ) ) {
-                        file = new File( file.getAbsolutePath() + "." + CustomFileFilter.EXT.SYN.getExtension() );
-                    }
-
-                    Editor.setLastPath( file.getAbsolutePath() );
-                    db.p( "Saving scheme: " + file.getName() );
-                    Editor.getInstance().getCurrentCanvas().saveScheme( file );
-                    Editor.getInstance().getCurrentPackage().setLastScheme( file.getAbsolutePath() );
-                    Editor.getInstance().updateWindowTitle();
-                }
+            if (e.getActionCommand().equals(Menu.SAVE_SCHEME_AS)) {
+            	saveSchemeAs();
+            } else if (Menu.SAVE_SCHEME.equals(e.getActionCommand())) {
+            	saveScheme();
             } else if ( e.getActionCommand().equals( Menu.LOAD_SCHEME ) ) {
                 if( Editor.getInstance().getCurrentPackage() == null ) {
                     JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
@@ -343,6 +323,68 @@ public class EditorActionListener implements ActionListener {
     }
 
 	/**
+	 * Saves the current scheme to the file it was loaded from or where it
+	 * was last saved to. If this scheme has not been saved before the
+	 * method invokes saveSchemeAs().
+	 */
+	private void saveScheme() {
+		Editor editor = Editor.getInstance();
+		VPackage pack = editor.getCurrentPackage();
+
+        if (pack == null) {
+            JOptionPane.showMessageDialog(editor, "No package loaded",
+            		"Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+		String fileName = pack.getLastScheme();
+
+		if (fileName != null) {
+			editor.getCurrentCanvas().saveScheme(new File(fileName));
+		} else {
+			saveSchemeAs();
+		}
+	}
+
+	/**
+	 * Saves the scheme to the file the user specifies interactively.
+	 */
+	private void saveSchemeAs() {
+		Editor editor = Editor.getInstance();
+		VPackage pack = editor.getCurrentPackage();
+
+        if (pack == null) {
+            JOptionPane.showMessageDialog(editor, "No package loaded",
+            		"Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JFileChooser fc = new JFileChooser(pack.getPath());
+        CustomFileFilter synFilter = new CustomFileFilter(
+        		CustomFileFilter.EXT.SYN);
+        fc.setFileFilter(synFilter);
+        int returnVal = fc.showSaveDialog(null);
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+
+            File file = fc.getSelectedFile();
+
+            if (!file.getAbsolutePath().toLowerCase().endsWith(
+            		CustomFileFilter.EXT.SYN.getExtension())) {
+
+            	file = new File(file.getAbsolutePath() + "." 
+                		+ CustomFileFilter.EXT.SYN.getExtension());
+            }
+
+            Editor.setLastPath(file.getAbsolutePath());
+            if (RuntimeProperties.isLogInfoEnabled())
+            	db.p("Saving scheme: " + file.getName());
+            editor.getCurrentCanvas().saveScheme(file);
+            pack.setLastScheme(file.getAbsolutePath());
+            editor.updateWindowTitle();
+        }
+	}
+
+	/**
 	 * Reloads the current package discarding the current scheme.
 	 * The request is ignored if no package is open.
 	 */
@@ -388,7 +430,8 @@ public class EditorActionListener implements ActionListener {
     				else
     					JOptionPane.showMessageDialog(canvas, "Cannot remove"
     							+ " the file " + lastScheme + ".\nPlease check"
-    							+ " the permissions.");
+    							+ " the permissions.", "Error",
+    							JOptionPane.ERROR_MESSAGE);
     			}
     		}
     	}
