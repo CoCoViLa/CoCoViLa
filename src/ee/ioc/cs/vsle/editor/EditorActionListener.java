@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.VPackage;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.iconeditor.AboutDialog;
 import ee.ioc.cs.vsle.iconeditor.LicenseDialog;
@@ -203,24 +204,16 @@ public class EditorActionListener implements ActionListener {
                     Editor.getInstance().updateWindowTitle();
                 }
             } else if ( e.getActionCommand().equals( Menu.CLOSE ) ) {
-                if ( Editor.getInstance().getCurrentPackage() != null ) {
-                    PropertyBox.setMultiProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
-                    Editor.getInstance().clearPane();
-                }
+            	closeCurrentScheme();
+            } else if (Menu.DELETE_SCHEME.equals(e.getActionCommand())) {
+            	deleteCurrentScheme();
             } else if ( e.getActionCommand().equals( Menu.CLOSE_ALL ) ) {
                 while ( Editor.getInstance().getCurrentPackage() != null ) {
                     PropertyBox.setMultiProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
                     Editor.getInstance().clearPane();
                 }
             } else if ( e.getActionCommand().equals( Menu.RELOAD ) ) {
-                if ( Editor.getInstance().getCurrentPackage() != null ) {
-                	File pack = new File(Editor.getInstance().getCurrentPackage().getPath());
-                	if( pack.exists() ) {
-                		Editor.getInstance().clearPane();
-                		Editor.setLastPath( pack.getAbsolutePath() );
-                		Editor.getInstance().loadPackage( pack );
-                	}
-                }
+            	reloadCurrentPackage();
             } else if ( e.getActionCommand().equals( Menu.INFO ) ) {
                 String message;
                 if ( Editor.getInstance().getCurrentPackage() != null ) {
@@ -348,4 +341,68 @@ public class EditorActionListener implements ActionListener {
             }
         }
     }
+
+	/**
+	 * Reloads the current package discarding the current scheme.
+	 * The request is ignored if no package is open.
+	 */
+	private void reloadCurrentPackage() {
+		Editor editor = Editor.getInstance();
+		VPackage pkg = editor.getCurrentPackage();
+		
+        if (pkg != null) {
+        	File pkgFile = new File(pkg.getPath());
+        	if (pkgFile.exists()) {
+        		Editor.getInstance().clearPane();
+        		Editor.setLastPath(pkgFile.getAbsolutePath());
+        		Editor.getInstance().loadPackage(pkgFile);
+        	}
+        }
+	}
+
+	/**
+	 * Closes the current scheme and removes the file the scheme was loaded
+	 * from. The user is asked for confirmation.
+	 */
+	private void deleteCurrentScheme() {
+		Editor editor = Editor.getInstance();
+    	Canvas canvas = editor.getCurrentCanvas();
+    	if (canvas != null) {
+    		String lastScheme = canvas.vPackage.getLastScheme();
+    		if (lastScheme == null) {
+    			int rv = JOptionPane.showConfirmDialog(canvas, 
+    					"The scheme is not saved. Are you sure you want to "
+    					+ "close it?", "Confirm Delete",
+    					JOptionPane.YES_NO_OPTION);
+    			if (rv == JOptionPane.YES_OPTION)
+    				reloadCurrentPackage();
+    		} else {
+    			int rv = JOptionPane.showConfirmDialog(editor,
+    					"Are you sure you want to delete the current scheme"
+    					+ " and permanently remove the file\n"
+    					+ lastScheme + "?", "Confirm Delete",
+    				JOptionPane.YES_NO_OPTION);
+    			if (rv == JOptionPane.YES_OPTION) {
+    				if (new File(lastScheme).delete())
+    					reloadCurrentPackage();
+    				else
+    					JOptionPane.showMessageDialog(canvas, "Cannot remove"
+    							+ " the file " + lastScheme + ".\nPlease check"
+    							+ " the permissions.");
+    			}
+    		}
+    	}
+	}
+
+	/**
+	 * Closes current scheme.
+	 */
+	private void closeCurrentScheme() {
+		Editor editor = Editor.getInstance();
+        if (editor.getCurrentPackage() != null) {
+            PropertyBox.setMultiProperty(PropertyBox.PALETTE_FILE,
+            		editor.getCurrentPackage().getPath(), false);
+            editor.clearPane();
+        }
+	}
 }
