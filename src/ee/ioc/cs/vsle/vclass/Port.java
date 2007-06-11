@@ -331,7 +331,7 @@ public class Port implements Cloneable, Serializable {
 	 * Checks if this port can be connected at all. For example, the syntax
 	 * rules of a visual language might disallow connecting some ports
 	 * in certain cases. These rules are implemented in auxiliary classes
-	 * such as a scheme daemon. Also, superclasses cannot be connected.
+	 * such as a scheme daemon.
 	 * @return true, if this port can possibly be connected to some other port,
 	 * 		   false otherwise.
 	 */
@@ -339,7 +339,7 @@ public class Port implements Cloneable, Serializable {
         // obj can be null when adding a relation class and the object is not
         // created yet. A relation class can never be a superclass and 
         // should always be connected.
-		return (obj != null) /*|| !obj.isSuperClass()*/;
+		return true;
 	}
 
 	/**
