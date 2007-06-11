@@ -1268,6 +1268,7 @@ public class Canvas extends JPanel {
 			
 			th.endElement(null, null, "scheme");
 			th.endDocument();
+			posInfo.setText("Scheme saved to: " + file.getName());
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
