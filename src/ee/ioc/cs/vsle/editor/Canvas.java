@@ -1658,11 +1658,10 @@ public class Canvas extends JPanel {
 	 */
 	public void setActionInProgress(boolean newValue) {
 		if (newValue != actionInProgress) {
-			Editor editor = Editor.getInstance();
-			editor.undoAction.setEnabled(!newValue);
-			editor.redoAction.setEnabled(!newValue);
-			editor.deleteAction.setEnabled(!newValue);
 			actionInProgress = newValue;
+			Editor editor = Editor.getInstance();
+			editor.deleteAction.setEnabled(!newValue);
+			editor.refreshUndoRedo();
 		}
 	}
 
