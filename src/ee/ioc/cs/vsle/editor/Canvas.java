@@ -1166,6 +1166,8 @@ public class Canvas extends JPanel {
 		if (scheme == null)
 			return false;
 
+		undoManager.discardAllEdits();
+		Editor.getInstance().refreshUndoRedo();
 		connections = scheme.getConnections();
 		objects = scheme.getObjects();
 		initClassPainters();
