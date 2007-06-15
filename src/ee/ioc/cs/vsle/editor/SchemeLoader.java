@@ -6,6 +6,9 @@ import org.xml.sax.*;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,9 +73,11 @@ public class SchemeLoader {
 		handler.setVPackage(vpackage);
 
 		long startParsing = System.currentTimeMillis();
-		
+
+		InputStream input = null;
 		try {
-			parser.parse(file, handler);
+			input = new FileInputStream(file);
+			parser.parse(input, handler);
 
 			if (RuntimeProperties.isLogDebugEnabled()) 
 				db.p("Scheme parsing completed in "
@@ -81,6 +86,17 @@ public class SchemeLoader {
 		} catch (Exception e) {
 			handler.collectDiagnostic(e.getMessage());
 			return false;
+		} finally {
+			// The stream must be explicitly closed, otherwise it is not
+			// possible to delete the file on Windows.
+			if (input != null) {
+				try {
+					input.close();
+				} catch (IOException e) {
+					db.p(e);
+				}
+				input = null;
+			}
 		}
 		return true;
 	}
