@@ -13,6 +13,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -1236,8 +1239,12 @@ public class Canvas extends JPanel {
 	}
 
 	public void saveScheme(File file) {
+		OutputStream output = null;
 		try {
-			StreamResult result = new StreamResult(file);
+			// The stream has to be closed explicitly or the file will
+			// remain open probably until the next garbage collection.
+			output = new FileOutputStream(file);
+			StreamResult result = new StreamResult(output);
 			SAXTransformerFactory tf = (SAXTransformerFactory)
 					TransformerFactory.newInstance();
 
@@ -1273,6 +1280,15 @@ public class Canvas extends JPanel {
 			posInfo.setText("Scheme saved to: " + file.getName());
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
+			if (output != null) {
+				try {
+					output.close();
+				} catch (IOException e) {
+					db.p(e);
+				}
+				output = null;
+			}
 		}
 	}
 
