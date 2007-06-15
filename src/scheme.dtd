@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='us-ascii'?>
-<!ELEMENT scheme	((object|relobject)+, connection*)>
+<!ELEMENT scheme	((object|relobject)*, connection*)>
 <!ELEMENT object 	(properties, fields*)>
 <!ELEMENT relobject 	(relproperties, fields*)>
 <!ELEMENT fields 	(field*)>
