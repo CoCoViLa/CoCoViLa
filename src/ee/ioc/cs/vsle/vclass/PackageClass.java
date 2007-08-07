@@ -16,6 +16,7 @@ public class PackageClass implements Serializable {
     public String painterName;
     private ClassPainter painterPrototype;
     private int sequence;
+    private boolean isStatic; // should the class be static by default?
 
 	public PackageClass(String name) {
 		this.name = name;
@@ -77,6 +78,7 @@ public class PackageClass implements Serializable {
 		obj.setWidth(graphics.getWidth());
 		obj.setHeight(graphics.getHeight());
 		obj.setClassName(name);
+		obj.setStatic(isStatic);
 
 		obj.shapes = new ArrayList<Shape>(graphics.shapes.size());
 		for (Shape shape : graphics.shapes)
@@ -147,5 +149,13 @@ public class PackageClass implements Serializable {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * Sets the default static property value for new instances of this class.
+	 * @param isStatic default static property value for new objects
+	 */
+	public void setStatic(boolean isStatic) {
+		this.isStatic = isStatic;
 	}
 }

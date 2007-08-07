@@ -157,6 +157,8 @@ public class PackageParser {
 		private static final String ATR_TYPE = "type";
 		private static final String EL_CLASS = "class";
 		private static final String EL_PACKAGE = "package";
+		private static final String ATR_STATIC = "static";
+		private static final String ATR_NATURE = "nature";
 
 		/**
 		 * The default alpha value
@@ -242,6 +244,10 @@ public class PackageParser {
 				if (type != null && type.equals(VAL_RELATION)) {
 					newClass.relation = true;
 				}
+
+				newClass.setStatic(Boolean.parseBoolean(
+						attrs.getValue(ATR_STATIC)));
+
 			} else if (element.equals(EL_GRAPHICS)) {
 				newGraphics = new ClassGraphics();
 				String showFields = attrs.getValue(ATR_SHOW_FIELDS);
@@ -293,6 +299,13 @@ public class PackageParser {
 				String desc = attrs.getValue(ATR_DESCRIPTION);
 
 				newField = new ClassField(name, type, value, desc);
+
+				String nature = attrs.getValue(ATR_NATURE);
+				if ("input".equals(nature))
+					newField.setInput(true);
+				else if ("goal".equals(nature))
+					newField.setGoal(true);
+
 				classFields.add(newField);
 			} else if (element.equals(EL_TEXT)) {
 				Text newText = makeText(attrs, newGraphics);

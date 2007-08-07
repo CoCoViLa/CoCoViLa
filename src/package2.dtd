@@ -32,7 +32,9 @@
 <!ELEMENT painter	(#PCDATA)>
 
 <!ATTLIST class
-	type (relation|class) #IMPLIED>
+	type (relation|class) #IMPLIED
+	static (true|false) "false">
+
 <!ATTLIST graphics 
 	showFields (true|false) #IMPLIED>
 <!ATTLIST port connection (single|area) #IMPLIED>
@@ -98,6 +100,7 @@
         transparency	CDATA	#IMPLIED>
 <!ATTLIST field 
         name		CDATA   #REQUIRED
+        nature		(normal|input|goal)	"normal"
         type		CDATA   #IMPLIED
         value		CDATA   #IMPLIED
 	description	CDATA   #IMPLIED>
