@@ -19,7 +19,6 @@ public class IconEditor
 	extends JFrame {
 
 	int mouseX, mouseY; // Mouse X and Y coordinates.
-	int shapeCount;
 	BoundingBox boundingbox;
 	public IconMouseOps mListener;
 	public static DrawingArea drawingArea;
@@ -32,7 +31,6 @@ public class IconEditor
 	JPanel infoPanel; // Panel for runtime information, mouse coordinates, selected objects etc.
 	public JPanel mainPanel = new JPanel();
 	JLabel posInfo; // Label for displaying mouse position information.
-	VPackage vPackage;
 	IconPalette palette;
 	Dimension drawAreaSize = new Dimension(700, 500);
 	ShapeGroup shapeList = new ShapeGroup(new ArrayList<Shape>());
@@ -840,7 +838,6 @@ public class IconEditor
 			setLastPath(file.getAbsolutePath());
 			try {
 				mListener.state = State.selection;
-				shapeCount = 0;
 				shapeList = new ShapeGroup(new ArrayList<Shape>());
 				ports = new ArrayList<IconPort>();
 				palette.boundingbox.setEnabled(true);
@@ -1590,41 +1587,39 @@ public class IconEditor
 	} // initializeRuntimeProperties
 
 
-	/**
-	 * Main method for module unit-testing.
-	 * @param args - command line arguments
-	 */
-	public static void main(String[] args) {
-		
-		for ( int i = 0; i < args.length; i++ )
-		{
-			if ( args[ i ].equals( "-webstart" ) )
-			{
-				RuntimeProperties.setFromWebstart();
-				
-				SystemUtils.unpackPackages();
-			}
-		}
-		
-		initializeRuntimeProperties();
 
-		JFrame window;
+    /**
+     * Main method for running Class Editor.
+     * @param args command line arguments
+     */
+    public static void main(final String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                createAndInitGUI(args);
+            }
+        });
+    }
 
-		try {
-			window = new IconEditor();
-			window.setTitle(WINDOW_TITLE);
-			window.setSize(775, 600);
-			window.setVisible(true);
-		} catch (Exception e) {
-			window = new IconEditor();
-			window.setTitle(WINDOW_TITLE);
-			window.setSize(775, 600);
-			window.setVisible(true);
-		}
+    static void createAndInitGUI(String[] args) {
+        assert SwingUtilities.isEventDispatchThread();
 
-		PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_EXECUTED,
-			new java.util.Date().toString());
-	}
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].equals("-webstart")) {
+                RuntimeProperties.setFromWebstart();
+                SystemUtils.unpackPackages();
+            }
+        }
+
+        initializeRuntimeProperties();
+
+        IconEditor window = new IconEditor();
+        window.setTitle(WINDOW_TITLE);
+        window.setSize(775, 600);
+        window.setVisible(true);
+
+        PropertyBox.setProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.LAST_EXECUTED,
+                new java.util.Date().toString());
+    }
 
 	public void zoom(double newZ, double oldZ) {
 		for (int i = 0; i < shapeList.size(); i++) {
@@ -1649,7 +1644,6 @@ public class IconEditor
 			setLastPath(file.getAbsolutePath());
 			try {
 				mListener.state = State.selection;
-				shapeCount = 0;
 				shapeList = new ShapeGroup(new ArrayList<Shape>());
 				dbrClassFields.setRowCount(0);
 				ports.clear();
