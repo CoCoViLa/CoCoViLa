@@ -13,7 +13,8 @@ import javax.xml.transform.sax.TransformerHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-public class GObj implements Serializable, Cloneable {
+public class GObj implements Serializable, Cloneable,
+        ee.ioc.cs.vsle.api.SchemeObject {
 
 	private static final long serialVersionUID = 1L;
 
