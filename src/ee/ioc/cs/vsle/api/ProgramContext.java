@@ -1,9 +1,5 @@
 package ee.ioc.cs.vsle.api;
 
-import ee.ioc.cs.vsle.vclass.ClassField;
-import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.vclass.Scheme;
-
 /**
  * <p>This class is made available to each synthesized program instance.
  * Generated programs can use the static methods of this class to 
@@ -14,44 +10,60 @@ import ee.ioc.cs.vsle.vclass.Scheme;
  * <p>A scheme object can read the vale of its field "k1" by including the
  * following statement:
  * <pre>double k1 = Double.valueOf(
- * 		(String) ProgramContext.getField(objectName, "k1"));
+ *              (String) ProgramContext.getFieldValue(objectName, "k1"));
  * </pre>
- * The variable {@code objectName} is a special field that is always present
- * in all scheme objects and contains the name of this particular scheme
- * object instance. User code should never attempt to modify this field.</p>
+ * There is a special specification variable {@code cocovilaSpecObjectName}
+ * of class String that is declared and initialized automatically.
+ * The value of this variable can be used to get hold of the corresponding
+ * scheme name of Java objects.
+ * <pre>
+ * public class A {
+ *     /&#42@ specification A {
+ *         int x, input;
+ *         cocovilaSpecObjectName, input -> x {getX};
+ *     }&#42;/
+ *     private int getX(String objectName, int in) {
+ *         return Integer.valueOf(
+ *                 (String) ProgramContext.getFieldValue(objectName, in));
+ *     }
+ * }
  */
 public final class ProgramContext {
 
-	/**
-	 * Reference to the scheme the program was generated from
-	 */
-	private static Scheme scheme;
+    /**
+     * Reference to the scheme the program was generated from
+     */
+    private static Scheme scheme;
 
-	/**
-	 * Sets the static scheme reference.
-	 * @param scheme the scheme
-	 */
-	public static void setScheme(Scheme scheme) {
-		ProgramContext.scheme = scheme;
-	}
+    /**
+     * Sets the static scheme reference.
+     * This method cannot be called by user code.
+     * @param scheme the scheme
+     */
+    public static void setScheme(Scheme scheme) {
+        if (ProgramContext.scheme == null)
+            ProgramContext.scheme = scheme;
+        else
+            throw new RuntimeException("ProgramContext already initialized");
+    }
 
-	/**
-	 * Returns a reference to the scheme the program was generated from.
-	 * @return the scheme reference
-	 */
-	public static Scheme getScheme() {
-		return ProgramContext.scheme;
-	}
+    /**
+     * Returns a reference to the scheme the program was generated from.
+     * @return the scheme reference
+     */
+    public static Scheme getScheme() {
+        return ProgramContext.scheme;
+    }
 
-	/**
-	 * Reads a value object from the specified field.
-	 * @param className the name of the object
-	 * @param fieldName the name of the field
-	 * @return the field value which can be null
-	 */
-	public static Object getField(String className, String fieldName) {
-		GObj obj = scheme.getObjects().getByName(className);
-		ClassField fld = obj.getField(fieldName);
-		return fld.getValue();
-	}
+    /**
+     * Gets the value from the specified scheme object field.
+     * This method is supplied for convenience.
+     * @param objectName the name of the object
+     * @param fieldName the name of the field
+     * @return the field value which can be null
+     * @throws RuntimeException when there is no such class or field
+     */
+    public static Object getFieldValue(String objectName, String fieldName) {
+        return scheme.getFieldValue(objectName, fieldName);
+    }
 }

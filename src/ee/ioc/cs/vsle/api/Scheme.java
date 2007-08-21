@@ -23,6 +23,15 @@ public interface Scheme {
     public SchemeObject getObject(String objectName);
 
     /**
+     * Gets the value from the specified scheme object field.
+     * @param objectName the name of the object
+     * @param fieldName the name of the field
+     * @return the field value which can be null
+     * @throws RuntimeException when there is no such class or field
+     */
+    public Object getFieldValue(String objectName, String fieldName);
+
+    /**
      * Repaints the canvas as soon as possible.
      * This method is thread safe.
      */
