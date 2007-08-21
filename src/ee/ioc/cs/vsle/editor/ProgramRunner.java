@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.vclass.*;
+import ee.ioc.cs.vsle.api.Scheme;
 import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.util.*;
