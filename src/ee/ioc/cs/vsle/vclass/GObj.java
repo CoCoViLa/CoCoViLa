@@ -668,4 +668,27 @@ public class GObj implements Serializable, Cloneable,
     public double getAngle() {
         return angle;
     }
+
+    /*
+     * @see ee.ioc.cs.vsle.api.SchemeObject#getFieldValue(java.lang.String)
+     */
+    public Object getFieldValue(String fieldName) {
+        ClassField f = getField(fieldName);
+        if (f == null)
+            throw new RuntimeException("No such field: " + fieldName);
+
+        return f.getValue();
+    }
+
+    /*
+     * @see ee.ioc.cs.vsle.api.SchemeObject#setFieldValue(java.lang.String,
+     *      java.lang.String)
+     */
+    public void setFieldValue(String fieldName, String value) {
+        ClassField f = getField(fieldName);
+        if (f == null)
+            throw new RuntimeException("No such field: " + fieldName);
+
+        f.setValue(value);
+    }
 }

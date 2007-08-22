@@ -58,4 +58,20 @@ public interface SchemeObject {
      * @return the name of the class.
      */
     public String getClassName();
+
+    /**
+     * Returns the value of the specified field
+     * @param fieldName the name of the field
+     * @return the value of the field, possibly null
+     * @throws RuntimeException when the field does not exist
+     */
+    public Object getFieldValue(String fieldName);
+
+    /**
+     * Sets the value of the specified field
+     * @param fieldName the name of the field
+     * @param value the new value of the field, can be null
+     * @throws RuntimeException when the field does not exist
+     */
+    public void setFieldValue(String fieldName, String value);
 }
