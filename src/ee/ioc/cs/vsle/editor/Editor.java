@@ -756,9 +756,9 @@ public class Editor extends JFrame implements ChangeListener {
 	}
 
 	public void stateChanged(ChangeEvent e) {
+	    refreshUndoRedo();
 		Canvas canvas = getCurrentCanvas();
 		if (canvas != null) {
-			refreshUndoRedo();
 			gridCheckBox.setSelected(canvas.isGridVisible());
 			canvas.drawingArea.repaint();
 			canvas.drawingArea.requestFocusInWindow();
