@@ -19,9 +19,13 @@ public class AnnotatedClass {
 	
 	private String name;
 	private Collection<AnnotatedClass> superClasses = new LinkedHashSet<AnnotatedClass>();
+	//relations declared in the specification of this class and in specifications of superclasses
 	private Collection<ClassRelation> classRelations = new LinkedHashSet<ClassRelation>();
-	private Collection<ClassField> fields = new LinkedHashSet<ClassField>();
-	private boolean isOnlyForSuperclassGeneration = false;
+	//fields declared in this annotated class
+	private Collection<ClassField> classFields = new LinkedHashSet<ClassField>();
+	//all fields declared here and in superclasses
+	private Collection<ClassField> allFields = new LinkedHashSet<ClassField>();
+	
 	/**
 	 * Class constructor.
 	 * @param name String
@@ -30,15 +34,13 @@ public class AnnotatedClass {
 		this.name = name;
 	} // ee.ioc.cs.editor.synthesize.AnnotatedClass
 
-	 void addSuperClass( AnnotatedClass clas ) {
-		 superClasses.add( clas );
-	 }
 	/**
 	 * Adds a new field to the ArrayList of fields.
 	 * @param field ClassField - a field to be appended to the list of fields.
 	 */ 
 	 void addField(ClassField field) {
-		fields.add(field);
+		classFields.add(field);
+		allFields.add(field);
 	} // addField
 
 	/**
@@ -46,7 +48,8 @@ public class AnnotatedClass {
 	 * @param v ArrayList - list of variables to be appended to the list of fields.
 	 */
 	void addFields(Collection<ClassField> v) {
-		fields.addAll(v);
+		classFields.addAll(v);
+		allFields.addAll(v);
 	} // addVars
 
 	/**
@@ -77,7 +80,7 @@ public class AnnotatedClass {
 	}
 
 	public ClassField getFieldByName(String fieldName) {
-		for ( ClassField f : fields ){
+		for ( ClassField f : allFields ){
 			if (f.getName().equals(fieldName))
 				return f;
 		}
@@ -93,19 +96,29 @@ public class AnnotatedClass {
 	}
 
 	Collection<ClassField> getFields() {
-		return fields;
+		return allFields;
 	}
 
+	Collection<ClassField> getClassFields() {
+		return classFields;
+	}
+	
+	void addSuperClass( AnnotatedClass clas ) {
+		
+		for( ClassField cf : clas.getFields() ) {
+			if( !SPEC_OBJECT_NAME.equals( cf.getName() ) ) {
+				allFields.add( cf );
+			}
+		}
+		classRelations.addAll( clas.getClassRelations() );
+		
+		superClasses.add( clas );
+	}
+
+	//TODO - remove?
 	public Collection<AnnotatedClass> getSuperClasses() {
 		return superClasses;
 	}
 
-	public boolean isOnlyForSuperclassGeneration() {
-		return isOnlyForSuperclassGeneration;
-	}
-
-	public void setOnlyForSuperclassGeneration(boolean isOnlyForSuperclassGeneration) {
-		this.isOnlyForSuperclassGeneration = isOnlyForSuperclassGeneration;
-	}
 }
 

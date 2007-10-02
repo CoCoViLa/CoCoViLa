@@ -77,10 +77,10 @@ public class Synthesizer {
         AnnotatedClass ac = classList.getType( TYPE_THIS );
 
         // check all the fields and make declarations accordingly
-        for ( ClassField field : ac.getFields() ) {
+        for ( ClassField field : ac.getClassFields() ) {
 
-        	if( AnnotatedClass.SPEC_OBJECT_NAME.equals( field.getName() ) && ac.getSuperClasses().size() > 0 )
-        		continue;
+//        	if( AnnotatedClass.SPEC_OBJECT_NAME.equals( field.getName() ) && ac.getSuperClasses().size() > 0 )
+//        		continue;//TODO - remove?
         	
             String dec = TypeUtil.getDeclaration( field, "public" );
            
@@ -138,13 +138,10 @@ public class Synthesizer {
         Pattern pattern;
         Matcher matcher;
 
-        Set<String> generated = new LinkedHashSet<String>();
         // for each class generate new one used in synthesis
-
         for ( int h = 0; h < classes.size(); h++ ) {
             pClass = ( AnnotatedClass ) classes.get( h );
-            if ( !pClass.getName().equals( TYPE_THIS ) && !generated.contains( pClass.getName() ) ) {
-            	generated.add( pClass.getName() );
+            if ( !pClass.getName().equals( TYPE_THIS ) ) {
                 fileString = "";
                 try {
                 	fileString = SpecParser.getStringFromFile( path + pClass.getName() + ".java" );
@@ -164,10 +161,10 @@ public class Synthesizer {
                 
                 String declars = "";
 
-                for ( ClassField field : pClass.getFields() ) {
-                	if( AnnotatedClass.SPEC_OBJECT_NAME.equals( field.getName() ) && pClass.getSuperClasses().size() > 0 )
-                		continue;
-                	
+                for ( ClassField field : pClass.getClassFields() ) {
+                	//TODO - remove?
+//                	if( AnnotatedClass.SPEC_OBJECT_NAME.equals( field.getName() ) && pClass.getSuperClasses().size() > 0 )
+//                		continue;//do not understand why should we skip adding SPEC_OBJECT_NAME if class has superclasses 
                 	declars += CodeGenerator.OT_TAB + TypeUtil.getDeclaration( field, "public" );
 				}
 

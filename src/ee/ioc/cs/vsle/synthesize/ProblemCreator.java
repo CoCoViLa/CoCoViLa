@@ -36,7 +36,6 @@ public class ProblemCreator {
     	AnnotatedClass ac = classes.getType( parent.getType() );
     	
         for ( ClassField cf : ac.getFields() ) {
-        	if( ac.isOnlyForSuperclassGeneration() ) continue;
         	
         	if ( cf.isAlias() ) {
                 aliases.add( (Alias)cf );

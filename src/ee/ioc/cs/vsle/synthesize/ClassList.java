@@ -29,7 +29,7 @@ public class ClassList
 	public AnnotatedClass getType(String type) {
 		for (AnnotatedClass ac : this ) {
 
-			if (ac.getName().equals(type) && !ac.isOnlyForSuperclassGeneration() ) {
+			if ( ac.getName().equals(type) ) {
 				return ac;
 			}
 		}
@@ -37,18 +37,7 @@ public class ClassList
 	} // getType
 
 	public boolean containsType( String type ) {
-		return true;
+		return getType( type ) != null;
 	}
-	
-	public ArrayList<AnnotatedClass> getSuperClasses() {
-		ArrayList<AnnotatedClass> a = new ArrayList<AnnotatedClass>();
-		
-		for (AnnotatedClass ac : this ) {
 
-			if ( ac.isOnlyForSuperclassGeneration() ) {
-				a.add( ac );
-			}
-		}
-		return a;
-	} // getType
 }

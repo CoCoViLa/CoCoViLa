@@ -251,7 +251,9 @@ public class ProgramRunner {
 
 			String s = st.nextToken();
 
-			f = clas.getDeclaredField(s);
+			//show values of variables declared in superclasses as well
+			f = clas.getField(s);//getDeclarField(s);
+			
 			if (st.hasMoreElements()) {
 				clas = f.getType();
 				obj = f.get(obj);

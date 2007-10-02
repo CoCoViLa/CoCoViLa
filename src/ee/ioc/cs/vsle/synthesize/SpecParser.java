@@ -291,13 +291,11 @@ public class SpecParser {
         Matcher matcher;
         Pattern pattern;
         String[] split;
-        Collection<ClassField> vars = new LinkedHashSet<ClassField>();
         AnnotatedClass annClass = new AnnotatedClass( className );
         
         /* ****** SPEC_OBJECT_NAME ****** */
         ClassField specObjectName = new ClassField( AnnotatedClass.SPEC_OBJECT_NAME, "String" );
         annClass.addField( specObjectName );
-        vars.add( specObjectName );
         /* ****** SPEC_OBJECT_NAME ****** */
         
         ClassList classList = new ClassList();
@@ -320,42 +318,25 @@ public class SpecParser {
                 		for (int i = 0; i < split.length; i++) {
 							String name = split[i];
 							
-							File file = new File( path + name + ".java" );
+							if( checkSpecClass(className, path, checkedClasses, classList, name) ) {
+								
+								AnnotatedClass superClass = classList.getType( name );
+								
+								annClass.addSuperClass(superClass);
+							}
+							else {
+								throw new SpecParseException( "Unable to parse superclass " + name +
+	                                    " of " + className );
+							}
 
-	                        if ( file.exists() && isSpecClass( path, name ) ) {
-	                            if ( classList.getType( name ) == null ) {
-	                                checkedClasses.add( name );
-	                                String s = new String( getStringFromFile( path + name + ".java" ) );
-
-	                                ClassList superClasses = parseSpecificationImpl( refineSpec( s ), name, null,
-	                                		path, checkedClasses );
-	                                checkedClasses.remove( name );
-	                                
-	                                superClasses.getType( name ).setOnlyForSuperclassGeneration( true );
-	                                
-	                                for ( AnnotatedClass superClass : superClasses.getSuperClasses() ) {
-	                                	annClass.addSuperClass( superClass );
-	                                	vars.addAll( superClass.getFields() );
-	                                	annClass.getClassRelations().addAll( superClass.getClassRelations() );
-	                                	ClassField specName = superClass.getFieldByName( AnnotatedClass.SPEC_OBJECT_NAME );
-	                                	superClass.getFields().clear();
-	                                	superClass.getFields().add( specName );
-	                                	superClass.getClassRelations().clear();
-	                                	
-	                                	if( !classList.contains(superClass) ) {
-	                                		classList.add( superClass );
-	                                	}
-									}
-	                            }
-	                        }
 						}
                 	} else if ( lt.getType() == LineType.TYPE_ASSIGNMENT ) {
                         split = lt.getSpecLine().split( ":", -1 );
                         ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, lt.getOrigSpecLine() );
 
-                        classRelation.addOutput( split[ 0 ], vars );
+                        classRelation.addOutput( split[ 0 ], annClass.getFields() );
                         classRelation.setMethod( split[ 0 ] + " = " + split[ 1 ] );
-                        checkAnyType( split[ 0 ], split[ 1 ], vars);
+                        checkAnyType( split[ 0 ], split[ 1 ], annClass.getFields());
                         annClass.addClassRelation( classRelation );
                         if ( RuntimeProperties.isLogDebugEnabled() ) 
                         	db.p( classRelation );
@@ -366,7 +347,7 @@ public class SpecParser {
                     	String name  = split[ 1 ].trim();
                     	String value = split[ 2 ].trim();
                     	
-                    	if ( varListIncludes( vars, name ) ) {
+                    	if ( containsVar( annClass.getFields(), name ) ) {
                     		s_parseErrors.add("Variable " + name +
                                     " declared more than once in class " + className);
                     		
@@ -385,7 +366,7 @@ public class SpecParser {
                     	
                     	ClassField var = new ClassField( name, type, value, true );
 
-                        vars.add( var );
+                    	annClass.addField( var );
                     	
                     } else if ( lt.getType() == LineType.TYPE_DECLARATION ) {
                         split = lt.getSpecLine().split( ":", -1 );
@@ -396,7 +377,7 @@ public class SpecParser {
                         boolean specClass = checkSpecClass(className, path, checkedClasses, classList, type);
                         
                         for ( int i = 0; i < vs.length; i++ ) {
-                            if ( varListIncludes( vars, vs[ i ] ) ) {
+                            if ( containsVar( annClass.getFields(), vs[ i ] ) ) {
                             	s_parseErrors.add( "Variable " + vs[ i ] +
                                         " declared more than once in class " + className );
                                 throw new SpecParseException( "Variable " + vs[ i ] +
@@ -413,13 +394,13 @@ public class SpecParser {
                             	
                             	ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, meth );
 
-                                classRelation.addOutput( s, vars );
+                                classRelation.addOutput( s, annClass.getFields() );
                                 classRelation.setMethod( meth );
                                 annClass.addClassRelation( classRelation );
                             }
                             /* ****** SPEC_OBJECT_NAME ****** */
                             
-                            vars.add( var );
+                            annClass.addField( var );
                         }
 
                     } else if ( lt.getType() == LineType.TYPE_ALIAS ) {
@@ -430,20 +411,20 @@ public class SpecParser {
                         
                         if( split[ 1 ].trim().equals("") ) {
                         	//if there are no variables on the rhs, mark alias as empty
-                        	if ( !varListIncludes( vars, name ) ) {
+                        	if ( !containsVar( annClass.getFields(), name ) ) {
                         		a = new Alias( name );
                         		if( !split[ 2 ].trim().equals("") )
                         		{
                         			a.setStrictTypeOfVars( split[ 2 ].trim() );
                         		}
-                        		vars.add( a );
+                        		annClass.addField( a );
                         		continue;
                         	}
                         }
                         
                         String[] list = split[ 1 ].trim().split( " *, *", -1 );
                         
-                        ClassField var = getVar( name, vars );
+                        ClassField var = getVar( name, annClass.getFields() );
                         
                         if ( var != null && !var.isAlias() ) {
                         	s_parseErrors.add( "Variable " + name +
@@ -460,7 +441,7 @@ public class SpecParser {
                         	//if its an assignment, check if alias has already been declared
                         	if( split.length > 3 && Boolean.parseBoolean( split[ 3 ] ) ) {
                         		try {
-                        			if( ( name.indexOf( "." ) == -1 ) && !varListIncludes( vars, name ) ) {
+                        			if( ( name.indexOf( "." ) == -1 ) && !containsVar( annClass.getFields(), name ) ) {
                         				throw new Exception();
                         				
                         			} else if ( name.indexOf( "." ) > -1 ) {
@@ -470,7 +451,7 @@ public class SpecParser {
                         				String parent = name.substring( 0, ind );
                         				String leftFromName = name.substring( ind + 1, name.length() );
                         				
-                        				ClassField parentVar = getVar( parent, vars );
+                        				ClassField parentVar = getVar( parent, annClass.getFields() );
                         				String parentType = parentVar.getType();
                         				
                         				AnnotatedClass parentClass = classList.getType( parentType );
@@ -505,13 +486,13 @@ public class SpecParser {
                     		}
                         }
 
-                        a.addAll( list, vars, classList );
-                        vars.add( a );
+                        a.addAll( list, annClass.getFields(), classList );
+                        annClass.addField( a );
                         ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS, lt.getOrigSpecLine() );
 
-                        classRelation.addInputs( list, vars );
+                        classRelation.addInputs( list, annClass.getFields() );
                         classRelation.setMethod( TypeUtil.TYPE_ALIAS );
-                        classRelation.addOutput( name, vars );
+                        classRelation.addOutput( name, annClass.getFields() );
                         annClass.addClassRelation( classRelation );
                         
                         if ( RuntimeProperties.isLogDebugEnabled() ) 
@@ -519,9 +500,9 @@ public class SpecParser {
                         
                         if ( !a.isWildcard() ) {
                             classRelation = new ClassRelation( RelType.TYPE_ALIAS, lt.getOrigSpecLine() );
-                            classRelation.addOutputs( list, vars );
+                            classRelation.addOutputs( list, annClass.getFields() );
                             classRelation.setMethod( TypeUtil.TYPE_ALIAS );
-                            classRelation.addInput( name, vars );
+                            classRelation.addInput( name, annClass.getFields() );
                             annClass.addClassRelation( classRelation );
                             if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
                         } 
@@ -538,7 +519,7 @@ public class SpecParser {
                             String out = pieces[ 2 ].trim();
                             
                             //cannot assign new values for constants
-                            ClassField tmp = getVar( checkAliasLength( out, vars, className ), vars );
+                            ClassField tmp = getVar( checkAliasLength( out, annClass, className ), annClass.getFields() );
                             if( tmp != null && tmp.isConstant() ) {
                             	db.p( "Ignoring constant and equation output: " + tmp );
                             	continue;
@@ -556,12 +537,12 @@ public class SpecParser {
                             
                             ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, lt.getOrigSpecLine() );
 
-                            classRelation.addOutput( out, vars );
+                            classRelation.addOutput( out, annClass.getFields() );
 
-                            //checkAliasLength( inputs, vars, className );
+                            //checkAliasLength( inputs, annClass.getFields(), className );
                             for( int i = 0; i < inputs.length; i++ ) {
                             	String initial = inputs[i];
-                            	inputs[i] = checkAliasLength( inputs[i], vars, className );
+                            	inputs[i] = checkAliasLength( inputs[i], annClass, className );
                             	String name = inputs[i];
                             	if( name.startsWith( "*" ) ) {
                             		name = inputs[i].substring( 1 );
@@ -570,10 +551,10 @@ public class SpecParser {
                         	}
                             method = method.replaceAll( "\\$" + out + "\\$", out );
                             
-                            checkAnyType( out, inputs, vars);
+                            checkAnyType( out, inputs, annClass.getFields());
                             
                             if ( !inputs[ 0 ].equals( "" ) ) {
-                                classRelation.addInputs( inputs, vars );
+                                classRelation.addInputs( inputs, annClass.getFields() );
                             }
                             classRelation.setMethod( method );
                             annClass.addClassRelation( classRelation );
@@ -620,22 +601,22 @@ public class SpecParser {
                             //String[] outputs = matcher2.group(2).trim().split(" *, *", -1);
 
                             if ( !outputs[ 0 ].equals( "" ) ) {
-                                classRelation.addOutputs( outputs, vars );
+                                classRelation.addOutputs( outputs, annClass.getFields() );
                             }
 
                             classRelation.setMethod( matcher.group( 3 ).trim() );
                             
                             String[] inputs = matcher.group( 1 ).trim().split( " *, *", -1 );
 
-                            checkAliasLength( inputs, vars, className );
+                            checkAliasLength( inputs, annClass, className );
                             
                             if ( !inputs[ 0 ].equals( "" ) ) {
-                                classRelation.addInputs( inputs, vars );
+                                classRelation.addInputs( inputs, annClass.getFields() );
                             }
                             if ( subtasks.size() != 0 ) {
 
                         		for ( String subtaskString : subtasks ) {
-                        			Collection<ClassField> varsForSubtask = vars;
+                        			Collection<ClassField> varsForSubtask = annClass.getFields();
                         			pattern = Pattern.compile("\\[ *(([a-zA-Z_$][0-9a-zA-Z_$]*) *\\|-)? *(.*) *-> ?(.*)\\]");
                         			matcher = pattern.matcher(subtaskString);
                         			if (matcher.find()) {
@@ -686,13 +667,13 @@ public class SpecParser {
                             String[] outputs = matcher.group( 2 ).trim().split( " *, *", -1 );
 
                             if ( !outputs[ 0 ].equals( "" ) ) {
-                                classRelation.addOutputs( outputs, vars );
+                                classRelation.addOutputs( outputs, annClass.getFields() );
                             }
 
                             String[] inputs = matcher.group( 1 ).trim().split( " *, *", -1 );
 
                             if ( !inputs[ 0 ].equals( "" ) ) {
-                                classRelation.addInputs( inputs, vars );
+                                classRelation.addInputs( inputs, annClass.getFields() );
                             }
                             if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
                             annClass.addClassRelation( classRelation );
@@ -707,7 +688,6 @@ public class SpecParser {
             throw new UnknownVariableException( className + "." + uve.excDesc );
 
         }
-        annClass.addFields( vars );
         classList.add( annClass );
         return classList;
     }
@@ -741,9 +721,9 @@ public class SpecParser {
 		// if a file by this name exists in the package directory and it includes a specification, we're gonna check it
 		if ( file.exists() && isSpecClass( path, type ) ) {
 		    specClass = true;
-		    if ( classList.getType( type ) == null ) {
+		    if ( !classList.containsType( type ) ) {
 		        checkedClasses.add( type );
-		        String s = new String( getStringFromFile( path + type + ".java" ) );
+		        String s = getStringFromFile( path + type + ".java" );
 
 		        classList.addAll( parseSpecificationImpl( refineSpec( s ), type, null, path,
 		                checkedClasses ) );
@@ -806,25 +786,25 @@ public class SpecParser {
     	out.setType( newType );
     }
     
-    private static void checkAliasLength( String inputs[], Collection<ClassField> vars, String className ) 
+    private static void checkAliasLength( String inputs[], AnnotatedClass thisClass, String className ) 
     				throws UnknownVariableException {
     	for( int i = 0; i < inputs.length; i++ ) {
-        	inputs[i] = checkAliasLength( inputs[i], vars, className ) ;
+        	inputs[i] = checkAliasLength( inputs[i], thisClass, className ) ;
     	}
     }
     
-    private static String checkAliasLength( String input, Collection<ClassField> vars, String className ) 
+    private static String checkAliasLength( String input, AnnotatedClass thisClass, String className ) 
     				throws UnknownVariableException {
     	//check if inputs contain <alias>.lenth variable
     	if( input.endsWith( ".length" ) ) {
     		int index = input.lastIndexOf( ".length" );
     		String aliasName = input.substring( 0, index );
-    		ClassField field = getVar( aliasName, vars );
+    		ClassField field = getVar( aliasName, thisClass.getFields() );
     		if( field != null && field.isAlias() ) {
     			Alias alias = (Alias)field;
     			String aliasLengthName = 
     				( (alias.isWildcard() ? "*" : "" ) + aliasName + "_LENGTH" );
-    			if( varListIncludes( vars, aliasLengthName ) ) {
+    			if( containsVar( thisClass.getFields(), aliasLengthName ) ) {
     				return aliasLengthName;
     			}
     			
@@ -832,7 +812,7 @@ public class SpecParser {
     			
     			ClassField var = new ClassField( aliasLengthName, TYPE_INT, "" + length, true );
     			
-    			vars.add( var );
+    			thisClass.addField( var );
     			
     			return aliasLengthName;
     			
@@ -910,7 +890,7 @@ public class SpecParser {
         return false;
     }
   
-    private static boolean varListIncludes( Collection<ClassField> vars, String varName ) {
+    private static boolean containsVar( Collection<ClassField> vars, String varName ) {
 
         return getVar( varName, vars ) != null;
     }
