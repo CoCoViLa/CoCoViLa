@@ -225,7 +225,11 @@ public class ProblemCreator {
     
     private static void createAlias( Alias alias, AnnotatedClass ac, ClassList classes, Problem problem, Var parent ) throws AliasException {
     	
-    	Var var = new Var( alias, parent );
+    	Var var;
+    	
+    	if( ( var = problem.getAllVars().get( parent.getFullNameForConcat() + alias.getName() ) ) == null ) {
+    		var = new Var( alias, parent );
+    	}
     	
     	if( alias.isWildcard() ) {
     		rewriteWildcardAlias( var, ac, classes, problem );

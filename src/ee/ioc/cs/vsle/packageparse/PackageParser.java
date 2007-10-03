@@ -143,6 +143,7 @@ public class PackageParser {
 		private static final String EL_DEFAULT = "default";
 		private static final String EL_OPEN = "open";
 		private static final String ATR_STRICT = "strict";
+		private static final String ATR_MULTY = "multy";
 		private static final String ATR_PORT_CONNECTION = "portConnection";
 		private static final String ATR_Y = "y";
 		private static final String VAL_TRUE = "true";
@@ -268,9 +269,10 @@ public class PackageParser {
 				String y = attrs.getValue(ATR_Y);
 				String portConnection = attrs.getValue(ATR_PORT_CONNECTION);
 				String strict = attrs.getValue(ATR_STRICT);
-
+				String multy = attrs.getValue(ATR_MULTY);
+				
 				newPort = new Port(name, type, Integer.parseInt(x), Integer
-						.parseInt(y), portConnection, strict);
+						.parseInt(y), portConnection, strict, multy );
 				newPort.setId(id);
 			} else if (element.equals(EL_OPEN)) {
 				status = PORT_OPEN;

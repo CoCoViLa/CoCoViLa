@@ -34,17 +34,20 @@ public class Alias extends ClassField {
 	public void addVar(ClassField f) throws AliasException {
 		if( isStrictType && !isWildcard() && !f.getType().equals( type ) ) {
 			throw new AliasException( "Unable to add " + f.type + " " + f + " to alias " 
-					+ this + " because types do not match: " + type + " vs. " + f.type );
-		} else if( ( type != null ) && !isObjectType && (!isStrictType && !f.getType().equals( type ) 
+					+ this + " because types do not match, required: " + type + ", given: " + f.type );
+		} else if( !isTypeEmpty() && !isObjectType && (!isStrictType && !f.getType().equals( type ) 
 									 /*|| ( f.isAlias() )*/ ) ) {
 			isOneTypeVars = false;
 			type = TYPE_OBJECT;
-		} else if( type == null ){
+		} else if( isTypeEmpty() ) {
 			type = f.getType();
 		}
 		vars.add(f);
 	} // addVar
 
+	private boolean isTypeEmpty() {
+		return type == null || type.equals( "" );
+	}
 	/**
 	 * Adds all variables from the varList input parameter to the variables ArrayList.
 	 * @param input String[]
@@ -104,6 +107,7 @@ public class Alias extends ClassField {
 	} // toString
 
 	/**
+	 * @deprecated
 	 * Returns the type of an alias.
 	 * @return String - alias's type.
 	 */
@@ -194,5 +198,21 @@ public class Alias extends ClassField {
 
 	public String getWildcardVar() {
 		return wildcardVar;
+	}
+	
+	/** 
+	 * this is used when the alias declaration is given in two lines, e.g.
+	 * alias x;
+	 * x = [a,b];
+	 */
+	public void setDeclaredValues( Alias real ) {
+		isWildcard = real.isWildcard;
+		isStrictType = real.isStrictType;
+		isOneTypeVars = real.isOneTypeVars;
+		isObjectType = real.isObjectType;
+		isInput = real.isInput;
+		isGoal = real.isGoal;
+		isStatic = real.isStatic;
+		type = real.type;
 	}
 }

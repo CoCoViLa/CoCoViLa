@@ -421,7 +421,13 @@ public class IconEditor
 				if (p.isArea()) buf.append("area");
 				buf.append("\" strict=\"");
 				buf.append(p.isStrict());
-				buf.append("\" />\n");
+				buf.append("\" ");
+				if(p.isMulty()) {
+					buf.append( "multy=\"" );
+					buf.append(p.isMulty());
+					buf.append("\" ");
+				}
+				buf.append("/>\n");
 				/*
 				if(!RuntimeProperties.classIsRelation) {
 				  buf.append("<open>\n");
@@ -1541,7 +1547,7 @@ public class IconEditor
 				boolean isStrict = Boolean.valueOf(str.substring(0, str.indexOf(":"))).booleanValue();
 				str = str.substring(str.indexOf(":") + 1);
 
-				IconPort port = new IconPort(str, x, y, isAreaConn, isStrict);
+				IconPort port = new IconPort( str, x, y, isAreaConn, isStrict, false );
 				ports.add(port);
 			} else if (str.startsWith("CLASSNAME:")) {
 				RuntimeProperties.className = str.substring(10);

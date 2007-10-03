@@ -31,6 +31,8 @@ public class ErrorWindow extends JFrame implements ActionListener {
 
             getContentPane().add( errorText );
             textArea.setEditable( false );
+            textArea.setWrapStyleWord( true );
+            textArea.setLineWrap( true );
             setDefaultCloseOperation(HIDE_ON_CLOSE);
             setSize( 600, 300 );
             validate();

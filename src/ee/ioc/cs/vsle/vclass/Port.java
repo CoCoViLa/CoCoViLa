@@ -15,7 +15,7 @@ public class Port implements Cloneable, Serializable {
 	private String type;
 	public int x;
 	public int y;
-	private boolean strict, area;
+	private boolean strict, area, isMulti;
 	private ClassGraphics openGraphics, closedGraphics;
 	private ArrayList<Connection> connections = new ArrayList<Connection>();
 	private boolean selected = false;
@@ -23,9 +23,7 @@ public class Port implements Cloneable, Serializable {
 	private boolean watched = false;
 	private boolean hilighted = false;
 
-	private boolean isMulti = false;//1:* type e.g. "{int}" will be transformed into int[]
-	
-	public Port(String name, String type, int x, int y, String portConnection, String strict) {
+	public Port(String name, String type, int x, int y, String portConnection, String strict, String multy ) {
 		this.name = name;
 		this.type = type.trim();
 		this.x = x;
@@ -36,11 +34,7 @@ public class Port implements Cloneable, Serializable {
 
 		this.strict = Boolean.parseBoolean( strict );
 
-		if( this.type.startsWith("[") && this.type.endsWith("]") ) {
-			this.type = this.type.substring( 0, type.length() - 1 ).substring( 1 );
-			
-			isMulti = true;
-		}
+		this.isMulti = Boolean.parseBoolean( multy );
 	}
 
 	public ArrayList<Port> getStrictConnected() {
@@ -367,13 +361,23 @@ public class Port implements Cloneable, Serializable {
 
 		if (port1.isMulti() && port2.isMulti())
 			return false;
-		else if (port1.isMulti() && port1.getType().equals(port2.getType())
-				|| port2.isMulti() && port2.getType().equals(port1.getType())) 
+		else if ( port1.isMulti() ) {
+			if( port1.getType().equals( port2.getType() ) )
+				return true;
+			else 
+				return false;
+		}
+		else if ( port2.isMulti() ) {
+			if( port2.getType().equals( port1.getType() ) )
+				return true;
+			else 
+				return false;
+		} 
+		else if (port1.isAny() && port2.isAny())
+			return false;
+		else if (port1.isAny() || port2.isAny())
 			return true;
 		else if (port1.getType().equals(port2.getType()))
-			return true;
-		else if ((port1.isAny() || port2.isAny()) 
-				&& !(port1.isAny() || port2.isAny()))
 			return true;
 		else if (TypeUtil.TYPE_ALIAS.equals(port2.getType()) 
 				&& port1.getType().substring(port1.getType().length() - 2,

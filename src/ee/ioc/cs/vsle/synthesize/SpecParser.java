@@ -407,17 +407,19 @@ public class SpecParser {
                         split = lt.getSpecLine().split( ":", -1 );
                         String name = split[ 0 ];
                         
-                        Alias a;
+                        Alias alias = null;
+                        //required for two-line alias declaration, mostly for multyport feature
+                        Alias aliasDeclaration = null;
                         
                         if( split[ 1 ].trim().equals("") ) {
                         	//if there are no variables on the rhs, mark alias as empty
                         	if ( !containsVar( annClass.getFields(), name ) ) {
-                        		a = new Alias( name );
+                        		alias = new Alias( name );
                         		if( !split[ 2 ].trim().equals("") )
                         		{
-                        			a.setStrictTypeOfVars( split[ 2 ].trim() );
+                        			alias.setStrictTypeOfVars( split[ 2 ].trim() );
                         		}
-                        		annClass.addField( a );
+                        		annClass.addField( alias );
                         		continue;
                         	}
                         }
@@ -432,62 +434,66 @@ public class SpecParser {
                             throw new SpecParseException( "Variable " + name +
                                     " declared more than once in class " + className );
                         } else if ( var != null && var.isAlias() ) {
-                        	a = (Alias)var;
-                        	if( !a.isEmpty() ) {
+                        	alias = (Alias)var;
+                        	if( !alias.isEmpty() ) {
                         		throw new SpecParseException( "Alias " + name +
                                         " cannot be overriden, class " + className );
                         	}
-                        } else {
+                        } else if( split.length > 3 && Boolean.parseBoolean( split[ 3 ] ) ) {
                         	//if its an assignment, check if alias has already been declared
-                        	if( split.length > 3 && Boolean.parseBoolean( split[ 3 ] ) ) {
-                        		try {
-                        			if( ( name.indexOf( "." ) == -1 ) && !containsVar( annClass.getFields(), name ) ) {
-                        				throw new Exception();
-                        				
-                        			} else if ( name.indexOf( "." ) > -1 ) {
-                        				//here we have to dig deeply
-                        				int ind = name.indexOf( "." );
-                        				
-                        				String parent = name.substring( 0, ind );
-                        				String leftFromName = name.substring( ind + 1, name.length() );
-                        				
-                        				ClassField parentVar = getVar( parent, annClass.getFields() );
-                        				String parentType = parentVar.getType();
-                        				
-                        				AnnotatedClass parentClass = classList.getType( parentType );
-                        				
-                        				while( leftFromName.indexOf( "." ) > -1 ) {
-                        					
-                        					ind = leftFromName.indexOf( "." );
-                        					parent = leftFromName.substring( 0, ind );
-                        					leftFromName = leftFromName.substring( ind + 1, leftFromName.length() );
-                        					
-                        					parentVar = parentClass.getFieldByName( parent );
-                        					
-                        					parentType = parentVar.getType();
-                        					parentClass = classList.getType( parentType );
-                        				}
-                        				
-                        				if( !parentClass.hasField(leftFromName) ) {
-                        					throw new Exception( "Variable " + leftFromName + " is not declared in class " + parentClass );
-                        				}
+                        	try {
+                        		if( ( name.indexOf( "." ) == -1 ) && !containsVar( annClass.getFields(), name ) ) {
+                        			throw new UnknownVariableException( "Alias " + name + " not declared" );
+
+                        		} else if ( name.indexOf( "." ) > -1 ) {
+                        			//here we have to dig deeply
+                        			int ind = name.indexOf( "." );
+
+                        			String parent = name.substring( 0, ind );
+                        			String leftFromName = name.substring( ind + 1, name.length() );
+
+                        			ClassField parentVar = getVar( parent, annClass.getFields() );
+                        			String parentType = parentVar.getType();
+
+                        			AnnotatedClass parentClass = classList.getType( parentType );
+
+                        			while( leftFromName.indexOf( "." ) > -1 ) {
+
+                        				ind = leftFromName.indexOf( "." );
+                        				parent = leftFromName.substring( 0, ind );
+                        				leftFromName = leftFromName.substring( ind + 1, leftFromName.length() );
+
+                        				parentVar = parentClass.getFieldByName( parent );
+
+                        				parentType = parentVar.getType();
+                        				parentClass = classList.getType( parentType );
                         			}
-                        		} catch( Exception e) {
-                        			throw new SpecParseException( "Alias " + name +
-                        					" is not declared, class " + className + ( e.getMessage() != null ? "\n" + e.getMessage() : "" ) );
+
+                        			if( !parentClass.hasField(leftFromName) ) {
+                        				throw new UnknownVariableException( "Variable " + leftFromName + " is not declared in class " + parentClass );
+                        			}
+
+                        			aliasDeclaration = (Alias)parentClass.getFieldByName( leftFromName );
+
+                        			//if everything is ok, create alias
+                                	alias = new Alias( name );
+
+                                	if( aliasDeclaration.isStrictType() ) {
+                                		alias.setStrictTypeOfVars( aliasDeclaration.getVarType() );
+                                	} else {
+                                		alias.setType( aliasDeclaration.getVarType() );
+                                	}
                         		}
+                        	} catch( Exception e) {
+                        		throw new SpecParseException( "Alias " + name +
+                        				" is not declared, class " + className + ( e.getMessage() != null ? "\n" + e.getMessage() : "" ) );
                         	}
-                        	//if everything is ok, create alias
-                        	a = new Alias( name );
-                        	
-                        	if( !split[ 2 ].trim().equals("") )
-                    		{
-                    			a.setStrictTypeOfVars( split[ 2 ].trim() );
-                    		}
+                        } else {
+                        	throw new SpecParseException( "Parsing error: " + lt );
                         }
 
-                        a.addAll( list, annClass.getFields(), classList );
-                        annClass.addField( a );
+                        alias.addAll( list, annClass.getFields(), classList );
+                        annClass.addField( alias );
                         ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS, lt.getOrigSpecLine() );
 
                         classRelation.addInputs( list, annClass.getFields() );
@@ -498,16 +504,18 @@ public class SpecParser {
                         if ( RuntimeProperties.isLogDebugEnabled() ) 
                         	db.p( classRelation );
                         
-                        if ( !a.isWildcard() ) {
+                        if ( !alias.isWildcard() ) {
                             classRelation = new ClassRelation( RelType.TYPE_ALIAS, lt.getOrigSpecLine() );
                             classRelation.addOutputs( list, annClass.getFields() );
                             classRelation.setMethod( TypeUtil.TYPE_ALIAS );
                             classRelation.addInput( name, annClass.getFields() );
                             annClass.addClassRelation( classRelation );
                             if ( RuntimeProperties.isLogDebugEnabled() ) db.p( classRelation );
-                        } 
-                        //wildcard flag will be set inside alias
-                        //else { a.setWildcard( true ); }
+                        }
+                        
+                        if( aliasDeclaration != null ) {
+                        	aliasDeclaration.setDeclaredValues( alias );
+                        }
 
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {
                         EquationSolver.solve( lt.getSpecLine() );
