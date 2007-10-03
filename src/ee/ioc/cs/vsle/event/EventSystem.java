@@ -55,7 +55,7 @@ public class EventSystem {
 
 		if ( m_eventQueue != null )
 		{
-			m_eventQueue.shotdown();
+			m_eventQueue.shutdown();
 
 			m_eventQueue = null;
 		}
@@ -74,7 +74,7 @@ public class EventSystem {
 	}
 
 	/**
-	 * Constructor <code>FTOeventSystem</code>
+	 * Constructor <code>EventSystem</code>
 	 *
 	 *
 	 */
@@ -104,7 +104,7 @@ public class EventSystem {
 			}
 		});
 		
-		MemoryWarningSystem.setPercentageUsageThreshold( 0.6 );
+		MemoryWarningSystem.setPercentageUsageThreshold( 0.95 );
 	}
 
 	public static void queueEvent( BaseEvent event )
@@ -115,7 +115,7 @@ public class EventSystem {
 	/**
 	 * Method <code>addEventToQueue</code>
 	 *
-	 * @param event is of <code>FTOevent</code> type
+	 * @param event is of <code>BaseEvent</code> type
 	 */
 	private void addEventToQueue( BaseEvent event )
 	{

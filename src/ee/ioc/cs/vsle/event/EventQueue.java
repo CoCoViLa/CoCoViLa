@@ -104,11 +104,11 @@ public class EventQueue extends Thread {
 	}
 
 	/**
-	 * Method <code>shotdown</code>
+	 * Method <code>shutdown</code>
 	 *
 	 *
 	 */
-	public void shotdown()
+	public void shutdown()
 	{
 		m_running = false;
 	}
