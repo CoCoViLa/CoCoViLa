@@ -52,10 +52,11 @@ public class FontResizePanel extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				JCheckBox c = (JCheckBox) e.getSource();
 				Font font = m_area.getFont();
-				m_area.setFont(new Font(font.getName(),
-						(c.isSelected()) ? Font.BOLD : Font.PLAIN,
-								((Integer) m_spinner.getValue()).intValue()));
-				RuntimeProperties.font = m_area.getFont();
+				m_area.setFont( font.deriveFont( (( c.isSelected()) ? Font.BOLD : Font.PLAIN ) , (float)((Integer) m_spinner.getValue()).intValue() ) );
+//				m_area.setFont(new Font(font.getName(),
+//						(c.isSelected()) ? Font.BOLD : Font.PLAIN,
+//								((Integer) m_spinner.getValue()).intValue()));
+				RuntimeProperties.setFont( m_area.getFont() );
 			}
 		});
 		
@@ -120,9 +121,10 @@ public class FontResizePanel extends JPanel {
 			public void run() {
 				Font font = m_area.getFont();
 				if( !m_isAjusting ) {
-					m_area.setFont(new Font(font.getName(), font.getStyle(), value ) );
+				    m_area.setFont( font.deriveFont( (float)((Integer) m_spinner.getValue()).intValue() ) );
+				    RuntimeProperties.setFont( m_area.getFont() );
 				}
-				RuntimeProperties.font = m_area.getFont();
+				
 			}});
 	}
 }

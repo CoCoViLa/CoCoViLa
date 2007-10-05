@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.editor;
 
-import java.awt.Component;
 import java.awt.Window;
 import java.awt.event.*;
 
@@ -14,95 +13,81 @@ import ee.ioc.cs.vsle.util.*;
  */
 public class Look {
 
-//	static {
-//		try {
-//			if( Class.forName( "com.incors.plaf.kunststoff.KunststoffLookAndFeel" ) != null ) {
-//				UIManager.installLookAndFeel("Kunststoff",
-//					"com.incors.plaf.kunststoff.KunststoffLookAndFeel");
-//			}
-//		} catch (ClassNotFoundException e) {}
-//	}
+    private static Look s_instance;
 
-	private static Look s_instance;
+    public static Look getInstance() {
 
-	public static Look getInstance() {
+        if ( s_instance == null ) {
+            s_instance = new Look();
+        }
 
-		if (s_instance == null) {
-			s_instance = new Look();
-		}
-
-		return s_instance;
-	}
+        return s_instance;
+    }
 
     /**
      * Updates the L'n'F of the application at run-time.
+     * 
      * @param lnf the class name of the new Look and Feel
      * @param saveConfig true to save the LnF as default
      */
-	public static void changeLookAndFeelForApp(final String lnf,
-            final boolean saveConfig) {
+    public static void changeLookAndFeelForApp( final String lnf, final boolean saveConfig ) {
 
-	    try {
-	        UIManager.setLookAndFeel(lnf);
+        try {
+            UIManager.setLookAndFeel( lnf );
 
-            for (Window window : SystemUtils.getAllWindows()) {
-                SwingUtilities.updateComponentTreeUI(window);
+            for ( Window window : SystemUtils.getAllWindows() ) {
+                SwingUtilities.updateComponentTreeUI( window );
                 window.pack();
             }
 
-            if (saveConfig)
-                PropertyBox.setProperty(PropertyBox.DEFAULT_LAYOUT, lnf);
-
-        } catch (Exception e) {
-	        db.p("Unable to change Look And Feel: " + lnf);
-	    }
-	}
-
-
+            if ( saveConfig )
+                RuntimeProperties.setLnf( lnf );
+            
+        } catch ( Exception e ) {
+            db.p( "Unable to change Look And Feel: " + lnf );
+        }
+    }
 
     public void initDefaultLnF() {
 
-		String lnf = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME,
-				PropertyBox.DEFAULT_LAYOUT);
+        try {
 
-		try {
+            UIManager.setLookAndFeel( RuntimeProperties.getLnf() );
 
-			UIManager.setLookAndFeel(lnf);
+        } catch ( Exception e ) {
+            db.p( "Unable to init default Look And Feel: " + RuntimeProperties.getLnf() );
+        }
+    }
 
-		} catch (Exception e) {
-			db.p("Unable to init default Look And Feel: " + lnf);
-		}
-	}
+    public void createMenuItems( JMenu menu ) {
 
-	public void createMenuItems(JMenu menu) {
+        LookAndFeel laf = UIManager.getLookAndFeel();
 
-		LookAndFeel laf = UIManager.getLookAndFeel();
+        String lafName = ( laf != null ) ? laf.getName() : "";
 
-		String lafName = (laf != null) ? laf.getName() : "";
+        ButtonGroup group = new ButtonGroup();
 
-		ButtonGroup group = new ButtonGroup();
+        for ( final LookAndFeelInfo lnfs : UIManager.getInstalledLookAndFeels() ) {
 
-		for (final LookAndFeelInfo lnfs : UIManager.getInstalledLookAndFeels()) {
-			
-			JRadioButtonMenuItem menuItem = new JRadioButtonMenuItem(lnfs.getName());
+            JRadioButtonMenuItem menuItem = new JRadioButtonMenuItem( lnfs.getName() );
 
-			group.add(menuItem);
+            group.add( menuItem );
 
-			if ( lafName.equals( lnfs.getName() ) ) {
-				menuItem.setSelected(true);
-			}
+            if ( lafName.equals( lnfs.getName() ) ) {
+                menuItem.setSelected( true );
+            }
 
-			menuItem.addActionListener(new ActionListener() {
+            menuItem.addActionListener( new ActionListener() {
 
-				public void actionPerformed(ActionEvent e) {
-					changeLookAndFeelForApp(lnfs.getClassName(), true);
-				}
-			});
+                public void actionPerformed( ActionEvent e ) {
+                    changeLookAndFeelForApp( lnfs.getClassName(), true );
+                }
+            } );
 
-			menu.add(menuItem);
-		}
+            menu.add( menuItem );
+        }
 
-		menu.setToolTipText("Set default Look And Feel");
-	}
+        menu.setToolTipText( "Set default Look And Feel" );
+    }
 
 }

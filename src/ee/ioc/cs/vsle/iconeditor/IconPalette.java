@@ -103,9 +103,9 @@ public class IconPalette {
 				SpinnerModel source = (SpinnerModel) e.getSource();
 				try {
 				    editor.mListener.state = State.selection;
-					double zoomFactor = Double.parseDouble(String.valueOf(source.getValue()));
-					editor.zoom(zoomFactor, RuntimeProperties.zoomFactor);
-					RuntimeProperties.zoomFactor = zoomFactor;
+					float zoomFactor = Float.parseFloat(String.valueOf(source.getValue()));
+					editor.zoom(zoomFactor, RuntimeProperties.getZoomFactor());
+					RuntimeProperties.setZoomFactor( zoomFactor );
 					editor.repaint();
 				} catch (Exception ex) {
 					ex.printStackTrace();

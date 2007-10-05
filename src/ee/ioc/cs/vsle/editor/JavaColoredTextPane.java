@@ -420,11 +420,9 @@ public class JavaColoredTextPane extends JTextPane {
 
 		public void setRunning(boolean isRunning) {
 			this.isRunning = isRunning;
-			synchronized(lock){
-                if (asleep){
-                    this.interrupt();
-                }
-            }
+			if (asleep){
+				this.interrupt();
+			}
 		}
     }
 

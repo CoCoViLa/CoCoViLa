@@ -118,11 +118,11 @@ public class PackagePropertiesDialog extends JDialog {
   private void storeVariables() {
 	String name = fldName.getText();
 	if(name!=null) name = name.trim();
-	RuntimeProperties.packageName = name;
+	IconEditor.packageName = name;
 
 	String desc = fldDesc.getText();
 	if(desc!=null) desc = desc.trim();
-	RuntimeProperties.packageDesc = desc;
+	IconEditor.packageDesc = desc;
   } // storeVariables.
 
   /**

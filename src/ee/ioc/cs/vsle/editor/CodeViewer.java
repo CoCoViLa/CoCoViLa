@@ -39,7 +39,7 @@ public class CodeViewer extends JFrame implements ActionListener {
 		
 		addComponentListener(new ComponentResizer(ComponentResizer.CARE_FOR_MINIMUM));
 
-		if( RuntimeProperties.isSyntaxHighlightingOn ) {
+		if( RuntimeProperties.isSyntaxHighlightingOn() ) {
 			textArea = SyntaxDocument.createEditor();
         } else {
         	JTextArea ta = new JTextArea();
@@ -50,7 +50,7 @@ public class CodeViewer extends JFrame implements ActionListener {
 		
 		//textArea = new JavaColoredTextPane();
 		textArea.addKeyListener(new ProgramTextEditor.CommentKeyListener());
-		textArea.setFont(RuntimeProperties.font);
+		textArea.setFont(RuntimeProperties.getFont());
 		
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 		areaScrollPane.setRowHeaderView(new LineNumberView(textArea));

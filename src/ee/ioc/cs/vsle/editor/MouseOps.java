@@ -324,13 +324,13 @@ class MouseOps extends MouseInputAdapter {
         canvas.setPosInfo(x, y);
 
 		if (State.dragBreakPoint.equals(state)) {
-			if (RuntimeProperties.snapToGrid == 1) {
+			if (RuntimeProperties.getSnapToGrid()) {
 				draggedBreakPoint.x = Math.round((float) x 
-						/ RuntimeProperties.gridStep) 
-						* RuntimeProperties.gridStep;
+						/ RuntimeProperties.getGridStep()) 
+						* RuntimeProperties.getGridStep();
 				draggedBreakPoint.y = Math.round((float) y 
-						/ RuntimeProperties.gridStep) 
-						* RuntimeProperties.gridStep;
+						/ RuntimeProperties.getGridStep()) 
+						* RuntimeProperties.getGridStep();
 			} else {
 				draggedBreakPoint.x = x;
 				draggedBreakPoint.y = y;
@@ -338,9 +338,9 @@ class MouseOps extends MouseInputAdapter {
 		} else if (State.drag.equals(state)) {
 			int moveX, moveY;
 
-			if (RuntimeProperties.snapToGrid == 1) {
+			if (RuntimeProperties.getSnapToGrid()) {
 				GObj obj = draggedObject;
-				int step = RuntimeProperties.gridStep;
+				int step = RuntimeProperties.getGridStep();
 
 				// When snap to grid is on mouse coordinates are calculated
 				// as if the mouse jumped from one grid line to the next.
@@ -430,11 +430,11 @@ class MouseOps extends MouseInputAdapter {
 		} else if (canvas.currentObj != null) {
 			// if we're adding a new object...
 
-			if (RuntimeProperties.snapToGrid == 1) {
-				canvas.currentObj.x = Math.round(x / RuntimeProperties.gridStep)
-						* RuntimeProperties.gridStep;
-				canvas.currentObj.y = Math.round(y / RuntimeProperties.gridStep)
-						* RuntimeProperties.gridStep;
+			if (RuntimeProperties.getSnapToGrid()) {
+				canvas.currentObj.x = Math.round(x / RuntimeProperties.getGridStep())
+						* RuntimeProperties.getGridStep();
+				canvas.currentObj.y = Math.round(y / RuntimeProperties.getGridStep())
+						* RuntimeProperties.getGridStep();
 			} else {
 				canvas.currentObj.y = y;
 				canvas.currentObj.x = x;

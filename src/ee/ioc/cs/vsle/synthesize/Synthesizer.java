@@ -32,7 +32,7 @@ public class Synthesizer {
     */
     public static void makeProgram( String progText, ClassList classes, String mainClassName, String path ) throws SpecParseException {
         generateSubclasses( classes, path );
-        FileFuncs.writeFile( progText, mainClassName, "java", RuntimeProperties.genFileDir, false );
+        FileFuncs.writeFile( progText, mainClassName, "java", RuntimeProperties.getGenFileDir(), false );
     }
 
     /** Takes care of steps needed for planning and algorithm extracting, calling problem creator
@@ -62,7 +62,7 @@ public class Synthesizer {
 
         // run the planner on the obtained problem
         ArrayList<Rel> algorithmList = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
-        if( RuntimeProperties.showAlgorithm ) {
+        if( RuntimeProperties.isShowAlgorithm() ) {
         	AlgorithmVisualizer.getInstance().addNewTab( mainClassName, algorithmList );
         }
         CodeGenerator cg = new CodeGenerator( algorithmList, problem, mainClassName );
@@ -179,7 +179,7 @@ public class Synthesizer {
 
                 fileString = "import ee.ioc.cs.vsle.api.*;\n\n" + fileString;
                
-                FileFuncs.writeFile( fileString, pClass.getName(), "java", RuntimeProperties.genFileDir, false );
+                FileFuncs.writeFile( fileString, pClass.getName(), "java", RuntimeProperties.getGenFileDir(), false );
             }
         }
     }

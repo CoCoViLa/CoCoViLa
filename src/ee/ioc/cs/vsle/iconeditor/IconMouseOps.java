@@ -857,7 +857,7 @@ class IconMouseOps
 			} else if (e.getActionCommand().equals(Menu.EXIT)) {
 				editor.exitApplication();
 			} else if (e.getActionCommand().equals(Menu.DOCS)) {
-				String documentationUrl = IconEditor.getSystemDocUrl();
+				String documentationUrl = RuntimeProperties.getSystemDocUrl();
 				if (documentationUrl != null && documentationUrl.trim().length() > 0) {
 					IconEditor.openInBrowser(documentationUrl);
 				} else {

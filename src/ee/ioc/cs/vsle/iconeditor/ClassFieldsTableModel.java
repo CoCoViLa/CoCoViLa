@@ -21,6 +21,10 @@ public class ClassFieldsTableModel extends DefaultTableModel {
 
 	private static final long serialVersionUID = 1L;
 
+	// Names of the class field table as well as the dbresult columns.
+	public static String[] classDbrFields = { "FIELD", "TYPE", "VALUE" };
+	public static String[] classTblFields = { "Field Name", "Field Type", "Field Value" };
+	    
 	// table model column indexes
 	public static final int iNAME = 0;
 	public static final int iTYPE = 1;
@@ -59,7 +63,7 @@ public class ClassFieldsTableModel extends DefaultTableModel {
 	 */
 	@Override
 	public int getColumnCount() {
-		return RuntimeProperties.classDbrFields.length;
+		return classDbrFields.length;
 	} // getColumnCount
 
 	/**
@@ -78,7 +82,7 @@ public class ClassFieldsTableModel extends DefaultTableModel {
 	 */
 	@Override
 	public String getColumnName(int col) {
-		return RuntimeProperties.classTblFields[col];
+		return classTblFields[col];
 	} // getColumnName
 
 	/**

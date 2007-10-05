@@ -69,7 +69,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
     	
     	tabbedPane = new JTabbedPane();
 
-        if( RuntimeProperties.isSyntaxHighlightingOn ) {
+        if( RuntimeProperties.isSyntaxHighlightingOn() ) {
 //        	jta_spec = new JavaColoredTextPane();
         	jta_spec = SyntaxDocument.createEditor();
         } else {
@@ -80,7 +80,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         }
         
         jta_spec.addKeyListener( new CommentKeyListener() );
-        jta_spec.setFont( RuntimeProperties.font );
+        jta_spec.setFont( RuntimeProperties.getFont() );
         JScrollPane areaScrollPane = new JScrollPane( jta_spec );
         areaScrollPane.setRowHeaderView(new LineNumberView(jta_spec));
         areaScrollPane.setVerticalScrollBarPolicy(
@@ -107,7 +107,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         specText.add( progToolBar, BorderLayout.NORTH );
         tabbedPane.addTab( "Specification", specText );
 
-        if( RuntimeProperties.isSyntaxHighlightingOn ) {
+        if( RuntimeProperties.isSyntaxHighlightingOn() ) {
 //        	jta_generatedCode = new JavaColoredTextPane();
         	jta_generatedCode = SyntaxDocument.createEditor();
         } else {
@@ -118,7 +118,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         }
         
         jta_generatedCode.addKeyListener( new CommentKeyListener() );
-        jta_generatedCode.setFont( RuntimeProperties.font );
+        jta_generatedCode.setFont( RuntimeProperties.getFont() );
         JToolBar toolBar = new JToolBar();
         toolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
         runProg = new JButton( "Compile & Run" );
@@ -145,7 +145,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         tabbedPane.addTab( "Program", progText );
 
         jta_runResult = new JTextArea();
-        jta_runResult.setFont( RuntimeProperties.font );
+        jta_runResult.setFont( RuntimeProperties.getFont() );
         JToolBar resultToolBar = new JToolBar();
         propagate = new JButton( "Propagate values" );
         propagate.addActionListener( this );

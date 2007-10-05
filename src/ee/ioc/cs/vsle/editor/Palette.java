@@ -1,28 +1,14 @@
 package ee.ioc.cs.vsle.editor;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
 
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.border.EmptyBorder;
+import javax.swing.*;
+import javax.swing.border.*;
 
-import ee.ioc.cs.vsle.util.FileFuncs;
-import ee.ioc.cs.vsle.util.PropertyBox;
-import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.vclass.PackageClass;
-import ee.ioc.cs.vsle.vclass.VPackage;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * Menubar that contains buttons for choosing tools
@@ -110,7 +96,7 @@ public class Palette implements ActionListener {
 		zoomPanel.setLayout(new BoxLayout(zoomPanel, BoxLayout.LINE_AXIS));
 		zoomPanel.setOpaque(false);
 
-		JComboBox zoom = getZoomComboBox(getDefaultZoom());
+		JComboBox zoom = getZoomComboBox( RuntimeProperties.getZoomFactor() );
 
 		zoom.addActionListener(new ActionListener() {
 
@@ -163,32 +149,6 @@ public class Palette implements ActionListener {
         buttons.add(button);
 
         return button;
-	}
-
-	/**
-	 * Reads the saved default zoom value. The returned value is guaranteed
-	 * to exist in ZOOM_LEVELS. It is assumed that the value 1.0f is always
-	 * present in ZOOM_LEVELS.
-	 * @return default zoom
-	 */
-	public static float getDefaultZoom() {
-		float zoom;
-
-		try {
-			zoom = Float.parseFloat(PropertyBox.getProperty(
-				PropertyBox.ZOOM_LEVEL));
-
-			// validate the value
-			for (float f : ZOOM_LEVELS) {
-				if (zoom == f)
-					break;
-			}
-		} catch (NumberFormatException e) {
-			db.p(e);
-			zoom = 1.0f;
-		}
-
-		return zoom;
 	}
 
 	/**

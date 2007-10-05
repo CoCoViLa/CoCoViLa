@@ -132,7 +132,7 @@ public class EditorActionListener implements ActionListener {
                 int returnVal = fc.showOpenDialog(Editor.getInstance());
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File file = fc.getSelectedFile();
-                    Editor.setLastPath( file.getAbsolutePath() );
+                    RuntimeProperties.setLastPath( file.getAbsolutePath() );
                     if ( RuntimeProperties.isLogDebugEnabled() ) 
                     	db.p( "Loading scheme: " + file.getName() );
                     try {
@@ -164,8 +164,8 @@ public class EditorActionListener implements ActionListener {
             	}
             } else if ( e.getActionCommand().equals( Menu.LOAD ) ) {
                 JFileChooser fc = new JFileChooser( 
-                		( Editor.getLastPath() != null && new File(Editor.getLastPath()).exists() )
-                		? Editor.getLastPath() : RuntimeProperties.getWorkingDirectory() );
+                		( RuntimeProperties.getLastPath() != null && new File(RuntimeProperties.getLastPath()).exists() )
+                		? RuntimeProperties.getLastPath() : RuntimeProperties.getWorkingDirectory() );
                 CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.EXT.XML );
 
                 fc.setFileFilter( synFilter );
@@ -175,9 +175,8 @@ public class EditorActionListener implements ActionListener {
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File pack = fc.getSelectedFile();
 
-                    Editor.setLastPath( pack.getAbsolutePath() );
-                    PropertyBox.setMultiProperty( PropertyBox.RECENT_PACKAGES, pack.getAbsolutePath(), true );
-                    PropertyBox.setMultiProperty( PropertyBox.PALETTE_FILE, pack.getAbsolutePath(), true );
+                    RuntimeProperties.setLastPath( pack.getAbsolutePath() );
+                    RuntimeProperties.addOpenPackage( pack.getAbsolutePath() );
                     db.p( "Loading package: " + pack.getName() );
                     Editor.getInstance().loadPackage( pack );
                     //Editor.getInstance().validate();
@@ -189,7 +188,7 @@ public class EditorActionListener implements ActionListener {
             	deleteCurrentScheme();
             } else if ( e.getActionCommand().equals( Menu.CLOSE_ALL ) ) {
                 while ( Editor.getInstance().getCurrentPackage() != null ) {
-                    PropertyBox.setMultiProperty( PropertyBox.PALETTE_FILE, Editor.getInstance().getCurrentPackage().getPath(), false );
+                    RuntimeProperties.removeOpenPackage( Editor.getInstance().getCurrentPackage().getPath() );
                     Editor.getInstance().clearPane();
                 }
             } else if ( e.getActionCommand().equals( Menu.RELOAD ) ) {
@@ -277,7 +276,7 @@ public class EditorActionListener implements ActionListener {
             	}
             } else if ( e.getActionCommand().equals( Menu.SHOW_ALGORITHM ) ) {
             	JCheckBoxMenuItem check = (JCheckBoxMenuItem)e.getSource();
-            	RuntimeProperties.showAlgorithm = check.isSelected();
+            	RuntimeProperties.setShowAlgorithm( check.isSelected() );
             } else if ( e.getActionCommand().equals( Menu.SCHEMEOPTIONS ) ) {
             	new SchemeSettingsDialog(Editor.getInstance());
             }
@@ -298,7 +297,7 @@ public class EditorActionListener implements ActionListener {
               resultsWindow.setVisible(true);
               }*/
             else if ( e.getActionCommand().equals( Menu.DOCS ) ) {
-                String documentationUrl = Editor.getSystemDocUrl();
+                String documentationUrl = RuntimeProperties.getSystemDocUrl();
 
                 if ( documentationUrl != null && documentationUrl.trim().length() > 0 ) {
                     Editor.openInBrowser( documentationUrl );
@@ -375,7 +374,7 @@ public class EditorActionListener implements ActionListener {
                 		+ CustomFileFilter.EXT.SYN.getExtension());
             }
 
-            Editor.setLastPath(file.getAbsolutePath());
+            RuntimeProperties.setLastPath(file.getAbsolutePath());
             if (RuntimeProperties.isLogInfoEnabled())
             	db.p("Saving scheme: " + file.getName());
             editor.getCurrentCanvas().saveScheme(file);
@@ -396,7 +395,7 @@ public class EditorActionListener implements ActionListener {
         	File pkgFile = new File(pkg.getPath());
         	if (pkgFile.exists()) {
         		Editor.getInstance().clearPane();
-        		Editor.setLastPath(pkgFile.getAbsolutePath());
+        		RuntimeProperties.setLastPath(pkgFile.getAbsolutePath());
         		Editor.getInstance().loadPackage(pkgFile);
         	}
         }
@@ -443,8 +442,8 @@ public class EditorActionListener implements ActionListener {
 	private void closeCurrentScheme() {
 		Editor editor = Editor.getInstance();
         if (editor.getCurrentPackage() != null) {
-            PropertyBox.setMultiProperty(PropertyBox.PALETTE_FILE,
-            		editor.getCurrentPackage().getPath(), false);
+            RuntimeProperties.removeOpenPackage( editor.getCurrentPackage().getPath() );
+            
             editor.clearPane();
         }
 	}

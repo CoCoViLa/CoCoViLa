@@ -328,10 +328,10 @@ public class ClassPropertiesDialog extends JDialog {
 	 * Initializes the property fields with runtime variables.
 	 */
 	private void initialize() {
-		if (RuntimeProperties.className != null) fldClassName.setText(RuntimeProperties.className);
-		if (RuntimeProperties.classDescription != null) fldClassDesc.setText(RuntimeProperties.classDescription);
-		if (RuntimeProperties.classIcon != null) fldClassIcon.setText(RuntimeProperties.classIcon);
-		chkRelation.setSelected(RuntimeProperties.classIsRelation);
+		if (IconEditor.className != null) fldClassName.setText(IconEditor.className);
+		if (IconEditor.classDescription != null) fldClassDesc.setText(IconEditor.classDescription);
+		if (IconEditor.classIcon != null) fldClassIcon.setText(IconEditor.classIcon);
+		chkRelation.setSelected(IconEditor.classIsRelation);
 	} // initialize
 
 	/**
@@ -341,20 +341,20 @@ public class ClassPropertiesDialog extends JDialog {
 	private void storeVariables() {
 		String className = fldClassName.getText();
 		if (className != null) className = className.trim();
-		RuntimeProperties.className = className;
+		IconEditor.className = className;
 
 		String classTitle = fldClassDesc.getText();
 		if (classTitle != null) classTitle = classTitle.trim();
-		RuntimeProperties.classDescription = classTitle;
+		IconEditor.classDescription = classTitle;
 
 		String classIcon = fldClassIcon.getText();
 		if (classIcon != null) {
 			classIcon = classIcon.trim();
 		}
-		RuntimeProperties.classIcon = classIcon;
+		IconEditor.classIcon = classIcon;
 
 		boolean relation = chkRelation.isSelected();
-		RuntimeProperties.classIsRelation = relation;
+		IconEditor.classIsRelation = relation;
 	} // storeVariables.
 
 	/**
@@ -362,13 +362,13 @@ public class ClassPropertiesDialog extends JDialog {
 	 * to the Class Icon text field.
 	 */
 	private void browseIcon() {
-		JFileChooser fc = new JFileChooser(IconEditor.getLastPath());
+		JFileChooser fc = new JFileChooser(RuntimeProperties.getLastPath());
 		fc.setFileFilter(IconEditor.getFileFilter("gif"));
 		int returnVal = fc.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			fldClassIcon.setText(file.getAbsolutePath());
-			IconEditor.setLastPath(file.getAbsolutePath());
+			RuntimeProperties.setLastPath(file.getAbsolutePath());
 		}
 	} // browseIcon
 
@@ -401,7 +401,7 @@ public class ClassPropertiesDialog extends JDialog {
             if (icon.length() > 0 && !(icon.endsWith(".gif") || icon.endsWith(".png"))) {
 				valid = false;
 				this.fldClassIcon.setText("");
-				RuntimeProperties.classIcon = "";
+				IconEditor.classIcon = "";
 				JOptionPane.showMessageDialog(null, "Only icons in GIF or PNG format allowed.",
                         "Invalid icon format", JOptionPane.INFORMATION_MESSAGE);
 				fldClassIcon.requestFocus();

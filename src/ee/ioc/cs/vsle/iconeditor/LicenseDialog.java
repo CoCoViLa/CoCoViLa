@@ -1,30 +1,13 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import ee.ioc.cs.vsle.util.PropertyBox;
-import ee.ioc.cs.vsle.util.db;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
 
-import javax.swing.JPanel;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JComboBox;
-import javax.swing.JTextArea;
-import javax.swing.JScrollPane;
-import javax.swing.JButton;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.BorderLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ItemListener;
-import java.awt.event.ItemEvent;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
 
 public class LicenseDialog extends JDialog {
 
@@ -110,10 +93,10 @@ public class LicenseDialog extends JDialog {
 	public String getLicenseText() {
 		StringBuffer textBuffer = new StringBuffer();
 		try {
-			String fileName = PropertyBox.GPL_EN_LICENSE_FILE_NAME;
+			String fileName = RuntimeProperties.GPL_EN_LICENSE_FILE_NAME;
 			if (cbLang != null && cbLang.getSelectedItem() != null 
 					&& cbLang.getSelectedItem().toString().equalsIgnoreCase("Eesti")) {
-				fileName = PropertyBox.GPL_EE_LICENSE_FILE_NAME;
+				fileName = RuntimeProperties.GPL_EE_LICENSE_FILE_NAME;
 			}
 			
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream(fileName);

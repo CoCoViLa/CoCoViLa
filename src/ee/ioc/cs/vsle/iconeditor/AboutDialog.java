@@ -1,6 +1,6 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import ee.ioc.cs.vsle.util.PropertyBox;
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.db;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -55,7 +55,7 @@ public class AboutDialog extends JDialog {
 
 		taLicenseText.setText(getLicenseText());
 		
-		String version = PropertyBox.getApplicationVersion();
+		String version = RuntimeProperties.getApplicationVersion();
 		taLicenseText.append("\nVersion: ");
 		taLicenseText.append(version == null ? "(development)" : version);
 		taLicenseText.append("\n");
@@ -88,7 +88,7 @@ public class AboutDialog extends JDialog {
 		StringBuffer textBuffer = new StringBuffer();
 		try {
 			InputStream is = this.getClass().getClassLoader().getResourceAsStream(
-					PropertyBox.GPL_EN_SHORT_LICENSE_FILE_NAME);
+			        RuntimeProperties.GPL_EN_SHORT_LICENSE_FILE_NAME);
 
 			if( is == null ) return "";
 			

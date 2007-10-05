@@ -1,73 +1,30 @@
 package ee.ioc.cs.vsle.editor;
 
-import java.awt.BasicStroke;
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.GridLayout;
-import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.net.MalformedURLException;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.*;
+import java.io.*;
+import java.net.*;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.List;
+import java.util.concurrent.*;
 
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
-import javax.swing.WindowConstants;
-import javax.swing.border.EmptyBorder;
-import javax.swing.event.UndoableEditEvent;
-import javax.swing.event.UndoableEditListener;
-import javax.swing.undo.AbstractUndoableEdit;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.UndoManager;
-import javax.swing.undo.UndoableEdit;
-import javax.swing.undo.UndoableEditSupport;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.sax.SAXTransformerFactory;
-import javax.xml.transform.sax.TransformerHandler;
-import javax.xml.transform.stream.StreamResult;
+import javax.swing.*;
+import javax.swing.border.*;
+import javax.swing.event.*;
+import javax.swing.undo.*;
+import javax.xml.transform.*;
+import javax.xml.transform.sax.*;
+import javax.xml.transform.stream.*;
 
-import org.xml.sax.helpers.AttributesImpl;
+import org.xml.sax.helpers.*;
 
-import ee.ioc.cs.vsle.ccl.CCL;
-import ee.ioc.cs.vsle.ccl.CompileException;
-import ee.ioc.cs.vsle.event.EventSystem;
-import ee.ioc.cs.vsle.packageparse.PackageParser;
-import ee.ioc.cs.vsle.util.PrintUtilities;
-import ee.ioc.cs.vsle.util.PropertyBox;
-import ee.ioc.cs.vsle.util.StringUtil;
-import ee.ioc.cs.vsle.util.VMath;
-import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.vclass.ClassPainter;
-import ee.ioc.cs.vsle.vclass.Connection;
-import ee.ioc.cs.vsle.vclass.ConnectionList;
-import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.vclass.ObjectList;
-import ee.ioc.cs.vsle.vclass.PackageClass;
+import ee.ioc.cs.vsle.ccl.*;
+import ee.ioc.cs.vsle.event.*;
+import ee.ioc.cs.vsle.packageparse.*;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.vclass.Point;
-import ee.ioc.cs.vsle.vclass.Port;
-import ee.ioc.cs.vsle.vclass.RelObj;
-import ee.ioc.cs.vsle.vclass.Scheme;
-import ee.ioc.cs.vsle.vclass.VPackage;
 
 /**
  */
@@ -570,7 +527,7 @@ public class Canvas extends JPanel {
 		drawingArea = new DrawingArea();
 		drawingArea.setOpaque(true);
 		drawingArea.setBackground(Color.white);
-		setGridVisible(getGridVisibility());
+		setGridVisible(RuntimeProperties.isShowGrid());
 		drawingArea.setFocusable(true);
 		infoPanel = new JPanel(new GridLayout(1, 2));
 		posInfo = new JLabel();
@@ -611,7 +568,7 @@ public class Canvas extends JPanel {
 				Editor.getInstance().refreshUndoRedo();
 			}
 		});
-		setScale(Palette.getDefaultZoom());
+		setScale(RuntimeProperties.getZoomFactor());
 	}
 
     private boolean createPainterPrototypes() {
@@ -648,19 +605,6 @@ public class Canvas extends JPanel {
         return success;
     }
     
-	/**
-	 * Check if the grid should be visible or not.
-	 * @return boolean - grid visibility from the properties file.
-	 */
-	public boolean getGridVisibility() {
-		String vis = PropertyBox.getProperty(PropertyBox.APP_PROPS_FILE_NAME, PropertyBox.SHOW_GRID);
-		if (vis != null) {
-			int v = Integer.parseInt(vis);
-			return v >= 1;
-		}
-		return false;
-	} // getGridVisibility
-
 	public VPackage getCurrentPackage() {
 		return vPackage;
 	}
@@ -1326,7 +1270,7 @@ public class Canvas extends JPanel {
 
             Rectangle vr = g.getClipBounds();
 
-            int step = RuntimeProperties.gridStep;
+            int step = RuntimeProperties.getGridStep();
             int bx = vr.x + vr.width;
             int by = vr.y + vr.height;
             int unit = (int) Math.ceil(1.0f / scale);
@@ -1363,7 +1307,7 @@ public class Canvas extends JPanel {
 			if (showGrid && scale >= .5f)
 				drawGrid(g2);
 
-			if (RuntimeProperties.isAntialiasingOn) {
+			if (RuntimeProperties.isAntialiasingOn()) {
 				g2.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
 					java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
 			}
@@ -1506,11 +1450,11 @@ public class Canvas extends JPanel {
         }
         
         drawAreaSize.width = Math.round(scale *
-                (maxx > 0 ? maxx + RuntimeProperties.gridStep
+                (maxx > 0 ? maxx + RuntimeProperties.getGridStep()
                         : drawAreaSize.width / this.scale));
         
         drawAreaSize.height = Math.round(scale *
-                (maxy > 0 ? maxy + RuntimeProperties.gridStep 
+                (maxy > 0 ? maxy + RuntimeProperties.getGridStep() 
                         : drawAreaSize.height / this.scale));
 
         drawingArea.setPreferredSize(drawAreaSize);

@@ -61,12 +61,12 @@ public class CCL extends URLClassLoader {
 		ArrayList<URL> urls = new ArrayList<URL>();
 		
 		try {
-			urls.add(new File(RuntimeProperties.genFileDir).toURI().toURL());
+			urls.add(new File(RuntimeProperties.getGenFileDir()).toURI().toURL());
 		} catch (MalformedURLException e) {
 			db.p(e);
 		}
 		
-		String[] paths = prepareClasspath( RuntimeProperties.compilationClasspath );
+		String[] paths = prepareClasspath( RuntimeProperties.getCompilationClasspath() );
 		
 		for( int i = 0; i < paths.length; i++ ) {
 			File file = new File(paths[i]);
@@ -136,7 +136,7 @@ public class CCL extends URLClassLoader {
 	 */
 	public boolean compile2(String javaFile) throws CompileException {
 	    if (compileDir == null)
-            compileDir = RuntimeProperties.genFileDir;
+            compileDir = RuntimeProperties.getGenFileDir();
         
 		javaFile = compileDir + RuntimeProperties.FS + javaFile + ".java";
 		
@@ -152,7 +152,7 @@ public class CCL extends URLClassLoader {
 		StringWriter sw = new StringWriter();		
 		PrintWriter pw = new PrintWriter(sw);
 		
-		String classpath = RuntimeProperties.genFileDir + prepareClasspathOS( RuntimeProperties.compilationClasspath );
+		String classpath = RuntimeProperties.getGenFileDir() + prepareClasspathOS( RuntimeProperties.getCompilationClasspath() );
 		
 		/*
 		int status = com.sun.tools.javac.Main.compile( 
