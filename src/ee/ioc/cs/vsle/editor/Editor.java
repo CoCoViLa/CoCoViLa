@@ -196,8 +196,8 @@ public class Editor extends JFrame implements ChangeListener {
                     empty.setEnabled( false );
 
                 } else {
-                    if ( ! ( ( submenuRecent.getMenuComponentCount() == 1 ) 
-                            && ( submenuRecent.getPopupMenu().getComponentIndex( empty ) >= -1 ) ) ) {
+                    if ( ! ( ( submenuRecent.getMenuComponentCount() == 1 ) && ( submenuRecent.getPopupMenu().getComponentIndex(
+                            empty ) >= -1 ) ) ) {
                         submenuRecent.remove( empty );
                     }
                 }
@@ -275,10 +275,8 @@ public class Editor extends JFrame implements ChangeListener {
     /**
      * Display information dialog to application user.
      * 
-     * @param title -
-     *                information dialog title.
-     * @param text -
-     *                text displayed in the information dialog.
+     * @param title - information dialog title.
+     * @param text - text displayed in the information dialog.
      */
     public void showInfoDialog( String title, String text ) {
         JOptionPane.showMessageDialog( this, text, title, JOptionPane.INFORMATION_MESSAGE );
@@ -435,6 +433,10 @@ public class Editor extends JFrame implements ChangeListener {
     void loadPackage( File f ) {
 
         if ( f != null ) {
+            String path;
+            RuntimeProperties.setLastPath( path = f.getAbsolutePath() );
+            RuntimeProperties.addOpenPackage( path );
+
             try {
 
                 Canvas canvas = new Canvas( f );
