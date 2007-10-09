@@ -43,6 +43,8 @@ public class RuntimeProperties {
     private static final String TEXT_FONT = "text_font";
     private static final String VERSION = "version";
     private static final String VERSION_UNKNOWN = "@project.version@";
+    //x;y;width;height;state
+    private static final String SCHEME_EDITOR_WINDOW_PROPS = "schemeEditorWindowProps";
 
     private static boolean fromWebstart = false;
     private static String workingDirectory = System.getProperty( "user.dir" ) + FS;
@@ -72,6 +74,7 @@ public class RuntimeProperties {
         s_defaultProperties.put( SHOW_ALGORITHM, Boolean.FALSE.toString() );
         s_defaultProperties.put( TEXT_FONT, "Courier New-plain-12" );
         s_defaultProperties.put( VERSION, VERSION_UNKNOWN );
+        s_defaultProperties.put( SCHEME_EDITOR_WINDOW_PROPS, ";;650;600;0" );
     }
 
     private static String genFileDir;
@@ -543,5 +546,14 @@ public class RuntimeProperties {
             db.p( "Error writing configuration properties" );
             e.printStackTrace();
         }
+    }
+
+    public static String getSchemeEditorWindowProps() {
+        return s_runtimeProperties.getProperty( SCHEME_EDITOR_WINDOW_PROPS );
+    }
+
+    public static void setSchemeEditorWindowProps( Rectangle bounds, int winState ) {
+        s_runtimeProperties.setProperty( SCHEME_EDITOR_WINDOW_PROPS, 
+                bounds.x + ";" + bounds.y + ";" + bounds.width + ";" + bounds.height + ";" + winState );
     }
 }

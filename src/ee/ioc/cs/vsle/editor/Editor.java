@@ -7,11 +7,9 @@ import java.util.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
-import javax.swing.undo.UndoManager;
+import javax.swing.undo.*;
 
-import ee.ioc.cs.vsle.editor.EditorActionListener.DeleteAction;
-import ee.ioc.cs.vsle.editor.EditorActionListener.RedoAction;
-import ee.ioc.cs.vsle.editor.EditorActionListener.UndoAction;
+import ee.ioc.cs.vsle.editor.EditorActionListener.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -246,20 +244,20 @@ public class Editor extends JFrame implements ChangeListener {
         menuBar.add( menuScheme );
         menu = new JMenu( Menu.MENU_OPTIONS );
         menu.setMnemonic( KeyEvent.VK_O );
-        
+
         menuItem = new JMenuItem( Menu.SETTINGS, KeyEvent.VK_S );
         menuItem.addActionListener( aListener );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_J, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
-        
+
         menuItem = new JMenuItem( Menu.SAVE_SETTINGS );
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
-        
+
         menuItem = new JMenuItem( Menu.VIEW_THREADS );
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
-        
+
         submenu = new JMenu( Menu.MENU_LAF );
         submenu.setMnemonic( KeyEvent.VK_L );
         Look.getInstance().createMenuItems( submenu );
@@ -293,8 +291,7 @@ public class Editor extends JFrame implements ChangeListener {
     /**
      * Overridden so we can exit when window is closed
      * 
-     * @param e -
-     *                Window Event.
+     * @param e - Window Event.
      */
     @Override
     protected void processWindowEvent( WindowEvent e ) {
@@ -314,8 +311,28 @@ public class Editor extends JFrame implements ChangeListener {
         int confirmed = JOptionPane.showConfirmDialog( this, "Exit Application?", Menu.EXIT, JOptionPane.OK_CANCEL_OPTION );
         switch ( confirmed ) {
         case JOptionPane.OK_OPTION:
-            RuntimeProperties.save();
-            System.exit( 0 );
+
+            SwingUtilities.invokeLater( new Runnable() {
+                public void run() {
+
+                    int state = getExtendedState();
+
+                    if ( ( state & MAXIMIZED_BOTH ) == MAXIMIZED_BOTH ) {
+                        // need to remember window's size in normal mode...looks
+                        // ugly,
+                        // any other ideas how to get normal size while staying
+                        // maximized?
+                        setExtendedState( NORMAL );
+                    }
+
+                    RuntimeProperties.setSchemeEditorWindowProps( getBounds(), state );
+
+                    RuntimeProperties.save();
+
+                    System.exit( 0 );
+                }
+            } );
+
             break;
         case JOptionPane.CANCEL_OPTION:
             break;
@@ -374,8 +391,7 @@ public class Editor extends JFrame implements ChangeListener {
      * Upon platform, use OS-specific methods for opening the URL in required
      * browser.
      * 
-     * @param url -
-     *                URL to be opened in a browser. Capable of browsing local
+     * @param url - URL to be opened in a browser. Capable of browsing local
      *                documentation as well if path is given with file://
      */
     public static void openInBrowser( String url ) {
@@ -398,8 +414,7 @@ public class Editor extends JFrame implements ChangeListener {
     /**
      * Check if Operating System type is Windows.
      * 
-     * @param osType -
-     *                Operating System type.
+     * @param osType - Operating System type.
      * @return boolean - Operating System belongs to the Windows family or not.
      */
     public static boolean isWin( String osType ) {
@@ -435,8 +450,7 @@ public class Editor extends JFrame implements ChangeListener {
     /**
      * Package loader.
      * 
-     * @param f -
-     *                package file to be loaded.
+     * @param f - package file to be loaded.
      */
     void loadPackage( File f ) {
 
@@ -477,28 +491,9 @@ public class Editor extends JFrame implements ChangeListener {
     } // loadPackage
 
     /**
-     * Returns the window width.
-     * 
-     * @return - window height.
-     */
-    private static final int getWinWidth() {
-        return 650;
-    }
-
-    /**
-     * Returns the window height.
-     * 
-     * @return int - window height.
-     */
-    private static final int getWinHeight() {
-        return 600;
-    }
-
-    /**
      * Main method for module unit-testing.
      * 
-     * @param args
-     *                command line arguments
+     * @param args command line arguments
      */
     public static void main( final String[] args ) {
         SwingUtilities.invokeLater( new Runnable() {
@@ -514,8 +509,7 @@ public class Editor extends JFrame implements ChangeListener {
     /**
      * Creates and displays the main application window.
      * 
-     * @param args
-     *                the arguments from the command line
+     * @param args the arguments from the command line
      */
     static void createAndInitGUI( String[] args ) {
         assert SwingUtilities.isEventDispatchThread();
@@ -551,7 +545,7 @@ public class Editor extends JFrame implements ChangeListener {
 
         Look.getInstance().initDefaultLnF();
 
-        Editor window = new Editor();
+        final Editor window = new Editor();
 
         if ( !RuntimeProperties.isFromWebstart() && args.length > 0 ) {
 
@@ -587,7 +581,24 @@ public class Editor extends JFrame implements ChangeListener {
         }
 
         window.setTitle( WINDOW_TITLE );
-        window.setSize( getWinWidth(), getWinHeight() );
+
+        //restore window location, size and state
+        final String[] bs = RuntimeProperties.getSchemeEditorWindowProps().split( ";" );
+
+        SwingUtilities.invokeLater( new Runnable() {
+            public void run() {
+                int x = bs[ 0 ] != null && bs[ 0 ].length() > 0 ? Integer.parseInt( bs[ 0 ] ) : window.getLocationOnScreen().x;
+                int y = bs[ 1 ] != null && bs[ 1 ].length() > 0 ? Integer.parseInt( bs[ 1 ] ) : window.getLocationOnScreen().y;
+                int w = bs[ 2 ] != null && bs[ 2 ].length() > 0 ? Integer.parseInt( bs[ 2 ] ) : window.getSize().width;
+                int h = bs[ 3 ] != null && bs[ 3 ].length() > 0 ? Integer.parseInt( bs[ 3 ] ) : window.getSize().height;
+                int s = bs[ 4 ] != null && bs[ 4 ].length() > 0 ? Integer.parseInt( bs[ 4 ] ) : window.getState();
+
+                window.setBounds( x, y, w, h );
+
+                window.setExtendedState( s );
+            }
+        } );
+
         window.setVisible( true );
 
         s_instance = window;
