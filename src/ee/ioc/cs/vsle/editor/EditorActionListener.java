@@ -297,6 +297,15 @@ public class EditorActionListener implements ActionListener {
 
             } else if ( e.getActionCommand().equals( Menu.SETTINGS ) ) {
                 Editor.getInstance().openOptionsDialog();
+            } else if ( e.getActionCommand().equals( Menu.SAVE_SETTINGS ) ) {
+                Canvas canvas = Editor.getInstance().getCurrentCanvas();
+                if ( canvas != null ) {
+                    RuntimeProperties.setZoomFactor( canvas.getScale() );
+                    RuntimeProperties.setShowGrid( canvas.isGridVisible() );
+                }
+                RuntimeProperties.save();
+            } else if ( e.getActionCommand().equals( Menu.VIEW_THREADS ) ) {
+                RunningThreadKillerDialog.getInstance();
             } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
                 new AboutDialog( Editor.getInstance() );
             } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {

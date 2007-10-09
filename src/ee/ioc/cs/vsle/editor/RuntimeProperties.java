@@ -226,6 +226,8 @@ public class RuntimeProperties {
         s_runtimeProperties.setProperty( RECENT_PACKAGES, recentPackagesString );
 
         writeProperties( APP_PROPS_FILE_NAME, s_runtimeProperties );
+        
+        db.p( "Configuration saved" );
     }
 
     /**

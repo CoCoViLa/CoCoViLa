@@ -93,7 +93,6 @@ public class OptionsDialog extends JDialog {
         pnlLabels.add( lblNudgeStep );
         pnlLabels.add( lblSyntaxColor );
         pnlLabels.add( lblDefaultZoom );
-        pnlLabels.add( new JLabel( "Unterminated threads:" ) );
 
         // Set fields' panel size.
         // pnlFields.setPreferredSize(new Dimension(200, 180));
@@ -134,18 +133,6 @@ public class OptionsDialog extends JDialog {
         pnlFields.add( pnlNudgeSpinner );
         pnlFields.add( chbSyntaxColor );
         pnlFields.add( pnlDefaultZoom );
-        JButton threads = new JButton( "View" );
-
-        JPanel pan = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
-        pan.add( threads );
-        pnlFields.add( pan );
-        threads.addActionListener( new ActionListener() {
-
-            public void actionPerformed( ActionEvent e ) {
-                closeDialog();
-                RunningThreadKillerDialog.getInstance();
-            }
-        } );
 
         // Set settings panel size.
         // pnlSettings.setPreferredSize(new Dimension(300, 180));

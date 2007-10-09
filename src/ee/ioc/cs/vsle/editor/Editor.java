@@ -246,15 +246,23 @@ public class Editor extends JFrame implements ChangeListener {
         menuBar.add( menuScheme );
         menu = new JMenu( Menu.MENU_OPTIONS );
         menu.setMnemonic( KeyEvent.VK_O );
-        submenu = new JMenu( Menu.MENU_LAF );
-        submenu.setMnemonic( KeyEvent.VK_L );
-
-        Look.getInstance().createMenuItems( submenu );
-
+        
         menuItem = new JMenuItem( Menu.SETTINGS, KeyEvent.VK_S );
         menuItem.addActionListener( aListener );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_J, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
+        
+        menuItem = new JMenuItem( Menu.SAVE_SETTINGS );
+        menuItem.addActionListener( aListener );
+        menu.add( menuItem );
+        
+        menuItem = new JMenuItem( Menu.VIEW_THREADS );
+        menuItem.addActionListener( aListener );
+        menu.add( menuItem );
+        
+        submenu = new JMenu( Menu.MENU_LAF );
+        submenu.setMnemonic( KeyEvent.VK_L );
+        Look.getInstance().createMenuItems( submenu );
         menu.add( submenu );
         menuBar.add( menu );
         menu = new JMenu( Menu.MENU_HELP );
