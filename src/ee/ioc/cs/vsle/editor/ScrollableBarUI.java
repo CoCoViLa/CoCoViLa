@@ -71,11 +71,15 @@ public class ScrollableBarUI extends ComponentUI
 		viewport = new JViewport() {
 			@Override
 			public Dimension getMinimumSize() {
-				// preserve the preferred height of the panel
-				Dimension d = getPreferredSize();
-				d.width = BTN_SIZE;
-				return d;
+				return getPreferredSize();
 			}
+			
+			public Dimension getPreferredSize() {
+                            // preserve the preferred height of the panel
+                            Dimension d = super.getPreferredSize();
+                            d.width = BTN_SIZE;
+                            return d;
+                    }
 		};
 
 		viewport.setView(sb.getComponent());
