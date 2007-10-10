@@ -7,132 +7,144 @@ import ee.ioc.cs.vsle.event.*;
 
 /**
  * @author pavelg
- *
+ * 
  */
 public class ProgramRunnerEvent extends BaseEvent {
 
-	private static Dispatcher s_dispatcher;
+    private static Dispatcher s_dispatcher;
 
-	private static Object s_lock = new Object();
+    private static Object s_lock = new Object();
 
-	public static final int COMPUTE_GOAL = 128;
-	public static final int COMPUTE_ALL = 1;
-	public static final int COMPILE = 2;
-	public static final int RUN = 4;
-	public static final int PROPAGATE = 8;
-	public static final int RUN_NEW = COMPILE | RUN;
-	public static final int DESTROY = 32;
-	public static final int REQUEST_SPEC = 64;
-	
-	private long m_id;
-	private int m_operation;
-	private String m_specText;
-	private String m_programText;
-	private boolean m_requestFeedback = false;
-	private int m_repeat = 1;
-	
-	static {
-		init();
-	}
+    public static final int COMPUTE_GOAL = 128;
+    public static final int COMPUTE_ALL = 1;
+    public static final int COMPILE = 2;
+    public static final int RUN = 4;
+    public static final int PROPAGATE = 8;
+    public static final int RUN_NEW = COMPILE | RUN;
+    public static final int DESTROY = 32;
+    public static final int REQUEST_SPEC = 64;
+    public static final int SHOW_VALUES = 256;
 
-	/**
-	 * @param originator
-	 */
-	public ProgramRunnerEvent( Object originator, long id, int operation ) {
-		super(originator);
-		
-		m_id = id;
-		m_operation = operation;
-	}
+    private long m_id;
+    private int m_operation;
+    private String m_specText;
+    private String m_programText;
+    private String m_objectName;
+    private boolean m_requestFeedback = false;
+    private int m_repeat = 1;
 
-	/* (non-Javadoc)
-	 * @see ee.ioc.cs.vsle.event.BaseEvent#getDispatcher()
-	 */
-	@Override
-	protected EventDispatcher getDispatcher() {
-		return s_dispatcher;
-	}
+    static {
+        init();
+    }
 
-	private static void init() {
+    /**
+     * @param originator
+     */
+    public ProgramRunnerEvent( Object originator, long id, int operation ) {
+        super( originator );
 
-		if (s_dispatcher == null) {
-			synchronized (s_lock) {
-				if (s_dispatcher == null) {
-					s_dispatcher = new Dispatcher();
+        m_id = id;
+        m_operation = operation;
+    }
 
-				}
-			}
-		}
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see ee.ioc.cs.vsle.event.BaseEvent#getDispatcher()
+     */
+    @Override
+    protected EventDispatcher getDispatcher() {
+        return s_dispatcher;
+    }
 
-	public static void registerListener(Listener listener) {
-		s_dispatcher.register(listener);
-	}
+    private static void init() {
 
-	public static void unregisterListener(Listener listener) {
-		s_dispatcher.unregister(listener);
-	}
+        if ( s_dispatcher == null ) {
+            synchronized ( s_lock ) {
+                if ( s_dispatcher == null ) {
+                    s_dispatcher = new Dispatcher();
 
-	private static class Dispatcher extends EventDispatcher {
+                }
+            }
+        }
+    }
 
-		public void callListenerOnEvent(BaseEventListener obj, BaseEvent evt) {
+    public static void registerListener( Listener listener ) {
+        s_dispatcher.register( listener );
+    }
 
-			Listener listener = (Listener) obj;
+    public static void unregisterListener( Listener listener ) {
+        s_dispatcher.unregister( listener );
+    }
 
-			listener.onProgramRunnerEvent((ProgramRunnerEvent) evt);
-		}
-	}
+    private static class Dispatcher extends EventDispatcher {
 
-	////////////////////////////////////////////////////////////////////////////
-	// Interface Listener
-	////////////////////////////////////////////////////////////////////////////
+        public void callListenerOnEvent( BaseEventListener obj, BaseEvent evt ) {
 
-	/**
-	 * Interface <code>Listener</code>
-	 *
-	 */
-	public interface Listener extends BaseEventListener {
+            Listener listener = (Listener) obj;
 
-		public void onProgramRunnerEvent(ProgramRunnerEvent event);
-	}
+            listener.onProgramRunnerEvent( (ProgramRunnerEvent) evt );
+        }
+    }
 
-	public long getId() {
-		return m_id;
-	}
+    // //////////////////////////////////////////////////////////////////////////
+    // Interface Listener
+    // //////////////////////////////////////////////////////////////////////////
 
-	public int getOperation() {
-		return m_operation;
-	}
+    /**
+     * Interface <code>Listener</code>
+     * 
+     */
+    public interface Listener extends BaseEventListener {
 
-	public String getSpecText() {
-		return m_specText;
-	}
+        public void onProgramRunnerEvent( ProgramRunnerEvent event );
+    }
 
-	public void setSpecText(String text) {
-		this.m_specText = text;
-	}
+    public long getId() {
+        return m_id;
+    }
 
-	public boolean isRequestFeedback() {
-		return m_requestFeedback;
-	}
+    public int getOperation() {
+        return m_operation;
+    }
 
-	public void setRequestFeedback(boolean requestFeedback) {
-		this.m_requestFeedback = requestFeedback;
-	}
+    public String getSpecText() {
+        return m_specText;
+    }
 
-	public String getProgramText() {
-		return m_programText;
-	}
+    public void setSpecText( String text ) {
+        this.m_specText = text;
+    }
 
-	public void setProgramText(String text) {
-		m_programText = text;
-	}
+    public boolean isRequestFeedback() {
+        return m_requestFeedback;
+    }
 
-	public int getRepeat() {
-		return m_repeat;
-	}
+    public void setRequestFeedback( boolean requestFeedback ) {
+        this.m_requestFeedback = requestFeedback;
+    }
 
-	public void setRepeat(int repeat) {
-		this.m_repeat = repeat;
-	}
+    public String getProgramText() {
+        return m_programText;
+    }
+
+    public void setProgramText( String text ) {
+        m_programText = text;
+    }
+
+    public int getRepeat() {
+        return m_repeat;
+    }
+
+    public void setRepeat( int repeat ) {
+        this.m_repeat = repeat;
+    }
+
+    public String getObjectName() {
+        return m_objectName;
+    }
+
+    public void setObjectName( String name ) {
+        m_objectName = name;
+    }
 }

@@ -226,6 +226,33 @@ public class ProgramRunner {
         return result.toString();
     }
 
+    private void showComputedValues( final String varName ) {
+        
+        final StringBuilder result = new StringBuilder();
+
+        for ( Var var : foundVars ) {
+
+            if ( var.getField().isAlias() || var.getField().isVoid() ) {
+                continue;
+            }
+
+            String varname;
+            
+            if( ( varname = var.getFullName() ).startsWith( varName ) ) {
+                try {
+                    appendVarStringValue( varname, result );
+                } catch ( Exception e ) {
+                }
+            }
+        }
+        
+        SwingUtilities.invokeLater( new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog( m_canvas, result.toString(), varName, JOptionPane.PLAIN_MESSAGE );
+            }
+        } );
+    }
+    
     private void appendVarStringValue( String fullName, StringBuilder result ) throws SecurityException, NoSuchFieldException,
             IllegalArgumentException, IllegalAccessException {
 
@@ -534,6 +561,10 @@ public class ProgramRunner {
 
             if ( !isPropagated && ( operation & ProgramRunnerEvent.PROPAGATE ) > 0 ) {
                 propagate();
+            }
+
+            if( ( operation & ProgramRunnerEvent.SHOW_VALUES ) > 0 ) {
+                showComputedValues( event.getObjectName() );
             }
 
             if ( ( operation & ProgramRunnerEvent.DESTROY ) > 0 ) {

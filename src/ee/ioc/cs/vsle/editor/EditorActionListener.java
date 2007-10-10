@@ -238,7 +238,7 @@ public class EditorActionListener implements ActionListener {
 
                     final ProgramRunner runner = new ProgramRunner( canv );
 
-                    int op = ProgramRunnerEvent.COMPUTE_ALL | ProgramRunnerEvent.RUN_NEW | ProgramRunnerEvent.DESTROY;
+                    int op = ProgramRunnerEvent.COMPUTE_ALL | ProgramRunnerEvent.RUN_NEW/* | ProgramRunnerEvent.DESTROY*/;
 
                     ProgramRunnerEvent evt = new ProgramRunnerEvent( this, runner.getId(), op );
 
@@ -253,7 +253,7 @@ public class EditorActionListener implements ActionListener {
                     final ProgramRunner runner = new ProgramRunner( canv );
 
                     int op = ProgramRunnerEvent.COMPUTE_ALL | ProgramRunnerEvent.RUN_NEW | ProgramRunnerEvent.PROPAGATE
-                            | ProgramRunnerEvent.DESTROY;
+                        /* | ProgramRunnerEvent.DESTROY*/;
 
                     ProgramRunnerEvent evt = new ProgramRunnerEvent( this, runner.getId(), op );
 
