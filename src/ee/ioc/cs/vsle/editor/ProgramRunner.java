@@ -417,9 +417,13 @@ public class ProgramRunner {
                         /*
                          * Stacktrace is printed so that there is some feedback
                          * when generated code throws an exception which isn't
-                         * caught.
+                         * caught. Stacktrace is not printed if a thread was
+                         * stopped manually. 
                          */
-                        ex.printStackTrace();
+                        if ( !( ex.getCause() instanceof ThreadDeath ) ) {
+                            ex.printStackTrace();
+                        }
+                        
                     }
 
                     RunningThreadKillerDialog.removeThread( this );
