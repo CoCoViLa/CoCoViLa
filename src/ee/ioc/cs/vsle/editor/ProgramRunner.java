@@ -245,7 +245,9 @@ public class ProgramRunner {
                     || ( TypeUtil.TYPE_THIS.equals( rootVarName ) && TypeUtil.TYPE_THIS.equals( var.getObject() ) ) ) {
                 try {
                     if ( var.getField().isAlias() ) {
-                        fillAliasTree( aliasRoot, var );
+                        DefaultMutableTreeNode aliasNode = new DefaultMutableTreeNode( var.getFullName() );
+                        aliasRoot.add( aliasNode );
+                        fillAliasTree( aliasNode, var );
                     } else {
                         StringBuilder result = new StringBuilder();
                         appendVarStringValue( varname, result, false );
@@ -281,18 +283,14 @@ public class ProgramRunner {
     
     private void fillAliasTree( DefaultMutableTreeNode parent, Var alias ) throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException {
         
-        DefaultMutableTreeNode aliasNode = new DefaultMutableTreeNode( alias.getFullName() );
-        parent.add( aliasNode );
-        
         for ( Var var : alias.getChildVars() ) {
 
             DefaultMutableTreeNode varNode = new DefaultMutableTreeNode();
-            aliasNode.add( varNode );
+            parent.add( varNode );
             
             if ( var.getField().isAlias() ) {
                 varNode.setUserObject( var.getFullName() );
                 fillAliasTree( varNode, var );
-                continue;
             } else if ( var.getField().isVoid() ) {
                 varNode.setUserObject( var.getFullName() );
             } else {
