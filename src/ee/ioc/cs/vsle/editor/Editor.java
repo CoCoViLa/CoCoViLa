@@ -573,7 +573,8 @@ public class Editor extends JFrame implements ChangeListener {
                 File f = new File( packageFile );
 
                 if ( f.exists() ) {
-                    db.p( "Found package file name " + packageFile + " from the configuration file." );
+                    if ( RuntimeProperties.isLogDebugEnabled() )
+                        db.p( "Found package file name " + packageFile + " from the configuration file." );
                     window.loadPackage( f );
                 }
             }

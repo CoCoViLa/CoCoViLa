@@ -6,6 +6,7 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.event.*;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
 /**
@@ -241,7 +242,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             cv.setVisible( true );
         } else if ( Menu.SHOW_VALUES.equals( cmd ) ) {
             ProgramRunnerEvent event = new ProgramRunnerEvent( this, canvas.getLastProgramRunnerID(), ProgramRunnerEvent.SHOW_VALUES );
-            event.setObjectName( object.getName() );
+            event.setObjectName( object.isSuperClass() ? TypeUtil.TYPE_THIS : object.getName() );
             EventSystem.queueEvent( event );
         } else if ( Menu.SET_AS_SUPER.equals( cmd ) ) {
             canvas.setAsSuperClass( object, true );

@@ -8,10 +8,13 @@ import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
+import java.awt.*;
+import java.util.List;
 import java.lang.reflect.*;
 import java.util.*;
 
 import javax.swing.*;
+import javax.swing.tree.*;
 
 /**
  */
@@ -215,7 +218,7 @@ public class ProgramRunner {
             }
 
             try {
-                appendVarStringValue( var.getFullName(), result );
+                appendVarStringValue( var.getFullName(), result, true );
             } catch ( Exception e ) {
             }
         }
@@ -226,35 +229,109 @@ public class ProgramRunner {
         return result.toString();
     }
 
-    private void showComputedValues( final String varName ) {
-        
-        final StringBuilder result = new StringBuilder();
+    private void showComputedValues( final String rootVarName ) {
 
+        final DefaultMutableTreeNode varRoot = new DefaultMutableTreeNode();
+        final DefaultMutableTreeNode aliasRoot = new DefaultMutableTreeNode( "Aliases" );
+        
         for ( Var var : foundVars ) {
 
-            if ( var.getField().isAlias() || var.getField().isVoid() ) {
+            if ( var.getField().isVoid() || AnnotatedClass.SPEC_OBJECT_NAME.equals( var.getName() ) ) {
                 continue;
             }
 
             String varname;
-            
-            if( ( varname = var.getFullName() ).startsWith( varName ) ) {
+            if ( ( varname = var.getFullName() ).startsWith( rootVarName )
+                    || ( TypeUtil.TYPE_THIS.equals( rootVarName ) && TypeUtil.TYPE_THIS.equals( var.getObject() ) ) ) {
                 try {
-                    appendVarStringValue( varname, result );
+                    if ( var.getField().isAlias() ) {
+                        fillAliasTree( aliasRoot, var );
+                    } else {
+                        StringBuilder result = new StringBuilder();
+                        appendVarStringValue( varname, result, false );
+                        DefaultMutableTreeNode varNode = new DefaultMutableTreeNode( result.toString() );
+                        varRoot.add( varNode );
+                    }
                 } catch ( Exception e ) {
                 }
             }
         }
+
+        if( aliasRoot.getChildCount() > 0 ) {
+            varRoot.add( aliasRoot );
+        }
         
         SwingUtilities.invokeLater( new Runnable() {
             public void run() {
-                JOptionPane.showMessageDialog( m_canvas, result.toString(), varName, JOptionPane.PLAIN_MESSAGE );
+                JDialog dialog = new JDialog( Editor.getInstance(), rootVarName );
+                dialog.setLocationRelativeTo( Editor.getInstance() );
+                dialog.getContentPane().setLayout( new BorderLayout() );
+                
+                JTree tree = new JTree( varRoot );
+                tree.setRootVisible( false );
+                JScrollPane treeView = new JScrollPane( tree );
+                
+                dialog.getContentPane().add( treeView, BorderLayout.CENTER );
+                dialog.setSize( 350, 400 );
+                dialog.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
+                dialog.setVisible( true );
             }
         } );
     }
     
-    private void appendVarStringValue( String fullName, StringBuilder result ) throws SecurityException, NoSuchFieldException,
-            IllegalArgumentException, IllegalAccessException {
+    private void fillAliasTree( DefaultMutableTreeNode parent, Var alias ) throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException {
+        
+        DefaultMutableTreeNode aliasNode = new DefaultMutableTreeNode( alias.getFullName() );
+        parent.add( aliasNode );
+        
+        for ( Var var : alias.getChildVars() ) {
+
+            DefaultMutableTreeNode varNode = new DefaultMutableTreeNode();
+            aliasNode.add( varNode );
+            
+            if ( var.getField().isAlias() ) {
+                varNode.setUserObject( var.getFullName() );
+                fillAliasTree( varNode, var );
+                continue;
+            } else if ( var.getField().isVoid() ) {
+                varNode.setUserObject( var.getFullName() );
+            } else {
+                varNode.setUserObject( var.getFullName().concat( " = " ).concat( getVarValueAsString( var.getFullName() ) ) );
+            }
+        }
+        
+    }
+    
+    private String getAliasStringValue( Var alias ) throws IllegalArgumentException, SecurityException, IllegalAccessException,
+            NoSuchFieldException {
+
+        StringBuilder result = new StringBuilder( "[" );
+
+        for ( Var var : alias.getChildVars() ) {
+
+            if ( var.getField().isAlias() ) {
+                result.append( getAliasStringValue( var ) ).append( ", " ).append( "\n" );
+                continue;
+            } else if ( var.getField().isVoid() ) {
+                result.append( var.getName() );
+            } else {
+                result.append( var.getFullName() ).append( " = " ).append( getVarValueAsString( var.getFullName() ) );
+            }
+
+            result.append( ", " );
+        }
+
+        // remove last ", "
+        int length = result.length();
+        result.delete( length - 2, length );
+
+        result.append( "]" );//.append( "\n" );
+
+        return result.toString();
+    }
+
+    private String getVarValueAsString( String fullName ) throws IllegalArgumentException, IllegalAccessException,
+            SecurityException, NoSuchFieldException {
 
         Class clas;
         Field f;
@@ -276,40 +353,52 @@ public class ProgramRunner {
             } else {
                 Class c = f.getType();
 
-                result.append( fullName );
-                result.append( ": " );
-
                 if ( c.toString().equals( TYPE_INT ) ) {
-                    result.append( f.getInt( obj ) );
+                    return Integer.toString( f.getInt( obj ) );
                 } else if ( c.toString().equals( TYPE_LONG ) ) {
-                    result.append( f.getLong( obj ) );
+                    return Long.toString( f.getLong( obj ) );
                 } else if ( c.toString().equals( TYPE_DOUBLE ) ) {
-                    result.append( f.getDouble( obj ) );
+                    return Double.toString( f.getDouble( obj ) );
                 } else if ( c.toString().equals( TYPE_BOOLEAN ) ) {
-                    result.append( f.getBoolean( obj ) );
+                    return Boolean.toString( f.getBoolean( obj ) );
                 } else if ( c.toString().equals( TYPE_CHAR ) ) {
-                    result.append( f.getChar( obj ) );
+                    return Character.toString( f.getChar( obj ) );
                 } else if ( c.toString().equals( TYPE_FLOAT ) ) {
-                    result.append( f.getFloat( obj ) );
+                    return Float.toString( f.getFloat( obj ) );
                 } else if ( c.toString().equals( TYPE_SHORT ) ) {
-                    result.append( f.getShort( obj ) );
+                    return Short.toString( f.getShort( obj ) );
                 } else if ( c.toString().equals( TYPE_BYTE ) ) {
-                    result.append( f.getByte( obj ) );
+                    return Byte.toString( f.getByte( obj ) );
                 } else {
                     Object o = f.get( obj );
                     if ( o instanceof Object[] ) {
 
-                        result.append( Arrays.deepToString( (Object[]) o ) );
+                        return Arrays.deepToString( (Object[]) o );
                     } else {
-                        result.append( o );
+                        return o.toString();
                     }
                 }
-
-                result.append( "\n" );
             }
-
         }
 
+        return null;
+    }
+
+    private void appendVarStringValue( String fullName, StringBuilder result, boolean showRoot ) throws SecurityException,
+            NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+
+        String value;
+
+        if ( ( value = getVarValueAsString( fullName ) ) != null ) {
+
+            int idx;
+
+            if ( !showRoot && ( idx = fullName.indexOf( "." ) ) > -1 ) {
+                fullName = fullName.substring( idx + 1, fullName.length() );
+            }
+
+            result.append( fullName ).append( " = " ).append( value ).append( "\n" );
+        }
     }
 
     private void propagate() {
@@ -445,12 +534,12 @@ public class ProgramRunner {
                          * Stacktrace is printed so that there is some feedback
                          * when generated code throws an exception which isn't
                          * caught. Stacktrace is not printed if a thread was
-                         * stopped manually. 
+                         * stopped manually.
                          */
-                        if ( !( ex.getCause() instanceof ThreadDeath ) ) {
+                        if ( ! ( ex.getCause() instanceof ThreadDeath ) ) {
                             ex.printStackTrace();
                         }
-                        
+
                     }
 
                     RunningThreadKillerDialog.removeThread( this );
@@ -489,7 +578,7 @@ public class ProgramRunner {
         for ( String wf : watchFields ) {
 
             try {
-                appendVarStringValue( wf, result );
+                appendVarStringValue( wf, result, true );
             } catch ( Exception e ) {
             }
         }
@@ -563,7 +652,7 @@ public class ProgramRunner {
                 propagate();
             }
 
-            if( ( operation & ProgramRunnerEvent.SHOW_VALUES ) > 0 ) {
+            if ( ( operation & ProgramRunnerEvent.SHOW_VALUES ) > 0 ) {
                 showComputedValues( event.getObjectName() );
             }
 
