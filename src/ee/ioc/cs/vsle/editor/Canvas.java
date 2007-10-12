@@ -1082,6 +1082,7 @@ public class Canvas extends JPanel {
     private boolean promptLoad( List<String> messages ) {
         final JDialog dialog = new JDialog( Editor.getInstance() );
         dialog.setModal( true );
+        dialog.setLocationRelativeTo( this );
         dialog.setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE );
         dialog.setTitle( "Warning: Inconsistent scheme" );
 
@@ -1105,7 +1106,7 @@ public class Canvas extends JPanel {
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
         dialog.add( scrollPane, BorderLayout.CENTER );
 
-        JButton btnContinue = new JButton( "Continue" );
+        final JButton btnContinue = new JButton( "Continue" );
         JButton btnCancel = new JButton( "Cancel" );
 
         final boolean[] result = new boolean[ 1 ];
@@ -1129,6 +1130,11 @@ public class Canvas extends JPanel {
         btnPanel.add( btnCancel );
         dialog.add( btnPanel, BorderLayout.SOUTH );
         dialog.pack();
+        SwingUtilities.invokeLater( new Runnable() {
+            public void run() {
+                btnContinue.requestFocus();
+            }
+        } );
         dialog.setVisible( true );
         dialog.dispose();
 
