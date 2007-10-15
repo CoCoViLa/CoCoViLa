@@ -105,15 +105,16 @@ public class CodeGenerator {
     
     private void genSubTasks( Rel rel, StringBuilder alg, boolean isNestedSubtask, String parentClassName, 
     		Set<Var> usedVars, Problem problem ) {
-        int subNum;
-        int start = subCount;
+        
+        List<String> subInstanceNames = new ArrayList<String>();
         
         for ( SubtaskRel subtask : rel.getSubtasks() ) {
         	
-        	subNum = subCount++;
+            int subNum = subCount++;
             
             String sbName = ( subtask.isIndependent() ? "Independent" : "" ) + SUBTASK_INTERFACE_NAME + "_" + subNum;
-
+            subInstanceNames.add( "subtask_" + subNum );
+            
         	if( !subtask.isIndependent()
         			|| ( subtask.isIndependent() && !independentSubtasks.containsKey( subtask ) ) ) {
         		
@@ -189,11 +190,11 @@ public class CodeGenerator {
         		IndSubt sub = independentSubtasks.get( subtask );
         		sbName = sub.getClassName();
         	}
-            alg.append( same() ).append( sbName ).append( " subtask_" ).append( subNum ).append( " = new " )
+            alg.append( same() ).append( sbName ).append( " " ).append( subInstanceNames.get( subInstanceNames.size() - 1 ) ).append( " = new " )
             	.append( sbName ).append( "();\n\n" );
         }
 
-        appendSubtaskRelToAlg( rel, start, alg, isNestedSubtask );
+        appendSubtaskRelToAlg( rel, subInstanceNames, alg, isNestedSubtask );
     }
 
     private static String _this_ = "." + TYPE_THIS + ".";
@@ -306,11 +307,11 @@ public class CodeGenerator {
         }
     }
 
-    private void appendSubtaskRelToAlg(Rel rel, int startInd, StringBuilder buf, boolean isNestedSubtask) {
+    private void appendSubtaskRelToAlg(Rel rel, List<String> names, StringBuilder buf, boolean isNestedSubtask) {
 
 		String relString = rel.toString();
 		for (int i = 0; i < rel.getSubtasks().size(); i++) {
-			relString = relString.replaceFirst(RelType.TAG_SUBTASK, "subtask_" + (startInd + i));
+			relString = relString.replaceFirst(RelType.TAG_SUBTASK, names.get( i ) );
 		}
 		if (rel.getExceptions().size() == 0 || isNestedSubtask) {
 			buf.append(same()).append(relString).append("\n");
