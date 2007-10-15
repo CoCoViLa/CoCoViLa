@@ -233,7 +233,7 @@ public class ProgramRunner {
 
         final DefaultMutableTreeNode varRoot = new DefaultMutableTreeNode();
         final DefaultMutableTreeNode aliasRoot = new DefaultMutableTreeNode( "Aliases" );
-        
+
         for ( Var var : foundVars ) {
 
             if ( var.getField().isVoid() || AnnotatedClass.SPEC_OBJECT_NAME.equals( var.getName() ) ) {
@@ -259,20 +259,20 @@ public class ProgramRunner {
             }
         }
 
-        if( aliasRoot.getChildCount() > 0 ) {
+        if ( aliasRoot.getChildCount() > 0 ) {
             varRoot.add( aliasRoot );
         }
-        
+
         SwingUtilities.invokeLater( new Runnable() {
             public void run() {
                 JDialog dialog = new JDialog( Editor.getInstance(), rootVarName );
                 dialog.setLocationRelativeTo( Editor.getInstance() );
                 dialog.getContentPane().setLayout( new BorderLayout() );
-                
+
                 JTree tree = new JTree( varRoot );
                 tree.setRootVisible( false );
                 JScrollPane treeView = new JScrollPane( tree );
-                
+
                 dialog.getContentPane().add( treeView, BorderLayout.CENTER );
                 dialog.setSize( 350, 400 );
                 dialog.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
@@ -280,14 +280,15 @@ public class ProgramRunner {
             }
         } );
     }
-    
-    private void fillAliasTree( DefaultMutableTreeNode parent, Var alias ) throws IllegalArgumentException, SecurityException, IllegalAccessException, NoSuchFieldException {
-        
+
+    private void fillAliasTree( DefaultMutableTreeNode parent, Var alias ) throws IllegalArgumentException, SecurityException,
+            IllegalAccessException, NoSuchFieldException {
+
         for ( Var var : alias.getChildVars() ) {
 
             DefaultMutableTreeNode varNode = new DefaultMutableTreeNode();
             parent.add( varNode );
-            
+
             if ( var.getField().isAlias() ) {
                 varNode.setUserObject( var.getFullName() );
                 fillAliasTree( varNode, var );
@@ -297,9 +298,9 @@ public class ProgramRunner {
                 varNode.setUserObject( var.getFullName().concat( " = " ).concat( getVarValueAsString( var.getFullName() ) ) );
             }
         }
-        
+
     }
-    
+
     private String getAliasStringValue( Var alias ) throws IllegalArgumentException, SecurityException, IllegalAccessException,
             NoSuchFieldException {
 
@@ -323,7 +324,7 @@ public class ProgramRunner {
         int length = result.length();
         result.delete( length - 2, length );
 
-        result.append( "]" );//.append( "\n" );
+        result.append( "]" );// .append( "\n" );
 
         return result.toString();
     }
