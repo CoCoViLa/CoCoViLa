@@ -2,6 +2,8 @@ package ee.ioc.cs.vsle.synthesize;
 
 import java.util.*;
 
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
@@ -11,9 +13,14 @@ public class ProblemCreator {
 	
 	static Problem makeProblem( ClassList classes ) throws SpecParseException {
 		
+	    long start = System.currentTimeMillis();
+	    
 		Problem problem = new Problem( new Var( new ClassField( TYPE_THIS, TYPE_THIS ), null ) );
 		
     	makeProblemImpl( classes, problem.getRootVar(), problem, new HashMap<SubtaskClassRelation, SubtaskRel>() );
+    	
+    	if ( RuntimeProperties.isLogInfoEnabled() )
+            db.p( "Problem created in: " + ( System.currentTimeMillis() - start ) + "ms." );
     	
     	return problem;
     }
@@ -84,23 +91,29 @@ public class ProblemCreator {
             
             boolean isAliasRel = false;
 
-            /* If we have a relation alias = alias, we rewrite it into new relations, ie we create
-             a relation for each component of the alias structure*/
+            /* 
+             * If we have a relation alias = alias, we rewrite it into new relations, ie we create
+             * a relation for each component of the alias structure.
+             * 
+             * Else if the relation is x = y where both vars have common spec type, 
+             * make their sub-components equal.
+             */
             if ( classRelation.getInputs().size() == 1 && classRelation.getOutputs().size() == 1 &&
                  ( classRelation.getType() == RelType.TYPE_ALIAS || classRelation.getType() == RelType.TYPE_EQUATION ) ) {
                 ClassField inpField = classRelation.getInput();
                 ClassField outpField = classRelation.getOutput();
 
+                String obj;
+                
                 //if we have a relation alias = *.sth, we need to find out what it actually is
-                if ( isAliasWildcard( classRelation ) ) {
+                if ( ( classRelation.getType() == RelType.TYPE_ALIAS ) && isAliasWildcard( classRelation ) ) {
                 	relSet = makeAliasWildcard( ac, classes, classRelation, problem, parent );
                 	rel = null;
                 	isAliasRel = true;
                 }
-                String obj = parent.getFullNameForConcat();
                 //the following is for x = y, not x -> y relation where both x and y are aliases
-                if ( ( classRelation.getType() == RelType.TYPE_EQUATION ) 
-                		&& problem.getAllVars().containsKey( obj + inpField.getName() ) ) {
+                else if ( ( classRelation.getType() == RelType.TYPE_EQUATION ) 
+                		&& problem.getAllVars().containsKey( ( obj = parent.getFullNameForConcat() ) + inpField.getName() ) ) {
                 	
                     Var inpVar = problem.getAllVars().get( obj + inpField.getName() );
                     Var outpVar = problem.getAllVars().get( obj + outpField.getName() );
@@ -118,14 +131,19 @@ public class ProblemCreator {
                         	inpChildVar = inpVar.getChildVars().get( i );
                         	outpChildVar = outpVar.getChildVars().get( i );
 
-                            rel = new Rel( parent, classRelation.getSpecLine() );
+                            rel = new Rel( parent, inpVar.getFullName() + " = " 
+                                    + outpVar.getFullName() + ", derived from: " + classRelation.getSpecLine() );
                             rel.setType( RelType.TYPE_EQUATION );
 
-                            rel.addInput( outpChildVar );
-                            rel.addOutput( inpChildVar );
-                            outpChildVar.addRel( rel );
+                            rel.addInput( inpChildVar );
+                            rel.addOutput( outpChildVar );
+                            inpChildVar.addRel( rel );
                             problem.addRel( rel );
+                            
+                            checkSpecClassBinding( inpChildVar, outpChildVar, classes, classRelation, parent, problem );
                         }
+                    } else {
+                        checkSpecClassBinding( inpVar, outpVar, classes, classRelation, parent, problem );
                     }
                 }
             }
@@ -141,49 +159,12 @@ public class ProblemCreator {
                         
                         if( subtask.isIndependent() ) {
                         	
-                        	if( indpSubtasks.containsKey( subtask ) )
-                        	{
+                        	if( indpSubtasks.containsKey( subtask ) ) {
+                        	    
                         		subtaskRel = indpSubtasks.get( subtask );
-                        	}
-                        	else
-                        	{
-                        		ClassField context = subtask.getContext();
-
-                        		ClassList newClassList = new ClassList();
-                        		newClassList.addAll( classes );
-                        		newClassList.remove( classes.getType( TYPE_THIS ) );
-
-                        		AnnotatedClass newAnnClass = new AnnotatedClass( "IndependentSubtask" );
-                        		newAnnClass.addField( context );
-                        		ClassRelation newCR = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, subtask.getSpecLine() );
-
-                        		List<ClassField> empty = new ArrayList<ClassField>();
-
-                        		for( ClassField input : subtask.getInputs() ) {
-                        			newCR.addInput( context + "." + input, empty );
-                        		}
-
-                        		for( ClassField output : subtask.getOutputs() ) {
-                        			newCR.addOutput( context + "." + output, empty );
-                        		}
-
-                        		newAnnClass.addClassRelation( newCR );
-                        		newClassList.add(newAnnClass);
-                        		Problem contextProblem = 
-                        			new Problem( new Var( new ClassField( TYPE_THIS, "IndependentSubtask" ), null ) );
-
-                        		makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem, indpSubtasks );
-
-                        		Var par = contextProblem.getVarByFullName(context.getName());
-
-                        		subtaskRel = new SubtaskRel( par, subtask.getSpecLine() );
-
-                        		makeRel( subtaskRel, subtask, contextProblem, par );
-
-                        		subtaskRel.setContextCF( context );
-                        		subtaskRel.setContext( contextProblem );
-                        		
-                        		indpSubtasks.put( subtask, subtaskRel );
+                        	} else {
+                        	    
+                        		subtaskRel = makeIndependentSubtask( classes, indpSubtasks, subtask );
                         	}
                         } else {
                         	subtaskRel = new SubtaskRel( parent, subtask.getSpecLine() );
@@ -221,6 +202,133 @@ public class ProblemCreator {
             }
 
         }
+    }
+
+    /**
+     * @param classes
+     * @param indpSubtasks
+     * @param subtask
+     * @return
+     * @throws UnknownVariableException
+     * @throws SpecParseException
+     */
+    private static SubtaskRel makeIndependentSubtask( ClassList classes, Map<SubtaskClassRelation, SubtaskRel> indpSubtasks,
+            SubtaskClassRelation subtask ) throws UnknownVariableException, SpecParseException {
+        SubtaskRel subtaskRel;
+        ClassField context = subtask.getContext();
+
+        ClassList newClassList = new ClassList();
+        newClassList.addAll( classes );
+        newClassList.remove( classes.getType( TYPE_THIS ) );
+
+        AnnotatedClass newAnnClass = new AnnotatedClass( "IndependentSubtask" );
+        newAnnClass.addField( context );
+        ClassRelation newCR = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, subtask.getSpecLine() );
+
+        List<ClassField> empty = new ArrayList<ClassField>();
+
+        for( ClassField input : subtask.getInputs() ) {
+        	newCR.addInput( context + "." + input, empty );
+        }
+
+        for( ClassField output : subtask.getOutputs() ) {
+        	newCR.addOutput( context + "." + output, empty );
+        }
+
+        newAnnClass.addClassRelation( newCR );
+        newClassList.add(newAnnClass);
+        Problem contextProblem = 
+        	new Problem( new Var( new ClassField( TYPE_THIS, "IndependentSubtask" ), null ) );
+
+        makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem, indpSubtasks );
+
+        Var par = contextProblem.getVarByFullName(context.getName());
+
+        subtaskRel = new SubtaskRel( par, subtask.getSpecLine() );
+
+        makeRel( subtaskRel, subtask, contextProblem, par );
+
+        subtaskRel.setContextCF( context );
+        subtaskRel.setContext( contextProblem );
+        
+        indpSubtasks.put( subtask, subtaskRel );
+        return subtaskRel;
+    }
+    
+    /**
+     * check if both vars have spec class types, find common spec class and make all sub-components to be equal
+     * 
+     * @throws SpecParseException 
+     */
+    private static void checkSpecClassBinding( Var inpVar, Var outpVar, ClassList classes, ClassRelation classRelation, Var parent, Problem problem ) throws SpecParseException {
+        
+        if( inpVar.getField().isSpecField() && outpVar.getField().isSpecField() ) {
+            
+            String typeIn = inpVar.getType();
+            String typeOut = outpVar.getType();
+            
+            ClassList commonTypes = getCommonTypes( classes, typeIn, typeOut );
+            
+            if( commonTypes.isEmpty() ) {
+                throw new SpecParseException( "Incorrect equality, types " + typeIn + " and " + typeOut 
+                        + " do not have common superclasses: " + outpVar.getFullName() + " = " 
+                        + inpVar.getFullName() + ", derived from: " + classRelation.getSpecLine() );
+            }
+            
+            Set<String> fields = new HashSet<String>();
+            fields.add( AnnotatedClass.SPEC_OBJECT_NAME );
+            
+            for ( AnnotatedClass commonType : commonTypes ) {
+                
+                for ( ClassField field : commonType.getFields() ) {
+                    if( !fields.contains( field.getName() ) ) {
+                        fields.add( field.getName() );
+                        
+                        Var inpVarSub = problem.getAllVars().get( inpVar.getFullNameForConcat() + field.getName() );
+                        Var outpVarSub = problem.getAllVars().get( outpVar.getFullNameForConcat() + field.getName() );
+                        
+                        Rel rel = new Rel( parent, outpVarSub.getFullName() + " = " 
+                                + inpVarSub.getFullName() + ", derived from: " + classRelation.getSpecLine() );
+                        rel.setType( RelType.TYPE_EQUATION );
+
+                        rel.addInput( inpVarSub );
+                        rel.addOutput( outpVarSub );
+                        inpVarSub.addRel( rel );
+                        problem.addRel( rel );
+                    }
+                }
+            }
+        }
+    }
+    
+    private static ClassList getCommonTypes( ClassList classes, String type1, String type2 ) {
+        
+        ClassList types = new ClassList();
+        
+        if( type1.equals( type2 ) ) {
+            types.add( classes.getType( type1 ) );
+        }
+        else {
+            AnnotatedClass ac1 = classes.getType( type1 );
+            AnnotatedClass ac2 = classes.getType( type2 );
+            
+            if( ac2.getSuperClasses().contains( ac1 ) ) {
+                types.add( ac1 );
+            }
+            else if( ac1.getSuperClasses().contains( ac2 ) ) {
+                types.add( ac2 );
+            }
+            else {
+                
+                for ( AnnotatedClass super1 : ac1.getSuperClasses() ) {
+                    if( ac2.getSuperClasses().contains( super1 ) ) {
+                        types.add( super1 );
+                    }
+                }
+            }
+        }
+        
+        return types;
     }
     
     private static void createAlias( Alias alias, AnnotatedClass ac, ClassList classes, Problem problem, Var parent ) throws AliasException {
@@ -277,7 +385,7 @@ public class ProblemCreator {
 
     private static boolean isAliasWildcard( ClassRelation classRelation ) {
     	
-        return classRelation.getInputs().size() == 1 && classRelation.getInput().getName().startsWith( "*." );
+        return classRelation.getInput().getName().startsWith( "*." );
     }
     
     /**

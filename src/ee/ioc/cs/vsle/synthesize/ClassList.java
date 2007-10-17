@@ -1,6 +1,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import java.util.ArrayList;
+import java.util.*;
 
 /**
  * <p>Title: ee.ioc.cs.editor.synthesize.ClassList</p>
@@ -11,7 +11,7 @@ import java.util.ArrayList;
  * @version 1.0
  */
 public class ClassList
-	extends ArrayList<AnnotatedClass> {
+	extends LinkedHashSet<AnnotatedClass> {
 
 	/**
 	 * Class constructor.

@@ -133,15 +133,15 @@ public class Synthesizer {
     		throw new SpecParseException( "Empty Class list!!!" );
     	}
     	
-        AnnotatedClass pClass;
         String fileString;
         Pattern pattern;
         Matcher matcher;
 
         // for each class generate new one used in synthesis
-        for ( int h = 0; h < classes.size(); h++ ) {
-            pClass = ( AnnotatedClass ) classes.get( h );
+        for ( AnnotatedClass pClass : classes ) {
+            
             if ( !pClass.getName().equals( TYPE_THIS ) ) {
+                
                 fileString = "";
                 try {
                 	fileString = SpecParser.getStringFromFile( path + pClass.getName() + ".java" );

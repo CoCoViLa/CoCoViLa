@@ -15,10 +15,10 @@ import java.util.*;
  */
 public class AnnotatedClass {
 
-	public static final String SPEC_OBJECT_NAME = "cocovilaSpecObjectName";
+    public static final String SPEC_OBJECT_NAME = "cocovilaSpecObjectName";
 	
 	private String name;
-	private Collection<AnnotatedClass> superClasses = new LinkedHashSet<AnnotatedClass>();
+	private ClassList superClasses = new ClassList();
 	//relations declared in the specification of this class and in specifications of superclasses
 	private Collection<ClassRelation> classRelations = new LinkedHashSet<ClassRelation>();
 	//fields declared in this annotated class
@@ -60,6 +60,7 @@ public class AnnotatedClass {
 		classRelations.add(classRelation);
 	} // addClassRelation
 
+	@Override
 	public boolean equals( Object o ) {
 		if( o != null && o instanceof AnnotatedClass )
 		{
@@ -67,6 +68,12 @@ public class AnnotatedClass {
 		}
 		return false;
 	}
+	
+	@Override
+    public int hashCode() {
+        return name.hashCode();
+    }
+	
 	/**
 	 * Converts the ee.ioc.cs.editor.synthesize.AnnotatedClass to a string, returning the name of the class.
 	 * @return String - a name of the class.
@@ -113,10 +120,10 @@ public class AnnotatedClass {
 		classRelations.addAll( clas.getClassRelations() );
 		
 		superClasses.add( clas );
+		superClasses.addAll( clas.getSuperClasses() );
 	}
 
-	//TODO - remove?
-	public Collection<AnnotatedClass> getSuperClasses() {
+	public ClassList getSuperClasses() {
 		return superClasses;
 	}
 

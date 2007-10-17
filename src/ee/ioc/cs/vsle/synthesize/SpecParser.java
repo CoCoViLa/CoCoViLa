@@ -265,9 +265,14 @@ public class SpecParser {
     public static ClassList parseSpecification( String fullSpec, String mainClassName, Set<String> schemeObjects, String path )
             throws IOException, SpecParseException, EquationException {
         s_parseErrors.clear();
+        long start = System.currentTimeMillis();
+        
         ClassList classes = parseSpecificationImpl( refineSpec( fullSpec ), TYPE_THIS, schemeObjects, path,
                 new LinkedHashSet<String>() );
 
+        if ( RuntimeProperties.isLogInfoEnabled() )
+            db.p( "Specification parsed in: " + ( System.currentTimeMillis() - start ) + "ms." );
+        
         /* ****** SPEC_OBJECT_NAME for scheme spec ? ****** */
         // AnnotatedClass _this = classes.getType( TYPE_THIS );
         //    	
@@ -562,8 +567,7 @@ public class SpecParser {
 
                             classRelation.addOutput( out, annClass.getFields() );
 
-                            // checkAliasLength( inputs, annClass.getFields(),
-                            // className );
+                            // checkAliasLength( inputs, annClass.getFields(), className );
                             for ( int i = 0; i < inputs.length; i++ ) {
                                 String initial = inputs[ i ];
                                 inputs[ i ] = checkAliasLength( inputs[ i ], annClass, className );
