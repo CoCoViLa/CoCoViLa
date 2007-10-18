@@ -65,11 +65,7 @@ public class SubtaskClassRelation extends ClassRelation {
         
         if( isIndependent() ) {
             if( lazyHash == -1 ) {
-                String res = "";
-
-                if( isIndependent() ) {
-                    res += context.getName();
-                }
+                String res = context.getName();
 
                 for( ClassField in : inputs ) {
                     res += in.getName();
