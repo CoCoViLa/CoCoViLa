@@ -27,7 +27,7 @@
 <!ELEMENT rect 		EMPTY>
 <!ELEMENT oval 		EMPTY>
 <!ELEMENT strict 	EMPTY>
-<!ELEMENT multy 	EMPTY>
+<!ELEMENT multi 	EMPTY>
 <!ELEMENT text 		EMPTY>
 <!ELEMENT portConnection EMPTY>
 <!ELEMENT painter	(#PCDATA)>
@@ -123,7 +123,7 @@
 	y 		CDATA 	#REQUIRED
 	portConnection 	CDATA 	#IMPLIED
 	strict 		CDATA 	#IMPLIED
-	multy CDATA #IMPLIED>
+	multi CDATA #IMPLIED>
 <!ATTLIST point
         x		CDATA   #REQUIRED
         y		CDATA   #REQUIRED>

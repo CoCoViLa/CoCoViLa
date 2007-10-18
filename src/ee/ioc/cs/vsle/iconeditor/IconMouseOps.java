@@ -166,8 +166,8 @@ class IconMouseOps
 	 * @param isStrict - port is strict or not.
 	 * @param portType - type of port: Integer, String, Object
 	 */
-	public void drawPort(String portName, boolean isAreaConn, boolean isStrict, String portType, boolean isMulty ) {
-		IconPort p = new IconPort(portName, startX, startY, isAreaConn, isStrict, isMulty );
+	public void drawPort(String portName, boolean isAreaConn, boolean isStrict, String portType, boolean isMulti ) {
+		IconPort p = new IconPort(portName, startX, startY, isAreaConn, isStrict, isMulti );
 		p.setType(portType);
 		editor.ports.add(p);
 		editor.repaint();

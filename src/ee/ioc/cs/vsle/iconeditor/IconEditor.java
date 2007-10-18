@@ -418,9 +418,9 @@ public class IconEditor extends JFrame {
                 buf.append( "\" strict=\"" );
                 buf.append( p.isStrict() );
                 buf.append( "\" " );
-                if ( p.isMulty() ) {
-                    buf.append( "multy=\"" );
-                    buf.append( p.isMulty() );
+                if ( p.isMulti() ) {
+                    buf.append( "multi=\"" );
+                    buf.append( p.isMulti() );
                     buf.append( "\" " );
                 }
                 buf.append( "/>\n" );

@@ -423,7 +423,7 @@ public class SpecParser {
 
                         Alias alias = null;
                         // required for two-line alias declaration, mostly for
-                        // multyport feature
+                        // multiport feature
                         Alias aliasDeclaration = null;
 
                         if ( split[ 1 ].trim().equals( "" ) ) {

@@ -88,7 +88,7 @@ public class ClassImport {
 			int tr = 255; //transparency
 			String strVal;
 			int startAngle, arcAngle;
-			boolean filled, fixed, strict, multy;
+			boolean filled, fixed, strict, multi;
 			String name = null;
 			String type = null;
 			String value = null;
@@ -256,8 +256,8 @@ public class ClassImport {
 				name = attrs.getValue("name");
 				boolean isAreaConn = Boolean.parseBoolean(attrs.getValue("isAreaConn"));
 				strict= Boolean.parseBoolean(attrs.getValue("strict"));
-				multy = Boolean.parseBoolean(attrs.getValue( "multy" ) );
-				IconPort port = new IconPort(name, x, y, isAreaConn, strict, multy);
+				multi = Boolean.parseBoolean(attrs.getValue( "multi" ) );
+				IconPort port = new IconPort(name, x, y, isAreaConn, strict, multi);
                 port.setType(attrs.getValue("type"));
 				ports.add(port);
 			}else if (element.equals("field")){

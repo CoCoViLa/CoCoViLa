@@ -26,7 +26,7 @@ public class IconPort implements Cloneable, Serializable {
 	int y;
 	boolean strict;
 	boolean area;
-	boolean multy;
+	boolean multi;
 	ClassGraphics openGraphics;
 	ClassGraphics closedGraphics;
 	Graphics2D graphics;
@@ -44,13 +44,13 @@ public class IconPort implements Cloneable, Serializable {
 	 * @param isAreaConn boolean - is port area connectible.
 	 * @param isStrict boolean - is port a strict one.
 	 */
-	IconPort(String name, int x, int y, boolean isAreaConn, boolean isStrict, boolean isMulty ) {
+	IconPort(String name, int x, int y, boolean isAreaConn, boolean isStrict, boolean isMulti ) {
 		this.name = name;
 		this.x = x;
 		this.y = y;
 		this.area = isAreaConn;
 		this.strict = isStrict;
-		this.multy = isMulty;
+		this.multi = isMulti;
 	} // IconPort
 
 	/**
@@ -256,8 +256,8 @@ public class IconPort implements Cloneable, Serializable {
 		return strict;
 	} // isStrict
 
-	boolean isMulty() {
-		return multy;
+	boolean isMulti() {
+		return multi;
 	}
 	
 	/**

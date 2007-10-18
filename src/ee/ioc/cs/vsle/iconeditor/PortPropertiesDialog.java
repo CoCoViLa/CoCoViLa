@@ -15,7 +15,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	private String portType;
 	private boolean isAreaConn;
 	private boolean isStrict;
-	private boolean isMulty;
+	private boolean isMulti;
 	
 	IconPort port;
 
@@ -27,13 +27,13 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	private JLabel lblPortType = new JLabel(" Port Type:");
 	private JLabel lblAreaConn = new JLabel(" Area Connected:");
 	private JLabel lblIsStrict = new JLabel(" Strict Port:");
-	private JLabel lblIsMulty = new JLabel(" Mutly Port:");
+	private JLabel lblIsMulti = new JLabel(" Multi Port:");
 
 	private JTextField tfPortName = new JTextField();
 
 	private JCheckBox checkAreaConn = new JCheckBox();
 	private JCheckBox checkIsStrict = new JCheckBox();
-	private JCheckBox checkIsMulty = new JCheckBox();
+	private JCheckBox checkIsMulti = new JCheckBox();
 	
 	private JComboBox cbPortType = new JComboBox();
 
@@ -57,8 +57,8 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		pnlAttrs.add(checkAreaConn);
 		pnlAttrs.add(lblIsStrict);
 		pnlAttrs.add(checkIsStrict);
-		pnlAttrs.add(lblIsMulty);
-		pnlAttrs.add(checkIsMulty);
+		pnlAttrs.add(lblIsMulti);
+		pnlAttrs.add(checkIsMulti);
 		
 		cbPortType.setEditable(true);
 		cbPortType.addItem("");
@@ -81,7 +81,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			setStrict(port.isStrict());
 			setAreaConn(port.isArea());
 			setPortType(port.getType());
-			setMulty(port.isMulty());
+			setMulti(port.isMulti());
 			this.port = port;
 		} else {
 			setTitle("Define Port Properties");
@@ -156,7 +156,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 
 		setAreaConn(checkAreaConn.isSelected());
 		setStrict(checkIsStrict.isSelected());
-		setMulty(checkIsMulty.isSelected());
+		setMulti(checkIsMulti.isSelected());
 
         // If the parameters were defined correctly, hide the dialog. Otherwise
 		// keep the dialog visible, allowing the user correct any noted errors in
@@ -166,13 +166,13 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			// an already existing one), draw the new port with its properties on the canvas.
 			if (port == null) {
 				editor.mListener.drawPort(getPortName(), isAreaConn(), isStrict(),
-							getPortType(), isMulty() );
+							getPortType(), isMulti() );
 			} else {
 				port.setType(getPortType());
 				port.setName(getPortName());
 				port.area = isAreaConn();
 				port.strict = isStrict();
-				port.multy = isMulty();
+				port.multi = isMulti();
 			}
 			setVisible(false);
 			dispose();
@@ -232,12 +232,12 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		}
 	}
 
-	public boolean isMulty() {
-		return isMulty;
+	public boolean isMulti() {
+		return isMulti;
 	}
 
-	public void setMulty(boolean isMulty) {
-		this.isMulty = isMulty;
-		checkIsMulty.setSelected(isMulty);
+	public void setMulti(boolean isMulti) {
+		this.isMulti = isMulti;
+		checkIsMulti.setSelected(isMulti);
 	}
 }

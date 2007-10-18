@@ -23,7 +23,7 @@ public class Port implements Cloneable, Serializable {
 	private boolean watched = false;
 	private boolean hilighted = false;
 
-	public Port(String name, String type, int x, int y, String portConnection, String strict, String multy ) {
+	public Port(String name, String type, int x, int y, String portConnection, String strict, String multi ) {
 		this.name = name;
 		this.type = type.trim();
 		this.x = x;
@@ -34,7 +34,7 @@ public class Port implements Cloneable, Serializable {
 
 		this.strict = Boolean.parseBoolean( strict );
 
-		this.isMulti = Boolean.parseBoolean( multy );
+		this.isMulti = Boolean.parseBoolean( multi );
 	}
 
 	public ArrayList<Port> getStrictConnected() {
