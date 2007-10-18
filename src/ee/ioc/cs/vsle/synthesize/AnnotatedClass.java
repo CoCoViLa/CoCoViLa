@@ -16,6 +16,7 @@ import java.util.*;
 public class AnnotatedClass {
 
     public static final String SPEC_OBJECT_NAME = "cocovilaSpecObjectName";
+    public static final String INDEPENDENT_SUBTASK = "IndependentSubtask";
 	
 	private String name;
 	private ClassList superClasses = new ClassList();

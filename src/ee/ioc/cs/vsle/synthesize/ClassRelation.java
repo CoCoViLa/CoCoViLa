@@ -19,9 +19,14 @@ import java.util.regex.Matcher;
 class ClassRelation
 	implements Serializable {
 
-    private Collection<ClassField> inputs = new LinkedHashSet<ClassField>();
+    /**
+     * 
+     */
+    private static final long serialVersionUID = -6822667728220713188L;
+    
+    protected Collection<ClassField> inputs = new LinkedHashSet<ClassField>();
     private Collection<SubtaskClassRelation> subtasks = new LinkedHashSet<SubtaskClassRelation>();
-    private Collection<ClassField> outputs = new LinkedHashSet<ClassField>();
+    protected Collection<ClassField> outputs = new LinkedHashSet<ClassField>();
     private Collection<ClassField> exceptions = new LinkedHashSet<ClassField>();
 
 	/**
@@ -35,7 +40,7 @@ class ClassRelation
 	 */
         private int type;
 	private String method;
-	private String specLine;
+	protected String specLine;
 
 	/**
 	 * Class constructor.

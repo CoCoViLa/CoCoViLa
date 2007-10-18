@@ -11,7 +11,14 @@ import ee.ioc.cs.vsle.vclass.*;
  */
 public class SubtaskClassRelation extends ClassRelation {
 
-	private ClassField context;
+	/**
+     * 
+     */
+    private static final long serialVersionUID = -7008909209999088790L;
+
+    private ClassField context;
+	
+	private int lazyHash = -1;
 	
 	/**
 	 * @param specLine
@@ -42,4 +49,42 @@ public class SubtaskClassRelation extends ClassRelation {
 	static SubtaskClassRelation createDependentSubtask( String specLine ) {
 		return new SubtaskClassRelation( specLine, null );
 	}
+
+    @Override
+    public boolean equals( Object obj ) {
+        
+        if( isIndependent() ) {
+            return this.hashCode() == obj.hashCode();
+        }
+        
+        return super.equals( obj );
+    }
+
+    @Override
+    public int hashCode() {
+        
+        if( isIndependent() ) {
+            if( lazyHash == -1 ) {
+                String res = "";
+
+                if( isIndependent() ) {
+                    res += context.getName();
+                }
+
+                for( ClassField in : inputs ) {
+                    res += in.getName();
+                }
+
+                for( ClassField out : outputs ) {
+                    res += out.getName();
+                }
+
+                lazyHash = res.hashCode();
+            }
+
+            return lazyHash;
+        }
+        
+        return super.hashCode();
+    }
 }
