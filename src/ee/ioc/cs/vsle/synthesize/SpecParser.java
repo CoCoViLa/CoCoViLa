@@ -430,10 +430,7 @@ public class SpecParser {
                             // if there are no variables on the rhs, mark alias
                             // as empty
                             if ( !containsVar( annClass.getFields(), name ) ) {
-                                alias = new Alias( name );
-                                if ( !split[ 2 ].trim().equals( "" ) ) {
-                                    alias.setStrictTypeOfVars( split[ 2 ].trim() );
-                                }
+                                alias = new Alias( name, split[ 2 ].trim() );
                                 annClass.addField( alias );
                                 continue;
                             }
@@ -490,24 +487,15 @@ public class SpecParser {
                                     aliasDeclaration = (Alias) parentClass.getFieldByName( leftFromName );
 
                                     // if everything is ok, create alias
-                                    alias = new Alias( name );
+                                    alias = new Alias( name, aliasDeclaration.getVarType() );
 
-                                    if ( aliasDeclaration.isStrictType() ) {
-                                        alias.setStrictTypeOfVars( aliasDeclaration.getVarType() );
-                                    } else {
-                                        alias.setType( aliasDeclaration.getVarType() );
-                                    }
                                 }
                             } catch ( Exception e ) {
                                 throw new SpecParseException( "Alias " + name + " is not declared, class " + className
                                         + ( e.getMessage() != null ? "\n" + e.getMessage() : "" ) );
                             }
                         } else {
-                            alias = new Alias( name );
-
-                            if ( !split[ 2 ].trim().equals( "" ) ) {
-                                alias.setStrictTypeOfVars( split[ 2 ].trim() );
-                            }
+                            alias = new Alias( name, split[ 2 ].trim() );
                         }
 
                         alias.addAll( list, annClass.getFields(), classList );

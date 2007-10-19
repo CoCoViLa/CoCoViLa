@@ -1,29 +1,32 @@
 package ee.ioc.cs.vsle.vclass;
 
-import ee.ioc.cs.vsle.synthesize.*;
-import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ALIAS;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_OBJECT;
 
 import java.util.*;
 
+import ee.ioc.cs.vsle.synthesize.*;
+
 
 public class Alias extends ClassField {
 
+	private static final long	serialVersionUID	= 1L;
 	private boolean isWildcard = false;
-	private boolean isStrictType = false;
-	private boolean isOneTypeVars = true;
-	//this means that alias represents Object[] with elements of any type
-	private boolean isObjectType = false;
 	private String wildcardVar;
 	
 	/**
 	 * Class constructor.
 	 * @param name String - alias name.
 	 */
-        public Alias( String name ) {
+        public Alias( String name, String strictType ) {
             super( name );
             vars = new ArrayList<ClassField>();
-            //type = TYPE_ALIAS;
+            
+            if( strictType == null || strictType.length() == 0 ) {
+            	type = TYPE_OBJECT;
+            } else {
+            	type = strictType;
+            }
+            
         } // ee.ioc.cs.editor.vclass.Alias
 
 	/**
@@ -32,22 +35,18 @@ public class Alias extends ClassField {
 	 * @throws AliasException 
 	 */
 	public void addVar(ClassField f) throws AliasException {
-		if( isStrictType && !isWildcard() && !f.getType().equals( type ) ) {
-			throw new AliasException( "Unable to add " + f.type + " " + f + " to alias " 
-					+ this + " because types do not match, required: " + type + ", given: " + f.type );
-		} else if( !isTypeEmpty() && !isObjectType && (!isStrictType && !f.getType().equals( type ) 
-									 /*|| ( f.isAlias() )*/ ) ) {
-			isOneTypeVars = false;
-			type = TYPE_OBJECT;
-		} else if( isTypeEmpty() ) {
-			type = f.getType();
+		if( !acceptsType( f.getType() ) ) {
+			throw new AliasException( "Unable to add " + f.getType() + " " + f + " to alias " 
+					+ this + " because types do not match, required: " + type + ", given: " + f.getType() );
 		}
+		
 		vars.add(f);
 	} // addVar
 
-	private boolean isTypeEmpty() {
-		return type == null || type.equals( "" );
+	public boolean acceptsType( String type ) {
+		return TYPE_OBJECT.equals( this.type ) || type.equals( this.type );
 	}
+	
 	/**
 	 * Adds all variables from the varList input parameter to the variables ArrayList.
 	 * @param input String[]
@@ -55,47 +54,51 @@ public class Alias extends ClassField {
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException - exception thrown if the variable added is null.
 	 * @throws AliasException 
 	 */
-    public void addAll(String[] input, Collection<ClassField> varList, ClassList classList) throws UnknownVariableException, AliasException {
-		for (int i = 0; i < input.length; i++) {
-			if( i > 0 && isWildcard() ) {
-				throw new AliasException( "Alias structure can only contain one wildcard OR variables that are not wildcards" );
-			}
-			ClassField var = getVar(input[i], varList);
-			
-			if (var != null) {
-				addVar(var);
-			} else if (input[i].indexOf(".") >= 1 && !input[i].startsWith("*.")) {
-				String[] split = input[i].trim().split("\\.", -1);
-				ClassField thisVar = getVar(split[0], varList);
-				if( thisVar == null ) {
-					throw new UnknownVariableException(split[0]);
-				}
-				String newType = "";
-				for (int k = 1; k < split.length; k++) {
-					ClassField cf = classList.getType(thisVar.type).getFieldByName(split[k]);
-					if (cf != null) {
-						newType = cf.type;
-					}
-					thisVar = cf;
-				}
-				
-				ClassField cfNew = new ClassField( input[i], newType);
-				
-				addVar(cfNew);
-			} else if (input[i].startsWith("*.")) {
-				//ClassField cf = new ClassField( input[i] );
-				
-				if( i != 0 && vars.size() > 0 ) {
-					throw new AliasException( "Alias structure can only contain one wildcard OR variables that are not wildcards" );
-				}
-				isWildcard = true;
-				wildcardVar = input[i].substring( 2 );
-				//addVar(cf);
-			} else {
-				throw new UnknownVariableException(input[i]);
-			}
-		}
-	} // addAll
+    public void addAll(String[] input, Collection<ClassField> varList,
+            ClassList classList) throws UnknownVariableException, AliasException {
+        for (int i = 0; i < input.length; i++) {
+            if (i > 0 && isWildcard()) {
+                throw new AliasException(
+                        "Alias structure can only contain one wildcard OR variables that are not wildcards");
+            }
+            ClassField var = getVar(input[i], varList);
+
+            if (var != null) {
+                addVar(var);
+            } else if (input[i].startsWith("*.")) {
+                // ClassField cf = new ClassField( input[i] );
+
+                if (i != 0 && vars.size() > 0) {
+                    throw new AliasException(
+                            "Alias structure can only contain one wildcard OR variables that are not wildcards");
+                }
+                isWildcard = true;
+                wildcardVar = input[i].substring(2);
+                // addVar(cf);
+            } else if (input[i].indexOf(".") >= 1) {
+                String[] split = input[i].trim().split("\\.", -1);
+                ClassField thisVar = getVar(split[0], varList);
+                if (thisVar == null) {
+                    throw new UnknownVariableException(split[0]);
+                }
+                String newType = "";
+                for (int k = 1; k < split.length; k++) {
+                    ClassField cf = classList.getType(thisVar.type)
+                            .getFieldByName(split[k]);
+                    if (cf != null) {
+                        newType = cf.type;
+                    }
+                    thisVar = cf;
+                }
+
+                ClassField cfNew = new ClassField(input[i], newType);
+
+                addVar(cfNew);
+            } else {
+                throw new UnknownVariableException(input[i]);
+            }
+        }
+    } // addAll
 
 
 	/**
@@ -167,28 +170,7 @@ public class Alias extends ClassField {
 		return vars.isEmpty();
 	}
 
-	public void setStrictTypeOfVars(String strictTypeOfVars) {
-		if( TYPE_OBJECT.equals( strictTypeOfVars ) ) {
-			isObjectType = true;
-		} else {
-			isStrictType = true;
-		}
-		this.type = strictTypeOfVars;
-	}
-
-	public boolean isStrictType() {
-		return isStrictType;
-	}
-
-	public boolean isObjectType() {
-		return isObjectType;
-	}
-
-	public boolean isOneTypeVars() {
-		return isOneTypeVars;
-	}
 	public boolean isAlias() {
-		//return TypeUtil.TYPE_ALIAS.equals( type );
 		return true;
 	} // isAlias
 	
@@ -207,9 +189,6 @@ public class Alias extends ClassField {
 	 */
 	public void setDeclaredValues( Alias real ) {
 		isWildcard = real.isWildcard;
-		isStrictType = real.isStrictType;
-		isOneTypeVars = real.isOneTypeVars;
-		isObjectType = real.isObjectType;
 		isInput = real.isInput;
 		isGoal = real.isGoal;
 		isStatic = real.isStatic;

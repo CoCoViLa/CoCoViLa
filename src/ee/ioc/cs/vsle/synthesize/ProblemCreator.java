@@ -359,8 +359,9 @@ public class ProblemCreator {
     
     private static void rewriteWildcardAlias( Var aliasVar, AnnotatedClass ac, ClassList classes, Problem problem ) throws AliasException {
     	
-    	String wildcardVar = ((Alias)aliasVar.getField()).getWildcardVar();
-
+    	Alias alias = (Alias)aliasVar.getField();
+    	String wildcardVar = alias.getWildcardVar();
+    	
     	for ( ClassField clf : ac.getFields() ) {
     		//in the following AnnotatedClass we look for vars that match wildcard
     		AnnotatedClass anc = classes.getType( clf.getType() );
@@ -369,8 +370,7 @@ public class ProblemCreator {
     			ClassField field = anc.getFieldByName( wildcardVar );
     			if ( field != null ) {
 
-    				if( !((Alias)aliasVar.getField()).isStrictType() 
-    						|| ((Alias)aliasVar.getField()).getVarType().equals( field.getType() ) ) {
+    				if( alias.acceptsType( field.getType() ) ) {
     					
     					String absoluteName = aliasVar.getParent().getFullNameForConcat() + clf + "." + field.getName();
     					
@@ -378,7 +378,7 @@ public class ProblemCreator {
     					
     					if( var != null ) {
     						aliasVar.addVar( var );
-    						((Alias)aliasVar.getField()).addVar( var.getField() );
+    						alias.addVar( var.getField() );
     					}
     				}
     			}
