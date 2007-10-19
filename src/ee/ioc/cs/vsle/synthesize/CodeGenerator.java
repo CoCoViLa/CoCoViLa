@@ -57,8 +57,8 @@ public class CodeGenerator {
 
                 Set<Var> usedVars = new HashSet<Var>();
 
-                addVarsToSet( rel.getInputs(), usedVars );
-                addVarsToSet( rel.getOutputs(), usedVars );
+                unfoldVarsToSet( rel.getInputs(), usedVars );
+                unfoldVarsToSet( rel.getOutputs(), usedVars );
 
                 genSubTasks( rel, alg, false, className, usedVars, problem );
             }
@@ -141,8 +141,8 @@ public class CodeGenerator {
                 List<Var> subInputs = subtask.getInputs();
                 List<Var> subOutputs = subtask.getOutputs();
 
-                addVarsToSet( subInputs, currentUsedVars );
-                addVarsToSet( subOutputs, currentUsedVars );
+                unfoldVarsToSet( subInputs, currentUsedVars );
+                unfoldVarsToSet( subOutputs, currentUsedVars );
 
                 List<Rel> subAlg = subtask.getAlgorithm();
                 right();
@@ -160,8 +160,8 @@ public class CodeGenerator {
                     } else {
                         appendRelToAlg( same(), trel, bufSbtBody );
                     }
-                    addVarsToSet( trel.getInputs(), currentUsedVars );
-                    addVarsToSet( trel.getOutputs(), currentUsedVars );
+                    unfoldVarsToSet( trel.getInputs(), currentUsedVars );
+                    unfoldVarsToSet( trel.getOutputs(), currentUsedVars );
                 }
                 // apend subtask outputs to algorithm
                 bufSbtBody.append( getSubtaskOutputs( subOutputs, same() ) );
@@ -464,7 +464,7 @@ public class CodeGenerator {
      * @param from
      * @param to
      */
-    public static void addVarsToSet( Collection<Var> from, Collection<Var> to ) {
+    public static void unfoldVarsToSet( Collection<Var> from, Collection<Var> to ) {
         for ( Var topvar : from ) {
 
             to.add( topvar );
@@ -475,7 +475,7 @@ public class CodeGenerator {
                     to.add( var );
                     if ( var.getField().isAlias() ) {
                         // this is used if we have alias in alias structure
-                        addVarsToSet( var.getChildVars(), to );// recursion
+                        unfoldVarsToSet( var.getChildVars(), to );// recursion
                     }
                 }
             }

@@ -567,27 +567,42 @@ public class ProblemCreator {
           UnknownVariableException {
 	  
       String obj = parent.getFullNameForConcat();
+      Collection<Var> vars = new HashSet<Var>();
+      Collection<Var> flattened = new HashSet<Var>();
       
-      for ( ClassField cf : classRelation.getInputs() ) {
-          String varName = obj + cf.getName();
-          if ( problem.getAllVars().containsKey( varName ) ) {
-        	  Var var = problem.getAllVars().get( varName );
-              problem.getKnownVars().add( var );
-              problem.getFoundVars().add( var );
-              problem.getAssumptions().add( var );
-          } else {
-              throw new UnknownVariableException( cf.getName() );
+      {//Assertions
+          for ( ClassField cf : classRelation.getInputs() ) {
+              String varName = obj + cf.getName();
+              if ( problem.getAllVars().containsKey( varName ) ) {
+                  vars.add( problem.getAllVars().get( varName ) );
+              } else {
+                  throw new UnknownVariableException( cf.getName() );
+              }
           }
+
+          CodeGenerator.unfoldVarsToSet( vars, flattened );
+
+          problem.getKnownVars().addAll( flattened );
+          problem.getFoundVars().addAll( flattened );
+          problem.getAssumptions().addAll( flattened );
       }
       
-      for ( ClassField cf : classRelation.getOutputs() ) {
-          String varName = obj + cf.getName();
-          if ( problem.getAllVars().containsKey( varName ) ) {
-        	  Var var = problem.getAllVars().get( varName );
-              problem.addGoal( var );
-          } else {
-              throw new UnknownVariableException( cf.getName() );
+      {//Goals
+          vars.clear();
+          flattened.clear();
+          
+          for ( ClassField cf : classRelation.getOutputs() ) {
+              String varName = obj + cf.getName();
+              if ( problem.getAllVars().containsKey( varName ) ) {
+                  vars.add( problem.getAllVars().get( varName ) );
+              } else {
+                  throw new UnknownVariableException( cf.getName() );
+              }
           }
+          
+          CodeGenerator.unfoldVarsToSet( vars, flattened );
+          
+          problem.getGoals().addAll( flattened );
       }
 
   }

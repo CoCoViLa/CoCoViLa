@@ -60,13 +60,17 @@ public class DepthFirstPlanner implements IPlanner {
         ArrayList<Rel> algorithm = new ArrayList<Rel>();
 
         // manage axioms
+        Collection<Var> flattened = new HashSet<Var>();
         for ( Iterator<Rel> axiomIter = problem.getAxioms().iterator(); axiomIter.hasNext(); ) {
             Rel rel = axiomIter.next();
             //do not overwrite values of variables that come via args of compute() or as inputs of independent subtasks
-            if( !problem.getAssumptions().containsAll( rel.getOutputs() ) ) {
+            unfoldVarsToSet( rel.getOutputs(), flattened );
+            
+            if( !problem.getAssumptions().containsAll( flattened ) ) {
                 algorithm.add( rel );
             }
             axiomIter.remove();
+            flattened.clear();
         }
 
         problem.getFoundVars().addAll( problem.getKnownVars() );
@@ -216,7 +220,7 @@ public class DepthFirstPlanner implements IPlanner {
 
                                 if ( !rel.getOutputs().isEmpty() ) {
                                     relOutputs.clear();
-                                    addVarsToSet( rel.getOutputs(), relOutputs );
+                                    unfoldVarsToSet( rel.getOutputs(), relOutputs );
                                     newVars.addAll( relOutputs );
                                     p.getFoundVars().addAll( relOutputs );
                                 }
@@ -421,7 +425,7 @@ public class DepthFirstPlanner implements IPlanner {
                         prepareSubtask( problemNew, subtaskNew );
 
                         Set<Var> goals = new LinkedHashSet<Var>();
-                        addVarsToSet( subtaskNew.getOutputs(), goals );
+                        unfoldVarsToSet( subtaskNew.getOutputs(), goals );
 
                         boolean solved = linearForwardSearch( problemNew, subtaskNew.getAlgorithm(),
                         // never optimize here
@@ -477,7 +481,7 @@ public class DepthFirstPlanner implements IPlanner {
 
                     Set<Var> newVars = new LinkedHashSet<Var>();
 
-                    addVarsToSet( subtaskRel.getOutputs(), newVars );
+                    unfoldVarsToSet( subtaskRel.getOutputs(), newVars );
 //                    System.err.println( "newVars " + newVars.size() + " " + newVars + 
 //                            "\nproblem.getKnownVars() " + problem.getKnownVars().size() + " " + problem.getKnownVars() + 
 //                            "\nproblem.getFoundVars() " + problem.getFoundVars().size() + " " + problem.getFoundVars() );
@@ -516,7 +520,7 @@ public class DepthFirstPlanner implements IPlanner {
     private void prepareSubtask( Problem problem, Rel subtask ) {
         // [x->y] assume x is known
         Set<Var> flatVars = new LinkedHashSet<Var>();
-        addVarsToSet( subtask.getInputs(), flatVars );
+        unfoldVarsToSet( subtask.getInputs(), flatVars );
         problem.getKnownVars().addAll( flatVars );
         problem.getFoundVars().addAll( flatVars );
     }
