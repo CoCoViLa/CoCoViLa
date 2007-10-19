@@ -62,7 +62,10 @@ public class DepthFirstPlanner implements IPlanner {
         // manage axioms
         for ( Iterator<Rel> axiomIter = problem.getAxioms().iterator(); axiomIter.hasNext(); ) {
             Rel rel = axiomIter.next();
-            algorithm.add( rel );
+            //do not overwrite values of variables that come via args of compute() or as inputs of independent subtasks
+            if( !problem.getAssumptions().containsAll( rel.getOutputs() ) ) {
+                algorithm.add( rel );
+            }
             axiomIter.remove();
         }
 
