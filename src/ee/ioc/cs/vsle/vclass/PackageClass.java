@@ -1,6 +1,6 @@
 package ee.ioc.cs.vsle.vclass;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.io.Serializable;
 import ee.ioc.cs.vsle.graphics.Shape;
 
@@ -8,7 +8,10 @@ public class PackageClass implements Serializable {
     private static final long serialVersionUID = 1L;
 	public String name;
 	public String icon;
-	public ArrayList<ClassField> fields = new ArrayList<ClassField>();
+	//fields declared in the xml
+    private Map<String, ClassField> propFields = new LinkedHashMap<String, ClassField>();
+    //fields declared in the specification of the corresponding java class
+    private Map<String, ClassField> specFields = new LinkedHashMap<String, ClassField>();
 	public ClassGraphics graphics;
 	public ArrayList<Port> ports = new ArrayList<Port>();
 	public String description;
@@ -80,6 +83,15 @@ public class PackageClass implements Serializable {
 		obj.setClassName(name);
 		obj.setStatic(isStatic);
 
+		// deep clone fields list
+        for (ClassField field : specFields.values() ) {
+            ClassField newField = field.clone();
+            if( propFields.containsValue( field ) ) {
+                obj.addField( newField );
+            }
+            obj.addSpecField( newField );
+        }
+        
 		obj.shapes = new ArrayList<Shape>(graphics.shapes.size());
 		for (Shape shape : graphics.shapes)
 			obj.shapes.add(shape.clone());
@@ -116,11 +128,6 @@ public class PackageClass implements Serializable {
 		}
 		obj.setPorts(newPorts);
 
-		// deep clone fields list
-		obj.fields = new ArrayList<ClassField>(fields.size());
-		for (ClassField field : fields)
-			obj.fields.add(field.clone());
-		
 		return obj;
 	}
 
@@ -141,10 +148,10 @@ public class PackageClass implements Serializable {
 	 * false otherwise
 	 */
 	public boolean hasField(String fieldName, String fieldType) {
-		if (fields == null)
+		if (getFields() == null)
 			return false;
 		
-		for (ClassField f : fields) {
+		for (ClassField f : getFields()) {
 			if (f.getName().equals(fieldName) && f.getType().equals(fieldType))
 				return true;
 		}
@@ -152,10 +159,40 @@ public class PackageClass implements Serializable {
 	}
 
 	/**
+     * @param propFields the fields to set
+     */
+    public void addField( ClassField field ) {
+        this.propFields.put( field.getName(), field );
+    }
+
+    /**
+     * @return the fields
+     */
+    public Collection<ClassField> getFields() {
+        return propFields.values();
+    }
+
+    /**
 	 * Sets the default static property value for new instances of this class.
 	 * @param isStatic default static property value for new objects
 	 */
 	public void setStatic(boolean isStatic) {
 		this.isStatic = isStatic;
 	}
+
+    /**
+     * @return the specFields
+     */
+    public ClassField getSpecField( String name ) {
+        return specFields.get( name );
+    }
+
+    /**
+     * @param specFields the specFields to set
+     */
+    public void setSpecFields( Collection<ClassField> specFields ) {
+        for( ClassField field : specFields ) {
+            this.specFields.put( field.getName(), field );
+        }
+    }
 }

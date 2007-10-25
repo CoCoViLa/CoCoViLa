@@ -22,9 +22,9 @@ public class RelObj extends GObj {
 	public Port endPort;
 	public int endX, endY;
 
-	public RelObj(int x, int y, int width, int height, String name) {
-		super(x, y, width, height, name);
-	}
+//	public RelObj(int x, int y, int width, int height, String name) {
+//		super(x, y, width, height, name);
+//	}
 
 	public RelObj() {
 		// do nothing
@@ -57,15 +57,15 @@ public class RelObj extends GObj {
 		int xModifier = getX();
 		int yModifier = getY();
 
-		for (ClassField field: fields) {
-			if (field.defaultGraphics != null) {
-				field.defaultGraphics.angle = angle;
-				field.defaultGraphics.drawSpecial(xModifier,
+		for (ClassField field: getFields()) {
+			if (field.getDefaultGraphics() != null) {
+				field.getDefaultGraphics().angle = angle;
+				field.getDefaultGraphics().drawSpecial(xModifier,
 					yModifier, getXsize(), getYsize(), g, field.getName(), field.value);
 			}
-			if (field.isKnown() && field.knownGraphics != null) {
-				field.knownGraphics.angle = angle;
-				field.knownGraphics.drawSpecial(xModifier,
+			if (field.isKnown() && field.getKnownGraphics() != null) {
+				field.getKnownGraphics().angle = angle;
+				field.getKnownGraphics().drawSpecial(xModifier,
 					yModifier, getXsize(), getYsize(), g, field.getName(), field.value);
 			}
 		}
@@ -170,7 +170,7 @@ public class RelObj extends GObj {
 		
 		th.startElement(null, null, "fields", null);
 
-		for (ClassField field: fields)
+		for (ClassField field: getFields())
 			field.toXML(th);
 
 		th.endElement(null, null, "fields");

@@ -570,7 +570,7 @@ public class ProblemCreator {
       Collection<Var> vars = new HashSet<Var>();
       Collection<Var> flattened = new HashSet<Var>();
       
-      {//Assertions
+      {//Assumptions
           for ( ClassField cf : classRelation.getInputs() ) {
               String varName = obj + cf.getName();
               if ( problem.getAllVars().containsKey( varName ) ) {

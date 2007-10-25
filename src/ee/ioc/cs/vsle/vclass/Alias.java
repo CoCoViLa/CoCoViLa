@@ -106,7 +106,7 @@ public class Alias extends ClassField {
 	 * @return String - alias's name.
 	 */
 	public String toString() {
-		return name;
+		return "(alias)" + super.toString();
 	} // toString
 
 	/**

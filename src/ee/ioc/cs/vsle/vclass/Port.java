@@ -3,13 +3,15 @@ package ee.ioc.cs.vsle.vclass;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-import ee.ioc.cs.vsle.util.TypeUtil;
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
 
 public class Port implements Cloneable, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String id;
 	private GObj obj;
+	private ClassField field;
 	//private int width, height;
 	private String name;
 	private String type;
@@ -193,11 +195,7 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	public ClassField getField() {
-        for (ClassField field: obj.getFields()) {
-			if (field.getName().equals(name))
-				return field;
-		}
-		return null;
+		return field;
 	}
 
 	public boolean isArea() {
@@ -210,6 +208,11 @@ public class Port implements Cloneable, Serializable {
 
 	public void setObject(GObj obj) {
 		this.obj = obj;
+		this.field = obj.getSpecField( name );
+		
+		if( this.field == null && RuntimeProperties.isLogDebugEnabled() ) {
+		    db.p( "Warning: Port " + name + " does not have the corresponding specification field" );
+		}
 	}
 
 	public GObj getObject() {

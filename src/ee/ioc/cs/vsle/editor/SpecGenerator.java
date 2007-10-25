@@ -54,7 +54,7 @@ public class SpecGenerator implements ISpecGenerator {
 						+ obj.getClassName() + " " + obj.getName() + ";\n");
 			}
 
-			for ( ClassField field : obj.fields ) {
+			for ( ClassField field : obj.getFields() ) {
 				if ( ( field.getValue() != null ) && !field.isGoal() ) {
 					appendSpecFieldLHS(obj, field, s);
 

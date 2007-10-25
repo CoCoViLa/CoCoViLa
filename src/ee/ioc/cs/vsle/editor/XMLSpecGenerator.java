@@ -11,7 +11,6 @@ public class XMLSpecGenerator implements ISpecGenerator {
 	
     public String generateSpec(Scheme scheme) {
         GObj obj;
-        ClassField field;
         String spec = "";
 
     	VPackage pack = scheme.getVPackage();
@@ -26,8 +25,7 @@ public class XMLSpecGenerator implements ISpecGenerator {
             s.append("<object type=\"" + obj.getClassName() + "\" name=\""
                     + obj.getName() + "\">\n");
             s.append("  <fields>\n");
-            for (int j = 0; j < obj.fields.size(); j++) {
-                field = obj.fields.get(j);
+            for ( ClassField field : obj.getFields() ) {
                 if (field.getValue() != null) {
                     s.append("    <field name=\""+ field.getName()
                             + "\" value =\""+ field.getValue() + "\">\n");

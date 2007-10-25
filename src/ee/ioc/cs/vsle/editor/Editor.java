@@ -4,12 +4,14 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
 
 import ee.ioc.cs.vsle.editor.EditorActionListener.*;
+import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -23,6 +25,8 @@ import ee.ioc.cs.vsle.vclass.*;
  * @version 1.0
  */
 public class Editor extends JFrame implements ChangeListener {
+
+    private static final long serialVersionUID = 1L;
 
     private static Editor s_instance;
 
@@ -461,24 +465,49 @@ public class Editor extends JFrame implements ChangeListener {
 
             try {
 
-                Canvas canvas = new Canvas( f );
                 String packageName = f.getName().substring( 0, f.getName().indexOf( "." ) );
-
-                int count = 0;
-
-                for ( Component canv : tabbedPane.getComponents() ) {
-                    if ( packageName.equals( ( (Canvas) canv ).getCurrentPackage().getName() ) ) {
-                        count++;
+                
+                PackageParser loader = new PackageParser();
+                boolean isOK = false;
+                
+                if ( loader.load( f ) ) {
+                    if ( loader.getDiagnostics().hasProblems() ) {
+                        if ( DiagnosticsCollector.promptLoad( this, loader.getDiagnostics(), "Warning: Package " + packageName + " contains errors", "package" ) ) {
+                            isOK = true;
+                        }
+                    } else {
+                        isOK = true;
                     }
-                }
+                } else {
+                    List<String> msgs = loader.getDiagnostics().getMessages();
+                    String msg;
+                    if ( msgs.size() > 0 )
+                        msg = msgs.get( 0 );
+                    else
+                        msg = "An error occured. See the log for details.";
 
-                if ( count > 0 ) {
-                    packageName = packageName + " (" + ( count + 1 ) + ")";
-                    canvas.setTitle( packageName );
+                    JOptionPane.showMessageDialog( this, msg, "Error loading package", JOptionPane.ERROR_MESSAGE );
                 }
+                
+                if( isOK ) {
+                    Canvas canvas = new Canvas( loader.getPackage(), f.getParent() + RuntimeProperties.FS );
+                    
+                    int count = 0;
 
-                tabbedPane.addTab( packageName, canvas );
-                tabbedPane.setSelectedComponent( canvas );
+                    for ( Component canv : tabbedPane.getComponents() ) {
+                        if ( packageName.equals( ( (Canvas) canv ).getCurrentPackage().getName() ) ) {
+                            count++;
+                        }
+                    }
+
+                    if ( count > 0 ) {
+                        packageName = packageName + " (" + ( count + 1 ) + ")";
+                        canvas.setTitle( packageName );
+                    }
+
+                    tabbedPane.addTab( packageName, canvas );
+                    tabbedPane.setSelectedComponent( canvas );
+                }
             } catch ( Exception e ) {
                 String message = "Unable to load package \"" + f.getAbsolutePath() + "\"";
                 db.p( message );

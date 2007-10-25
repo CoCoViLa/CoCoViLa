@@ -1,7 +1,6 @@
 package ee.ioc.cs.vsle.editor;
 
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.image.*;
 import java.io.*;
 import java.net.*;
@@ -10,7 +9,6 @@ import java.util.List;
 import java.util.concurrent.*;
 
 import javax.swing.*;
-import javax.swing.border.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
 import javax.xml.transform.*;
@@ -21,7 +19,6 @@ import org.xml.sax.helpers.*;
 
 import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
-import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import ee.ioc.cs.vsle.vclass.Point;
@@ -462,18 +459,15 @@ public class Canvas extends JPanel {
         }
     }
 
-    public Canvas( File f ) {
+    public Canvas( VPackage _package, String workingDir ) {
         super();
-        if ( f.exists() ) {
-            setWorkDir( f.getParent() + RuntimeProperties.FS );
-            vPackage = PackageParser.createPackage( f );
-            initialize();
-            palette = new Palette( vPackage, this );
-            m_canvasTitle = vPackage.getName();
-            validate();
-        } else {
-            JOptionPane.showMessageDialog( this, "Cannot read file " + f, "Error", JOptionPane.INFORMATION_MESSAGE );
-        }
+        
+        setWorkDir( workingDir );
+        vPackage = _package;
+        initialize();
+        palette = new Palette( vPackage, this );
+        m_canvasTitle = vPackage.getName();
+        validate();
     }
 
     private String m_canvasTitle;
@@ -1047,17 +1041,17 @@ public class Canvas extends JPanel {
         SchemeLoader loader = new SchemeLoader();
         loader.setVPackage( vPackage );
         if ( loader.load( file ) ) {
-            if ( loader.hasProblems() ) {
-                if ( promptLoad( loader.getDiagnostics() ) ) {
+            if ( loader.getDiagnostics().hasProblems() ) {
+                if ( DiagnosticsCollector.promptLoad( this, loader.getDiagnostics(), "Warning: Inconsistent scheme", "scheme" ) ) {
                     scheme = new Scheme( vPackage, loader.getObjectList(), loader.getConnectionList() );
                 }
             } else {
                 scheme = new Scheme( vPackage, loader.getObjectList(), loader.getConnectionList() );
             }
         } else {
-            List<String> msgs = loader.getDiagnostics();
+            List<String> msgs = loader.getDiagnostics().getMessages();
             String msg;
-            if ( msgs != null && msgs.size() > 0 )
+            if ( msgs.size() > 0 )
                 msg = msgs.get( 0 );
             else
                 msg = "An error occured. See the log for details.";
@@ -1079,67 +1073,6 @@ public class Canvas extends JPanel {
         return true;
     } // loadScheme
 
-    private boolean promptLoad( List<String> messages ) {
-        final JDialog dialog = new JDialog( Editor.getInstance() );
-        dialog.setModal( true );
-        dialog.setLocationRelativeTo( this );
-        dialog.setDefaultCloseOperation( WindowConstants.HIDE_ON_CLOSE );
-        dialog.setTitle( "Warning: Inconsistent scheme" );
-
-        JLabel topLabel = new JLabel( "The following problems occured " + "while loading the scheme:" );
-        topLabel.setBorder( new EmptyBorder( 20, 5, 5, 5 ) );
-
-        dialog.add( topLabel, BorderLayout.NORTH );
-
-        JTextArea txt = new JTextArea( 5, 40 );
-        txt.setBorder( new EmptyBorder( 5, 5, 5, 5 ) );
-        txt.setLineWrap( true );
-        txt.setWrapStyleWord( true );
-        txt.setEditable( false );
-        for ( String s : messages ) {
-            txt.append( " - " );
-            txt.append( s );
-            txt.append( "\n" );
-        }
-        txt.setCaretPosition( 0 );
-        JScrollPane scrollPane = new JScrollPane( txt, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-                ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
-        dialog.add( scrollPane, BorderLayout.CENTER );
-
-        final JButton btnContinue = new JButton( "Continue" );
-        JButton btnCancel = new JButton( "Cancel" );
-
-        final boolean[] result = new boolean[ 1 ];
-        result[ 0 ] = false; // close is Cancel
-
-        btnCancel.addActionListener( new ActionListener() {
-            public void actionPerformed( ActionEvent e ) {
-                dialog.setVisible( false );
-            }
-        } );
-
-        btnContinue.addActionListener( new ActionListener() {
-            public void actionPerformed( ActionEvent e ) {
-                dialog.setVisible( false );
-                result[ 0 ] = true;
-            }
-        } );
-
-        JPanel btnPanel = new JPanel( new FlowLayout( FlowLayout.RIGHT ) );
-        btnPanel.add( btnContinue );
-        btnPanel.add( btnCancel );
-        dialog.add( btnPanel, BorderLayout.SOUTH );
-        dialog.pack();
-        SwingUtilities.invokeLater( new Runnable() {
-            public void run() {
-                btnContinue.requestFocus();
-            }
-        } );
-        dialog.setVisible( true );
-        dialog.dispose();
-
-        return result[ 0 ];
-    }
 
     public void saveScheme( File file ) {
         OutputStream output = null;

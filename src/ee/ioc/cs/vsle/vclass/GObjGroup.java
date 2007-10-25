@@ -277,13 +277,12 @@ public class GObjGroup extends GObj implements Serializable {
 
 		GObj obj;
 		StringBuffer s = new StringBuffer();
-		ClassField field;
+
 		for (int i = 0; i < objects.size(); i++) {
 			obj = objects.get(i);
 			s.append(
 				"    " + obj.getClassName() + " " + obj.getName() + ";\n");
-			for (int j = 0; j < obj.fields.size(); j++) {
-				field = obj.fields.get(j);
+			for ( ClassField field : obj.getFields() ) {
 				if (field.value != null) {
 					if (field.type.equals(TYPE_STRING)) {
 						s.append("        " + obj.getName() + "." + field.name

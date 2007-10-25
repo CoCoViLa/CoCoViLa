@@ -1,20 +1,14 @@
 package ee.ioc.cs.vsle.editor;
 
-import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.*;
+import java.io.*;
 
-import javax.xml.parsers.SAXParserFactory;
-import javax.xml.parsers.SAXParser;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
+import javax.xml.parsers.*;
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.graphics.Shape;
 
 /**
  * Loads stored schemes from .syn files. Instances of this scheme loader
@@ -27,12 +21,13 @@ import ee.ioc.cs.vsle.graphics.Shape;
  * 
  * @see ee.ioc.cs.vsle.editor.RuntimeProperties#SCHEME_DTD
  */
-public class SchemeLoader {
+public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 
 	private SAXParser parser;
 	private PackageHandler handler;
 	private VPackage vpackage;
-
+	private DiagnosticsCollector collector = new DiagnosticsCollector();
+	
 	/**
 	 * Sets the package description
 	 * @param vpackage package description
@@ -84,7 +79,7 @@ public class SchemeLoader {
 						+ (System.currentTimeMillis() - startParsing)
 						+ "ms.\n" );
 		} catch (Exception e) {
-			handler.collectDiagnostic(e.getMessage());
+		    collector.collectDiagnostic(e.getMessage());
 			return false;
 		} finally {
 			// The stream must be explicitly closed, otherwise it is not
@@ -119,37 +114,36 @@ public class SchemeLoader {
 	 * Returns the list of diagnostic messages generated.
 	 * @return diagnostic messages
 	 */
-	public List<String> getDiagnostics() {
-		if (handler == null)
-			return null;
-		
-		List<String> list = handler.getDiagnostics();
-		
-		if (list == null || list.isEmpty())
-			return null;
-		
-		return list;
-	}
-
-	/**
-	 * This method should be consulted after loading a scheme to see if 
-	 * there might have been gone anything wrong.
-	 * Invoking load() method resets this value.
-	 * @return true, if there were problems, false otherwise.
-	 */
-	public boolean hasProblems() {
-		return getDiagnostics() != null;
+	public DiagnosticsCollector getDiagnostics() {
+	    return collector;
 	}
 	
 	// ===========================================================
 	// SAX DocumentHandler methods
 	// ===========================================================
-	static class PackageHandler extends DefaultHandler {
-		private ObjectList objects;
+	class PackageHandler extends DefaultHandler {
+
+	    private static final String CONNECTION = "connection";
+        private static final String WATCH = "watch";
+        private static final String GOAL = "goal";
+        private static final String INPUT = "input";
+        private static final String NATURE = "nature";
+        private static final String VALUE = "value";
+        private static final String NAME = "name";
+        private static final String FIELD = "field";
+        private static final String RELPROPERTIES = "relproperties";
+        private static final String PROPERTIES = "properties";
+        private static final String SUPERCLASS = "superclass";
+        private static final String PACKAGE = "package";
+        private static final String SCHEME = "scheme";
+        private static final String TYPE = "type";
+        private static final String RELOBJECT = "relobject";
+        private static final String OBJECT = "object";
+        
+        private ObjectList objects;
 		private ConnectionList connections;
 		private VPackage vPackage;
 		private String superClass;
-		private List<String> messages;
 
 		private Connection connection;
 		private GObj obj;
@@ -172,7 +166,7 @@ public class SchemeLoader {
 			String msg = "Parsing error, line " + spe.getLineNumber()
 				+ ", uri " + spe.getSystemId();
 			db.p(msg);
-			collectDiagnostic(msg + "\n" + spe.getMessage());
+			collector.collectDiagnostic(msg + "\n" + spe.getMessage());
 
 			// Use the contained exception, if any
 			Exception x = spe;
@@ -198,7 +192,6 @@ public class SchemeLoader {
 			// the parser may be reused
 			superClass = null;
 			ignoreCurrent = false;
-			messages = null;
 			pclass = null;
 			obj = null;
 		}
@@ -207,7 +200,7 @@ public class SchemeLoader {
 		public void endDocument() {
 			if (superClass != null 
 					&& objects.getByName(superClass) == null) {
-				collectDiagnostic("Superclass " + superClass 
+			    collector.collectDiagnostic("Superclass " + superClass 
 						+ " not found.");
 				superClass = null;
 			}
@@ -223,43 +216,44 @@ public class SchemeLoader {
 
 			String element = qName;
 
-			if (element.equals("object") || element.equals("relobject")) {
-				String name = attrs.getValue("name");
+			if (element.equals(OBJECT) || element.equals(RELOBJECT)) {
+				String name = attrs.getValue(NAME);
 
 				// catch duplicate names
 				if (objects.getByName(name) != null) {
-					collectDiagnostic("Duplicate class name: " + name
+				    collector.collectDiagnostic("Duplicate class name: " + name
 							+ ". Discarding second instance.");
 					ignoreCurrent = true;
 					return;
 				}
 
-				String type = attrs.getValue("type");
+				String type = attrs.getValue(TYPE);
 				pclass = vPackage.getClass(type);
 				
 				if (pclass == null) {
-					collectDiagnostic("The type " + type + " not found in "
+				    collector.collectDiagnostic("The type " + type + " not found in "
 							+ "the package. Discarding class " + name + ".");
 					ignoreCurrent = true;
 					return;
 				}
 
-				obj = (element.equals("relobject")) ? new RelObj() : new GObj();
+				obj = pclass.getNewInstance();
+				
 				obj.setName(name);
 				obj.setClassName(type);
 				obj.setStatic( Boolean.parseBoolean( attrs.getValue("static") ) );
 				objects.add(obj);
-			} else if (element.equals("scheme")) {
-				String type = attrs.getValue("package");
+			} else if (element.equals(SCHEME)) {
+				String type = attrs.getValue(PACKAGE);
 
-				superClass = attrs.getValue("superclass");
+				superClass = attrs.getValue(SUPERCLASS);
 				
 				if (!type.equals(vPackage.getName())) {
 					throw new SAXException("Scheme was built with package \""
 							+ type + "\", load this package first");
 				}
-			} else if (element.equals("properties")
-					|| element.equals("relproperties")) {
+			} else if (element.equals(PROPERTIES)
+					|| element.equals(RELPROPERTIES)) {
 
 				String x = attrs.getValue("x");
 				String y = attrs.getValue("y");
@@ -272,7 +266,7 @@ public class SchemeLoader {
 				obj.setX(Integer.parseInt(x));
 				obj.setY(Integer.parseInt(y));
 
-				if (element.equals("relproperties")) {
+				if (element.equals(RELPROPERTIES)) {
 					String endX = attrs.getValue("endX");
 					String endY = attrs.getValue("endY");
 
@@ -290,31 +284,31 @@ public class SchemeLoader {
                 if (angle != null)
                     obj.setAngle(Double.valueOf(angle).doubleValue());
 
-			} else if (element.equals("field")) {
-				String name = new String(attrs.getValue("name"));
-				String type = new String(attrs.getValue("type"));
-				String value = attrs.getValue("value");
+			} else if (element.equals(FIELD)) {
+				String name = new String(attrs.getValue(NAME));
+				String type = new String(attrs.getValue(TYPE));
+				String value = attrs.getValue(VALUE);
 
 				if (!pclass.hasField(name, type)) {
-					collectDiagnostic("The class " + obj.getName()
+				    collector.collectDiagnostic("The class " + obj.getName()
 							+ " has saved field " + name + "(" + type + ")"
 							+ " = " + value
 							+ " but there is no corresponding field in the"
 							+ " package. Discarding field value.");
 					return;
 				}
-				ClassField cf = new ClassField(name, type, value);
+				ClassField cf = obj.getField( name );
+				cf.setValue( value );
 				
-				String nature = attrs.getValue("nature");
-				if ("input".equals(nature))
+				String nature = attrs.getValue(NATURE);
+				if (INPUT.equals(nature))
 					cf.setInput(true);
-				else if ("goal".equals(nature))
+				else if (GOAL.equals(nature))
 					cf.setGoal(true);
 
-				cf.setWatched(Boolean.parseBoolean(attrs.getValue("watch")));
+				cf.setWatched(Boolean.parseBoolean(attrs.getValue(WATCH)));
 
-				obj.fields.add(cf);
-			} else if (element.equals("connection")) {
+			} else if (element.equals(CONNECTION)) {
 				String obj1 = new String(attrs.getValue("obj1"));
 				String port1 = new String(attrs.getValue("port1"));
 				String obj2 = new String(attrs.getValue("obj2"));
@@ -323,7 +317,7 @@ public class SchemeLoader {
 				Port endPort = objects.getPort(obj2, port2);
 
 				if (beginPort == null || endPort == null) {
-					collectDiagnostic("Discarding connection "
+				    collector.collectDiagnostic("Discarding connection "
 							+ obj1 + "." + port1 + " = " 
 							+ obj2 + "." + port2
 							+ " because of missing object(s) or port(s): "
@@ -350,119 +344,39 @@ public class SchemeLoader {
 		}
 
 		@Override
-		public void endElement(String namespaceURI, String sName, String qName)
-				throws SAXException {
+		public void endElement( String namespaceURI, String sName, String qName ) throws SAXException {
 
-			if (qName.equals("object") || qName.equals("relobject")) {
-				
-				if (ignoreCurrent) {
-					ignoreCurrent = false;
-					return;
-				}
+            if ( qName.equals( OBJECT ) || qName.equals( RELOBJECT ) ) {
 
-				PackageClass pClass = vPackage.getClass(obj.className);
-				
-				if (pClass != null) {
-					// deep clone each separate field
-					ClassField field;
-					ClassField objField;
-						
-					for (int i = 0; i < pClass.fields.size(); i++) {
-						field = pClass.fields.get(i);
-						
-						// match object by name because the order of
-						// the ports might have changed
-						objField = obj.getField(field.getName());
+                if ( ignoreCurrent ) {
+                    ignoreCurrent = false;
+                    return;
+                }
 
-						if (objField == null) {
-							collectDiagnostic("Missing field created: "
-									+ obj.getName() + "." + field.getName());
+                if ( superClass != null && superClass.equals( obj.getName() ) ) {
+                    obj.setSuperClass( true );
+                }
+            } else if ( CONNECTION.equals( qName ) ) {
+                connection = null;
+            } else if ( qName.equals( SCHEME ) ) {
+                // create proper references to start and endports in all
+                // RelObjects
+                // Ysna valus h2kk
+                for ( int i = 0; i < objects.size(); i++ ) {
+                    obj = objects.get( i );
+                    if ( obj instanceof RelObj ) {
+                        Port port = obj.getPorts().get( 0 );
+                        Connection con = port.getConnections().get( 0 );
+                        ( (RelObj) obj ).startPort = con.beginPort;
+                        // ((RelObj)obj).startPort.obj = con.beginPort.obj;
+                        port = obj.getPorts().get( 1 );
+                        con = port.getConnections().get( 0 );
+                        ( (RelObj) obj ).endPort = con.endPort;
 
-							objField = new ClassField(field.getName(),
-									field.getType(), field.getValue());
-
-							obj.fields.add(objField);
-						}
-							
-						objField.setKnownGraphics(field.getKnownGraphics());
-						objField.setDefaultGraphics(field.getDefaultGraphics());
-					}
-
-					ArrayList<Port> ports = new ArrayList<Port>(pClass.ports);
-					obj.shapes = new ArrayList<Shape>(pClass.graphics.shapes);
-
-					Shape shape;
-					for (int i = 0; i < obj.shapes.size(); i++) {
-						shape = obj.shapes.get(i);
-						obj.shapes.set(i, shape.clone());
-					}
-
-					Port port;
-					for (int i = 0; i < ports.size(); i++) {
-						port = ports.get(i);
-						ports.set(i, port.clone());
-						port = ports.get(i);
-						port.setObject(obj);
-
-						if (port.x + port.getOpenGraphics().boundX < obj.portOffsetX1) {
-							obj.portOffsetX1 = port.x 
-									+ port.getOpenGraphics().boundX;
-						}
-
-						if (port.y + port.getOpenGraphics().boundY < obj.portOffsetY1) {
-							obj.portOffsetY1 = port.y
-									+ port.getOpenGraphics().boundY;
-						}
-
-						if (port.x + port.getOpenGraphics().boundWidth > obj.width
-								+ obj.portOffsetX2) {
-
-							obj.portOffsetX2 = Math.max((port.x
-									+ port.getOpenGraphics().boundX + port.getOpenGraphics().boundWidth)
-									- obj.width, 0);
-						}
-
-						if (port.y + port.getOpenGraphics().boundHeight > obj.height
-								+ obj.portOffsetY2) {
-							
-							obj.portOffsetY2 = Math.max((port.y
-									+ port.getOpenGraphics().boundY + port.getOpenGraphics().boundHeight)
-									- obj.height, 0);
-						}
-
-						port.setConnections(new ArrayList<Connection>(port.getConnections()));
-					}
-					obj.setPorts(ports);
-
-					if (superClass != null 
-							&& superClass.equals(obj.getName())) {
-						obj.setSuperClass(true);
-					}
-				} else {
-					throw new SAXException("There is no class \"" + obj.getClassName()
-							+ "\" in the package \"" + vPackage.getName() + "\"");
-				}
-			} else if ("connection".equals(qName)) {
-				connection = null;
-			} else if (qName.equals("scheme")) {
-				// create proper references to start and endports in all
-				// RelObjects
-				// Üsna valus häkk
-				for (int i = 0; i < objects.size(); i++) {
-					obj = objects.get(i);
-					if (obj instanceof RelObj) {
-						Port port = obj.getPorts().get(0);
-						Connection con = port.getConnections().get(0);
-						((RelObj) obj).startPort = con.beginPort;
-						// ((RelObj)obj).startPort.obj = con.beginPort.obj;
-						port = obj.getPorts().get(1);
-						con = port.getConnections().get(0);
-						((RelObj) obj).endPort = con.endPort;
-
-					}
-				}
-			}
-		}
+                    }
+                }
+            }
+        }
 
 		@Override
 		public void characters(char buf[], int offset, int len) {
@@ -491,17 +405,5 @@ public class SchemeLoader {
 			return objects;
 		}
 
-		void collectDiagnostic(String msg) {
-			if (RuntimeProperties.isLogDebugEnabled())
-				db.p(msg);
-
-			if (messages == null)
-				messages = new ArrayList<String>();
-			messages.add(msg);
-		}
-
-		public List<String> getDiagnostics() {
-			return messages;
-		}
 	}
 }

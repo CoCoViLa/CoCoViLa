@@ -4,7 +4,7 @@ import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.graphics.Shape;
 
 import java.io.Serializable;
-import java.util.ArrayList;
+import java.util.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 
@@ -32,7 +32,10 @@ public class GObj implements Serializable, Cloneable,
 	private boolean isStatic = false;
 	
 	private ArrayList<Port> ports = new ArrayList<Port>();
-	public ArrayList<ClassField> fields = new ArrayList<ClassField>();
+	//fields declared in the xml
+	private Map<String, ClassField> fields = new LinkedHashMap<String, ClassField>();
+	//fields declared in the specification of the corresponding java class
+	private Map<String, ClassField> specFields = new LinkedHashMap<String, ClassField>();
 	public ArrayList<Shape> shapes = new ArrayList<Shape>();
 
 	private boolean selected;
@@ -55,14 +58,6 @@ public class GObj implements Serializable, Cloneable,
 
 	public GObj() {
 		// default constructor
-	}
-
-	public GObj(int x, int y, int width, int height, String name) {
-		this.setX(x);
-		this.setY(y);
-		this.setWidth(width);
-		this.setHeight(height);
-		this.setClassName(name);
 	}
 
 	public boolean contains(int pointX, int pointY) {
@@ -344,28 +339,27 @@ public class GObj implements Serializable, Cloneable,
 					getXsize(), getYsize(), g2);
 		}
 
-		for (int i = 0; i < fields.size(); i++) { //print all field values
-			ClassField field = fields.get(i);
-			if (field.defaultGraphics != null) {
+		for ( ClassField field : getFields() ) { //print all field values
+			if (field.getDefaultGraphics() != null) {
 				if (!TypeUtil.isArray(field.type)) {
-					field.defaultGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value);
+					field.getDefaultGraphics().drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value);
 				} else {
 					String[] split = field.value.split( ClassField.ARRAY_TOKEN );
 					int textOffset = 0;
 					for (int j = 0; j < split.length; j++) {
-						field.defaultGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.getName(), split[j]);
+						field.getDefaultGraphics().drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.getName(), split[j]);
 						textOffset += 12;
 					}
 				}
 			}
-			if (field.isKnown() && field.knownGraphics !=null) {
+			if (field.isKnown() && field.getKnownGraphics() !=null) {
 				if (!TypeUtil.isArray(field.type)) {
-					field.knownGraphics.drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value);
+					field.getKnownGraphics().drawSpecial(xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value);
 				} else  {
 					String[] split = field.value.split( ClassField.ARRAY_TOKEN );
 					int textOffset = 0;
 					for (int j = 0; j < split.length; j++) {
-						field.knownGraphics.drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.getName(), split[j]);
+						field.getKnownGraphics().drawSpecial(xModifier, yModifier+textOffset, getXsize(), getYsize(), g2, field.getName(), split[j]);
 						textOffset += 12;
 					}
 				}
@@ -411,12 +405,10 @@ public class GObj implements Serializable, Cloneable,
 				port.setConnections(new ArrayList<Connection>());
 			}
 
-			obj.setFields(new ArrayList<ClassField>());
+			obj.fields = new LinkedHashMap<String, ClassField>();
 			// deep clone each separate field
-			ClassField field;
 
-			for (int i = 0; i < getFields().size(); i++) {
-				field = getFields().get(i);
+			for ( ClassField field : getFields() ) {
 				obj.getFields().add(field.clone());
 			}
 
@@ -489,15 +481,29 @@ public class GObj implements Serializable, Cloneable,
 			strict = true;
 	}
 
-	public ArrayList<ClassField> getFields() {
-		return fields;
+	public Collection<ClassField> getFields() {
+		return fields.values();
 	}
 
-	public void setFields(ArrayList<ClassField> fields) {
-		this.fields = fields;
+	public void addField( ClassField field ) {
+		this.fields.put( field.getName(), field );
 	}
 
-	public void setGroup(boolean group) {
+	/**
+     * @param specFields the specFields to set
+     */
+    public void addSpecField( ClassField specField ) {
+        this.specFields.put( specField.getName(), specField );
+    }
+
+    /**
+     * @return the specFields
+     */
+    public ClassField getSpecField( String name ) {
+        return specFields.get( name );
+    }
+
+    public void setGroup(boolean group) {
 		this.group = group;
 	}
 
@@ -539,7 +545,7 @@ public class GObj implements Serializable, Cloneable,
 		
 		th.startElement(null, null, "fields", null);
 
-		for (ClassField field: fields)
+		for (ClassField field: getFields())
 			field.toXML(th);
 
 		th.endElement(null, null, "fields");
@@ -585,14 +591,10 @@ public class GObj implements Serializable, Cloneable,
 	 * @return the field with the specified name or null
 	 */
 	public ClassField getField(String fldName) {
-		if (fields == null || fldName == null)
+		if ( fldName == null)
 			return null;
 		
-		for (ClassField f : fields) {
-			if (fldName.equals(f.getName()))
-				return f;
-		}
-		return null;
+		return fields.get( fldName );
 	}
 
 	public boolean isStatic() {

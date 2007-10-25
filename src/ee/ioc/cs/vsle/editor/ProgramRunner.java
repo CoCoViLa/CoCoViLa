@@ -177,7 +177,6 @@ public class ProgramRunner {
     }
 
     private Collection<String> watchableFields() {
-        ClassField field;
         GObj obj;
 
         objects = GroupUnfolder.unfold( objects );
@@ -185,8 +184,7 @@ public class ProgramRunner {
 
         for ( int i = 0; i < objects.size(); i++ ) {
             obj = objects.get( i );
-            for ( int j = 0; j < obj.fields.size(); j++ ) {
-                field = obj.fields.get( j );
+            for ( ClassField field : obj.getFields() ) {
                 if ( field.isWatched() ) {
                     watchFields.add( obj.getName() + "." + field.getName() );
                 }
@@ -332,7 +330,7 @@ public class ProgramRunner {
     private String getVarValueAsString( String fullName ) throws IllegalArgumentException, IllegalAccessException,
             SecurityException, NoSuchFieldException {
 
-        Class clas;
+        Class<?> clas;
         Field f;
 
         StringTokenizer st = new StringTokenizer( fullName, "." );
@@ -350,7 +348,7 @@ public class ProgramRunner {
                 clas = f.getType();
                 obj = f.get( obj );
             } else {
-                Class c = f.getType();
+                Class<?> c = f.getType();
 
                 if ( c.toString().equals( TYPE_INT ) ) {
                     return Integer.toString( f.getInt( obj ) );
@@ -406,7 +404,7 @@ public class ProgramRunner {
             if ( genObject == null || isWorking() )
                 return;
 
-            final Class clas = genObject.getClass();
+            final Class<?> clas = genObject.getClass();
 
             Field fieldOfGobj, fieldOfCf;
             Object lastObj;
@@ -421,7 +419,7 @@ public class ProgramRunner {
                 fieldOfGobj = clas.getDeclaredField( gObj.getName() );
                 lastObj = fieldOfGobj.get( genObject );
 
-                for ( ClassField cf : gObj.fields ) {
+                for ( ClassField cf : gObj.getFields() ) {
 
                     if ( cf.isAlias() || cf.isInput() ) {
                         continue;
@@ -516,7 +514,7 @@ public class ProgramRunner {
                         db.p( args[ i ].getClass() + " " + args[ i ] );
                     }
 
-                    Class clas = genObject.getClass();
+                    Class<?> clas = genObject.getClass();
                     Method method = clas.getMethod( "compute", Object[].class );
                     db
                             .p( "Running... ( NB! The thread is alive until the next message --> ) "

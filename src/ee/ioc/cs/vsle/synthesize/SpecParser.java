@@ -854,8 +854,8 @@ public class SpecParser {
     /**
      * @return list of fields declared in a specification.
      */
-    public static ArrayList<ClassField> getFields( String fileName ) throws IOException {
-        ArrayList<ClassField> fields = new ArrayList<ClassField>();
+    public static Collection<ClassField> getFields( String fileName ) throws IOException {
+        Map<String, ClassField> fields = new LinkedHashMap<String, ClassField>();
         String s = new String( getStringFromFile( fileName ) );
         ArrayList<String> specLines = getSpec( s, false );
         String[] split;
@@ -871,10 +871,9 @@ public class SpecParser {
             if ( lt != null ) {
                 if ( lt.getType() == LineType.TYPE_ASSIGNMENT ) {
                     split = lt.getSpecLine().split( ":", -1 );
-                    for ( int i = 0; i < fields.size(); i++ ) {
-                        if ( fields.get( i ).getName().equals( split[ 0 ] ) ) {
-                            fields.get( i ).setValue( split[ 1 ] );
-                        }
+                    ClassField field;
+                    if( ( field = fields.get( split[ 0 ] ) ) != null ) {
+                        field.setValue( split[ 1 ] );
                     }
                 } else if ( lt.getType() == LineType.TYPE_DECLARATION ) {
                     split = lt.getSpecLine().split( ":", -1 );
@@ -884,12 +883,17 @@ public class SpecParser {
                     for ( int i = 0; i < vs.length; i++ ) {
                         ClassField var = new ClassField( vs[ i ], type );
 
-                        fields.add( var );
+                        fields.put( var.getName(), var );
                     }
+                } else if ( lt.getType() == LineType.TYPE_ALIAS ) {
+                    split = lt.getSpecLine().split( ":", -1 );
+                    String name = split[ 0 ];
+                    Alias alias = new Alias( name, split[ 2 ].trim() );
+                    fields.put( name, alias );
                 }
             }
         }
-        return fields;
+        return fields.values();
     }
 
     private static boolean isSpecClass( String path, String file ) {

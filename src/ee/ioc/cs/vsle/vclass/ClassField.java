@@ -57,9 +57,9 @@ public class ClassField implements Cloneable, Serializable {
 
 	protected ArrayList<ClassField> vars;
 
-	protected ClassGraphics knownGraphics;
+	private ClassGraphics knownGraphics;
 
-	protected ClassGraphics defaultGraphics;
+	private ClassGraphics defaultGraphics;
 
 	protected boolean isInput = false;
 	
@@ -209,7 +209,7 @@ public class ClassField implements Cloneable, Serializable {
 	 */
 	@Override
 	public String toString() {
-		return getName();
+		return getType() + " " + getName();
 	} // toString
 
 	/**
@@ -275,7 +275,14 @@ public class ClassField implements Cloneable, Serializable {
 		return description;
 	}
 
-	public ArrayList<ClassField> getVars() {
+	/**
+     * @param description the description to set
+     */
+    public void setDescription( String description ) {
+        this.description = description;
+    }
+
+    public ArrayList<ClassField> getVars() {
 		//alias
 		if( !isAlias() ) {
 			throw new IllegalStateException( "ClassField " + getName() + " is not alias, but " + type );

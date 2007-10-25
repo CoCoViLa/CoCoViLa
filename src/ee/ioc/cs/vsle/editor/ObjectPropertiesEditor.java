@@ -16,29 +16,19 @@ import static ee.ioc.cs.vsle.util.TypeUtil.*;
 public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		KeyListener {
 	
-	private ArrayList<JTextField> textFields = new ArrayList<JTextField>();
-
-	private ArrayList<JCheckBox> watchFields = new ArrayList<JCheckBox>();
-
-	private ArrayList<JCheckBox> inputs = new ArrayList<JCheckBox>();
-	
-	private ArrayList<JCheckBox> goals = new ArrayList<JCheckBox>();
-	
-	private ArrayList<JComboBox> comboBoxes = new ArrayList<JComboBox>();
-
-	private ArrayList<ClassField> primitiveNameList = new ArrayList<ClassField>();
-
-	private ArrayList<ClassField> arrayNameList = new ArrayList<ClassField>();
-
-	private GObj controlledObject;
-
-	private JTextField nameTextField;
-
-	private JButton clear, ok, apply, close;
-
-	private Canvas canvas;
-	
-	private JCheckBox isStatic;
+    private static final long           serialVersionUID  = 1L;
+    private ArrayList<JTextField>       textFields        = new ArrayList<JTextField>();
+    private ArrayList<JCheckBox>        watchFields       = new ArrayList<JCheckBox>();
+    private ArrayList<JCheckBox>        inputs            = new ArrayList<JCheckBox>();
+    private ArrayList<JCheckBox>        goals             = new ArrayList<JCheckBox>();
+    private ArrayList<JComboBox>        comboBoxes        = new ArrayList<JComboBox>();
+    private ArrayList<ClassField>       primitiveNameList = new ArrayList<ClassField>();
+    private ArrayList<ClassField>       arrayNameList     = new ArrayList<ClassField>();
+    private GObj                        controlledObject;
+    private JTextField                  nameTextField;
+    private JButton                     clear, ok, apply, close;
+    private Canvas                      canvas;
+    private JCheckBox                   isStatic;
 
 	//key - class name, value - last width
 	private static Map<String, Integer> s_widths = new HashMap<String, Integer>();
@@ -160,7 +150,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		JComboBox comboBox;
 		JCheckBox watch;
 		
-		for (ClassField field : object.fields) {
+		for (ClassField field : object.getFields()) {
 			if (field.isArray()) {
 				comboBox = new JComboBox();
 				comboBox.setEditable(true);
@@ -281,7 +271,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		buttonPane.add(apply);
 		clear = new JButton("Clear all");
 		clear.addActionListener(this);
-		if (object.fields.size() == 0) {
+		if (object.getFields().size() == 0) {
 			clear.setEnabled(false);
 		} else {
 			clear.setEnabled(true);
@@ -429,7 +419,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			// Clears object properties except the object name.
 			for (int i = 0; i < textFields.size(); i++) {
 				textField = textFields.get(i);
-				field = controlledObject.fields.get(i);
+				field = primitiveNameList.get(i);
 				watchFields.get(i).setSelected(false);
 				inputs.get(i).setSelected(false);
 				goals.get(i).setSelected(false);
