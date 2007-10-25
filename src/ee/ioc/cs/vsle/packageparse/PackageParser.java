@@ -650,9 +650,17 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 			} else if (qName.equals(EL_GRAPHICS)) {
 
 				if (status == FIELD) {
-					newField.setDefaultGraphics(newGraphics);
+				    if( newField != null ) {
+				        newField.setDefaultGraphics(newGraphics);
+				    } else {
+				        collector.collectDiagnostic( "Default Graphics ignored" );
+				    }
 				} else if (status == FIELD_KNOWN) {
-					newField.setKnownGraphics(newGraphics);
+				    if( newField != null ) {
+				        newField.setKnownGraphics(newGraphics);
+				    } else {
+                        collector.collectDiagnostic( "Known Graphics ignored" );
+                    }
 				} else if (status == PORT_OPEN) {
 					newPort.setOpenGraphics(newGraphics);
 				} else if (status == PORT_CLOSED) {

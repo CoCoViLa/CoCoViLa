@@ -365,17 +365,11 @@ public class Port implements Cloneable, Serializable {
 		if (port1.isMulti() && port2.isMulti())
 			return false;
 		else if ( port1.isMulti() ) {
-			if( port1.getType().equals( port2.getType() ) )
-				return true;
-			else 
-				return false;
+		    return port1.field != null && port1.field.isAlias() && ((Alias)port1.field).acceptsType( port2.getType() );
 		}
 		else if ( port2.isMulti() ) {
-			if( port2.getType().equals( port1.getType() ) )
-				return true;
-			else 
-				return false;
-		} 
+		    return port2.field != null && port2.field.isAlias() && ((Alias)port2.field).acceptsType( port1.getType() );
+		}
 		else if (port1.isAny() && port2.isAny())
 			return false;
 		else if (port1.isAny() || port2.isAny())
