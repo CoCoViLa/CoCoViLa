@@ -231,11 +231,11 @@ public class ProblemCreator {
         List<ClassField> empty = new ArrayList<ClassField>();
 
         for( ClassField input : subtask.getInputs() ) {
-        	newCR.addInput( context + "." + input, empty );
+        	newCR.addInput( context.getName() + "." + input.getName(), empty );
         }
 
         for( ClassField output : subtask.getOutputs() ) {
-        	newCR.addOutput( context + "." + output, empty );
+        	newCR.addOutput( context.getName() + "." + output.getName(), empty );
         }
 
         newAnnClass.addClassRelation( newCR );
@@ -372,7 +372,7 @@ public class ProblemCreator {
 
     				if( alias.acceptsType( field.getType() ) ) {
     					
-    					String absoluteName = aliasVar.getParent().getFullNameForConcat() + clf + "." + field.getName();
+    					String absoluteName = aliasVar.getParent().getFullNameForConcat() + clf.getName() + "." + field.getName();
     					
     					Var var = problem.getAllVars().get( absoluteName );
     					

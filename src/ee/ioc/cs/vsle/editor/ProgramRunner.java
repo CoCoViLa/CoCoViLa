@@ -152,7 +152,8 @@ public class ProgramRunner {
         } catch ( UnknownVariableException uve ) {
 
             db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
-            ErrorWindow.showErrorMessage( "Fatal error: variable " + uve.excDesc + " not declared" );
+            String line = uve.getLine();
+            ErrorWindow.showErrorMessage( "Fatal error: variable " + uve.excDesc + " not declared" + ( line != null ? ", line: " + line : "" ) );
 
         } catch ( LineErrorException lee ) {
             db.p( "Fatal error on line " + lee.excDesc );

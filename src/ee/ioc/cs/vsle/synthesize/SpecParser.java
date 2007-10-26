@@ -117,7 +117,7 @@ public class SpecParser {
         final String line = a.get( 0 );
 
         a.remove( 0 );
-        if ( line.indexOf( "alias " ) >= 0 ) {
+        if ( line.startsWith( "alias " ) ) {
             pattern = Pattern.compile( "alias *(\\(( *[^\\(\\) ]+ *)\\))* *([^= ]+) *= *\\((.*)\\) *" );
             matcher = pattern.matcher( line );
             if ( matcher.find() ) {
@@ -320,12 +320,13 @@ public class SpecParser {
 
         ArrayList<String> specLines = getSpec( spec, true );
 
+        LineType lt = null;
+        
         try {
 
             while ( !specLines.isEmpty() ) {
-                LineType lt = getLine( specLines );
 
-                if ( lt != null ) {
+                if ( ( lt = getLine( specLines ) ) != null ) {
 
                     if ( RuntimeProperties.isLogDebugEnabled() )
                         db.p( "Parsing: Class " + className + " " + lt );
@@ -453,7 +454,7 @@ public class SpecParser {
                             // been declared
                             try {
                                 if ( ( name.indexOf( "." ) == -1 ) && !containsVar( annClass.getFields(), name ) ) {
-                                    throw new UnknownVariableException( "Alias " + name + " not declared" );
+                                    throw new UnknownVariableException( "Alias " + name + " not declared", lt.getOrigSpecLine() );
 
                                 } else if ( name.indexOf( "." ) > -1 ) {
                                     // here we have to dig deeply
@@ -481,7 +482,7 @@ public class SpecParser {
 
                                     if ( !parentClass.hasField( leftFromName ) ) {
                                         throw new UnknownVariableException( "Variable " + leftFromName
-                                                + " is not declared in class " + parentClass );
+                                                + " is not declared in class " + parentClass, lt.getOrigSpecLine() );
                                     }
 
                                     aliasDeclaration = (Alias) parentClass.getFieldByName( leftFromName );
@@ -705,7 +706,8 @@ public class SpecParser {
             }
         } catch ( UnknownVariableException uve ) {
 
-            throw new UnknownVariableException( className + "." + uve.excDesc );
+            String line = uve.getLine() != null ? uve.getLine() : lt != null ? lt.getOrigSpecLine() : null;
+            throw new UnknownVariableException( className + "." + uve.excDesc, line );
 
         }
         classList.add( annClass );

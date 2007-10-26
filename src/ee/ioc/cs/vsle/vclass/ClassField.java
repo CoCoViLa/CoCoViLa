@@ -204,7 +204,7 @@ public class ClassField implements Cloneable, Serializable {
 
 	/**
 	 * Converts the class into a string and returns the name of it.
-	 * 
+	 * NB! FOR DEBUG ONLY
 	 * @return String - name of the class.
 	 */
 	@Override

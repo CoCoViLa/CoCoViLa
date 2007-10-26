@@ -19,4 +19,8 @@ public class UnknownVariableException
 		super(s);
 	} // ee.ioc.cs.editor.synthesize.UnknownVariableException
 
+	public UnknownVariableException(String s, String line) {
+        super(s);
+        setLine( line );
+    } // ee.ioc.cs.editor.synthesize.UnknownVariableException
 }

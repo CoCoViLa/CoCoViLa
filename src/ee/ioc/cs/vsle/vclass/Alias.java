@@ -103,6 +103,7 @@ public class Alias extends ClassField {
 
 	/**
 	 * Converts the ee.ioc.cs.editor.vclass.Alias into string, returning the alias's name.
+	 * NB! FOR DEBUG ONLY
 	 * @return String - alias's name.
 	 */
 	public String toString() {
