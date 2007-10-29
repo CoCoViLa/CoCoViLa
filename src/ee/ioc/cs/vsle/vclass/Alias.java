@@ -127,11 +127,18 @@ public class Alias extends ClassField {
 	} // getAliasType
 
 	public boolean equalsByTypes( Alias alias ) {
-		
+	    if( vars.size() != alias.vars.size() ) {
+	        return false;
+	    }
+	    
 		for (int i = 0; i < vars.size(); i++) {
-			//TODO if alias contains alias then need additional check
-			if( !vars.get(i).getType().equals(alias.vars.get(i).getType()) ) {
-				return false;
+		    ClassField thisVar = vars.get(i);
+		    ClassField otherVar = alias.vars.get(i);
+		    
+			if( !thisVar.getType().equals( otherVar.getType() )
+			        || ( thisVar.isAlias() ^ otherVar.isAlias() )
+			        || thisVar.isAlias() && otherVar.isAlias() && !((Alias)thisVar).equalsByTypes( (Alias)otherVar ) ) {
+			    return false;
 			}
 		}
 		return true;

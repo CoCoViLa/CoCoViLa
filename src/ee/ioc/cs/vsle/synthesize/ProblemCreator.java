@@ -98,53 +98,23 @@ public class ProblemCreator {
              * Else if the relation is x = y where both vars have common spec type, 
              * make their sub-components equal.
              */
-            if ( classRelation.getInputs().size() == 1 && classRelation.getOutputs().size() == 1 &&
-                 ( classRelation.getType() == RelType.TYPE_ALIAS || classRelation.getType() == RelType.TYPE_EQUATION ) ) {
-                ClassField inpField = classRelation.getInput();
-                ClassField outpField = classRelation.getOutput();
+            if ( classRelation.getInputs().size() == 1 && classRelation.getOutputs().size() == 1 ) {
 
-                String obj;
-                
                 //if we have a relation alias = *.sth, we need to find out what it actually is
                 if ( ( classRelation.getType() == RelType.TYPE_ALIAS ) && isAliasWildcard( classRelation ) ) {
                 	relSet = makeAliasWildcard( ac, classes, classRelation, problem, parent );
                 	rel = null;
                 	isAliasRel = true;
                 }
-                //the following is for x = y, not x -> y relation where both x and y are aliases
-                else if ( ( classRelation.getType() == RelType.TYPE_EQUATION ) 
-                		&& problem.getAllVars().containsKey( ( obj = parent.getFullNameForConcat() ) + inpField.getName() ) ) {
+                //the following is for x = y, not x -> y relation
+                else if ( ( classRelation.getType() == RelType.TYPE_EQUATION ) ) {
                 	
-                    Var inpVar = problem.getAllVars().get( obj + inpField.getName() );
-                    Var outpVar = problem.getAllVars().get( obj + outpField.getName() );
-
-                    if ( inpVar.getField().isAlias() && outpVar.getField().isAlias() ) {
-
-                        if ( !( ( Alias ) inpVar.getField() ).equalsByTypes( ( Alias ) outpVar.
-                                getField() ) ) {
-                            throw new AliasException( "Differently typed aliases connected: " 
-                            		+ obj + inpField.getName() + " and " + obj + outpField.getName() );
-                        }
-                        isAliasRel = true;
-                        Var inpChildVar, outpChildVar;
-                        for ( int i = 0; i < inpVar.getChildVars().size(); i++ ) {
-                        	inpChildVar = inpVar.getChildVars().get( i );
-                        	outpChildVar = outpVar.getChildVars().get( i );
-
-                            rel = new Rel( parent, inpVar.getFullName() + " = " 
-                                    + outpVar.getFullName() + ", derived from: " + classRelation.getSpecLine() );
-                            rel.setType( RelType.TYPE_EQUATION );
-
-                            rel.addInput( inpChildVar );
-                            rel.addOutput( outpChildVar );
-                            inpChildVar.addRel( rel );
-                            problem.addRel( rel );
-                            
-                            checkSpecClassBinding( inpChildVar, outpChildVar, classes, classRelation, parent, problem );
-                        }
-                    } else {
-                        checkSpecClassBinding( inpVar, outpVar, classes, classRelation, parent, problem );
-                    }
+                    String obj = parent.getFullNameForConcat();
+                    
+                    Var inpVar = problem.getAllVars().get( obj + classRelation.getInput().getName() );
+                    Var outpVar = problem.getAllVars().get( obj + classRelation.getOutput().getName() );
+                    
+                    isAliasRel = checkEquality( inpVar, outpVar, classes, classRelation, parent, problem );
                 }
             }
 
@@ -256,6 +226,44 @@ public class ProblemCreator {
         
         indpSubtasks.put( subtask, subtaskRel );
         return subtaskRel;
+    }
+    
+    private static boolean checkEquality( Var inpVar, Var outpVar, ClassList classes, ClassRelation classRelation, Var parent, Problem problem ) throws SpecParseException {
+        
+        if ( inpVar.getField().isAlias() && outpVar.getField().isAlias() ) {
+
+            if ( !( ( Alias ) inpVar.getField() ).equalsByTypes( ( Alias ) outpVar.
+                    getField() ) ) {
+                throw new AliasException( "Differently typed aliases connected: " 
+                        + parent.getFullNameForConcat() + inpVar.getField().getName() + " and " + parent.getFullNameForConcat() + outpVar.getField().getName() );
+            }
+            
+            Var inpChildVar, outpChildVar;
+            for ( int i = 0; i < inpVar.getChildVars().size(); i++ ) {
+                inpChildVar = inpVar.getChildVars().get( i );
+                outpChildVar = outpVar.getChildVars().get( i );
+
+                if( !checkEquality( inpChildVar, outpChildVar, classes, classRelation, parent, problem ) ) {
+                    
+                    Rel rel = new Rel( parent, inpVar.getFullName() + " = " 
+                            + outpVar.getFullName() + ", derived from: " + classRelation.getSpecLine() );
+                    rel.setType( RelType.TYPE_EQUATION );
+
+                    rel.addInput( inpChildVar );
+                    rel.addOutput( outpChildVar );
+                    inpChildVar.addRel( rel );
+                    problem.addRel( rel );
+
+                    checkSpecClassBinding( inpChildVar, outpChildVar, classes, classRelation, parent, problem );
+                }
+            }
+            
+            return true;
+        } else {
+            checkSpecClassBinding( inpVar, outpVar, classes, classRelation, parent, problem );
+        }
+        
+        return false;
     }
     
     /**
