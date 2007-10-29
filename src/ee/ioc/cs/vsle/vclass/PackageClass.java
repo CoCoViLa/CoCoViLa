@@ -192,7 +192,11 @@ public class PackageClass implements Serializable {
      */
     public void setSpecFields( Collection<ClassField> specFields ) {
         for( ClassField field : specFields ) {
-            this.specFields.put( field.getName(), field );
+            addSpecField( field );
         }
+    }
+    
+    public void addSpecField( ClassField field ) {
+        this.specFields.put( field.getName(), field );
     }
 }

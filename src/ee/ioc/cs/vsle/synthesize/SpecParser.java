@@ -856,9 +856,9 @@ public class SpecParser {
     /**
      * @return list of fields declared in a specification.
      */
-    public static Collection<ClassField> getFields( String fileName ) throws IOException {
+    public static Collection<ClassField> getFields( String path, String fileName, String ext ) throws IOException {
         Map<String, ClassField> fields = new LinkedHashMap<String, ClassField>();
-        String s = new String( getStringFromFile( fileName ) );
+        String s = new String( getStringFromFile( path + fileName + ext ) );
         ArrayList<String> specLines = getSpec( s, false );
         String[] split;
 
@@ -892,6 +892,14 @@ public class SpecParser {
                     String name = split[ 0 ];
                     Alias alias = new Alias( name, split[ 2 ].trim() );
                     fields.put( name, alias );
+                } else if ( lt.getType() == LineType.TYPE_SUPERCLASSES ) {
+                    String[] superClasses = lt.getSpecLine().split( "#", -1 );
+
+                    for ( String name : superClasses ) {
+                        for( ClassField var : getFields( path, name, ext ) ) {
+                            fields.put( var.getName(), var );
+                        }
+                    }
                 }
             }
         }

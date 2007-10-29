@@ -274,16 +274,30 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 				
 				ClassField cf = newClass.getSpecField( name );
                 
-                if( cf == null ) {
+				if( name.indexOf( "." ) > -1 ) {
+                    //TODO - temporarily do not dig into hierarchy
+                    int idx = name.indexOf( "." );
+                    String root = name.substring( 0, idx );
                     
-                    collector.collectDiagnostic( "Port " + type + " " + name + " in class " 
-                            + newClass.name + " does not have the corresponding field in the specification" );
-                } else if( !cf.getType().equals( type ) ) {
+                    if( newClass.getSpecField( root ) == null ) {
+                        collector.collectDiagnostic( "Field " + root + " in class "
+                                + newClass.name + " is not declared in the specification, variable " + type + " " + name + " ignored " );
+                        return;
+                    }
                     
-                    collector.collectDiagnostic( "Port " + type + " " + name + " in class " 
-                            + newClass.name + " does not match the field declared in the specification: " + cf.getType() + " " + cf.getName() );
-                }
-				
+                    newField = new ClassField( name, type );
+                    newClass.addSpecField( newField );
+				} else {
+				    if( cf == null ) {
+
+				        collector.collectDiagnostic( "Port " + type + " " + name + " in class " 
+				                + newClass.name + " does not have the corresponding field in the specification" );
+				    } else if( !cf.getType().equals( type ) ) {
+
+				        collector.collectDiagnostic( "Port " + type + " " + name + " in class " 
+				                + newClass.name + " does not match the field declared in the specification: " + cf.getType() + " " + cf.getName() );
+				    }
+				}
 				newPort = new Port(name, type, Integer.parseInt(x), Integer
 						.parseInt(y), portConnection, strict, multi );
 				newPort.setId(id);
@@ -311,20 +325,35 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 				String value = attrs.getValue(ATR_VALUE);
 				String desc = attrs.getValue(ATR_DESCRIPTION);
 
-				newField = newClass.getSpecField( name );
-				
-				if( newField == null ) {
+				if( name.indexOf( "." ) > -1 ) {
+				    //TODO - temporarily do not dig into hierarchy
+				    int idx = name.indexOf( "." );
+				    String root = name.substring( 0, idx );
 				    
-				    collector.collectDiagnostic( "Field " + type + " " + name + " in class " 
-				            + newClass.name + " is not declared in the specification" );
-				    return;
-				} else if( !newField.getType().equals( type ) ) {
+				    if( newClass.getSpecField( root ) == null ) {
+				        collector.collectDiagnostic( "Field " + root + " in class "
+                                + newClass.name + " is not declared in the specification, variable " + type + " " + name + " ignored " );
+                        return;
+				    }
 				    
-				    collector.collectDiagnostic( "Field " + type + " " + name + " in class " 
-                            + newClass.name + " does not match the field declared in the specification: " + newField.getType() + " " + newField.getName() );
-				    return;
-                }
+				    newField = new ClassField( name, type );
+				    newClass.addSpecField( newField );
+				} else {
+				    newField = newClass.getSpecField( name );
 
+				    if( newField == null ) {
+
+				        collector.collectDiagnostic( "Field " + type + " " + name + " in class " 
+				                + newClass.name + " is not declared in the specification" );
+				        return;
+				    } else if( !newField.getType().equals( type ) ) {
+
+				        collector.collectDiagnostic( "Field " + type + " " + name + " in class " 
+				                + newClass.name + " does not match the field declared in the specification: " + newField.getType() + " " + newField.getName() );
+				        return;
+				    }
+				}
+				
 				newField.setValue( value );
 				newField.setDescription( desc );
 				
@@ -690,7 +719,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 					Collection<ClassField> specFields;
 	                
 	                try {
-	                    specFields = SpecParser.getFields(path + RuntimeProperties.FS + newClass.name + ".java");
+	                    specFields = SpecParser.getFields( path + RuntimeProperties.FS, newClass.name, ".java");
 	                    newClass.setSpecFields( specFields );
 	                    
 	                } catch (IOException e) {
