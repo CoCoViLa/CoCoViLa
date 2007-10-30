@@ -409,7 +409,7 @@ public class GObj implements Serializable, Cloneable,
 			// deep clone each separate field
 
 			for ( ClassField field : getFields() ) {
-				obj.getFields().add(field.clone());
+				obj.addField(field.clone());
 			}
 
 			return obj;
