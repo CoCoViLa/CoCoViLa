@@ -29,7 +29,8 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
     private JButton                     clear, ok, apply, close;
     private Canvas                      canvas;
     private JCheckBox                   isStatic;
-
+    private ComponentListener           lst;
+    
 	//key - class name, value - last width
 	private static Map<String, Integer> s_widths = new HashMap<String, Integer>();
 	
@@ -81,27 +82,32 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		this.canvas = canvas;
 		controlledObject = object;
 		
-		addComponentListener(new ComponentAdapter() {
+		lst =  new ComponentAdapter() {
 
-			public void componentResized(ComponentEvent e) {
-				
-				Dimension d = getLayout().preferredLayoutSize( ObjectPropertiesEditor.this );
-				
-				Dimension resized = getSize();
-				
-				if( d.width > resized.width && d.height > resized.height ) {
-					resized.setSize( d.width, d.height );
-				} else if ( d.width > resized.width ) {
-					resized.setSize( d.width, resized.height );
-				} else if ( d.height > resized.height ) {
-					resized.setSize( resized.width, d.height );
-				}
-				
-				s_widths.put( controlledObject.getClassName(), resized.width );
-				
-				ObjectPropertiesEditor.this.setSize( resized );
-			}
-		});
+            public void componentResized(ComponentEvent e) {
+                
+                Dimension d = getLayout().preferredLayoutSize( ObjectPropertiesEditor.this );
+                
+                Dimension resized = getSize();
+                
+                if( d.width > resized.width && d.height > resized.height ) {
+                    resized.setSize( d.width, d.height );
+                } else if ( d.width > resized.width ) {
+                    resized.setSize( d.width, resized.height );
+                } else if ( d.height > resized.height ) {
+                    resized.setSize( resized.width, d.height );
+                }
+                
+                if( s_widths == null || controlledObject == null ) {
+                    System.err.println( "shit");
+                }
+                s_widths.put( controlledObject.getClassName(), resized.width );
+                
+                ObjectPropertiesEditor.this.setSize( resized );
+            }
+        };
+		
+		addComponentListener( lst );
 		
 		JPanel westPanel = new JPanel();
 		westPanel.setLayout( new BoxLayout( westPanel, BoxLayout.X_AXIS ) );
@@ -394,6 +400,10 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 	public void dispose() {
 		super.dispose();
 		
+		if( lst != null ) {
+		    removeComponentListener( lst );
+		    lst = null;
+		}
 		controlledObject = null;
 		canvas = null;
 	}
