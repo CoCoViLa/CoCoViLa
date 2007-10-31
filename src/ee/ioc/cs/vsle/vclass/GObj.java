@@ -397,19 +397,23 @@ public class GObj implements Serializable, Cloneable,
 		try {
 			GObj obj = (GObj) super.clone();
 
+			obj.fields = new LinkedHashMap<String, ClassField>();
+			obj.specFields = new LinkedHashMap<String, ClassField>();
+			// deep clone fields list
+	        for (ClassField field : specFields.values() ) {
+	            ClassField newField = field.clone();
+	            if( fields.containsValue( field ) ) {
+	                obj.addField( newField );
+	            }
+	            obj.addSpecField( newField );
+	        }
+	        
             obj.setPorts(new ArrayList<Port>());
 			for (Port port : getPorts()) {
 				port = port.clone();
 				obj.getPorts().add(port);
 				port.setObject(obj);
 				port.setConnections(new ArrayList<Connection>());
-			}
-
-			obj.fields = new LinkedHashMap<String, ClassField>();
-			// deep clone each separate field
-
-			for ( ClassField field : getFields() ) {
-				obj.addField(field.clone());
 			}
 
 			return obj;
