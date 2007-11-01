@@ -41,7 +41,7 @@ public class ClassField implements Cloneable, Serializable {
 	public final static int TYPE_EXCEPTION = 3;
 	public final static int TYPE_CONSTANT = 4;
 	
-	protected String name;
+	private String name;
 
 	protected String type = "";
 
@@ -71,61 +71,33 @@ public class ClassField implements Cloneable, Serializable {
 	 * Class constructor.
 	 */
 	public ClassField(String name) {
-		if( name == null ) {
-			throw new IllegalArgumentException( "Name cannot be null!" );
-		}
-		setName( name );
+		this(name, "", null, false, false);
 	} // ee.ioc.cs.editor.vclass.ClassField
 
-	/**
-	 * Class constructor
-	 * 
-	 * @param name
-	 *            String - name of the class.
-	 * @param type
-	 *            String - type of the class.
-	 */
 	public ClassField(String name, String type) {
-		setName( name );
-		this.type = type;
+		this(name, type, null, false, false);
 	}
 
 	public ClassField(String name, String type, String value) {
-		this.value = value;
-		setName( name );
-		this.type = type;
+		this(name, type, value, false, false);
 	}
 
 	public ClassField(String name, String type, String value, boolean isConstant) {
-		this.value = value;
-		setName( name );
-		this.type = type;
-		this.isConstant = isConstant;
+		this(name, type, value, false, isConstant);
 	}
 
-	/**
-	 * Class constructor.
-	 * 
-	 * @param name
-	 *            String
-	 * @param type
-	 *            String
-     * @param isSpecField
-	 *            boolean
-	 */
     public ClassField(String name, String type, boolean isSpecField) {
-		setName( name );
-		this.type = type;
-        specField = isSpecField;
+    	this(name, type, null, isSpecField, false);
 	} // ee.ioc.cs.editor.vclass.ClassField
 
-	public ClassField(String name, String type, String value, String desc) {
+	private ClassField(String name, String type, String value, boolean isSpecField, boolean isConstant) {
 		setName( name );
-		this.type = type;
-		this.value = value;
-		description = desc;
+		setType(type);
+		setValue(value);
+		this.isConstant = isConstant;
+		this.specField = isSpecField;
 	}
-
+	
 	/**
 	 * Checks if we have an ee.ioc.cs.editor.vclass.Alias class or not.
 	 * 
@@ -143,13 +115,13 @@ public class ClassField implements Cloneable, Serializable {
 	 * @return boolean -
 	 */
 	public boolean isArray() {
-		return TypeUtil.isArray( type );
+		return TypeUtil.isArray( getType() );
 	} // isArray
 
 	public String arrayType() {
 
-		if (TypeUtil.isArray(type)) {
-			return TypeUtil.getTypeWithoutArray(type);
+		if (TypeUtil.isArray(getType())) {
+			return TypeUtil.getTypeWithoutArray(getType());
 		}
 		return "notArray";
 	}
@@ -167,7 +139,7 @@ public class ClassField implements Cloneable, Serializable {
 	}
 
 	public boolean isPrimitive() {
-		return TypeUtil.isPrimitive(type);
+		return TypeUtil.isPrimitive(getType());
 	}
 
 	public boolean isPrimitiveOrString(String s) {
@@ -315,6 +287,9 @@ public class ClassField implements Cloneable, Serializable {
 	}
 
 	public void setName(String name) {
+		if( name == null ) {
+			throw new IllegalArgumentException( "Name cannot be null!" );
+		}
 		this.name = name;
 	}
 

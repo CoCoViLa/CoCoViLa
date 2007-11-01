@@ -36,15 +36,15 @@ public class Alias extends ClassField {
 	 */
 	public void addVar(ClassField f) throws AliasException {
 		if( !acceptsType( f.getType() ) ) {
-			throw new AliasException( "Unable to add " + f.getType() + " " + f + " to alias " 
-					+ this + " because types do not match, required: " + type + ", given: " + f.getType() );
+			throw new AliasException( "Unable to add " + f.getType() + " " + f.getName() + " to alias " 
+					+ this + " because types do not match, required: " + getVarType() + ", given: " + f.getType() );
 		}
 		
 		vars.add(f);
 	} // addVar
 
 	public boolean acceptsType( String type ) {
-		return TYPE_OBJECT.equals( this.type ) || type.equals( this.type );
+		return TYPE_OBJECT.equals( this.getVarType() ) || type.equals( this.getVarType() );
 	}
 	
 	/**
@@ -83,10 +83,10 @@ public class Alias extends ClassField {
                 }
                 String newType = "";
                 for (int k = 1; k < split.length; k++) {
-                    ClassField cf = classList.getType(thisVar.type)
+                    ClassField cf = classList.getType(thisVar.getType() )
                             .getFieldByName(split[k]);
                     if (cf != null) {
-                        newType = cf.type;
+                        newType = cf.getType();
                     }
                     thisVar = cf;
                 }
@@ -109,22 +109,6 @@ public class Alias extends ClassField {
 	public String toString() {
 		return "(alias)" + super.toString();
 	} // toString
-
-	/**
-	 * @deprecated
-	 * Returns the type of an alias.
-	 * @return String - alias's type.
-	 */
-	public String getAliasType() {
-		String type = TYPE_ALIAS + ":";
-		ClassField cf;
-
-		for (int i = 0; i < vars.size(); i++) {
-			cf = vars.get(i);
-			type += cf.type;
-		}
-		return type;
-	} // getAliasType
 
 	public boolean equalsByTypes( Alias alias ) {
 	    if( vars.size() != alias.vars.size() ) {
@@ -163,7 +147,7 @@ public class Alias extends ClassField {
     ClassField getVar(String varName, Collection<ClassField> varList) {
 
         for ( ClassField var : varList ) {
-			if (var.name.equals(varName)) {
+			if (var.getName().equals(varName)) {
 				return var;
 			}
 		}

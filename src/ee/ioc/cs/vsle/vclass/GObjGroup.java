@@ -285,11 +285,11 @@ public class GObjGroup extends GObj implements Serializable {
 			for ( ClassField field : obj.getFields() ) {
 				if (field.value != null) {
 					if (field.type.equals(TYPE_STRING)) {
-						s.append("        " + obj.getName() + "." + field.name
+						s.append("        " + obj.getName() + "." + field.getName()
 							+ " = \"" + field.value + "\";\n");
 					} else if (field.isPrimitiveArray()) {
 						s.append(
-							"        " + obj.getName() + "." + field.name
+							"        " + obj.getName() + "." + field.getName()
 							+ " = {");
 						String[] split = field.value.split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
@@ -302,7 +302,7 @@ public class GObjGroup extends GObj implements Serializable {
 
 					} else if (field.isPrimOrStringArray()) {
 						s.append(
-							"        " + obj.getName() + "." + field.name
+							"        " + obj.getName() + "." + field.getName()
 							+ " = {");
 						String[] split = field.value.split( ClassField.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
@@ -314,7 +314,7 @@ public class GObjGroup extends GObj implements Serializable {
 						s.append("};\n");
 					} else {
 						s.append(
-							"        " + obj.getName() + "." + field.name + " = "
+							"        " + obj.getName() + "." + field.getName() + " = "
 							+ field.value + ";\n");
 					}
 				}
