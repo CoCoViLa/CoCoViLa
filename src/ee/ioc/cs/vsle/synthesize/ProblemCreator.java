@@ -114,6 +114,14 @@ public class ProblemCreator {
                     Var inpVar = problem.getAllVars().get( obj + classRelation.getInput().getName() );
                     Var outpVar = problem.getAllVars().get( obj + classRelation.getOutput().getName() );
                     
+                    if( inpVar == null ) {
+                    	throw new UnknownVariableException( classRelation.getInput().getName() );
+                    }
+                    
+                    if( outpVar == null ) {
+                    	throw new UnknownVariableException( classRelation.getOutput().getName() );
+                    }
+                    
                     isAliasRel = checkEquality( inpVar, outpVar, classes, classRelation, parent, problem );
                 }
             }
