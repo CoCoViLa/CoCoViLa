@@ -178,6 +178,8 @@ public class EditorActionListener implements ActionListener {
                 closeCurrentScheme();
             } else if ( Menu.DELETE_SCHEME.equals( e.getActionCommand() ) ) {
                 deleteCurrentScheme();
+            } else if ( Menu.EXPORT_SCHEME.equals( e.getActionCommand() ) ) {
+            	exportSchemeSpecification();
             } else if ( e.getActionCommand().equals( Menu.CLOSE_ALL ) ) {
                 while ( Editor.getInstance().getCurrentPackage() != null ) {
                     RuntimeProperties.removeOpenPackage( Editor.getInstance().getCurrentPackage().getPath() );
@@ -393,6 +395,42 @@ public class EditorActionListener implements ActionListener {
         }
     }
 
+    private void exportSchemeSpecification() {
+    	Editor editor = Editor.getInstance();
+        VPackage pack = editor.getCurrentPackage();
+
+        if ( pack == null ) {
+            JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+            return;
+        }
+
+        JFileChooser fc = new JFileChooser( pack.getPath() );
+        
+        String schemeTitle = editor.getCurrentCanvas().getSchemeTitle();
+        
+        if( schemeTitle != null ) {
+        	fc.setSelectedFile( new File( pack.getPath() + RuntimeProperties.FS + schemeTitle ) );
+        }
+        
+        CustomFileFilter filter = SpecGenFactory.getInstance().getCurrentSpecGen().getFileFilter();
+        fc.setFileFilter( filter );
+        int returnVal = fc.showSaveDialog( editor );
+        if ( returnVal == JFileChooser.APPROVE_OPTION ) {
+
+            File file = fc.getSelectedFile();
+
+            if ( !file.getAbsolutePath().toLowerCase().endsWith( filter.getExtension() ) ) {
+
+                file = new File( file.getAbsolutePath() + "." + filter.getExtension() );
+            }
+
+            RuntimeProperties.setLastPath( file.getAbsolutePath() );
+            if ( RuntimeProperties.isLogInfoEnabled() )
+                db.p( "Exporting scheme specification into: " + file.getName() );
+            editor.getCurrentCanvas().exportSchemeSpecification( file );
+        }
+    }
+    
     /**
      * Closes the current scheme and removes the file the scheme was loaded
      * from. The user is asked for confirmation.

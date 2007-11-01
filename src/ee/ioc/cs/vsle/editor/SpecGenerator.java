@@ -19,8 +19,7 @@ public class SpecGenerator implements ISpecGenerator {
 		// use the factory to get instances
 	}
 	
-	public String generateSpec(Scheme scheme) {
-    	VPackage pack = scheme.getVPackage();
+	public String generateSpec(Scheme scheme, String className) {
     	ObjectList objects = scheme.getObjects();
     	ConnectionList relations = scheme.getConnections();
 
@@ -29,7 +28,7 @@ public class SpecGenerator implements ISpecGenerator {
 		StringBuffer s = new StringBuffer();
 		
 		// construct class and spec declarations
-		s.append("public class " + pack.getPackageClassName());
+		s.append("public class " + className);
 		if (superClass != null) {
 			s.append(" extends ");
 			s.append(superClass.getClassName());
@@ -37,7 +36,7 @@ public class SpecGenerator implements ISpecGenerator {
 		s.append(" {");
 
 		s.append("\n    /*@ specification  ");
-		s.append(pack.getPackageClassName());
+		s.append(className);
 		
 		if (superClass != null) {
 			s.append(" super ");
@@ -194,6 +193,11 @@ public class SpecGenerator implements ISpecGenerator {
 		public String getDescription() {
 			return "SSP specification";
 		}		
+	}
+
+	@Override
+	public CustomFileFilter getFileFilter() {
+		return new CustomFileFilter( CustomFileFilter.EXT.JAVA );
 	}
 	
 }

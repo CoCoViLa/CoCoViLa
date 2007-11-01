@@ -9,16 +9,15 @@ public class XMLSpecGenerator implements ISpecGenerator {
 		// use the factory
 	}
 	
-    public String generateSpec(Scheme scheme) {
+    public String generateSpec(Scheme scheme, String className) {
         GObj obj;
         String spec = "";
 
-    	VPackage pack = scheme.getVPackage();
     	ObjectList objects = scheme.getObjects();
     	ConnectionList relations = scheme.getConnections();
 
         StringBuffer s = new StringBuffer();
-        s.append("<package name=\"" + pack.getPackageClassName() + "\">\n");
+        s.append("<package name=\"" + className + "\">\n");
 
         for (int i = 0; i < objects.size(); i++) {
             obj = objects.get(i);
@@ -62,6 +61,11 @@ public class XMLSpecGenerator implements ISpecGenerator {
         return s.toString();
     }
 
+    @Override
+	public CustomFileFilter getFileFilter() {
+		return new CustomFileFilter( CustomFileFilter.EXT.XML );
+	}
+    
     public static void init() {
 		FactoryStorage.register( new Factory() );
 	}

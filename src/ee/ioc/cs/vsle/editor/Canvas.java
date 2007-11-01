@@ -1073,7 +1073,30 @@ public class Canvas extends JPanel {
         return true;
     } // loadScheme
 
-
+    public void exportSchemeSpecification( File file ) {
+    	
+    	String className = file.getName();
+    	
+    	if( className.lastIndexOf( "." ) > -1 ) {
+    		className = className.substring( 0, className.lastIndexOf( "." ) );
+    	}
+    	
+    	String spec = SpecGenFactory.getInstance().getCurrentSpecGen().generateSpec( scheme, className );
+    	
+        try {
+            FileWriter writer = new FileWriter( file );
+            
+            try {
+            	writer.write(spec);
+            }
+            finally {
+            	writer.close();
+            }
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
+    }
+    
     public void saveScheme( File file ) {
         OutputStream output = null;
         try {
