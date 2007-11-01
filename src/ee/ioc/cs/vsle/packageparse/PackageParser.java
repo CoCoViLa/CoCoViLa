@@ -708,7 +708,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 				if (status == PACKAGE)
 					pack.description = charBuf.toString();
 				else
-					newClass.description = charBuf.toString();
+					newClass.setDescription(charBuf.toString());
 			} else if (EL_NAME.equals(element)) {
 				// if we are reading a package field
 				if (status == PACKAGE)

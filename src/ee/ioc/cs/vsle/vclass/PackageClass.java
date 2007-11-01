@@ -14,7 +14,7 @@ public class PackageClass implements Serializable {
     private Map<String, ClassField> specFields = new LinkedHashMap<String, ClassField>();
 	public ClassGraphics graphics;
 	public ArrayList<Port> ports = new ArrayList<Port>();
-	public String description;
+	private String description;
 	public boolean relation = false;
     public String painterName;
     private ClassPainter painterPrototype;
@@ -199,4 +199,12 @@ public class PackageClass implements Serializable {
     public void addSpecField( ClassField field ) {
         this.specFields.put( field.getName(), field );
     }
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public String getDescription() {
+		return description;
+	}
 }

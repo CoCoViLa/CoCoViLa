@@ -80,7 +80,7 @@ public class Palette implements ActionListener {
 			else
 				actionCmd = pClass.name;
 
-			JToggleButton button = createButton(icon, pClass.description,
+			JToggleButton button = createButton(icon, pClass.name + " " + pClass.getDescription(),
 					actionCmd);
 
 			classPanel.add(button);
