@@ -61,7 +61,6 @@ public class XMLSpecGenerator implements ISpecGenerator {
         return s.toString();
     }
 
-    @Override
 	public CustomFileFilter getFileFilter() {
 		return new CustomFileFilter( CustomFileFilter.EXT.XML );
 	}

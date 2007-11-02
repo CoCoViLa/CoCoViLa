@@ -195,7 +195,6 @@ public class SpecGenerator implements ISpecGenerator {
 		}		
 	}
 
-	@Override
 	public CustomFileFilter getFileFilter() {
 		return new CustomFileFilter( CustomFileFilter.EXT.JAVA );
 	}
