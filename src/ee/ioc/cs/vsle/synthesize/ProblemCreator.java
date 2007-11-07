@@ -17,7 +17,7 @@ public class ProblemCreator {
 	    
 		Problem problem = new Problem( new Var( new ClassField( TYPE_THIS, TYPE_THIS ), null ) );
 		
-    	makeProblemImpl( classes, problem.getRootVar(), problem, new HashMap<SubtaskClassRelation, SubtaskRel>() );
+    	makeProblemImpl( classes, problem.getRootVar(), problem, new HashMap<SubtaskClassRelation, SubtaskRel>(), new HashMap<String, Integer>() );
     	
     	if ( RuntimeProperties.isLogInfoEnabled() )
             db.p( "Problem created in: " + ( System.currentTimeMillis() - start ) + "ms." );
@@ -34,7 +34,8 @@ public class ProblemCreator {
      @param caller caller, or the "parent" of the current object. The objects name will be caller + . + obj.name
      @param problem the problem itself (needed because of recursion).
      */
-    private static void makeProblemImpl( ClassList classes, Var parent, Problem problem, Map<SubtaskClassRelation, SubtaskRel> indpSubtasks ) throws
+    private static void makeProblemImpl( ClassList classes, Var parent, Problem problem, Map<SubtaskClassRelation, SubtaskRel> indpSubtasks, 
+    		Map<String, Integer> visitedClasses ) throws
             SpecParseException {
 
     	List<Alias> aliases = new ArrayList<Alias>();
@@ -53,10 +54,31 @@ public class ProblemCreator {
             
             problem.addVar( var );
             
-            if ( classes.getType( cf.getType() ) != null ) {
+            String type;
+            
+            if ( classes.getType( type = cf.getType() ) != null ) {
             	
-                makeProblemImpl( classes, var, problem, indpSubtasks );
-                continue;
+            	if( RuntimeProperties.isRecursiveSpecsAllowed() ) {
+            		int lastDepth;
+
+            		if( !visitedClasses.containsKey( type ) ) {
+            			visitedClasses.put( type, ( lastDepth = RuntimeProperties.getMaxRecursiveDeclarationDepth() ) - 1 );
+            		} else if( visitedClasses.get( type ) <= 0 ) {
+            			continue;
+            		} else {
+            			lastDepth = visitedClasses.get(type);
+            			visitedClasses.put( type, lastDepth -1 );
+            		}
+
+            		makeProblemImpl( classes, var, problem, indpSubtasks, visitedClasses );
+
+            		visitedClasses.put( type, lastDepth );
+            		
+            	} else {
+            		makeProblemImpl( classes, var, problem, indpSubtasks, visitedClasses );
+            	}
+            	
+            	continue;
             }
             else if( cf.isConstant() && cf.getName().startsWith( "*" ) ) {
             	//this denotes for alias.length constant
@@ -86,6 +108,15 @@ public class ProblemCreator {
         
         for ( ClassRelation classRelation : ac.getClassRelations() ) {
 
+        	String obj = parent.getFullNameForConcat();
+        	
+        	//check mutual declaration
+        	if( RuntimeProperties.isRecursiveSpecsAllowed() 
+        			&& ( checkRecursiveSpecRelationImpl( classRelation.getInputs(), visitedClasses, problem, obj ) 
+        	    			|| checkRecursiveSpecRelationImpl( classRelation.getOutputs(), visitedClasses, problem, obj ) ) ) {
+        		continue;
+        	}
+        	
             Rel rel = new Rel( parent, classRelation.getSpecLine() );
             Set<Rel> relSet = null;
             
@@ -109,17 +140,15 @@ public class ProblemCreator {
                 //the following is for x = y, not x -> y relation
                 else if ( ( classRelation.getType() == RelType.TYPE_EQUATION ) ) {
                 	
-                    String obj = parent.getFullNameForConcat();
-                    
                     Var inpVar = problem.getAllVars().get( obj + classRelation.getInput().getName() );
                     Var outpVar = problem.getAllVars().get( obj + classRelation.getOutput().getName() );
                     
                     if( inpVar == null ) {
-                    	throw new UnknownVariableException( classRelation.getInput().getName() );
+                    	throw new UnknownVariableException( obj + classRelation.getInput().getName() );
                     }
                     
                     if( outpVar == null ) {
-                    	throw new UnknownVariableException( classRelation.getOutput().getName() );
+                    	throw new UnknownVariableException( obj + classRelation.getOutput().getName() );
                     }
                     
                     isAliasRel = checkEquality( inpVar, outpVar, classes, classRelation, parent, problem );
@@ -221,7 +250,7 @@ public class ProblemCreator {
         Problem contextProblem = 
         	new Problem( new Var( new ClassField( TYPE_THIS, AnnotatedClass.INDEPENDENT_SUBTASK ), null ) );
 
-        makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem, indpSubtasks );
+        makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem, indpSubtasks, new HashMap<String, Integer>() );
 
         Var par = contextProblem.getVarByFullName(context.getName());
 
@@ -234,6 +263,30 @@ public class ProblemCreator {
         
         indpSubtasks.put( subtask, subtaskRel );
         return subtaskRel;
+    }
+    
+    /**
+     * check mutual declaration
+     * @param classRelation
+     * @param visitedClasses
+     * @param problem
+     * @param obj
+     * @return
+     */
+    private static boolean checkRecursiveSpecRelationImpl( Collection<ClassField> fields, Map<String, Integer> visitedClasses, Problem problem, String obj ) {
+    	for( ClassField outp : fields ) {
+    		if( outp.isSpecField() && visitedClasses.get(outp.getType()) == 0 ) {
+    			return true;
+    		} else if( problem.getAllVars().get( obj + outp.getName() ) == null && outp.getName().indexOf( "." ) > -1 ) {
+    			Var par = problem.getAllVars().get( obj + outp.getName().substring( 0, outp.getName().lastIndexOf( ".") ) );
+    			
+    			if( par != null && par.getField().isSpecField() && visitedClasses.get(par.getType()) == 0 ) {
+    				return true;
+    			}
+    		}
+    	}
+    	
+    	return false;
     }
     
     private static boolean checkEquality( Var inpVar, Var outpVar, ClassList classes, ClassRelation classRelation, Var parent, Problem problem ) throws SpecParseException {
@@ -454,29 +507,31 @@ public class ProblemCreator {
            UnknownVariableException {
        Var var;
 
+       String parentObj = parentVar.getFullNameForConcat();
+       
        for ( ClassField input : classRelation.getInputs() ) {
            //if we deal with equation and one variable is used on both sides of "=", we cannot use it.
            if( classRelation.getType() == RelType.TYPE_EQUATION && classRelation.getOutputs().contains( input ) ) {
 				return null;
 			}
            
-           String varName = parentVar.getFullNameForConcat() + input.getName();
+           String varName = parentObj + input.getName();
            if ( problem.getAllVars().containsKey( varName ) ) {
                var = problem.getAllVars().get( varName );
                var.addRel( rel );
                rel.addInput( var );
            } else {
-               throw new UnknownVariableException( varName );
+               throw new UnknownVariableException( parentObj + varName );
            }
        }
        
        for ( ClassField output : classRelation.getOutputs() ) {
-           String varName = parentVar.getFullNameForConcat() + output.getName();
+           String varName = parentObj + output.getName();
            if ( problem.getAllVars().containsKey( varName ) ) {
                var = problem.getAllVars().get( varName );
                rel.addOutput( var );
            } else {
-               throw new UnknownVariableException( varName );
+               throw new UnknownVariableException( parentObj + varName );
            }
        }
        

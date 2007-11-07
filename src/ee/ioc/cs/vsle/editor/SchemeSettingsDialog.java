@@ -16,6 +16,10 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 
+import sun.net.www.content.image.jpeg;
+
+import com.sun.crypto.provider.JceKeyStore;
+
 import ee.ioc.cs.vsle.factoryStorage.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.FileFuncs;
@@ -52,11 +56,40 @@ public class SchemeSettingsDialog extends JDialog {
 					SpecGenFactory.getInstance().setCurrentSpecGen((ISpecGenerator)factory.getInstance());
 				}});
 			group.add(button);
-			spec.add( button );
+			JPanel flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );
+			flow.add( button );
+			spec.add( flow );
 			if( factory.getInstance() == SpecGenFactory.getInstance().getCurrentSpecGen() ) {
 				button.setSelected( true );
 			}
 		}
+		
+		JPanel specRec = new JPanel();
+		specRec.setLayout( new BoxLayout( specRec, BoxLayout.X_AXIS ) );
+		final JSpinner maxRecDepthSpin = new JSpinner( new SpinnerNumberModel( RuntimeProperties.getMaxRecursiveDeclarationDepth(), 2, 20, 1 ) );
+		maxRecDepthSpin.addChangeListener( new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				RuntimeProperties.setMaxRecursiveDeclarationDepth( (Integer)maxRecDepthSpin.getValue() );
+			}
+		} );
+		
+		final JCheckBox specRecAllowed = new JCheckBox( "Allow recursive declarations", RuntimeProperties.isRecursiveSpecsAllowed() );
+		maxRecDepthSpin.setEnabled( specRecAllowed.isSelected() );
+		specRecAllowed.addChangeListener( new ChangeListener() {
+
+			public void stateChanged(ChangeEvent e) {
+				boolean selected = specRecAllowed.isSelected();
+				
+				RuntimeProperties.setRecursiveSpecsAllowed(selected);
+				maxRecDepthSpin.setEnabled(selected);
+			}
+		} );
+		specRec.add(specRecAllowed);
+		specRec.add(maxRecDepthSpin);
+		
+		spec.add(specRec);
+		
 		spec_flow.add(spec);
 		
 		JPanel plan_flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );

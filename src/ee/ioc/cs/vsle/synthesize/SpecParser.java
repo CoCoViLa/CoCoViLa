@@ -731,6 +731,9 @@ public class SpecParser {
         if ( RuntimeProperties.isLogDebugEnabled() )
             db.p( "Checking existence of " + path + type + ".java" );
         if ( checkedClasses.contains( type ) ) {
+        	if( RuntimeProperties.isRecursiveSpecsAllowed() ) {
+        		return true;
+        	}
             throw new MutualDeclarationException( className + " <-> " + type );
         } else if ( classList.getType( type ) != null ) {
             // do not need to parse already parsed class again

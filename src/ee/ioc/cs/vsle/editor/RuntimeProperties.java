@@ -41,6 +41,7 @@ public class RuntimeProperties {
     private static final String SYNTAX_HIGHLIGHT = "syntax_highlight";
     private static final String SHOW_ALGORITHM = "show_algorithm";
     private static final String TEXT_FONT = "text_font";
+    private static final String SPEC_RECURSION_PARAMS = "spec_recursion";
     private static final String VERSION = "version";
     private static final String VERSION_UNKNOWN = "@project.version@";
     //x;y;width;height;state
@@ -75,6 +76,7 @@ public class RuntimeProperties {
         s_defaultProperties.put( TEXT_FONT, "Courier New-plain-12" );
         s_defaultProperties.put( VERSION, VERSION_UNKNOWN );
         s_defaultProperties.put( SCHEME_EDITOR_WINDOW_PROPS, ";;650;600;0" );
+        s_defaultProperties.put( SPEC_RECURSION_PARAMS, "false;2" );
     }
 
     private static String genFileDir;
@@ -90,6 +92,8 @@ public class RuntimeProperties {
     private static boolean showAlgorithm;
     private static String lnf;
     private static Font font;
+    private static boolean recursiveSpecsAllowed = false;
+    private static int maxRecursiveDeclarationDepth = 2;
     private static Set<String> openPackages = new LinkedHashSet<String>();
     private static Map<String, String> recentPackages = new LinkedHashMap<String, String>();
     
@@ -148,8 +152,9 @@ public class RuntimeProperties {
         setShowAlgorithm( Boolean.parseBoolean( s_runtimeProperties.getProperty( SHOW_ALGORITHM ) ) );
         setSyntaxHighlightingOn( Boolean.parseBoolean( s_runtimeProperties.getProperty( SYNTAX_HIGHLIGHT ) ) );
         setFont( Font.decode( s_runtimeProperties.getProperty( TEXT_FONT ) ) );
+        
         String openPacks = s_runtimeProperties.getProperty( OPEN_PACKAGES );
-
+        
         if ( openPacks != null && openPacks.trim().length() > 0 ) {
             String[] pack = openPacks.split( ";" );
 
@@ -181,6 +186,10 @@ public class RuntimeProperties {
             }
         }
 
+        String[] specRec = s_runtimeProperties.getProperty( SPEC_RECURSION_PARAMS ).split( ";" );
+        setRecursiveSpecsAllowed( Boolean.parseBoolean( specRec[0] ) );
+        setMaxRecursiveDeclarationDepth( Integer.parseInt( specRec[1] ) );
+        
         s_runtimeProperties.setProperty( LAST_EXECUTED, new java.util.Date().toString() );
 
     }
@@ -199,7 +208,8 @@ public class RuntimeProperties {
         s_runtimeProperties.setProperty( SYNTAX_HIGHLIGHT, Boolean.toString( isSyntaxHighlightingOn ) );
         s_runtimeProperties.setProperty( SHOW_ALGORITHM, Boolean.toString( showAlgorithm ) );
         s_runtimeProperties.setProperty( DEFAULT_LNF, lnf );
-
+        s_runtimeProperties.setProperty( SPEC_RECURSION_PARAMS, Boolean.toString( recursiveSpecsAllowed ) + ";" + maxRecursiveDeclarationDepth );
+        
         String fontString = font.getName() + "-";
 
         if ( font.isBold() ) {
@@ -556,4 +566,29 @@ public class RuntimeProperties {
         s_runtimeProperties.setProperty( SCHEME_EDITOR_WINDOW_PROPS, 
                 bounds.x + ";" + bounds.y + ";" + bounds.width + ";" + bounds.height + ";" + winState );
     }
+    
+    /**
+     * allow recursive specifications, e.g. - 
+     * class A {
+     * 	int x;
+     *  A a;
+     *  a.x = x;
+     * }
+     * @return
+     */
+    public static boolean isRecursiveSpecsAllowed() {
+    	return recursiveSpecsAllowed;
+    }
+    
+    public static int getMaxRecursiveDeclarationDepth() {
+    	return maxRecursiveDeclarationDepth;
+    }
+
+	public static void setRecursiveSpecsAllowed( boolean recursiveSpecsAllowed ) {
+		RuntimeProperties.recursiveSpecsAllowed = recursiveSpecsAllowed;
+	}
+
+	public static void setMaxRecursiveDeclarationDepth( int maxRecursiveDeclarationDepth ) {
+		RuntimeProperties.maxRecursiveDeclarationDepth = maxRecursiveDeclarationDepth;
+	}
 }
