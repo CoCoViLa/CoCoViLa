@@ -3,8 +3,6 @@ package ee.ioc.cs.vsle.editor;
 import ee.ioc.cs.vsle.util.FileFuncs;
 
 import javax.swing.*;
-import javax.swing.filechooser.*;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.text.*;
 
 import java.awt.*;
@@ -48,7 +46,6 @@ public class CodeViewer extends JFrame implements ActionListener {
         	textArea = ta;
         }
 		
-		//textArea = new JavaColoredTextPane();
 		textArea.addKeyListener(new ProgramTextEditor.CommentKeyListener());
 		textArea.setFont(RuntimeProperties.getFont());
 		
@@ -56,16 +53,13 @@ public class CodeViewer extends JFrame implements ActionListener {
 		areaScrollPane.setRowHeaderView(new LineNumberView(textArea));
 		areaScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
-		specText = new JPanel();
-		specText.setLayout(new BorderLayout());
+		specText = new JPanel(new BorderLayout());
 		specText.add(areaScrollPane, BorderLayout.CENTER);
 		JToolBar toolBar = new JToolBar();
 		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
 		toolBar.add(new FontResizePanel(textArea));
 		toolBar.add(new UndoRedoDocumentPanel(textArea.getDocument()));
 
-		specText.setLayout(new BorderLayout());
-		specText.add(areaScrollPane, BorderLayout.CENTER);
 		specText.add(toolBar, BorderLayout.NORTH);
 
 		getContentPane().add(specText);
@@ -105,7 +99,6 @@ public class CodeViewer extends JFrame implements ActionListener {
 		
 		menuBar.add(fileMenu);
 		setJMenuBar( menuBar );
-		validate();
 	}
 	
 	private void openFile( File file ) {
@@ -118,6 +111,7 @@ public class CodeViewer extends JFrame implements ActionListener {
 			public void run() {
 				textArea.setText(fileText);
 				textArea.setCaretPosition( 0 );
+				textArea.requestFocusInWindow();
 			}
 		} );
 	}
