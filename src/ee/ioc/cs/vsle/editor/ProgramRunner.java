@@ -507,7 +507,7 @@ public class ProgramRunner {
 
         new Thread() {
             public void run() {
-                Thread.currentThread().setName( "RunningThread" + System.currentTimeMillis() );
+                Thread.currentThread().setName( "RunningThread_" + System.currentTimeMillis() );
 
                 try {
                     Object[] args = getArguments();
@@ -593,14 +593,12 @@ public class ProgramRunner {
 
     class ProgramRunnerEventListener implements ProgramRunnerEvent.Listener {
 
-        public void onProgramRunnerEvent( ProgramRunnerEvent event ) {
+        public void onProgramRunnerEvent( final ProgramRunnerEvent event ) {
 
             if ( event.getId() != m_id )
                 return;
 
             int operation = event.getOperation();
-
-            String programSource = null;
 
             if ( ( operation & ProgramRunnerEvent.REQUEST_SPEC ) > 0 ) {
 
@@ -612,24 +610,56 @@ public class ProgramRunner {
                 return;
             }
 
-            if ( ( ( operation & ProgramRunnerEvent.COMPUTE_GOAL ) > 0 ) || ( ( operation & ProgramRunnerEvent.COMPUTE_ALL ) > 0 ) ) {
+            Boolean computeAll = null;
+            
+            if( ( operation & ProgramRunnerEvent.COMPUTE_ALL ) > 0 ) {
+            	computeAll = true;
+            	operation &= ~ProgramRunnerEvent.COMPUTE_ALL;
+            } else if( ( operation & ProgramRunnerEvent.COMPUTE_GOAL ) > 0 ) {
+            	computeAll = false;
+            	operation &= ~ProgramRunnerEvent.COMPUTE_GOAL;
+            }
+            
+            if ( computeAll != null ) {
 
-                String spec = ( event.getSpecText() != null ) ? event.getSpecText() : getSpec();
+            	final int type = operation;
+            	final boolean compute = computeAll;
+            	
+            	new Thread( "PlanningThread_" + System.currentTimeMillis() ) {
 
-                programSource = compute( spec, ( ( operation & ProgramRunnerEvent.COMPUTE_ALL ) > 0 ) );
+					@Override
+					public void run() {
+						String spec = ( event.getSpecText() != null ) ? event.getSpecText() : getSpec();
 
-                if ( event.isRequestFeedback() ) {
-                    ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
-                            ProgramRunnerFeedbackEvent.TEXT_PROGRAM, programSource );
+						RunningThreadKillerDialog.addThread( this );
+						
+		                String programSource = compute( spec, compute );
 
-                    EventSystem.queueEvent( evt );
-                }
+		                RunningThreadKillerDialog.removeThread( this );
+		                
+		                if ( event.isRequestFeedback() ) {
+		                    ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
+		                            ProgramRunnerFeedbackEvent.TEXT_PROGRAM, programSource );
+
+		                    EventSystem.queueEvent( evt );
+		                }
+		                
+		                ProgramRunnerEvent newEvent = 
+		                	new ProgramRunnerEvent( event.getSource(), event.getId(), type );
+		                
+		                newEvent.setProgramText( programSource );
+		                
+		                EventSystem.queueEvent( newEvent );
+					}
+            		
+            	}.start();
+                
+                return;
             }
 
             if ( ( operation & ProgramRunnerEvent.COMPILE ) > 0 ) {
 
-                compile( event.getProgramText() != null ? event.getProgramText() : programSource );
-
+                compile( event.getProgramText() );
             }
 
             boolean isPropagated = false;
