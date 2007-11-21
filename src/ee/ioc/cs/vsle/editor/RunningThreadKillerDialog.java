@@ -8,6 +8,11 @@ import java.awt.event.*;
 import java.util.*;
 
 import javax.swing.*;
+import javax.swing.Timer;
+
+import sun.net.www.content.image.jpeg;
+
+import com.sun.xml.internal.messaging.saaj.soap.JpegDataContentHandler;
 
 /**
  * @author pavelg
@@ -19,7 +24,7 @@ public class RunningThreadKillerDialog extends JDialog {
 
     private static final long serialVersionUID = 1L;
 
-    private static HashMap<Thread, JPanel> threads = new HashMap<Thread, JPanel>();
+    private static HashMap<Thread, JPanel> threads = new LinkedHashMap<Thread, JPanel>();
 
     private JPanel jContentPane = null;
 
@@ -27,6 +32,8 @@ public class RunningThreadKillerDialog extends JDialog {
 
     private JButton jButtonRefresh = null;
 
+    private JButton jButtonKillAll = null;
+    
     public static void addThread( final Thread thr ) {
         SwingUtilities.invokeLater( new Runnable() {
 
@@ -60,37 +67,62 @@ public class RunningThreadKillerDialog extends JDialog {
         if ( m_mainPanel == null ) {
             m_mainPanel = new JPanel();
 
-            // m_mainPanel.setLayout( new BoxLayout( m_mainPanel,
-            // BoxLayout.Y_AXIS ) );
-            m_mainPanel.setLayout( new GridLayout( 0, 1 ) );
+             m_mainPanel.setLayout( new BoxLayout( m_mainPanel, BoxLayout.Y_AXIS ) );
+//            m_mainPanel.setLayout( new GridLayout( 0, 1 ) );
         }
 
         return m_mainPanel;
     }
 
     private static JPanel createThreadPanel( final Thread thread ) {
-        JPanel panel = new JPanel();
+        JPanel panel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
 
-        panel.add( new JLabel( thread.getName() ) );
+        String threadName = thread.getName();
+        final String s = threadName + "(alive for %1$tT)";
+        final JLabel lbl = new JLabel( threadName );
+        panel.add( lbl );
 
         JButton but = new JButton( "X" );
         panel.add( but );
 
+        ActionListener taskPerformer = new ActionListener() {
+        	int secs = 0;
+        	
+            public void actionPerformed(ActionEvent evt) {
+            	lbl.setText( String.format( s, (long)++secs * 1000 ) );
+            }
+        };
+        
+        final Timer timer = new Timer( 1000, taskPerformer);
+        timer.start();
+        
         panel.setEnabled( true );
         but.addActionListener( new ActionListener() {
-            @SuppressWarnings("deprecation")
+            
             public void actionPerformed( ActionEvent e ) {
-                removeThread( thread );
-                try {
-                    thread.stop();
-                } catch ( Exception ex ) {
-                }
+            	timer.stop();
+                stopAndRemove( thread );
             }
         } );
 
         return panel;
     }
 
+    /**
+     * Stops given thread and removes corresponding panel
+     * @param thread
+     */
+    @SuppressWarnings("deprecation")
+    private static void stopAndRemove( Thread thread ) {
+    	removeThread( thread );
+        try {
+        	
+            thread.stop();
+        } catch ( Exception ex ) {
+        	//do not print anything here
+        }
+    }
+    
     /**
      * This method initializes jButtonRefresh
      * 
@@ -103,9 +135,8 @@ public class RunningThreadKillerDialog extends JDialog {
                 public void actionPerformed( java.awt.event.ActionEvent e ) {
                     getMainPanel().removeAll();
 
-                    for ( Iterator iter = threads.values().iterator(); iter.hasNext(); ) {
-                        JPanel el = (JPanel) iter.next();
-                        getMainPanel().add( el );
+                    for ( JPanel panel : threads.values() ) {
+                        getMainPanel().add( panel );
                     }
                 }
             } );
@@ -113,6 +144,20 @@ public class RunningThreadKillerDialog extends JDialog {
         return jButtonRefresh;
     }
 
+    private JButton getJButtonKillAll() {
+        if ( jButtonKillAll == null ) {
+        	jButtonKillAll = new JButton( "Kill All" );
+        	jButtonKillAll.addActionListener( new ActionListener() {
+                public void actionPerformed( ActionEvent e ) {
+                    for ( Thread thread : threads.keySet() ) {
+                    	stopAndRemove( thread );
+                    }
+                }
+            } );
+        }
+        return jButtonKillAll;
+    }
+    
     public static void getInstance() {
         s_instance.setVisible( true );
     }
@@ -158,7 +203,7 @@ public class RunningThreadKillerDialog extends JDialog {
      */
     private void initialize() {
         this.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
-        this.setSize( 300, 200 );
+        this.setSize( 430, 200 );
         this.setContentPane( getJContentPane() );
         this.setLocationRelativeTo( getParent() );
     }
@@ -172,10 +217,14 @@ public class RunningThreadKillerDialog extends JDialog {
         if ( jContentPane == null ) {
             jContentPane = new JPanel();
             jContentPane.setLayout( new BorderLayout() );
-            JScrollPane scrollPane = new JScrollPane( getMainPanel() );
-
+            JPanel flow = new JPanel( new FlowLayout() );
+            flow.add( getMainPanel() );
+            JScrollPane scrollPane = new JScrollPane( flow );
             jContentPane.add( scrollPane, BorderLayout.CENTER );
-            jContentPane.add( getJButtonRefresh(), BorderLayout.SOUTH );
+            JPanel btnPanel = new JPanel( new GridLayout( 1, 2 ) );
+            btnPanel.add( getJButtonRefresh() );
+            btnPanel.add( getJButtonKillAll() );
+            jContentPane.add( btnPanel, BorderLayout.SOUTH );
         }
         return jContentPane;
     }
