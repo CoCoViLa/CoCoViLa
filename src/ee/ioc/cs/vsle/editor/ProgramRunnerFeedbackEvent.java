@@ -4,95 +4,115 @@ import ee.ioc.cs.vsle.event.*;
 
 public class ProgramRunnerFeedbackEvent extends BaseEvent {
 
-	private static Dispatcher s_dispatcher;
+    private static Dispatcher s_dispatcher;
 
-	private static Object s_lock = new Object();
+    private static Object s_lock = new Object();
 
-	public static final int TEXT_SPECIFICATION = 0;
-	public static final int TEXT_PROGRAM = 1;
-	public static final int TEXT_RESULT = 2;
-	public static final int DISPOSE = 3;
-	
-	private long m_id;
-	private int m_type;
-	private String m_text;
-	
-	static {
-		init();
-	}
+    public static final int TEXT_SPECIFICATION = 0;
+    public static final int TEXT_PROGRAM = 1;
+    public static final int TEXT_RESULT = 2;
+    public static final int DISPOSE = 3;
+    public static final int WORKING = 4;
 
-	/**
-	 * @param originator
-	 */
-	public ProgramRunnerFeedbackEvent( Object originator, long id, int type, String text ) {
-		super(originator);
-		
-		m_id = id;
-		m_type = type;
-		m_text = text;
-	}
+    private long m_id;
+    private int m_type;
+    private String m_text;
+    private boolean m_working;
 
-	/* (non-Javadoc)
-	 * @see ee.ioc.cs.vsle.event.BaseEvent#getDispatcher()
-	 */
-	@Override
-	protected EventDispatcher getDispatcher() {
-		return s_dispatcher;
-	}
+    static {
+        init();
+    }
 
-	private static void init() {
+    private ProgramRunnerFeedbackEvent( Object originator, long id, int type ) {
+        super( originator );
 
-		if (s_dispatcher == null) {
-			synchronized (s_lock) {
-				if (s_dispatcher == null) {
-					s_dispatcher = new Dispatcher();
+        m_id = id;
+        m_type = type;
+    }
 
-				}
-			}
-		}
-	}
+    public ProgramRunnerFeedbackEvent( Object originator, long id, boolean working ) {
+        this( originator, id, WORKING );
+        m_working = working;
+    }
 
-	public static void registerListener(Listener listener) {
-		s_dispatcher.register(listener);
-	}
+    /**
+     * @param originator
+     */
+    public ProgramRunnerFeedbackEvent( Object originator, long id, int type, String text ) {
+        this( originator, id, type );
+        m_text = text;
+    }
 
-	public static void unregisterListener(Listener listener) {
-		s_dispatcher.unregister(listener);
-	}
+    /*
+     * (non-Javadoc)
+     * 
+     * @see ee.ioc.cs.vsle.event.BaseEvent#getDispatcher()
+     */
+    @Override
+    protected EventDispatcher getDispatcher() {
+        return s_dispatcher;
+    }
 
-	private static class Dispatcher extends EventDispatcher {
+    private static void init() {
 
-		public void callListenerOnEvent(BaseEventListener obj, BaseEvent evt) {
+        if ( s_dispatcher == null ) {
+            synchronized ( s_lock ) {
+                if ( s_dispatcher == null ) {
+                    s_dispatcher = new Dispatcher();
 
-			Listener listener = (Listener) obj;
+                }
+            }
+        }
+    }
 
-			listener.onProgramRunnerFeedbackEvent((ProgramRunnerFeedbackEvent) evt);
-		}
-	}
+    public static void registerListener( Listener listener ) {
+        s_dispatcher.register( listener );
+    }
 
-	////////////////////////////////////////////////////////////////////////////
-	// Interface Listener
-	////////////////////////////////////////////////////////////////////////////
+    public static void unregisterListener( Listener listener ) {
+        s_dispatcher.unregister( listener );
+    }
 
-	/**
-	 * Interface <code>Listener</code>
-	 *
-	 */
-	public interface Listener extends BaseEventListener {
+    private static class Dispatcher extends EventDispatcher {
 
-		public void onProgramRunnerFeedbackEvent(ProgramRunnerFeedbackEvent event);
-	}
+        public void callListenerOnEvent( BaseEventListener obj, BaseEvent evt ) {
 
-	public long getId() {
-		return m_id;
-	}
+            Listener listener = (Listener) obj;
 
-	public int getType() {
-		return m_type;
-	}
+            listener.onProgramRunnerFeedbackEvent( (ProgramRunnerFeedbackEvent) evt );
+        }
+    }
 
-	public String getText() {
-		return m_text;
-	}
+    // //////////////////////////////////////////////////////////////////////////
+    // Interface Listener
+    // //////////////////////////////////////////////////////////////////////////
+
+    /**
+     * Interface <code>Listener</code>
+     * 
+     */
+    public interface Listener extends BaseEventListener {
+
+        public void onProgramRunnerFeedbackEvent( ProgramRunnerFeedbackEvent event );
+    }
+
+    public long getId() {
+        return m_id;
+    }
+
+    public int getType() {
+        return m_type;
+    }
+
+    public String getText() {
+        return m_text;
+    }
+
+    /**
+     * @return the working
+     */
+    public boolean isWorking() {
+        return m_working;
+    }
 
 }

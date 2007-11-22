@@ -1,20 +1,21 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.api.Scheme;
-import ee.ioc.cs.vsle.ccl.*;
-import ee.ioc.cs.vsle.event.*;
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.synthesize.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 import java.awt.*;
-import java.util.List;
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.tree.*;
+
+import ee.ioc.cs.vsle.api.Scheme;
+import ee.ioc.cs.vsle.ccl.*;
+import ee.ioc.cs.vsle.event.*;
+import ee.ioc.cs.vsle.synthesize.*;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  */
@@ -72,12 +73,13 @@ public class ProgramRunner {
 
         updateFromCanvas();
 
-        return SpecGenFactory.getInstance().getCurrentSpecGen().generateSpec( m_canvas.scheme, m_canvas.scheme.getVPackage().getPackageClassName() );
+        return SpecGenFactory.getInstance().getCurrentSpecGen().generateSpec( m_canvas.scheme,
+                m_canvas.scheme.getVPackage().getPackageClassName() );
     }
 
     private Object[] getArguments() throws Exception {
         if ( getAssumptions().isEmpty() ) {
-            return new Object[ 0 ];
+            return new Object[0];
         }
 
         if ( arguments == null ) {
@@ -112,8 +114,7 @@ public class ProgramRunner {
             pc.getMethod( "setScheme", Scheme.class ).invoke( null, m_canvas.scheme );
 
         } catch ( NoClassDefFoundError e ) {
-            JOptionPane.showMessageDialog( null, "Class not found:\n" + e.getMessage(), "Execution error",
-                    JOptionPane.ERROR_MESSAGE );
+            JOptionPane.showMessageDialog( null, "Class not found:\n" + e.getMessage(), "Execution error", JOptionPane.ERROR_MESSAGE );
             e.printStackTrace( System.err );
 
         } catch ( CompileException ce ) {
@@ -126,6 +127,48 @@ public class ProgramRunner {
         }
 
         return null;
+    }
+
+    private void generateProgramSource( final ProgramRunnerEvent event, final int operation, final boolean compute ) {
+
+        new Thread( "PlanningThread_" + System.currentTimeMillis() ) {
+
+            @Override
+            public void run() {
+
+                setWorking( true );
+
+                String programSource = null;
+
+                try {
+                    String spec = ( event.getSpecText() != null ) ? event.getSpecText() : getSpec();
+
+                    RunningThreadManager.addThread( ProgramRunner.this.getId(), this );
+
+                    programSource = compute( spec, compute );
+
+                } finally {
+                    setWorking( false );
+                }
+
+                RunningThreadManager.removeThread( ProgramRunner.this.getId(), false );
+
+                if ( event.isRequestFeedback() ) {
+                    ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
+                            ProgramRunnerFeedbackEvent.TEXT_PROGRAM, programSource );
+
+                    EventSystem.queueEvent( evt );
+                }
+
+                ProgramRunnerEvent newEvent = new ProgramRunnerEvent( event.getSource(), event.getId(), operation );
+
+                newEvent.setProgramText( programSource );
+
+                EventSystem.queueEvent( newEvent );
+            }
+
+        }.start();
+
     }
 
     private String compute( String fullSpec, boolean computeAll ) {
@@ -153,7 +196,8 @@ public class ProgramRunner {
 
             db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
             String line = uve.getLine();
-            ErrorWindow.showErrorMessage( "Fatal error: variable " + uve.excDesc + " not declared" + ( line != null ? ", line: " + line : "" ) );
+            ErrorWindow.showErrorMessage( "Fatal error: variable " + uve.excDesc + " not declared"
+                    + ( line != null ? ", line: " + line : "" ) );
 
         } catch ( LineErrorException lee ) {
             db.p( "Fatal error on line " + lee.excDesc );
@@ -328,8 +372,8 @@ public class ProgramRunner {
         return result.toString();
     }
 
-    private String getVarValueAsString( String fullName ) throws IllegalArgumentException, IllegalAccessException,
-            SecurityException, NoSuchFieldException {
+    private String getVarValueAsString( String fullName ) throws IllegalArgumentException, IllegalAccessException, SecurityException,
+            NoSuchFieldException {
 
         Class<?> clas;
         Field f;
@@ -480,7 +524,7 @@ public class ProgramRunner {
                                 String[] sar = (String[]) o;
                                 String result = "";
                                 for ( int k = 0; k < sar.length; k++ ) {
-                                    result += sar[ k ] + ClassField.ARRAY_TOKEN;
+                                    result += sar[k] + ClassField.ARRAY_TOKEN;
                                 }
                                 cf.setValue( result );
                             } else {
@@ -512,18 +556,16 @@ public class ProgramRunner {
                 try {
                     Object[] args = getArguments();
                     for ( int i = 0; i < args.length; i++ ) {
-                        db.p( args[ i ].getClass() + " " + args[ i ] );
+                        db.p( args[i].getClass() + " " + args[i] );
                     }
 
                     Class<?> clas = genObject.getClass();
                     Method method = clas.getMethod( "compute", Object[].class );
-                    db
-                            .p( "Running... ( NB! The thread is alive until the next message --> ) "
-                                    + Thread.currentThread().getName() );
+                    db.p( "Running... ( NB! The thread is alive until the next message --> ) " + Thread.currentThread().getName() );
 
                     setWorking( true );
 
-                    RunningThreadKillerDialog.addThread( this );
+                    RunningThreadManager.addThread( ProgramRunner.this.getId(), this );
 
                     try {
                         method.invoke( genObject, new Object[] { args } );
@@ -534,13 +576,13 @@ public class ProgramRunner {
                          * caught. Stacktrace is not printed if a thread was
                          * stopped manually.
                          */
-                        if ( ! ( ex.getCause() instanceof ThreadDeath ) ) {
+                        if ( !( ex.getCause() instanceof ThreadDeath ) ) {
                             ex.printStackTrace();
                         }
 
                     }
 
-                    RunningThreadKillerDialog.removeThread( this );
+                    RunningThreadManager.removeThread( ProgramRunner.this.getId(), false );
 
                     setWorking( false );
 
@@ -548,8 +590,8 @@ public class ProgramRunner {
 
                     if ( sendFeedback ) {
 
-                        ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, id,
-                                ProgramRunnerFeedbackEvent.TEXT_RESULT, printFoundVars() + printWatchFields() );
+                        ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, id, ProgramRunnerFeedbackEvent.TEXT_RESULT,
+                                printFoundVars() + printWatchFields() );
 
                         EventSystem.queueEvent( evt );
                     }
@@ -595,7 +637,7 @@ public class ProgramRunner {
 
         public void onProgramRunnerEvent( final ProgramRunnerEvent event ) {
 
-            if ( event.getId() != m_id )
+            if ( event.getId() != m_id || isWorking() )
                 return;
 
             int operation = event.getOperation();
@@ -611,49 +653,18 @@ public class ProgramRunner {
             }
 
             Boolean computeAll = null;
-            
-            if( ( operation & ProgramRunnerEvent.COMPUTE_ALL ) > 0 ) {
-            	computeAll = true;
-            	operation &= ~ProgramRunnerEvent.COMPUTE_ALL;
-            } else if( ( operation & ProgramRunnerEvent.COMPUTE_GOAL ) > 0 ) {
-            	computeAll = false;
-            	operation &= ~ProgramRunnerEvent.COMPUTE_GOAL;
+
+            if ( ( operation & ProgramRunnerEvent.COMPUTE_ALL ) > 0 ) {
+                computeAll = true;
+                operation &= ~ProgramRunnerEvent.COMPUTE_ALL;
+            } else if ( ( operation & ProgramRunnerEvent.COMPUTE_GOAL ) > 0 ) {
+                computeAll = false;
+                operation &= ~ProgramRunnerEvent.COMPUTE_GOAL;
             }
-            
+
             if ( computeAll != null ) {
 
-            	final int type = operation;
-            	final boolean compute = computeAll;
-            	
-            	new Thread( "PlanningThread_" + System.currentTimeMillis() ) {
-
-					@Override
-					public void run() {
-						String spec = ( event.getSpecText() != null ) ? event.getSpecText() : getSpec();
-
-						RunningThreadKillerDialog.addThread( this );
-						
-		                String programSource = compute( spec, compute );
-
-		                RunningThreadKillerDialog.removeThread( this );
-		                
-		                if ( event.isRequestFeedback() ) {
-		                    ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
-		                            ProgramRunnerFeedbackEvent.TEXT_PROGRAM, programSource );
-
-		                    EventSystem.queueEvent( evt );
-		                }
-		                
-		                ProgramRunnerEvent newEvent = 
-		                	new ProgramRunnerEvent( event.getSource(), event.getId(), type );
-		                
-		                newEvent.setProgramText( programSource );
-		                
-		                EventSystem.queueEvent( newEvent );
-					}
-            		
-            	}.start();
-                
+                generateProgramSource( event, operation, computeAll );
                 return;
             }
 
@@ -687,8 +698,8 @@ public class ProgramRunner {
             if ( ( operation & ProgramRunnerEvent.DESTROY ) > 0 ) {
                 destroy();
 
-                ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
-                        ProgramRunnerFeedbackEvent.DISPOSE, null );
+                ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(), ProgramRunnerFeedbackEvent.DISPOSE,
+                        null );
 
                 EventSystem.queueEvent( evt );
             }
@@ -707,11 +718,15 @@ public class ProgramRunner {
     public void setWorking( boolean isWorking ) {
         synchronized ( s_lock ) {
             this.isWorking = isWorking;
+
+            ProgramRunnerFeedbackEvent event = new ProgramRunnerFeedbackEvent( this, getId(), isWorking );
+            EventSystem.queueEvent( event );
         }
     }
 
     /**
-     * @param assumptions the assumptions to set
+     * @param assumptions
+     *                the assumptions to set
      */
     public void setAssumptions( List<Var> assumptions ) {
         this.assumptions = assumptions;

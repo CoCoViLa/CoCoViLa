@@ -1,18 +1,16 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.vclass.VPackage;
-import ee.ioc.cs.vsle.event.*;
-import ee.ioc.cs.vsle.iconeditor.AboutDialog;
-import ee.ioc.cs.vsle.iconeditor.LicenseDialog;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.*;
 
 import javax.swing.*;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.*;
 
-import java.awt.Frame;
-import java.awt.event.*;
-import java.io.File;
+import ee.ioc.cs.vsle.event.*;
+import ee.ioc.cs.vsle.iconeditor.*;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 public class EditorActionListener implements ActionListener {
 
@@ -307,7 +305,7 @@ public class EditorActionListener implements ActionListener {
                 }
                 RuntimeProperties.save();
             } else if ( e.getActionCommand().equals( Menu.VIEW_THREADS ) ) {
-                RunningThreadKillerDialog.getInstance();
+                RunningThreadManager.showDialog();
             } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
                 new AboutDialog( Editor.getInstance() );
             } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
