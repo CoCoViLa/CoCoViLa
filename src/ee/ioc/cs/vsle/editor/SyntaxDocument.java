@@ -15,7 +15,8 @@ import javax.swing.text.*;
  */
 class SyntaxDocument extends DefaultStyledDocument {
 
-	private static final long		serialVersionUID	= 1L;
+
+    private static final long		serialVersionUID	= 1L;
 
 	private static final String		SPEC_START			= "/*@";
 	private static final String		SPEC_END			= "@*/";
@@ -152,6 +153,17 @@ class SyntaxDocument extends DefaultStyledDocument {
 		}
 	}
 
+	@Override
+	protected void fireUndoableEditUpdate( UndoableEditEvent e ) {
+	    if( ( e.getEdit() instanceof AbstractDocument.DefaultDocumentEvent ) ) {
+	        AbstractDocument.DefaultDocumentEvent event = (AbstractDocument.DefaultDocumentEvent)e.getEdit();
+	        
+	        if( event.getType() != DocumentEvent.EventType.CHANGE ) {
+	            super.fireUndoableEditUpdate( e );
+	        }
+	    }
+	}
+	    
 	/*
 	 * Override to apply syntax highlighting after the document has been updated
 	 */
