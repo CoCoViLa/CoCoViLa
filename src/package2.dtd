@@ -6,7 +6,7 @@
 <!ELEMENT port 		(open|closed)*>
 <!ELEMENT field 	(known|default)*>
 <!ELEMENT polygon 	(point+)>
-<!ELEMENT graphics 	((bounds| (line | rect | oval| arc | polygon) | text)*, painter?)>
+<!ELEMENT graphics 	((bounds| (line | rect | oval| arc | polygon | image) | text)*, painter?)>
 <!ELEMENT open 		(graphics)>
 <!ELEMENT closed 	(graphics)>
 <!ELEMENT known 	(graphics)>
@@ -29,6 +29,7 @@
 <!ELEMENT strict 	EMPTY>
 <!ELEMENT multi 	EMPTY>
 <!ELEMENT text 		EMPTY>
+<!ELEMENT image		EMPTY>
 <!ELEMENT portConnection EMPTY>
 <!ELEMENT painter	(#PCDATA)>
 
@@ -115,6 +116,12 @@
         fontsize        CDATA   #REQUIRED
         fixedsize	CDATA   #IMPLIED
         transparency	CDATA	#IMPLIED>
+<!ATTLIST image
+        x		CDATA   #REQUIRED
+        y		CDATA   #REQUIRED
+        width		CDATA   #REQUIRED
+        height		CDATA   #REQUIRED       
+        path		CDATA   #REQUIRED>
 <!ATTLIST port
 	id 		CDATA 	#IMPLIED
 	name 		CDATA 	#REQUIRED

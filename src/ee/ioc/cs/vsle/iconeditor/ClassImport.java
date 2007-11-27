@@ -101,7 +101,7 @@ public class ClassImport {
 				classIcon = new IconClass();
 				ports = new ArrayList<IconPort>();
 				fields = new ArrayList<ClassField>();
-				shapeList = new ShapeGroup(new ArrayList<Shape>());
+				shapeList = new ShapeGroup();
 				if ("relation".equals(attrs.getValue("type")))
 					classIcon.isRelation = true;
 			} else if(element.equals("name") && inClass){

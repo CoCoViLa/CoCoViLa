@@ -43,7 +43,7 @@ public class IconEditor extends JFrame {
     JLabel posInfo; // Label for displaying mouse position information.
     IconPalette palette;
     Dimension drawAreaSize = new Dimension( 700, 500 );
-    ShapeGroup shapeList = new ShapeGroup( new ArrayList<Shape>() );
+    ShapeGroup shapeList = new ShapeGroup();
     ArrayList<IconClass> icons = new ArrayList<IconClass>();
     ArrayList<ClassField> fields = new ArrayList<ClassField>();
     Shape currentShape;
@@ -65,6 +65,8 @@ public class IconEditor extends JFrame {
     public static boolean classParamsOk = false;
     public static boolean packageParamsOk = false;
 
+    private File packageFile;
+    
     /**
      * Class constructor [1].
      */
@@ -194,6 +196,10 @@ public class IconEditor extends JFrame {
         menuItem.addActionListener( mListener );
         menu.add( menuItem );
 
+        menuItem = new JMenuItem( Menu.SELECT_PACKAGE );
+        menuItem.addActionListener( mListener );
+        menu.add( menuItem );
+        
         menu.addSeparator();
 
         menuItem = new JMenuItem( Menu.PRINT, KeyEvent.VK_P );
@@ -321,6 +327,35 @@ public class IconEditor extends JFrame {
         savePackage();
     } // createPackage
 
+    public void selectPackage() {
+
+        try {
+
+            // Package file chooser.
+
+            File file = selectFile();
+
+            if ( file != null ) {
+                // Check if the file name ends with a required extension. If
+                // not,
+                // append the default extension to the file name.
+                if ( !file.getAbsolutePath().toLowerCase().endsWith( ".xml" ) ) {
+                    file = new File( file.getAbsolutePath() + ".xml" );
+                }
+
+                setPackageFile( file );
+                
+                updateTitle();
+                
+                // store the last open directory in system properties.
+                RuntimeProperties.setLastPath( file.getAbsolutePath() );
+                
+            }
+        } catch ( Exception exc ) {
+            exc.printStackTrace();
+        }
+    }
+    
     private void savePackage() {
         StringBuffer sb = new StringBuffer();
         sb.append( "<?xml version=\'1.0\' encoding=\'utf-8\'?>\n" );
@@ -331,10 +366,18 @@ public class IconEditor extends JFrame {
         sb.append( "<description>" + IconEditor.packageDesc + "</description>\n" );
         sb.append( "</package>" );
         if ( packageParamsOk ) {
-            saveToFile( sb.toString(), "xml" );
+            setPackageFile( saveToFile( sb.toString(), "xml" ) );
+            updateTitle();
         }
     } // savePackage
 
+    private void updateTitle() {
+        if( getPackageFile() != null ) {
+            setTitle( getPackageFile().getAbsolutePath() );
+        } else {
+            setTitle( null );
+        }
+    }
     /**
      * Save shape to file in XML format.
      */
@@ -385,7 +428,7 @@ public class IconEditor extends JFrame {
             Shape shape = shapeList.get( i );
             if ( ! ( shape instanceof BoundingBox ) ) {
                 String shapeXML = null;
-                shapeXML = shape.toFile( boundingbox.x, boundingbox.y );
+                shapeXML = shape.toFile( boundingbox.getX(), boundingbox.getY() );
 
                 if ( shapeXML != null )
                     buf.append( shapeXML );
@@ -406,10 +449,10 @@ public class IconEditor extends JFrame {
                 buf.append( "\" type=\"" );
                 buf.append( p.getType() );
                 buf.append( "\" x=\"" );
-                buf.append( p.getX() - boundingbox.x );
+                buf.append( p.getX() - boundingbox.getX() );
 
                 buf.append( "\" y=\"" );
-                buf.append( p.getY() - boundingbox.y );
+                buf.append( p.getY() - boundingbox.getY() );
 
                 buf.append( "\" portConnection=\"" );
 
@@ -654,7 +697,7 @@ public class IconEditor extends JFrame {
      */
     public void clearObjects() {
         mListener.state = State.selection;
-        shapeList = new ShapeGroup( new ArrayList<Shape>() );
+        shapeList = new ShapeGroup();
         ports = new ArrayList<IconPort>();
         palette.boundingbox.setEnabled( true );
         boundingbox = null;
@@ -800,7 +843,7 @@ public class IconEditor extends JFrame {
             RuntimeProperties.setLastPath( file.getAbsolutePath() );
             try {
                 mListener.state = State.selection;
-                shapeList = new ShapeGroup( new ArrayList<Shape>() );
+                shapeList = new ShapeGroup();
                 ports = new ArrayList<IconPort>();
                 palette.boundingbox.setEnabled( true );
                 loadGraphicsFromFile( file );
@@ -878,7 +921,7 @@ public class IconEditor extends JFrame {
         for ( int i = 0; i < shapeList.getSelected().size(); i++ ) {
             shape = shapeList.getSelected().get( i );
             if ( shape.getName() != null && shape.getName().startsWith( "GROUP" ) ) {
-                shapeList.addAll( ( (ShapeGroup) shape ).shapes );
+                shapeList.addAll( ( (ShapeGroup) shape ).getShapes() );
                 shapeList.remove( shape );
                 shape = null;
                 currentShape = null;
@@ -911,7 +954,7 @@ public class IconEditor extends JFrame {
      * @param content - file content.
      * @param format - file format (also the default file extension).
      */
-    public void saveToFile( String content, String format ) {
+    public File saveToFile( String content, String format ) {
         try {
             if ( format != null ) {
                 format = format.toLowerCase();
@@ -953,12 +996,13 @@ public class IconEditor extends JFrame {
                 if ( valid ) {
                     // Save scheme.
                     try {
-                        FileOutputStream out = new FileOutputStream( new File( file.getAbsolutePath() ) );
+                        FileOutputStream out = new FileOutputStream( file );
                         out.write( content.getBytes() );
                         out.flush();
                         out.close();
                         JOptionPane.showMessageDialog( null, "Saved to: " + file.getName(), "Saved",
                                 JOptionPane.INFORMATION_MESSAGE );
+                        return file;
 
                     } catch ( Exception exc ) {
                         exc.printStackTrace();
@@ -969,8 +1013,26 @@ public class IconEditor extends JFrame {
         } catch ( Exception exc ) {
             exc.printStackTrace();
         }
+        
+        return null;
     }
 
+    boolean checkPackage() {
+        if( getPackageFile() == null ) {
+            int result = JOptionPane.showConfirmDialog( this, "Select package and continue?", "Package not selected!", 
+                    JOptionPane.YES_NO_OPTION );
+            
+            if( result == JOptionPane.YES_OPTION ) {
+                selectPackage();
+            }
+            if( getPackageFile() == null ) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
     /**
      * Saves any input string into a file.
      */
@@ -981,157 +1043,141 @@ public class IconEditor extends JFrame {
             IconEditor.classIcon = "default.gif";
         }
 
-        try {
+        if( !checkPackage() ) {
+            return;
+        }
+        
+        // See if class allready exists in package
+        ci = new ClassImport( getPackageFile(), packageClasses, icons );
+        for ( int i = 0; i < icons.size(); i++ ) {
 
-            // Package file chooser.
+            // class exists, move changed class to the end
 
-            File file = selectFile();
-
-            if ( file != null ) {
-                // Check if the file name ends with a required extension. If
-                // not,
-                // append the default extension to the file name.
-                if ( !file.getAbsolutePath().toLowerCase().endsWith( ".xml" ) ) {
-                    file = new File( file.getAbsolutePath() + ".xml" );
+            if ( IconEditor.className.equalsIgnoreCase( icons.get( i ).getName() ) ) {
+                inPackage = true;
+                classX = 0 - classX;
+                classY = 0 - classY;
+                // shift everything back to where it was when first
+                // loaded
+                shapeList.shift( classX, classY );
+                // set values to those on screen
+                icons.get( i ).setBoundingbox( boundingbox );
+                icons.get( i ).setDescription( IconEditor.classDescription );
+                if ( IconEditor.classIcon == null ) {
+                    icons.get( i ).setIconName( "default.gif" );
+                } else {
+                    icons.get( i ).setIconName( IconEditor.classIcon );
                 }
+                icons.get( i ).setIsRelation( IconEditor.classIsRelation );
+                icons.get( i ).setName( IconEditor.className );
+                icons.get( i ).setPorts( ports );
+                icons.get( i ).shiftPorts( classX, classY );
+                icons.get( i ).setShapeList( shapeList );
 
-                // store the last open directory in system properties.
-                RuntimeProperties.setLastPath( file.getAbsolutePath() );
-                // See if class allready exists in package
-                ci = new ClassImport( file, packageClasses, icons );
+                if ( dbrClassFields != null && dbrClassFields.getRowCount() > 0 ) {
+                    fields.clear();
+                    for ( int j = 0; j < dbrClassFields.getRowCount(); j++ ) {
+                        String fieldName = dbrClassFields.getValueAt( j, iNAME );
+                        String fieldType = dbrClassFields.getValueAt( j, iTYPE );
+                        String fieldValue = dbrClassFields.getValueAt( j, iVALUE );
+                        ClassField field = new ClassField( fieldName, fieldType, fieldValue );
+                        fields.add( field );
+                    }
+                }
+                icons.get( i ).setFields( fields );
+                icons.add( icons.get( i ) );
+                icons.remove( i );
+                // assume that we only have one class with that name
+                break;
+            }
+        }
+        try {
+            // Read the contents of the package, escaping the package
+            // end that
+            // will be appended later.
+            BufferedReader in = new BufferedReader( new FileReader( getPackageFile() ) );
+            String str;
+            StringBuffer content = new StringBuffer();
+
+            // Read file contents to be appended to.
+            while ( ( str = in.readLine() ) != null ) {
+
+                if ( inPackage && str.trim().startsWith( "<class" ) ) {
+                    break;
+
+                    // class is not in package, just write everything to
+                    // file
+                } else if ( !inPackage ) {
+                    if ( str.equalsIgnoreCase( "</package>" ) )
+                        break;
+                    content.append( str + "\n" );
+
+                } else if ( inPackage )
+                    content.append( str + "\n" );
+            }
+
+            // if class is not in package, append the xml of current
+            // drawing.
+            if ( !inPackage ) {
+                content.append( getShapesInXML( false ) );
+            } else {
+                // write all classes
                 for ( int i = 0; i < icons.size(); i++ ) {
 
-                    // class exists, move changed class to the end
+                    classX = 0;
+                    classY = 0;
 
-                    if ( IconEditor.className.equalsIgnoreCase( icons.get( i ).getName() ) ) {
-                        inPackage = true;
-                        classX = 0 - classX;
-                        classY = 0 - classY;
-                        // shift everything back to where it was when first
-                        // loaded
-                        shapeList.shift( classX, classY );
-                        // set values to those on screen
-                        icons.get( i ).setBoundingbox( boundingbox );
-                        icons.get( i ).setDescription( IconEditor.classDescription );
-                        if ( IconEditor.classIcon == null ) {
-                            icons.get( i ).setIconName( "default.gif" );
-                        } else {
-                            icons.get( i ).setIconName( IconEditor.classIcon );
-                        }
-                        icons.get( i ).setIsRelation( IconEditor.classIsRelation );
-                        icons.get( i ).setName( IconEditor.className );
-                        icons.get( i ).setPorts( ports );
-                        icons.get( i ).shiftPorts( classX, classY );
-                        icons.get( i ).setShapeList( shapeList );
-
-                        if ( dbrClassFields != null && dbrClassFields.getRowCount() > 0 ) {
-                            fields.clear();
-                            for ( int j = 0; j < dbrClassFields.getRowCount(); j++ ) {
-                                String fieldName = dbrClassFields.getValueAt( j, iNAME );
-                                String fieldType = dbrClassFields.getValueAt( j, iTYPE );
-                                String fieldValue = dbrClassFields.getValueAt( j, iVALUE );
-                                ClassField field = new ClassField( fieldName, fieldType, fieldValue );
-                                fields.add( field );
-                            }
-                        }
-                        icons.get( i ).setFields( fields );
-                        icons.add( icons.get( i ) );
-                        icons.remove( i );
-                        // assume that we only have one class with that name
-                        break;
-                    }
-                }
-                try {
-                    // Read the contents of the package, escaping the package
-                    // end that
-                    // will be appended later.
-                    BufferedReader in = new BufferedReader( new FileReader( file ) );
-                    String str;
-                    StringBuffer content = new StringBuffer();
-
-                    // Read file contents to be appended to.
-                    while ( ( str = in.readLine() ) != null ) {
-
-                        if ( inPackage && str.trim().startsWith( "<class" ) ) {
-                            break;
-
-                            // class is not in package, just write everything to
-                            // file
-                        } else if ( !inPackage ) {
-                            if ( str.equalsIgnoreCase( "</package>" ) )
-                                break;
-                            content.append( str + "\n" );
-
-                        } else if ( inPackage )
-                            content.append( str + "\n" );
-                    }
-
-                    // if class is not in package, append the xml of current
-                    // drawing.
-                    if ( !inPackage ) {
-                        content.append( getShapesInXML( false ) );
-                    } else {
-                        // write all classes
-                        for ( int i = 0; i < icons.size(); i++ ) {
-
-                            classX = 0;
-                            classY = 0;
-
-                            makeClass( icons.get( i ) );
-                            content.append( getShapesInXML( false ) );
-                        }
-                    }
-                    content.append( "</package>" );
-
-                    in.close();
-
-                    /* See if .java file exists */
-                    File javaFile = new File( file.getParent() + RuntimeProperties.FS + className + ".java" );
-
-                    /* If file exists show conformation dialog */
-                    int overWriteFile = JOptionPane.YES_OPTION;
-                    if ( javaFile.exists() ) {
-
-                        overWriteFile = JOptionPane.showConfirmDialog( null, "Java class already exists. Overwrite?" );
-                    }
-
-                    if ( overWriteFile != JOptionPane.CANCEL_OPTION ) {
-
-                        FileOutputStream out = new FileOutputStream( new File( file.getAbsolutePath() ) );
-                        out.write( content.toString().getBytes() );
-                        out.flush();
-                        out.close();
-
-                        if ( overWriteFile == JOptionPane.YES_OPTION ) {
-                            String fileText = "class " + className + " {";
-                            fileText += "\n    /*@ specification " + className + " {\n";
-
-                            for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
-                                String fieldName = dbrClassFields.getValueAt( i, iNAME );
-                                String fieldType = dbrClassFields.getValueAt( i, iTYPE );
-                                // String fieldValue =
-                                // RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2],
-                                // i);
-
-                                if ( fieldType != null ) {
-                                    fileText += "    " + fieldType + " " + fieldName + ";\n";
-                                }
-                            }
-                            fileText += "    }@*/\n \n}";
-                            FileFuncs.writeFile( new File( file.getParent() + RuntimeProperties.FS + className + ".java" ),
-                                    fileText );
-                        }
-
-                        JOptionPane.showMessageDialog( null, "Saved to package: " + file.getName(), "Saved",
-                                JOptionPane.INFORMATION_MESSAGE );
-                    }
-                } catch ( IOException e ) {
-                    e.printStackTrace();
+                    makeClass( icons.get( i ) );
+                    content.append( getShapesInXML( false ) );
                 }
             }
-        } catch ( Exception exc ) {
-            exc.printStackTrace();
+            content.append( "</package>" );
+
+            in.close();
+
+            /* See if .java file exists */
+            File javaFile = new File( getPackageFile().getParent() + RuntimeProperties.FS + className + ".java" );
+
+            /* If file exists show conformation dialog */
+            int overWriteFile = JOptionPane.YES_OPTION;
+            if ( javaFile.exists() ) {
+
+                overWriteFile = JOptionPane.showConfirmDialog( null, "Java class already exists. Overwrite?" );
+            }
+
+            if ( overWriteFile != JOptionPane.CANCEL_OPTION ) {
+
+                FileOutputStream out = new FileOutputStream( new File( getPackageFile().getAbsolutePath() ) );
+                out.write( content.toString().getBytes() );
+                out.flush();
+                out.close();
+
+                if ( overWriteFile == JOptionPane.YES_OPTION ) {
+                    String fileText = "class " + className + " {";
+                    fileText += "\n    /*@ specification " + className + " {\n";
+
+                    for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
+                        String fieldName = dbrClassFields.getValueAt( i, iNAME );
+                        String fieldType = dbrClassFields.getValueAt( i, iTYPE );
+                        // String fieldValue =
+                        // RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2],
+                        // i);
+
+                        if ( fieldType != null ) {
+                            fileText += "    " + fieldType + " " + fieldName + ";\n";
+                        }
+                    }
+                    fileText += "    }@*/\n \n}";
+                    FileFuncs.writeFile( javaFile, fileText );
+                }
+
+                JOptionPane.showMessageDialog( null, "Saved to package: " + getPackageFile().getName(), "Saved",
+                        JOptionPane.INFORMATION_MESSAGE );
+            }
+        } catch ( IOException e ) {
+            e.printStackTrace();
         }
+
 
     } // saveToPackage
 
@@ -1171,46 +1217,9 @@ public class IconEditor extends JFrame {
      * Clones the currently selected object.
      */
     public void cloneObject() {
-        ShapeGroup sl = new ShapeGroup( new ArrayList<Shape>() );
 
-        for ( int i = 0; i < shapeList.size(); i++ ) {
-
-            Shape shape = shapeList.get( i );
-            boolean isFixed = shape.isFixed();
-            sl.add( shape );
-
-            if ( shape.isSelected() ) {
-
-                shape.setSelected( false );
-                if ( shape instanceof Rect ) {
-                    shape = new Rect( shape.getX(), shape.getY(), shape.width, shape.height, shape.getColor().getRed(), shape
-                            .isFilled(), shape.getStrokeWidth(), shape.getTransparency(), shape.getLineType() );
-                } else if ( shape instanceof Oval ) {
-                    shape = new Oval( shape.getX(), shape.getY(), shape.width, shape.height, shape.getColor().getRGB(), shape
-                            .isFilled(), shape.getStrokeWidth(), shape.getTransparency(), shape.getLineType() );
-                } else if ( shape instanceof Line ) {
-                    shape = new Line( shape.getStartX(), shape.getStartY(), shape.getEndX(), shape.getEndY(), shape.getColor()
-                            .getRGB(), shape.getStrokeWidth(), shape.getTransparency(), shape.getLineType() );
-                } else if ( shape instanceof Dot ) {
-                    shape = new Dot( shape.getX(), shape.getY(), shape.getColor().getRGB(), shape.getStrokeWidth(), shape
-                            .getTransparency() );
-                } else if ( shape instanceof Arc ) {
-                    shape = new Arc( shape.getX(), shape.getY(), shape.width, shape.height, shape.getStartAngle(), shape
-                            .getArcAngle(), shape.getColor().getRGB(), shape.isFilled(), shape.getStrokeWidth(), shape
-                            .getTransparency(), shape.getLineType() );
-                } else if ( shape instanceof Text ) {
-                    shape = new Text( shape.getX(), shape.getY(), shape.getFont(), shape.getColor(), shape.getTransparency(),
-                            shape.getText() );
-                }
-                shape.setSelected( true );
-                shape.x = shape.getX() + 5;
-                shape.y = shape.getY() + 5;
-                shape.setFixed( isFixed );
-                sl.add( shape );
-            }
-
-        }
-        shapeList = sl;
+        currentShape = null;
+        shapeList = shapeList.getCopy();
         repaint();
     } // cloneObject
 
@@ -1561,12 +1570,21 @@ public class IconEditor extends JFrame {
         RuntimeProperties.init();
 
         IconEditor window = new IconEditor();
-        window.setTitle( WINDOW_TITLE );
+        window.setTitle( null );
         window.setSize( 775, 600 );
         window.setVisible( true );
 
     }
 
+    public void setTitle( String title ) {
+        
+        if( title == null || title.length() == 0 ) {
+            super.setTitle( WINDOW_TITLE );
+        } else {
+            super.setTitle( title + " - " + WINDOW_TITLE );
+        }
+    }
+    
     public void zoom( double newZ, double oldZ ) {
         for ( int i = 0; i < shapeList.size(); i++ ) {
             Shape s = shapeList.get( i );
@@ -1590,7 +1608,7 @@ public class IconEditor extends JFrame {
             RuntimeProperties.setLastPath( file.getAbsolutePath() );
             try {
                 mListener.state = State.selection;
-                shapeList = new ShapeGroup( new ArrayList<Shape>() );
+                shapeList = new ShapeGroup();
                 dbrClassFields.setRowCount( 0 );
                 ports.clear();
                 fields.clear();
@@ -1741,6 +1759,20 @@ public class IconEditor extends JFrame {
      */
     public ClassFieldsTableModel getClassFieldModel() {
         return dbrClassFields;
+    }
+
+    /**
+     * @param packageFile the packageFile to set
+     */
+    void setPackageFile( File packageFile ) {
+        this.packageFile = packageFile;
+    }
+
+    /**
+     * @return the packageFile
+     */
+    File getPackageFile() {
+        return packageFile;
     }
 
 } // end of class

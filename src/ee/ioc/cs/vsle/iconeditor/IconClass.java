@@ -23,7 +23,7 @@ public class IconClass {
 	
 	
 	IconClass(){
-		this.shapeList = new ShapeGroup(new ArrayList<Shape>());
+		this.shapeList = new ShapeGroup();
 		this.ports = new ArrayList<IconPort>();
 		this.fields = new ArrayList<ClassField>();
 		this.name = null;

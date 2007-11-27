@@ -5,144 +5,374 @@ import java.util.*;
 
 import java.awt.*;
 
-
 public abstract class Shape implements Serializable, Cloneable {
 
-	public int x;
-	public int y;
-	public int width;
-	public int height;
-	int difWithMasterX;
-	int difWithMasterY;
-	//public abstract void drawSelection();
+    private int x;
+    private int y;
+    private int width;
+    private int height;
+    private boolean selected = false;
+    private String name;
+    private boolean fixed = false;
+    private boolean filled = false;
+    private Color color;
+    private BasicStroke stroke;
 
-	public Shape() {
-	}
+    public Shape( int x, int y ) {
+        this.setX( x );
+        this.setY( y );
+    }
 
-	public Shape(int x, int y, int width, int height, String name) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-	}
+    public Shape( int x, int y, int width, int height ) {
+        this.setX( x );
+        this.setY( y );
+        this.setWidth( width );
+        this.setHeight( height );
+    }
 
-	public void setFont(Font f) {
-	}
+    public ArrayList<Shape> getShapes() {
+        return null;
+    }
 
-	public void setText(String s) {
-	}
+    public boolean isFilled() {
+        return filled;
+    } // isFilled
 
-	public String getText() {
-		return null;
-	}
+    public boolean isSelected() {
+        return selected;
+    } // isSelected
 
-	public Font getFont() {
-		return null;
-	}
+    public void setSelected( boolean b ) {
+        this.selected = b;
+    } // setSelected
 
-	public int getStartX() {
-		return 0;
-	}
+    public int getX() {
+        return this.x;
+    } // getX
 
-	public int getStartY() {
-		return 0;
-	}
+    public int getY() {
+        return this.y;
+    } // getY
 
-	public int getStartAngle() {
-		return 0;
-	}
+    /**
+         * Returns width of the shape.
+         * @return int - shape width.
+         */
+    public int getWidth() {
+        return width;
+    } // getWidth
 
-	public int getArcAngle() {
-		return 0;
-	}
+    /**
+     * Returns height of the shape.
+     * @return int - shape height.
+     */
+    public int getHeight() {
+        return height;
+    } // getHeight
 
-	public int getEndX() {
-		return 0;
-	}
+    /**
+     * Returns the name of the shape.
+     * 
+     * @return String - the name of the shape.
+     */
+    public String getName() {
+        return this.name;
+    } // getName
 
-	public int getEndY() {
-		return 0;
-	}
+    /**
+     * Specify the name of the shape.
+     * 
+     * @param s
+     *            String - the name of the shape.
+     */
+    public void setName( String s ) {
+        this.name = s;
+    } // setName
 
-	public ArrayList<Shape> getShapes() {
-		return null;
-	}
+    /**
+     * Set the shape dimensions fixed in which case the shape cannot be resized.
+     * 
+     * @param b boolean - fix or unfix the shape.
+     */
+    public void setFixed( boolean b ) {
+        this.fixed = b;
+    } // setFixed
 
-	public abstract boolean isFilled();
+    /**
+     * Returns a boolean value representing if the shape is fixed or not.
+     * 
+     * @return boolean - boolean value representing if the shape is fixed or
+     *         not.
+     */
+    public boolean isFixed() {
+        return this.fixed;
+    } // isFixed.
 
-	public abstract boolean isSelected();
+    /**
+     * Set the color of a shape.
+     * 
+     * @param col Color - color of a shape.
+     */
+    public void setColor( Color col ) {
+        this.color = col;
+    } // setColor
 
-	public abstract boolean isInside(int x1, int y1, int x2, int y2);
+    /**
+     * Returns the color of the arc.
+     * 
+     * @return Color - color of the arc.
+     */
+    public Color getColor() {
+        return this.color;
+    } // getColor
 
-	public abstract boolean isInsideRect(int x1, int y1, int x2, int y2);
+    /**
+     * Returns the real height of the shape.
+     * 
+     * @return int - the real height of the shape.
+     */
+    public int getRealHeight() {
+        return getHeight();
+    } // getRealHeight
 
-	//public abstract void setTransparency(double transparencyPercentage);
+    /**
+     * Returns the real width of the shape.
+     * 
+     * @return int - the real width of the shape.
+     */
+    public int getRealWidth() {
+        return getWidth();
+    } // getRealWidth
 
-	public abstract void setColor(Color col);
+    public BasicStroke getStroke() {
+        return stroke;
+    }
 
-	public abstract void setMultSize(float s1, float s2);
-
-	public abstract void setSelected(boolean b);
-
-	public abstract void setPosition(int x, int y);
-
-	public abstract int getX();
-
-	public abstract int getY();
-
-	public abstract Color getColor();
-
-
-	public abstract int getRealWidth();
-
-	public abstract int getRealHeight();
-
-	public abstract double getStrokeWidth();
-
-	public abstract String getName();
+    public abstract void draw( int x, int y, float Xsize, float Ysize, Graphics2D g );
 
 
-	public abstract int getTransparency();
+    /**
+     * Resizes current object.
+     * @param deltaW int - change of object with.
+     * @param deltaH int - change of object height.
+     * @param cornerClicked int - number of the clicked corner.
+     */
+    public void resize( int deltaW, int deltaH, int cornerClicked ) {
+        if ( !isFixed() ) {
+            if ( cornerClicked == 1 ) { // TOP-LEFT
+                if ( this.getWidth() - deltaW > 0 && this.getHeight() - deltaH > 0 ) {
+                    this.setX( this.getX() + deltaW );
+                    this.setY( this.getY() + deltaH );
+                    this.setWidth( this.getWidth() - deltaW );
+                    this.setHeight( this.getHeight() - deltaH );
+                }
+            } else if ( cornerClicked == 2 ) { // TOP-RIGHT
+                if ( this.getWidth() + deltaW > 0 && this.getHeight() - deltaH > 0 ) {
+                    this.setY( this.getY() + deltaH );
+                    this.setWidth( this.getWidth() + deltaW );
+                    this.setHeight( this.getHeight() - deltaH );
+                }
+            } else if ( cornerClicked == 3 ) { // BOTTOM-LEFT
+                if ( this.getWidth() - deltaW > 0 && this.getHeight() + deltaH > 0 ) {
+                    this.setX( this.getX() + deltaW );
+                    this.setWidth( this.getWidth() - deltaW );
+                    this.setHeight( this.getHeight() + deltaH );
+                }
+            } else if ( cornerClicked == 4 ) { // BOTTOM-RIGHT
+                if ( this.getWidth() + deltaW > 0 && this.getHeight() + deltaH > 0 ) {
+                    this.setWidth( this.getWidth() + deltaW );
+                    this.setHeight( this.getHeight() + deltaH );
+                }
+            }
+        }
+    } // resize
+    
+    /**
+     * Draw the selection markers if object selected.
+     * @param g2 - graphics.
+     */
+    protected void drawSelection( Graphics2D g2 ) {
+        g2.setColor( Color.black );
+        g2.setStroke( new BasicStroke( (float) 1.0 ) );
+        g2.fillRect( getX(), getY(), 4, 4 );
+        g2.fillRect( getX() + getWidth() - 4, getY(), 4, 4 );
+        g2.fillRect( getX(), getY() + getHeight() - 4, 4, 4 );
+        g2.fillRect( getX() + getWidth() - 4, getY() + getHeight() - 4, 4, 4 );
+    } // drawSelection
+    
+    public abstract String toFile( int boundingboxX, int boundingboxY );
 
-	public abstract int getLineType();
+    public abstract String toText();
 
-	public abstract void resize(int deltaW, int deltaH, int cornerClicked);
+    public abstract Shape getCopy();
+    
+    public Shape clone() {
+        try {
+            return (Shape) super.clone();
+        } catch ( Exception e ) {
+            return null;
+        }
+    }
 
-	public abstract int controlRectContains(int pointX, int pointY);
+    public void setStrokeWidth( float sW ) {
+        
+        if( getStroke() != null ) {
+            setStroke( sW, getLineType() );
+        }
+    }
 
-	public abstract void draw(int x, int y, float Xsize, float Ysize, Graphics2D g);
+    public void setTransparency( int d ) {
+        if( getColor() != null ) {
+            setColor( new Color( getColor().getRed(), getColor().getGreen(), getColor().getBlue(), d ) );
+        }
+    }
 
-	public abstract String toFile(int boundingboxX, int boundingboxY);
+    public void setLineType( float lineType ) {
+        if( getStroke() != null ) {
+            setStroke( getStrokeWidth(), lineType );
+        }
+    }
 
-	public abstract String toText();
+    public float getStrokeWidth() {
+        return getStroke() != null ? getStroke().getLineWidth() : 1.0f;
+    }
 
-	//public abstract String toString();
+    public float getLineType() {
+        if ( getStroke() != null && getStroke().getDashArray() != null ) {
+            return getStroke().getDashArray()[0];
+        }
 
-	public abstract boolean contains(int pointX, int pointY);
+        return 0.0f;
+    } // getLineType
 
-	public abstract void setFixed(boolean b);
+    public int getTransparency() {
+        return getColor() != null ? getColor().getAlpha() : 0;
+    } // getTransparency
 
-	public abstract boolean isFixed();
+    /**
+     * Set shape position.
+     */
+    public void setPosition( int x, int y ) {
+        this.setX( getX() + x );
+        this.setY( getY() + y );
+    } // setPosition
 
-	public Shape clone() {
-		try {
-			return (Shape) super.clone();
-		} catch (Exception e) {
-			return null;
-		}
-	}
+    public boolean contains( int pointX, int pointY ) {
+        return ( pointX > getX() && pointY > getY() && pointX < getX() + getWidth() && pointY < getY() + getHeight() );
+    } // contains
 
-	public abstract void setStrokeWidth(double d);
+    /**
+     * Returns a boolean value representing if the mouse was clicked inside the
+     * shape.
+     */
+    public boolean isInside( int x1, int y1, int x2, int y2 ) {
+        return ( x1 > getX() && y1 > getY() && x2 < getX() + getWidth() && y2 < getY() + getHeight() );
+    } // isInside
 
-	public abstract void setTransparency(int d);
+    /**
+     * Returns a boolean value representing if the shape is in the selection
+     * rectangle.
+     */
+    public boolean isInsideRect( int x1, int y1, int x2, int y2 ) {
+        return ( x1 < getX() && y1 < getY() && x2 > getX() + getWidth() && y2 > getY() + getHeight() );
+    } // isInsideRect
 
-	public abstract void setLineType(int lineType);
+    /**
+     * Set size using zoom multiplication.
+     */
+    public void setMultSize( float s1, float s2 ) {
+        setX( getX() * (int) s1 / (int) s2 );
+        setY( getY() * (int) s1 / (int) s2 );
+        setWidth( getWidth() * (int) s1 / (int) s2 );
+        setHeight( getHeight() * (int) s1 / (int) s2 );
+    } // setMultSize
 
-	public abstract BasicStroke getStroke();
+    /**
+     * Returns the number representing a corner the mouse was clicked in.
+     * 1: top-left, 2: top-right, 3: bottom-left, 4: bottom-right.
+     * Returns 0 if the click was not in the corner.
+     * @param pointX int - mouse x coordinate.
+     * @param pointY int - mouse y coordinate.
+     * @return int - corner number the mouse was clicked in.
+     */
+    public int controlRectContains( int pointX, int pointY ) {
+        if( isFixed() ) {
+            return 0;
+        }
+        
+        if ( pointX >= getX() && pointY >= getY() && pointX <= getX() + 4 && pointY <= getY() + 4 ) {
+            return 1;
+        }
+        if ( pointX >= getX() + getWidth() - 4 && pointY >= getY() && pointX <= getX() + getWidth() && pointY <= getY() + 4 ) {
+            return 2;
+        }
+        if ( pointX >= getX() && pointY >= getY() + getHeight() - 4 && pointX <= getX() + 4 && pointY <= getY() + getHeight() ) {
+            return 3;
+        }
+        if ( pointX >= getX() + getWidth() - 4 && pointY >= getY() + getHeight() - 4 && pointX <= getX() + getWidth()
+                && pointY <= getY() + getHeight() ) {
+            return 4;
+        }
+        return 0;
+    } // controlRectContains
 
-	public void shift(int offsetX, int offsetY) {
-		x += offsetX;
-		y += offsetY;
-	}
+    /**
+     * Returns the name of the shape. In future implementations should return
+     * the textual representation of the shape, ie. the return value of the
+     * currently implemented "toText" method.
+     * 
+     * @return String - the name of the shape.
+     */
+    public String toString() {
+        return getName();
+    } // toString
+
+    /**
+     * @param x the x to set
+     */
+    public void setX( int x ) {
+        this.x = x;
+    }
+
+    /**
+     * @param y the y to set
+     */
+    public void setY( int y ) {
+        this.y = y;
+    }
+
+    /**
+     * @param width the width to set
+     */
+    public void setWidth( int width ) {
+        this.width = width;
+    }
+
+    /**
+     * @param height the height to set
+     */
+    public void setHeight( int height ) {
+        this.height = height;
+    }
+
+    /**
+     * @param filled the filled to set
+     */
+    protected void setFilled( boolean filled ) {
+        this.filled = filled;
+    }
+
+    /**
+     * @param stroke the stroke to set
+     */
+    public void setStroke( float strokeWidth, float lineType ) {
+        
+        if ( lineType > 0 ) {
+            this.stroke = new BasicStroke( strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 50, 
+                    new float[] { lineType, lineType }, 0 );
+        } else {
+            this.stroke = new BasicStroke( (float) strokeWidth );
+        }
+    }
 
 }

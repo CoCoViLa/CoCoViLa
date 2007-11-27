@@ -49,7 +49,8 @@ public class IconPalette {
 	JButton eraser;
 	JButton colors;
 	JButton addport;
-
+	JButton image;
+	
 	public IconPalette(IconMouseOps mListener, IconEditor ed) {
 	  toolBar = new JToolBar();
 
@@ -78,7 +79,7 @@ public class IconPalette {
 			public void stateChanged(ChangeEvent e) {
 				SpinnerModel source = (SpinnerModel) e.getSource();
 				try {
-					editor.mListener.changeStrokeWidth(Double.parseDouble(String.valueOf(source.getValue())));
+					editor.mListener.changeStrokeWidth(Float.parseFloat(String.valueOf(source.getValue())));
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -153,6 +154,13 @@ public class IconPalette {
 		addport.setToolTipText("Add Port");
 		toolBar.add(addport);
 
+		icon = FileFuncs.getImageIcon("images/image.png", false );
+                image = new JButton(icon);
+                image.setActionCommand(State.insertImage);
+                image.addActionListener(mListener);
+                image.setToolTipText("Insert Image");
+                toolBar.add(image);
+                
 		icon = FileFuncs.getImageIcon("images/text.gif", false );
 		text = new JButton(icon);
 		text.setActionCommand(State.drawText);

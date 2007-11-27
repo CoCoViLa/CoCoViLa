@@ -1,355 +1,76 @@
 package ee.ioc.cs.vsle.graphics;
 
-import java.io.*;
-import java.util.*;
-
 import java.awt.*;
+import java.io.*;
 
 public class BoundingBox extends Shape implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    String xEquation;
-	String yEquation;
-	String widthEquation;
-	String heightEquation;
-	boolean filled = false;
-	private BasicStroke stroke;
+    public static final String name = "BoundingBox";
 
-	/**
-	 * Shape color.
-	 */
-	Color color;
-	/**
-	 * Name of the shape.
-	 */
-	public static final String name = "BoundingBox";
+    public BoundingBox( int x, int y, int width, int height ) {
+        super( x, y, width, height );
+        this.setColor( Color.lightGray );
+        setTransparency( 200 );
+        this.setFilled( true );
+    } // BoundingBox
 
-	/**
-	 * Shape graphics.
-	 */
-	Graphics2D g2;
+    public String getName() {
+        return name;
+    } // getName
 
-	/**
-	 * Indicates if the shape is selected or not.
-	 */
-	private boolean selected = false;
+    /**
+     * Return a specification of the shape to be written into a file in XML format.
+     * @param boundingboxX - x coordinate of the bounding box.
+     * @param boundingboxY - y coordinate of the bounding box.
+     * @return String - specification of a shape.
+     */
+    public String toFile( int boundingboxX, int boundingboxY ) {
+        return "<bounds x=\"0\" y=\"0\" width=\"" + getWidth() + "\" height=\"" + getHeight() + "\"/>\n";
+    } // toFile
 
-	/**
-	 * Defines if the shape is resizable or not.
-	 */
-	private boolean fixed = false;
+    /**
+     * Return a text string representing the shape. Required for storing
+     * scheme of shapes on a disk for later loading into the IconEditor
+     * for continuing the work.
+     * @return String - text string representing the shape.
+     */
+    public String toText() {
+        return "BOUNDS:" + getX() + ":" + getY() + ":" + getWidth() + ":" + getHeight();
+    } // toText
 
-	public BoundingBox(int x, int y, int width, int height) {
-		this.x = x;
-		this.y = y;
-		this.width = width;
-		this.height = height;
-		this.color = Color.lightGray;
-		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), 200);
-		this.filled = true;
-	} // BoundingBox
+    /**
+     * Draw rectangle.
+     * @param xModifier int -
+     * @param yModifier int -
+     * @param Xsize float - zoom factor.
+     * @param Ysize float - zoom factor.
+     * @param g2 Graphics - class graphics.
+     */
+    public void draw( int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2 ) {
 
-	public void setFixed(boolean b) {
-		this.fixed = b;
-	}
+        // Set the box color: light-gray, with a transparency defined by "alpha" value.
+        g2.setColor( getColor() );
 
-	public boolean isFixed() {
-		return this.fixed;
-	}
+        int a = xModifier + (int) ( Xsize * getX() );
+        int b = yModifier + (int) ( Ysize * getY() );
+        int c = (int) ( Xsize * getWidth() );
+        int d = (int) ( Ysize * getHeight() );
 
-	public void setName(String s) {
-	} // setName
+        // draw the bounding box rectangle.
+        g2.fillRect( a, b, c, d );
 
-	public String getName() {
-		return name;
-	} // getName
+        // Draw selection markers if object selected.
+        if ( isSelected() ) {
+            drawSelection( g2 );
+        }
 
-	public void setSelected(boolean b) {
-		this.selected = b;
-	} // setSelected
+    } // draw
 
-	public boolean isSelected() {
-		return this.selected;
-	} // isSelected
-
-	public String toString() {
-		return getName();
-	} // toString
-
-	public void setPosition(int x, int y) {
-		this.x = getX() + x;
-		this.y = getY() + y;
-	} // setPosition
-
-	public int getRealHeight() {
-		return getHeight();
-	} // getRealHeight
-
-	public int getRealWidth() {
-		return getWidth();
-	} // getRealWidth
-
-	public boolean isInside(int x1, int y1, int x2, int y2) {
-		if (x1 > x && y1 > y && x2 < x + width && y2 < y + height) {
-			return true;
-		}
-		return false;
-	} // isInside
-
-	public boolean isInsideRect(int x1, int y1, int x2, int y2) {
-		if (x1 < x && y1 < y && x2 > x + width && y2 > y + height) {
-			return true;
-		}
-		return false;
-	} // isInsideRect
-
-	public boolean contains(int pointX, int pointY) {
-		if (pointX > x && pointY > y && pointX < x + width && pointY < y + height) {
-			return true;
-		}
-		return false;
-	} // contains
-
-	/**
-	 * Set size using zoom multiplication.
-	 * @param s1 float - set size using zoom multiplication.
-	 * @param s2 float - set size using zoom multiplication.
-	 */
-	public void setMultSize(float s1, float s2) {
-		x = x * (int) s1 / (int) s2;
-		y = y * (int) s1 / (int) s2;
-		width = width * (int) s1 / (int) s2;
-		height = height * (int) s1 / (int) s2;
-	} // setMultSize
-
-	/**
-	 * Returns the color of the rectangle.
-	 * @return Color - color of the rectangle.
-	 */
-	public Color getColor() {
-		return this.color;
-	} // getColor
-
-	/**
-	 * Set the color of a shape.
-	 * @param col Color - color of a shape.
-	 */
-	public void setColor(Color col) {
-		this.color = col;
-	} // setColor
-
-	/**
-	 * Returns a boolean value representing if the shape is filled or not.
-	 * @return boolean - a boolean value representing if the shape is filled or not.
-	 */
-	public boolean isFilled() {
-		return this.filled;
-	} // isFilled
-
-	/**
-	 * Returns the transparency of the shape.
-	 * @return double - the transparency of the shape.
-	 */
-	public int getTransparency() {
-		return 255;
-	} // getTransparency
-
-	/**
-	 * Returns the line typ of the shape.
-	 * @return int - line type of the shape.
-	 */
-	public int getLineType() {
-		return 0;
-	} // getLineType
-
-
-	/**
-	 * Returns the stroke with of a shape.
-	 * @return double - stroke width of a shape.
-	 */
-	public double getStrokeWidth() {
-		return 0;
-	} // getStrokeWidth
-
-	/**
-	 * Resizes current object.
-	 * @param deltaW int - change of object with.
-	 * @param deltaH int - change of object height.
-	 * @param cornerClicked int - number of the clicked corner.
-	 */
-	public void resize(int deltaW, int deltaH, int cornerClicked) {
-		if (!isFixed()) {
-			if (cornerClicked == 1) { // TOP-LEFT
-				if (this.width - deltaW > 0 && this.height - deltaH > 0) {
-					this.x += deltaW;
-					this.y += deltaH;
-					this.width -= deltaW;
-					this.height -= deltaH;
-				}
-			} else if (cornerClicked == 2) { // TOP-RIGHT
-				if (this.width + deltaW > 0 && this.height - deltaH > 0) {
-					this.y += deltaH;
-					this.width += deltaW;
-					this.height -= deltaH;
-				}
-			} else if (cornerClicked == 3) { // BOTTOM-LEFT
-				if (this.width - deltaW > 0 && this.height + deltaH > 0) {
-					this.x += deltaW;
-					this.width -= deltaW;
-					this.height += deltaH;
-				}
-			} else if (cornerClicked == 4) { // BOTTOM-RIGHT
-				if (this.width + deltaW > 0 && this.height + deltaH > 0) {
-					this.width += deltaW;
-					this.height += deltaH;
-				}
-			}
-		}
-	} // resize
-
-	/**
-	 * Returns the number representing a corner the mouse was clicked in.
-	 * 1: top-left, 2: top-right, 3: bottom-left, 4: bottom-right.
-	 * Returns 0 if the click was not in the corner.
-	 * @param pointX int - mouse x coordinate.
-	 * @param pointY int - mouse y coordinate.
-	 * @return int - corner number the mouse was clicked in.
-	 */
-	public int controlRectContains(int pointX, int pointY) {
-		if (pointX >= x && pointY >= y && pointX <= x + 4 && pointY <= y + 4) {
-			return 1;
-		}
-		if (pointX >= x + width - 4 && pointY >= y && pointX <= x + width && pointY <= y + 4) {
-			return 2;
-		}
-		if (pointX >= x && pointY >= y + height - 4 && pointX <= x + 4 && pointY <= y + height) {
-			return 3;
-		}
-		if (pointX >= x + width - 4 && pointY >= y + height - 4 && pointX <= x + width && pointY <= y + height) {
-			return 4;
-		}
-		return 0;
-	} // controlRectContains
-
-	/**
-	 * Draw the selection markers if object selected.
-	 */
-	public void drawSelection(Graphics2D g2) {
-		g2.setColor(Color.black);
-		g2.setStroke(new BasicStroke((float) 1.0));
-		g2.fillRect(x, y, 4, 4);
-		g2.fillRect(x + width - 4, y, 4, 4);
-		g2.fillRect(x, y + height - 4, 4, 4);
-		g2.fillRect(x + width - 4, y + height - 4, 4, 4);
-	} // drawSelection
-
-	/**
-	 * Return a specification of the shape to be written into a file in XML format.
-	 * @param boundingboxX - x coordinate of the bounding box.
-	 * @param boundingboxY - y coordinate of the bounding box.
-	 * @return String - specification of a shape.
-	 */
-	public String toFile(int boundingboxX, int boundingboxY) {
-		return "<bounds x=\"0\" y=\"0\" width=\"" + width + "\" height=\"" + height + "\"/>\n";
-	} // toFile
-
-	/**
-	 * Return a text string representing the shape. Required for storing
-	 * scheme of shapes on a disk for later loading into the IconEditor
-	 * for continuing the work.
-	 * @return String - text string representing the shape.
-	 */
-	public String toText() {
-		return "BOUNDS:" + x + ":" + y + ":" + width + ":" + height;
-	} // toText
-
-	public void setStrokeWidth(double d) {
-        stroke = new BasicStroke((float)d, stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), stroke.getDashArray(), stroke.getDashPhase());
-	}
-
-	public void setTransparency(int d) {
-		color = new Color(color.getRed(), color.getGreen(), color.getBlue(), d);
-	}
-
-	public void setLineType(int lineType) {
-		stroke = new BasicStroke(stroke.getLineWidth(), stroke.getEndCap(), stroke.getLineJoin(), stroke.getMiterLimit(), new float[]{lineType, lineType}, stroke.getDashPhase());
-	}
-
-	/**
-	 * Returns x coordinate of the rectangle.
-	 * @return int - rectangle x coordinate.
-	 */
-	public int getX() {
-		return x;
-	} // getX
-
-	/**
-	 * Returns y coordinate of the rectangle.
-	 * @return int - rectangle y coordinate.
-	 */
-	public int getY() {
-		return y;
-	} // getY
-
-	/**
-	 * Returns width of the rectangle.
-	 * @return int - rectangle width.
-	 */
-	int getWidth() {
-		return width;
-	} // getWidth
-
-	/**
-	 * Returns height of the rectangle.
-	 * @return int - rectangle height.
-	 */
-	int getHeight() {
-		return height;
-	} // getHeight
-
-
-
-	public BasicStroke getStroke() {
-		return null;
-	}
-
-	void drawDynamic(int xModifier, int yModifier, float Xsize, float Ysize,
-					 Graphics g, HashMap table) {
-		/*int drawx = xModifier + x + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(xEquation, table);
-			 int drawy = yModifier + y + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(yEquation, table)
-			 int drawWidth = width + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(widthEquation, table);
-			 int drawHeight = height + ee.ioc.cs.editor.Equations.EquationSolver.calcValue(heightEquation, table);
-			 g.drawRect(drawx, drawy, drawWidth, drawHeight);*/
-	} // drawDynamic
-
-	/**
-	 * Draw rectangle.
-	 * @param xModifier int -
-	 * @param yModifier int -
-	 * @param Xsize float - zoom factor.
-	 * @param Ysize float - zoom factor.
-	 * @param g2 Graphics - class graphics.
-	 */
-	public void draw(int xModifier, int yModifier, float Xsize, float Ysize,
-					 Graphics2D g2) {
-
-		// Set the box color: light-gray, with a transparency defined by "alpha" value.
-		g2.setColor(color);
-
-		int a = xModifier + (int) (Xsize * x);
-		int b = yModifier + (int) (Ysize * y);
-		int c = (int) (Xsize * width);
-		int d = (int) (Ysize * height);
-
-		// draw the bounding box rectangle.
-		g2.fillRect(a, b, c, d);
-
-		// Draw selection markers if object selected.
-		if (selected) {
-			drawSelection(g2);
-		}
-
-	} // draw
+    @Override
+    public Shape getCopy() {
+        throw new IllegalStateException( "Not allowed to copy " + name );
+    }
 
 }
