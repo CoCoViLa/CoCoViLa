@@ -71,6 +71,7 @@ public class ErrorWindow extends JFrame {
     static void appendAndShow(String message) {
         assert SwingUtilities.isEventDispatchThread();
 
+        int oldLen = instance.textArea.getDocument().getLength();
         instance.textArea.append(message + "\n\n");
         // The window must be set visible before modelToView() call,
         // otherwise the size of the textarea is not computed yet.
@@ -79,21 +80,20 @@ public class ErrorWindow extends JFrame {
         int firstErrorIndex = message.indexOf("ERROR");
         
         if( firstErrorIndex > -1 ) {
-        	int curLen = instance.textArea.getDocument().getLength();
         	// The compiler generated error messages are often very long but
         	// the root cause of the error is described after the first occurence
         	// of the string "ERROR". Make it easier for the user to spot errors
         	// by scrolling to the hopefully most relevant location.
         	JViewport vp = instance.areaScrollPane.getViewport();
         	try {
-        		Rectangle r = instance.textArea.modelToView(curLen 
+        		Rectangle r = instance.textArea.modelToView(oldLen 
         				+ firstErrorIndex);
         		Point p = vp.getViewPosition();
         		p.setLocation(0, r.y);
         		vp.setViewPosition(p);
         		// Hilight the first occurence of "ERROR"
-        		instance.textArea.select(curLen + firstErrorIndex,
-        				curLen + firstErrorIndex + 5);
+        		instance.textArea.select(oldLen + firstErrorIndex,
+        				oldLen + firstErrorIndex + 5);
         	} catch (BadLocationException e) {
         		db.p(e);
         	}
