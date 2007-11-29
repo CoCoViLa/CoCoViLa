@@ -21,6 +21,11 @@ public class RuntimeProperties {
     public static final String GPL_EE_LICENSE_FILE_NAME = "resources/gpl_ee.txt";
 
     /**
+     * Default minimum size for applicaion windows and dialogs
+     */
+    public static final Dimension WINDOW_MIN_DIM = new Dimension(150, 100);
+
+    /**
      * Property names (keys) found in the configuration file.
      */
     private static final String DOCUMENTATION_URL = "documentation.url";
@@ -440,7 +445,7 @@ public class RuntimeProperties {
     }
 
     /**
-     * @param openPackages the openPackages to set
+     * @param openPackage the openPackage to set
      */
     public static void addOpenPackage( String openPackage ) {
         RuntimeProperties.openPackages.add( openPackage );
