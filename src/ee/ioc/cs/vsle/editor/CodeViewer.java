@@ -67,6 +67,7 @@ public class CodeViewer extends JFrame implements ActionListener {
 		JMenuBar menuBar = new JMenuBar();
 		
 		JMenu fileMenu = new JMenu("File");
+		fileMenu.setMnemonic(KeyEvent.VK_F);
 		
 		JMenuItem new_ = new JMenuItem( "New" );
 		new_.setActionCommand( "New" );
@@ -76,6 +77,8 @@ public class CodeViewer extends JFrame implements ActionListener {
 		JMenuItem open = new JMenuItem( "Open..." );
 		open.setActionCommand( "Open" );
 		open.addActionListener(this);
+		open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
+		        InputEvent.CTRL_DOWN_MASK));
 		fileMenu.add(open);
 		
 		fileMenu.add( new JSeparator() );
@@ -83,6 +86,9 @@ public class CodeViewer extends JFrame implements ActionListener {
 		JMenuItem save = new JMenuItem( "Save" );
 		save.setActionCommand( "Save" );
 		save.addActionListener(this);
+		save.setMnemonic(KeyEvent.VK_S);
+		save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+		        InputEvent.CTRL_DOWN_MASK));
 		fileMenu.add(save);
 		
 		JMenuItem saveAs = new JMenuItem( "Save As..." );
@@ -95,9 +101,25 @@ public class CodeViewer extends JFrame implements ActionListener {
 		JMenuItem close = new JMenuItem( "Close" );
 		close.setActionCommand( "Close" );
 		close.addActionListener(this);
+		close.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+		        InputEvent.CTRL_DOWN_MASK));
+
 		fileMenu.add(close);
 		
 		menuBar.add(fileMenu);
+
+		JMenu editMenu = new JMenu("Edit");
+		editMenu.setMnemonic(KeyEvent.VK_E);
+
+		JMenuItem find = new JMenuItem("Find...");
+		find.addActionListener(this);
+		find.setMnemonic(KeyEvent.VK_F);
+		find.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F,
+		        InputEvent.CTRL_DOWN_MASK));
+		editMenu.add(find);
+
+		menuBar.add(editMenu);
+
 		setJMenuBar( menuBar );
 	}
 	
@@ -169,6 +191,8 @@ public class CodeViewer extends JFrame implements ActionListener {
 			
 		} else if ( e.getActionCommand().equals( "Close" ) ) {
 			dispose();
+		} else if ("Find...".equals(e.getActionCommand())) {
+		    TextSearchDialog.showDialog(this, textArea);
 		}
 	}
 
