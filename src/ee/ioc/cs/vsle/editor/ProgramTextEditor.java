@@ -13,7 +13,7 @@ import ee.ioc.cs.vsle.event.*;
  * This class contains only GUI and interacts with ProgrammRunner via
  * ProgramRunnerEvents
  */
-public class ProgramTextEditor extends JFrame implements ActionListener {
+public class ProgramTextEditor extends JFrame implements ActionListener, TextEditView {
 
     private ProgramRunnerFeedbackEventListener m_lst = new ProgramRunnerFeedbackEventListener();
 
@@ -177,6 +177,20 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
         statusBar = new StatusBar();
 
         contentPane.add( statusBar, BorderLayout.SOUTH );
+
+        // Bind the search dialog to Ctrl+F
+        InputMap im = getRootPane().getInputMap(
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK),
+                "actionFind");
+
+        getRootPane().getActionMap().put("actionFind", new AbstractAction() {
+
+            public void actionPerformed(ActionEvent e) {
+                TextSearchDialog.showDialog(ProgramTextEditor.this);
+            }
+            
+        });
 
         setContentPane( contentPane );
         validate();
@@ -455,6 +469,29 @@ public class ProgramTextEditor extends JFrame implements ActionListener {
             }
         }
 
+    }
+
+    /**
+     * Returns the text component in the selected tab.
+     */
+    public JTextComponent getTextComponent() {
+        switch (tabbedPane.getSelectedIndex()) {
+        case 0:
+            return jta_spec;
+        case 1:
+            return jta_generatedCode;
+        case 2:
+            return jta_runResult;
+        default:
+            return null;
+        }
+    }
+
+    /**
+     * Returns the root window.
+     */
+    public Window getWindow() {
+        return this;
     }
 
 }
