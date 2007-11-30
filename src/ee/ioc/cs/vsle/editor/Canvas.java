@@ -54,7 +54,8 @@ public class Canvas extends JPanel {
     UndoableEditSupport undoSupport;
     private boolean actionInProgress = false;
     private JScrollPane areaScrollPane;
-
+    private boolean drawPorts = true;
+    
     /*
      * The Edit classes implementing undo-redo could be moved somewhere else but
      * as they need to touch the internal state of the Canvas object then maybe
@@ -1031,6 +1032,13 @@ public class Canvas extends JPanel {
         drawingArea.repaint();
     } // hilightPorts
 
+    public void drawSelectedPorts() {
+        for ( GObj obj : objects.getSelected() ) {
+            obj.setDrawPorts( !obj.isDrawPorts() );
+        }
+        drawingArea.repaint();
+    }
+    
     public void print() {
         PrintUtilities.printComponent( this );
     } // print
@@ -1174,7 +1182,25 @@ public class Canvas extends JPanel {
         this.showGrid = b;
         drawingArea.repaint();
     }
+    
+    public void setDrawPorts( boolean b ) {
+        
+        drawPorts = b;
+        
+        for ( GObj obj : objects ) {
+            obj.setDrawPorts( b );
+        }
+        
+        drawingArea.repaint();
+    }
 
+    /**
+     * @return the drawPorts
+     */
+    public boolean isDrawPorts() {
+        return drawPorts;
+    }
+    
     class DrawingArea extends JPanel {
         private static final long serialVersionUID = 1L;
 
@@ -1620,6 +1646,8 @@ public class Canvas extends JPanel {
 
         currentObj.setName( genObjectName( pClass, currentObj ) );
 
+        currentObj.setDrawPorts( drawPorts );
+        
         currentPainter = pClass.getPainterFor( scheme, currentObj );
     }
 

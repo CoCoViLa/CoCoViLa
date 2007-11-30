@@ -42,7 +42,8 @@ public class Editor extends JFrame implements ChangeListener {
     public static final String WINDOW_TITLE = "CoCoViLa - Scheme Editor";
 
     private JCheckBoxMenuItem gridCheckBox;
-
+    private JCheckBoxMenuItem showPortCheckBox;
+    
     /**
      * Class constructor [1].
      */
@@ -140,11 +141,6 @@ public class Editor extends JFrame implements ChangeListener {
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
 
-        gridCheckBox = new JCheckBoxMenuItem( Menu.GRID, RuntimeProperties.isShowGrid() );
-        gridCheckBox.setMnemonic( 'G' );
-        gridCheckBox.addActionListener( aListener );
-        menu.add( gridCheckBox );
-
         final JCheckBoxMenuItem painterEnabled = new JCheckBoxMenuItem( Menu.CLASSPAINTER, true );
         painterEnabled.addActionListener( aListener );
         menu.add( painterEnabled );
@@ -172,6 +168,38 @@ public class Editor extends JFrame implements ChangeListener {
         } );
 
         menuBar.add( menu );
+        
+        menu = new JMenu( Menu.MENU_VIEW );
+        menu.setMnemonic( KeyEvent.VK_V );
+        gridCheckBox = new JCheckBoxMenuItem( Menu.GRID, RuntimeProperties.isShowGrid() );
+        gridCheckBox.setMnemonic( 'G' );
+        gridCheckBox.addActionListener( aListener );
+        menu.add( gridCheckBox );
+        
+        showPortCheckBox = new JCheckBoxMenuItem( Menu.SHOW_PORTS, true );
+        showPortCheckBox.addActionListener( aListener );
+        menu.add( showPortCheckBox );
+        
+        //sync View with current canvas
+        menu.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
+
+            public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
+                gridCheckBox.setSelected( getCurrentCanvas().isGridVisible() );
+                showPortCheckBox.setSelected( getCurrentCanvas().isDrawPorts() );
+            }
+
+            public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {
+                // ignore
+            }
+
+            public void popupMenuCanceled( PopupMenuEvent e ) {
+                // ignore
+            }
+
+        } );
+        
+        menuBar.add( menu );
+        
         menu = new JMenu( Menu.MENU_PACKAGE );
         menu.setMnemonic( KeyEvent.VK_P );
         menuItem = new JMenuItem( Menu.LOAD, KeyEvent.VK_L );

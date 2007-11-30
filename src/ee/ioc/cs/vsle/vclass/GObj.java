@@ -58,6 +58,8 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
      */
     protected double angle = 0d;
 
+    private boolean drawPorts = true;
+    
     public GObj() {
         // default constructor
     }
@@ -319,21 +321,24 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
             g2.drawString( "s", xModifier, yModifier );
         }
 
-        for ( int i = 0; i < getPorts().size(); i++ ) {
-            ClassGraphics graphics;
-            Port port = getPorts().get( i );
+        if( isDrawPorts() ) {
+            for ( int i = 0; i < getPorts().size(); i++ ) {
+                ClassGraphics graphics;
+                Port port = getPorts().get( i );
 
-            if ( port.isSelected() || port.isConnected() || port.isHilighted() ) {
+                if ( port.isSelected() || port.isConnected() || port.isHilighted() ) {
 
-                graphics = port.getClosedGraphics();
+                    graphics = port.getClosedGraphics();
 
-            } else
-                graphics = port.getOpenGraphics();
+                } else
+                    graphics = port.getOpenGraphics();
 
-            graphics
-                    .draw( xModifier + (int) ( getXsize() * port.x ), yModifier + (int) ( getYsize() * port.y ), getXsize(), getYsize(), g2 );
+                graphics.draw( xModifier + (int) ( getXsize() * port.x ), 
+                        yModifier + (int) ( getYsize() * port.y ), 
+                        getXsize(), getYsize(), g2 );
+            }
         }
-
+        
         for ( ClassField field : getFields() ) { // print all field values
             if ( field.getDefaultGraphics() != null ) {
                 if ( !TypeUtil.isArray( field.type ) ) {
@@ -695,5 +700,19 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
             throw new RuntimeException( "No such field: " + fieldName );
 
         f.setValue( value );
+    }
+
+    /**
+     * @return the drawPorts
+     */
+    public boolean isDrawPorts() {
+        return drawPorts;
+    }
+
+    /**
+     * @param drawPorts the drawPorts to set
+     */
+    public void setDrawPorts( boolean drawPorts ) {
+        this.drawPorts = drawPorts;
     }
 }

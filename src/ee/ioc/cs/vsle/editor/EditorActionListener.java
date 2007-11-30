@@ -204,6 +204,10 @@ public class EditorActionListener implements ActionListener {
                     Editor.getInstance().getCurrentCanvas().setGridVisible(
                             !Editor.getInstance().getCurrentCanvas().isGridVisible() );
                 }
+            } else if ( e.getActionCommand().equals( Menu.SHOW_PORTS ) ) {
+                if ( Editor.getInstance().getCurrentCanvas() != null ) {
+                    Editor.getInstance().getCurrentCanvas().setDrawPorts( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
+                }
             } else if ( e.getActionCommand().equals( Menu.CLEAR_ALL ) ) {
                 if ( Editor.getInstance().getCurrentCanvas() != null ) {
                     Editor.getInstance().getCurrentCanvas().clearObjects();

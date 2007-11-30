@@ -84,13 +84,15 @@ class MouseOps extends MouseInputAdapter {
     private void openObjectPopupMenu( GObj obj, int x, int y ) {
         ObjectPopupMenu popupMenu = new ObjectPopupMenu( obj, canvas );
 
-        if ( obj.className == null ) {
+        if ( obj == null || obj.className == null ) {
             popupMenu.remove( popupMenu.itemViewCode );
-        } else {
+            popupMenu.remove( popupMenu.submenuOrder );
+        } 
+//        else {
             popupMenu.remove( popupMenu.itemMakeClass );
-        }
+//        }
 
-        if ( canvas.objects.getSelected().size() < 2 ) {
+        if ( obj != null && canvas.objects.getSelected().size() < 2 ) {
             /*
              * if (obj.isGroup()) {
              * popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, true); }
@@ -128,6 +130,7 @@ class MouseOps extends MouseInputAdapter {
             // popupMenu.enableDisableMenuItem(popupMenu.itemGroup, true);
             // popupMenu.enableDisableMenuItem(popupMenu.itemUngroup, false);
         }
+        
         popupMenu.show( canvas, x, y );
     }
 
@@ -153,7 +156,7 @@ class MouseOps extends MouseInputAdapter {
                     popupMenu.show( canvas, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
                 } else {
                     GObj obj = canvas.objects.checkInside( x, y );
-                    if ( obj != null ) {
+                    if ( obj != null || canvas.objects.getSelected().size() > 1 ) {
                         openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
                     }
                 }

@@ -22,6 +22,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
     // JMenuItem itemUngroup;
     JMenuItem itemClone;
     JMenuItem itemHLPorts;
+    JMenuItem itemDrawPorts;
     JMenuItem itemBackward;
     JMenuItem itemForward;
     JMenuItem itemToFront;
@@ -30,7 +31,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
     JMenuItem itemViewCode;
     JMenuItem itemShowValues;
 
-    private JMenu submenuOrder;
+    JMenu submenuOrder;
 
     private Canvas canvas;
     private GObj object;
@@ -82,6 +83,10 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         itemHLPorts.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_H, InputEvent.CTRL_DOWN_MASK ) );
         this.add( itemHLPorts );
 
+        itemDrawPorts = new JMenuItem( Menu.SHPORTS );
+        itemDrawPorts.addActionListener( this );
+        this.add( itemDrawPorts );
+        
         itemViewCode = new JMenuItem( Menu.VIEWCODE );
         itemViewCode.addActionListener( this );
         itemViewCode.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK ) );
@@ -120,20 +125,21 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
 
         this.add( submenuOrder );
 
-        if ( !object.isStrictConnected() && ! ( object instanceof RelObj ) )
-            add( makeSubmenuRotation( object, canvas ) );
+        if( object != null ) {
+            if ( !object.isStrictConnected() && ! ( object instanceof RelObj ) )
+                add( makeSubmenuRotation( object, canvas ) );
 
-        // superclass
-        if ( canvas.canBeSetAsSuperClass( object ) ) {
-            JMenuItem tmp = new JMenuItem( Menu.SET_AS_SUPER, KeyEvent.VK_S );
-            tmp.addActionListener( this );
-            this.add( tmp );
-        } else if ( object.isSuperClass() ) {
-            JMenuItem tmp = new JMenuItem( Menu.UNSET_AS_SUPER, KeyEvent.VK_S );
-            tmp.addActionListener( this );
-            this.add( tmp );
+            // superclass
+            if ( canvas.canBeSetAsSuperClass( object ) ) {
+                JMenuItem tmp = new JMenuItem( Menu.SET_AS_SUPER, KeyEvent.VK_S );
+                tmp.addActionListener( this );
+                this.add( tmp );
+            } else if ( object.isSuperClass() ) {
+                JMenuItem tmp = new JMenuItem( Menu.UNSET_AS_SUPER, KeyEvent.VK_S );
+                tmp.addActionListener( this );
+                this.add( tmp );
+            }
         }
-
     }
 
     private Component makeSubmenuRotation( final GObj obj, final Canvas canv ) {
@@ -211,6 +217,8 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             canvas.cloneObject();
         } else if ( Menu.HLPORTS.equals( cmd ) ) {
             canvas.hilightPorts();
+        } else if ( Menu.SHPORTS.equals( cmd ) ) {
+            canvas.drawSelectedPorts();
         } else if ( Menu.BACKWARD.equals( cmd ) ) {
             // MOVE OBJECT BACKWARD IN THE LIST
             // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
