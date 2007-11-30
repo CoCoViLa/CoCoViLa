@@ -4,6 +4,7 @@
 package ee.ioc.cs.vsle.graphics;
 
 import java.awt.*;
+import java.awt.geom.*;
 import java.awt.image.*;
 
 import javax.swing.*;
@@ -27,19 +28,19 @@ public class Image extends Shape {
      * @param height
      * @param name
      */
-    public Image( int x, int y, BufferedImage image, String path ) {
+    public Image( int x, int y, BufferedImage image, String path, boolean fixed ) {
         super( x, y, image.getWidth(), image.getHeight() );
         this.image = image;
         this.path = path;
-        setFixed( true );
+        setFixed( fixed );
     }
 
-    public Image( int x, int y, java.awt.Image image, String path ) {
-        this( x, y, toBufferedImage( image ), path );
+    public Image( int x, int y, java.awt.Image image, String path, boolean fixed ) {
+        this( x, y, toBufferedImage( image ), path, fixed );
     }
     
-    public Image( int x, int y, String image, String path ) {
-        this( x, y, Toolkit.getDefaultToolkit().getImage( image ), path );
+    public Image( int x, int y, String image, String path, boolean fixed ) {
+        this( x, y, Toolkit.getDefaultToolkit().getImage( image ), path, fixed );
     }
     
  // This method returns a buffered image with the contents of an image
@@ -115,8 +116,18 @@ public class Image extends Shape {
     }
 
     @Override
+    public int getWidth() {
+        return image.getWidth();
+    }
+
+    @Override
+    public int getHeight() {
+        return image.getHeight();
+    }
+
+    @Override
     public Shape getCopy() {
-        return new Image( getX(), getY(), image, path );
+        return new Image( getX(), getY(), image, path, isFixed() );
     }
 
     @Override
@@ -124,7 +135,15 @@ public class Image extends Shape {
         int a = xModifier + (int) ( Xsize * getX() );
         int b = yModifier + (int) ( Ysize * getY() );
         
-        g.drawImage( image, a, b, null );
+        AffineTransformOp op = null;
+        
+        if( !isFixed() ) {
+            AffineTransform tx = new AffineTransform();
+            tx.scale( Xsize, Ysize );
+            op = new AffineTransformOp(tx, AffineTransformOp.TYPE_BILINEAR);
+        }
+        
+        g.drawImage( image, op, a, b );
         
         if( isSelected() ) {
             drawSelection( g );
@@ -132,17 +151,26 @@ public class Image extends Shape {
     }
 
     @Override
+    public void resize( int deltaW, int deltaH, int cornerClicked ) {
+
+    }
+
+    @Override
     protected void drawSelection( Graphics2D g2 ) {
-        g2.setColor( Color.black );
-        g2.setStroke( new BasicStroke( 1.0f ) );
-        g2.drawRect( getX(), getY(), getWidth(), getHeight() );
+        if( isFixed() ) {
+            g2.setColor( Color.black );
+            g2.setStroke( new BasicStroke( 1.0f ) );
+            g2.drawRect( getX(), getY(), getWidth(), getHeight() );
+        } else {
+            super.drawSelection( g2 );
+        }
     }
     
     @Override
     public String toFile( int boundingboxX, int boundingboxY ) {
         return "<image x=\"" + ( getX() - boundingboxX ) + "\" y=\"" + ( getY() - boundingboxY ) //
                 + "\" width=\"" + getWidth() + "\" height=\"" + getHeight() //
-                + "\" path=\"" + path + "\" />\n";//
+                + "\" path=\"" + path + "\" fixed=\"" + isFixed() + "\" />\n";//
     }
 
     @Override

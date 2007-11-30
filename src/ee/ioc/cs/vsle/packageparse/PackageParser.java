@@ -5,6 +5,7 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import javax.swing.*;
 import javax.xml.parsers.*;
 
 import org.xml.sax.*;
@@ -132,6 +133,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
         private static final String EL_TEXT = "text";
         private static final String EL_IMAGE = "image";
         private static final String ATR_PATH = "path";
+        private static final String ATR_FIXED = "fixed";
         private static final String ATR_DESCRIPTION = "description";
         private static final String EL_DESCRIPTION = "description";
         private static final String ATR_VALUE = "value";
@@ -379,11 +381,27 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 String y = attrs.getValue( ATR_Y );
 //                String width = attrs.getValue( ATR_WIDTH );
 //                String height = attrs.getValue( ATR_HEIGHT );
+                String fixed = attrs.getValue( ATR_FIXED );
                 String path = attrs.getValue( ATR_PATH );
                 
-                Image newImg = new Image( Integer.parseInt( x ), Integer.parseInt( y ), PackageParser.this.path + path, path );
+                String fullPath;
+                
+                if ( !PackageParser.this.path.endsWith( RuntimeProperties.FS )
+                        && !path.startsWith( RuntimeProperties.FS ) ) {
+                    fullPath = PackageParser.this.path + RuntimeProperties.FS
+                            + path;
+                } else {
+                    fullPath = PackageParser.this.path + path;
+                }
+                
+                fullPath = FileFuncs.preparePathOS( fullPath );
+                
+                Image newImg = new Image( Integer.parseInt( x ), Integer.parseInt( y ), 
+                        fullPath, path,
+                        ( fixed != null ) ? Boolean.parseBoolean( fixed ) : true );
                 
                 newGraphics.addShape( newImg );
+                
             } else if ( element.equals( EL_RECT ) ) {
                 String x = attrs.getValue( ATR_X );
                 String y = attrs.getValue( ATR_Y );

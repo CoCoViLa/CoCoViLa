@@ -121,7 +121,8 @@
         y		CDATA   #REQUIRED
         width		CDATA   #REQUIRED
         height		CDATA   #REQUIRED       
-        path		CDATA   #REQUIRED>
+        path		CDATA   #REQUIRED
+        fixed CDATA #IMPLIED>
 <!ATTLIST port
 	id 		CDATA 	#IMPLIED
 	name 		CDATA 	#REQUIRED

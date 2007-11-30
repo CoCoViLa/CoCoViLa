@@ -26,6 +26,8 @@ public class ImageDialog extends JDialog implements ActionListener {
     private JTextField m_jtfImagePath;
 
     private JButton m_jbtImageSelect;
+
+    private JCheckBox m_jcbAllowResize;
     
     ImageDialog( IconEditor editor, Image image ) {
         super( editor );
@@ -53,16 +55,23 @@ public class ImageDialog extends JDialog implements ActionListener {
         JPanel pnlMain = new JPanel( new BorderLayout() );
         JPanel pnlButtons = new JPanel();
         
-        
+        m_jcbAllowResize = new JCheckBox( "Allow resizing", false );
         m_jtfImagePath = new JTextField( 30 );
         m_jbtImageSelect = new JButton( "Browse..." );
+        m_jbtImageSelect.setMargin( new Insets( 0, 0, 0, 0 ) );
         
         JPanel topFlow = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
-        topFlow.setBorder( BorderFactory.createTitledBorder( "NB! Set image path relative to the package" ) );
         topFlow.add( m_jtfImagePath );
         topFlow.add( m_jbtImageSelect );
+        JPanel topFlow2 = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
+        topFlow2.add( m_jcbAllowResize );
         
-        pnlMain.add( topFlow, BorderLayout.NORTH );
+        Box top = Box.createVerticalBox();
+        top.setBorder( BorderFactory.createTitledBorder( "NB! Set image path relative to the package" ) );
+        top.add( topFlow );
+        top.add( topFlow2 );
+        
+        pnlMain.add( top, BorderLayout.NORTH );
         
         pnlButtons.add( bttnOk );
         pnlButtons.add( bttnCancel );
@@ -87,7 +96,7 @@ public class ImageDialog extends JDialog implements ActionListener {
             
             if( fullPath != null && fullPath.length() != 0 
                     && relativePath != null && relativePath.length() != 0 )
-            image = new Image( editor.mouseX, editor.mouseY, fullPath, relativePath );
+            image = new Image( editor.mouseX, editor.mouseY, fullPath, relativePath, !m_jcbAllowResize.isSelected() );
             
             if( image != null ) {
                 editor.shapeList.add( image );

@@ -128,4 +128,25 @@ public class FileFuncs {
     	
     	return new ImageIcon( icon );
     }
+    
+    
+    /**
+     * Makes sure that all file separators in path are valid for current OS
+     * 
+     * @param path
+     * @return modified path
+     */
+    public static String preparePathOS( String path ) {
+        
+        if( path.indexOf( "\\" ) > 0 ) {
+            path = path.replaceAll( "\\\\", RuntimeProperties.FS );
+        }
+        
+        if( path.indexOf( "/" ) > 0 ) {
+            path = path.replaceAll( "/", RuntimeProperties.FS );
+        }
+
+        return path;
+    }
+
 }
