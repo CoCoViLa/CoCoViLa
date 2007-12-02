@@ -82,7 +82,7 @@ public class RunningThreadManager {
 
     private static class ManagerDialog extends JDialog {
 
-        private HashMap<Long, JPanel> threads = new LinkedHashMap<Long, JPanel>();
+        private HashMap<Long, PanelWithTimer> threads = new LinkedHashMap<Long, PanelWithTimer>();
 
         private JPanel jContentPane = null;
         private JPanel m_mainPanel;
@@ -122,15 +122,43 @@ public class RunningThreadManager {
         }
 
         /**
+         * Panel with Timer
+         */
+        class PanelWithTimer extends JPanel {
+            
+            Timer timer;
+            
+            public PanelWithTimer(LayoutManager layout) {
+                super(layout);
+            }
+            
+            void setTimer( Timer timer ) {
+                if( timer != null ) {
+                    this.timer = timer;
+                    this.timer.start();
+                }
+            }
+            
+            void stopTimer() {
+                if( timer != null ) {
+                    timer.stop();
+                    timer = null;
+                }
+            }
+        }
+        
+        /**
          * @param id
          * @return
          */
-        private JPanel createThreadPanel( final long id ) {
-            JPanel panel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
+        private PanelWithTimer createThreadPanel( final long id ) {
+            final PanelWithTimer panel = new PanelWithTimer( new FlowLayout( FlowLayout.LEFT ) );
 
             String threadName = threadsByID.get( id ).getName();
             final String s = threadName + "(alive for %1$tT)";
-            final JLabel lbl = new JLabel( String.format( s, 0L ) );
+            final Calendar c = Calendar.getInstance( TimeZone.getTimeZone( "GMT" ) );
+            c.setTimeInMillis( 0L );
+            final JLabel lbl = new JLabel( String.format( s, c ) );
             panel.add( lbl );
 
             JButton but = new JButton( "X" );
@@ -140,18 +168,18 @@ public class RunningThreadManager {
                 long secs = System.currentTimeMillis() - threadsStartTime.get( id );
 
                 public void actionPerformed( ActionEvent evt ) {
-                    lbl.setText( String.format( s, secs += 1000 ) );
+                    c.setTimeInMillis( secs += 1000 );
+                    lbl.setText( String.format( s, c ) );
                 }
             };
 
-            final Timer timer = new Timer( 1000, taskPerformer );
-            timer.start();
-
+            panel.setTimer(new Timer( 1000, taskPerformer ));
+            
             panel.setEnabled( true );
             but.addActionListener( new ActionListener() {
 
                 public void actionPerformed( ActionEvent e ) {
-                    timer.stop();
+                    panel.stopTimer();
                     RunningThreadManager.removeThread( id, true );
                 }
             } );
@@ -236,7 +264,7 @@ public class RunningThreadManager {
             SwingUtilities.invokeLater( new Runnable() {
 
                 public void run() {
-                    JPanel panel = createThreadPanel( id );
+                    PanelWithTimer panel = createThreadPanel( id );
                     threads.put( id, panel );
                     m_mainPanel.add( panel );
                     validate();
@@ -252,9 +280,10 @@ public class RunningThreadManager {
             SwingUtilities.invokeLater( new Runnable() {
 
                 public void run() {
-                    JPanel panel = threads.remove( id );
+                    PanelWithTimer panel = threads.remove( id );
 
                     if ( panel != null ) {
+                        panel.stopTimer();
                         m_mainPanel.remove( panel );
                         m_mainPanel.validate();
                         m_mainPanel.repaint();
