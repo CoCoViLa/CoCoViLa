@@ -18,6 +18,10 @@ import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
 /**
+ * This class is used for invoking planning, compiling and other procedures. It
+ * communicates with ProgramTextEditor by means of events through EventQueue
+ * thread. Planning and invocation of compiled code is done in the separate
+ * threads.
  */
 public class ProgramRunner {
 
@@ -54,9 +58,12 @@ public class ProgramRunner {
 
     public void destroy() {
 
+        RunningThreadManager.removeThread( getId(), true );
+        
         SwingUtilities.invokeLater( new Runnable() {
             public void run() {
                 m_canvas.unregisterRunner( m_id );
+                m_canvas = null;
             }
         } );
 
@@ -67,6 +74,11 @@ public class ProgramRunner {
             m_lst = null;
 
         }
+        
+        ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, m_id, ProgramRunnerFeedbackEvent.DISPOSE,
+                null );
+
+        EventSystem.queueEvent( evt );
     }
 
     private String getSpec() {
@@ -629,6 +641,9 @@ public class ProgramRunner {
         return result.toString();
     }
 
+    /**
+     * @return id of this Runner
+     */
     public long getId() {
         return m_id;
     }
@@ -637,8 +652,19 @@ public class ProgramRunner {
 
         public void onProgramRunnerEvent( final ProgramRunnerEvent event ) {
 
-            if ( event.getId() != m_id || isWorking() )
+            if ( event.getId() != m_id ) {
                 return;
+            }
+            
+            if ( isWorking() ) {
+                
+                //kill 'em all even if working
+                if ( ( event.getOperation() & ProgramRunnerEvent.DESTROY ) > 0 ) {
+                    destroy();
+                }
+                
+                return;
+            }
 
             int operation = event.getOperation();
 
@@ -697,17 +723,17 @@ public class ProgramRunner {
 
             if ( ( operation & ProgramRunnerEvent.DESTROY ) > 0 ) {
                 destroy();
-
-                ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(), ProgramRunnerFeedbackEvent.DISPOSE,
-                        null );
-
-                EventSystem.queueEvent( evt );
             }
 
         }
 
     }
 
+    /**
+     * Indicates if there is a working thread running
+     * 
+     * @return <code>true</code> if there is a working thread running; <code>false</code> otherwise.
+     */
     public boolean isWorking() {
 
         synchronized ( s_lock ) {
@@ -715,6 +741,11 @@ public class ProgramRunner {
         }
     }
 
+    /**
+     * Sets the flag to indicate that there is a working thread running
+     * 
+     * @param isWorking
+     */
     public void setWorking( boolean isWorking ) {
         synchronized ( s_lock ) {
             this.isWorking = isWorking;
