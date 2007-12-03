@@ -4,7 +4,9 @@
 package ee.ioc.cs.vsle.synthesize;
 
 import javax.swing.*;
-import java.awt.BorderLayout;
+
+import java.awt.*;
+
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
@@ -16,12 +18,13 @@ import java.util.*;
 import java.util.List;
 
 import javax.swing.JTabbedPane;
+import javax.swing.text.*;
 
 /**
  * @author pavelg
  *
  */
-public class AlgorithmVisualizer extends JFrame {
+public class AlgorithmVisualizer extends JFrame implements TextEditView {
 
 	private static final long serialVersionUID = 1L;
 
@@ -79,6 +82,11 @@ public class AlgorithmVisualizer extends JFrame {
 		initialize();
 	}
 
+	/**
+	 * Creates new TabPanel with custom Tab Component
+	 * @param title
+	 * @param algorithm
+	 */
 	public void addNewTab( String title, List<Rel> algorithm ) {
 		
 		final TabPanel panel = new TabPanel( algorithm );
@@ -86,37 +94,28 @@ public class AlgorithmVisualizer extends JFrame {
 		getJTabbedPane().addTab( title, panel );
 		getJTabbedPane().setSelectedComponent( panel );
 		
-		/* TODO this will wait until 1.6 - 
-		final JLabel lbl = new JLabel( title );
-		
-		lbl.addMouseListener( new MouseAdapter() {
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-				getJTabbedPane().setSelectedComponent( panel );
-			}
-		} );
+		JLabel lbl = new JLabel( title );
 		
 		final JButton btn = new JButton( "x" );
+		btn.setHorizontalTextPosition( SwingConstants.CENTER );
 		btn.setMargin( new Insets( 0, 0, 0, 0 ) );
-		btn.setPreferredSize( new Dimension( 15, 15 ) );
+		btn.setPreferredSize( new Dimension( 20, 15 ) );
 		
 		btn.addActionListener( new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 				getJTabbedPane().remove( panel );
+				btn.removeActionListener( this );
 			}
 		} );
 		
-		JPanel pnl = new JPanel();
+		JPanel pnl = new JPanel( new FlowLayout( FlowLayout.CENTER, 5, 0 ) );
 		pnl.setOpaque( false );
 		
 		pnl.add( lbl );
 		pnl.add( btn );
 		
 		getJTabbedPane().setTabComponentAt( getJTabbedPane().getSelectedIndex(), pnl );
-		*/
 	}
 	
 	/**
@@ -125,6 +124,21 @@ public class AlgorithmVisualizer extends JFrame {
 	 * @return void
 	 */
 	private void initialize() {
+	    
+	    // Bind the search dialog to Ctrl+F
+        InputMap im = getRootPane().getInputMap(
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK),
+                "actionFind");
+
+        getRootPane().getActionMap().put("actionFind", new AbstractAction() {
+
+            public void actionPerformed(ActionEvent e) {
+                TextSearchDialog.showDialog(AlgorithmVisualizer.this);
+            }
+            
+        });
+        
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setBounds(new Rectangle(300, 300, 600, 400));
 		this.setContentPane(getJContentPane());
@@ -183,6 +197,7 @@ public class AlgorithmVisualizer extends JFrame {
 		private JTextArea getJtaAlgorithm() {
 			if (jtaAlgorithm == null) {
 				jtaAlgorithm = new JTextArea();
+				jtaAlgorithm.setFont( RuntimeProperties.getFont() );
 				jtaAlgorithm.setEditable(false);
 				jtaAlgorithm.setText("Please wait...");
 			}
@@ -282,5 +297,27 @@ public class AlgorithmVisualizer extends JFrame {
 	    	return offset;
 	    }
 	}
+
+
+    /* (non-Javadoc)
+     * @see ee.ioc.cs.vsle.editor.TextEditView#getTextComponent()
+     */
+    public JTextComponent getTextComponent() {
+        
+        TabPanel panel = (TabPanel)getJTabbedPane().getSelectedComponent();
+        
+        if( panel != null ) {
+            return panel.getJtaAlgorithm();
+        }
+        
+        return null;
+    }
+
+    /* (non-Javadoc)
+     * @see ee.ioc.cs.vsle.editor.TextEditView#getWindow()
+     */
+    public Window getWindow() {
+        return this;
+    }
 	
-}  //  @jve:decl-index=0:visual-constraint="10,10"
+}
