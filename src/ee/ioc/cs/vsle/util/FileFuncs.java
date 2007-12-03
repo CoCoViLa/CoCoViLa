@@ -138,12 +138,13 @@ public class FileFuncs {
      */
     public static String preparePathOS( String path ) {
         
-        if( path.indexOf( "\\" ) > 0 ) {
+        if( RuntimeProperties.FS.equals( "/" ) && path.indexOf( "\\" ) > 0 ) {
             path = path.replaceAll( "\\\\", RuntimeProperties.FS );
         }
         
-        if( path.indexOf( "/" ) > 0 ) {
-            path = path.replaceAll( "/", RuntimeProperties.FS );
+        if( RuntimeProperties.FS.equals( "\\" ) && path.indexOf( "/" ) > 0 ) {
+            //path = path.replaceAll( "/", RuntimeProperties.FS ); - this does not work
+            path = path.replaceAll( "/", "\\\\" );
         }
 
         return path;
