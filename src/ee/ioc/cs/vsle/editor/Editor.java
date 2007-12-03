@@ -596,9 +596,9 @@ public class Editor extends JFrame implements ChangeListener {
 
         System.err.println( "Java Version: " + version );
 
-        if ( version.compareTo( "1.5.0" ) < 0 ) {
+        if ( version.compareTo( "1.6.0" ) < 0 ) {
 
-            System.err.println( "CoCoViLa requires at least Java 1.5.0 to run!" );
+            System.err.println( "CoCoViLa requires at least Java 1.6.0 to run!" );
             System.exit( 1 );
         }
 
