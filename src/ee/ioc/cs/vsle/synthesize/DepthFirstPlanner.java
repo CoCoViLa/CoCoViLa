@@ -247,7 +247,7 @@ public class DepthFirstPlanner implements IPlanner {
             db.p( "algorithm " + algorithm );
 
         if ( !computeAll ) {
-            Optimizer.optimize( algorithm, new HashSet<Var>( allTargetVars ) );
+            Optimizer.optimize( p, algorithm, new HashSet<Var>( allTargetVars ) );
 
             if ( isLinearLoggingOn() )
                 db.p( "optimized algorithm " + algorithm );

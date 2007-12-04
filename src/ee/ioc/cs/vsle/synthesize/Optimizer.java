@@ -16,11 +16,11 @@ public class Optimizer {
 	 @param algorithm an unoptimized algorithm
 	 @param targets the variables which the algorithm has to calculate (other branches are removed)
 	 */   
-    public static void optimize(List<Rel> algorithm, Set<Var> targets) {
-    	optimize( algorithm, targets, "" );
+    public static void optimize( Problem problem, List<Rel> algorithm, Set<Var> targets) {
+    	optimize( problem, algorithm, targets, "" );
     }
     
-	private static void optimize(List<Rel> algorithm, Set<Var> targets, String p ) {
+	private static void optimize( Problem problem, List<Rel> algorithm, Set<Var> targets, String p ) {
 		Set<Var> stuff = targets;
 		Rel rel;
 		Var relVar;
@@ -55,7 +55,8 @@ public class Optimizer {
 						if (RuntimeProperties.isLogDebugEnabled())
 							db.p( p + "Optimizing subtask: " + subtask );
 						HashSet<Var> subGoals = new HashSet<Var>( subtask.getOutputs() );
-						optimize( subtask.getAlgorithm(), subGoals, incPrefix( p ) );
+						// the problem object is required only on the top level
+						optimize( null, subtask.getAlgorithm(), subGoals, incPrefix( p ) );
 						if (RuntimeProperties.isLogDebugEnabled()) {
 							db.p( p + "Finished optimizing subtask: " + subtask );
 							db.p( p + "Required inputs from upper level: " + subGoals );
@@ -75,10 +76,20 @@ public class Optimizer {
 		if (RuntimeProperties.isLogDebugEnabled()) {
 			db.p( p + "Initial algorithm: " + algorithm + "\nRels to remove: " + removeThese );
 		}
-		//algorithm.removeAll(removeThese);
+		
+		//remove unneeded relations
 		for (Rel relToRemove : removeThese) {
 			if( algorithm.indexOf( relToRemove ) > -1 ) {
 				algorithm.remove( relToRemove);
+			}
+			
+			if( problem != null ) {
+			    /* 
+			     * Do not keep vars in Found set if a relation that introduces 
+			     * those vars has been removed, otherwise the propagation procedure
+			     * may overwrite values of such variables.
+			     */
+			    problem.getFoundVars().removeAll( relToRemove.getOutputs() );
 			}
 		}
 		if (RuntimeProperties.isLogDebugEnabled())
