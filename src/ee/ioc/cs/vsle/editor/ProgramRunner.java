@@ -532,15 +532,18 @@ public class ProgramRunner {
 
                         } else {// it is type object
                             Object o = fieldOfCf.get( lastObj );
-                            if ( o instanceof String[] ) {
-                                String[] sar = (String[]) o;
-                                String result = "";
-                                for ( int k = 0; k < sar.length; k++ ) {
-                                    result += sar[k] + ClassField.ARRAY_TOKEN;
+                            
+                            if( o != null ) {
+                                if ( o instanceof String[] ) {
+                                    String[] sar = (String[]) o;
+                                    String result = "";
+                                    for ( int k = 0; k < sar.length; k++ ) {
+                                        result += sar[k] + ClassField.ARRAY_TOKEN;
+                                    }
+                                    cf.setValue( result );
+                                } else {
+                                    cf.setValue( o.toString() );
                                 }
-                                cf.setValue( result );
-                            } else {
-                                cf.setValue( o.toString() );
                             }
                         }
                     }
