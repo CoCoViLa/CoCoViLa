@@ -20,6 +20,8 @@ public class SpecGenerator implements ISpecGenerator {
 	}
 	
 	public String generateSpec(Scheme scheme, String className) {
+	    String goalAxiom = null;
+	    
     	ObjectList objects = scheme.getObjects();
     	ConnectionList relations = scheme.getConnections();
 
@@ -54,7 +56,25 @@ public class SpecGenerator implements ISpecGenerator {
 			}
 
 			for ( ClassField field : obj.getFields() ) {
-				if ( ( field.getValue() != null ) && !field.isGoal() ) {
+			    
+			    if( field.isGoal() ) {
+			        
+			        String goal = "";
+                    if (!obj.isSuperClass()) {
+                        goal += obj.getName() + ".";
+                    }
+                    goal += field.getName() ;
+                    
+			        if( goalAxiom == null ) {
+			            goalAxiom = CodeGenerator.OT_TAB + "-> " + goal;
+			        } else {
+			            goalAxiom += ", " + goal;
+			        }
+			        
+			        continue;
+			    }
+			    
+				if ( field.getValue() != null ) {
 					appendSpecFieldLHS(obj, field, s);
 
 					if (field.getType().equals(TYPE_STRING)) {
@@ -144,6 +164,10 @@ public class SpecGenerator implements ISpecGenerator {
 				}
 			}
 			s.append( CodeGenerator.OT_TAB + multiport + " = [ " + portarray + " ];\n");
+		}
+		
+		if( goalAxiom != null ) {
+		    s.append( goalAxiom ).append( ";\n" );
 		}
 		
 		s.append("    }@*/\n}\n");
