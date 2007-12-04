@@ -124,21 +124,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 	 * @return void
 	 */
 	private void initialize() {
-	    
-	    // Bind the search dialog to Ctrl+F
-        InputMap im = getRootPane().getInputMap(
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK),
-                "actionFind");
-
-        getRootPane().getActionMap().put("actionFind", new AbstractAction() {
-
-            public void actionPerformed(ActionEvent e) {
-                TextSearchDialog.showDialog(AlgorithmVisualizer.this);
-            }
-            
-        });
-        
+        TextSearchDialog.attachTo(this, this);
 		this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setBounds(new Rectangle(300, 300, 600, 400));
 		this.setContentPane(getJContentPane());

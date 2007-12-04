@@ -178,19 +178,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
 
         contentPane.add( statusBar, BorderLayout.SOUTH );
 
-        // Bind the search dialog to Ctrl+F
-        InputMap im = getRootPane().getInputMap(
-                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
-        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK),
-                "actionFind");
-
-        getRootPane().getActionMap().put("actionFind", new AbstractAction() {
-
-            public void actionPerformed(ActionEvent e) {
-                TextSearchDialog.showDialog(ProgramTextEditor.this);
-            }
-            
-        });
+        TextSearchDialog.attachTo(this, this);
 
         setContentPane( contentPane );
         validate();

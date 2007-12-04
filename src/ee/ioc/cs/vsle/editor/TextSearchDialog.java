@@ -6,6 +6,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -22,8 +23,10 @@ import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -51,7 +54,7 @@ public class TextSearchDialog {
 
     // Action names
     private static final String ACTION_CLOSE = "closeAction";
-    private static final String ACTION_FIND = "findAction";
+    public static final String ACTION_FIND = "findAction";
 
     // The haystack text component.  When textComponent is not specified
     // at construction time, the component is dynamic and should be asked
@@ -73,6 +76,30 @@ public class TextSearchDialog {
     // We allow only one search dialog per parent window even when there
     // are multiple text components or tabs in the window.
     protected static Map<Window, TextSearchDialog> viewCache;
+
+    /**
+     * Attaches a text search window to the specified frame.
+     * The search function is bound to Ctrl+F shortcut key
+     * and the corresponding action name is ACTION_FIND.
+     * The arguments cannot be null.
+     * @param frame the frame the search function is attached to, should
+     * actually be the same object as returned by the specified view later
+     * @param view the proxy which is asked for active text area
+     */
+    public static void attachTo(JFrame frame, final TextEditView view) {
+        JRootPane rp = frame.getRootPane();
+
+        InputMap im = rp.getInputMap(
+                JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.CTRL_DOWN_MASK),
+                ACTION_FIND);
+
+        rp.getActionMap().put(ACTION_FIND, new AbstractAction() {
+            public void actionPerformed(ActionEvent e) {
+                TextSearchDialog.showDialog(view);
+            }
+        });
+    }
 
     /**
      * Returns an existing search dialog for the window returned by the
