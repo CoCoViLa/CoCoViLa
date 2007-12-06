@@ -894,6 +894,22 @@ public class SpecParser {
                     split = lt.getSpecLine().split( ":", -1 );
                     String name = split[ 0 ];
                     Alias alias = new Alias( name, split[ 2 ].trim() );
+                    String[] list = split[ 1 ].trim().split( " *, *", -1 );
+                    if( list.length > 0 ) {
+                        try {
+                            //TODO - probably some time it will be needed to fill the class list
+                            //and this does not work for aliases with wildcards
+                            alias.addAll( list, fields.values(), new ClassList() );
+                            //alternative approach is to do next - 
+                            //for( String var : list ) {
+                            //    ClassField aliasCF = fields.get( var );
+                            //    if( aliasCF != null )
+                            //        alias.addVar( aliasCF );
+                            //}
+                        } catch ( UnknownVariableException e ) {
+                        } catch ( AliasException e ) {
+                        }
+                    }
                     fields.put( name, alias );
                 } else if ( lt.getType() == LineType.TYPE_SUPERCLASSES ) {
                     String[] superClasses = lt.getSpecLine().split( "#", -1 );

@@ -374,18 +374,22 @@ public class Port implements Cloneable, Serializable {
 			return false;
 		else if (port1.isAny() || port2.isAny())
 			return true;
-		else if (port1.getType().equals(port2.getType()))
-			return true;
-		else if (TypeUtil.TYPE_ALIAS.equals(port2.getType()) 
-				&& port1.getType().substring(port1.getType().length() - 2,
-						port1.getType().length()).equals("[]"))
-			return true;
-		else if (TypeUtil.TYPE_ALIAS.equals(port1.getType()) 
-				&& port2.getType().substring(port2.getType().length() - 2,
-						port2.getType().length()).equals("[]"))
-			return true;
+		else if ( port1.field != null && port1.field.isAlias() ) {
+		    if( port2.field != null && port2.field.isAlias() && ((Alias)port2.field).equalsByTypes( (Alias)port1.field ) ) {
+		        return true;
+		    } else {
+		        return ((Alias)port1.field).acceptsType( port2.getType() );
+		    }
+		}
+		else if ( port2.field != null && port2.field.isAlias() ) {
+            if( port1.field != null && port1.field.isAlias() && ((Alias)port1.field).equalsByTypes( (Alias)port2.field ) ) {
+                return true;
+            } else {
+                return ((Alias)port2.field).acceptsType( port1.getType() );
+            }
+        }
 		else 
-			return false;
+			return port1.getType().equals(port2.getType());
 	}
 
 	/**

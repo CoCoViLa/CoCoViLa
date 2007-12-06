@@ -290,7 +290,9 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 
                         collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.name
                                 + " does not have the corresponding field in the specification" );
-                    } else if ( !cf.getType().equals( type ) ) {
+                    } else if ( !cf.getType().equals( type )
+                            //type may be declared as "alias", however cf.getType() returns e.g. "double[]", ignore it
+                            && !( cf.isAlias() && TypeUtil.TYPE_ALIAS.equals( type )) ) {
 
                         collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.name
                                 + " does not match the field declared in the specification: " + cf.getType() + " " + cf.getName() );
