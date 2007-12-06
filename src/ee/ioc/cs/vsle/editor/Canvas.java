@@ -745,15 +745,17 @@ public class Canvas extends JPanel {
             if ( port.isStrict() ) {
                 port.setSelected( false );
 
-                Port p2 = objects.getPort( port.getRealCenterX(), port.getRealCenterY(), object );
+                Point p1 = object.toCanvasSpace( port.getRealCenterX(), port.getRealCenterY() );
+                
+                Port port2 = objects.getPort( p1.x, p1.y, object );
 
-                if ( p2 != null && p2.isStrict() && port.canBeConnectedTo( p2 ) && !port.isConnectedTo( p2 ) ) {
+                if ( port2 != null && port2.isStrict() && port.canBeConnectedTo( port2 ) && !port.isConnectedTo( port2 ) ) {
 
                     // do not create more than one connection to a strict port
                     boolean ignore = false;
 
                     for ( Connection c : object.getConnections() ) {
-                        if ( c.isStrict() && ( c.beginPort == p2 || c.endPort == p2 ) ) {
+                        if ( c.isStrict() && ( c.beginPort == port2 || c.endPort == port2 ) ) {
                             ignore = true;
                             break;
                         }
@@ -762,7 +764,7 @@ public class Canvas extends JPanel {
 
                     if ( !ignore && conns != null ) {
                         for ( Connection c : conns ) {
-                            if ( c.beginPort == p2 || c.endPort == p2 ) {
+                            if ( c.beginPort == port2 || c.endPort == port2 ) {
                                 ignore = true;
                                 break;
                             }
@@ -773,7 +775,7 @@ public class Canvas extends JPanel {
                         if ( conns == null )
                             conns = new ArrayList<Connection>();
 
-                        conns.add( new Connection( port, p2, true ) );
+                        conns.add( new Connection( port, port2, true ) );
                     }
                 }
             }

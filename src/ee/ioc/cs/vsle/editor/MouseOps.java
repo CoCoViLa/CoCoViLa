@@ -352,17 +352,19 @@ class MouseOps extends MouseInputAdapter {
             ArrayList<GObj> selected = canvas.objects.getSelected();
             SNAP: for ( GObj obj : selected ) {
                 if ( obj.isStrict() ) {
-                    for ( Port p : obj.getPorts() ) {
-                        if ( p.isStrict() ) {
+                    for ( Port port1 : obj.getPorts() ) {
+                        if ( port1.isStrict() ) {
+                            Point p1 = obj.toCanvasSpace( port1.getRealCenterX(), port1.getRealCenterY() );
+                            Port port2 = canvas.objects.getPort( p1.x + moveX, p1.y + moveY, obj );
 
-                            Port p2 = canvas.objects.getPort( p.getRealCenterX() + moveX, p.getRealCenterY() + moveY, obj );
+                            if ( port2 != null && !selected.contains( port2.getObject() ) && port1.canBeConnectedTo( port2 )
+                                    && ( !port1.isConnectedTo( port2 ) || port1.isStrictConnected() ) ) {
 
-                            if ( p2 != null && !selected.contains( p2.getObject() ) && p.canBeConnectedTo( p2 )
-                                    && ( !p.isConnectedTo( p2 ) || p.isStrictConnected() ) ) {
+                                Point p2 = port2.getObject().toCanvasSpace( port2.getRealCenterX(), port2.getRealCenterY() );
+                                
+                                moveX = p2.x - p1.x;
 
-                                moveX = p2.getRealCenterX() - p.getRealCenterX();
-
-                                moveY = p2.getRealCenterY() - p.getRealCenterY();
+                                moveY = p2.y - p1.y;
 
                                 break SNAP;
                             }
