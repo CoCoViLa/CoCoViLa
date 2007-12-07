@@ -1166,6 +1166,12 @@ public class Canvas extends JPanel {
         ObjectPropertiesEditor.show( obj, this );
     }
 
+    void openClassCodeViewer( String className ) {
+        CodeViewer cv = new CodeViewer( className, getWorkDir() );
+        cv.setSize( 550, 450 );
+        cv.setVisible( true );
+    }
+    
     /**
      * Opens the object properties dialog on the first selected object if there
      * is one.

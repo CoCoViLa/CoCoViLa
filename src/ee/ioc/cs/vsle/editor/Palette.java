@@ -27,10 +27,30 @@ public class Palette implements ActionListener {
 	public static final Dimension PANEL_SPACE = new Dimension(5, 0);
 	public static final Insets BUTTON_BORDER = new Insets(2, 2, 2, 2);
 
-	public JPanel toolBar;
-	Canvas canvas;
-    ArrayList<JToggleButton> buttons;
+	private JPanel toolBar;
+	private Canvas canvas;
+    private ArrayList<JToggleButton> buttons;
 
+    private final MouseListener mouseLst = new MouseAdapter() {
+
+        @Override
+        public void mouseClicked( MouseEvent e ) {
+            if( SwingUtilities.isRightMouseButton( e ) ) {
+                int i = buttons.lastIndexOf( e.getSource() );
+                
+                if ( i < 0 ) {
+                    return;
+                }
+                
+                String action = buttons.get(i).getActionCommand();
+                
+                if( State.isAddObject( action ) || State.isAddRelClass( action ) ) {
+                    canvas.openClassCodeViewer( State.getClassName( action ) );
+                }
+            }
+        }
+    };
+    
 	public Palette(VPackage vPackage, final Canvas canv) {
 		this.canvas = canv;
 
@@ -146,6 +166,7 @@ public class Palette implements ActionListener {
 		button.setMargin(BUTTON_BORDER);
 
 		button.addActionListener(this);
+		button.addMouseListener( mouseLst );
         buttons.add(button);
 
         return button;

@@ -245,9 +245,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             csd.setLocationRelativeTo( canvas );
             csd.setVisible( true );
         } else if ( Menu.VIEWCODE.equals( cmd ) ) {
-            CodeViewer cv = new CodeViewer( object.getClassName(), canvas.getWorkDir() );
-            cv.setSize( 550, 450 );
-            cv.setVisible( true );
+            canvas.openClassCodeViewer( object.getClassName() );
         } else if ( Menu.SHOW_VALUES.equals( cmd ) ) {
             ProgramRunnerEvent event = new ProgramRunnerEvent( this, canvas.getLastProgramRunnerID(), ProgramRunnerEvent.SHOW_VALUES );
             event.setObjectName( object.isSuperClass() ? TypeUtil.TYPE_THIS : object.getName() );
