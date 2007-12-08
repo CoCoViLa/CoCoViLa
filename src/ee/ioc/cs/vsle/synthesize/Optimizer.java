@@ -23,7 +23,6 @@ public class Optimizer {
 	private static void optimize( Problem problem, List<Rel> algorithm, Set<Var> targets, String p ) {
 		Set<Var> stuff = targets;
 		Rel rel;
-		Var relVar;
 		ArrayList<Rel> removeThese = new ArrayList<Rel>();
 		
 		if (RuntimeProperties.isLogDebugEnabled())
@@ -37,8 +36,10 @@ public class Optimizer {
     			db.p( p + "Rel from algorithm: " + rel );
 			boolean relIsNeeded = false;
 
-			for (int j = 0; j < rel.getOutputs().size(); j++) {
-				relVar = rel.getOutputs().get(j);
+			Set<Var> outputs = new LinkedHashSet<Var>();
+			CodeGenerator.unfoldVarsToSet(rel.getOutputs(), outputs);
+			
+			for ( Var relVar : outputs ) {
 				if (stuff.contains(relVar)) {
 					relIsNeeded = true;
 					stuff.remove( relVar );
@@ -65,8 +66,10 @@ public class Optimizer {
 						tmpSbtInputs.addAll(subGoals);
 					}
 					stuff.addAll(tmpSbtInputs);
-				} 
-				stuff.addAll(rel.getInputs());
+				}
+				Set<Var> inputs = new LinkedHashSet<Var>();
+                CodeGenerator.unfoldVarsToSet(rel.getInputs(), inputs);
+				stuff.addAll(inputs);
 			} else {
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( p + "Removed");
