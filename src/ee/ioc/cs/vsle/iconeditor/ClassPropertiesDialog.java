@@ -330,7 +330,7 @@ public class ClassPropertiesDialog extends JDialog {
 	private void initialize() {
 		if (IconEditor.className != null) fldClassName.setText(IconEditor.className);
 		if (IconEditor.classDescription != null) fldClassDesc.setText(IconEditor.classDescription);
-		if (IconEditor.classIcon != null) fldClassIcon.setText(IconEditor.classIcon);
+		if (IconEditor.getClassIcon() != null) fldClassIcon.setText(IconEditor.getClassIcon());
 		chkRelation.setSelected(IconEditor.classIsRelation);
 	} // initialize
 
@@ -351,7 +351,7 @@ public class ClassPropertiesDialog extends JDialog {
 		if (classIcon != null) {
 			classIcon = classIcon.trim();
 		}
-		IconEditor.classIcon = classIcon;
+		IconEditor.setClassIcon( classIcon );
 
 		boolean relation = chkRelation.isSelected();
 		IconEditor.classIsRelation = relation;
@@ -367,7 +367,20 @@ public class ClassPropertiesDialog extends JDialog {
 		int returnVal = fc.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
-			fldClassIcon.setText(file.getAbsolutePath());
+			
+			String packageDir = IconEditor.getPackageFile().getParent();
+            
+            if( packageDir == null || !file.getAbsolutePath().startsWith( packageDir ) ) {
+                JOptionPane.showMessageDialog( this, "Path is not relative to the package", "Error", JOptionPane.ERROR_MESSAGE );
+                fldClassIcon.setText( null );
+                return;
+            }
+            
+            String relativePath = file.getAbsolutePath().substring( packageDir.length() + 1 );
+            
+            relativePath = relativePath.replaceAll( "\\\\", "/" );
+            
+			fldClassIcon.setText(relativePath);
 			RuntimeProperties.setLastPath(file.getAbsolutePath());
 		}
 	} // browseIcon
@@ -401,7 +414,7 @@ public class ClassPropertiesDialog extends JDialog {
             if (icon.length() > 0 && !(icon.endsWith(".gif") || icon.endsWith(".png"))) {
 				valid = false;
 				this.fldClassIcon.setText("");
-				IconEditor.classIcon = "";
+				IconEditor.setClassIcon( "" );
 				JOptionPane.showMessageDialog(null, "Only icons in GIF or PNG format allowed.",
                         "Invalid icon format", JOptionPane.INFORMATION_MESSAGE);
 				fldClassIcon.requestFocus();

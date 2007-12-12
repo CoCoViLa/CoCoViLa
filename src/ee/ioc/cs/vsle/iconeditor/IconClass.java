@@ -16,7 +16,7 @@ public class IconClass {
 	ArrayList<ClassField> fields;
 	String name;
 	String description;
-	String iconName;
+	private String iconName;
 	boolean isRelation;
 	BoundingBox boundingbox;
 	int maxWidth = 0, maxHeight = 0;

@@ -16,6 +16,7 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 import ee.ioc.cs.vsle.graphics.*;
+import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
@@ -27,7 +28,7 @@ public class ClassImport {
 	IconClass classIcon;
 	ArrayList <IconPort> ports;
 	ArrayList <ClassField> fields;
-	
+	String path;
 /*
  * Takes the package file and gives a list of class names and a list of classes information
  */
@@ -40,6 +41,8 @@ public class ClassImport {
 		packageClasses.clear();
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 
+		path = file.getParentFile().getAbsolutePath();
+		
 		factory.setValidating(true);
 		
 		try {
@@ -250,7 +253,29 @@ public class ClassImport {
 					shapeList.add(text);
 				}
 				
-			}else if(element.equals("port")){
+			} else if(element.equals("image")) { 
+			    x = getCoordinate(attrs.getValue("x"));
+                y = getCoordinate(attrs.getValue("y"));
+                fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
+                String path = attrs.getValue( "path" );
+                
+                String fullPath;
+                
+                if ( !ClassImport.this.path.endsWith( RuntimeProperties.FS )
+                        && !path.startsWith( RuntimeProperties.FS ) ) {
+                    fullPath = ClassImport.this.path + RuntimeProperties.FS
+                            + path;
+                } else {
+                    fullPath = ClassImport.this.path + path;
+                }
+                
+                fullPath = FileFuncs.preparePathOS( fullPath );
+                
+                Image newImg = new Image( x, y, fullPath, path, fixed );
+                
+                shapeList.add(newImg);
+                
+			} else if(element.equals("port")){
 				x = getCoordinate(attrs.getValue("x"));
 				y = getCoordinate(attrs.getValue("y"));
 				name = attrs.getValue("name");
