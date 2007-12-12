@@ -4,6 +4,7 @@ import java.util.*;
 
 import ee.ioc.cs.vsle.factoryStorage.*;
 import ee.ioc.cs.vsle.synthesize.*;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
@@ -138,13 +139,19 @@ public class SpecGenerator implements ISpecGenerator {
 				}
 				multiRels.put( multiport, list );
 			} else {
-				String startObjName = ( rel.beginPort.getObject().isSuperClass() ) 
-										? rel.beginPort.getName()
-										: rel.beginPort.getObject().getName() + "." + rel.beginPort.getName();
+				String startObjName = 
+				    TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.beginPort.getName() ) 
+				        ? rel.beginPort.getObject().getName()
+				        : ( rel.beginPort.getObject().isSuperClass() ) 
+						    ? rel.beginPort.getName()
+							: rel.beginPort.getObject().getName() + "." + rel.beginPort.getName();
 										
-				String endObjName = ( rel.endPort.getObject().isSuperClass() )
-										? rel.endPort.getName()
-										: rel.endPort.getObject().getName() + "." + rel.endPort.getName();
+				String endObjName = 
+				    TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.endPort.getName() ) 
+                        ? rel.endPort.getObject().getName()
+                        : ( rel.endPort.getObject().isSuperClass() )
+							? rel.endPort.getName()
+							: rel.endPort.getObject().getName() + "." + rel.endPort.getName();
 				
 				s.append( CodeGenerator.OT_TAB + endObjName + " = " + startObjName + ";\n" );
 			}
