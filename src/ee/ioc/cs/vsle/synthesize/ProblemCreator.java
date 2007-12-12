@@ -93,7 +93,7 @@ public class ProblemCreator {
         
         //make aliases when all other vars have been created
         for ( Alias alias : aliases) {
-        	createAlias( alias, ac, classes, problem, parent );
+        	createAliasVar( alias, ac, classes, problem, parent );
 		}
         
         for ( Var length : aliasLengths ) {
@@ -132,8 +132,8 @@ public class ProblemCreator {
             if ( classRelation.getInputs().size() == 1 && classRelation.getOutputs().size() == 1 ) {
 
                 //if we have a relation alias = *.sth, we need to find out what it actually is
-                if ( ( classRelation.getType() == RelType.TYPE_ALIAS ) && isAliasWildcard( classRelation ) ) {
-                	relSet = makeAliasWildcard( ac, classes, classRelation, problem, parent );
+                if ( ( classRelation.getType() == RelType.TYPE_ALIAS ) && isAliasWildcardInput( classRelation ) ) {
+                	relSet = makeAliasWildcardRel( ac, classes, classRelation, problem, parent );
                 	rel = null;
                 	isAliasRel = true;
                 }
@@ -151,7 +151,7 @@ public class ProblemCreator {
                     	throw new UnknownVariableException( obj + classRelation.getOutput().getName() );
                     }
                     
-                    isAliasRel = checkEquality( inpVar, outpVar, classes, classRelation, parent, problem );
+                    isAliasRel = checkVarEquality( inpVar, outpVar, classes, classRelation, parent, problem );
                 }
             }
 
@@ -289,7 +289,23 @@ public class ProblemCreator {
     	return false;
     }
     
-    private static boolean checkEquality( Var inpVar, Var outpVar, ClassList classes, ClassRelation classRelation, Var parent, Problem problem ) throws SpecParseException {
+    /** 
+     * If we have a relation alias = alias, we rewrite it into new relations, ie we create
+     * a relation for each component of the alias structure.
+     * 
+     * Else if the relation is x = y where both vars have common spec type, 
+     * make their sub-components equal.
+     * 
+     * @param inpVar
+     * @param outpVar
+     * @param classes
+     * @param classRelation
+     * @param parent
+     * @param problem
+     * @return
+     * @throws SpecParseException
+     */
+    private static boolean checkVarEquality( Var inpVar, Var outpVar, ClassList classes, ClassRelation classRelation, Var parent, Problem problem ) throws SpecParseException {
         
         if ( inpVar.getField().isAlias() && outpVar.getField().isAlias() ) {
 
@@ -304,7 +320,7 @@ public class ProblemCreator {
                 inpChildVar = inpVar.getChildVars().get( i );
                 outpChildVar = outpVar.getChildVars().get( i );
 
-                if( !checkEquality( inpChildVar, outpChildVar, classes, classRelation, parent, problem ) ) {
+                if( !checkVarEquality( inpChildVar, outpChildVar, classes, classRelation, parent, problem ) ) {
                     
                     Rel rel = new Rel( parent, inpVar.getFullName() + " = " 
                             + outpVar.getFullName() + ", derived from: " + classRelation.getSpecLine() );
@@ -315,13 +331,13 @@ public class ProblemCreator {
                     inpChildVar.addRel( rel );
                     problem.addRel( rel );
 
-                    checkSpecClassBinding( inpChildVar, outpChildVar, classes, classRelation, parent, problem );
+                    checkSpecClassVarBinding( inpChildVar, outpChildVar, classes, classRelation, parent, problem );
                 }
             }
             
             return true;
         } else {
-            checkSpecClassBinding( inpVar, outpVar, classes, classRelation, parent, problem );
+            checkSpecClassVarBinding( inpVar, outpVar, classes, classRelation, parent, problem );
         }
         
         return false;
@@ -332,7 +348,7 @@ public class ProblemCreator {
      * 
      * @throws SpecParseException 
      */
-    private static void checkSpecClassBinding( Var inpVar, Var outpVar, ClassList classes, ClassRelation classRelation, Var parent, Problem problem ) throws SpecParseException {
+    private static void checkSpecClassVarBinding( Var inpVar, Var outpVar, ClassList classes, ClassRelation classRelation, Var parent, Problem problem ) throws SpecParseException {
         
         if( inpVar.getField().isSpecField() && outpVar.getField().isSpecField() ) {
             
@@ -367,12 +383,25 @@ public class ProblemCreator {
                         rel.addOutput( outpVarSub );
                         inpVarSub.addRel( rel );
                         problem.addRel( rel );
+                        
+                        //recursively check this equality
+                        checkVarEquality( inpVarSub, outpVarSub, classes, classRelation, parent, problem );
                     }
                 }
             }
         }
     }
     
+    /**
+     * Derives common types for given two types.
+     * As multiple inheritance of specifications is allowed, 
+     * more that one common type may be derived.
+     * 
+     * @param classes
+     * @param type1
+     * @param type2
+     * @return
+     */
     private static ClassList getCommonTypes( ClassList classes, String type1, String type2 ) {
         
         ClassList types = new ClassList();
@@ -403,16 +432,26 @@ public class ProblemCreator {
         return types;
     }
     
-    private static void createAlias( Alias alias, AnnotatedClass ac, ClassList classes, Problem problem, Var parent ) throws AliasException {
+    /**
+     * Creates an alias
+     * 
+     * @param alias
+     * @param ac
+     * @param classes
+     * @param problem
+     * @param parent
+     * @throws AliasException
+     */
+    private static void createAliasVar( Alias alias, AnnotatedClass ac, ClassList classes, Problem problem, Var parent ) throws AliasException {
     	
     	Var var;
-    	
+    	//corresponding Var may have already been initialized
     	if( ( var = problem.getAllVars().get( parent.getFullNameForConcat() + alias.getName() ) ) == null ) {
     		var = new Var( alias, parent );
     	}
     	
     	if( alias.isWildcard() ) {
-    		rewriteWildcardAlias( var, ac, classes, problem );
+    		rewriteWildcardAliasVar( var, ac, classes, problem );
     	} else {
     		for ( ClassField childField : alias.getVars() ) {
     			Var childVar = problem.getAllVars().get( parent.getFullNameForConcat() + childField.getName() );
@@ -426,7 +465,16 @@ public class ProblemCreator {
         problem.addVar( var );
     }
     
-    private static void rewriteWildcardAlias( Var aliasVar, AnnotatedClass ac, ClassList classes, Problem problem ) throws AliasException {
+    /**
+     * Fills an alias with corresponding variables that match the wildcard
+     * 
+     * @param aliasVar
+     * @param ac
+     * @param classes
+     * @param problem
+     * @throws AliasException
+     */
+    private static void rewriteWildcardAliasVar( Var aliasVar, AnnotatedClass ac, ClassList classes, Problem problem ) throws AliasException {
     	
     	Alias alias = (Alias)aliasVar.getField();
     	String wildcardVar = alias.getWildcardVar();
@@ -455,7 +503,13 @@ public class ProblemCreator {
     	}
     }
 
-    private static boolean isAliasWildcard( ClassRelation classRelation ) {
+    /**
+     * checks whether a given relation has a wildcard alias as its input
+     * 
+     * @param classRelation
+     * @return
+     */
+    private static boolean isAliasWildcardInput( ClassRelation classRelation ) {
     	
         return classRelation.getInput().getName().startsWith( "*." );
     }
@@ -463,7 +517,7 @@ public class ProblemCreator {
     /**
      * creates Rel for alias x = ( *.wildcardVar );
      */
-    private static Set<Rel> makeAliasWildcard( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
+    private static Set<Rel> makeAliasWildcardRel( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
     		Problem problem, Var parentObj ) throws UnknownVariableException {
     	
         Var alias = problem.getAllVars().get( parentObj.getFullNameForConcat() + classRelation.getOutput().getName() );
