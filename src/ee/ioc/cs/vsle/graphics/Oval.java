@@ -11,13 +11,18 @@ public class Oval extends Shape implements Serializable {
     double rotation = 0.0;
 
     public Oval( int x, int y, int width, int height, int colorInt, boolean fill, float strokeWidth, int transp, float lineType ) {
+        this( x, y, width, height, colorInt, fill, strokeWidth, transp, lineType, false );
+    } // Oval
+
+    public Oval( int x, int y, int width, int height, int colorInt, boolean fill, float strokeWidth, int transp, float lineType, boolean fixed ) {
         super( x, y, width, height );
         setColor( new Color( colorInt ) );
         setTransparency( transp );
         setFilled( fill );
         setStroke( strokeWidth, lineType );
+        setFixed( fixed );
     } // Oval
-
+    
     /**
      * Return a specification of the shape to be written into a file in XML format.
      * @param boundingboxX - x coordinate of the bounding box.
@@ -25,10 +30,6 @@ public class Oval extends Shape implements Serializable {
      * @return String - specification of a shape.
      */
     public String toFile( int boundingboxX, int boundingboxY ) {
-        String fill = "false";
-
-        if ( isFilled() )
-            fill = "true";
 
         int colorInt = 0;
 
@@ -36,23 +37,19 @@ public class Oval extends Shape implements Serializable {
             colorInt = getColor().getRGB();
 
         return "<oval x=\"" + ( getX() - boundingboxX ) + "\" y=\"" + ( getY() - boundingboxY ) + "\" width=\"" + getWidth()
-                + "\" height=\"" + getHeight() + "\" colour=\"" + colorInt + "\" filled=\"" + fill + "\" fixed=\"" + isFixed()
+                + "\" height=\"" + getHeight() + "\" colour=\"" + colorInt + "\" filled=\"" + Boolean.toString( isFilled() ) + "\" fixed=\"" + isFixed()
                 + "\" stroke=\"" + (int) getStroke().getLineWidth() + "\" linetype=\"" + this.getLineType() + "\" transparency=\""
                 + getTransparency() + "\"/>\n";
     } // toFile
 
     public String toText() {
-        String fill = "false";
-
-        if ( isFilled() )
-            fill = "true";
 
         int colorInt = 0;
 
         if ( getColor() != null )
             colorInt = getColor().getRGB();
 
-        return "OVAL:" + getX() + ":" + getY() + ":" + getWidth() + ":" + getHeight() + ":" + colorInt + ":" + fill + ":"
+        return "OVAL:" + getX() + ":" + getY() + ":" + getWidth() + ":" + getHeight() + ":" + colorInt + ":" + Boolean.toString( isFilled() ) + ":"
                 + (int) getStroke().getLineWidth() + ":" + this.getLineType() + ":" + getTransparency() + ":" + isFixed();
     } // toText
 
@@ -86,6 +83,10 @@ public class Oval extends Shape implements Serializable {
         g2.setColor( getColor() );
 
         // Get dimensions. If fixed, do not multiply with size.
+        if( isFixed() ) {
+            Xsize = 1;
+            Ysize = 1;
+        }
         int a = xModifier + (int) ( Xsize * getX() );
         int b = yModifier + (int) ( Ysize * getY() );
         int c = (int) ( Xsize * getWidth() );

@@ -624,15 +624,15 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             } else if ( qName.equals( EL_PORT ) ) {
                 if ( newPort.getOpenGraphics() == null ) {
                     newGraphics = new ClassGraphics();
-                    newGraphics.addShape( new Oval( -4, -4, 8, 8, 12632256, true, 1.0f, 255, 0 ) );
-                    newGraphics.addShape( new Oval( -4, -4, 8, 8, 0, false, 1.0f, 255, 0 ) );
+                    newGraphics.addShape( new Oval( -4, -4, 8, 8, 12632256, true, 1.0f, 255, 0, true ) );
+                    newGraphics.addShape( new Oval( -4, -4, 8, 8, 0, false, 1.0f, 255, 0, true ) );
 
                     newGraphics.setBounds( -4, -4, 8, 8 );
                     newPort.setOpenGraphics( newGraphics );
                 }
                 if ( newPort.getClosedGraphics() == null ) {
                     newGraphics = new ClassGraphics();
-                    newGraphics.addShape( new Oval( -4, -4, 8, 8, 0, true, 1.0f, 255, 0 ) );
+                    newGraphics.addShape( new Oval( -4, -4, 8, 8, 0, true, 1.0f, 255, 0, true ) );
                     newGraphics.setBounds( -4, -4, 8, 8 );
                     newPort.setClosedGraphics( newGraphics );
                 }
