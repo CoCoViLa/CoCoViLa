@@ -285,7 +285,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 
                     newField = new ClassField( name, type );
                     newClass.addSpecField( newField );
-                } else {
+                } else if ( !TypeUtil.TYPE_THIS.equalsIgnoreCase( name ) ) {
                     if ( cf == null ) {
 
                         collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.name
