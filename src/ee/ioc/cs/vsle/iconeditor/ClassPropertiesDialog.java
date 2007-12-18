@@ -178,13 +178,6 @@ public class ClassPropertiesDialog extends JDialog {
 
 		bttnDelField.setEnabled(false);
 
-		setDefaultCloseOperation( DISPOSE_ON_CLOSE );
-		// Specify dialog size, resizability and modality.
-		// The dialog is made visible by the calling application.
-		setSize(new Dimension(410, 350));
-		setResizable(false);
-		setModal(true);
-
 		//////////////////////////////////////////////////////
 		////// ACTION LISTENERS AS ANONYMOUS CLASSES /////////
 		//////////////////////////////////////////////////////
@@ -264,7 +257,18 @@ public class ClassPropertiesDialog extends JDialog {
 				}
 			}
 		}); // end selectionModel ListSelectionListener
+
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
+		// Specify dialog size, resizability and modality.
+		setPreferredSize(new Dimension(410, 350));
+		setResizable(false);
+		setModal(true);
+		
+		// The following pack() call sets the real size to preferredSize
+		// and is needed before setting a non-resizable frame visible.
+		// Ohterwise the window will appear as a dot under some WMs.
+		pack();
 		setVisible(true);
 	} // ClassPropertiesDialog
 
