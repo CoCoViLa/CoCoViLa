@@ -1021,13 +1021,9 @@ public class Canvas extends JPanel {
     /**
      * Hilight ports of the object.
      */
-
     public void hilightPorts() {
-        for ( int i = 0; i < objects.getSelected().size(); i++ ) {
-            GObj obj = objects.getSelected().get( i );
-            ArrayList<Port> ps = obj.getPorts();
-            for ( int port_index = 0; port_index < ps.size(); port_index++ ) {
-                Port p = ps.get( port_index );
+        for (GObj obj : objects.getSelected()) {
+            for (Port p : obj.getPorts()) {
                 p.setHilighted( !p.isHilighted() );
             }
         }
