@@ -413,6 +413,9 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
                 port.setConnections( new ArrayList<Connection>() );
             }
 
+            // Only one superclass is permitted
+            obj.setSuperClass(false);
+
             return obj;
         } catch ( CloneNotSupportedException e ) {
             db.p( "Unable to clone." );
