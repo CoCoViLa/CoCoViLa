@@ -1303,7 +1303,22 @@ public class Canvas extends JPanel {
      * Update mouse position in info label
      */
     public void setPosInfo( int x, int y ) {
-        posInfo.setText( x + ", " + y );
+        String message = x + ", " + y;
+        
+        GObj obj = objects.checkInside( x, y );
+        
+        if( obj != null ) {
+            
+            message += " : " + obj.className + " " + obj.getName();
+            
+            Port port = obj.portContains( x, y );
+            
+            if( port != null ) {
+                message += " : " + port.getType() + " " + port.getName();
+            }
+        }
+        
+        posInfo.setText( message );
     }
 
     /**
