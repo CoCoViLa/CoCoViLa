@@ -36,7 +36,7 @@ public class Connection implements Serializable {
 	public Port beginPort;
 	public Port endPort;
 	private boolean selected;
-	private ArrayList<Point> breakPoints;
+	private ArrayList<Point> breakPoints = new ArrayList<Point>();
 	
 	/**
 	 * Is this an implicit connection between two strict ports 
