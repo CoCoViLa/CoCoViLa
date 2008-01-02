@@ -36,6 +36,7 @@ public class Editor extends JFrame implements ChangeListener {
     DeleteAction deleteAction;
     UndoAction undoAction;
     RedoAction redoAction;
+    CloneAction cloneAction;
 
     JMenuBar menuBar;
 
@@ -64,13 +65,30 @@ public class Editor extends JFrame implements ChangeListener {
         undoAction = new UndoAction();
         redoAction = new RedoAction();
         deleteAction = new DeleteAction();
+        cloneAction = new CloneAction();
         aListener = new EditorActionListener();
         makeMenu();
         getContentPane().add( tabbedPane );
-        getRootPane().getActionMap().put( DeleteAction.class, deleteAction );
-        getRootPane().getInputMap( JComponent.WHEN_IN_FOCUSED_WINDOW ).put( KeyStroke.getKeyStroke( KeyEvent.VK_DELETE, 0 ),
-                DeleteAction.class );
+        initActions();
     } // initialize
+
+    /**
+     * Creates Action objects and initializes Input and Action mappings
+     */
+    private void initActions() {
+        JRootPane rp = getRootPane();
+
+        ActionMap am = rp.getActionMap();
+        InputMap im = rp.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        
+        am.put(DeleteAction.class, deleteAction);
+        am.put(CloneAction.class, cloneAction);
+
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0),
+                DeleteAction.class );
+        im.put(KeyStroke.getKeyStroke(KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK),
+                CloneAction.class);
+    }
 
     /**
      * Build menu.
@@ -126,13 +144,7 @@ public class Editor extends JFrame implements ChangeListener {
 
         menu.add( undoAction );
         menu.add( redoAction );
-        // as it is already defined in the object popup menu and
-        // otherwise would require implementing all the object
-        // popup items in the current menu as well.
-        /*
-         * menuItem = new JMenuItem("Clone", KeyEvent.VK_C);
-         * menuItem.addActionListener(aListener); menu.add(menuItem);
-         */
+        menu.add(cloneAction);
         menuItem = new JMenuItem( Menu.SELECT_ALL, KeyEvent.VK_A );
         menuItem.addActionListener( aListener );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_A, ActionEvent.CTRL_MASK ) );

@@ -103,6 +103,23 @@ public class EditorActionListener implements ActionListener {
         }
     }
 
+    static class CloneAction extends AbstractAction {
+
+        public CloneAction() {
+            putValue(Action.NAME, Menu.CLONE);
+            putValue(Action.MNEMONIC_KEY, Integer.valueOf(KeyEvent.VK_C));
+            putValue(Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke(
+                    KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK));
+        }
+
+        public void actionPerformed(ActionEvent e) {
+            Canvas canvas = Editor.getInstance().getCurrentCanvas();
+            if (canvas != null) {
+                canvas.cloneObject();
+            }
+        }
+    }
+
     public void actionPerformed( ActionEvent e ) {
 
         // JmenuItem chosen
