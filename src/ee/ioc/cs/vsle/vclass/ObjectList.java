@@ -106,6 +106,20 @@ public class ObjectList extends ArrayList<GObj> {
 		return a;
 	}
 
+    /**
+     * Returns the number of selected objects.
+     * @return the number of selected objects
+     */
+    public int getSelectedCount() {
+        int count = 0;
+        for (GObj obj : this) {
+            if (obj.isSelected()) {
+                count++;
+            }
+        }
+        return count;
+    }
+
 	/**
 	 * Recalculates start and end points of relation objects and dimensions.
 	 */
