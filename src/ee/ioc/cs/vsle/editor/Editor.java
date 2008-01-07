@@ -196,8 +196,13 @@ public class Editor extends JFrame implements ChangeListener {
         menu.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
 
             public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
-                gridCheckBox.setSelected( getCurrentCanvas().isGridVisible() );
-                showPortCheckBox.setSelected( getCurrentCanvas().isDrawPorts() );
+                Canvas canvas;
+                
+                if( ( canvas = getCurrentCanvas() ) == null ) 
+                    return;
+                
+                gridCheckBox.setSelected( canvas.isGridVisible() );
+                showPortCheckBox.setSelected( canvas.isDrawPorts() );
             }
 
             public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {
