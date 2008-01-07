@@ -92,7 +92,13 @@ public class Synthesizer {
        
         prog.append( "\n" ).append(  CodeGenerator.OT_TAB ).append( getComputeMethodSignature() ).append( " {\n" );
         prog.append( algorithm );
-        prog.append( CodeGenerator.OT_TAB ).append( "}\n" );
+        prog.append( CodeGenerator.OT_TAB ).append( "}\n\n" );
+        
+        prog.append( CodeGenerator.OT_TAB ).append( "public static void main( String[] args ) {\n" )
+                .append( CodeGenerator.OT_TAB ).append( CodeGenerator.OT_TAB )
+                .append( "new " ).append( mainClassName ).append( "().compute();\n" )
+                .append( CodeGenerator.OT_TAB ).append( "}\n" );
+        
         Pattern pattern;
         Matcher matcher;
 

@@ -97,21 +97,22 @@ public class SchemeSettingsDialog extends JDialog {
 		JPanel plan = new JPanel( );		
 		//plan.setLayout(new BoxLayout(plan, BoxLayout.Y_AXIS));
 		
-		List<IPlanner> plans = PlannerFactory.getInstance().getAllInstances();
+		List<Class<? extends IPlanner>> plans = PlannerFactory.getInstance().getAllInstances();
 		plan.setLayout( new GridLayout( plans.size(), 0 ) );
 		
 		ButtonGroup group2 = new ButtonGroup();
-		for (final IPlanner planner : plans) {
+		for (final Class<? extends IPlanner> plannerClass : plans) {
+		    IPlanner planner = PlannerFactory.getInstance().getPlannerInstance( plannerClass );
 			final Component opt = planner.getCustomOptionComponent();
 			
 			final JRadioButton button = new JRadioButton(planner.getDescription());
 			button.addActionListener(new ActionListener(){
 
 				public void actionPerformed(ActionEvent e) {
-					PlannerFactory.getInstance().setCurrentPlanner( planner );
+					PlannerFactory.getInstance().setCurrentPlannerClass( plannerClass );
 				}});
 			group2.add(button);
-			if( planner == PlannerFactory.getInstance().getCurrentPlanner() ) {
+			if( plannerClass == PlannerFactory.getInstance().getCurrentPlannerClass() ) {
 				button.setSelected( true );
 			}
 			if( opt != null ) {
