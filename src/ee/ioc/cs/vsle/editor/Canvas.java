@@ -1405,6 +1405,19 @@ public class Canvas extends JPanel {
                 maxy = tmp;
         }
 
+        for( Connection con : getConnections() ) {
+            for( Point p : con.getBreakPoints() ) {
+                
+                if( p.x > maxx ) {
+                    maxx = p.x;
+                }
+                
+                if( p.y > maxy ) {
+                    maxy = p.y;
+                }
+            }
+        }
+        
         drawAreaSize.width = Math.round( scale
                 * ( maxx > 0 ? maxx + RuntimeProperties.getGridStep() : drawAreaSize.width / this.scale ) );
 
