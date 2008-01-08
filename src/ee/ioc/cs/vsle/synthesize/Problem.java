@@ -16,7 +16,6 @@ class Problem implements Serializable {
 	private Set<Rel> allRels = new LinkedHashSet<Rel>();
 	private Set<Rel> relWithSubtasks = new LinkedHashSet<Rel>();
 	private Set<SubtaskRel> subtasks = new LinkedHashSet<SubtaskRel>();
-	private Vector<Rel> subGoal = null;
 	private Set<Var> foundVars = new LinkedHashSet<Var>();
 	private Var rootVarThis;
 	
@@ -131,8 +130,7 @@ class Problem implements Serializable {
 	public String toString() {
 		return ("All: " + allVars + "\n Rels: " + allRels + "\n Known: "
 				+ knownVars + "\n Targets:" + goals + "\n Axioms:"
-				+ axioms + "\n Subtasks:" + relWithSubtasks + "\n subGoal:"
-				+ subGoal + "\n");
+				+ axioms + "\n Subtasks:" + relWithSubtasks );
 	}
 
 }
