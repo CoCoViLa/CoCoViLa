@@ -680,7 +680,7 @@ public class SpecParser {
                         }
 
                     } else if ( lt.getType() == LineType.TYPE_SPECAXIOM ) {
-                        pattern = Pattern.compile( "(.*) *-> *([-_a-zA-Z0-9.,]+) *$" );
+                        pattern = Pattern.compile( "(.*) *-> *([ -_a-zA-Z0-9.,]+) *$" );
                         matcher = pattern.matcher( lt.getSpecLine() );
                         if ( matcher.find() ) {
                             ClassRelation classRelation = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, lt.getOrigSpecLine() );
