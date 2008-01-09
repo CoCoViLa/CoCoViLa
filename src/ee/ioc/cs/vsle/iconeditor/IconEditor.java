@@ -1136,7 +1136,7 @@ public class IconEditor extends JFrame {
             in.close();
 
             /* See if .java file exists */
-            File javaFile = new File( getPackageFile().getParent() + RuntimeProperties.FS + className + ".java" );
+            File javaFile = new File( getPackageFile().getParent() + File.separator + className + ".java" );
 
             /* If file exists show conformation dialog */
             int overWriteFile = JOptionPane.YES_OPTION;
@@ -1739,7 +1739,7 @@ public class IconEditor extends JFrame {
             out.flush();
             out.close();
             if ( deleteJavaClass ) {
-                File javaFile = new File( f.getParent() + RuntimeProperties.FS + selection + ".java" );
+                File javaFile = new File( f.getParent() + File.separator + selection + ".java" );
                 javaFile.delete();
             }
             JOptionPane.showMessageDialog( null, "Deleted " + selection + " from package: " + f.getName(), "Deleted",

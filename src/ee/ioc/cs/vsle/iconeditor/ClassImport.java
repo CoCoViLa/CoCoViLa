@@ -261,9 +261,9 @@ public class ClassImport {
                 
                 String fullPath;
                 
-                if ( !ClassImport.this.path.endsWith( RuntimeProperties.FS )
-                        && !path.startsWith( RuntimeProperties.FS ) ) {
-                    fullPath = ClassImport.this.path + RuntimeProperties.FS
+                if ( !ClassImport.this.path.endsWith(File.separator)
+                        && !path.startsWith(File.separator)) {
+                    fullPath = ClassImport.this.path + File.separator
                             + path;
                 } else {
                     fullPath = ClassImport.this.path + path;
