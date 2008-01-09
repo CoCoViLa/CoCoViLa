@@ -543,7 +543,7 @@ public class Editor extends JFrame implements ChangeListener {
                 }
                 
                 if( isOK ) {
-                    Canvas canvas = new Canvas( loader.getPackage(), f.getParent() + RuntimeProperties.FS );
+                    Canvas canvas = new Canvas( loader.getPackage(), f.getParent() + File.separator );
                     
                     int count = 0;
 
@@ -633,7 +633,7 @@ public class Editor extends JFrame implements ChangeListener {
 
             if ( args[ 0 ].equals( "-p" ) ) {
 
-                String dir = ( args.length == 3 ) ? directory + args[ 2 ] + RuntimeProperties.FS : directory;
+                String dir = ( args.length == 3 ) ? directory + args[ 2 ] + File.separator : directory;
 
                 Synthesizer.parseFromCommandLine( dir, args[ 1 ] );
 

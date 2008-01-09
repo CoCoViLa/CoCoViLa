@@ -8,9 +8,6 @@ import ee.ioc.cs.vsle.util.*;
 
 public class RuntimeProperties {
 
-    public static final String FS = System.getProperty( "file.separator" );
-    public static final String PS = System.getProperty( "path.separator" );
-
     public final static String SCHEME_DTD = "scheme.dtd";
     public final static String PACKAGE_DTD = "package2.dtd";
     public final static String PACKAGE_LOCATOR = "package.locator";
@@ -53,7 +50,8 @@ public class RuntimeProperties {
     private static final String SCHEME_EDITOR_WINDOW_PROPS = "schemeEditorWindowProps";
 
     private static boolean fromWebstart = false;
-    private static String workingDirectory = System.getProperty( "user.dir" ) + FS;
+    private static String workingDirectory = System.getProperty( "user.dir" ) 
+            + File.separator;
     
     private static final Properties s_defaultProperties;
     private static final Properties s_runtimeProperties;
@@ -118,7 +116,8 @@ public class RuntimeProperties {
 
         RuntimeProperties.fromWebstart = true;
 
-        workingDirectory = System.getProperty( "user.home" ) + FS + "CoCoViLa" + FS;
+        workingDirectory = System.getProperty( "user.home" ) + File.separator 
+                + "CoCoViLa" + File.separator;
 
         File file = new File( workingDirectory );
 

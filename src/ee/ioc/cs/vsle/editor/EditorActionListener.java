@@ -428,7 +428,7 @@ public class EditorActionListener implements ActionListener {
         String schemeTitle = editor.getCurrentCanvas().getSchemeTitle();
         
         if( schemeTitle != null ) {
-        	fc.setSelectedFile( new File( pack.getPath() + RuntimeProperties.FS + schemeTitle ) );
+        	fc.setSelectedFile( new File( pack.getPath() + File.separator + schemeTitle ) );
         }
         
         CustomFileFilter filter = SpecGenFactory.getInstance().getCurrentSpecGen().getFileFilter();

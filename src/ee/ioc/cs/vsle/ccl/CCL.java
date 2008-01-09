@@ -96,16 +96,17 @@ public class CCL extends URLClassLoader {
 		return new String[]{ path };
 	}
 	
-	private static String prepareClasspathOS( String path ) {
-		String[] paths = prepareClasspath( path );
-		String classpath = RuntimeProperties.PS;
-		
-		for( int i= 0; i < paths.length; i++ ) {
-			classpath += paths[i] + RuntimeProperties.PS;
-		}
-		
-		return classpath;
-	}
+    private static String prepareClasspathOS( String path ) {
+        String[] paths = prepareClasspath( path );
+        StringBuilder classpath = new StringBuilder(File.pathSeparator);
+
+        for (int i= 0; i < paths.length; i++) {
+            classpath.append(paths[i]);
+            classpath.append(File.pathSeparatorChar);
+        }
+
+        return classpath.toString();
+    }
 	
 	@Override
 	public Class<?> loadClass(String name) throws ClassNotFoundException {
@@ -138,7 +139,7 @@ public class CCL extends URLClassLoader {
 	    if (compileDir == null)
             compileDir = RuntimeProperties.getGenFileDir();
         
-		javaFile = compileDir + RuntimeProperties.FS + javaFile + ".java";
+		javaFile = compileDir + File.separator + javaFile + ".java";
 		
 		db.p("Compiling " + javaFile + "...");
 		
