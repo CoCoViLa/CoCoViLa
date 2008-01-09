@@ -5,8 +5,6 @@ import java.net.*;
 
 import javax.swing.*;
 
-import ee.ioc.cs.vsle.editor.*;
-
 /**
  * User: Ando
  * Date: 28.03.2005
@@ -61,20 +59,19 @@ public class FileFuncs {
 		return status;
 	}
 
-	public static void writeFile( String prog, String mainClassName, String ext, String dir, boolean append ) {
+    public static void writeFile( String prog, String mainClassName, String ext, String dir, boolean append ) {
         try {
-        	if( !dir.endsWith( RuntimeProperties.FS ) ) {
-        		dir += RuntimeProperties.FS;
-        	}
-        	String path = dir + RuntimeProperties.FS + mainClassName + "." + ext;
-        	
-        	File file = new File( path );
-        	
-        	if( !append && file.exists() ) {
-        		file.delete();
-        	}
-        	
-            PrintWriter out = new PrintWriter( new BufferedWriter( new FileWriter( path, append ) ) );
+            if (!dir.endsWith(File.separator)) {
+                dir += File.separator;
+            }
+            String path = dir + mainClassName + "." + ext;
+            File file = new File( path );
+
+            if( !append && file.exists() ) {
+                file.delete();
+            }
+
+            PrintWriter out = new PrintWriter( new BufferedWriter(new FileWriter( path, append ) ) );
 
             out.println( prog );
             out.close();
@@ -131,23 +128,19 @@ public class FileFuncs {
     
     
     /**
-     * Makes sure that all file separators in path are valid for current OS
+     * Makes sure that all file separators in path are valid for current OS.
+     * If the path is already valid the same string is returned.
      * 
-     * @param path
-     * @return modified path
+     * @param path a string representing a path name that possibly contains
+     * path name separators of a different platform
+     * @return a string where foreign path name separators are replaced with
+     * the separators of current platform; or the original string if it did not
+     * contain any foreign path name separators
      */
     public static String preparePathOS( String path ) {
-        
-        if( RuntimeProperties.FS.equals( "/" ) && path.indexOf( "\\" ) > 0 ) {
-            path = path.replaceAll( "\\\\", RuntimeProperties.FS );
-        }
-        
-        if( RuntimeProperties.FS.equals( "\\" ) && path.indexOf( "/" ) > 0 ) {
-            //path = path.replaceAll( "/", RuntimeProperties.FS ); - this does not work
-            path = path.replaceAll( "/", "\\\\" );
-        }
-
-        return path;
+        return File.separatorChar == '/'
+                ? path.replace('\\', '/')
+                : path.replace('/', '\\');
     }
 
 }
