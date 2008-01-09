@@ -75,7 +75,7 @@ public class SystemUtils {
 			{
 				String entryName   = e.nextElement().toString();
 				String newFileName = RuntimeProperties.getWorkingDirectory() 
-										+ "packages" + RuntimeProperties.FS + entryName;
+										+ "packages" + File.separator + entryName;
 
 				// ignore CVS directories
 				if ( entryName.indexOf( "CVS" ) != -1 )

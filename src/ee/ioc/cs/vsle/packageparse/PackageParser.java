@@ -388,10 +388,9 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 
                 String fullPath;
                 
-                if ( !PackageParser.this.path.endsWith( RuntimeProperties.FS )
-                        && !path.startsWith( RuntimeProperties.FS ) ) {
-                    fullPath = PackageParser.this.path + RuntimeProperties.FS
-                            + path;
+                if ( !PackageParser.this.path.endsWith( File.separator )
+                        && !path.startsWith( File.separator ) ) {
+                    fullPath = PackageParser.this.path + File.separator + path;
                 } else {
                     fullPath = PackageParser.this.path + path;
                 }
@@ -719,7 +718,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                     Collection<ClassField> specFields;
 
                     try {
-                        specFields = SpecParser.getFields( path + RuntimeProperties.FS, newClass.name, ".java" );
+                        specFields = SpecParser.getFields( path + File.separator, newClass.name, ".java" );
                         newClass.setSpecFields( specFields );
 
                     } catch ( IOException e ) {
