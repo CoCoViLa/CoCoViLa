@@ -259,7 +259,9 @@ public class EditorActionListener implements ActionListener {
 
                     final ProgramRunner runner = new ProgramRunner( canv );
 
-                    int op = ProgramRunnerEvent.COMPUTE_ALL | ProgramRunnerEvent.RUN_NEW/* | ProgramRunnerEvent.DESTROY*/;
+                    int op = ( RuntimeProperties.isComputeGoal() ? ProgramRunnerEvent.COMPUTE_GOAL : ProgramRunnerEvent.COMPUTE_ALL ) 
+                        | ProgramRunnerEvent.RUN_NEW
+                        | ( RuntimeProperties.isPropagateValues() ? ProgramRunnerEvent.PROPAGATE : 0 );
 
                     ProgramRunnerEvent evt = new ProgramRunnerEvent( this, runner.getId(), op );
 
@@ -267,22 +269,12 @@ public class EditorActionListener implements ActionListener {
                 } else {
                     JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
                 }
-            } else if ( e.getActionCommand().equals( Menu.RUNPROPAGATE ) ) {
-                Canvas canv = Editor.getInstance().getCurrentCanvas();
-                if ( canv != null ) {
-
-                    final ProgramRunner runner = new ProgramRunner( canv );
-
-                    int op = ProgramRunnerEvent.COMPUTE_ALL | ProgramRunnerEvent.RUN_NEW | ProgramRunnerEvent.PROPAGATE
-                        /* | ProgramRunnerEvent.DESTROY*/;
-
-                    ProgramRunnerEvent evt = new ProgramRunnerEvent( this, runner.getId(), op );
-
-                    EventSystem.queueEvent( evt );
-
-                } else {
-                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
-                }
+            } else if ( e.getActionCommand().equals( Menu.PROPAGATE_VALUES ) ) {
+                JCheckBoxMenuItem check = (JCheckBoxMenuItem) e.getSource();
+                RuntimeProperties.setPropagateValues( check.isSelected() );
+            } else if ( e.getActionCommand().equals( Menu.COMPUTE_GOAL ) ) {
+                JCheckBoxMenuItem check = (JCheckBoxMenuItem) e.getSource();
+                RuntimeProperties.setComputeGoal( check.isSelected() );
             } else if ( e.getActionCommand().equals( Menu.SHOW_ALGORITHM ) ) {
                 JCheckBoxMenuItem check = (JCheckBoxMenuItem) e.getSource();
                 RuntimeProperties.setShowAlgorithm( check.isSelected() );

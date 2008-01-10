@@ -124,7 +124,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
         runProg = new JButton( "Compile & Run" );
         runProg.addActionListener( this );
         toolBar.add( runProg );
-        propagateOnRunNew = new JCheckBox( "Propagate", true );
+        propagateOnRunNew = new JCheckBox( "Propagate", RuntimeProperties.isPropagateValues() );
         propagateOnRunNew.setOpaque( false );
         toolBar.add( propagateOnRunNew );
         toolBar.add( new UndoRedoDocumentPanel( jta_generatedCode.getDocument() ) );

@@ -48,6 +48,8 @@ public class RuntimeProperties {
     private static final String VERSION_UNKNOWN = "@project.version@";
     //x;y;width;height;state
     private static final String SCHEME_EDITOR_WINDOW_PROPS = "schemeEditorWindowProps";
+    private static final String COMPUTE_GOAL = "computeGoal";
+    private static final String PROPAGATE_VALUES = "propagateValues";
 
     private static boolean fromWebstart = false;
     private static String workingDirectory = System.getProperty( "user.dir" ) 
@@ -80,6 +82,8 @@ public class RuntimeProperties {
         s_defaultProperties.put( VERSION, VERSION_UNKNOWN );
         s_defaultProperties.put( SCHEME_EDITOR_WINDOW_PROPS, ";;650;600;0" );
         s_defaultProperties.put( SPEC_RECURSION_PARAMS, "false;2" );
+        s_defaultProperties.put( COMPUTE_GOAL, Boolean.FALSE.toString() );
+        s_defaultProperties.put( PROPAGATE_VALUES, Boolean.FALSE.toString() );
     }
 
     private static String genFileDir;
@@ -99,6 +103,8 @@ public class RuntimeProperties {
     private static int maxRecursiveDeclarationDepth = 2;
     private static Set<String> openPackages = new LinkedHashSet<String>();
     private static Map<String, String> recentPackages = new LinkedHashMap<String, String>();
+    private static boolean computeGoal;
+    private static boolean propagateValues;
     
     public static boolean isLogDebugEnabled() {
         return getDebugInfo() >= 1;
@@ -156,6 +162,8 @@ public class RuntimeProperties {
         setShowAlgorithm( Boolean.parseBoolean( s_runtimeProperties.getProperty( SHOW_ALGORITHM ) ) );
         setSyntaxHighlightingOn( Boolean.parseBoolean( s_runtimeProperties.getProperty( SYNTAX_HIGHLIGHT ) ) );
         setFont( Font.decode( s_runtimeProperties.getProperty( TEXT_FONT ) ) );
+        setPropagateValues( Boolean.parseBoolean( s_runtimeProperties.getProperty( PROPAGATE_VALUES ) ) );
+        setComputeGoal( Boolean.parseBoolean( s_runtimeProperties.getProperty( COMPUTE_GOAL ) ) );
         
         String openPacks = s_runtimeProperties.getProperty( OPEN_PACKAGES );
         
@@ -213,6 +221,8 @@ public class RuntimeProperties {
         s_runtimeProperties.setProperty( SHOW_ALGORITHM, Boolean.toString( showAlgorithm ) );
         s_runtimeProperties.setProperty( DEFAULT_LNF, lnf );
         s_runtimeProperties.setProperty( SPEC_RECURSION_PARAMS, Boolean.toString( recursiveSpecsAllowed ) + ";" + maxRecursiveDeclarationDepth );
+        s_runtimeProperties.setProperty( COMPUTE_GOAL, Boolean.toString( computeGoal ) );
+        s_runtimeProperties.setProperty( PROPAGATE_VALUES, Boolean.toString( propagateValues ) );
         
         String fontString = font.getName() + "-";
 
@@ -595,4 +605,32 @@ public class RuntimeProperties {
 	public static void setMaxRecursiveDeclarationDepth( int maxRecursiveDeclarationDepth ) {
 		RuntimeProperties.maxRecursiveDeclarationDepth = maxRecursiveDeclarationDepth;
 	}
+
+    /**
+     * @return the computeGoal
+     */
+    public static boolean isComputeGoal() {
+        return computeGoal;
+    }
+
+    /**
+     * @param computeGoal the computeGoal to set
+     */
+    public static void setComputeGoal( boolean computeGoal ) {
+        RuntimeProperties.computeGoal = computeGoal;
+    }
+
+    /**
+     * @return the propagateValues
+     */
+    public static boolean isPropagateValues() {
+        return propagateValues;
+    }
+
+    /**
+     * @param propagateValues the propagateValues to set
+     */
+    public static void setPropagateValues( boolean propagateValues ) {
+        RuntimeProperties.propagateValues = propagateValues;
+    }
 }

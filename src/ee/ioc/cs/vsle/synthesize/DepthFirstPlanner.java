@@ -25,6 +25,7 @@ public class DepthFirstPlanner implements IPlanner {
     private int maxDepth = s_maxDepth;
     private final boolean isSubtaskRepetitionAllowed = s_isSubtaskRepetitionAllowed;
     private final boolean isIncremental = s_isIncremental;
+    private final boolean isOptDisabled = s_disableOptimizationInSubtasks;
     
     /**
      * private constructor
@@ -244,7 +245,7 @@ public class DepthFirstPlanner implements IPlanner {
                     db.p( "Incremental dfs, with max depth " + ( incrementalDepth + 1 ) 
                             + " and " + problem.getRelsWithSubtasks().size() + " subtasks to solve" );
                 maxDepth = incrementalDepth++;
-                subtaskPlanningImpl( problem, algorithm, new LinkedHashSet<Rel>(), 0, new ArrayList<SubtaskRel>(), computeAll );
+                subtaskPlanningImpl( problem, algorithm, new LinkedHashSet<Rel>(), 0, new ArrayList<SubtaskRel>() );
                 if( isSubtaskLoggingOn() )
                     db.p( "Unsolved subtask left: " + problem.getRelsWithSubtasks().size() );
             }
@@ -266,7 +267,7 @@ public class DepthFirstPlanner implements IPlanner {
             if ( isSubtaskLoggingOn() )
                 db.p( "maxDepth: " + ( maxDepth + 1 ) );
 
-            subtaskPlanningImpl( problem, algorithm, new LinkedHashSet<Rel>(), 0, new ArrayList<SubtaskRel>(), computeAll );
+            subtaskPlanningImpl( problem, algorithm, new LinkedHashSet<Rel>(), 0, new ArrayList<SubtaskRel>() );
 
             linearForwardSearch( problem, algorithm, problem.getGoals(), computeAll );
         }
@@ -281,10 +282,9 @@ public class DepthFirstPlanner implements IPlanner {
      * @param algorithm
      * @param subtaskRelsInPath
      * @param depth
-     * @param computeAll
      */
     private void subtaskPlanningImpl( Problem problem, List<Rel> algorithm, Set<Rel> subtaskRelsInPath, int depth,
-            List<SubtaskRel> indSubtasks, boolean computeAll ) {
+            List<SubtaskRel> indSubtasks ) {
 
         Set<Rel> relsWithSubtasks = new LinkedHashSet<Rel>( problem.getRelsWithSubtasks() );
 
@@ -383,7 +383,7 @@ public class DepthFirstPlanner implements IPlanner {
                             if ( RuntimeProperties.isLogInfoEnabled() ) {
                                 db.p( "Start solving independent subtask " + subtask.getDeclaration() );
                             }
-                            ArrayList<Rel> alg = invokePlaning( context, computeAll );
+                            ArrayList<Rel> alg = invokePlaning( context, isOptDisabled );
                             boolean solved = context.getFoundVars().containsAll( context.getGoals() );
                             if ( solved ) {
                                 subtask.setSolvable( Boolean.TRUE );
@@ -424,13 +424,23 @@ public class DepthFirstPlanner implements IPlanner {
                         Set<Var> goals = new LinkedHashSet<Var>();
                         unfoldVarsToSet( subtaskNew.getOutputs(), goals );
 
+                        //this set with full list of goals is used later for optimization
+                        Set<Var> allGoals = new LinkedHashSet<Var>( goals );
+                        
+                        //during linear planning, if some goals are found, they are removed from the set "goals" 
                         boolean solved = linearForwardSearch( problemNew, subtaskNew.getAlgorithm(),
-                        // never optimize here
+                                // do not optimize here, because the solution may require additional rels with subtasks
                                 goals, true );
 
                         if ( solved ) {
                             if ( isSubtaskLoggingOn() )
                                 db.p( p( depth ) + "SOLVED subtask: " + subtaskNew );
+                            
+                            if( !isOptDisabled ) {
+                                //if a subtask has been solved, optimize its algorithm
+                                Optimizer.optimize( problemNew, subtaskNew.getAlgorithm(), allGoals );
+                            }
+                            
                             subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
                             allSolved &= solved;
                             continue AND;
@@ -445,16 +455,18 @@ public class DepthFirstPlanner implements IPlanner {
 
                         List<Rel> newAlg = new ArrayList<Rel>( subtaskNew.getAlgorithm() );
 
-                        subtaskPlanningImpl( problemNew, newAlg, newPath, depth + 1, indSubtasks, computeAll );
+                        subtaskPlanningImpl( problemNew, newAlg, newPath, depth + 1, indSubtasks );
 
                         if ( isSubtaskLoggingOn() )
                             db.p( p( depth ) + "Back to depth " + ( depth + 1 ) );
 
-                        solved = linearForwardSearch( problemNew, newAlg,
-                        // always optimize here in order to get rid of
-                        // unnecessary subtask instances
-                                goals, computeAll );
-
+                        if( ( solved = linearForwardSearch( problemNew, newAlg, goals, true ) ) 
+                                && !isOptDisabled ) {
+                            // if solved, optimize here with full list of goals in order to get rid of
+                            // unnecessary subtask instances and other relations
+                            Optimizer.optimize( problemNew, subtaskNew.getAlgorithm(), allGoals );
+                        }
+                        
                         if ( isSubtaskLoggingOn() )
                             db.p( p( depth ) + ( solved ? "" : "NOT" ) + " SOLVED subtask: " + subtaskNew );
 
@@ -533,6 +545,7 @@ public class DepthFirstPlanner implements IPlanner {
     private static volatile int s_maxDepth = 2;// 0..2, i.e. 3
     private static volatile boolean s_isSubtaskRepetitionAllowed = false;
     private static volatile boolean s_isIncremental = false;
+    private static volatile boolean s_disableOptimizationInSubtasks = false;
     
     private String p( int depth ) {
         String s = "\t";
@@ -587,7 +600,8 @@ public class DepthFirstPlanner implements IPlanner {
         chboxRepeat.setSelected( s_isSubtaskRepetitionAllowed );
         
         final JCheckBox chboxIncremental = new JCheckBox( "Incremental" );
-
+        chboxIncremental.setToolTipText( "Incremental depth-first search" );
+        
         chboxIncremental.addChangeListener( new ChangeListener() {
 
             public void stateChanged( ChangeEvent e ) {
@@ -597,11 +611,6 @@ public class DepthFirstPlanner implements IPlanner {
                 
                 s_isIncremental = chboxIncremental.isSelected();
                 
-//                if( isIncremental) {
-//                    chboxRepeat.setSelected( false );
-//                }
-//                chboxRepeat.setEnabled( !isIncremental );
-                
                 if ( RuntimeProperties.isLogDebugEnabled() )
                     db.p( "isIncremental " + s_isIncremental );
             }
@@ -609,8 +618,28 @@ public class DepthFirstPlanner implements IPlanner {
         
         chboxIncremental.setSelected( s_isIncremental );
                
+        final JCheckBox chboxOptimize = new JCheckBox( "Disable optimization in subtasks" );
+        chboxOptimize.setToolTipText( "Use for debugging purposes" );
+        
+        chboxOptimize.addChangeListener( new ChangeListener() {
+
+            public void stateChanged( ChangeEvent e ) {
+                
+                if( s_disableOptimizationInSubtasks == chboxOptimize.isSelected() )
+                    return;
+                
+                s_disableOptimizationInSubtasks = chboxOptimize.isSelected();
+                
+                if ( RuntimeProperties.isLogDebugEnabled() )
+                    db.p( "disableOptimizationInSubtasks " + s_disableOptimizationInSubtasks );
+            }
+        } );
+        
+        chboxOptimize.setSelected( s_disableOptimizationInSubtasks );
+        
         JPanel container1 = new JPanel( new GridLayout( 4, 0 ) );
         container1.setBorder( BorderFactory.createTitledBorder( "Planning settings" ) );
+        container1.add( chboxOptimize );
         container1.add( chboxIncremental );
         container1.add( chboxRepeat );
         container1.add( panel );

@@ -426,11 +426,16 @@ public class Editor extends JFrame implements ChangeListener {
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
 
-        // Run & Propagate
-        menuItem = new JMenuItem( Menu.RUNPROPAGATE, KeyEvent.VK_P );
+        //Propagate
+        menuItem = new JCheckBoxMenuItem( Menu.PROPAGATE_VALUES, RuntimeProperties.isPropagateValues() );
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
 
+        //Compute goal
+        menuItem = new JCheckBoxMenuItem( Menu.COMPUTE_GOAL, RuntimeProperties.isComputeGoal() );
+        menuItem.addActionListener( aListener );
+        menu.add( menuItem );
+        
         menu.add( new JSeparator() );
 
         menuItem = new JCheckBoxMenuItem( Menu.SHOW_ALGORITHM, RuntimeProperties.isShowAlgorithm() );
