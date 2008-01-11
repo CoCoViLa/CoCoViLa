@@ -12,25 +12,24 @@ public class Optimizer {
     private Optimizer() {}
     
 	/**
-	 Takes an algorithm and optimizes it to only calculate the variables that are targets.
+	 Takes an algorithm and optimizes it to only calculate the variables that are goals.
 	 @param algorithm an unoptimized algorithm
-	 @param targets the variables which the algorithm has to calculate (other branches are removed)
+	 @param goals the variables which the algorithm has to calculate (other branches are removed)
 	 */   
-    public static void optimize( Problem problem, List<Rel> algorithm, Set<Var> targets) {
-    	optimize( problem, algorithm, targets, "" );
+    public static void optimize( Problem problem, List<Rel> algorithm, Set<Var> goals ) {
+    	optimize( problem, algorithm, goals, "" );
     }
     
-	private static void optimize( Problem problem, List<Rel> algorithm, Set<Var> targets, String p ) {
-		Set<Var> stuff = targets;
+	private static void optimize( Problem problem, List<Rel> algorithm, Set<Var> goals, String p ) {
 		Rel rel;
 		ArrayList<Rel> removeThese = new ArrayList<Rel>();
 		
 		if (RuntimeProperties.isLogDebugEnabled())
-			db.p( p + "!!!--------- Starting Optimization with targets: " + targets + " ---------!!!");
+			db.p( p + "!!!--------- Starting Optimization with targets: " + goals + " ---------!!!");
 		
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
 			if (RuntimeProperties.isLogDebugEnabled())
-				db.p( p + "Reguired vars: " + stuff );
+				db.p( p + "Reguired vars: " + goals );
             rel = algorithm.get(i);
             if (RuntimeProperties.isLogDebugEnabled())
     			db.p( p + "Rel from algorithm: " + rel );
@@ -40,9 +39,9 @@ public class Optimizer {
 			CodeGenerator.unfoldVarsToSet(rel.getOutputs(), outputs);
 			
 			for ( Var relVar : outputs ) {
-				if (stuff.contains(relVar)) {
+				if (goals.contains(relVar)) {
 					relIsNeeded = true;
-					stuff.remove( relVar );
+					goals.remove( relVar );
 				}
 			}
 
@@ -55,7 +54,8 @@ public class Optimizer {
 					for (SubtaskRel subtask : rel.getSubtasks() ) {
 						if (RuntimeProperties.isLogDebugEnabled())
 							db.p( p + "Optimizing subtask: " + subtask );
-						HashSet<Var> subGoals = new HashSet<Var>( subtask.getOutputs() );
+						HashSet<Var> subGoals = new HashSet<Var>();
+						CodeGenerator.unfoldVarsToSet( subtask.getOutputs(), subGoals );
 						// the problem object is required only on the top level
 						optimize( null, subtask.getAlgorithm(), subGoals, incPrefix( p ) );
 						if (RuntimeProperties.isLogDebugEnabled()) {
@@ -65,11 +65,11 @@ public class Optimizer {
 
 						tmpSbtInputs.addAll(subGoals);
 					}
-					stuff.addAll(tmpSbtInputs);
+					goals.addAll(tmpSbtInputs);
 				}
 				Set<Var> inputs = new LinkedHashSet<Var>();
                 CodeGenerator.unfoldVarsToSet(rel.getInputs(), inputs);
-				stuff.addAll(inputs);
+				goals.addAll(inputs);
 			} else {
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( p + "Removed");

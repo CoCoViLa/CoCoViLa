@@ -464,7 +464,7 @@ public class DepthFirstPlanner implements IPlanner {
                                 && !isOptDisabled ) {
                             // if solved, optimize here with full list of goals in order to get rid of
                             // unnecessary subtask instances and other relations
-                            Optimizer.optimize( problemNew, subtaskNew.getAlgorithm(), allGoals );
+                            Optimizer.optimize( problemNew, newAlg, allGoals );
                         }
                         
                         if ( isSubtaskLoggingOn() )
