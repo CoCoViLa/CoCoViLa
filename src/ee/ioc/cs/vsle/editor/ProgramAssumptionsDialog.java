@@ -98,8 +98,8 @@ implements ActionListener, KeyListener {
 		
 		JPanel contentPane = new JPanel();
 		JScrollPane areaScrollPane = new JScrollPane(contentPane,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+				ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		
 		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		fullPane.setLayout(new BorderLayout());
@@ -124,11 +124,11 @@ implements ActionListener, KeyListener {
 	}
 	
 	public void keyTyped(KeyEvent e) {
-		
+		// ignore
 	}
 	
 	public void keyReleased(KeyEvent e) {
-		
+		// ignore
 	}
 	
 	public void keyPressed(KeyEvent e) {
@@ -203,7 +203,7 @@ implements ActionListener, KeyListener {
 		TypeToken token = TypeToken.getTypeToken( var.getType() );
 		//db.p( "var: " + var.getName() + " type " + var.getType() + " value " + value);
 		
-		Class clazz = token.getWrapperClass();
+		Class<?> clazz = token.getWrapperClass();
 		
 		if( clazz != null ) {
 				Method meth = clazz.getMethod( "valueOf", new Class[]{ String.class });

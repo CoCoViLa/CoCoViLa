@@ -17,11 +17,11 @@ public class TypeToken implements Comparable<TypeToken> {
     private String m_type;
     private String m_objType;
     private String m_method;
-    private Class  m_wclass;
-    private Class  m_pclass;
+    private Class<?>  m_wclass;
+    private Class<?>  m_pclass;
     private int priority;
     
-    private TypeToken( int priority, String type, Class wrapperClass, Class primeClass, String method ) {
+    private TypeToken( int priority, String type, Class<?> wrapperClass, Class<?> primeClass, String method ) {
     	this.priority = priority;
         m_type = type;
         m_objType = wrapperClass != null ? wrapperClass.getName() : "";
@@ -42,11 +42,11 @@ public class TypeToken implements Comparable<TypeToken> {
         return m_method;
     }
     
-    public Class getWrapperClass() {
+    public Class<?> getWrapperClass() {
     	return m_wclass;
     }
     
-    public Class getPrimeClass() {
+    public Class<?> getPrimeClass() {
     	return m_pclass;
     }
 
