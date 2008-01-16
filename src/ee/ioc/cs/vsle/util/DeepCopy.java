@@ -18,7 +18,7 @@ public class DeepCopy {
      * Returns a copy of the object, or throws exception if the object cannot
      * be serialized.
      */
-	public static <T> T copy( T orig ) throws Exception {
+    public static <T> T copy( T orig ) throws Exception {
 		
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream( bos );
@@ -31,6 +31,12 @@ public class DeepCopy {
 
 		ObjectInputStream ois = new ObjectInputStream( bis );
 
+		// Hide the ugly warning caused by the following unchecked cast
+		// as this is unavoidable under current Java type system.
+		// Besides, this should never cause problems because we
+		// produced the stream we arre interpreting from an object
+		// of type T.
+		@SuppressWarnings("unchecked")
 		T copy = (T) ois.readObject();
 
 		ois.close();
@@ -103,18 +109,21 @@ class FastByteArrayOutputStream extends OutputStream {
         return buf;
     }
 
+    @Override
     public final void write(byte b[]) {
         verifyBufferSize(size + b.length);
         System.arraycopy(b, 0, buf, size, b.length);
         size += b.length;
     }
 
+    @Override
     public final void write(byte b[], int off, int len) {
         verifyBufferSize(size + len);
         System.arraycopy(b, off, buf, size, len);
         size += len;
     }
 
+    @Override
     public final void write(int b) {
         verifyBufferSize(size + 1);
         buf[size++] = (byte) b;
@@ -157,14 +166,17 @@ class FastByteArrayInputStream extends InputStream {
        this.count = count;
    }
 
+   @Override
    public final int available() {
        return count - pos;
    }
 
+   @Override
    public final int read() {
        return (pos < count) ? (buf[pos++] & 0xff) : -1;
    }
 
+   @Override
    public final int read(byte[] b, int off, int len) {
        if (pos >= count)
            return -1;
@@ -177,6 +189,7 @@ class FastByteArrayInputStream extends InputStream {
        return len;
    }
 
+   @Override
    public final long skip(long n) {
        if ((pos + n) > count)
            n = count - pos;
