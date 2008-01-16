@@ -3,6 +3,13 @@
  */
 package ee.ioc.cs.vsle.event;
 
+import java.awt.GraphicsEnvironment;
+
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+import ee.ioc.cs.vsle.editor.Editor;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.util.*;
 
@@ -36,7 +43,13 @@ public class EventSystem {
 		}
 	}
 	
-	private void restartQueue() {
+    // Thread.stop() is really bad because it can leave objects in an
+    // inconsistent state:
+    // http://java.sun.com/javase/6/docs/technotes/guides/concurrency/threadPrimitiveDeprecation.html
+    // We should maybe implement something safer but until then there
+    // is no need to bother users with cryptic warning messages.
+    @SuppressWarnings("deprecation")
+    private void restartQueue() {
 		if ( RuntimeProperties.isLogInfoEnabled() ) 
 			db.p( "The queue is restarting" );
 		System.gc();
@@ -101,11 +114,44 @@ public class EventSystem {
 				if ( RuntimeProperties.isLogInfoEnabled() ) 
 					db.p("Memory usage low!!!");
 				restartQueue();
+				displayWarning();
 			}
 		});
 		
 		MemoryWarningSystem.setPercentageUsageThreshold( 0.95 );
 	}
+
+    void displayWarning() {
+        if (GraphicsEnvironment.isHeadless()) {
+            return;
+        }
+
+        final String title = "Warning: Application memory resources exhausted";
+        final String message = 
+                  "The processing thread and job queue was destroyed because it ran\n"
+                + "out of memory.\n\n"
+
+                + "You need to rerun the last task to get the results.\n\n"
+
+                + "Seeing this message means that the application may have been left\n"
+                + "in an inconsistent state and this may result in unexpected behaviour.\n\n"
+
+                + "To avoid the problem in the future more resources could be given to\n"
+                + "the application (-Xmx). This can also mean the package needs to be fixed\n"
+                + "or the task should be refined.";
+
+        if (SwingUtilities.isEventDispatchThread()) {
+            JOptionPane.showMessageDialog(Editor.getInstance(), message,
+                    title, JOptionPane.WARNING_MESSAGE);
+        } else {
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    JOptionPane.showMessageDialog(Editor.getInstance(), message,
+                            title, JOptionPane.WARNING_MESSAGE);
+                }
+            });
+        }
+    }
 
 	public static void queueEvent( BaseEvent event )
 	{
