@@ -16,10 +16,6 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 
-import sun.net.www.content.image.jpeg;
-
-import com.sun.crypto.provider.JceKeyStore;
-
 import ee.ioc.cs.vsle.factoryStorage.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.FileFuncs;
@@ -70,7 +66,7 @@ public class SchemeSettingsDialog extends JDialog {
 		maxRecDepthSpin.addChangeListener( new ChangeListener() {
 
 			public void stateChanged(ChangeEvent e) {
-				RuntimeProperties.setMaxRecursiveDeclarationDepth( (Integer)maxRecDepthSpin.getValue() );
+				RuntimeProperties.setMaxRecursiveDeclarationDepth( ((Integer)maxRecDepthSpin.getValue()).intValue() );
 			}
 		} );
 		
@@ -124,9 +120,10 @@ public class SchemeSettingsDialog extends JDialog {
 
 					public void actionPerformed(ActionEvent e) {
 						new JDialog( SchemeSettingsDialog.this, "Advanced Options", true ) {
+							@Override
 							public void setVisible( boolean b ) {
 								if( b ) {
-									setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
+									setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
 									setLocationRelativeTo(SchemeSettingsDialog.this);
 									getContentPane().add( opt );
 									pack();
@@ -183,6 +180,7 @@ public class SchemeSettingsDialog extends JDialog {
 
                         private final String[] extensions = new String[] {"jpg", "jpeg", "png", "gif", "tif", "tiff"};
 
+                        @Override
                         public boolean accept(File file) {
                             if (file.isDirectory())
                                 return file.canRead();
@@ -199,6 +197,7 @@ public class SchemeSettingsDialog extends JDialog {
                             return false;
                         }
 
+                        @Override
                         public String getDescription() {
                             return "Image files";
                         }
@@ -266,21 +265,27 @@ public class SchemeSettingsDialog extends JDialog {
                                         }
 
                                         public void readAborted(ImageReader source) {
+                                            // ignore
                                         }
 
                                         public void sequenceComplete(ImageReader source) {
+                                            // ignore
                                         }
 
                                         public void sequenceStarted(ImageReader source, int minIndex) {
+                                            // ignore
                                         }
 
                                         public void thumbnailComplete(ImageReader source) {
+                                            // ignore
                                         }
 
                                         public void thumbnailProgress(ImageReader source, float percentageDone) {
+                                            // ignore
                                         }
 
                                         public void thumbnailStarted(ImageReader source, int imageIndex, int thumbnaiIndex) {
+                                            // ignore
                                         }
                                         
                                     });
@@ -330,9 +335,9 @@ public class SchemeSettingsDialog extends JDialog {
         clearBg.addActionListener(new ActionListener() {
             
             public void actionPerformed(ActionEvent evt) {
-                Canvas canvas = Editor.getInstance().getCurrentCanvas();
-                if (canvas != null) {
-                    canvas.setBackgroundImage(null);
+                Canvas curCanvas = Editor.getInstance().getCurrentCanvas();
+                if (curCanvas != null) {
+                    curCanvas.setBackgroundImage(null);
                     clearBg.setEnabled(false);
                 }
             }
