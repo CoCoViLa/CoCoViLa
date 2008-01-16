@@ -34,7 +34,7 @@ public class DeepCopy {
 		// Hide the ugly warning caused by the following unchecked cast
 		// as this is unavoidable under current Java type system.
 		// Besides, this should never cause problems because we
-		// produced the stream we arre interpreting from an object
+		// produced the stream we are interpreting from an object
 		// of type T.
 		@SuppressWarnings("unchecked")
 		T copy = (T) ois.readObject();
