@@ -65,7 +65,8 @@ public class ErrorWindow extends JFrame {
 
     /**
      * Appends the specified message to the error window and brings the
-     * window to front.
+     * window to front.  If the message is null the string "null\n\n" is
+     * appended.
      * @param message the message to append
      */
     static void appendAndShow(String message) {
@@ -77,8 +78,8 @@ public class ErrorWindow extends JFrame {
         // otherwise the size of the textarea is not computed yet.
         instance.setVisible(true);
 
-        int firstErrorIndex = message.indexOf("ERROR");
-        
+        int firstErrorIndex = (message == null) ? -1 : message.indexOf("ERROR");
+
         if( firstErrorIndex > -1 ) {
         	// The compiler generated error messages are often very long but
         	// the root cause of the error is described after the first occurence
