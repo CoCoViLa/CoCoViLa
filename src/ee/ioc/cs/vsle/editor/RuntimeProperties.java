@@ -50,11 +50,12 @@ public class RuntimeProperties {
     private static final String SCHEME_EDITOR_WINDOW_PROPS = "schemeEditorWindowProps";
     private static final String COMPUTE_GOAL = "computeGoal";
     private static final String PROPAGATE_VALUES = "propagateValues";
+    private static final String DUMP_GENERATED = "dumpGeneratedFiles";
 
     private static boolean fromWebstart = false;
     private static String workingDirectory = System.getProperty( "user.dir" ) 
             + File.separator;
-    
+
     private static final Properties s_defaultProperties;
     private static final Properties s_runtimeProperties;
 
@@ -84,6 +85,7 @@ public class RuntimeProperties {
         s_defaultProperties.put( SPEC_RECURSION_PARAMS, "false;2" );
         s_defaultProperties.put( COMPUTE_GOAL, Boolean.FALSE.toString() );
         s_defaultProperties.put( PROPAGATE_VALUES, Boolean.FALSE.toString() );
+        s_defaultProperties.put( DUMP_GENERATED, Boolean.FALSE.toString() );
     }
 
     private static String genFileDir;
@@ -105,7 +107,8 @@ public class RuntimeProperties {
     private static Map<String, String> recentPackages = new LinkedHashMap<String, String>();
     private static boolean computeGoal;
     private static boolean propagateValues;
-    
+    private static boolean dumpGenerated;
+
     public static boolean isLogDebugEnabled() {
         return getDebugInfo() >= 1;
     }
@@ -140,19 +143,14 @@ public class RuntimeProperties {
 
         readProperties( APP_PROPS_FILE_NAME, s_runtimeProperties );
 
-        // Initialize runtime environment before loading any packages
-        // that might need compilation of classpainters or something.
-        setGenFileDir( s_runtimeProperties.getProperty( GENERATED_FILES_DIR ) );
-
-        File file = new File( RuntimeProperties.getGenFileDir() );
-        if ( !file.exists() ) {
-            file.mkdirs();
-        }
-
-        setCompilationClasspath( s_runtimeProperties.getProperty( COMPILATION_CLASSPATH ) );
-
-        setLnf( s_runtimeProperties.getProperty( DEFAULT_LNF ) );
+        // Initialize debug flag first because other initializations could want to use this flag
         setDebugInfo( Integer.parseInt( s_runtimeProperties.getProperty( DEBUG_INFO ) ) );
+
+        setGenFileDir( s_runtimeProperties.getProperty( GENERATED_FILES_DIR ) );
+        setDumpGenerated(Boolean.parseBoolean(
+                s_runtimeProperties.getProperty(DUMP_GENERATED)));
+        setCompilationClasspath( s_runtimeProperties.getProperty( COMPILATION_CLASSPATH ) );
+        setLnf( s_runtimeProperties.getProperty( DEFAULT_LNF ) );
         setGridStep( Integer.parseInt( s_runtimeProperties.getProperty( GRID_STEP ) ) );
         setAntialiasingOn( Boolean.parseBoolean( s_runtimeProperties.getProperty( ANTI_ALIASING ) ) );
         setSnapToGrid( Boolean.parseBoolean( s_runtimeProperties.getProperty( SNAP_TO_GRID ) ) );
@@ -164,9 +162,9 @@ public class RuntimeProperties {
         setFont( Font.decode( s_runtimeProperties.getProperty( TEXT_FONT ) ) );
         setPropagateValues( Boolean.parseBoolean( s_runtimeProperties.getProperty( PROPAGATE_VALUES ) ) );
         setComputeGoal( Boolean.parseBoolean( s_runtimeProperties.getProperty( COMPUTE_GOAL ) ) );
-        
+
         String openPacks = s_runtimeProperties.getProperty( OPEN_PACKAGES );
-        
+
         if ( openPacks != null && openPacks.trim().length() > 0 ) {
             String[] pack = openPacks.split( ";" );
 
@@ -201,7 +199,7 @@ public class RuntimeProperties {
         String[] specRec = s_runtimeProperties.getProperty( SPEC_RECURSION_PARAMS ).split( ";" );
         setRecursiveSpecsAllowed( Boolean.parseBoolean( specRec[0] ) );
         setMaxRecursiveDeclarationDepth( Integer.parseInt( specRec[1] ) );
-        
+
         s_runtimeProperties.setProperty( LAST_EXECUTED, new java.util.Date().toString() );
 
     }
@@ -223,7 +221,8 @@ public class RuntimeProperties {
         s_runtimeProperties.setProperty( SPEC_RECURSION_PARAMS, Boolean.toString( recursiveSpecsAllowed ) + ";" + maxRecursiveDeclarationDepth );
         s_runtimeProperties.setProperty( COMPUTE_GOAL, Boolean.toString( computeGoal ) );
         s_runtimeProperties.setProperty( PROPAGATE_VALUES, Boolean.toString( propagateValues ) );
-        
+        s_runtimeProperties.setProperty( DUMP_GENERATED, Boolean.toString(dumpGenerated ));
+
         String fontString = font.getName() + "-";
 
         if ( font.isBold() ) {
@@ -312,11 +311,9 @@ public class RuntimeProperties {
      * @param compilationClasspath the compilationClasspath to set
      */
     public static void setCompilationClasspath( String compilationClasspath ) {
-
-        if ( compilationClasspath == null ) {
-            compilationClasspath = "";
-        }
-        RuntimeProperties.compilationClasspath = compilationClasspath;
+        RuntimeProperties.compilationClasspath = (compilationClasspath == null)
+            ? ""
+            : compilationClasspath;
     }
 
     /**
@@ -588,7 +585,7 @@ public class RuntimeProperties {
      *  A a;
      *  a.x = x;
      * }
-     * @return
+     * @return true when recursive functions are allowed, false otherwise
      */
     public static boolean isRecursiveSpecsAllowed() {
     	return recursiveSpecsAllowed;
@@ -632,5 +629,40 @@ public class RuntimeProperties {
      */
     public static void setPropagateValues( boolean propagateValues ) {
         RuntimeProperties.propagateValues = propagateValues;
+    }
+
+    /**
+     * This runtime property shows whether the generated files (e.g. source
+     * code, compiled classes) should be stored into the filesystem or kept in
+     * memory by the framework.
+     * @return true when generated files should be dumped into the filesystem,
+     * false otherwise.
+     */
+    public static boolean isDumpGenerated() {
+        return dumpGenerated;
+    }
+
+    /**
+     * Set to true to store the generated files into the filesystem, otherwise
+     * the files should be kept in memory only.  When set to true the directory
+     * genFileDir is created.
+     * @param dumpGenerated true to dump generated files, false otherwise
+     */
+    public static void setDumpGenerated(boolean dumpGenerated) {
+        // create the directory for generated files
+        if (dumpGenerated) {
+            File file = new File(getGenFileDir());
+            if (!file.exists()) {
+                if (isLogDebugEnabled()) {
+                    db.p("Creating genFileDir " + file + "...");
+                }
+                file.mkdirs();
+                if (isLogDebugEnabled()) {
+                    db.p("done.");
+                }
+            }
+        }
+
+        RuntimeProperties.dumpGenerated = dumpGenerated;
     }
 }
