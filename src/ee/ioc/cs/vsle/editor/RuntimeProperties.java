@@ -85,7 +85,7 @@ public class RuntimeProperties {
         s_defaultProperties.put( SPEC_RECURSION_PARAMS, "false;2" );
         s_defaultProperties.put( COMPUTE_GOAL, Boolean.FALSE.toString() );
         s_defaultProperties.put( PROPAGATE_VALUES, Boolean.FALSE.toString() );
-        s_defaultProperties.put( DUMP_GENERATED, Boolean.FALSE.toString() );
+        s_defaultProperties.put( DUMP_GENERATED, Boolean.TRUE.toString() );
     }
 
     private static String genFileDir;
