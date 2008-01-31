@@ -176,7 +176,7 @@ public class SpecParser {
                 return new LineType( LineType.TYPE_ALIAS, returnLine, line );
             }
 
-            pattern = Pattern.compile( " *([^= ]+) *= *((\".*\")|(new .*\\(.*\\))|(\\{.*\\})) *$" );
+            pattern = Pattern.compile( " *([^= ]+) *= *((\".*\")|(new .*\\(.*\\))|(\\{.*\\})|(true)|(false)) *$" );
             matcher = pattern.matcher( line );
             if ( matcher.find() ) {
                 return new LineType( LineType.TYPE_ASSIGNMENT, matcher.group( 1 ) + ":" + matcher.group( 2 ), line );
