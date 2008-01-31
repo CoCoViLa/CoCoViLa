@@ -4,7 +4,6 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.*;
-import javax.swing.border.*;
 
 /**
  * Application Options dialog
@@ -23,6 +22,7 @@ public class OptionsDialog extends JDialog {
     private static final JLabel lblNudgeStep = new JLabel( "Nudge step:" );
     private static final JLabel lblSyntaxColor = new JLabel( "Syntax Highlighting:" );
     private static final JLabel lblDefaultZoom = new JLabel( "Default Zoom:" );
+    private static final JLabel lblDumpGen = new JLabel("Dump generated files:");
 
     // Text Fields.
     private static final JTextField tfGenFilesDir = new JTextField( 40 );
@@ -33,6 +33,7 @@ public class OptionsDialog extends JDialog {
     private static final JCheckBox chbAntiAlias = new JCheckBox();
     private static final JCheckBox chbShowGrid = new JCheckBox();
     private static final JCheckBox chbSyntaxColor = new JCheckBox();
+    private static final JCheckBox chbDumpGen = new JCheckBox();
 
     // Spinners.
     private JSpinner spinnerGridStep = new JSpinner( new SpinnerNumberModel( 1, 1, 100, 1 ) );
@@ -49,7 +50,7 @@ public class OptionsDialog extends JDialog {
      * Class constructor.
      */
     public OptionsDialog( JFrame parent ) {
-        super( parent, "Settings" );
+        super( parent, "CoCoViLa - Settings" );
         initialize();
     }
 
@@ -64,100 +65,89 @@ public class OptionsDialog extends JDialog {
 
         setLocationByPlatform( true );
         setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );
+        setMinimumSize(RuntimeProperties.WINDOW_MIN_DIM);
+        setModal(true);
 
-        TitledBorder mainBorder = BorderFactory.createTitledBorder( "Program settings" );
+        
+        // Settings panel layout
 
-        // See documentation at the "docs" folder for panel layout.
-        JPanel pnlMain = new JPanel(); // Dialog main panel holding all other
-                                        // panels.
-        JPanel pnlSettings = new JPanel(); // Panel for labels and fields.
-        JPanel pnlLabels = new JPanel(); // Panel for field labels.
-        JPanel pnlFields = new JPanel(); // Panel for fields.
-        JPanel pnlBttns = new JPanel(); // Panel for buttons.
+        JPanel pnlSettings = new JPanel(new GridBagLayout());
 
-        pnlMain.setBorder( mainBorder );
+        GridBagConstraints cSettings = new GridBagConstraints();
+        GridBagConstraints cLabels = new GridBagConstraints();
 
-        // Set field labels' panel size.
-        // pnlLabels.setPreferredSize(new Dimension(100, 180));
-        pnlLabels.setMaximumSize( pnlLabels.getPreferredSize() );
-        pnlLabels.setMinimumSize( pnlLabels.getPreferredSize() );
+        cLabels.anchor = GridBagConstraints.LINE_START;
+        cLabels.insets = new Insets(8, 0, 8, 8);
 
-        // Set field labels on their panel.
-        pnlLabels.setLayout( new GridLayout( 12, 1 ) );
-        pnlLabels.add( lblGenFilesDir );
-        pnlLabels.add( lblCompClasspath );
-        pnlLabels.add( lblDebugInfo );
-        pnlLabels.add( lblAntiAlias );
-        pnlLabels.add( lblShowGrid );
-        pnlLabels.add( lblGridStep );
-        pnlLabels.add( lblNudgeStep );
-        pnlLabels.add( lblSyntaxColor );
-        pnlLabels.add( lblDefaultZoom );
+        cSettings.anchor = GridBagConstraints.LINE_START;
+        cSettings.gridwidth = GridBagConstraints.REMAINDER;
+        cSettings.weightx = 1;
 
-        // Set fields' panel size.
-        // pnlFields.setPreferredSize(new Dimension(200, 180));
-        pnlFields.setMaximumSize( pnlFields.getPreferredSize() );
-        pnlFields.setMinimumSize( pnlFields.getPreferredSize() );
+        cSettings.fill = GridBagConstraints.HORIZONTAL; // for txtfields
 
-        spinnerGridStep.setPreferredSize( new Dimension( 40, 18 ) );
-        spinnerGridStep.setMaximumSize( spinnerGridStep.getPreferredSize() );
-        spinnerGridStep.setBorder( BorderFactory.createEtchedBorder() );
+        // genFilesDir
+        pnlSettings.add(lblGenFilesDir, cLabels);
+        pnlSettings.add(tfGenFilesDir, cSettings);
 
-        spinnerNudgeStep.setPreferredSize( new Dimension( 48, 18 ) );
-        spinnerNudgeStep.setMaximumSize( spinnerNudgeStep.getPreferredSize() );
-        spinnerNudgeStep.setBorder( BorderFactory.createEtchedBorder() );
+        // compClasspath
+        pnlSettings.add(lblCompClasspath, cLabels);
+        pnlSettings.add(tfCompClasspath, cSettings);
 
-        FlowLayout fl = new FlowLayout();
-        fl.setAlignment( FlowLayout.LEFT );
+        cSettings.fill = GridBagConstraints.NONE; // do not strech checkboxes
 
-        JPanel pnlGridSpinner = new JPanel();
-        pnlGridSpinner.setLayout( fl );
-        pnlGridSpinner.add( spinnerGridStep );
+        // dumpGen
+        pnlSettings.add(lblDumpGen, cLabels);
+        pnlSettings.add(chbDumpGen, cSettings);
 
-        JPanel pnlNudgeSpinner = new JPanel();
-        pnlNudgeSpinner.setLayout( fl );
-        pnlNudgeSpinner.add( spinnerNudgeStep );
+        // debugInfo
+        pnlSettings.add(lblDebugInfo, cLabels);
+        pnlSettings.add(chbDebugInfo, cSettings);
 
-        JPanel pnlDefaultZoom = new JPanel();
-        pnlDefaultZoom.setLayout( fl );
-        pnlDefaultZoom.add( cbDfltZoom );
+        // antiAlias
+        pnlSettings.add(lblAntiAlias, cLabels);
+        pnlSettings.add(chbAntiAlias, cSettings);
 
-        // Set fields to their panel.
-        pnlFields.setLayout( new GridLayout( 12, 1 ) );
-        pnlFields.add( tfGenFilesDir );
-        pnlFields.add( tfCompClasspath );
-        pnlFields.add( chbDebugInfo );
-        pnlFields.add( chbAntiAlias );
-        pnlFields.add( chbShowGrid );
-        pnlFields.add( pnlGridSpinner );
-        pnlFields.add( pnlNudgeSpinner );
-        pnlFields.add( chbSyntaxColor );
-        pnlFields.add( pnlDefaultZoom );
+        // showGrid
+        pnlSettings.add(lblShowGrid, cLabels);
+        pnlSettings.add(chbShowGrid, cSettings);
 
-        // Set settings panel size.
-        // pnlSettings.setPreferredSize(new Dimension(300, 180));
-        pnlSettings.setMaximumSize( pnlSettings.getPreferredSize() );
-        pnlSettings.setMinimumSize( pnlSettings.getPreferredSize() );
+        // gridStep
+        pnlSettings.add(lblGridStep, cLabels);
+        pnlSettings.add(spinnerGridStep, cSettings);
 
-        // Add labels and fields to the main panel.
-        pnlSettings.setLayout( new BorderLayout() );
-        pnlSettings.add( pnlLabels, BorderLayout.WEST );
-        pnlSettings.add( pnlFields, BorderLayout.CENTER );
+        // nudgeStep
+        pnlSettings.add(lblNudgeStep, cLabels);
+        pnlSettings.add(spinnerNudgeStep, cSettings);
 
-        // Add buttons.
-        pnlBttns.add( bttnSave );
-        pnlBttns.add( bttnCancel );
+        // syntaxColor
+        pnlSettings.add(lblSyntaxColor, cLabels);
+        pnlSettings.add(chbSyntaxColor, cSettings);
 
-        // Add all panels to the main panel.
-        pnlMain.setLayout( new BorderLayout() );
-        pnlMain.add( pnlSettings, BorderLayout.CENTER );
-        pnlMain.add( pnlBttns, BorderLayout.SOUTH );
+        // defaultZoom
+        pnlSettings.add(lblDefaultZoom, cLabels);
+        pnlSettings.add(cbDfltZoom, cSettings);
 
-        getContentPane().add( pnlMain );
 
-        // setSize(new Dimension(500, 300));
-        setResizable( false );
-        setModal( true );
+        // Window layout
+
+        // Buttons are added first, this way they are not covered by the
+        // settings panel when the window is too small to fit everyting.
+        JPanel pnlBttn = new JPanel(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        c.insets = new Insets(5, 2, 5, 2);
+        pnlBttn.add(bttnSave, c);
+        pnlBttn.add(bttnCancel, c);
+        add(pnlBttn, BorderLayout.PAGE_END);
+
+        // Wrap the settings gridbag into a JPanel with BorderLayout that
+        // respects the insets created by the titled border
+        JPanel pnlSettingsTitle = new JPanel(new BorderLayout());
+        pnlSettingsTitle.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Program settings"),
+                BorderFactory.createEmptyBorder(0, 5, 5, 5)));
+        pnlSettingsTitle.add(pnlSettings, BorderLayout.PAGE_START);
+        add(pnlSettingsTitle, BorderLayout.PAGE_START);
+
         pack();
         initializeSettings();
 
@@ -190,8 +180,8 @@ public class OptionsDialog extends JDialog {
 
         tfGenFilesDir.setText( RuntimeProperties.getGenFileDir() );
         tfCompClasspath.setText( RuntimeProperties.getCompilationClasspath() );
-        spinnerGridStep.getModel().setValue( RuntimeProperties.getGridStep() );
-        spinnerNudgeStep.getModel().setValue( RuntimeProperties.getNudgeStep() );
+        spinnerGridStep.getModel().setValue( Integer.valueOf(RuntimeProperties.getGridStep()) );
+        spinnerNudgeStep.getModel().setValue( Integer.valueOf(RuntimeProperties.getNudgeStep()) );
 
         // Initialize debug output checkbox.
         if ( RuntimeProperties.getDebugInfo() < 1 ) {
@@ -207,6 +197,7 @@ public class OptionsDialog extends JDialog {
         chbShowGrid.setSelected( RuntimeProperties.isShowGrid() );
 
         chbSyntaxColor.setSelected( RuntimeProperties.isSyntaxHighlightingOn() );
+        chbDumpGen.setSelected(RuntimeProperties.isDumpGenerated());
     } // initializeSettings
 
     /**
@@ -219,10 +210,11 @@ public class OptionsDialog extends JDialog {
         RuntimeProperties.setDebugInfo( chbDebugInfo.isSelected() ? 1 : 0 );
         RuntimeProperties.setAntialiasingOn( chbAntiAlias.isSelected() );
         RuntimeProperties.setShowGrid( chbShowGrid.isSelected() );
-        RuntimeProperties.setGridStep( (Integer) spinnerGridStep.getModel().getValue() );
-        RuntimeProperties.setNudgeStep( (Integer) spinnerNudgeStep.getModel().getValue() );
+        RuntimeProperties.setGridStep( ((Integer) spinnerGridStep.getModel().getValue()).intValue() );
+        RuntimeProperties.setNudgeStep( ((Integer) spinnerNudgeStep.getModel().getValue()).intValue() );
         RuntimeProperties.setZoomFactor( Palette.ZOOM_LEVELS[ cbDfltZoom.getSelectedIndex() ] );
         RuntimeProperties.setSyntaxHighlightingOn( chbSyntaxColor.isSelected() );
+        RuntimeProperties.setDumpGenerated(chbDumpGen.isSelected());
         RuntimeProperties.save();
 
         closeDialog();
