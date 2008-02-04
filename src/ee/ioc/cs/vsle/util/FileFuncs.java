@@ -2,8 +2,13 @@ package ee.ioc.cs.vsle.util;
 
 import java.io.*;
 import java.net.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.*;
+
+import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
 /**
  * User: Ando
@@ -11,23 +16,160 @@ import javax.swing.*;
  * Time: 21:45:37
  */
 public class FileFuncs {
-	public static String getFileContents(File file) {
-		String fileString = new String();
-		if( file != null && file.exists() && !file.isDirectory() ) {
-			try {
-				BufferedReader in = new BufferedReader(new FileReader(file));
-				String lineString = new String();
 
-				while ((lineString = in.readLine()) != null) {
-					fileString += lineString+"\n";
-				}
-				in.close();
-			} catch (IOException ioe) {
-				db.p("Couldn't open file "+ file.getAbsolutePath());
-			}
-		}
-		return fileString;
-	}
+    /**
+     * Buffer size for file read and write operations.
+     */
+    private static final int BUFSIZE = 1024;
+
+    /**
+     * Interface for different storage types for generated data.
+     * The effect of these functions is implementation dependant, for example
+     * the files might be kept in memory or written to disk.
+     * It could be the case that only files written using writeFile()
+     * can be later successfully read.
+     */
+    public static interface GenStorage {
+        public boolean writeFile(String fileName, byte[] data);
+        public byte[] getFileContents(String fileName);
+        public char[] getCharFileContents(String fileName);
+    }
+
+    /**
+     * Filesystem backed GenStorage implementation.
+     */
+    public static class FileSystemStorage implements GenStorage {
+
+        private File path;
+
+        public FileSystemStorage(String defaultPath) {
+            if (defaultPath == null) {
+                defaultPath = RuntimeProperties.getWorkingDirectory();
+            }
+            path = new File(defaultPath);
+        }
+
+        public byte[] getFileContents(String fileName) {
+            File file = new File(fileName);
+            if (!file.isAbsolute()) {
+                file = new File(path, fileName);
+            }
+            if (file.isFile() && file.canRead()) {
+                try {
+                    return getByteStreamContents(new FileInputStream(file));
+                } catch (FileNotFoundException e) {
+                    db.p(e);
+                }
+            }
+            return null;
+        }
+
+        public boolean writeFile(String fileName, byte[] data) {
+            File file = new File(fileName);
+            if (!file.isAbsolute()) {
+                file = new File(path, fileName);
+            }
+            return FileFuncs.writeFile(file, new String(data));
+        }
+
+        @Override
+        public String toString() {
+            return "FileSystemStorage(" + path + ")";
+        }
+
+        public char[] getCharFileContents(String fileName) {
+            File file = new File(fileName);
+            if (!file.isAbsolute()) {
+                file = new File(path, fileName);
+            }
+            if (file.isFile() && file.canRead()) {
+                try {
+                    return getCharStreamContents(new FileInputStream(file));
+                } catch (FileNotFoundException e) {
+                    db.p(e);
+                }
+            }
+            return null;
+        }
+    }
+
+    /**
+     * Memory backed GenStorage implementation.
+     * This storage knows nothing about filesystems and files. All the
+     * data is kept in memory as byte arrays corresponding to the specified
+     * names. Only the files written using writeFile() can be later read.
+     */
+    public static class MemoryStorage implements GenStorage {
+
+        private Map<String, byte[]> fileMap;
+
+        public byte[] getFileContents(String fileName) {
+            byte[] data = null;
+            if (fileMap != null) {
+                data = fileMap.get(fileName);
+            }
+            return data;
+        }
+
+        public boolean writeFile(String fileName, byte[] data) {
+            if (fileMap == null) {
+                fileMap = new HashMap<String, byte[]>();
+            }
+            fileMap.put(fileName, data);
+            return true;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder s = new StringBuilder();
+            s.append("MemoryStorage (");
+            s.append(this.hashCode());
+            s.append("):");
+            if (fileMap != null && fileMap.size() > 0) {
+                s.append("\n");
+                for (Map.Entry<String, byte[]> v : fileMap.entrySet()) {
+                    s.append('\t');
+                    s.append(v.getKey());
+                    s.append(" (");
+                    s.append(v.getValue().length);
+                    s.append(")\n");
+                }
+            } else {
+                s.append(" <empty>");
+            }
+            return s.toString();
+        }
+
+        public char[] getCharFileContents(String fileName) {
+            byte[] contents = getFileContents(fileName);
+            if (contents != null) {
+                return new String(contents).toCharArray();
+            }
+            return null;
+        }
+    }
+
+    public static String getFileContents(File file) {
+        if (RuntimeProperties.isLogDebugEnabled()) {
+            db.p("Retrieving " + file);
+        }
+
+        String fileString = new String();
+        if( file != null && file.exists() && !file.isDirectory() ) {
+            try {
+                BufferedReader in = new BufferedReader(new FileReader(file));
+                String lineString = new String();
+
+                while ((lineString = in.readLine()) != null) {
+                    fileString += lineString+"\n";
+                }
+                in.close();
+            } catch (IOException ioe) {
+                db.p("Couldn't open file "+ file.getAbsolutePath());
+            }
+        }
+        return fileString;
+    }
 
 	/**
 	 * Writes the text to the specified file. The file is created if it
@@ -143,4 +285,93 @@ public class FileFuncs {
                 : path.replace('/', '\\');
     }
 
+    /**
+     * Reads everything from a character input stream into a char array.
+     * @param charStream Finite character stream
+     * @return the contents of the stream as char array; null in case of errors
+     */
+    public static char[] getCharStreamContents(InputStream charStream) {
+        InputStreamReader reader = new InputStreamReader(charStream);
+        char[] buf = null;
+        int readTotal = 0;
+        int read = 0;
+
+        try {
+            buf = new char[BUFSIZE];
+
+            while (true) {
+                if (buf.length == readTotal) {
+                    // a linked list of chunks could be more efficient
+                    buf = Arrays.copyOf(buf, readTotal + BUFSIZE);
+                }
+                read = reader.read(buf, readTotal, buf.length - readTotal);
+                if (read > -1) {
+                    readTotal += read;
+                } else {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            db.p(e);
+            buf = null;
+        } finally {
+            try {
+                reader.close();
+            } catch (IOException e) {
+                // ignore
+            }
+            try {
+                charStream.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+
+        if (buf != null && buf.length > readTotal) {
+            buf = Arrays.copyOf(buf, readTotal);
+        }
+        return buf;
+    }
+
+    /**
+     * Reads everything from a byte input stream into a byte array.
+     * @param byteStream Finite byte stream
+     * @return the contents of the stream as byte array; null in case of errors
+     */
+    public static byte[] getByteStreamContents(InputStream byteStream) {
+        byte[] buf = null;
+        int readTotal = 0;
+        int read = 0;
+
+        try {
+            buf = new byte[BUFSIZE];
+
+            while (true) {
+                if (buf.length == readTotal) {
+                    // a linked list of chunks could be more efficient
+                    buf = Arrays.copyOf(buf, readTotal + BUFSIZE);
+                }
+                read = byteStream.read(buf, readTotal, buf.length - readTotal);
+                if (read > -1) {
+                    readTotal += read;
+                } else {
+                    break;
+                }
+            }
+        } catch (IOException e) {
+            db.p(e);
+            buf = null;
+        } finally {
+            try {
+                byteStream.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+
+        if (buf != null && buf.length > readTotal) {
+            buf = Arrays.copyOf(buf, readTotal);
+        }
+        return buf;
+    }
 }
