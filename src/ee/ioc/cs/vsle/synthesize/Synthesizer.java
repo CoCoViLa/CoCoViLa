@@ -6,6 +6,7 @@ import java.util.regex.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.util.FileFuncs.*;
 import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
@@ -30,9 +31,9 @@ public class Synthesizer {
     a file.
      * @throws SpecParseException 
     */
-    public static void makeProgram( String progText, ClassList classes, String mainClassName, String path ) throws SpecParseException {
-        generateSubclasses( classes, path );
-        FileFuncs.writeFile( progText, mainClassName, "java", RuntimeProperties.getGenFileDir(), false );
+    public static void makeProgram( String progText, ClassList classes, String mainClassName, String path, GenStorage storage ) throws SpecParseException {
+        generateSubclasses( classes, path, storage );
+        storage.writeFile( mainClassName + ".java", progText.getBytes() );
     }
 
     /** Takes care of steps needed for planning and algorithm extracting, calling problem creator
@@ -135,7 +136,7 @@ public class Synthesizer {
      @param classes List of classes obtained from the ee.ioc.cs.editor.synthesize.SpecParser
      * @throws SpecParseException 
      */
-    private static void generateSubclasses( ClassList classes, String path ) throws SpecParseException {
+    private static void generateSubclasses( ClassList classes, String path, GenStorage storage ) throws SpecParseException {
 
     	if( classes == null ) {
     		throw new SpecParseException( "Empty Class list!!!" );
@@ -150,14 +151,10 @@ public class Synthesizer {
             
             if ( !pClass.getName().equals( TYPE_THIS ) ) {
                 
-                fileString = "";
-                try {
-                	fileString = SpecParser.getStringFromFile( path + pClass.getName() + ".java" );
-                	
-                } catch ( IOException io ) {
-                    db.p( io );
-                }
-                // find the class declaration
+                fileString = FileFuncs.getFileContents(
+                        new File(path, pClass.getName() + ".java"));
+
+                    // find the class declaration
                 pattern = Pattern.compile( "class[ \t\n]+" + pClass.getName() 
                 		+ "|" + "public class[ \t\n]+" + pClass.getName());
                 matcher = pattern.matcher( fileString );
@@ -186,8 +183,8 @@ public class Synthesizer {
                 }
 
                 fileString = "import ee.ioc.cs.vsle.api.*;\n\n" + fileString;
-               
-                FileFuncs.writeFile( fileString, pClass.getName(), "java", RuntimeProperties.getGenFileDir(), false );
+
+                storage.writeFile( pClass.getName() + ".java", fileString.getBytes() );
             }
         }
     }
@@ -198,14 +195,16 @@ public class Synthesizer {
     public static void parseFromCommandLine( String path, String fileName ) {
         try {
             
-            String file = SpecParser.getStringFromFile( path + fileName );
+            String file = FileFuncs.getFileContents(new File(path, fileName));
 
             String mainClassName = SpecParser.getClassName( file );
             
             ClassList classList = SpecParser.parseSpecification(file, mainClassName, null, path);
             String prog = makeProgramText( file, true, classList, mainClassName, null ); //changed to true
 
-            makeProgram( prog, classList, mainClassName, path );
+            String outputDir = RuntimeProperties.getGenFileDir();
+            makeProgram( prog, classList, mainClassName, path,
+                    new FileSystemStorage(outputDir));
         } catch ( UnknownVariableException uve ) {
             db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
         } catch ( LineErrorException lee ) {

@@ -2,19 +2,27 @@ package ee.ioc.cs.vsle.ccl;
 
 import java.io.*;
 import java.net.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
-/*
- * When using Eclipse 3.x this import can be resolved as follows:
- * Project -> Properties -> Java Build Path -> Libraries ->
- * -> Add Variable... -> ECLIPSE_HOME -> Extend... ->
- * -> plugins/org.eclipse.jdt.core_3.x.jar (-> OK)^3
- * 
- * A stripped down version of this library consisting of the compiler
- * only is distributed within release archives which are downloadable
- * from the homepage.
- */
-import org.eclipse.jdt.internal.compiler.batch.Main;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
+import org.eclipse.jdt.core.compiler.CharOperation;
+import org.eclipse.jdt.internal.compiler.ClassFile;
+import org.eclipse.jdt.internal.compiler.CompilationResult;
+import org.eclipse.jdt.internal.compiler.Compiler;
+import org.eclipse.jdt.internal.compiler.ICompilerRequestor;
+import org.eclipse.jdt.internal.compiler.IErrorHandlingPolicy;
+import org.eclipse.jdt.internal.compiler.IProblemFactory;
+import org.eclipse.jdt.internal.compiler.batch.CompilationUnit;
+import org.eclipse.jdt.internal.compiler.batch.FileSystem;
+import org.eclipse.jdt.internal.compiler.env.ICompilationUnit;
+import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
+import org.eclipse.jdt.internal.compiler.impl.CompilerOptions;
+import org.eclipse.jdt.internal.compiler.problem.DefaultProblem;
+import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
+
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 
@@ -23,369 +31,365 @@ import ee.ioc.cs.vsle.util.*;
  * Title: ee.ioc.cs.editor.ccl.CCL - Compiling Class Loader
  * </p>
  * <p>
- * Description: A CompilingClassLoader compiles Java source on-the-fly. It
- * checks for nonexistent .class files, or .class files that are older than
- * their corresponding source code.
- * </p>
- * <p>
- * Copyright: Copyright (c) 2004
- * </p>
- * <p>
- * Company:
- * </p>
- * 
- * @author Ando Saabas, Pavel Grigorenko
- * @version 1.0
+ * Description: A CompilingClassLoader compiles Java source on-the-fly.
  */
-/*
- * This thing really needs some refactoring to make it anywhere even remotely
- * nice, reusable and future proof. It is probably not worth the time right
- * now as Java 1.6 is going to have a nice javax.tools.ToolProvider interface
- * and ejc will most likely adapt it quite soon.
- */
-public class CCL extends URLClassLoader {
+public abstract class CCL extends URLClassLoader {
 
-    private String compileDir;
-    private Main batchCompiler;
-    
-	public CCL() {
-		super(createClasspath());
-	}
-	
-	/**
-	 * Creates URL array with paths (dirs and jars) required for class loading
-	 * @return URL[]
-	 */
-	private static URL[] createClasspath() {
-		
-		ArrayList<URL> urls = new ArrayList<URL>();
-		
-		try {
-			urls.add(new File(RuntimeProperties.getGenFileDir()).toURI().toURL());
-		} catch (MalformedURLException e) {
-			db.p(e);
-		}
-		
-		String[] paths = prepareClasspath( RuntimeProperties.getCompilationClasspath() );
-		
-		for( int i = 0; i < paths.length; i++ ) {
-			File file = new File(paths[i]);
-			if(file.exists()) {
-				try {
-					urls.add(file.toURI().toURL());
-					if (RuntimeProperties.isLogDebugEnabled())
-						db.p("file.toURI().toURL() " + file.toURI().toURL());
-				} catch (MalformedURLException e) {
-					db.p(e);
-				}
-			}
-		}
-		
-		return urls.toArray(new URL[urls.size()]);
-	}
+    public static final String 
+            PROGRAM_CONTEXT = "ee.ioc.cs.vsle.api.ProgramContext";
 
-	private static String[] prepareClasspath( String path ) {
-	
-		if( path.indexOf(";") != -1 ) {
-			return path.split(";");
-			
-		} else if( path.indexOf(":") != -1 ) {
-			return path.split(":");
-		}
-		
-		return new String[]{ path };
-	}
-	
-    private static String prepareClasspathOS( String path ) {
-        String[] paths = prepareClasspath( path );
-        StringBuilder classpath = new StringBuilder(File.pathSeparator);
+    // May be used by subclasses
+    protected INameEnvironment environment;
 
-        for (int i= 0; i < paths.length; i++) {
-            classpath.append(paths[i]);
-            classpath.append(File.pathSeparatorChar);
+    private Map<String, Class<?>> classCache;
+    private Map<String, ClassFile> resultAccumulator;
+    private ArrayList<CompilationResult> problems;
+
+    private Compiler compiler;
+    private boolean hasErrors;
+
+    protected CCL(URL[] urls, ClassLoader parent) {
+        super(urls, parent);
+    }
+
+    public static String[] prepareClasspath(String path) {
+        if (path != null) {
+            if (path.indexOf(';') != -1) {
+                return path.split(";");
+            } else if( path.indexOf(':') != -1) {
+                return path.split(":");
+            }
+            return new String[] { path };
+        }
+        return null;
+    }
+
+    protected void putCachedClass(String name, Class<?> c) {
+        if (classCache == null) {
+            classCache = new HashMap<String, Class<?>>();
+        }
+        classCache.put(name, c);
+    }
+
+    protected Class<?> getCachedClass(String name) {
+        Class<?> c = null;
+        if (classCache != null) {
+            c = classCache.get(name);
         }
 
-        return classpath.toString();
-    }
-	
-	@Override
-	public Class<?> loadClass(String name) throws ClassNotFoundException {
-		// Make sure ProgramContext gets loaded by the right classloader
-		// as the static fields must have different values for different
-		// programs.
-		if ("ee.ioc.cs.vsle.api.ProgramContext".equals(name)) {
-			try {
-				String resName = name.replace('.', '/').concat(".class");
-				URL u = getResource(resName);
-				addURL(new URL(u.toString().replace(resName, "")));
-				return findClass(name);
-			} catch (Exception e) {
-				throw new ClassNotFoundException(
-						"Loading of ProgramContext failed", e);
-			}
-		}
-
-		return super.loadClass(name);
-	}
-	
-	/**
-	 * Another implementation which uses internal compiler.
-	 * 
-	 * @param javaFile
-	 * @return <code>true</code> on successful compilation
-	 * @throws CompileException
-	 */
-	public boolean compile2(String javaFile) throws CompileException {
-	    if (compileDir == null)
-            compileDir = RuntimeProperties.getGenFileDir();
-        
-		javaFile = compileDir + File.separator + javaFile + ".java";
-		
-		db.p("Compiling " + javaFile + "...");
-		
-		File file = new File(javaFile);
-		
-		//Check if the file exists.
-		if (!file.exists()) {
-			throw new CompileException("File " + javaFile + " does not exist.");
-		}
-				
-		StringWriter sw = new StringWriter();		
-		PrintWriter pw = new PrintWriter(sw);
-		
-		String classpath = RuntimeProperties.getGenFileDir() + prepareClasspathOS( RuntimeProperties.getCompilationClasspath() );
-		
-		/*
-		int status = com.sun.tools.javac.Main.compile( 
-				new String[]{ "-classpath", classpath, javaFile }, pw );
-			
-		if (status != 0) {
-
-			throw new CompileException( sw.getBuffer().toString() );
-
-		}
-		*/
-		if (batchCompiler == null)
-			batchCompiler = new Main(pw, pw,false);
-		
-		if (!batchCompiler.compile(new String[] {"-source", "1.5",
-				"-target", "1.5",
-				"-classpath", classpath + File.pathSeparator 
-				+ System.getProperty("java.class.path"),
-				javaFile }))
-			throw new CompileException(sw.toString());
-		
-		db.p("Compilation successful!");
-		
-		return true;
-	}
-//	
-//	/**
-//	 * Spawns a process to compile the java source code file specified in the
-//	 * 'javaFile' parameter. Return a true if the compilation worked, false
-//	 * otherwise.
-//	 * 
-//	 * @param javaFile
-//	 *            String - name of the Java file to be compiled.
-//	 * @return boolean - indicates whether the compilation succeeded or not.
-//	 * @throws java.io.IOException -
-//	 *             Input/Output exception at reading the file.
-//	 * @throws ee.ioc.cs.vsle.ccl.CompileException -
-//	 *             Exception at compilation.
-//	 */
-//	public boolean compile(String javaFile) throws IOException,
-//			CompileException {
-//		javaFile = RuntimeProperties.genFileDir
-//				+ System.getProperty("file.separator") + javaFile + ".java";
-//		db.p("ee.ioc.cs.editor.ccl.CCL: Compiling " + javaFile + "...");
-//
-//		File file = new File(javaFile);
-//
-//		// Check if the file exists.
-//		if (!file.exists()) {
-//			throw new CompileException("File " + javaFile + " does not exist.");
-//		}
-//		
-//		String execCMD = "javac -classpath "
-//			+ RuntimeProperties.genFileDir
-//			+ prepareClasspathOS( RuntimeProperties.compilationClasspath )
-//			+ " " + javaFile;
-//		
-//		Process p = null;
-//		
-//		try {
-//			p = Runtime.getRuntime().exec(execCMD);
-//		} catch (IOException ex) {
-//			JOptionPane.showMessageDialog(null, ex.getMessage(),
-//					"Compilation error", JOptionPane.ERROR_MESSAGE);
-//			return false;
-//		}
-//
-//		db.p(execCMD);
-//
-//		int ret = 1;
-//
-//		try {
-//			// Wait for it to finish running.
-//			p.waitFor();
-//			ret = p.exitValue();
-//
-//			// check if an error has occured, in this case throw an exception
-//			if (ret != 0) {
-//
-//				InputStream inpStream = p.getErrorStream();
-//				InputStreamReader inpReader = new InputStreamReader(inpStream);
-//				BufferedReader err = new BufferedReader(inpReader);
-//
-//				String errBuff = new String();
-//				String line;
-//
-//				while ((line = err.readLine()) != null) {
-//					errBuff += line + "\n";
-//				}
-//
-//				throw new CompileException(errBuff);
-//
-//			}
-//			db.p("Compilation successful!");
-//			
-//		} catch (InterruptedException ie) {
-//			db.p(ie);
-//		}
-//
-//		// Tell whether the compilation worked.
-//		return ret == 0;
-//	} // compile
-//
-//	/**
-//	 * Perform an automatic compilation of sources as necessary when looking for
-//	 * class files. If the source modification is dated/timed later than the
-//	 * class files, then a recompilation will be performed. Otherwise the file
-//	 * is skipped.
-//	 * 
-//	 * @param name
-//	 *            String - name of the file.
-//	 * @param resolve
-//	 *            boolean
-//	 * @throws java.lang.ClassNotFoundException
-//	 * @return Class - a compiled class.
-//	 */
-//	public Class loadClass(String name, boolean resolve)
-//			throws ClassNotFoundException {
-//
-//		Class c;
-//
-//		// First, see if we've already dealt with this one
-//		c = findLoadedClass(name);
-//
-//		String fileStub = name.replace('.', '/');
-//		
-//		String classFilename = RuntimeProperties.genFileDir
-//				+ System.getProperty("file.separator") + fileStub + ".class";
-//
-//		System.err.println( "name " + name + " classFilename " + classFilename );
-//		// File classFile = new File( classFilename );
-//
-//		// First, see if we want to try compiling. We do if (a) there
-//		// is source code, and either (b0) there is no object code,
-//		// or (b1) there is object code, but it's older than the source
-//
-//		/*
-//		 * if (javaFile.exists() && (!classFile.exists() ||
-//		 * javaFile.lastModified() > classFile.lastModified())) { try { // Try
-//		 * to compile it. If this doesn't work, then // we must declare failure.
-//		 * (It's not good enough to use // and already-existing, but
-//		 * out-of-date, classfile) if (!compile( javaFilename ) ||
-//		 * !classFile.exists()) { throw new ClassNotFoundException( "Compile
-//		 * failed: "+javaFilename ); } } catch( IOException ie ) { // Another
-//		 * place where we might come to if we fail to compile. throw new
-//		 * ClassNotFoundException( ie.toString() ); } }
-//		 */
-//
-//		// Let's try to load up the raw bytes, assuming they were
-//		// properly compiled, or didn't need to be compiled.
-//		try {
-//
-//			// read the bytes
-//			byte raw[] = getBytes(classFilename);
-//
-//			// try to turn them into a class
-//			c = defineClass(name, raw, 0, raw.length);
-//
-//		} catch (IOException ie) { // This is not a failure! If we reach here,
-//									// it might
-//			// mean that we are dealing with a class in a library,
-//			// such as java.lang.Object }
-//			// ee.ioc.cs.editor.util.db.p( "defineClass: "+clas );
-//		}
-//
-//		// Maybe the class is in a library -- try loading the normal way.
-//		if (c == null) {
-//			c = findSystemClass(name);
-//		}
-//
-//		// Resolve the class, if any, but only if the "resolve" flag is set to
-//		// true.
-//		if (resolve && c != null) {
-//			resolveClass(c);
-//		}
-//
-//		// If we still don't have a class, it's an error.
-//		if (c == null) {
-//			throw new ClassNotFoundException(name);
-//		}
-//
-//		// Otherwise, return the class.
-//		return c;
-//	} // loadClass
-//	
-//	/**
-//	 * Given a file name, reads the entirety of that file from disk and return
-//	 * it as a byte array.
-//	 * 
-//	 * @param filename
-//	 *            String - name of the file to be read.
-//	 * @return byte[] - byte stream of the file read.
-//	 * @throws java.io.IOException -
-//	 *             Input/Output Exception thrown at reading the file.
-//	 */
-//	private byte[] getBytes(String filename) throws IOException {
-//
-//		File file = new File(filename);
-//
-//		// Find out the length of the file.
-//		long len = file.length();
-//
-//		// Create an array that's just the right size for the file's contents.
-//		byte raw[] = new byte[(int) len];
-//
-//		// Open the file for reading.
-//		FileInputStream fin = new FileInputStream(file);
-//
-//		// Read all of it into the array; if we don't get all, then it's an
-//		// error.
-//		int r = fin.read(raw);
-//
-//		if (r != len) {
-//			throw new IOException("Can't read all, " + r + " != " + len);
-//		}
-//
-//		// Close the file.
-//		fin.close();
-//
-//		return raw;
-//	} // getBytes
-
-    public String getCompileDir() {
-        return compileDir;
+        // the class could be compiled but not yet define()d
+        if (c == null && resultAccumulator != null) {
+            ClassFile cf = resultAccumulator.get(name);
+            if (cf != null) {
+                c = defineClass(name, cf);
+                resultAccumulator.remove(cf);
+            }
+        }
+        return c;
     }
 
-    public void setCompileDir(String compileDir) {
-        this.compileDir = compileDir;
+    protected void addProblem(CompilationResult result) {
+        if (problems == null) {
+            problems = new ArrayList<CompilationResult>();
+        }
+        problems.add(result);
+        if (result.hasErrors()) {
+            hasErrors = true;
+        }
+    }
+
+    public void clearProblems() {
+        if (problems != null) {
+            problems.clear();
+            hasErrors = false;
+        }
+    }
+
+    public boolean hasErrors() {
+        return hasErrors;
+    }
+
+    public void writeProblemLog(Appendable out) throws IOException {
+        out.append("----------\n");
+        if (problems != null) {
+            int errorCount = 0;
+            for (CompilationResult r : problems) {
+                for (CategorizedProblem p : r.getAllProblems()) {
+                    out.append(Integer.toString(++errorCount));
+                    out.append(". ");
+                    if (p.isError()) {
+                        out.append("ERROR in ");
+                    } else if (p.isWarning()) {
+                        out.append("WARNING in ");
+                    } else {
+                        out.append("Problem in ");
+                    }
+                    out.append(new String(p.getOriginatingFileName()));
+
+                    String errorReportSource = 
+                        ((DefaultProblem) p).errorReportSource(
+                                r.compilationUnit.getContents());
+
+                    out.append(errorReportSource);
+                    out.append("\n");
+                    out.append(p.getMessage());
+                    out.append("\n----------\n");
+                }
+            }
+        }
+    }
+
+    protected void accumulateResult(ClassFile classFile) {
+        if (resultAccumulator == null) {
+            resultAccumulator = new HashMap<String, ClassFile>();
+        }
+
+        String className = new String(
+                CharOperation.concatWith(classFile.getCompoundName(), '.'));
+
+        resultAccumulator.put(className, classFile);
     }
 
     @Override
-	public void addURL(URL url) {
-        super.addURL(url);
+    protected Class<?> findClass(String name) throws ClassNotFoundException {
+        try {
+            // Search from our URLs
+            Class<?> c = super.findClass(name);
+            if (c != null) {
+                return c;
+            }
+        } catch (Exception e) {
+            // Class was not found in our URLClassPath
+        }
+
+        // When this method is called it is already known the class was
+        // not found elsewhere or the class should be defined by this
+        // classloader.  Therefore, the only reasonable thing to to
+        // is to try to find the source and then compile it.
+
+        try {
+            return compile(name, (char[]) null);
+        } catch (CompileException e) {
+            db.p(e);
+        }
+
+        // Failure
+        throw new ClassNotFoundException();
+    }
+
+
+    protected Class<?> compile(String className, char[] source) {
+        if (source == null) {
+            source = findSource(className);
+        }
+
+        if (source != null) {
+            if (compiler == null) {
+                compiler = new Compiler(
+                        getNameEnvironment(),
+                        getErrorHandlingPolicy(),
+                        getCompilerOptions(),
+                        getCompileRequestor(),
+                        getProblemFactory());
+            }
+
+            ICompilationUnit[] units = new CompilationUnit[1];
+            units[0] = new CompilationUnit(source, className, null);
+            compiler.compile(units);
+            if (hasErrors()) {
+                StringBuilder sb = new StringBuilder();
+                try {
+                    writeProblemLog(sb);
+                } catch (IOException e) {
+                    db.p(e);
+                } finally {
+                    clearProblems();
+                }
+                throw new CompileException(sb.toString());
+            }
+        }
+        return getCachedClass(className);
+    }
+
+    protected Class<?> defineClass(String name, ClassFile classFile) {
+        byte bs[] = classFile.getBytes();
+        Class<?> c = defineClass(name, bs, 0, bs.length);
+        putCachedClass(name, c);
+        return c;
+    }
+
+    protected char[] findSource(String className) {
+        char[] data = null;
+
+        String srcName = className.replace('.', File.separatorChar);
+        srcName = srcName.concat(".java");
+
+        InputStream is = getResourceAsStream(srcName);
+
+        if (is != null) {
+            data = FileFuncs.getCharStreamContents(is);
+        }
+        return data;
+    }
+
+    protected IProblemFactory getProblemFactory() {
+        return new DefaultProblemFactory();
+    }
+
+    protected ICompilerRequestor getCompileRequestor() {
+
+        return new ICompilerRequestor() {
+            public void acceptResult(CompilationResult result) {
+                if (result.hasErrors()) {
+                    addProblem(result);
+                } else {
+                    for (ClassFile f : result.getClassFiles()) {
+                        accumulateResult(f);
+                    }
+                }
+            }
+        };
+    }
+
+    protected CompilerOptions getCompilerOptions() {
+        Map<String, String> settings = new HashMap<String, String>();
+
+        settings.put(CompilerOptions.OPTION_Compliance,
+                CompilerOptions.VERSION_1_5);
+        settings.put(CompilerOptions.OPTION_Source,
+                CompilerOptions.VERSION_1_5);
+        settings.put(CompilerOptions.OPTION_TargetPlatform,
+                CompilerOptions.VERSION_1_5);
+
+        return new CompilerOptions(settings);
+    }
+
+    protected IErrorHandlingPolicy getErrorHandlingPolicy() {
+        return new IErrorHandlingPolicy() {
+
+            public boolean proceedOnErrors() {
+                return true;
+            }
+
+            public boolean stopOnFirstError() {
+                return false;
+            }
+        };
+    }
+
+    protected String[] getCompilerClassPath() {
+        String[] userLibs = prepareClasspath(
+                RuntimeProperties.getCompilationClasspath());
+
+        String[] libNames = prepareClasspath(
+                System.getProperty("java.class.path"));
+
+        File[] sysLibs = getSystemLibs();
+
+        int req = 0;
+
+        if (userLibs != null) {
+            req += userLibs.length;
+        }
+        if (libNames != null) {
+            req += libNames.length;
+        }
+        if (sysLibs != null) {
+            req += sysLibs.length;
+        }
+
+        String[] cp = new String[req];
+
+        int j = 0;
+        for (int i = 0; userLibs != null && i < userLibs.length; i++) {
+            try {
+                cp[j++] = new File(userLibs[i]).getCanonicalPath();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        for (int i = 0; libNames != null && i < libNames.length; i++) {
+            cp[j++] = libNames[i];
+        }
+        for (int i = 0; sysLibs != null && i < sysLibs.length; i++) {
+            try {
+                cp[j++] = sysLibs[i].getCanonicalPath();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return cp;
+    }
+
+    protected INameEnvironment getNameEnvironment() {
+        if (environment == null) {
+            environment = new FileSystem(
+                    getCompilerClassPath(), new String[] { }, null);
+        }
+        return environment;
+    }
+
+    public static File[] getSystemLibs() {
+        File javaHome = new File(System.getProperty("java.home"));
+        File libDir = new File(javaHome, "lib");
+        File extDir = new File(libDir, "ext");
+        File[] libs = getLibraryFiles(libDir);
+        File[] extLibs = getLibraryFiles(extDir);
+
+        if (libs == null || libs.length < 1) {
+            return extLibs;
+        } else if (extLibs == null || extLibs.length < 1) {
+            return libs;
+        } else {
+            int nLib = libs.length;
+            libs = Arrays.copyOf(libs, libs.length + extLibs.length);
+            for (int i = 0; i < extLibs.length; i++) {
+                libs[nLib + i] = extLibs[i];
+            }
+            return libs;
+        }
+    }
+
+    public static File[] getLibraryFiles(File searchDir) {
+        return searchDir.listFiles(new FilenameFilter() {
+            public boolean accept(File dir, String name) {
+                name = name.toLowerCase();
+                return name.endsWith(".jar") || name.endsWith(".zip");
+            }
+        });
+    }
+
+    // Convenience methods for manipulating class names consistently
+
+    public static String classToFile(String className) {
+        return className.replace('.', File.separatorChar);
+    }
+
+    public static String classToSrcFile(String className) {
+        return classToFile(className).concat(".java");
+    }
+
+    public static String classToClassFile(String className) {
+        return classToFile(className).concat(".class");
+    }
+
+    public static String fileToClass(String fileName) {
+        return fileName.replace(File.separatorChar, '.');
+    }
+
+    public static String fileToClassFile(String baseFile) {
+        return baseFile.concat(".class");
+    }
+
+    public static String fileToSrcFile(String baseFile) {
+        return baseFile.concat(".java");
+    }
+
+    public static String toClassName(char[][] packageName, char[] typeName) {
+        return new String(CharOperation.concatWith(packageName, typeName, '.'));
+    }
+
+    public static String toClassName(char[][] compoundName) {
+        return new String(CharOperation.concatWith(compoundName, '.'));
     }
 }

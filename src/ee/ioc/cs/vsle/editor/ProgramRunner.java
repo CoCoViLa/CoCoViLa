@@ -15,6 +15,7 @@ import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.util.FileFuncs.*;
 import ee.ioc.cs.vsle.vclass.*;
 
 /**
@@ -39,6 +40,7 @@ public class ProgramRunner {
     private Object[] arguments;
     private String mainClassName = new String();
     private Canvas m_canvas;
+    private GenStorage storage;
 
     public ProgramRunner( Canvas canvas ) {
 
@@ -112,19 +114,14 @@ public class ProgramRunner {
         arguments = null;
 
         try {
-            Synthesizer.makeProgram( genCode, classList, mainClassName, m_canvas.getWorkDir() );
-
-            CCL classLoader = new CCL();
-
+            GenStorage fs = getStorage();
+            Synthesizer.makeProgram( genCode, classList, mainClassName, m_canvas.getWorkDir(), fs );
+            ClassLoader classLoader = m_canvas.vPackage.newRunnerClassLoader(fs);
             genObject = null;
-
-            if ( classLoader.compile2( mainClassName ) ) {
-                Class<?> clas = classLoader.loadClass( mainClassName );
-                genObject = clas.newInstance();
-            }
-            Class<?> pc = classLoader.loadClass( "ee.ioc.cs.vsle.api.ProgramContext" );
+            Class<?> pc = classLoader.loadClass(CCL.PROGRAM_CONTEXT);
+            Class<?> clas = classLoader.loadClass( mainClassName );
+            genObject = clas.newInstance();
             pc.getMethod( "setScheme", Scheme.class ).invoke( null, m_canvas.scheme );
-
         } catch ( NoClassDefFoundError e ) {
             JOptionPane.showMessageDialog( null, "Class not found:\n" + e.getMessage(), "Execution error", JOptionPane.ERROR_MESSAGE );
             e.printStackTrace( System.err );
@@ -773,4 +770,12 @@ public class ProgramRunner {
         return assumptions;
     }
 
+    private GenStorage getStorage() {
+        if (storage == null) {
+            storage = RuntimeProperties.isDumpGenerated()
+                ? new FileSystemStorage(RuntimeProperties.getGenFileDir())
+                : new MemoryStorage();
+        }
+        return storage;
+    }
 }

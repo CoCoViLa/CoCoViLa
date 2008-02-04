@@ -1,8 +1,13 @@
 package ee.ioc.cs.vsle.vclass;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
+
+import ee.ioc.cs.vsle.ccl.PackageClassLoader;
+import ee.ioc.cs.vsle.ccl.RunnerClassLoader;
+import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
 
 /**
  * <p>Title: ee.ioc.cs.editor.vclass.VPackage</p>
@@ -15,10 +20,12 @@ import java.util.regex.Matcher;
 public class VPackage {
 
     private String name;
-	public String description;
-	private String path;
-	private String lastScheme;
-	public ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
+    public String description;
+    private String path;
+    private String lastScheme;
+    public ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
+    private PackageClassLoader classLoader;
+
     /**
      * Are there any classes with custom painters in this package?
      */
@@ -127,4 +134,32 @@ public class VPackage {
 			
 			return -1;
 		}
+
+    /**
+     * Creates and returns the package classloader for this package.
+     * The same instance is returned on subsequent calls.
+     * @return the package classloader
+     */
+    public PackageClassLoader getPackageClassLoader() {
+        if (classLoader == null) {
+            File p = new File(path);
+            if (!p.isDirectory()) {
+                p = p.getParentFile();
+            }
+            classLoader = new PackageClassLoader(p);
+        }
+            
+        return classLoader;
+    }
+
+    /**
+     * Creates and returns a new RunnerClassLoader on each call.
+     * The returned runner classloader uses the package classloader to delegate
+     * work to.
+     * @param fs the storage for generated files
+     * @return a fresh runner classloader
+     */
+    public ClassLoader newRunnerClassLoader(GenStorage fs) {
+        return new RunnerClassLoader(fs, getPackageClassLoader());
+    }
 }
