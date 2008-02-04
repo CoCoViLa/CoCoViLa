@@ -61,25 +61,6 @@ public class SpecParser {
     }
 
     /**
-     * Return the contents of a file as a String object.
-     * 
-     * @param fileName name of the file name
-     */
-    static String getStringFromFile( String fileName ) throws IOException {
-        if ( RuntimeProperties.isLogDebugEnabled() )
-            db.p( "Retrieving " + fileName );
-
-        BufferedReader in = new BufferedReader( new FileReader( fileName ) );
-        String lineString, fileString = new String();
-
-        while ( ( lineString = in.readLine() ) != null ) {
-            fileString += lineString + "\n";
-        }
-        in.close();
-        return fileString;
-    }
-
-    /**
      * @return ArrayList of lines in specification
      * @param text Secification text as String
      */
@@ -748,7 +729,7 @@ public class SpecParser {
             specClass = true;
             if ( !classList.containsType( type ) ) {
                 checkedClasses.add( type );
-                String s = getStringFromFile( path + type + ".java" );
+                String s = FileFuncs.getFileContents(file);
 
                 classList.addAll( parseSpecificationImpl( refineSpec( s ), type, null, path, checkedClasses ) );
                 checkedClasses.remove( type );
@@ -861,7 +842,7 @@ public class SpecParser {
      */
     public static Collection<ClassField> getFields( String path, String fileName, String ext ) throws IOException {
         Map<String, ClassField> fields = new LinkedHashMap<String, ClassField>();
-        String s = new String( getStringFromFile( path + fileName + ext ) );
+        String s = FileFuncs.getFileContents(new File(path, fileName + ext));
         ArrayList<String> specLines = getSpec( s, false );
         String[] split;
 
