@@ -556,34 +556,32 @@ public class Canvas extends JPanel {
 
     private boolean createPainterPrototypes() {
         boolean success = true;
-        CCL classLoader = new CCL();
-        classLoader.setCompileDir( workDir );
-        try {
-            classLoader.addURL( new File( vPackage.getPath() ).getParentFile().toURI().toURL() );
-        } catch ( MalformedURLException e1 ) {
-            // TODO Clean up this class loading mess
-            e1.printStackTrace();
-        }
+        /* TODO Will be replaced by more general daemon stuff
+        PackageClassLoader pcl = null;
 
         for ( PackageClass pclass : vPackage.classes ) {
             if ( pclass.painterName == null )
                 continue;
 
             try {
-                if ( classLoader.compile2( pclass.painterName ) ) {
-                    Class<?> painterClass = classLoader.loadClass( pclass.painterName );
-                    pclass.setPainterPrototype( (ClassPainter) painterClass.newInstance() );
-                } else {
-                    success = false;
+                if (pcl == null) {
+                    pcl = vPackage.getPackageClassLoader();
                 }
+                Class<?> painterClass = pcl.loadClass(pclass.painterName);
+                pclass.setPainterPrototype((ClassPainter) painterClass.newInstance());
             } catch ( CompileException e ) {
                 success = false;
                 db.p( e ); // print compiler generated message
             } catch ( Exception e ) {
                 success = false;
                 db.p( e );
+            } finally {
+                if (pcl != null && pcl.hasErrors()) {
+                    pcl.clearProblems();
+                }
             }
         }
+        */
         return success;
     }
 
