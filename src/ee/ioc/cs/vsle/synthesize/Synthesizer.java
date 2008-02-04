@@ -68,8 +68,10 @@ public class Synthesizer {
         CodeGenerator cg = new CodeGenerator( algorithmList, problem, mainClassName );
         String algorithm = cg.generate();
 
-        runner.addFoundVars( problem.getFoundVars() );
-        runner.setAssumptions( problem.getAssumptions() );
+        if (runner != null) {
+            runner.addFoundVars( problem.getFoundVars() );
+            runner.setAssumptions( problem.getAssumptions() );
+        }
         
         StringBuilder prog = new StringBuilder();
         
@@ -200,7 +202,7 @@ public class Synthesizer {
 
             String mainClassName = SpecParser.getClassName( file );
             
-            ClassList classList = SpecParser.parseSpecification( path, mainClassName, null, file );
+            ClassList classList = SpecParser.parseSpecification(file, mainClassName, null, path);
             String prog = makeProgramText( file, true, classList, mainClassName, null ); //changed to true
 
             makeProgram( prog, classList, mainClassName, path );
