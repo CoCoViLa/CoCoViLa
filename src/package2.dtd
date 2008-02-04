@@ -1,12 +1,12 @@
 <?xml version='1.0' encoding='us-ascii'?>
-<!ELEMENT package (name, description, eventlistener?, class+)>
-<!ELEMENT class 	(name, description, icon, graphics, ports?, fields?)>
+<!ELEMENT package (name, description, daemon?, class+)>
+<!ELEMENT class 	(name, description, icon, daemon?, graphics, ports?, fields?)>
 <!ELEMENT fields 	(field*)>
 <!ELEMENT ports 	(port+)>
 <!ELEMENT port 		(open|closed)*>
 <!ELEMENT field 	(known|default)*>
 <!ELEMENT polygon 	(point+)>
-<!ELEMENT graphics 	((bounds| (line | rect | oval| arc | polygon | image) | text)*, painter?)>
+<!ELEMENT graphics 	(bounds| (line | rect | oval | arc | polygon | image ) | text)*>
 <!ELEMENT open 		(graphics)>
 <!ELEMENT closed 	(graphics)>
 <!ELEMENT known 	(graphics)>
@@ -19,7 +19,6 @@
 <!ELEMENT datatype 	(#PCDATA)>
 <!ELEMENT xpos 		(#PCDATA)>
 <!ELEMENT ypos 		(#PCDATA)>
-<!ELEMENT eventlistener	(#PCDATA)>
 <!ELEMENT point		EMPTY>
 <!ELEMENT line 		EMPTY>
 <!ELEMENT arc 		EMPTY>
@@ -31,7 +30,7 @@
 <!ELEMENT text 		EMPTY>
 <!ELEMENT image		EMPTY>
 <!ELEMENT portConnection EMPTY>
-<!ELEMENT painter	(#PCDATA)>
+<!ELEMENT daemon	(#PCDATA)>
 
 <!ATTLIST class
 	type (relation|class) #IMPLIED
