@@ -465,7 +465,7 @@ public class ProblemCreator {
         problem.addVar( var );
         
         //if alias has no elements it is always computable
-        if( var.getChildVars().isEmpty() ) {
+        if( var.getChildVars().isEmpty() && !alias.isDeclaration() ) {
             problem.getKnownVars().add( var );
         }
     }

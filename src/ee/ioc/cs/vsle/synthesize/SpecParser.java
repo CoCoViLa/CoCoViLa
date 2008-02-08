@@ -413,6 +413,7 @@ public class SpecParser {
                             // as empty
                             if ( !containsVar( annClass.getFields(), name ) ) {
                                 alias = new Alias( name, split[ 2 ].trim() );
+                                alias.setDeclaration( true );
                                 annClass.addField( alias );
                                 continue;
                             }
@@ -427,7 +428,7 @@ public class SpecParser {
                             throw new SpecParseException( "Variable " + name + " declared more than once in class " + className );
                         } else if ( var != null && var.isAlias() ) {
                             alias = (Alias) var;
-                            if ( !alias.isEmpty() ) {
+                            if ( !alias.isDeclaration() ) {
                                 throw new SpecParseException( "Alias " + name + " cannot be overriden, class " + className );
                             }
                         } else if ( split.length > 3 && Boolean.parseBoolean( split[ 3 ] ) ) {

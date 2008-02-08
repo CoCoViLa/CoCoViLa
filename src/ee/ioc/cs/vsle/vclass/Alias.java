@@ -12,6 +12,7 @@ public class Alias extends ClassField {
 	private static final long	serialVersionUID	= 1L;
 	private boolean isWildcard = false;
 	private String wildcardVar;
+	private boolean isDeclaration = false;
 	
 	/**
 	 * Class constructor.
@@ -186,4 +187,18 @@ public class Alias extends ClassField {
 		isStatic = real.isStatic;
 		type = real.type;
 	}
+
+    /**
+     * @return the isDeclaration
+     */
+    public boolean isDeclaration() {
+        return isDeclaration;
+    }
+
+    /**
+     * @param isDeclaration the isDeclaration to set
+     */
+    public void setDeclaration( boolean isDeclaration ) {
+        this.isDeclaration = isDeclaration;
+    }
 }
