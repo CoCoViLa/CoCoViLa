@@ -66,4 +66,30 @@ public final class ProgramContext {
     public static Object getFieldValue(String objectName, String fieldName) {
         return scheme.getFieldValue(objectName, fieldName);
     }
+
+    /**
+     * Sets the value of a scheme object field.
+     * @param objectName the name of the scheme object
+     * @param fieldName the name of the field
+     * @param value the value to set, null is also accepted
+     * @throws RuntimeException when there is no such class or field
+     */
+    public static void setFieldValue(String objectName, String fieldName,
+            String value) {
+        scheme.getObject(objectName).setFieldValue(fieldName, value);
+    }
+    /**
+     * Terminates the current execution of the generated program
+     * and reruns the scheme.
+     */
+    public static final void rerun() {
+        throw new RerunProgramException();
+    }
+
+    /**
+     * Terminates the current execution of the generated program.
+     */
+    public static final void terminate() {
+        throw new TerminateProgramException();
+    }
 }

@@ -10,6 +10,8 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.tree.*;
 
+import ee.ioc.cs.vsle.api.TerminateProgramException;
+import ee.ioc.cs.vsle.api.RerunProgramException;
 import ee.ioc.cs.vsle.api.Scheme;
 import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
@@ -565,6 +567,8 @@ public class ProgramRunner {
             public void run() {
                 Thread.currentThread().setName( "RunningThread_" + System.currentTimeMillis() );
 
+                boolean rerun = false;
+
                 try {
                     Object[] args = getArguments();
                     for ( int i = 0; i < args.length; i++ ) {
@@ -586,12 +590,21 @@ public class ProgramRunner {
                          * Stacktrace is printed so that there is some feedback
                          * when generated code throws an exception which isn't
                          * caught. Stacktrace is not printed if a thread was
-                         * stopped manually.
+                         * stopped manually or a rerun was requested.
                          */
-                        if ( !( ex.getCause() instanceof ThreadDeath ) ) {
+                        if (ex.getCause() instanceof RerunProgramException) {
+                            ProgramRunner pr = new ProgramRunner(m_canvas);
+                            int op = ( RuntimeProperties.isComputeGoal() ? ProgramRunnerEvent.COMPUTE_GOAL : ProgramRunnerEvent.COMPUTE_ALL ) 
+                                | ProgramRunnerEvent.RUN_NEW
+                                | ( RuntimeProperties.isPropagateValues() ? ProgramRunnerEvent.PROPAGATE : 0 );
+
+                            ProgramRunnerEvent evt = new ProgramRunnerEvent( this, pr.getId(), op );
+                            EventSystem.queueEvent( evt );
+                            rerun = true;
+                        } else if ( !( ex.getCause() instanceof ThreadDeath )
+                                && !(ex.getCause() instanceof TerminateProgramException)) {
                             ex.printStackTrace();
                         }
-
                     }
 
                     RunningThreadManager.removeThread( ProgramRunner.this.getId(), false );
@@ -608,7 +621,7 @@ public class ProgramRunner {
                         EventSystem.queueEvent( evt );
                     }
 
-                    if ( doPropagate ) {
+                    if ( doPropagate && !rerun ) {
                         propagate();
                     }
 
