@@ -46,4 +46,10 @@ public interface Scheme {
      * @param height the height
      */
     public void repaint(int x, int y, int width, int height);
+    
+    /**
+     * 
+     * @return Package
+     */
+    public ee.ioc.cs.vsle.api.Package getPackage();
 }

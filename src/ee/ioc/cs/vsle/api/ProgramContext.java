@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.api;
 
+import ee.ioc.cs.vsle.table.*;
+
 /**
  * <p>This class is made available to each synthesized program instance.
  * Generated programs can use the static methods of this class to 
@@ -65,6 +67,10 @@ public final class ProgramContext {
      */
     public static Object getFieldValue(String objectName, String fieldName) {
         return scheme.getFieldValue(objectName, fieldName);
+    }
+    
+    public static Object queryTable( String tableName, Object... args ) throws TableException {
+        return TableManager.getTable( scheme.getPackage(), tableName ).queryTable( args );
     }
 
     /**

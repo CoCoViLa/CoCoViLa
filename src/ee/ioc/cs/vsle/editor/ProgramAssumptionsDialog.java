@@ -159,7 +159,7 @@ implements ActionListener, KeyListener {
 				String text = textField.getText();
 				
 				try {
-					args[asumptions.indexOf( var )] = createObject( var, text );
+					args[asumptions.indexOf( var )] = createObjectFromString( var.getType(), text );
 				} catch (Exception e1) {
 					showError( var.getName(), e1 );
 					return;
@@ -173,7 +173,7 @@ implements ActionListener, KeyListener {
 					s += (String) comboBox.getItemAt(j) + ClassField.ARRAY_TOKEN;
 				}
 				try {
-					args[asumptions.indexOf( var )] = createObject( var, s );
+					args[asumptions.indexOf( var )] = createObjectFromString( var.getType(), s );
 				} catch (Exception e1) {
 					showError( var.getName(), e1 );					
 					return;
@@ -197,48 +197,6 @@ implements ActionListener, KeyListener {
 		JOptionPane.showMessageDialog( ProgramAssumptionsDialog.this, 
 				"Unable to read assumption \"" + var + "\"" + s,
 				"Error", JOptionPane.ERROR_MESSAGE );
-	}
-	
-	private Object createObject( Var var, String value ) throws Exception {
-		TypeToken token = TypeToken.getTypeToken( var.getType() );
-		//db.p( "var: " + var.getName() + " type " + var.getType() + " value " + value);
-		
-		Class<?> clazz = token.getWrapperClass();
-		
-		if( clazz != null ) {
-				Method meth = clazz.getMethod( "valueOf", new Class[]{ String.class });
-				Object o = meth.invoke( null, new Object[]{ value });
-				//db.p( "createObject " + o.getClass().getName() + " " + o );
-				return o;
-		} else if ( var.getType().equals( TYPE_STRING ) ) {
-			return value;
-		} else if( var.getField().isPrimOrStringArray() ) {
-			String type = var.getField().arrayType();
-			
-			token = TypeToken.getTypeToken( type );
-			clazz = token.getWrapperClass();
-			
-			
-			if( clazz != null ) {
-				
-				String[] split = value.split( ClassField.ARRAY_TOKEN );
-				Object primeArray = Array.newInstance( token.getPrimeClass(), split.length );
-				
-				for (int j = 0; j < split.length; j++) {
-					Method meth = clazz.getMethod( "valueOf", new Class[]{ String.class });
-					Object val = meth.invoke( null, new Object[]{ split[j] });
-					Array.set( primeArray, j, val );
-					
-					//db.p( "createObject[] " + val.getClass().getName() + " " + val );
-				}
-				return primeArray;
-			}  
-			/* equals String[] */ 
-			return value.split( ClassField.ARRAY_TOKEN );
-			
-		}
-		
-		return null;
 	}
 	
 	JComboBox getComboBox(JTextField jtf) {

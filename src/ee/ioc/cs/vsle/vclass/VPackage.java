@@ -17,7 +17,7 @@ import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
  * @author Ando Saabas
  * @version 1.0
  */
-public class VPackage {
+public class VPackage implements ee.ioc.cs.vsle.api.Package {
 
     private String name;
     public String description;
@@ -87,6 +87,9 @@ public class VPackage {
             return packClassName;
         }
 
+        /* (non-Javadoc)
+         * @see ee.ioc.cs.vsle.vclass.Package#getPath()
+         */
         public String getPath() {
             return path;
         }
@@ -106,9 +109,9 @@ public class VPackage {
 			this.name = name;
 		}
 
-		/**
-		 * @return the name
-		 */
+		/* (non-Javadoc)
+         * @see ee.ioc.cs.vsle.vclass.Package#getName()
+         */
 		public String getName() {
 			return name;
 		}
@@ -161,5 +164,15 @@ public class VPackage {
      */
     public ClassLoader newRunnerClassLoader(GenStorage fs) {
         return new RunnerClassLoader(fs, getPackageClassLoader());
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+        return path.equals( ((VPackage)obj).path );
+    }
+
+    @Override
+    public int hashCode() {
+        return path.hashCode();
     }
 }

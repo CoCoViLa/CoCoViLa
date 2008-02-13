@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
+import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
@@ -356,10 +357,36 @@ class Rel implements Serializable {
         		|| ( type == RelType.TYPE_METHOD_WITH_SUBTASK )) {
 
         	String output = getOutputString();
+        	String meth;
+        	
+        	if( Table.TABLE_KEYWORD.equals( method ) ) {
+        	    
+        	    String cast = "";
+        	    
+        	    if( !getOutputs().isEmpty() ) {
+        	        
+        	        cast += "(";
+        	            
+        	        String type = getOutputs().iterator().next().getType();
+        	        
+        	        TypeToken token = TypeToken.getTypeToken( type );
+        	        
+        	        if( token == TypeToken.TOKEN_OBJECT ) {
+        	            cast += type;
+        	        } else {
+        	            cast += token.getObjType();
+        	        }
+        	        
+        	        cast += ")";
+        	    }
+        	    meth = cast + "ProgramContext.queryTable";
+        	} else {
+        	    meth = parent.getFullNameForConcat() + method;
+        	}
         	String params = ( type == RelType.TYPE_JAVAMETHOD ) ? getParametersString(true) : getSubtaskParametersString();
         	return ( checkAliasInputs()
         			+ ( output.length() > 0 ? output + " = " : "" ) 
-        			+ parent.getFullNameForConcat() + method + params )
+        			+ meth + params )
         			+ ";\n" + checkAliasOutputs();
 
         } else {

@@ -121,7 +121,7 @@ public class ClassField implements Cloneable, Serializable {
 	public String arrayType() {
 
 		if (TypeUtil.isArray(getType())) {
-			return TypeUtil.getTypeWithoutArray(getType());
+			return TypeUtil.getArrayComponentType(getType());
 		}
 		return "notArray";
 	}

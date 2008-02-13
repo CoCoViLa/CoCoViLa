@@ -16,6 +16,7 @@ import ee.ioc.cs.vsle.api.Scheme;
 import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.synthesize.*;
+import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.util.FileFuncs.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -53,6 +54,9 @@ public class ProgramRunner {
 
         m_canvas.registerRunner( m_id );
 
+        //TODO tmp:parse tables each time new runner is created
+        TableManager.updateTables( m_canvas.getCurrentPackage() );
+        
         updateFromCanvas();
     }
 

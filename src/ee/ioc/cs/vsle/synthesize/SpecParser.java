@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.synthesize;
 
+import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
 
 import java.io.*;
@@ -595,8 +596,6 @@ public class SpecParser {
                                 throw new SpecParseException( "Error in line \n" + lt.getOrigSpecLine() + "\nin class "
                                         + className + ".\nAn axiom can not have an empty output." );
                             }
-                            // String[] outputs =
-                            // matcher2.group(2).trim().split(" *, *", -1);
 
                             if ( !outputs[ 0 ].equals( "" ) ) {
                                 classRelation.addOutputs( outputs, annClass.getFields() );
@@ -604,6 +603,11 @@ public class SpecParser {
 
                             classRelation.setMethod( matcher.group( 3 ).trim() );
 
+                            if( Table.TABLE_KEYWORD.equals( classRelation.getMethod() ) ) {
+                                classRelation.getExceptions().clear();
+                                classRelation.getExceptions().add( new ClassField( "java.lang.Exception", "exception" ) );
+                            }
+                                
                             String[] inputs = matcher.group( 1 ).trim().split( " *, *", -1 );
 
                             checkAliasLength( inputs, annClass, className );

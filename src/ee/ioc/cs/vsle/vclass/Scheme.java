@@ -37,8 +37,8 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
 		return vpackage;
 	}
 
-	public String getPackageName() {
-		return vpackage.getName();
+	public ee.ioc.cs.vsle.api.Package getPackage() {
+		return vpackage;
 	}
 
 	public ObjectList getObjects() {
