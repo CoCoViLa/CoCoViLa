@@ -200,7 +200,7 @@
   <target name="copy-resources" depends="compile">
     <copy todir="${build}">
       <fileset dir="${src}">
-        <include name="application.properties"/>
+        <include name="*.xsd"/>
         <include name="*.dtd"/>
       </fileset>
       <filterset>
