@@ -5,6 +5,7 @@ import java.io.Serializable;
 import ee.ioc.cs.vsle.api.SchemeObject;
 import ee.ioc.cs.vsle.editor.Canvas;
 import ee.ioc.cs.vsle.editor.Editor;
+import ee.ioc.cs.vsle.table.*;
 
 /**
  * The scheme description
@@ -124,5 +125,12 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
         if (obj == null)
             throw new RuntimeException("No such object: " + objectName);
         return obj;
+    }
+    
+    /*
+     * @see ee.ioc.cs.vsle.api.Scheme#queryTable(java.lang.String, java.lang.Object[])
+     */
+    public Object queryTable( String tableName, Object[] args ) {
+        return TableManager.getTable( getPackage(), tableName ).queryTable( args );
     }
 }

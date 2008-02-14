@@ -52,4 +52,12 @@ public interface Scheme {
      * @return Package
      */
     public ee.ioc.cs.vsle.api.Package getPackage();
+    
+    /**
+     * @param tableName
+     * @param args
+     * @return
+     */
+    public Object queryTable( String tableName, Object[] args );
+    
 }

@@ -1,7 +1,8 @@
 package ee.ioc.cs.vsle.api;
 
 /**
- *
+ * Package interface.
+ * It can be accessed by generated programs via Scheme interface
  */
 public interface Package {
 
