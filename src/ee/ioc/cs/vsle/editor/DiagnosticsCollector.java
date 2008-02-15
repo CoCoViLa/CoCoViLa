@@ -18,8 +18,15 @@ import ee.ioc.cs.vsle.util.*;
  */
 public class DiagnosticsCollector {
 
+    private int fatalMessagesCount = 0;
+    
     private List<String> messages = new ArrayList<String>();
 
+    /**
+     * Collects messages
+     * 
+     * @param msg
+     */
     public void collectDiagnostic( String msg ) {
         if ( RuntimeProperties.isLogDebugEnabled() )
             db.p( msg );
@@ -27,6 +34,25 @@ public class DiagnosticsCollector {
         messages.add( msg );
     }
 
+    /**
+     * Collects messages.
+     * Some messages may be fatal
+     * 
+     * @param msg
+     * @param isFatal
+     */
+    public void collectDiagnostic( String msg, boolean isFatal ) {
+        
+        collectDiagnostic( msg );
+        
+        if( isFatal ) {
+            fatalMessagesCount++;
+        }
+    }
+    
+    /**
+     * @return list of all collected messages
+     */
     public List<String> getMessages() {
         return messages;
     }
@@ -38,10 +64,26 @@ public class DiagnosticsCollector {
         return getMessages().size() > 0;
     }
     
-    public interface Diagnosable {
-        public DiagnosticsCollector getDiagnostics();
+    /**
+     * if there are fatal messages, promptLoad() will always return false
+     * 
+     * @return
+     */
+    public boolean hasFatalCases() {
+        return fatalMessagesCount > 0;
     }
     
+    /**
+     * Displays a modal dialog with list of messages. 
+     * Allows users to make a choice either to continue or cancel.
+     * If there are fatal messages in the list, method returns false.
+     * 
+     * @param relative
+     * @param collector
+     * @param title
+     * @param source
+     * @return
+     */
     public static boolean promptLoad( Component relative, DiagnosticsCollector collector, String title, String source ) {
         final JDialog dialog = new JDialog( Editor.getInstance() );
         dialog.setModal( true );
@@ -69,38 +111,61 @@ public class DiagnosticsCollector {
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER );
         dialog.add( scrollPane, BorderLayout.CENTER );
 
-        final JButton btnContinue = new JButton( "Continue" );
-        JButton btnCancel = new JButton( "Cancel" );
-
         final boolean[] result = new boolean[ 1 ];
         result[ 0 ] = false; // close is Cancel
+        
+        final JComponent focusable;
+        
+        JButton btnCancel = new JButton( "Cancel" );
 
         btnCancel.addActionListener( new ActionListener() {
             public void actionPerformed( ActionEvent e ) {
                 dialog.setVisible( false );
             }
         } );
-
-        btnContinue.addActionListener( new ActionListener() {
-            public void actionPerformed( ActionEvent e ) {
-                dialog.setVisible( false );
-                result[ 0 ] = true;
-            }
-        } );
-
+        
         JPanel btnPanel = new JPanel( new FlowLayout( FlowLayout.RIGHT ) );
-        btnPanel.add( btnContinue );
+        
+        if( collector.hasFatalCases() ) {
+            focusable = btnCancel;
+            
+            btnCancel.setText( "Close" );
+        }
+        else { 
+            final JButton btnContinue = new JButton( "Continue" );
+
+            btnContinue.addActionListener( new ActionListener() {
+                public void actionPerformed( ActionEvent e ) {
+                    dialog.setVisible( false );
+                    result[ 0 ] = true;
+                }
+            } );
+            
+            btnPanel.add( btnContinue );
+            
+            focusable = btnContinue;
+        }
+
         btnPanel.add( btnCancel );
         dialog.add( btnPanel, BorderLayout.SOUTH );
-        dialog.pack();
+        
         SwingUtilities.invokeLater( new Runnable() {
             public void run() {
-                btnContinue.requestFocus();
+                focusable.requestFocus();
             }
         } );
+        
+        dialog.pack();
         dialog.setVisible( true );
         dialog.dispose();
 
         return result[ 0 ];
+    }
+    
+    /**
+     * Interface
+     */
+    public interface Diagnosable {
+        public DiagnosticsCollector getDiagnostics();
     }
 }

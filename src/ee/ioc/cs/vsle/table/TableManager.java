@@ -7,7 +7,6 @@ import java.io.*;
 import java.util.*;
 
 import ee.ioc.cs.vsle.api.Package;
-import ee.ioc.cs.vsle.util.*;
 
 /**
  * Class for caching tables and providing access to the tables from outer packages
@@ -15,6 +14,15 @@ import ee.ioc.cs.vsle.util.*;
 public class TableManager {
 
     private static Map<Package, Map<String, Table>> tablesByPackages = new HashMap<Package, Map<String, Table>>();
+    
+    private static final FilenameFilter FILENAME_FILTER = new FilenameFilter() {
+
+        @Override
+        public boolean accept( File dir, String name ) {
+            
+            return name.toLowerCase().endsWith(".tbl");
+        }
+    };
     
     /**
      * Calls parser and caches tables for the specified package
@@ -26,21 +34,35 @@ public class TableManager {
     public synchronized static Table getTable( Package pack, String tableId ) {
         
         if( !tablesByPackages.containsKey( pack ) ) {
-            String path;
-            File packFile = new File( pack.getPath() );
             
-            if( packFile.isDirectory() ) {
-                path = packFile.getAbsolutePath();
-            } else {
-                path = packFile.getParent();
+            Map<String, Table> tables = new HashMap<String, Table>();
+            
+            File folder = new File( pack.getPath() );
+            
+            if( !folder.isDirectory() ) {
+                folder = folder.getParentFile();
             }
             
-            db.p( "Parsing table(s) from: " + path + File.separator + "table.xml" );
+            File[] tableFiles = folder.listFiles( FILENAME_FILTER );
             
-            tablesByPackages.put( pack, TableParser.parse( path + File.separator + "table.xml" ) );
+            for ( int i = 0; i < tableFiles.length; i++ ) {
+                
+                //db.p( "Parsing table(s) from: " + tableFiles[i].getAbsolutePath() );
+                
+                tables.putAll( TableParser.parse( tableFiles[i] ) );
+            }
+            
+            //this line can be reached if no errors occurred during parsing 
+            tablesByPackages.put( pack, tables );
         }
         
-        return tablesByPackages.get( pack ).get( tableId );
+        Table table = tablesByPackages.get( pack ).get( tableId );
+        
+        if( table != null ) {
+            return table;
+        } else {
+            throw new TableException( "No such table: " + tableId );
+        }
     }
     
     /**
@@ -58,14 +80,6 @@ public class TableManager {
             }
             tables.clear();
         }
-    }
-    
-    /**
-     * @param args
-     */
-    public static void main( String[] args ) {
-        // TODO Auto-generated method stub
-//        ProgramContext.getScheme().
     }
 
 }

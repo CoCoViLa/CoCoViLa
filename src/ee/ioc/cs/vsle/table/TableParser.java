@@ -9,6 +9,7 @@ import javax.xml.parsers.*;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 
 
@@ -25,9 +26,17 @@ class TableParser {
      * @param tableFile absolute path to table.xml
      * @return Map<table id, table>
      */
-    static Map<String, Table> parse( String tableFile ) {
+    static Map<String, Table> parse( final File tableFile ) {
         
         Map<String, Table> tables = new HashMap<String, Table>();
+        
+        if( tableFile == null || !tableFile.exists() ) {
+            return tables;
+        }
+        
+        final DiagnosticsCollector collector = new DiagnosticsCollector();
+        
+        Document document = null;
         
         try {
             
@@ -48,38 +57,46 @@ class TableParser {
             builder.setErrorHandler( new ErrorHandler() {
 
                 public void error(SAXParseException exception) {
-                    System.out.println("error: "+ exception.getMessage());
+                    
+                    collector.collectDiagnostic( "Error: " + exception.getMessage(), true );
                 }
 
                 public void fatalError(SAXParseException exception) {
-                    System.out.println("fatalError: "+ exception.getMessage());
+                    
+                    collector.collectDiagnostic( "Fatal Error: " + exception.getMessage(), true );
                 }
 
                 public void warning(SAXParseException exception) {
-                    System.out.println("warning: "+ exception.getMessage());
+                    
+                    collector.collectDiagnostic( "Warning: " +exception.getMessage(), false );
                 }
             } );
             
-            Document document = builder.parse( new File( tableFile ) );
-
-            Element root = document.getDocumentElement();
-            
-            NodeList list = root.getElementsByTagName( "table" );
-            
-            for (int i=0; i<list.getLength(); i++) {
-                Table t =  createTable( (Element)list.item(i) );
-                tables.put( t.getId(), t );
-             }
+            document = builder.parse( tableFile );
             
         } catch ( ParserConfigurationException e ) {
-            e.printStackTrace();
+            collector.collectDiagnostic( "ParserConfigurationException: " + e.getMessage(), true );
         } catch ( IOException e ) {
-            e.printStackTrace();
+            collector.collectDiagnostic( "IOException: " + e.getMessage(), true );
         } catch ( SAXException e ) {
-            e.printStackTrace();
-        } catch ( TableException e ) {
-            e.printStackTrace();
+            collector.collectDiagnostic( "SAXException: " + e.getMessage(), true );
         }
+        
+        if( collector.hasProblems() 
+                && !DiagnosticsCollector.promptLoad( Editor.getInstance(), collector, 
+                        "Error parsing table file " + tableFile.getName(), tableFile.getName() ) || document == null ) {
+            
+            throw new TableException( "Error parsing table file " + tableFile.getName() );
+        }
+        
+        Element root = document.getDocumentElement();
+        
+        NodeList list = root.getElementsByTagName( "table" );
+        
+        for (int i=0; i<list.getLength(); i++) {
+            Table t =  createTable( (Element)list.item(i) );
+            tables.put( t.getId(), t );
+         }
         
         return tables;
     }
@@ -230,6 +247,7 @@ class TableParser {
      */
     public static void main( String[] args ) {
         
+//      try {
 //        Map<String, Table> tables = parse( "table.xml" );
         
 //        Table t = tables.get( "multiplication" );
@@ -239,7 +257,6 @@ class TableParser {
 //        int x = 1 + r.nextInt( 9 );
 //        int y = 1 + r.nextInt( 9 );
 //        
-//        try {
 //            
 //            Object o =  t.queryTable( new Object[] { x, y } );
 //            
@@ -249,18 +266,19 @@ class TableParser {
 //            e.printStackTrace();
 //        }
         
-        Map<String, Table> tables = parse( "table_test.xml" );
-        
-        Table t = tables.get( "test" );
-        
         try {
+            
+            Map<String, Table> tables = parse( new File( "table_test.xml" ) );
+            
+            Table t = tables.get( "test" );
             
             Object o =  t.queryTable( new Object[] { 5, 30, true } );
             
             System.out.println( "From table: " + o );
             
         } catch ( TableException e ) {
-            e.printStackTrace();
+            System.err.println( e.getMessage() );
+//            e.printStackTrace();
         }
     }
 }
