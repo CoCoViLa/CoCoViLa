@@ -1,16 +1,16 @@
 package ee.ioc.cs.vsle.ccl;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Date;
+import java.io.*;
+import java.net.*;
+import java.util.*;
+import java.util.jar.*;
 
-import org.eclipse.jdt.internal.compiler.batch.CompilationUnit;
-import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
-import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
+import org.eclipse.jdt.internal.compiler.batch.*;
+import org.eclipse.jdt.internal.compiler.env.*;
 
-import ee.ioc.cs.vsle.util.FileFuncs;
-import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.util.FileFuncs.*;
 
 /**
  * ClassLoader for ProgramRunner.
@@ -46,9 +46,15 @@ public class RunnerClassLoader extends CCL {
         // version of this class present in the classpath and we should ignore
         // other (source) versions there might exist.
         if (PROGRAM_CONTEXT.equals(className)) {
-            InputStream is = getSystemResourceAsStream(
-                    classToClassFile(className));
+            
+            String classFile = classToClassFile(className);
+            
+            InputStream is = getSystemResourceAsStream( classFile );
 
+            if( is == null ) {
+                is = getSystemResourceAsStream( classFile.replace( '\\', '/' ) );
+            }
+            
             if (is != null) {
                 byte[] classData = FileFuncs.getByteStreamContents(is);
                 if (classData != null) {
