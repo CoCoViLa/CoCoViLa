@@ -52,18 +52,6 @@ public abstract class CCL extends URLClassLoader {
         super(urls, parent);
     }
 
-    public static String[] prepareClasspath(String path) {
-        if (path != null) {
-            if (path.indexOf(';') != -1) {
-                return path.split(";");
-            } else if( path.indexOf(':') != -1) {
-                return path.split(":");
-            }
-            return new String[] { path };
-        }
-        return null;
-    }
-
     protected void putCachedClass(String name, Class<?> c) {
         if (classCache == null) {
             classCache = new HashMap<String, Class<?>>();
@@ -221,10 +209,7 @@ public abstract class CCL extends URLClassLoader {
     protected char[] findSource(String className) {
         char[] data = null;
 
-        String srcName = className.replace('.', File.separatorChar);
-        srcName = srcName.concat(".java");
-
-        InputStream is = getResourceAsStream(srcName);
+        InputStream is = getResourceAsStream(classToSourceResource(className));
 
         if (is != null) {
             data = FileFuncs.getCharStreamContents(is);
@@ -278,11 +263,9 @@ public abstract class CCL extends URLClassLoader {
     }
 
     protected String[] getCompilerClassPath() {
-        String[] userLibs = prepareClasspath(
-                RuntimeProperties.getCompilationClasspath());
+        String[] userLibs = RuntimeProperties.getCompilationClasspaths();
 
-        String[] libNames = prepareClasspath(
-                System.getProperty("java.class.path"));
+        String[] libNames = getJavaClassPath();
 
         File[] sysLibs = getSystemLibs();
 
@@ -329,6 +312,20 @@ public abstract class CCL extends URLClassLoader {
         return environment;
     }
 
+    /**
+     * Returns Java class path as string array.
+     * @return Java class path, may be null or empty
+     */
+    public static String[] getJavaClassPath() {
+        // The entries should always be separated by File.pathSeparator as
+        // we get the string from the system. 
+        String jcp = System.getProperty("java.class.path");
+        if (jcp != null) {
+            return jcp.split(File.pathSeparator);
+        }
+        return null;
+    }
+
     public static File[] getSystemLibs() {
         File javaHome = new File(System.getProperty("java.home"));
         File libDir = new File(javaHome, "lib");
@@ -369,20 +366,24 @@ public abstract class CCL extends URLClassLoader {
         return classToFile(className).concat(".java");
     }
 
-    public static String classToClassFile(String className) {
-        return classToFile(className).concat(".class");
+    /**
+     * Translates a class name into a Java class resource name.
+     * Example: org.example.Main -&gt; org/example/Main.class
+     * @param className class name
+     * @return class resource name
+     */
+    public static String classToClassResource(String className) {
+        return className.replace('.', '/').concat(".class");
     }
 
-    public static String fileToClass(String fileName) {
-        return fileName.replace(File.separatorChar, '.');
-    }
-
-    public static String fileToClassFile(String baseFile) {
-        return baseFile.concat(".class");
-    }
-
-    public static String fileToSrcFile(String baseFile) {
-        return baseFile.concat(".java");
+    /**
+     * Translates a class name into a Java source resource name.
+     * Example: org.example.Main -&gt; org/example/Main.java
+     * @param className class name
+     * @return source resource name
+     */
+    public static String classToSourceResource(String className) {
+        return className.replace('.', '/').concat(".java");
     }
 
     public static String toClassName(char[][] packageName, char[] typeName) {

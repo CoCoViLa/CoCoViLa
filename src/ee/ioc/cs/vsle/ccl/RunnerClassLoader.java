@@ -3,12 +3,10 @@ package ee.ioc.cs.vsle.ccl;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.jar.*;
 
 import org.eclipse.jdt.internal.compiler.batch.*;
 import org.eclipse.jdt.internal.compiler.env.*;
 
-import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.util.FileFuncs.*;
 
@@ -46,15 +44,9 @@ public class RunnerClassLoader extends CCL {
         // version of this class present in the classpath and we should ignore
         // other (source) versions there might exist.
         if (PROGRAM_CONTEXT.equals(className)) {
-            
-            String classFile = classToClassFile(className);
-            
-            InputStream is = getSystemResourceAsStream( classFile );
+            InputStream is = getSystemResourceAsStream(
+                    classToClassResource(className));
 
-            if( is == null ) {
-                is = getSystemResourceAsStream( classFile.replace( '\\', '/' ) );
-            }
-            
             if (is != null) {
                 byte[] classData = FileFuncs.getByteStreamContents(is);
                 if (classData != null) {

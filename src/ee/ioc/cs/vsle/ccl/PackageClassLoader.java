@@ -86,8 +86,7 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
         }
 
         // (4) user set classpath
-        String[] paths = prepareClasspath(
-                RuntimeProperties.getCompilationClasspath());
+        String[] paths = RuntimeProperties.getCompilationClasspaths();
 
         for (String path : paths) {
             File file = new File(path);
@@ -125,7 +124,7 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
     }
 
     private NameEnvironmentAnswer findSourceAnswer(String className) {
-        String fileName = classToSrcFile(className);
+        String fileName = classToSourceResource(className);
         InputStream is = getResourceAsStream(fileName);
         if (is != null) {
             char[] source = FileFuncs.getCharStreamContents(is);

@@ -38,6 +38,9 @@ public class RuntimeProperties {
     private static final String NUDGE_STEP = "nudgeStep";
     private static final String SNAP_TO_GRID = "snapToGrid";
     private static final String RECENT_PACKAGES = "recentPackages";
+    // TODO Make sure that classpath entries do not contain semicolons
+    // Also, clients of this class should not need to know how the entries are
+    // represented internally.
     private static final String COMPILATION_CLASSPATH = "compilationClasspath";
     private static final String ZOOM_LEVEL = "defaultzoom";
     private static final String SYNTAX_HIGHLIGHT = "syntax_highlight";
@@ -321,6 +324,17 @@ public class RuntimeProperties {
      */
     public static String getCompilationClasspath() {
         return compilationClasspath;
+    }
+
+    /**
+     * Returns the user set compilation classpath as array.
+     * @return the compilationClasspath, can be empty or null
+     */
+    public static String[] getCompilationClasspaths() {
+        if (compilationClasspath != null) {
+            return compilationClasspath.split(";");
+        }
+        return null;
     }
 
     /**
