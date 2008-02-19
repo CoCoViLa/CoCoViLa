@@ -485,7 +485,7 @@ public class ProgramRunner {
                         continue;
                     }
 
-                    fieldOfCf = fieldOfGobj.getType().getDeclaredField( cf.getName() );
+                    fieldOfCf = fieldOfGobj.getType().getField( cf.getName() );
 
                     boolean varIsComputed = false;
 
