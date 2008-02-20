@@ -233,7 +233,13 @@ class TableParser {
                     if( cell.getNodeType() == Node.ELEMENT_NODE ) {
                         NamedNodeMap cellAttrs = cell.getAttributes();
                         int colId = Integer.parseInt( cellAttrs.getNamedItem( "id" ).getNodeValue() );
-                        table.addDataCell( new Table.DataCell( rowId, colId, cell.getTextContent() ) );
+
+                        table.addDataCell( new Table.DataCell( rowId, colId, 
+                                ( cell.getChildNodes().getLength() == 0 ) 
+                                    //<cell id="..."/> 
+                                    ? null 
+                                    //<cell id="...">text</cell>
+                                    : cell.getTextContent() ) );
                     }
                 }
             }
@@ -272,7 +278,7 @@ class TableParser {
             
             Table t = tables.get( "test" );
             
-            Object o =  t.queryTable( new Object[] { 5, 30, true } );
+            Object o =  t.queryTable( new Object[] { 5, 30, false } );
             
             System.out.println( "From table: " + o );
             

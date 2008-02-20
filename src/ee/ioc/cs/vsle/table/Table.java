@@ -20,8 +20,6 @@ import ee.ioc.cs.vsle.util.*;
  */
 public class Table {
     
-    private static final String VALUE_UNDEFINED = "%null%";
-
     public static final String TABLE_KEYWORD = "@table";
     
     private String id;
@@ -112,7 +110,7 @@ public class Table {
         
         DataCell cell = data.get( rowId ).get( colId );
         
-        if( cell == null || cell.getValue().equals( VALUE_UNDEFINED ) ) {
+        if( cell == null || cell.getValue() == null ) {
             throw new TableException( "Cell value not specified" );
         }
         
