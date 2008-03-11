@@ -288,7 +288,6 @@ public class FileFuncs {
     /**
      * Reads everything from a character input stream into a char array.
      * @param charStream Finite character stream
-     * @return the contents of the stream as char array; null in case of errors
      */
     public static char[] getCharStreamContents(InputStream charStream) {
         InputStreamReader reader = new InputStreamReader(charStream);
@@ -331,6 +330,28 @@ public class FileFuncs {
             buf = Arrays.copyOf(buf, readTotal);
         }
         return buf;
+    }
+    
+    /**
+    * Copies files using byte streams
+    * @param fileIn Input file
+    * @param fileOut Output file
+    */
+    public static void copyImageFile(File fileIn, File fileOut) {
+    	try {
+    		FileInputStream in = new FileInputStream(fileIn);
+    		FileOutputStream out = new FileOutputStream(fileOut);
+			
+			int b;
+			while ((b = in.read()) != -1) {
+				out.write((byte)b);
+			}
+			in.close();
+			out.close();
+			
+		} catch (IOException e) {
+			db.p(e);
+		} 
     }
 
     /**
