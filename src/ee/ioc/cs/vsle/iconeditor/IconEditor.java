@@ -17,12 +17,14 @@ import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.*;
 
 public class IconEditor extends JFrame {
 
- // Class properties.
+ 
+	private static final long serialVersionUID = 1L;
+	// Class properties.
     public static String className;
     public static String classDescription;
     private static String classIcon;
     public static boolean classIsRelation;
-
+    
     // Package properties
     public static String packageName;
     public static String packageDesc;
@@ -67,6 +69,8 @@ public class IconEditor extends JFrame {
 
     private static File packageFile;
     
+    public static String prevPackagePath;
+        
     /**
      * Class constructor [1].
      */
@@ -1039,15 +1043,24 @@ public class IconEditor extends JFrame {
     public void saveToPackage() {
         boolean inPackage = false;
         String className = IconEditor.className;
-        if ( IconEditor.getClassIcon() == null ) {
-            IconEditor.setClassIcon( "default.gif" );
-        }
-
+        
         if( !checkPackage() ) {
             return;
         }
+       
+        File iconFile = new File( getPackageFile().getParent() + File.separator + classIcon);
         
-        // See if class allready exists in package
+        /* See if icon file exists */
+        File prevIconFile = new File( prevPackagePath + File.separator + classIcon);
+        
+        
+        if ( (IconEditor.getClassIcon() == null) || !prevIconFile.exists() ) {
+            IconEditor.setClassIcon( "default.gif" );
+        } else if (prevIconFile.exists()) {
+        	FileFuncs.copyImageFile(prevIconFile, iconFile);        	
+        }
+                
+        // See if class already exists in package
         ci = new ClassImport( getPackageFile(), packageClasses, icons );
         for ( int i = 0; i < icons.size(); i++ ) {
 
@@ -1137,38 +1150,47 @@ public class IconEditor extends JFrame {
 
             /* See if .java file exists */
             File javaFile = new File( getPackageFile().getParent() + File.separator + className + ".java" );
+            /* See if previews .java file exists */
+            File prevJavaFile = new File( prevPackagePath + File.separator + className + ".java" );
+            
 
-            /* If file exists show conformation dialog */
-            int overWriteFile = JOptionPane.YES_OPTION;
+            /* If file exists show confirmation dialog */
+            int overwriteFile = JOptionPane.YES_OPTION;
             if ( javaFile.exists() ) {
 
-                overWriteFile = JOptionPane.showConfirmDialog( null, "Java class already exists. Overwrite?" );
+                overwriteFile = JOptionPane.showConfirmDialog( null, "Java class already exists. Overwrite?" );
             }
 
-            if ( overWriteFile != JOptionPane.CANCEL_OPTION ) {
+            if ( overwriteFile != JOptionPane.CANCEL_OPTION ) {
 
                 FileOutputStream out = new FileOutputStream( new File( getPackageFile().getAbsolutePath() ) );
                 out.write( content.toString().getBytes() );
                 out.flush();
                 out.close();
+                
+                
+                if ( overwriteFile == JOptionPane.YES_OPTION ) {
+                	String fileText = null;
+                	if (prevJavaFile.exists()) {
+                		fileText = FileFuncs.getFileContents(prevJavaFile);
+                	} else {
+                		fileText = "class " + className + " {";
+                		fileText += "\n    /*@ specification " + className + " {\n";
 
-                if ( overWriteFile == JOptionPane.YES_OPTION ) {
-                    String fileText = "class " + className + " {";
-                    fileText += "\n    /*@ specification " + className + " {\n";
+                		for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
+                			String fieldName = dbrClassFields.getValueAt( i, iNAME );
+                			String fieldType = dbrClassFields.getValueAt( i, iTYPE );
+                			// String fieldValue =
+                			// RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2],
+                			// i);
 
-                    for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
-                        String fieldName = dbrClassFields.getValueAt( i, iNAME );
-                        String fieldType = dbrClassFields.getValueAt( i, iTYPE );
-                        // String fieldValue =
-                        // RuntimeProperties.dbrClassFields.getFieldAsString(RuntimeProperties.classDbrFields[2],
-                        // i);
-
-                        if ( fieldType != null ) {
-                            fileText += "    " + fieldType + " " + fieldName + ";\n";
-                        }
-                    }
-                    fileText += "    }@*/\n \n}";
-                    FileFuncs.writeFile( javaFile, fileText );
+                			if ( fieldType != null ) {
+                				fileText += "    " + fieldType + " " + fieldName + ";\n";
+                			}
+                		}
+                		fileText += "    }@*/\n \n}";
+                	}
+                	FileFuncs.writeFile( javaFile, fileText );
                 }
 
                 JOptionPane.showMessageDialog( null, "Saved to package: " + getPackageFile().getName(), "Saved",
@@ -1624,8 +1646,8 @@ public class IconEditor extends JFrame {
      * Show a list of classes that can be imported from package
      */
     public void importClassFromPackage( File f ) {
-
-        ci = new ClassImport( f, packageClasses, icons );
+    	prevPackagePath = f.getParent();
+    	ci = new ClassImport( f, packageClasses, icons );
         // opens dialog with list of class names
         ccd.newJList( packageClasses );
         ccd.setLocationRelativeTo( rootPane );
