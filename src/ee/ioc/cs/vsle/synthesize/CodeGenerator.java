@@ -50,7 +50,7 @@ public class CodeGenerator {
         for ( Rel rel : algRelList ) {
 
             if ( rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) {
-                appendRelToAlg( same(), rel, alg );
+                appendRelToAlg( rel, alg, false );
             }
 
             else if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
@@ -158,7 +158,7 @@ public class CodeGenerator {
                         genSubTasks( trel, bufSbtBody, true, sbName, currentUsedVars, currentProblem );
 
                     } else {
-                        appendRelToAlg( same(), trel, bufSbtBody );
+                        appendRelToAlg( trel, bufSbtBody, true );
                     }
                     unfoldVarsToSet( trel.getInputs(), currentUsedVars );
                     unfoldVarsToSet( trel.getOutputs(), currentUsedVars );
@@ -295,11 +295,11 @@ public class CodeGenerator {
         return offset;
     }
 
-    private void appendRelToAlg( String offset, Rel rel, StringBuilder buf ) {
+    private void appendRelToAlg( Rel rel, StringBuilder buf, boolean isInSubtask ) {
         String s = rel.toString();
         if ( !s.equals( "" ) ) {
-            if ( rel.getExceptions().size() == 0 ) {
-                buf.append( offset ).append( s ).append( ";\n" );
+            if ( isInSubtask || rel.getExceptions().size() == 0 ) {
+                buf.append( same() ).append( s ).append( ";\n" );
             } else {
                 buf.append( appendExceptions( rel, s ) );
             }
@@ -312,7 +312,7 @@ public class CodeGenerator {
         for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
             relString = relString.replaceFirst( RelType.TAG_SUBTASK, names.get( i ) );
         }
-        if ( rel.getExceptions().size() == 0 || isNestedSubtask ) {
+        if ( isNestedSubtask || rel.getExceptions().size() == 0 ) {
             buf.append( same() ).append( relString ).append( "\n" );
         } else {
             buf.append( appendExceptions( rel, relString ) ).append( "\n" );
