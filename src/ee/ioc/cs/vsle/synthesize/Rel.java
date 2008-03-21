@@ -429,7 +429,7 @@ class Rel implements Serializable {
             	
             	String alias_tmp = getAliasTmpName( input );
                 
-                if (input.getChildVars().size() == 0) {
+                if ( ((Alias)input.getField()).isDeclaration() ) {
                     assigns = input.getType() + " " + alias_tmp + " = null;\n";
                     assigns += CodeGenerator.getOffset();
                 } else {
@@ -490,7 +490,7 @@ class Rel implements Serializable {
         	
             String alias_tmp = getAliasTmpName( output );
             
-            if (output.getChildVars().size() == 0) {
+            if ( ((Alias)output.getField()).isDeclaration() ) {
                 assigns = CodeGenerator.getOffset() + output.getType() + " " + alias_tmp + " = null;\n";
             } else {
                 for (int k = 0; k < output.getChildVars().size(); k++) {
