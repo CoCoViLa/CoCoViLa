@@ -173,7 +173,7 @@ class Rel implements Serializable {
             if (var.getField().isAlias()) {
                 String alias_tmp = getAliasTmpName( var );
 
-                if (var.getChildVars().size() > 0) {
+                if (!var.getChildVars().isEmpty()) {
 
                     outputString = ((Alias)var.getField()).getType()
                             + " " + alias_tmp + " ";
@@ -367,7 +367,7 @@ class Rel implements Serializable {
         	        
         	        cast += "(";
         	            
-        	        String type = getOutputs().iterator().next().getType();
+        	        String type = getFirstOutput().getType();
         	        
         	        TypeToken token = TypeToken.getTypeToken( type );
         	        
@@ -429,7 +429,7 @@ class Rel implements Serializable {
             	
             	String alias_tmp = getAliasTmpName( input );
                 
-                if ( ((Alias)input.getField()).isDeclaration() ) {
+                if ( input.getChildVars().isEmpty() && !((Alias)input.getField()).isInitialized() ) {
                     assigns = input.getType() + " " + alias_tmp + " = null;\n";
                     assigns += CodeGenerator.getOffset();
                 } else {
@@ -490,33 +490,29 @@ class Rel implements Serializable {
         	
             String alias_tmp = getAliasTmpName( output );
             
-            if ( ((Alias)output.getField()).isDeclaration() ) {
-                assigns = CodeGenerator.getOffset() + output.getType() + " " + alias_tmp + " = null;\n";
-            } else {
-                for (int k = 0; k < output.getChildVars().size(); k++) {
-                	Var varFromAlias = output.getChildVars().get(k);
-                    
-                	if( varFromAlias.getField().isVoid() ) continue;
-                	
-                	String varType = varFromAlias.getType();
-            		TypeToken token = TypeToken.getTypeToken( varType );
-            		
-            		if ( token == TypeToken.TOKEN_OBJECT ) {
-            			if( varFromAlias.getField().isAlias() ) {
-            				assigns += CodeGenerator.getVarsFromAlias( varFromAlias, 
-            						CodeGenerator.getAliasTmpName( varFromAlias.getName() ),
-            						alias_tmp, k );
-            			} else {
-            				assigns += CodeGenerator.getOffset() + varFromAlias.getFullName() + " = (" + varType + ")" 
-            						+ alias_tmp + "[" + k + "];\n";
-            			}
-            		} else {
-            			assigns += CodeGenerator.getOffset()
-            					+ varFromAlias.getFullName() + " = ((" + token.getObjType() + ")" 
-            					+ alias_tmp + "[" + k + "])." + token.getMethod() + "();\n";
-            		}
-                    
+            for (int k = 0; k < output.getChildVars().size(); k++) {
+                Var varFromAlias = output.getChildVars().get(k);
+
+                if( varFromAlias.getField().isVoid() ) continue;
+
+                String varType = varFromAlias.getType();
+                TypeToken token = TypeToken.getTypeToken( varType );
+
+                if ( token == TypeToken.TOKEN_OBJECT ) {
+                    if( varFromAlias.getField().isAlias() ) {
+                        assigns += CodeGenerator.getVarsFromAlias( varFromAlias, 
+                                CodeGenerator.getAliasTmpName( varFromAlias.getName() ),
+                                alias_tmp, k );
+                    } else {
+                        assigns += CodeGenerator.getOffset() + varFromAlias.getFullName() + " = (" + varType + ")" 
+                        + alias_tmp + "[" + k + "];\n";
+                    }
+                } else {
+                    assigns += CodeGenerator.getOffset()
+                    + varFromAlias.getFullName() + " = ((" + token.getObjType() + ")" 
+                    + alias_tmp + "[" + k + "])." + token.getMethod() + "();\n";
                 }
+
             }
             assigns += CodeGenerator.getOffset();
         }

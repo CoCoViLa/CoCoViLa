@@ -4,6 +4,7 @@ import java.util.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 import static ee.ioc.cs.vsle.synthesize.Synthesizer.*;
 
@@ -363,6 +364,11 @@ public class CodeGenerator {
 
     // getAliasSubtaskInput
     public static String getVarsFromAlias( Var aliasVar, String aliasTmp, String parentVar, int num ) {
+        
+        if( aliasVar.getChildVars().isEmpty() ) {
+            return "";
+        }
+        
         String aliasType = aliasVar.getType();
 
         String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType + ")" + parentVar + "[" + num + "];\n";
@@ -431,6 +437,11 @@ public class CodeGenerator {
 
         String aliasType = aliasVar.getType();
         String before = "";
+        
+        if( aliasVar.getChildVars().isEmpty() && !((Alias)aliasVar.getField()).isInitialized() ) {
+            return offset + aliasType + " " + aliasTmp + " = null;\n";
+        }
+
         String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
 
         int count = 0;

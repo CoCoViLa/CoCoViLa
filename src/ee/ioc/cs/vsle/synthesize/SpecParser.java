@@ -475,7 +475,6 @@ public class SpecParser {
                         if( statement.isDeclaration() ) {
                             if ( !containsVar( annClass.getFields(), name ) ) {
                                 alias = new Alias( name, statement.getComponentType() );
-                                alias.setDeclaration( true );
                                 annClass.addField( alias );
                                 continue;
                             }
@@ -485,11 +484,13 @@ public class SpecParser {
 
                         if ( var != null && !var.isAlias() ) {
                             s_parseErrors.add( "Variable " + name + " declared more than once in class " + className );
-                            throw new SpecParseException( "Variable " + name + " declared more than once in class " + className );
+                            throw new SpecParseException( "Variable " + name + " declared more than once in class " + 
+                                    className + ", line: " + lt.getOrigSpecLine() );
                         } else if ( var != null && var.isAlias() ) {
                             alias = (Alias) var;
-                            if ( !alias.isDeclaration() ) {
-                                throw new SpecParseException( "Alias " + name + " cannot be overriden, class " + className );
+                            if ( alias.isInitialized() ) {
+                                throw new SpecParseException( "Alias " + name + " has already been initialized and cannot be overriden, class " + 
+                                        className + ", line: " + lt.getOrigSpecLine() );
                             }
                         } else if ( statement.isAssignment() ) {
                             // if its an assignment, check if alias has already
@@ -529,6 +530,12 @@ public class SpecParser {
 
                                     aliasDeclaration = (Alias) parentClass.getFieldByName( leftFromName );
 
+                                    if( aliasDeclaration.isInitialized() ) {
+                                        throw new SpecParseException( "Alias " + aliasDeclaration.getName() + 
+                                                " has already been initialized and cannot be overriden, class " + 
+                                                className + ", line: " + lt.getOrigSpecLine() );
+                                    }
+                                    
                                     // if everything is ok, create alias
                                     alias = new Alias( name, aliasDeclaration.getVarType() );
 
@@ -565,8 +572,11 @@ public class SpecParser {
                                 db.p( classRelation );
                         }
 
+                        alias.setInitialized( true );
+                        
                         if ( aliasDeclaration != null ) {
                             aliasDeclaration.setDeclaredValues( alias );
+                            aliasDeclaration.setInitialized( true );
                         }
 
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {

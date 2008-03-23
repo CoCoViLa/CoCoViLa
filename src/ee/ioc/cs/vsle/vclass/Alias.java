@@ -12,7 +12,7 @@ public class Alias extends ClassField {
 	private static final long	serialVersionUID	= 1L;
 	private boolean isWildcard = false;
 	private String wildcardVar;
-	private boolean isDeclaration = false;
+	private boolean isInitialized = false;
 	
 	/**
 	 * Class constructor.
@@ -189,16 +189,18 @@ public class Alias extends ClassField {
 	}
 
     /**
-     * @return the isDeclaration
+     * Alias is not initialized if it has been declared, 
+     * but no components have been assigned
+     * @return
      */
-    public boolean isDeclaration() {
-        return isDeclaration;
+    public boolean isInitialized() {
+        return isInitialized;
     }
 
     /**
-     * @param isDeclaration the isDeclaration to set
+     * @param isInitialized
      */
-    public void setDeclaration( boolean isDeclaration ) {
-        this.isDeclaration = isDeclaration;
+    public void setInitialized(boolean isInitialized) {
+        this.isInitialized = isInitialized;
     }
 }
