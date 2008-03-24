@@ -576,7 +576,6 @@ public class SpecParser {
                         
                         if ( aliasDeclaration != null ) {
                             aliasDeclaration.setDeclaredValues( alias );
-                            aliasDeclaration.setInitialized( true );
                         }
 
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {

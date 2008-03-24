@@ -448,6 +448,8 @@ public class ProblemCreator {
     	//corresponding Var may have already been initialized
     	if( ( var = problem.getAllVars().get( parent.getFullNameForConcat() + alias.getName() ) ) == null ) {
     		var = new Var( alias, parent );
+    	} else {
+    	    var.swapAliasDeclaration( alias );
     	}
     	
     	if( alias.isWildcard() ) {

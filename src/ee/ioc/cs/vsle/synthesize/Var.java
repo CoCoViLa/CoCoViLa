@@ -6,7 +6,7 @@ import java.io.Serializable;
 import java.util.*;
 
 import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.vclass.ClassField;
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * <p>Title: ee.ioc.cs.editor.synthesize.Var</p>
@@ -54,6 +54,13 @@ public class Var implements //Cloneable,
 			throw new IllegalStateException( "getChildVars(): Var " + getName() + " is not alias, but " + getType() );
 		}
     	return vars;
+    }
+    
+    public void swapAliasDeclaration( Alias alias ) {
+        if( !field.isAlias() || ((Alias)field).isInitialized() || !alias.isInitialized() ) {
+            throw new IllegalStateException( "Only uninitialized alias declaration can be swapped with corresponding initialized alias!" );
+        }
+        field = alias;
     }
     
     public void addVar( Var var ) {
