@@ -175,19 +175,6 @@ public class Alias extends ClassField {
 		return wildcardVar;
 	}
 	
-	/** 
-	 * this is used when the alias declaration is given in two lines, e.g.
-	 * alias x;
-	 * x = [a,b];
-	 */
-	public void setDeclaredValues( Alias real ) {
-		isWildcard = real.isWildcard;
-		isInput = real.isInput;
-		isGoal = real.isGoal;
-		isStatic = real.isStatic;
-		type = real.type;
-	}
-
     /**
      * Alias is not initialized if it has been declared, 
      * but no components have been assigned

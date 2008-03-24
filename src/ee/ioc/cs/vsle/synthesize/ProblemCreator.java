@@ -466,7 +466,7 @@ public class ProblemCreator {
         
         problem.addVar( var );
         
-        //if alias has no elements it is always computable
+        //if an alias has been initialized with an empty list of elements it is always computable
         if( var.getChildVars().isEmpty() && alias.isInitialized() ) {
             problem.getKnownVars().add( var );
         }

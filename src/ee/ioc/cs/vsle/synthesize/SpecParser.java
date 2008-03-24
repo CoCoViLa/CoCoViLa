@@ -466,18 +466,13 @@ public class SpecParser {
                         LineType.Alias statement = ( LineType.Alias)lt.getStatement();
 
                         Alias alias = null;
-                        // required for two-line alias declaration, mostly for
-                        // multiport feature
-                        Alias aliasDeclaration = null;
                         
                         String name = statement.getName();
                         
-                        if( statement.isDeclaration() ) {
-                            if ( !containsVar( annClass.getFields(), name ) ) {
-                                alias = new Alias( name, statement.getComponentType() );
-                                annClass.addField( alias );
-                                continue;
-                            }
+                        if( statement.isDeclaration() && !containsVar( annClass.getFields(), name ) ) {
+                            alias = new Alias( name, statement.getComponentType() );
+                            annClass.addField( alias );
+                            continue;
                         }
 
                         ClassField var = getVar( name, annClass.getFields() );
@@ -528,7 +523,7 @@ public class SpecParser {
                                                 + " is not declared in class " + parentClass, lt.getOrigSpecLine() );
                                     }
 
-                                    aliasDeclaration = (Alias) parentClass.getFieldByName( leftFromName );
+                                    Alias aliasDeclaration = (Alias) parentClass.getFieldByName( leftFromName );
 
                                     if( aliasDeclaration.isInitialized() ) {
                                         throw new SpecParseException( "Alias " + aliasDeclaration.getName() + 
@@ -573,10 +568,6 @@ public class SpecParser {
                         }
 
                         alias.setInitialized( true );
-                        
-                        if ( aliasDeclaration != null ) {
-                            aliasDeclaration.setDeclaredValues( alias );
-                        }
 
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {
                         LineType.Equation statement = ( LineType.Equation)lt.getStatement();
