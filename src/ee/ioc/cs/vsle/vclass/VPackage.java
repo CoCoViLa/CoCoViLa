@@ -70,13 +70,14 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
 		return null;
 	} // getClass
 
+        /**
+         * Creates suitable Java class name for scheme's metaclass
+         * 
+         * @return package class name
+         */
         public String getPackageClassName() {
-            String packClassName = getName().substring( 0, 1 ).toUpperCase()
-                                   .concat( getName().substring( 1, getName().length() ) );
-
-            Pattern pattern = Pattern.compile( "[ \t]+" );
-            Matcher matcher = pattern.matcher( packClassName );
-            packClassName = matcher.replaceAll( "" );
+            //all non word chars are removed and then if the first char is digit or the string is empty it is replaced by "_"
+            String packClassName = getName().replaceAll( "\\W+", "" ).replaceFirst( "^[0-9]|^$", "_" );
 
             int i = 0;
 
@@ -84,7 +85,8 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
                 packClassName = packClassName + "_" + i++;
             }
 
-            return packClassName;
+            //if first char is in lower case, make it upper case
+            return packClassName.replaceFirst( "^\\p{javaLowerCase}", packClassName.substring( 0, 1 ).toUpperCase() );
         }
 
         /* (non-Javadoc)
