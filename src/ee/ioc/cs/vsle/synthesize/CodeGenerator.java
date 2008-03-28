@@ -6,10 +6,15 @@ import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
-import static ee.ioc.cs.vsle.synthesize.Synthesizer.*;
 
 public class CodeGenerator {
 
+    public static final String COMPUTE_ARG_NAME = "cocovilaArgs";
+    public static final String SPEC_OBJECT_NAME = "cocovilaSpecObjectName";
+    public static final String INDEPENDENT_SUBTASK = "IndependentSubtask";
+    public static final String GENERATED_INTERFACE_NAME = "IComputable";
+    public static final String SUBTASK_INTERFACE_NAME = "Subtask";
+    
     private static String      offset = "";
 
     public static final String OT_TAB = "    ";
@@ -46,7 +51,7 @@ public class CodeGenerator {
         StringBuilder alg = new StringBuilder();
         cOT( OFFSET.OT_INC, 2 );
 
-        genAssumptions( alg, problem.getAssumptions() );
+        genInputs( alg, problem.getAssumptions(), COMPUTE_ARG_NAME );
 
         for ( Rel rel : algRelList ) {
 
@@ -81,31 +86,6 @@ public class CodeGenerator {
         return buf.toString();
     }
 
-    private void genAssumptions( StringBuilder alg, List<Var> assumptions ) {
-        if ( assumptions.isEmpty() ) {
-            return;
-        }
-
-        StringBuilder result = new StringBuilder( "" );
-        int i = 0;
-        for ( Var var : assumptions ) {
-
-            String varType = var.getType();
-            TypeToken token = TypeToken.getTypeToken( varType );
-
-            result.append( offset );
-
-            if ( token == TypeToken.TOKEN_OBJECT ) {
-                result.append( var.getFullName() ).append( " = (" ).append( varType ).append( ")args[" ).append( i++ ).append( "];\n" );
-            } else {
-                result.append( var.getFullName() ).append( " = ((" ).append( token.getObjType() ).append( ")args[" ).append( i++ ).append( "])." )
-                        .append( token.getMethod() ).append( "();\n" );
-            }
-        }
-
-        alg.append( result );
-    }
-
     private void genSubTasks( Rel rel, StringBuilder alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars, Problem problem ) {
 
         List<String> subInstanceNames = new ArrayList<String>();
@@ -137,7 +117,9 @@ public class CodeGenerator {
 
                 StringBuilder bufSbtBody = new StringBuilder();
 
-                bufSbtBody.append( same() ).append( getRunMethodSignature() ).append( " {\n" );
+                String subtaskInputArrayName = "cocovilaSubtaskInput" + subNum;
+                
+                bufSbtBody.append( same() ).append( getRunMethodSignature( subtaskInputArrayName ) ).append( " {\n" );
 
                 List<Var> subInputs = subtask.getInputs();
                 List<Var> subOutputs = subtask.getOutputs();
@@ -149,7 +131,8 @@ public class CodeGenerator {
                 right();
                 bufSbtBody.append( same() ).append( "//Subtask: " ).append( subtask ).append( "\n" );
                 // apend subtask inputs to algorithm
-                bufSbtBody.append( getSubtaskInputs( subInputs ) );
+                genInputs( bufSbtBody, subInputs, subtaskInputArrayName );
+                
                 for ( int i = 0; i < subAlg.size(); i++ ) {
                     Rel trel = subAlg.get( i );
                     if ( RuntimeProperties.isLogDebugEnabled() )
@@ -335,31 +318,44 @@ public class CodeGenerator {
         return buf.toString();
     }
 
-    private String getSubtaskInputs( List<Var> vars ) {
+    /**
+     * Generates code for value extraction from assumptions or subtask input object array
+     * 
+     * @param alg
+     * @param vars
+     * @param inputArgName
+     */
+    private void genInputs( StringBuilder alg, List<Var> vars, String inputArgName ) {
+        
+        if ( vars.isEmpty() ) {
+            return;
+        }
 
-        String result = "";
-
+        StringBuilder result = new StringBuilder( "" );
+        
         for ( int i = 0; i < vars.size(); i++ ) {
             Var var = vars.get( i );
+
             if ( var.getField().isAlias() ) {
                 String aliasTmp = getAliasTmpName( var.getName() );
-                result += getVarsFromAlias( var, aliasTmp, "in", i );
+                result.append( getVarsFromAlias( var, aliasTmp, inputArgName, i ) );
                 continue;
             }
-
+            
             String varType = var.getType();
             TypeToken token = TypeToken.getTypeToken( varType );
 
-            result += offset;
+            result.append( offset );
 
             if ( token == TypeToken.TOKEN_OBJECT ) {
-                result += var.getFullName() + " = (" + varType + ")in[" + i + "];\n";
+                result.append( var.getFullName() ).append( " = (" ).append( varType ).append( ")" + inputArgName + "[" ).append( i ).append( "];\n" );
             } else {
-                result += var.getFullName() + " = ((" + token.getObjType() + ")in[" + i + "])." + token.getMethod() + "();\n";
+                result.append( var.getFullName() ).append( " = ((" ).append( token.getObjType() ).append( ")" + inputArgName + "[" ).append( i ).append( "])." )
+                        .append( token.getMethod() ).append( "();\n" );
             }
         }
 
-        return result + "\n";
+        alg.append( result ).append( "\n" );
     }
 
     // getAliasSubtaskInput
@@ -519,5 +515,14 @@ public class CodeGenerator {
         public String getCode() {
             return code;
         }
+    }
+    
+    
+    public static String getRunMethodSignature( String argName ) {
+        return "public Object[] run(Object[] " + argName + ") throws Exception";
+    }
+    
+    public static String getComputeMethodSignature( String argName ) {
+        return "public void compute( Object... " + argName + " )";
     }
 }

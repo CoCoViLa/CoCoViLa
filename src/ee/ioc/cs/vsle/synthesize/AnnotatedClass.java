@@ -15,9 +15,6 @@ import java.util.*;
  */
 public class AnnotatedClass {
 
-    public static final String SPEC_OBJECT_NAME = "cocovilaSpecObjectName";
-    public static final String INDEPENDENT_SUBTASK = "IndependentSubtask";
-	
 	private String name;
 	private ClassList superClasses = new ClassList();
 	//relations declared in the specification of this class and in specifications of superclasses
@@ -114,7 +111,7 @@ public class AnnotatedClass {
 	void addSuperClass( AnnotatedClass clas ) {
 		
 		for( ClassField cf : clas.getFields() ) {
-			if( !SPEC_OBJECT_NAME.equals( cf.getName() ) ) {
+			if( !CodeGenerator.SPEC_OBJECT_NAME.equals( cf.getName() ) ) {
 				allFields.add( cf );
 			}
 		}

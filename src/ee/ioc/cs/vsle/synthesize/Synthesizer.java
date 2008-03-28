@@ -20,9 +20,6 @@ public class Synthesizer {
 			"[a-zA-Z_0-9-.]+[ \t\n]*(super ([ a-zA-Z_0-9-,]+ ))?" +
 			"[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *";
 
-    public static final String GENERATED_INTERFACE_NAME = "IComputable";
-    public static final String SUBTASK_INTERFACE_NAME = "Subtask";
-
     private Synthesizer() {}
       
     /**
@@ -93,7 +90,9 @@ public class Synthesizer {
             
         }
        
-        prog.append( "\n" ).append(  CodeGenerator.OT_TAB ).append( getComputeMethodSignature() ).append( " {\n" );
+        prog.append( "\n" ).append(  CodeGenerator.OT_TAB )
+            .append( CodeGenerator.getComputeMethodSignature( CodeGenerator.COMPUTE_ARG_NAME) )
+            .append( " {\n" );
         prog.append( algorithm );
         prog.append( CodeGenerator.OT_TAB ).append( "}\n\n" );
         
@@ -114,7 +113,7 @@ public class Synthesizer {
             fileString = matcher.replaceAll("public class " + mainClassName
             		+ (matcher.start(1) < matcher.end(1) 
             				? " extends " + matcher.group(1) : "")
-            		+ " implements " + GENERATED_INTERFACE_NAME);
+            		+ " implements " + CodeGenerator.GENERATED_INTERFACE_NAME);
         }
 
         pattern = Pattern.compile(RE_SPEC, Pattern.DOTALL);
@@ -219,12 +218,5 @@ public class Synthesizer {
             ex.printStackTrace();
         }
     }
-   
-    public static String getRunMethodSignature() {
-        return "public Object[] run(Object[] in) throws Exception";
-    }
-    
-    public static String getComputeMethodSignature() {
-    	return "public void compute( Object... args )";
-    }   
+
 }

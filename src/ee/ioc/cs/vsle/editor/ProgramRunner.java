@@ -294,7 +294,7 @@ public class ProgramRunner {
 
         for ( Var var : foundVars ) {
 
-            if ( var.getField().isVoid() || AnnotatedClass.SPEC_OBJECT_NAME.equals( var.getName() ) ) {
+            if ( var.getField().isVoid() || CodeGenerator.SPEC_OBJECT_NAME.equals( var.getName() ) ) {
                 continue;
             }
 

@@ -229,9 +229,9 @@ public class ProblemCreator {
         //remove annotated class for current context...
         newClassList.remove( classes.getType( TYPE_THIS ) );
         //[current context can be either THIS of the main scheme class or another independent subtask]
-        newClassList.remove( classes.getType( AnnotatedClass.INDEPENDENT_SUBTASK ) );
+        newClassList.remove( classes.getType( CodeGenerator.INDEPENDENT_SUBTASK ) );
         //...and create a new one as new root context
-        AnnotatedClass newAnnClass = new AnnotatedClass( AnnotatedClass.INDEPENDENT_SUBTASK );
+        AnnotatedClass newAnnClass = new AnnotatedClass( CodeGenerator.INDEPENDENT_SUBTASK );
         newAnnClass.addField( context );
         ClassRelation newCR = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, subtask.getSpecLine() );
 
@@ -248,7 +248,7 @@ public class ProblemCreator {
         newAnnClass.addClassRelation( newCR );
         newClassList.add(newAnnClass);
         Problem contextProblem = 
-        	new Problem( new Var( new ClassField( TYPE_THIS, AnnotatedClass.INDEPENDENT_SUBTASK ), null ) );
+        	new Problem( new Var( new ClassField( TYPE_THIS, CodeGenerator.INDEPENDENT_SUBTASK ), null ) );
 
         makeProblemImpl( newClassList, contextProblem.getRootVar(), contextProblem, indpSubtasks, new HashMap<String, Integer>() );
 
@@ -364,7 +364,7 @@ public class ProblemCreator {
             }
             
             Set<String> fields = new HashSet<String>();
-            fields.add( AnnotatedClass.SPEC_OBJECT_NAME );
+            fields.add( CodeGenerator.SPEC_OBJECT_NAME );
             
             for ( AnnotatedClass commonType : commonTypes ) {
                 
