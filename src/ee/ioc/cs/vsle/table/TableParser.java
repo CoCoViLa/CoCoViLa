@@ -1,9 +1,11 @@
 package ee.ioc.cs.vsle.table;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.util.*;
 
+import javax.swing.SwingUtilities;
 import javax.xml.parsers.*;
 
 import org.w3c.dom.*;
@@ -81,14 +83,36 @@ class TableParser {
         } catch ( SAXException e ) {
             collector.collectDiagnostic( "SAXException: " + e.getMessage(), true );
         }
-        
-        if( collector.hasProblems() 
-                && !DiagnosticsCollector.promptLoad( Editor.getInstance(), collector, 
-                        "Error parsing table file " + tableFile.getName(), tableFile.getName() ) || document == null ) {
-            
-            throw new TableException( "Error parsing table file " + tableFile.getName() );
+
+        if (collector.hasProblems()) {
+            final boolean[] rv = new boolean[] { false };
+            try {
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    public void run() {
+                        rv[0] = DiagnosticsCollector.promptLoad(
+                                Editor.getInstance(), collector,
+                                "Error parsing table file " 
+                                    + tableFile.getName(),
+                                tableFile.getName());
+                    }
+                });
+            } catch (InterruptedException e) {
+                db.p(e);
+            } catch (InvocationTargetException e) {
+                db.p(e);
+            }
+
+            if (!rv[0]) {
+                throw new TableException("Error parsing table file " 
+                        + tableFile.getName());
+            }
         }
-        
+
+        if (document == null) {
+            throw new TableException("Error parsing table file " 
+                    + tableFile.getName());
+        }
+
         Element root = document.getDocumentElement();
         
         NodeList list = root.getElementsByTagName( "table" );
