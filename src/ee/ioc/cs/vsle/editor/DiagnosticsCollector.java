@@ -67,7 +67,8 @@ public class DiagnosticsCollector {
     /**
      * if there are fatal messages, promptLoad() will always return false
      * 
-     * @return
+     * @return false when there are no "fatal" messages collected,
+     *         true otherwise
      */
     public boolean hasFatalCases() {
         return fatalMessagesCount > 0;
@@ -82,9 +83,10 @@ public class DiagnosticsCollector {
      * @param collector
      * @param title
      * @param source
-     * @return
+     * @return true when the user chose to continue, false otherwise
      */
     public static boolean promptLoad( Component relative, DiagnosticsCollector collector, String title, String source ) {
+        assert SwingUtilities.isEventDispatchThread();
         final JDialog dialog = new JDialog( Editor.getInstance() );
         dialog.setModal( true );
         dialog.setLocationRelativeTo( relative );
