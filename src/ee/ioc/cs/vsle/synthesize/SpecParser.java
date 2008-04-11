@@ -65,6 +65,9 @@ public class SpecParser {
             }
         } catch ( Exception e ) {
             db.p( e );
+        } catch ( SpecParseException e ) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 
@@ -82,8 +85,9 @@ public class SpecParser {
     /**
      * @return ArrayList of lines in specification
      * @param text Secification text as String
+     * @throws SpecParseException 
      */
-    static ArrayList<String> getSpec( String text, boolean isRefinedSpec ) throws IOException {
+    static ArrayList<String> getSpec( String text, boolean isRefinedSpec ) throws IOException, SpecParseException {
         if ( !isRefinedSpec ) {
             text = refineSpec( text );
         }
@@ -273,8 +277,9 @@ public class SpecParser {
      * 
      * @return specification text
      * @param fileString a (Java) file containing the specification
+     * @throws SpecParseException 
      */
-    private static String refineSpec( String fileString ) throws IOException {
+    private static String refineSpec( String fileString ) throws IOException, SpecParseException {
         Matcher matcher;
 
         // remove comments before removing line brake \n
@@ -304,9 +309,10 @@ public class SpecParser {
                 }
                 sc += ";\n";
             }
-            fileString = sc + matcher.group( 3 );
+            return sc + matcher.group( 3 );
         }
-        return fileString;
+        
+        throw new SpecParseException( "Specification parsing error" );
     }
 
     private static ArrayList<String> s_parseErrors = new ArrayList<String>();
@@ -736,13 +742,12 @@ public class SpecParser {
      * @param classList
      * @param type
      * @return
-     * @throws MutualDeclarationException
      * @throws IOException
+     * @throws SpecParseException 
      * @throws SpecParseException
-     * @throws EquationException
      */
     private static boolean checkSpecClass( String className, String path, Set<String> checkedClasses, ClassList classList,
-            String type ) throws MutualDeclarationException, IOException, SpecParseException, EquationException {
+            String type ) throws IOException, SpecParseException {
         if ( RuntimeProperties.isLogDebugEnabled() )
             db.p( "Checking existence of " + path + type + ".java" );
         if ( checkedClasses.contains( type ) ) {
@@ -765,7 +770,11 @@ public class SpecParser {
                 checkedClasses.add( type );
                 String s = FileFuncs.getFileContents(file);
 
-                classList.addAll( parseSpecificationImpl( refineSpec( s ), type, null, path, checkedClasses ) );
+                try {
+                    classList.addAll( parseSpecificationImpl( refineSpec( s ), type, null, path, checkedClasses ) );
+                } catch ( SpecParseException e ) {
+                    throw new SpecParseException( "Class \"" + type + "\": " + e.excDesc );
+                }
                 checkedClasses.remove( type );
             }
         }
@@ -873,8 +882,9 @@ public class SpecParser {
 
     /**
      * @return list of fields declared in a specification.
+     * @throws SpecParseException 
      */
-    public static Collection<ClassField> getFields( String path, String fileName, String ext ) throws IOException {
+    public static Collection<ClassField> getFields( String path, String fileName, String ext ) throws IOException, SpecParseException {
         Map<String, ClassField> fields = new LinkedHashMap<String, ClassField>();
         String s = FileFuncs.getFileContents(new File(path, fileName + ext));
         ArrayList<String> specLines = getSpec( s, false );

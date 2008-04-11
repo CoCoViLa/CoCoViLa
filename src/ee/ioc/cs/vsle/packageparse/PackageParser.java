@@ -724,6 +724,8 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                     } catch ( IOException e ) {
 
                         collector.collectDiagnostic( "Class " + newClass.name + " specified in package does not exist." );
+                    } catch ( SpecParseException e ) {
+                        collector.collectDiagnostic( "Unable to parse the specification of class " + newClass.name );
                     }
                 }
             }
