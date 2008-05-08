@@ -91,7 +91,7 @@ public class SpecParser {
         if ( !isRefinedSpec ) {
             text = refineSpec( text );
         }
-        String[] s = text.trim().split( ";", -1 );
+        String[] s = text.trim().split( ";", 0 );
         ArrayList<String> a = new ArrayList<String>();
 
         for ( int i = 0; i < s.length; i++ ) {
