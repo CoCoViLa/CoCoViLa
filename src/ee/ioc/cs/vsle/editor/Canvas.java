@@ -1119,14 +1119,14 @@ public class Canvas extends JPanel {
             th.startDocument();
 
             AttributesImpl attrs = new AttributesImpl();
-            attrs.addAttribute( null, null, "package", StringUtil.CDATA, vPackage.getName() );
+            attrs.addAttribute("", "", "package", StringUtil.CDATA, vPackage.getName());
 
             GObj superClass = scheme.getSuperClass();
             if ( superClass != null ) {
-                attrs.addAttribute( null, null, "superclass", StringUtil.CDATA, superClass.getName() );
+                attrs.addAttribute("", "", "superclass", StringUtil.CDATA, superClass.getName());
             }
 
-            th.startElement( null, null, "scheme", attrs );
+            th.startElement("", "", "scheme", attrs);
 
             for ( GObj obj : objects )
                 obj.toXML( th );
@@ -1134,7 +1134,7 @@ public class Canvas extends JPanel {
             for ( Connection con : connections )
                 con.toXML( th );
 
-            th.endElement( null, null, "scheme" );
+            th.endElement("", "", "scheme");
             th.endDocument();
             posInfo.setText( "Scheme saved to: " + file.getName() );
         } catch ( Exception e ) {
