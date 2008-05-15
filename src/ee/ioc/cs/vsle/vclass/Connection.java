@@ -251,32 +251,33 @@ public class Connection implements Serializable {
 	public void toXML(TransformerHandler th) throws SAXException {
 		AttributesImpl attrs = new AttributesImpl();
 		
-		attrs.addAttribute(null, null, "obj1", StringUtil.CDATA,
+		attrs.addAttribute("", "", "obj1", StringUtil.CDATA,
 				beginPort.getObject().getName());
-		attrs.addAttribute(null, null, "port1", StringUtil.CDATA,
+		attrs.addAttribute("", "", "port1", StringUtil.CDATA,
 				beginPort.toString());
-		attrs.addAttribute(null, null, "obj2", StringUtil.CDATA,
+		attrs.addAttribute("", "", "obj2", StringUtil.CDATA,
 				endPort.getObject().getName());
-		attrs.addAttribute(null, null, "port2", StringUtil.CDATA,
+		attrs.addAttribute("", "", "port2", StringUtil.CDATA,
 				endPort.toString());
 
-		th.startElement(null, null, "connection", attrs);
-		th.startElement(null, null, "breakpoints", null);
+		th.startElement("", "", "connection", attrs);
+		attrs.clear();
+		th.startElement("", "", "breakpoints", attrs);
 
 		if (breakPoints != null) {
 			for (Point point : breakPoints) {
 				attrs.clear();
-				attrs.addAttribute(null, null, "x", StringUtil.CDATA,
+				attrs.addAttribute("", "", "x", StringUtil.CDATA,
 						Integer.toString(point.x));
-				attrs.addAttribute(null, null, "y", StringUtil.CDATA,
+				attrs.addAttribute("", "", "y", StringUtil.CDATA,
 						Integer.toString(point.y));
-				th.startElement(null, null, "point", attrs);
-				th.endElement(null, null, "point");
+				th.startElement("", "", "point", attrs);
+				th.endElement("", "", "point");
 			}
 		}
 
-		th.endElement(null, null, "breakpoints");
-		th.endElement(null, null, "connection");
+		th.endElement("", "", "breakpoints");
+		th.endElement("", "", "connection");
 	}
 
 	/**

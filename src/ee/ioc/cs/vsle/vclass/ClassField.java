@@ -205,22 +205,22 @@ public class ClassField implements Cloneable, Serializable {
 	public void toXML(TransformerHandler th) throws SAXException {
 		AttributesImpl attrs = new AttributesImpl();
 		
-		attrs.addAttribute(null, null, "name", StringUtil.CDATA, getName());
-		attrs.addAttribute(null, null, "type", StringUtil.CDATA, getType());
+		attrs.addAttribute("", "", "name", StringUtil.CDATA, getName());
+		attrs.addAttribute("", "", "type", StringUtil.CDATA, getType());
 
 		if (isInput && !isGoal) {
-			attrs.addAttribute(null, null, "nature", StringUtil.CDATA,
+			attrs.addAttribute("", "", "nature", StringUtil.CDATA,
 					"input");
 		} else if (!isInput && isGoal)
-			attrs.addAttribute(null, null, "nature", StringUtil.CDATA, "goal");
+			attrs.addAttribute("", "", "nature", StringUtil.CDATA, "goal");
 
 		if (watched)
-			attrs.addAttribute(null, null, "watch", StringUtil.CDATA, "true");
+			attrs.addAttribute("", "", "watch", StringUtil.CDATA, "true");
 		if (value != null)
-			attrs.addAttribute(null, null, "value", StringUtil.CDATA, value);
+			attrs.addAttribute("", "", "value", StringUtil.CDATA, value);
 
-		th.startElement(null, null, "field", attrs);
-		th.endElement(null, null, "field");
+		th.startElement("", "", "field", attrs);
+		th.endElement("", "", "field");
 	}
 
 	public String getName() {

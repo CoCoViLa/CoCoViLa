@@ -524,33 +524,34 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     public void toXML( TransformerHandler th ) throws SAXException {
         AttributesImpl attrs = new AttributesImpl();
 
-        attrs.addAttribute( null, null, "name", StringUtil.CDATA, name );
-        attrs.addAttribute( null, null, "type", StringUtil.CDATA, className );
-        attrs.addAttribute( null, null, "static", StringUtil.CDATA, Boolean.toString( isStatic() ) );
+        attrs.addAttribute("", "", "name", StringUtil.CDATA, name);
+        attrs.addAttribute("", "", "type", StringUtil.CDATA, className);
+        attrs.addAttribute("", "", "static", StringUtil.CDATA, Boolean.toString(isStatic()));
 
-        th.startElement( null, null, "object", attrs );
+        th.startElement("", "", "object", attrs);
 
         attrs.clear();
-        attrs.addAttribute( null, null, "x", StringUtil.CDATA, Integer.toString( x ) );
-        attrs.addAttribute( null, null, "y", StringUtil.CDATA, Integer.toString( y ) );
-        attrs.addAttribute( null, null, "width", StringUtil.CDATA, Integer.toString( width ) );
-        attrs.addAttribute( null, null, "height", StringUtil.CDATA, Integer.toString( height ) );
-        attrs.addAttribute( null, null, "xsize", StringUtil.CDATA, Double.toString( Xsize ) );
-        attrs.addAttribute( null, null, "ysize", StringUtil.CDATA, Double.toString( Ysize ) );
-        attrs.addAttribute( null, null, "strict", StringUtil.CDATA, Boolean.toString( isStrict() ) );
+        attrs.addAttribute("", "", "x", StringUtil.CDATA, Integer.toString(x));
+        attrs.addAttribute("", "", "y", StringUtil.CDATA, Integer.toString(y));
+        attrs.addAttribute("", "", "width", StringUtil.CDATA, Integer.toString(width));
+        attrs.addAttribute("", "", "height", StringUtil.CDATA, Integer.toString(height));
+        attrs.addAttribute("", "", "xsize", StringUtil.CDATA, Double.toString(Xsize));
+        attrs.addAttribute("", "", "ysize", StringUtil.CDATA, Double.toString(Ysize));
+        attrs.addAttribute("", "", "strict", StringUtil.CDATA, Boolean.toString(isStrict()));
         if ( angle != 0.0 )
-            attrs.addAttribute( null, null, "angle", StringUtil.CDATA, Double.toString( angle ) );
+            attrs.addAttribute("", "", "angle", StringUtil.CDATA, Double.toString(angle));
 
-        th.startElement( null, null, "properties", attrs );
-        th.endElement( null, null, "properties" );
+        th.startElement("", "", "properties", attrs);
+        th.endElement("", "", "properties");
 
-        th.startElement( null, null, "fields", null );
+        attrs.clear();
+        th.startElement("", "", "fields", attrs);
 
         for ( ClassField field : getFields() )
             field.toXML( th );
 
-        th.endElement( null, null, "fields" );
-        th.endElement( null, null, "object" );
+        th.endElement("", "", "fields");
+        th.endElement("", "", "object");
     }
 
     /**

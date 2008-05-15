@@ -138,42 +138,43 @@ public class RelObj extends GObj {
 	public void toXML(TransformerHandler th) throws SAXException {
 		AttributesImpl attrs = new AttributesImpl();
 		
-		attrs.addAttribute(null, null, "name", StringUtil.CDATA, name);
-		attrs.addAttribute(null, null, "type", StringUtil.CDATA, className);
+		attrs.addAttribute("", "", "name", StringUtil.CDATA, name);
+		attrs.addAttribute("", "", "type", StringUtil.CDATA, className);
 
-		th.startElement(null, null, "relobject", attrs);
+		th.startElement("", "", "relobject", attrs);
 
 		attrs.clear();
-		attrs.addAttribute(null, null, "x", StringUtil.CDATA,
+		attrs.addAttribute("", "", "x", StringUtil.CDATA,
 				Integer.toString(x));
-		attrs.addAttribute(null, null, "y", StringUtil.CDATA,
+		attrs.addAttribute("", "", "y", StringUtil.CDATA,
 				Integer.toString(y));
-		attrs.addAttribute(null, null, "endX", StringUtil.CDATA,
+		attrs.addAttribute("", "", "endX", StringUtil.CDATA,
 				Integer.toString(endX));
-		attrs.addAttribute(null, null, "endY", StringUtil.CDATA,
+		attrs.addAttribute("", "", "endY", StringUtil.CDATA,
 				Integer.toString(endY));
-		attrs.addAttribute(null, null, "angle", StringUtil.CDATA,
+		attrs.addAttribute("", "", "angle", StringUtil.CDATA,
 				Double.toString(angle));
-		attrs.addAttribute(null, null, "width", StringUtil.CDATA,
+		attrs.addAttribute("", "", "width", StringUtil.CDATA,
 				Integer.toString(width));
-		attrs.addAttribute(null, null, "height", StringUtil.CDATA,
+		attrs.addAttribute("", "", "height", StringUtil.CDATA,
 				Integer.toString(height));
-		attrs.addAttribute(null, null, "xsize", StringUtil.CDATA,
+		attrs.addAttribute("", "", "xsize", StringUtil.CDATA,
 				Double.toString(Xsize));
-		attrs.addAttribute(null, null, "ysize", StringUtil.CDATA,
+		attrs.addAttribute("", "", "ysize", StringUtil.CDATA,
 				Double.toString(Ysize));
-		attrs.addAttribute(null, null, "strict", StringUtil.CDATA,
+		attrs.addAttribute("", "", "strict", StringUtil.CDATA,
 				Boolean.toString(isStrict()));
 
-		th.startElement(null, null, "relproperties", attrs);
-		th.endElement(null, null, "relproperties");
-		
-		th.startElement(null, null, "fields", null);
+		th.startElement("", "", "relproperties", attrs);
+		th.endElement("", "", "relproperties");
+
+		attrs.clear();
+		th.startElement("", "", "fields", attrs);
 
 		for (ClassField field: getFields())
 			field.toXML(th);
 
-		th.endElement(null, null, "fields");
-		th.endElement(null, null, "relobject");
+		th.endElement("", "", "fields");
+		th.endElement("", "", "relobject");
 	}
 }
