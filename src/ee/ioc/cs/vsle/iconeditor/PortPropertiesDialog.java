@@ -87,11 +87,10 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			setTitle("Define Port Properties");
 		}
 		
-		getContentPane().add(pnlMain);
-		setSize(new Dimension(220, 150));
-		setResizable(false);
-
+		add(pnlMain);
 		setLocationRelativeTo(editor);
+                setResizable(false);
+                pack();
 
 		bttnCancel.addActionListener(this); // end bttnCancel Action Listener
 
