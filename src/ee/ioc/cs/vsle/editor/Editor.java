@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.editor;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.net.URI;
 import java.util.*;
 import java.util.List;
 
@@ -461,15 +462,31 @@ public class Editor extends JFrame implements ChangeListener {
             // Check if URL is defined, otherwise there is no reason for opening
             // the browser in the first place.
             if ( url != null && url.trim().length() > 0 ) {
-                // Get OS type.
-                String osType = getOsType();
-                // Open URL with OS-specific methods.
-                if ( osType != null && osType.equalsIgnoreCase( "Windows" ) ) {
-                    Runtime.getRuntime().exec( "rundll32 url.dll,FileProtocolHandler " + url );
-                }
+                Desktop.getDesktop().browse(new URI(url));
             }
-        } catch ( Exception e ) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            if (RuntimeProperties.isLogDebugEnabled()) {
+                db.p(e);
+            }
+
+            StringBuilder msg = new StringBuilder();
+            msg.append("A browser could not be launched for opening ");
+            msg.append("the documentation web page.");
+
+            String exMsg = e.getMessage();
+            if (exMsg != null) {
+                msg.append('\n');
+                msg.append(exMsg);
+            }
+
+            msg.append("\nThe documentation can still be found by ");
+            msg.append("browsing to the following URL:\n");
+            msg.append(url);
+
+            JOptionPane.showMessageDialog(Editor.getInstance(),
+                    msg.toString(),
+                    "Error opening documentation",
+                    JOptionPane.ERROR_MESSAGE);
         }
     }
 
