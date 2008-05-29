@@ -12,6 +12,8 @@ import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 /**
+ * Editor window for editing properties (field values, object name, etc)
+ * of visual class instances on the scheme.
  */
 public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		KeyListener {
@@ -84,6 +86,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		
 		lst =  new ComponentAdapter() {
 
+            @Override
             public void componentResized(ComponentEvent e) {
                 
                 Dimension d = getLayout().preferredLayoutSize( ObjectPropertiesEditor.this );
@@ -97,12 +100,9 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
                 } else if ( d.height > resized.height ) {
                     resized.setSize( resized.width, d.height );
                 }
-                
-                if( s_widths == null || controlledObject == null ) {
-                    System.err.println( "shit");
-                }
+
                 s_widths.put( controlledObject.getClassName(), resized.width );
-                
+
                 ObjectPropertiesEditor.this.setSize( resized );
             }
         };
@@ -222,7 +222,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			goalsPane.add(goal);
 			goals.add(goal);
 			
-			ActionListener lst = new ActionListener() {
+			ActionListener chkBoxlst = new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
 					if( e.getSource() == input && input.isSelected() ) {
@@ -237,8 +237,8 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 				}
 			};
 			
-			input.addActionListener(lst);
-			goal.addActionListener(lst);
+			input.addActionListener(chkBoxlst);
+			goal.addActionListener(chkBoxlst);
 		}
 		
 		isStatic = new JCheckBox( "Static", object.isStatic() );
@@ -251,8 +251,8 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		
 		JPanel contentPane = new JPanel();
 		JScrollPane areaScrollPane = new JScrollPane(contentPane,
-				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		        ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+		        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 
 		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 		fullPane.setLayout(new BorderLayout());
@@ -290,11 +290,11 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 	}
 
 	public void keyTyped(KeyEvent e) {
-
+	    // ignored
 	}
 
 	public void keyReleased(KeyEvent e) {
-
+	    // ignored
 	}
 
 	public void keyPressed(KeyEvent e) {
@@ -359,20 +359,35 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			}
 		}
 		if (!inputError) {
-			for (int i = 0; i < textFields.size(); i++) {
-				textField = textFields.get(i);
-				field = primitiveNameList.get(i);
-				field.setWatched( watchFields.get(i).isSelected() );
-				field.setInput( inputs.get(i).isSelected() );
-				field.setGoal( goals.get(i).isSelected() );
-				if (!textField.getText().trim().equals("")) {
 
-					field.setValue(textField.getText());
-				} else {
-					field.setValue(null);
-				}
-			}
-			for (int i = 0; i < comboBoxes.size(); i++) {
+		    // Apply checkbox values to class fields.
+		    // Indexes of textFields and checkboxes do not match
+		    // in case there are array fields.  Therefore, separate
+		    // indexes txtIdx and i are needes. 
+		    int i = 0;
+		    int txtIdx = 0;
+
+		    for (ClassField fld : controlledObject.getFields()) {
+		        if (fld.isArray()) {
+		            fld.setInput(inputs.get(i).isSelected());
+		            fld.setGoal(goals.get(i).isSelected());
+		            i++;
+		        } else if (fld.isPrimitiveOrString()) { 
+		            fld.setWatched(watchFields.get(i).isSelected());
+		            fld.setInput(inputs.get(i).isSelected());
+		            fld.setGoal(goals.get(i).isSelected());
+		            textField = textFields.get(txtIdx);
+		            if (!textField.getText().trim().equals("")) {
+		                fld.setValue(textField.getText());
+		            } else {
+		                fld.setValue(null);
+		            }
+		            txtIdx++;
+		            i++;
+		        }
+		    }
+
+		    for (i = 0; i < comboBoxes.size(); i++) {
 				JComboBox comboBox = comboBoxes.get(i);
 				field = arrayNameList.get(i);
 				//field.setInput( inputs.get(i).isSelected() );
@@ -397,7 +412,8 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		return !inputError;
 	}
 	
-	public void dispose() {
+    @Override
+    public void dispose() {
 		super.dispose();
 		
 		if( lst != null ) {
