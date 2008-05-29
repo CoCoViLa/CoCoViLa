@@ -12,6 +12,7 @@ public class TypeToken implements Comparable<TypeToken> {
     public static final TypeToken TOKEN_SHORT = new TypeToken( 2, TYPE_SHORT, Short.class, short.class, "shortValue" );
     public static final TypeToken TOKEN_LONG = new TypeToken( 4, TYPE_LONG, Long.class, long.class, "longValue" );
     public static final TypeToken TOKEN_BOOLEAN = new TypeToken( 0, TYPE_BOOLEAN, Boolean.class, boolean.class, "booleanValue" );
+    public static final TypeToken TOKEN_STRING = new TypeToken( 0, TYPE_STRING, String.class, null, "" );
     public static final TypeToken TOKEN_OBJECT = new TypeToken( 0, null, null, null, "" );
     
     private String m_type;
@@ -75,7 +76,9 @@ public class TypeToken implements Comparable<TypeToken> {
 			token = TypeToken.TOKEN_LONG;
 		} else if ( varType.equals( TypeToken.TOKEN_BOOLEAN.getType() ) ) {
 			token = TypeToken.TOKEN_BOOLEAN;
-		} else {
+		} else if ( varType.equals( TypeToken.TOKEN_STRING.getType() ) ) {
+            token = TypeToken.TOKEN_STRING;
+        } else {
 			token = TypeToken.TOKEN_OBJECT;
 		}
     	

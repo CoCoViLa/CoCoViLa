@@ -27,6 +27,14 @@ public class TableField {
         return type;
     }
 
+    /**
+     * @param f
+     * @return
+     */
+    public boolean equalsByID( TableField f ) {
+        return id.equals( f.id );
+    }
+    
     @Override
     public boolean equals( Object obj ) {
         return id.equals( ((TableField)obj).id ) && type.equals( ((TableField)obj).type );

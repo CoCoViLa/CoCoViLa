@@ -312,15 +312,14 @@ public class Editor extends JFrame implements ChangeListener {
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
 
-        menuItem = new JMenuItem( Menu.VIEW_THREADS );
-        menuItem.addActionListener( aListener );
-        menu.add( menuItem );
-
         submenu = new JMenu( Menu.MENU_LAF );
         submenu.setMnemonic( KeyEvent.VK_L );
         Look.getInstance().createMenuItems( submenu );
         menu.add( submenu );
         menuBar.add( menu );
+        
+        makeToolsMenu( menuBar );
+        
         menu = new JMenu( Menu.MENU_HELP );
         menu.setMnemonic( KeyEvent.VK_H );
         menuBar.add( menu );
@@ -334,6 +333,7 @@ public class Editor extends JFrame implements ChangeListener {
         menuItem = new JMenuItem( Menu.ABOUT, KeyEvent.VK_A );
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
+        
     }
 
     /**
@@ -397,7 +397,10 @@ public class Editor extends JFrame implements ChangeListener {
         }
     }
 
-    void makeRecentSubMenu( JMenu menu ) {
+    /**
+     * @param menu
+     */
+    private void makeRecentSubMenu( JMenu menu ) {
 
         menu.removeAll();
 
@@ -414,7 +417,10 @@ public class Editor extends JFrame implements ChangeListener {
         }
     }
 
-    void makeSchemeMenu( JMenu menu ) {
+    /**
+     * @param menu
+     */
+    private void makeSchemeMenu( JMenu menu ) {
         menu.removeAll();
 
         // Specification...
@@ -439,17 +445,35 @@ public class Editor extends JFrame implements ChangeListener {
         
         menu.add( new JSeparator() );
 
-        menuItem = new JCheckBoxMenuItem( Menu.SHOW_ALGORITHM, RuntimeProperties.isShowAlgorithm() );
-        menuItem.setToolTipText( "If checked, after planning a window with the synthesized algorithm will be shown" );
-        menuItem.addActionListener( aListener );
-        menu.add( menuItem );
-
         // Options
         menuItem = new JMenuItem( Menu.SCHEMEOPTIONS, KeyEvent.VK_O );
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
     }
 
+    /**
+     * 
+     */
+    private void makeToolsMenu( JMenuBar menuBar ) {
+        
+        JMenu menu = new JMenu( Menu.MENU_TOOLS );
+        menu.setMnemonic( KeyEvent.VK_T );
+        menuBar.add( menu );
+        
+        JMenuItem menuItem = new JMenuItem( Menu.EXPERT_TABLE );
+        menuItem.addActionListener( aListener );
+        menu.add( menuItem );
+        
+        menuItem = new JCheckBoxMenuItem( Menu.SHOW_ALGORITHM, RuntimeProperties.isShowAlgorithm() );
+        menuItem.setToolTipText( "If checked, after planning a window with the synthesized algorithm will be shown" );
+        menuItem.addActionListener( aListener );
+        menu.add( menuItem );
+        
+        menuItem = new JMenuItem( Menu.VIEW_THREADS );
+        menuItem.addActionListener( aListener );
+        menu.add( menuItem );
+    }
+    
     /**
      * Upon platform, use OS-specific methods for opening the URL in required
      * browser.

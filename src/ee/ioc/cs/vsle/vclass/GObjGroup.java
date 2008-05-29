@@ -3,6 +3,8 @@ package ee.ioc.cs.vsle.vclass;
 import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
+
+import ee.ioc.cs.vsle.util.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 public class GObjGroup extends GObj implements Serializable {
@@ -291,7 +293,7 @@ public class GObjGroup extends GObj implements Serializable {
 						s.append(
 							"        " + obj.getName() + "." + field.getName()
 							+ " = {");
-						String[] split = field.value.split( ClassField.ARRAY_TOKEN );
+						String[] split = field.value.split( TypeUtil.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append(split[k]);
@@ -304,7 +306,7 @@ public class GObjGroup extends GObj implements Serializable {
 						s.append(
 							"        " + obj.getName() + "." + field.getName()
 							+ " = {");
-						String[] split = field.value.split( ClassField.ARRAY_TOKEN );
+						String[] split = field.value.split( TypeUtil.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append("\"" + split[k] + "\"");

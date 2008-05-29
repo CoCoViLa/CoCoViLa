@@ -9,6 +9,7 @@ import javax.swing.undo.*;
 
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.iconeditor.*;
+import ee.ioc.cs.vsle.table.gui.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
@@ -319,6 +320,10 @@ public class EditorActionListener implements ActionListener {
                 RuntimeProperties.save();
             } else if ( e.getActionCommand().equals( Menu.VIEW_THREADS ) ) {
                 RunningThreadManager.showDialog();
+            } else if ( e.getActionCommand().equals( Menu.EXPERT_TABLE ) ) {
+                TableFrame frame = new TableFrame();
+                frame.setLocationRelativeTo( Editor.getInstance() );
+                frame.setVisible( true );
             } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
                 new AboutDialog( Editor.getInstance() );
             } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {

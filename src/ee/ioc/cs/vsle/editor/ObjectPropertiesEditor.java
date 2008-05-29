@@ -7,7 +7,7 @@ import java.util.*;
 
 import javax.swing.*;
 
-import ee.ioc.cs.vsle.util.StringUtil;
+import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
@@ -164,7 +164,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 
 				if (field.getValue() != "" && field.getValue() != null) {
 					String[] split = field.getValue().split(
-							ClassField.ARRAY_TOKEN);
+							TypeUtil.ARRAY_TOKEN);
 					for (int j = 0; j < split.length; j++) {
 						comboBox.addItem(split[j]);
 					}
@@ -380,7 +380,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 				String s = "";
 				for (int j = 0; j < comboBox.getItemCount(); j++) {
 					s += (String) comboBox.getItemAt(j)
-							+ ClassField.ARRAY_TOKEN;
+							+ TypeUtil.ARRAY_TOKEN;
 				}
 				if (!s.equals("")) {
 					field.setValue(s);

@@ -82,7 +82,7 @@ public class SpecGenerator implements ISpecGenerator {
 						s.append("\"" + field.getValue() + "\";\n");
 					} else if (field.isPrimitiveArray()) {
 						s.append("{");
-						String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
+						String[] split = field.getValue().split( TypeUtil.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append(split[k]);
@@ -93,7 +93,7 @@ public class SpecGenerator implements ISpecGenerator {
 						
 					} else if (field.isPrimOrStringArray()) {
 						s.append("{");
-						String[] split = field.getValue().split( ClassField.ARRAY_TOKEN );
+						String[] split = field.getValue().split( TypeUtil.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
 								s.append("\"" + split[k] + "\"");

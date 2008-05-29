@@ -17,7 +17,8 @@ public class CustomFileFilter extends FileFilter {
 		JAVA( "java", "Java Source Code (*.java)"), 
 		SYN( "syn", "Java Synthesizer Schemes (*.syn)" ),
 		XML( "xml", "Extensible Markup Language (*.xml)" ),
-		TXT( "txt", "Text Documents (*.txt)" );
+		TXT( "txt", "Text Documents (*.txt)" ),
+		TBL( "tbl", "Expert Table (*.tbl)" );
 		
 		private String description = "";
 		private String extension = "";

@@ -347,7 +347,7 @@ public class CodeGenerator {
 
             result.append( offset );
 
-            if ( token == TypeToken.TOKEN_OBJECT ) {
+            if ( token == TypeToken.TOKEN_OBJECT || token == TypeToken.TOKEN_STRING ) {
                 result.append( var.getFullName() ).append( " = (" ).append( varType ).append( ")" + inputArgName + "[" ).append( i ).append( "];\n" );
             } else {
                 result.append( var.getFullName() ).append( " = ((" ).append( token.getObjType() ).append( ")" + inputArgName + "[" ).append( i ).append( "])." )
@@ -385,7 +385,7 @@ public class CodeGenerator {
                 String tmp = getAliasTmpName( var.getName() );
                 out += getVarsFromAlias( var, tmp, aliasTmp, i );
 
-            } else if ( token == TypeToken.TOKEN_OBJECT ) {
+            } else if ( token == TypeToken.TOKEN_OBJECT || token == TypeToken.TOKEN_STRING ) {
 
                 out += offset + var.getFullName() + " = (" + varType + ")" + aliasTmp + "[" + i + "];\n";
             } else {

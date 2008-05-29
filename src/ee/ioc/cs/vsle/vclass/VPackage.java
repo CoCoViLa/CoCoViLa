@@ -1,13 +1,10 @@
 package ee.ioc.cs.vsle.vclass;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.io.*;
+import java.util.*;
 
-import ee.ioc.cs.vsle.ccl.PackageClassLoader;
-import ee.ioc.cs.vsle.ccl.RunnerClassLoader;
-import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
+import ee.ioc.cs.vsle.ccl.*;
+import ee.ioc.cs.vsle.util.FileFuncs.*;
 
 /**
  * <p>Title: ee.ioc.cs.editor.vclass.VPackage</p>

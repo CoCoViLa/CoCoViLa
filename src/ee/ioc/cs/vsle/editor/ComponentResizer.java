@@ -70,6 +70,7 @@ public class ComponentResizer extends ComponentAdapter {
 			cont.setSize(w, minHeight);
 		}
 
+		comp.repaint();
 	}
 
 }

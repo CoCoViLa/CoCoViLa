@@ -62,7 +62,7 @@ implements ActionListener, KeyListener {
 				comboBox.addActionListener(this);
 				
 				if (var.getField().getValue() != "" && var.getField().getValue() != null) {
-					String[] split = var.getField().getValue().split( ClassField.ARRAY_TOKEN );
+					String[] split = var.getField().getValue().split( TypeUtil.ARRAY_TOKEN );
 					for (int j = 0; j < split.length; j++) {
 						comboBox.addItem(split[j]);
 					}
@@ -170,7 +170,7 @@ implements ActionListener, KeyListener {
 				var = arrayNameList.get(i);
 				String s = "";
 				for (int j = 0; j < comboBox.getItemCount(); j++) {
-					s += (String) comboBox.getItemAt(j) + ClassField.ARRAY_TOKEN;
+					s += (String) comboBox.getItemAt(j) + TypeUtil.ARRAY_TOKEN;
 				}
 				try {
 					args[asumptions.indexOf( var )] = createObjectFromString( var.getType(), s );

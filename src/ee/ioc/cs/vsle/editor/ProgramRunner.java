@@ -541,7 +541,7 @@ public class ProgramRunner {
                                     String[] sar = (String[]) o;
                                     String result = "";
                                     for ( int k = 0; k < sar.length; k++ ) {
-                                        result += sar[k] + ClassField.ARRAY_TOKEN;
+                                        result += sar[k] + TypeUtil.ARRAY_TOKEN;
                                     }
                                     cf.setValue( result );
                                 } else {

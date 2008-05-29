@@ -34,8 +34,6 @@ public class ClassField implements Cloneable, Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	public final static String ARRAY_TOKEN = "%%";
-	
 	public final static int TYPE_VARIABLE = 1;
 	public final static int TYPE_ALIAS = 2;
 	public final static int TYPE_EXCEPTION = 3;

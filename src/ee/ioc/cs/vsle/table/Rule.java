@@ -24,18 +24,22 @@ public class Rule {
      * @param condition
      * @param isNegative
      */
-    private Rule( TableField field, Object value, Condition condition, boolean isNegative ) {
+    private Rule( TableField field, String value, Condition condition, boolean isNegative ) {
         this.field = field;
-        this.value = value;
         this.condition = condition;
         this.negative = isNegative;
+        setValueFromString( value );
     }
     
     /**
      * @param index
      */
-    void addEntry( int index ) {
+    public void addEntry( int index ) {
         entries.add( index );
+    }
+    
+    public void removeEntry( int index ) {
+        entries.remove( index );
     }
     
     /**
@@ -54,15 +58,60 @@ public class Rule {
     /**
      * @return the entries
      */
-    Set<Integer> getEntries() {
+    public Set<Integer> getEntries() {
         return entries;
     }
 
     /**
      * @return the field
      */
-    TableField getField() {
+    public TableField getField() {
         return field;
+    }
+    
+    public boolean isNegative() {
+        return negative;
+    }
+
+    public void setNegative( boolean negative ) {
+        this.negative = negative;
+    }
+
+    public Condition getCondition() {
+        return condition;
+    }
+
+    public void setCondition( Condition condition ) {
+        this.condition = condition;
+    }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public void setValueFromString( String svalue ) {
+
+        String varType = field.getType();
+
+        //the following check is required in order to create an array from svalue
+        if( condition == Condition.COND_IN_ARRAY ) {
+
+            varType += "[]";
+        }
+
+        try {
+            value = TypeUtil.createObjectFromString( varType, svalue );
+        } catch ( Exception e ) {
+            throw new TableException( "Unable to create an object from the string \"" + 
+                    svalue + "\", " + field.toString(), e );
+        }
+
+    }
+
+    @Override
+    public String toString() {
+        return field.getId() + " " + ( negative ? "!" : "" )
+                + condition.getKeyword() + " " + ( condition == Condition.COND_IN_ARRAY ? TypeUtil.toString( value ) : value );
     }
     
     /**
@@ -74,11 +123,7 @@ public class Rule {
      * @return
      * @throws Exception
      */
-    static Rule createRule( TableField var, String cond, String svalue ) {
-        
-        //db.p( "createRule(): " + var + " " + cond + " " + svalue );
-        
-        String varType = var.getType();
+    public static Rule createRule( TableField var, String cond, String svalue ) {
         
         boolean negative = false;
         
@@ -91,24 +136,9 @@ public class Rule {
         Condition condition = Condition.Factory.getCondition( cond );
         
         if( condition == null ) {
-            throw new TableException( "Invalid condition" );
+            throw new TableException( "Invalid condition: " + cond );
         }
         
-        //the following check is required in order to create an array from svalue
-        if( condition == Condition.COND_IN_ARRAY ) {
-            
-            varType += "[]";
-        }
-        
-        Object value;
-        
-        try {
-            value = TypeUtil.createObjectFromString( varType, svalue );
-        } catch ( Exception e ) {
-            throw new TableException( "Unable to create an object from the string value " + 
-                    svalue + ", " + var.toString(), e );
-        }
-        
-        return new Rule( var, value, condition, negative );
+        return new Rule( var, svalue, condition, negative );
     }
 }

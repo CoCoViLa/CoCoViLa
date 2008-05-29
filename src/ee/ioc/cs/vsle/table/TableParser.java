@@ -1,11 +1,10 @@
 package ee.ioc.cs.vsle.table;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.net.*;
 import java.util.*;
 
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.xml.parsers.*;
 
 import org.w3c.dom.*;
@@ -20,17 +19,15 @@ import ee.ioc.cs.vsle.util.*;
  * parse() method takes table file name as input 
  * and returns a set of tables by their ids.
  */
-class TableParser {
+public class TableParser {
 
-    //TODO add functionality for saving tables modified via GUI
-    
     /**
      * @param tableFile absolute path to table.xml
      * @return Map<table id, table>
      */
-    static Map<String, Table> parse( final File tableFile ) {
+    public static Map<String, Table> parse( final File tableFile ) {
         
-        Map<String, Table> tables = new HashMap<String, Table>();
+        Map<String, Table> tables = new LinkedHashMap<String, Table>();
         
         if( tableFile == null || !tableFile.exists() ) {
             return tables;
@@ -86,22 +83,29 @@ class TableParser {
 
         if (collector.hasProblems()) {
             final boolean[] rv = new boolean[] { false };
-            try {
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    public void run() {
-                        rv[0] = DiagnosticsCollector.promptLoad(
-                                Editor.getInstance(), collector,
-                                "Error parsing table file " 
-                                    + tableFile.getName(),
-                                tableFile.getName());
-                    }
-                });
-            } catch (InterruptedException e) {
-                db.p(e);
-            } catch (InvocationTargetException e) {
-                db.p(e);
+            
+            Runnable runnable = new Runnable() {
+                public void run() {
+                    rv[0] = DiagnosticsCollector.promptLoad(
+                            Editor.getInstance(), collector,
+                            "Error parsing table file " 
+                                + tableFile.getName(),
+                            tableFile.getName());
+                }
+            };
+            
+            if( SwingUtilities.isEventDispatchThread() ) {
+                
+                runnable.run();
+                
+            } else {
+                try {
+                    SwingUtilities.invokeAndWait( runnable );
+                } catch (Exception e) {
+                    db.p(e);
+                }
             }
-
+            
             if (!rv[0]) {
                 throw new TableException("Error parsing table file " 
                         + tableFile.getName());
@@ -119,7 +123,7 @@ class TableParser {
         
         for (int i=0; i<list.getLength(); i++) {
             Table t =  createTable( (Element)list.item(i) );
-            tables.put( t.getId(), t );
+            tables.put( t.getTableId(), t );
          }
         
         return tables;
@@ -258,12 +262,12 @@ class TableParser {
                         NamedNodeMap cellAttrs = cell.getAttributes();
                         int colId = Integer.parseInt( cellAttrs.getNamedItem( "id" ).getNodeValue() );
 
-                        table.addDataCell( new Table.DataCell( rowId, colId, 
+                        table.addDataCell( rowId, colId, 
                                 ( cell.getChildNodes().getLength() == 0 ) 
                                     //<cell id="..."/> 
                                     ? null 
                                     //<cell id="...">text</cell>
-                                    : cell.getTextContent() ) );
+                                    : cell.getTextContent() );
                     }
                 }
             }
@@ -300,7 +304,7 @@ class TableParser {
             
             Map<String, Table> tables = parse( new File( "table_test.xml" ) );
             
-            Table t = tables.get( "test" );
+            IStructuralExpertTable t = tables.get( "test" );
             
             Object o =  t.queryTable( new Object[] { 5, 30, false } );
             

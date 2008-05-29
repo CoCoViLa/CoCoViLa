@@ -25,6 +25,8 @@ public class TypeUtil {
 	public static final String TYPE_BOOLEAN = "boolean";
 	public static final String TYPE_CHAR = "char";
 	
+	public final static String ARRAY_TOKEN = "%%";
+	
 	/**
 	 * @param type
 	 * @return true if type is primitive, false otherwise
@@ -136,13 +138,13 @@ public class TypeUtil {
 
         Class<?> clazz = token.getWrapperClass();
 
-        if ( clazz != null ) {
+        if ( type.equals( TYPE_STRING ) ) {
+            return value;
+        } else if ( clazz != null ) {
             Method meth = clazz.getMethod( "valueOf",
                     new Class[] { String.class } );
             Object o = meth.invoke( null, new Object[] { value } );
             return o;
-        } else if ( type.equals( TYPE_STRING ) ) {
-            return value;
         } else if ( isArray( type )
                 && isPrimitiveOrString( getArrayComponentType( type ) ) ) {
 
@@ -151,7 +153,7 @@ public class TypeUtil {
 
             if ( clazz != null ) {
 
-                String[] split = value.split( ClassField.ARRAY_TOKEN );
+                String[] split = value.split( ARRAY_TOKEN );
                 Object primeArray = Array.newInstance( token.getPrimeClass(),
                         split.length );
 
@@ -164,11 +166,67 @@ public class TypeUtil {
                 return primeArray;
             }
             /* equals String[] */
-            return value.split( ClassField.ARRAY_TOKEN );
+            return value.split( ARRAY_TOKEN );
 
         }
 
         return null;
     }
     
+    /**
+     * Creates a string from a given array with elements separated by ARRAY_TOKEN
+     * 
+     * @param array
+     * @return
+     */
+    public static String toTokenString( Object array ) {
+        return toString( array, "", "", ARRAY_TOKEN, "" );
+    }
+    
+    /**
+     * Universal toString() method
+     * 
+     * @param array
+     * @return
+     */
+    public static String toString( Object array ) {
+        return toString( array, "[", "]", ", ", "[]" );
+    }
+    
+    /**
+     * Private toString implementation used for different purposes
+     * 
+     * @param array
+     * @param start
+     * @param end
+     * @param separator
+     * @param empty
+     * @return
+     */
+    private static String toString( Object array, String start, String end, String separator, String empty ) {
+        
+        if( array == null ) {
+            return "null";
+        } else if( !array.getClass().isArray() ) {
+            return array.toString();
+        }
+        
+        int maxLength = Array.getLength( array ) - 1;
+        
+        if( maxLength == -1 ) {
+            return empty;
+        }
+        
+        StringBuilder b = new StringBuilder();
+        b.append(start);        
+        for ( int i = 0;; i++ ) {
+            
+            b.append( String.valueOf( Array.get( array, i ) ) );
+            if( i == maxLength ) {
+                return b.append(end).toString();
+            }
+            b.append(separator);
+        }
+    }
+
 }

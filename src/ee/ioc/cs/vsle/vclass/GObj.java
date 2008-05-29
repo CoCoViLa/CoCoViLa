@@ -344,7 +344,7 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
                 if ( !TypeUtil.isArray( field.type ) ) {
                     field.getDefaultGraphics().drawSpecial( xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value );
                 } else {
-                    String[] split = field.value.split( ClassField.ARRAY_TOKEN );
+                    String[] split = field.value.split( TypeUtil.ARRAY_TOKEN );
                     int textOffset = 0;
                     for ( int j = 0; j < split.length; j++ ) {
                         field.getDefaultGraphics().drawSpecial( xModifier, yModifier + textOffset, getXsize(), getYsize(), g2,
@@ -357,7 +357,7 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
                 if ( !TypeUtil.isArray( field.type ) ) {
                     field.getKnownGraphics().drawSpecial( xModifier, yModifier, getXsize(), getYsize(), g2, field.getName(), field.value );
                 } else {
-                    String[] split = field.value.split( ClassField.ARRAY_TOKEN );
+                    String[] split = field.value.split( TypeUtil.ARRAY_TOKEN );
                     int textOffset = 0;
                     for ( int j = 0; j < split.length; j++ ) {
                         field.getKnownGraphics().drawSpecial( xModifier, yModifier + textOffset, getXsize(), getYsize(), g2,

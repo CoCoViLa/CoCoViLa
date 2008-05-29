@@ -498,7 +498,7 @@ class Rel implements Serializable {
                 String varType = varFromAlias.getType();
                 TypeToken token = TypeToken.getTypeToken( varType );
 
-                if ( token == TypeToken.TOKEN_OBJECT ) {
+                if ( token == TypeToken.TOKEN_OBJECT || token == TypeToken.TOKEN_STRING ) {
                     if( varFromAlias.getField().isAlias() ) {
                         assigns += CodeGenerator.getVarsFromAlias( varFromAlias, 
                                 CodeGenerator.getAliasTmpName( varFromAlias.getName() ),

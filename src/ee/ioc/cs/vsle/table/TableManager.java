@@ -31,7 +31,7 @@ public class TableManager {
      * @param tableId
      * @return
      */
-    public synchronized static Table getTable( Package pack, String tableId ) {
+    public synchronized static IStructuralExpertTable getTable( Package pack, String tableId ) {
         
         if( !tablesByPackages.containsKey( pack ) ) {
             
@@ -56,13 +56,13 @@ public class TableManager {
             tablesByPackages.put( pack, tables );
         }
         
-        Table table = tablesByPackages.get( pack ).get( tableId );
+        IStructuralExpertTable table = tablesByPackages.get( pack ).get( tableId );
         
         if( table != null ) {
             return table;
-        } else {
-            throw new TableException( "No such table: " + tableId );
         }
+        
+        throw new TableException( "No such table: " + tableId );
     }
     
     /**
