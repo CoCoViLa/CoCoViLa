@@ -1739,4 +1739,21 @@ public class Canvas extends JPanel {
         } while ( !objects.isUniqueName( name, obj ) );
         return name;
     }
+
+    /**
+     * Selects the specified object and clears other selections.
+     * An attempt is made to bring the object into visible area.
+     * @param obj the object to be focused; if obj is null all selections
+     * are cleared
+     */
+    public void focusObject(GObj obj) {
+        objects.clearSelected();
+        if (obj != null) {
+            obj.setSelected(true);
+            drawingArea.scrollRectToVisible(
+                    new Rectangle(obj.getX(), obj.getY(),
+                        obj.getRealWidth(), obj.getRealHeight()));
+        }
+        drawingArea.repaint();
+    }
 }
