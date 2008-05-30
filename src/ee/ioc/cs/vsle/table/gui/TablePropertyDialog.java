@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.table.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 /**
  * @author pavelg
@@ -19,7 +20,10 @@ import ee.ioc.cs.vsle.table.*;
 public class TablePropertyDialog extends JDialog {
 
     private boolean isOk = false;
-    private static final Object[] allowedTypes = new Object[] { "String", "int", "double", "boolean" }; //TODO !!!
+    
+    private static final Object[] allowedTypes = new Object[] { 
+        TYPE_STRING, TYPE_INT, TYPE_DOUBLE, TYPE_LONG, TYPE_BOOLEAN, TYPE_FLOAT, TYPE_SHORT, TYPE_BYTE };
+    
     private List<FieldPane> inputFields = new ArrayList<FieldPane>();
     private FieldPane outputField;
     private JPanel inputFieldsPane;
@@ -154,25 +158,6 @@ public class TablePropertyDialog extends JDialog {
         inputFields.clear();
     }
     
-//    /* (non-Javadoc)
-//     * @see java.awt.Dialog#setVisible(boolean)
-//     */
-//    @Override
-//    public void setVisible( boolean b ) {
-//        
-//        if( b ) {
-//            SwingUtilities.invokeLater( new Runnable() {
-//                public void run() {
-//                    System.err.println( "packing" );
-//                    pack();
-//                    System.err.println( "done" );
-//                }
-//            } );
-//        }
-//        System.err.println( "setVisible");
-//        super.setVisible( b );
-//    }TODO
-
     /**
      * @return
      * @throws TableException
