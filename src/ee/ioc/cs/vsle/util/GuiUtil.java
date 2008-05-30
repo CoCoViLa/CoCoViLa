@@ -40,8 +40,26 @@ public final class GuiUtil {
 
         return gbc;
     }
-    
-    
+
+    /**
+     * Resets all parameters except insets to default values.
+     * @param gbc the constraints object to reset
+     */
+    public static final void resetGridBagConstraints(GridBagConstraints gbc) {
+        gbc.gridx = GridBagConstraints.RELATIVE;
+        gbc.gridy = GridBagConstraints.RELATIVE;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+
+        gbc.weightx = 0;
+        gbc.weighty = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.NONE;
+
+        gbc.ipadx = 0;
+        gbc.ipady = 0;
+    }
+
     /**
      * Takes a tooltip from the renderer and returns it 
      * only if the string does NOT fit the bounds of the renderer
