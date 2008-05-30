@@ -18,7 +18,7 @@ import ee.ioc.cs.vsle.util.*;
  * It has two addition GUI components to be layouted separately - 
  * header and pane with control buttons.
  */
-public class RuleTable extends AbstractDestroyableTable {
+public class RuleTable extends JTable {
 
     private RuleTableHeader fixedTableHeader;
     private ControlPanel controlPanel;
@@ -87,9 +87,7 @@ public class RuleTable extends AbstractDestroyableTable {
     /**
      * Clears references
      */
-    @Override
     public void destroy() {
-        setDestroyed();
         
         fixedTableHeader.destroy();
         fixedTableHeader = null;

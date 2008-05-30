@@ -18,7 +18,7 @@ import ee.ioc.cs.vsle.util.*;
  *
  * Data table
  */
-public class DataTable extends AbstractDestroyableTable {
+public class DataTable extends JTable {
 
     private Table expTable;
     private RuleTable hct, vct;
@@ -84,9 +84,7 @@ public class DataTable extends AbstractDestroyableTable {
     /**
      * Clears references
      */
-    @Override
     public void destroy() {
-        setDestroyed();
         
         expTable.removeTableListener( tableListener );
         tableListener = null;

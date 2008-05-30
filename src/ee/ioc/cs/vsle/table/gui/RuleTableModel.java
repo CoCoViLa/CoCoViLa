@@ -50,20 +50,10 @@ public class RuleTableModel extends AbstractTableModel {
     public Boolean getValueAt( int rowIndex, int columnIndex ) {
         if( orientation == HORIZONTAL ) {
             
-//            if( storage.getRowCount() == 0 ) {
-//                fireTableStructureChanged();
-//                return null;
-//            }
-            
             int id = storage.getOrderedRowIds().get( rowIndex );
             
             return new Boolean( storage.getHRules().get( columnIndex ).getEntries().contains( new Integer( id ) ) );
         }
-        
-//        if( storage.getColumnCount() == 0 ) {
-//            fireTableStructureChanged();
-//            return null;
-//        }
         
         int id = storage.getOrderedColumnIds().get( columnIndex );
         
