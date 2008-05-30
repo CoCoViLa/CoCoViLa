@@ -45,7 +45,7 @@ public class Editor extends JFrame implements ChangeListener {
 
     private JCheckBoxMenuItem gridCheckBox;
     private JCheckBoxMenuItem showPortCheckBox;
-    
+
     /**
      * Class constructor [1].
      */
@@ -146,6 +146,12 @@ public class Editor extends JFrame implements ChangeListener {
         menu.add( undoAction );
         menu.add( redoAction );
         menu.add(cloneAction);
+
+        menuItem = new JMenuItem(Menu.SCHEME_FIND, KeyEvent.VK_F);
+        menuItem.addActionListener(aListener);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
+        menu.add(menuItem);
+
         menuItem = new JMenuItem( Menu.SELECT_ALL, KeyEvent.VK_A );
         menuItem.addActionListener( aListener );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_A, ActionEvent.CTRL_MASK ) );
@@ -820,5 +826,12 @@ public class Editor extends JFrame implements ChangeListener {
             undoAction.putValue( Action.NAME, Menu.UNDO );
             redoAction.putValue( Action.NAME, Menu.REDO );
         }
+    }
+
+    /**
+     * Shows the scheme search dialog.
+     */
+    public void showSchemeSearchDialog() {
+        SchemeSearchDialog.getDialog().show();
     }
 }

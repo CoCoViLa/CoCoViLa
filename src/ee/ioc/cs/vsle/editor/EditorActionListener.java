@@ -333,6 +333,8 @@ public class EditorActionListener implements ActionListener {
                 if ( canvas != null ) {
                     canvas.setEnableClassPainter( !canvas.isEnableClassPainter() );
                 }
+            } else if (e.getActionCommand().equals(Menu.SCHEME_FIND)) {
+                Editor.getInstance().showSchemeSearchDialog();
             }
         }
     }
