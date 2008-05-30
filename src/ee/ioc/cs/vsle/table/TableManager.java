@@ -7,6 +7,7 @@ import java.io.*;
 import java.util.*;
 
 import ee.ioc.cs.vsle.api.Package;
+import ee.ioc.cs.vsle.editor.*;
 
 /**
  * Class for caching tables and providing access to the tables from outer packages
@@ -20,7 +21,7 @@ public class TableManager {
         @Override
         public boolean accept( File dir, String name ) {
             
-            return name.toLowerCase().endsWith(".tbl");
+            return name.toLowerCase().endsWith( CustomFileFilter.EXT.TBL.getExtension() );
         }
     };
     
@@ -49,7 +50,7 @@ public class TableManager {
                 
                 //db.p( "Parsing table(s) from: " + tableFiles[i].getAbsolutePath() );
                 
-                tables.putAll( TableParser.parse( tableFiles[i] ) );
+                tables.putAll( new TableXmlProcessor( tableFiles[i] ).parse() );
             }
             
             //this line can be reached if no errors occurred during parsing 

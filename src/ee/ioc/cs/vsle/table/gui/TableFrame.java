@@ -209,7 +209,7 @@ public class TableFrame extends JFrame {
             Map<String, Table> tables;
             
             try {
-                tables = TableParser.parse( openTableFile );
+                tables = new TableXmlProcessor( openTableFile ).parse();
             } catch( TableException e ) {
                 return;
             }
@@ -284,8 +284,8 @@ public class TableFrame extends JFrame {
             }
         }
         
-        if( openTableFile != null && lastPanel != null ) {
-            System.err.println( table );
+        if( openTableFile != null ) {
+            new TableXmlProcessor( openTableFile ).save( table );
         }
     }
     
