@@ -29,6 +29,20 @@ import ee.ioc.cs.vsle.util.*;
  */
 public class TableXmlProcessor {
 
+    private static final String TBL_ELEM_ENTRY = "entry";
+    private static final String TBL_ELEM_RULE = "rule";
+    private static final String TBL_ELEM_ROOT = "table";
+    private static final String TBL_ATTR_VALUE = "value";
+    private static final String TBL_ATTR_COND = "cond";
+    private static final String TBL_ELEM_VAR = "var";
+    private static final String TBL_ATTR_VAR = "var";
+    private static final String TBL_ATTR_TYPE = "type";
+    private static final String TBL_ELEM_DATA = "data";
+    private static final String TBL_ELEM_VRULES = "vrules";
+    private static final String TBL_ELEM_HRULES = "hrules";
+    private static final String TBL_ELEM_OUTPUT = "output";
+    private static final String TBL_ELEM_INPUT = "input";
+    private static final String TBL_ATTR_ID = "id";
     private static final String XML_DOC_ROOT = "tables";
     private static final String XML_NS_URI = "cocovila";
     private DiagnosticsCollector collector = new DiagnosticsCollector();
@@ -47,7 +61,9 @@ public class TableXmlProcessor {
     }
     
     /**
-     * @return
+     * Parses and validates table xml document
+     * 
+     * @return document
      * @throws ParserConfigurationException
      * @throws SAXException
      * @throws IOException
@@ -66,6 +82,8 @@ public class TableXmlProcessor {
     }
     
     /**
+     * Validates table structure
+     * 
      * @param document
      * @throws SAXException
      * @throws IOException
@@ -119,34 +137,67 @@ public class TableXmlProcessor {
     }
     
     /**
+     * Creates new table xml document with corresponding namespace
+     * 
+     * @return document
+     * @throws ParserConfigurationException
+     */
+    private Document createNewDocument() throws ParserConfigurationException {
+        
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        return builder.getDOMImplementation().createDocument( XML_NS_URI, XML_DOC_ROOT, null );
+    }
+    
+    /**
+     * Saves the table in xml format
+     * 
      * @param table
      */
-    public void save( Table table ) {
+    public void save( Table table, boolean askOnOverwrite ) {
         
         try {
             Document document = null;
             
             if( !xmlFile.exists() ) {
-
+                
                 xmlFile.createNewFile();
-                DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-                DocumentBuilder builder = factory.newDocumentBuilder();
-                document = builder.getDOMImplementation().createDocument( XML_NS_URI, XML_DOC_ROOT, null );
+                document = createNewDocument();
 
+            } else if( xmlFile.length() == 0 ) {
+                
+                document = createNewDocument();
+                
             } else {
-                document = getDocument();
+                try {
+                    document = getDocument();
+                    
+                } catch( Exception e ) {
+                    
+                    if( JOptionPane.showConfirmDialog( null,
+                            "Unable to parse table content, overwrite " + xmlFile.getName() + "?", 
+                            "Error reading table file", 
+                            JOptionPane.OK_CANCEL_OPTION ) == JOptionPane.OK_OPTION ) {
+                        
+                        collector.clearMessages();
+                        
+                        document = createNewDocument();
+                    } else {
+                        return;
+                    }
+                }
             }
             
             Element root = document.getDocumentElement();
-            NodeList tables = root.getElementsByTagName( "table" );
+            NodeList tables = root.getElementsByTagNameNS( XML_NS_URI, TBL_ELEM_ROOT );
             
             Node existingTableNode = null;
             
             for( int i = 0; i < tables.getLength(); i++ ) {
                 
-                if( table.getTableId().equals( tables.item( i ).getAttributes().getNamedItem( "id" ).getNodeValue() ) ) {
+                if( table.getTableId().equals( tables.item( i ).getAttributes().getNamedItem( TBL_ATTR_ID ).getNodeValue() ) ) {
 
-                    if( JOptionPane.showConfirmDialog( null, 
+                    if( askOnOverwrite && JOptionPane.showConfirmDialog( null, 
                             "Overwrite existing table \"" + table.getTableId() + "\" in "+ xmlFile.getName() + "?", 
                             "Overwrite table?", 
                             JOptionPane.OK_CANCEL_OPTION ) != JOptionPane.OK_OPTION ) {
@@ -154,14 +205,15 @@ public class TableXmlProcessor {
                     }
                     
                     existingTableNode = tables.item( i );
+                    
                     break;
                 }
             }
             
-            Node newTableNode = createTableNode( table );
+            Node newTableNode = createTableNode( table, document );
             
             if( existingTableNode != null ) {
-                root.replaceChild( existingTableNode, newTableNode );
+                root.replaceChild( newTableNode, existingTableNode );
             } else {
                 root.appendChild( newTableNode );
             }
@@ -169,16 +221,18 @@ public class TableXmlProcessor {
             //just in case
             validateDocument( document );
             
-            // Serialize the document onto System.out
-            TransformerFactory xformFactory = TransformerFactory.newInstance();  
-            Transformer transformer = xformFactory.newTransformer();
-            transformer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
-            transformer.setOutputProperty(OutputKeys.INDENT,"yes");
-            Source input = new DOMSource(document);
-            Result output = new StreamResult( new FileOutputStream( xmlFile ) );
-            transformer.transform(input, output);
-            
+            if( !collector.hasProblems() ) {
+                //transform and save into file
+                TransformerFactory xformFactory = TransformerFactory.newInstance();  
+                Transformer transformer = xformFactory.newTransformer();
+                transformer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
+                transformer.setOutputProperty(OutputKeys.INDENT,"yes");
+                Source input = new DOMSource(document);
+                Result output = new StreamResult( new FileOutputStream( xmlFile ) );
+                transformer.transform(input, output);
+            }
         } catch ( Exception e ) {
+            e.printStackTrace();
             collector.collectDiagnostic( e.getClass().getName() + " " + e.getMessage(), true );
             
         } finally {
@@ -187,11 +241,132 @@ public class TableXmlProcessor {
         
     }
     
-    private Node createTableNode( Table table ) {
+    /**
+     * Creates table node
+     * 
+     * @param table
+     * @param document
+     * @return
+     */
+    private Node createTableNode( Table table, Document document ) {
         
-        return null;
+        Element tableNode = document.createElementNS( XML_NS_URI, TBL_ELEM_ROOT );
+        tableNode.setAttribute( TBL_ATTR_ID, table.getTableId() );
+        
+        //save input vars
+        Element inputNode = document.createElementNS( XML_NS_URI,TBL_ELEM_INPUT );
+        tableNode.appendChild( inputNode );
+        
+        for( TableField input : table.getInputFields() ) {
+            
+            inputNode.appendChild( createVarNode( input, document ) );
+        }
+        
+        //save output var
+        Element outputNode = document.createElementNS( XML_NS_URI,TBL_ELEM_OUTPUT );
+        tableNode.appendChild( outputNode );
+        outputNode.appendChild( createVarNode( table.getOutputField(), document ) );
+        
+        //save rules
+        Element hRulesNode = document.createElementNS( XML_NS_URI,TBL_ELEM_HRULES );
+        createRuleNodesAndAppend( table.getHRules(), document, hRulesNode );
+        tableNode.appendChild( hRulesNode );
+        
+        Element vRulesNode = document.createElementNS( XML_NS_URI,TBL_ELEM_VRULES );
+        createRuleNodesAndAppend( table.getVRules(), document, vRulesNode );
+        tableNode.appendChild( vRulesNode );
+        
+        //save data table
+        tableNode.appendChild( createDataNode( table, document ) );
+        
+        return tableNode;
     }
     
+    /**
+     * Creates var node
+     * 
+     * @param field
+     * @param doc
+     * @return
+     */
+    private Node createVarNode( TableField field, Document doc ) {
+        Element var = doc.createElementNS( XML_NS_URI,TBL_ELEM_VAR );
+        var.setAttribute( TBL_ATTR_ID, field.getId() );
+        var.setAttribute( TBL_ATTR_TYPE, field.getType() );
+        
+        return var;
+    }
+    
+    /**
+     * Creates and appends rule nodes
+     * 
+     * @param rules
+     * @param doc
+     * @param rulesNode
+     */
+    private void createRuleNodesAndAppend( List<Rule> rules, Document doc, Node rulesNode ) {
+        
+        for ( Rule rule : rules ) {
+            Element ruleNode = doc.createElementNS( XML_NS_URI,TBL_ELEM_RULE );
+            ruleNode.setAttribute( TBL_ATTR_COND, rule.getConditionString() );
+            ruleNode.setAttribute( TBL_ATTR_VALUE, rule.getValue().toString() );
+            ruleNode.setAttribute( TBL_ATTR_VAR, rule.getField().getId() );
+            
+            //entries
+            for ( Integer entry : rule.getEntries() ) {
+                Element entryNode = doc.createElementNS( XML_NS_URI,TBL_ELEM_ENTRY );
+                entryNode.setAttribute( TBL_ATTR_ID, entry.toString() );
+                ruleNode.appendChild( entryNode );
+            }
+            
+            rulesNode.appendChild( ruleNode );
+        }
+    }
+    
+    /**
+     * Creates a node for the data table
+     * 
+     * @param tbl
+     * @param doc
+     * @return
+     */
+    private Node createDataNode( Table tbl, Document doc ) {
+        
+        Element dataNode = doc.createElementNS( XML_NS_URI,TBL_ELEM_DATA );
+        
+        List<Integer> rowIds = tbl.getOrderedRowIds();
+        List<Integer> colIds = tbl.getOrderedColumnIds();
+        
+        for ( int i = 0, rowCount = rowIds.size(); i < rowCount; i++ ) {
+            
+            Element rowNode = doc.createElementNS( XML_NS_URI,"row" );
+            rowNode.setAttribute( TBL_ATTR_ID, rowIds.get( i ).toString() );
+            
+            for ( int j = 0, colCount = colIds.size(); j < colCount; j++ ) {
+                
+                Element cellNode = doc.createElementNS( XML_NS_URI,"cell" );
+                cellNode.setAttribute( TBL_ATTR_ID, colIds.get( j ).toString() );
+                
+                Object value = tbl.getCellValueAt( i, j );
+                
+                if( value != null ) {
+                    cellNode.setTextContent( value.toString() );
+                }
+                
+                rowNode.appendChild( cellNode );
+            }
+            
+            dataNode.appendChild( rowNode );
+        }
+        
+        return dataNode;
+    }
+    
+    /**
+     * Checks if there are any problems
+     * 
+     * @param errorMess
+     */
     private void checkProblems( final String errorMess ) {
         
         if (collector.hasProblems()) {
@@ -225,6 +400,8 @@ public class TableXmlProcessor {
     }
     
     /**
+     * Parses the table xml from a given file
+     * 
      * @param tableFile absolute path to table.xml
      * @return Map<table id, table>
      */
@@ -232,65 +409,60 @@ public class TableXmlProcessor {
         
         Map<String, Table> tables = new LinkedHashMap<String, Table>();
         
-        Document document = null;
-
         try {
-            document = getDocument();
+            Document document = getDocument();
+
+            Element root = document.getDocumentElement();
+
+            NodeList list = root.getElementsByTagNameNS( XML_NS_URI, TBL_ELEM_ROOT );
+
+            for (int i=0; i<list.getLength(); i++) {
+                Table t =  createTable( (Element)list.item(i) );
+                tables.put( t.getTableId(), t );
+            }
+
         } catch ( Exception e ) {
             collector.collectDiagnostic( e.getMessage(), true );
+        } finally {
+            checkProblems( "Error parsing table file " + xmlFile.getName() );
         }
-        
-        checkProblems( "Error parsing table file " + xmlFile.getName() );
-        
-        if ( document == null ) {
-            throw new TableException( "Error parsing table file " + xmlFile.getName() );
-        }
-
-        Element root = document.getDocumentElement();
-        
-        NodeList list = root.getElementsByTagName( "table" );
-        
-        for (int i=0; i<list.getLength(); i++) {
-            Table t =  createTable( (Element)list.item(i) );
-            tables.put( t.getTableId(), t );
-         }
         
         return tables;
     }
     
     /**
-     * Iterates through nodes and parses each element using corresponding method
+     * Iterates through nodes and parses each element using corresponding methods
      *  
      * @param tableRoot Element
      * @return Table object
      * @throws TableException
      */
-    private static Table createTable( Element tableRoot ) throws TableException {
+    private Table createTable( Element tableRoot ) throws TableException {
         
-        Table table = new Table( tableRoot.getAttribute( "id" ) );
+        Table table = new Table( tableRoot.getAttribute( TBL_ATTR_ID ) );
         
         NodeList nodes = tableRoot.getChildNodes();
         
         for (int i=0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
 
-            if( "input".equals( node.getNodeName() ) ) {
+            if( TBL_ELEM_INPUT.equals( node.getNodeName() ) ) {
                 
                 table.addInputFields( parseVariables( node.getChildNodes() ) );
                 
-            } else if ( "output".equals( node.getNodeName() )  ) {
+            } else if ( TBL_ELEM_OUTPUT.equals( node.getNodeName() )  ) {
                 
                 table.setOutputField( parseVariables( node.getChildNodes() ).iterator().next() );
 
-            } else if ( "hrules".equals( node.getNodeName() )  ) {
+            } else if ( TBL_ELEM_HRULES.equals( node.getNodeName() )  ) {
                 
                 table.addHRules( parseRules( node.getChildNodes(), table ) );
                 
-            } else if ( "vrules".equals( node.getNodeName() )  ) {
+            } else if ( TBL_ELEM_VRULES.equals( node.getNodeName() )  ) {
                 
                 table.addVRules( parseRules( node.getChildNodes(), table ) );
                 
-            } else if ( "data".equals( node.getNodeName() )  ) {
+            } else if ( TBL_ELEM_DATA.equals( node.getNodeName() )  ) {
                 
                 parseData( node.getChildNodes(), table );
             }
@@ -305,7 +477,7 @@ public class TableXmlProcessor {
      * @param list
      * @return
      */
-    private static Set<TableField> parseVariables( NodeList list ) {
+    private Set<TableField> parseVariables( NodeList list ) {
 
         Set<TableField> vars = new LinkedHashSet<TableField>();
         
@@ -314,7 +486,7 @@ public class TableXmlProcessor {
             if ( var.getNodeType() == Node.ELEMENT_NODE ) {
                 NamedNodeMap attrs = var.getAttributes();
                 
-                vars.add( new TableField( attrs.getNamedItem( "id" ).getNodeValue(), attrs.getNamedItem( "type" ).getNodeValue() ) );
+                vars.add( new TableField( attrs.getNamedItem( TBL_ATTR_ID ).getNodeValue(), attrs.getNamedItem( TBL_ATTR_TYPE ).getNodeValue() ) );
             }
         }
         
@@ -329,7 +501,7 @@ public class TableXmlProcessor {
      * @return
      * @throws TableException
      */
-    private static Set<Rule> parseRules( NodeList ruleNodes, Table table ) throws TableException {
+    private Set<Rule> parseRules( NodeList ruleNodes, Table table ) throws TableException {
 
         Set<Rule> rules = new LinkedHashSet<Rule>();
         
@@ -342,9 +514,9 @@ public class TableXmlProcessor {
                 
                 try {
                     rule = Rule.createRule( 
-                            table.getInput( attrs.getNamedItem( "var" ).getNodeValue() ), 
-                            attrs.getNamedItem( "cond" ).getNodeValue(), 
-                            attrs.getNamedItem( "value" ).getNodeValue() );
+                            table.getInput( attrs.getNamedItem( TBL_ATTR_VAR ).getNodeValue() ), 
+                            attrs.getNamedItem( TBL_ATTR_COND ).getNodeValue(), 
+                            attrs.getNamedItem( TBL_ATTR_VALUE ).getNodeValue() );
                     
                 } catch ( Exception e ) {
                     throw new TableException( e );
@@ -359,7 +531,7 @@ public class TableXmlProcessor {
                     
                     if( entry.getNodeType() == Node.ELEMENT_NODE ) {
                         NamedNodeMap eattrs = entry.getAttributes();
-                        rule.addEntry( Integer.parseInt( eattrs.getNamedItem( "id" ).getNodeValue() ) );
+                        rule.addEntry( Integer.parseInt( eattrs.getNamedItem( TBL_ATTR_ID ).getNodeValue() ) );
                     }
                 }
             }
@@ -375,13 +547,13 @@ public class TableXmlProcessor {
      * @param table
      * @throws TableException
      */
-    private static void parseData( NodeList dataNodes, Table table ) throws TableException {
+    private void parseData( NodeList dataNodes, Table table ) throws TableException {
 
         for ( int j = 0; j < dataNodes.getLength(); j++ ) {
             Node row = dataNodes.item( j );
             if ( row.getNodeType() == Node.ELEMENT_NODE ) {
                 NamedNodeMap attrs = row.getAttributes();
-                int rowId = Integer.parseInt( attrs.getNamedItem( "id" ).getNodeValue() );
+                int rowId = Integer.parseInt( attrs.getNamedItem( TBL_ATTR_ID ).getNodeValue() );
                 NodeList cells = row.getChildNodes();
                 
                 for ( int k = 0; k < cells.getLength(); k++ ) {
@@ -389,7 +561,7 @@ public class TableXmlProcessor {
                     
                     if( cell.getNodeType() == Node.ELEMENT_NODE ) {
                         NamedNodeMap cellAttrs = cell.getAttributes();
-                        int colId = Integer.parseInt( cellAttrs.getNamedItem( "id" ).getNodeValue() );
+                        int colId = Integer.parseInt( cellAttrs.getNamedItem( TBL_ATTR_ID ).getNodeValue() );
 
                         table.addDataCell( rowId, colId, 
                                 ( cell.getChildNodes().getLength() == 0 ) 

@@ -57,6 +57,10 @@ public class DiagnosticsCollector {
         return messages;
     }
 
+    public void clearMessages() {
+        messages.clear();
+    }
+    
     /**
      * @return true, if there were problems, false otherwise.
      */

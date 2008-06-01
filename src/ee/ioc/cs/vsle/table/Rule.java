@@ -89,6 +89,10 @@ public class Rule {
         return value;
     }
 
+    public String getConditionString() {
+        return ( isNegative() ? "!" : "" ) + condition.getKeyword(); 
+    }
+    
     public void setValueFromString( String svalue ) {
 
         String varType = field.getType();
@@ -110,8 +114,12 @@ public class Rule {
 
     @Override
     public String toString() {
-        return field.getId() + " " + ( negative ? "!" : "" )
-                + condition.getKeyword() + " " + ( condition == Condition.COND_IN_ARRAY ? TypeUtil.toString( value ) : value );
+        return field.getId()
+                + " "
+                + getConditionString()
+                + " "
+                + ( condition == Condition.COND_IN_ARRAY ? TypeUtil
+                        .toString( value ) : value );
     }
     
     /**

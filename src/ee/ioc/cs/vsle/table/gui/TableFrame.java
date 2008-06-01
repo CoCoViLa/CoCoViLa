@@ -150,6 +150,7 @@ public class TableFrame extends JFrame {
         
         if( dialog.isOk() ) {
             setTable( dialog.getTable() );
+            openTableFile = null;
         }
     }
     
@@ -244,7 +245,9 @@ public class TableFrame extends JFrame {
     private void updateFrameTitle() {
         Table table = getTable();
         
-        setTitle( ( table != null ? table.getTableId() + " - ": "" ) + "Expert Table");
+        String fileName = openTableFile != null ? " (" + openTableFile.getName() + ")": "";
+        
+        setTitle( ( table != null ? table.getTableId() + fileName + " - ": "" ) + "Expert Table");
     }
     
     /**
@@ -266,6 +269,8 @@ public class TableFrame extends JFrame {
             return;
         }
         
+        boolean isFileChanged = false;
+        
         if( showDialog || openTableFile == null ) {
             
             JFileChooser fc = new JFileChooser( getPath() );
@@ -277,7 +282,16 @@ public class TableFrame extends JFrame {
 
             if ( fc.showOpenDialog( TableFrame.this ) == JFileChooser.APPROVE_OPTION ) {
                 
-                openTableFile = fc.getSelectedFile();
+                File file = fc.getSelectedFile();
+                
+                if ( !file.getAbsolutePath().toLowerCase().endsWith( CustomFileFilter.EXT.TBL.getExtension() ) ) {
+
+                    file = new File( file.getAbsolutePath() + "." + CustomFileFilter.EXT.TBL.getExtension() );
+                }
+                
+                isFileChanged = !file.equals( openTableFile );
+                
+                openTableFile = file;
                 
             } else {
                 return;
@@ -285,7 +299,11 @@ public class TableFrame extends JFrame {
         }
         
         if( openTableFile != null ) {
-            new TableXmlProcessor( openTableFile ).save( table );
+            try {
+                new TableXmlProcessor( openTableFile ).save( table, isFileChanged );
+            } catch( TableException e ) {
+                return;
+            }
         }
     }
     

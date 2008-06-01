@@ -31,8 +31,8 @@ public final class Table implements IStructuralExpertTable {
     private List<Rule> vrules = new ArrayList<Rule>();
     private List<DataRow> data = new ArrayList<DataRow>();
     
-    private int lastHorizontalId = -1;
-    private int lastVerticalId = -1;
+    private int lastHorizontalId = 0;
+    private int lastVerticalId = 0;
     
     /**
      * Constructor
@@ -526,15 +526,6 @@ public final class Table implements IStructuralExpertTable {
         }
         
         return -1;
-    }
-    
-
-    /**
-     * @return
-     */
-    public List<DataRow> getData() {
-        //return copy
-        return new ArrayList<DataRow>( data );
     }
     
     /**
