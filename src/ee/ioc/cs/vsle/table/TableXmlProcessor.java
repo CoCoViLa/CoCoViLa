@@ -157,21 +157,18 @@ public class TableXmlProcessor {
     public void save( Table table, boolean askOnOverwrite ) {
         
         try {
-            Document document = null;
+            Document document;
             
             if( !xmlFile.exists() ) {
-                
                 xmlFile.createNewFile();
+            } 
+            
+            if( xmlFile.length() == 0 ) {
                 document = createNewDocument();
-
-            } else if( xmlFile.length() == 0 ) {
-                
-                document = createNewDocument();
-                
             } else {
+                
                 try {
                     document = getDocument();
-                    
                 } catch( Exception e ) {
                     
                     if( JOptionPane.showConfirmDialog( null,
