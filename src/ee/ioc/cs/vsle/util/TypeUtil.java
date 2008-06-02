@@ -134,6 +134,11 @@ public class TypeUtil {
      */
     public static Object createObjectFromString( String type, String value )
             throws Exception {
+        
+        if( value == null ) {
+            return null;
+        }
+        
         TypeToken token = TypeToken.getTypeToken( type );
 
         Class<?> clazz = token.getWrapperClass();
