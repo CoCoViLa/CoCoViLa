@@ -130,7 +130,6 @@ public class RuleTableModel extends AbstractTableModel {
     public void deleteRule( int position ) {
         if( orientation == HORIZONTAL ) {
             storage.removeHRule( position );
-            System.err.println("fireTableStructureChanged");
             fireTableStructureChanged();
         } else {
             storage.removeVRule( position );

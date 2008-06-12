@@ -116,7 +116,7 @@ public class Rule {
     public String toString() {
         return field.getId()
                 + " "
-                + getConditionString()
+                + ( isNegative() ? condition.getOppositeSymbol() : condition.getSymbol() )
                 + " "
                 + ( condition == Condition.COND_IN_ARRAY ? TypeUtil
                         .toString( value ) : value );

@@ -28,6 +28,10 @@ public interface Condition {
      */
     public abstract String getKeyword();
     
+    public abstract String getSymbol();
+    
+    public abstract String getOppositeSymbol();
+    
     /**
      * COND_EQUALS
      */
@@ -42,6 +46,17 @@ public interface Condition {
         public String getKeyword() {
             return "eq";
         }
+
+        @Override
+        public String getOppositeSymbol() {
+            return "\u2260";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "=";
+        }
+
     };
 
     /**
@@ -57,6 +72,16 @@ public interface Condition {
         @Override
         public String getKeyword() {
             return "less";
+        }
+        
+        @Override
+        public String getOppositeSymbol() {
+            return "\u2265";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "<";
         }
     };
 
@@ -74,6 +99,16 @@ public interface Condition {
         @Override
         public String getKeyword() {
             return "leq";
+        }
+        
+        @Override
+        public String getOppositeSymbol() {
+            return ">";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "\u2264";
         }
     };
     
@@ -98,6 +133,16 @@ public interface Condition {
         @Override
         public String getKeyword() {
             return "in";
+        }
+        
+        @Override
+        public String getOppositeSymbol() {
+            return "\u2209";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "\u2208";
         }
     };
     

@@ -20,7 +20,6 @@ import ee.ioc.cs.vsle.util.*;
 public class RuleInputDialog extends JDialog {
     
     private JComboBox cboxVar;
-    private JCheckBox chboxNot;
     private JComboBox cboxCond;
     private JTextField tfValue;
     private JButton btnSave;
@@ -70,14 +69,14 @@ public class RuleInputDialog extends JDialog {
         JPanel root = new JPanel();
         setContentPane( root );
         root.setLayout( new BoxLayout( root, BoxLayout.Y_AXIS ) );
-        root.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
+        root.setBorder( BorderFactory.createEmptyBorder( 15, 5, 5, 5 ) );
         
         JPanel main = new JPanel();
         main.setLayout( new BoxLayout( main, BoxLayout.X_AXIS ) );
         
         ListCellRenderer listRenderer = new ListCellRenderer() {
             
-            private JLabel lbl = new JLabel();
+            private JLabel lbl = new JLabel( "", SwingConstants.CENTER );
             
             @Override
             public Component getListCellRendererComponent( JList list,
@@ -87,9 +86,8 @@ public class RuleInputDialog extends JDialog {
                 if( value instanceof TableField ) {
                     TableField field = ((TableField)value);
                     lbl.setText( " " + field.getType() + " " + field.getId() );
-                } else if( value instanceof Condition ) {
-                    Condition con = ((Condition)value);
-                    lbl.setText( con.getKeyword() );
+                } else {
+                    lbl.setText( value.toString() );
                 }
                 
                 lbl.setOpaque( true );
@@ -109,18 +107,14 @@ public class RuleInputDialog extends JDialog {
         
         cboxVar = new JComboBox( fields.toArray() );
         cboxVar.setRenderer( listRenderer );
-        main.add( buildGridPanel( "var:", cboxVar ) );
-        main.add( Box.createHorizontalStrut( 5 ) );
-        chboxNot = new JCheckBox();
-        chboxNot.setHorizontalAlignment(JCheckBox.CENTER);
-        main.add( buildGridPanel( "not:", chboxNot ) );
-        main.add( Box.createHorizontalStrut( 5 ) );
-        cboxCond = new JComboBox( new Object[]{ Condition.COND_EQUALS, Condition.COND_LESS, Condition.COND_LESS_OR_EQUAL, Condition.COND_IN_ARRAY } );
+        main.add( cboxVar );
+        main.add( Box.createHorizontalStrut( 10 ) );
+        cboxCond = new JComboBox( ConditionItem.values() );
         cboxCond.setRenderer( listRenderer );
-        main.add( buildGridPanel( "cond:", cboxCond ) );
-        main.add( Box.createHorizontalStrut( 5 ) );
+        main.add( cboxCond );
+        main.add( Box.createHorizontalStrut( 10 ) );
         tfValue = new JTextField( 10 );
-        main.add( buildGridPanel( "value:", tfValue ) );
+        main.add( tfValue );
         
         JPanel buttonPane = new JPanel( new GridLayout( 1, 2, 5, 5 ) );
         btnSave = new JButton( "Save" );
@@ -135,8 +129,6 @@ public class RuleInputDialog extends JDialog {
                 
                 if( e.getSource() == btnSave ) {
 
-//                  SwingUtilities.invokeLater( new Runnable() {
-//                  public void run() {
                     try {
                         if ( rule != null ) {
 
@@ -146,9 +138,10 @@ public class RuleInputDialog extends JDialog {
                             //old condition will not be restored.
                             createRuleFromGUI();
 
-                            rule.setCondition( (Condition) cboxCond.getSelectedItem() );
+                            ConditionItem item = (ConditionItem) cboxCond.getSelectedItem();
+                            rule.setCondition( item.getCond() );
                             rule.setValueFromString( tfValue.getText() );
-                            rule.setNegative( chboxNot.isSelected() );
+                            rule.setNegative( item.isNegative() );
 
                         } else {
                             rule = createRuleFromGUI();
@@ -161,8 +154,6 @@ public class RuleInputDialog extends JDialog {
                     valid = true;
                     dispose();
                     btnSave.removeActionListener( this );
-//                  }
-//                  } );
 
                 } else if( e.getSource() == btnCancel ) {
                     dispose();
@@ -184,19 +175,6 @@ public class RuleInputDialog extends JDialog {
     }
     
     /**
-     * @param lbl
-     * @param comp
-     * @return
-     */
-    private JPanel buildGridPanel( String lbl, JComponent comp ) {
-        JPanel panel = new JPanel( new GridLayout( 2, 1, 5, 5 ) );
-        panel.add( new JLabel( lbl, SwingConstants.CENTER ) );
-        panel.add( comp );
-        
-        return panel;
-    }
-    
-    /**
      * Set rule values to GUI components
      * 
      * @param rule
@@ -205,19 +183,21 @@ public class RuleInputDialog extends JDialog {
         this.rule = r;
         
         cboxVar.setSelectedItem( rule.getField() );
-        chboxNot.setSelected( rule.isNegative() );
-        cboxCond.setSelectedItem( rule.getCondition() );
-        if( rule.getValue() != null )
+        cboxCond.setSelectedItem( ConditionItem.getItem( rule.getCondition(), rule.isNegative() ) );
+        
+        if( rule.getValue() != null ) {
             tfValue.setText( TypeUtil.toTokenString( rule.getValue() ) );
+        }
     }
     
     /**
      * @return new rule
      */
     private Rule createRuleFromGUI() {
+        ConditionItem item = (ConditionItem) cboxCond.getSelectedItem();
         return Rule.createRule( 
                 (TableField) cboxVar.getSelectedItem(), 
-                ( chboxNot.isSelected() ? "!" : "" ) + ( (Condition) cboxCond.getSelectedItem() ).getKeyword(), 
+                ( item.isNegative() ? "!" : "" ) + item.getCond().getKeyword(), 
                 tfValue.getText() );
     }
     
@@ -234,4 +214,69 @@ public class RuleInputDialog extends JDialog {
     public boolean isDataValid() {
         return valid;
     }
+    
+    /**
+     * @author pavelg
+     *
+     */
+    private enum ConditionItem {
+        
+        EQ( Condition.COND_EQUALS, false ), 
+        NEQ( Condition.COND_EQUALS, true ), 
+        LESS( Condition.COND_LESS, false ), 
+        GREQ( Condition.COND_LESS, true ), 
+        LESSEQ( Condition.COND_LESS_OR_EQUAL, false ), 
+        GREATER( Condition.COND_LESS_OR_EQUAL, true ), 
+        IN( Condition.COND_IN_ARRAY, false ), 
+        NOTIN( Condition.COND_IN_ARRAY, true );
+        
+        private Condition cond;
+        private boolean isNegative;
+        
+        /**
+         * @param cond
+         * @param isNegative
+         */
+        ConditionItem( Condition cond, boolean isNegative ) {
+            this.cond = cond;
+            this.isNegative = isNegative;
+        }
+        
+
+        /**
+         * @return the cond
+         */
+        public Condition getCond() {
+            return cond;
+        }
+
+        /**
+         * @return the isNegative
+         */
+        public boolean isNegative() {
+            return isNegative;
+        }
+        
+        @Override
+        public String toString() {
+            return isNegative ? cond.getOppositeSymbol() : cond.getSymbol();
+        }
+        
+        /**
+         * @param c
+         * @param neg
+         * @return
+         */
+        public static ConditionItem getItem( Condition c, boolean neg ) {
+            
+            for ( ConditionItem item : values() ) {
+                if( item.getCond() == c && item.isNegative() == neg ) {
+                    return item;
+                }
+            }
+            
+            throw new IllegalArgumentException( "No such item" );
+        }
+    }
+
 }

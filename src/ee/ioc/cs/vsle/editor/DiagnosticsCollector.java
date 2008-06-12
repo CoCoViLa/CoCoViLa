@@ -91,7 +91,7 @@ public class DiagnosticsCollector {
      */
     public static boolean promptLoad( Component relative, DiagnosticsCollector collector, String title, String source ) {
         assert SwingUtilities.isEventDispatchThread();
-        final JDialog dialog = new JDialog( Editor.getInstance() );
+        final JDialog dialog = new JDialog( relative != null ? SwingUtilities.getWindowAncestor( relative ) : null );
         dialog.setModal( true );
         dialog.setLocationRelativeTo( relative );
         dialog.setDefaultCloseOperation( WindowConstants.DISPOSE_ON_CLOSE );

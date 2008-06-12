@@ -47,6 +47,10 @@ public class TableFrame extends JFrame {
      */
     private void init() {
         
+        ToolTipManager.sharedInstance().setInitialDelay( 100 );
+        ToolTipManager.sharedInstance().setReshowDelay( 100 );
+        ToolTipManager.sharedInstance().setDismissDelay( 8000 );
+        
         updateFrameTitle();
         
         setDefaultCloseOperation( DISPOSE_ON_CLOSE );
@@ -205,15 +209,18 @@ public class TableFrame extends JFrame {
         
         if ( returnVal == JFileChooser.APPROVE_OPTION ) {
             
-            openTableFile = fc.getSelectedFile();
-            
             Map<String, Table> tables;
             
             try {
-                tables = new TableXmlProcessor( openTableFile ).parse();
+                tables = new TableXmlProcessor( fc.getSelectedFile() ).parse();
             } catch( TableException e ) {
+                if( RuntimeProperties.isLogDebugEnabled() ) {
+                    e.printStackTrace();
+                }
                 return;
             }
+            
+            openTableFile = fc.getSelectedFile();
             
             final Table table;
             
@@ -302,6 +309,9 @@ public class TableFrame extends JFrame {
             try {
                 new TableXmlProcessor( openTableFile ).save( table, isFileChanged );
             } catch( TableException e ) {
+                if( RuntimeProperties.isLogDebugEnabled() ) {
+                    e.printStackTrace();
+                }
                 return;
             }
         }
@@ -311,6 +321,9 @@ public class TableFrame extends JFrame {
      * @param args
      */
     public static void main( String[] args ) {
+        
+        RuntimeProperties.setDebugInfo( 1 );
+        
         TableFrame fr = new TableFrame();
         fr.setDefaultCloseOperation( EXIT_ON_CLOSE );
         fr.setVisible( true );

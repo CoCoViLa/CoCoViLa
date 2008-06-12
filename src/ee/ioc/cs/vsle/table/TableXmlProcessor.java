@@ -306,7 +306,7 @@ public class TableXmlProcessor {
         for ( Rule rule : rules ) {
             Element ruleNode = doc.createElementNS( XML_NS_URI,TBL_ELEM_RULE );
             ruleNode.setAttribute( TBL_ATTR_COND, rule.getConditionString() );
-            ruleNode.setAttribute( TBL_ATTR_VALUE, rule.getValue().toString() );
+            ruleNode.setAttribute( TBL_ATTR_VALUE, TypeUtil.toTokenString( rule.getValue() ) );
             ruleNode.setAttribute( TBL_ATTR_VAR, rule.getField().getId() );
             
             //entries
