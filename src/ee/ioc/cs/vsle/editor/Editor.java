@@ -479,46 +479,6 @@ public class Editor extends JFrame implements ChangeListener {
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
     }
-    
-    /**
-     * Upon platform, use OS-specific methods for opening the URL in required
-     * browser.
-     * 
-     * @param url - URL to be opened in a browser. Capable of browsing local
-     *                documentation as well if path is given with file://
-     */
-    public static void openInBrowser( String url ) {
-        try {
-            // Check if URL is defined, otherwise there is no reason for opening
-            // the browser in the first place.
-            if ( url != null && url.trim().length() > 0 ) {
-                Desktop.getDesktop().browse(new URI(url));
-            }
-        } catch (Exception e) {
-            if (RuntimeProperties.isLogDebugEnabled()) {
-                db.p(e);
-            }
-
-            StringBuilder msg = new StringBuilder();
-            msg.append("A browser could not be launched for opening ");
-            msg.append("the documentation web page.");
-
-            String exMsg = e.getMessage();
-            if (exMsg != null) {
-                msg.append('\n');
-                msg.append(exMsg);
-            }
-
-            msg.append("\nThe documentation can still be found by ");
-            msg.append("browsing to the following URL:\n");
-            msg.append(url);
-
-            JOptionPane.showMessageDialog(Editor.getInstance(),
-                    msg.toString(),
-                    "Error opening documentation",
-                    JOptionPane.ERROR_MESSAGE);
-        }
-    }
 
     /**
      * Check if Operating System type is Windows.

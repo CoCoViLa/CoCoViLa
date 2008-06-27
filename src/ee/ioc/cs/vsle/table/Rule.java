@@ -116,10 +116,18 @@ public class Rule {
     public String toString() {
         return field.getId()
                 + " "
-                + ( isNegative() ? condition.getOppositeSymbol() : condition.getSymbol() )
+                + toStringCond()
                 + " "
-                + ( condition == Condition.COND_IN_ARRAY ? TypeUtil
-                        .toString( value ) : value );
+                + toStringValue();
+    }
+    
+    public String toStringCond() {
+        return ( isNegative() ? condition.getOppositeSymbol() : condition.getSymbol() );
+    }
+    
+    public String toStringValue() {
+        return ( condition == Condition.COND_IN_ARRAY ? TypeUtil
+                .toString( value ) : value.toString() );
     }
     
     /**

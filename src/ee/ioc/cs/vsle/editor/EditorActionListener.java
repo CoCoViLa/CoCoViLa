@@ -304,7 +304,7 @@ public class EditorActionListener implements ActionListener {
                 String documentationUrl = RuntimeProperties.getSystemDocUrl();
 
                 if ( documentationUrl != null && documentationUrl.trim().length() > 0 ) {
-                    Editor.openInBrowser( documentationUrl );
+                    SystemUtils.openInBrowser( documentationUrl, Editor.getInstance() );
                 } else {
                     Editor.getInstance().showInfoDialog( "Missing information", "No documentation URL defined in properties." );
                 }

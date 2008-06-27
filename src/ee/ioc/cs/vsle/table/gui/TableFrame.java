@@ -13,6 +13,10 @@ import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.table.*;
+import ee.ioc.cs.vsle.table.event.*;
+import ee.ioc.cs.vsle.util.*;
+
+import static ee.ioc.cs.vsle.table.gui.TableConstants.*;
 
 /**
  * @author pavelg
@@ -25,6 +29,9 @@ public class TableFrame extends JFrame {
     private static final String MENU_SAVE = "Save";
     private static final String MENU_SAVE_AS = "Save As";
     private static final String MENU_EXIT = "Exit";
+    private static final String MENU_H_RENDERER = "Horizontal";
+    private static final String MENU_V_RENDERER = "Vertical";
+    private static final String MENU_TUTORIAL = "Tutorial";
     private static final String MENU_EDIT_TABLE = "Table Properties...";
     private TableMainPanel lastPanel;
     private File openTableFile;
@@ -33,6 +40,9 @@ public class TableFrame extends JFrame {
     private JMenuItem menuItemEditTable;
     private JMenuItem menuItemSaveAs;
     private JMenuItem menuItemSave;
+    
+    private static int rowHeightH = ROW_HEIGHT_NORM;
+    private static int rowHeightV = ROW_HEIGHT_NORM;
     
     /**
      * @throws HeadlessException
@@ -131,8 +141,34 @@ public class TableFrame extends JFrame {
             }
             
         } );
+        
+        menu = new JMenu( "View" );
+        menu.setMnemonic( KeyEvent.VK_V );
+        menuBar.add( menu );
+        
+        JMenu submenu = new JMenu( "Increase rule height" );
+        menu.add( submenu );
+        
+        menuItem = new JCheckBoxMenuItem( MENU_H_RENDERER, rowHeightH == ROW_HEIGHT_EXTENDED );
+        submenu.add( menuItem );
+        menuItem.addActionListener( actionLst );
+        
+        menuItem = new JCheckBoxMenuItem( MENU_V_RENDERER, rowHeightV == ROW_HEIGHT_EXTENDED );
+        submenu.add( menuItem );
+        menuItem.addActionListener( actionLst );
+        
+        menu = new JMenu( "Help" );
+        menu.setMnemonic( KeyEvent.VK_H );
+        menuBar.add( menu );
+        
+        menuItem = new JMenuItem( MENU_TUTORIAL );
+        menu.add( menuItem );
+        menuItem.addActionListener( actionLst );
     }
     
+    /**
+     * @return
+     */
     private String getPath() {
         
         if( Editor.getInstance() != null && Editor.getInstance().getCurrentPackage() != null ) {
@@ -191,6 +227,15 @@ public class TableFrame extends JFrame {
         return null;
     }
     
+    /**
+     * @param isHorizontal
+     * @return
+     */
+    static int getRowHeight( boolean isHorizontal ) {
+        
+        return isHorizontal ? rowHeightH : rowHeightV;
+    }
+    
     @Override
     public void dispose() {
         
@@ -199,6 +244,9 @@ public class TableFrame extends JFrame {
         setTable( null );
     }
     
+    /**
+     * 
+     */
     private void openTable() {
 
         JFileChooser fc = new JFileChooser( getPath() );
@@ -249,6 +297,9 @@ public class TableFrame extends JFrame {
         }
     }
     
+    /**
+     * 
+     */
     private void updateFrameTitle() {
         Table table = getTable();
         
@@ -356,10 +407,30 @@ public class TableFrame extends JFrame {
             } else if( e.getActionCommand() == MENU_EXIT ) {
                 
                 dispose();
+                return;
                 
             } else if( e.getActionCommand() == MENU_EDIT_TABLE ) {
                 
                 editTableProperties();
+                
+            } else if( e.getActionCommand() == MENU_H_RENDERER || e.getActionCommand() == MENU_V_RENDERER ) {
+                
+                int height = ( (JCheckBoxMenuItem) e.getSource()).isSelected() ? ROW_HEIGHT_EXTENDED : ROW_HEIGHT_NORM;
+                
+                if( e.getActionCommand() == MENU_H_RENDERER ) {
+                    rowHeightH = height;
+                } else {
+                    rowHeightV = height;
+                }
+                
+                TableEvent.dispatchEvent( new TableEvent( this, TableEvent.RENDERER ) );
+                
+                return;
+                
+            } else if( e.getActionCommand() == MENU_TUTORIAL ) {
+                
+                SystemUtils.openInBrowser( URL_TUTORIAL, TableFrame.this );
+                return;
             }
             
             SwingUtilities.invokeLater( new Runnable() {

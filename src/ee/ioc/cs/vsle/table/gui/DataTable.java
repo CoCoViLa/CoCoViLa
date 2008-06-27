@@ -10,7 +10,7 @@ import javax.swing.event.*;
 import javax.swing.table.*;
 
 import ee.ioc.cs.vsle.table.*;
-import ee.ioc.cs.vsle.table.Table.*;
+import ee.ioc.cs.vsle.table.event.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**
@@ -24,7 +24,7 @@ public class DataTable extends JTable {
     private RuleTable hct, vct;
     
     private TableModelListener modelLst;
-    private TableEventListener tableListener;
+    private TableEvent.Listener tableListener;
     
     /**
      * Constructor
@@ -60,7 +60,7 @@ public class DataTable extends JTable {
         hct.getModel().addTableModelListener( modelLst );
         vct.getModel().addTableModelListener( modelLst );
         
-        tableListener = new TableEventListener() {
+        tableListener = new TableEvent.Listener() {
 
             @Override
             public void tableChanged( TableEvent e ) {
@@ -72,7 +72,7 @@ public class DataTable extends JTable {
             }
         };
         
-        expTable.addTableListener( tableListener );
+        TableEvent.addTableListener( tableListener );
     }
     
     @Override
@@ -86,7 +86,7 @@ public class DataTable extends JTable {
      */
     public void destroy() {
         
-        expTable.removeTableListener( tableListener );
+        TableEvent.removeTableListener( tableListener );
         tableListener = null;
         expTable = null;
         hct.getModel().removeTableModelListener( modelLst );

@@ -9,7 +9,10 @@ import java.awt.event.*;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.table.*;
+import ee.ioc.cs.vsle.table.event.*;
 import ee.ioc.cs.vsle.util.*;
+
+import static ee.ioc.cs.vsle.table.gui.TableConstants.*;
 
 /**
  * @author pavelg
@@ -22,11 +25,10 @@ public class RuleTable extends JTable {
 
     private RuleTableHeader fixedTableHeader;
     private ControlPanel controlPanel;
-    public final static int HORIZONTAL = 0;
-    public final static int VERTICAL = 1;
     private RuleTableModel model;
     private int orientation = HORIZONTAL;
     private Table table;
+    private TableEvent.Listener tableListener;
     
     /**
      * @param expTable
@@ -44,6 +46,10 @@ public class RuleTable extends JTable {
         setColumnSelectionAllowed( orientation == VERTICAL );
         
         fixedTableHeader = new RuleTableHeader( this );
+        
+        initTableListener();
+        
+        updateRowHeight();
     }
  
     @Override
@@ -89,6 +95,8 @@ public class RuleTable extends JTable {
      */
     public void destroy() {
         
+        TableEvent.removeTableListener( tableListener );
+        tableListener = null;
         fixedTableHeader.destroy();
         fixedTableHeader = null;
         model.destroy();
@@ -96,6 +104,45 @@ public class RuleTable extends JTable {
         table = null;
         controlPanel.destroy();
         controlPanel = null;
+    }
+    
+    /**
+     * 
+     */
+    private void initTableListener() {
+        
+        tableListener = new TableEvent.Listener() {
+
+            @Override
+            public void tableChanged( TableEvent e ) {
+                
+                if( ( e.getType() & TableEvent.RENDERER ) > 0 ) {
+                    updateRowHeight();                    
+                }
+            }
+        };
+        
+        TableEvent.addTableListener( tableListener );
+    }
+
+    /**
+     * 
+     */
+    private void updateRowHeight() {
+        
+        int height;
+        
+        if( orientation == HORIZONTAL ) {
+            
+            height = TableFrame.getRowHeight( true ); 
+            
+        } else {
+            
+            height = TableFrame.getRowHeight( false ); 
+            setRowHeight( height );
+        }
+        
+        getFixedTableHeader().setRowHeight( height );
     }
     
     private class ControlPanel extends JPanel {

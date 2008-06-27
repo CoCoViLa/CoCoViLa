@@ -5,8 +5,7 @@ package ee.ioc.cs.vsle.table;
 
 import java.util.*;
 
-import javax.swing.event.*;
-
+import ee.ioc.cs.vsle.table.event.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**
@@ -162,7 +161,7 @@ public final class Table implements IStructuralExpertTable {
         }
         
         if( eventTypeMask > 0 ) {
-            fireTableChanged( new TableEvent( this, eventTypeMask ) );
+            TableEvent.dispatchEvent( new TableEvent( this, eventTypeMask ) );
         }
     }
 
@@ -658,68 +657,4 @@ public final class Table implements IStructuralExpertTable {
         }
     }
     
-    /////////////////////////////////////////////////////TABLE EVENT/////////////////////////////////////////////////////
-    
-    /** List of listeners */
-    private EventListenerList listenerList = new EventListenerList();
-    
-    /**
-     * @param l
-     */
-    public void addTableListener(TableEventListener l) {
-        listenerList.add(TableEventListener.class, l);
-    }
-
-    /**
-     * @param l
-     */
-    public void removeTableListener(TableEventListener l) {
-        listenerList.remove(TableEventListener.class, l);
-    }
-    
-    /**
-     * @param e
-     */
-    private void fireTableChanged(TableEvent e) {
-        Object[] listeners = listenerList.getListenerList();
-        
-        for (int i = listeners.length-2; i>=0; i-=2) {
-            if (listeners[i]==TableEventListener.class) {
-                ((TableEventListener)listeners[i+1]).tableChanged(e);
-            }
-        }
-    }
-    
-    /**
-     *
-     */
-    public class TableEvent extends java.util.EventObject
-    {
-        public static final int HRULES = 1;
-        public static final int VRULES = 2;
-        public static final int DATA = 3;
-        
-        private int typeMask;
-        
-        public TableEvent( Object source, int mask ) {
-            super( source );
-            
-            typeMask = mask;
-        }
-
-        /**
-         * @return the typeMask
-         */
-        public int getType() {
-            return typeMask;
-        }
-    }
-    
-    /**
-     *
-     */
-    public interface TableEventListener extends java.util.EventListener
-    {
-        public void tableChanged(TableEvent e);
-    }
 }

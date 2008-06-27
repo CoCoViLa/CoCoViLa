@@ -1,11 +1,13 @@
 package ee.ioc.cs.vsle.util;
 
-import java.awt.Frame;
-import java.awt.Window;
+import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.List;
 import java.util.jar.*;
+
+import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
 
@@ -263,5 +265,46 @@ public class SystemUtils {
         list.add(window);
         for (Window w : window.getOwnedWindows())
             addAllOwnedWindows(w, list);
+    }
+    
+
+    /**
+     * Upon platform, use OS-specific methods for opening the URL in required
+     * browser.
+     * 
+     * @param url - URL to be opened in a browser. Capable of browsing local
+     *                documentation as well if path is given with file://
+     */
+    public static void openInBrowser( String url, Component parent ) {
+        try {
+            // Check if URL is defined, otherwise there is no reason for opening
+            // the browser in the first place.
+            if ( url != null && url.trim().length() > 0 ) {
+                Desktop.getDesktop().browse(new URI(url));
+            }
+        } catch (Exception e) {
+            if (RuntimeProperties.isLogDebugEnabled()) {
+                db.p(e);
+            }
+
+            StringBuilder msg = new StringBuilder();
+            msg.append("A browser could not be launched for opening ");
+            msg.append("the documentation web page.");
+
+            String exMsg = e.getMessage();
+            if (exMsg != null) {
+                msg.append('\n');
+                msg.append(exMsg);
+            }
+
+            msg.append("\nThe documentation can still be found by ");
+            msg.append("browsing to the following URL:\n");
+            msg.append(url);
+
+            JOptionPane.showMessageDialog(parent,
+                    msg.toString(),
+                    "Error opening documentation",
+                    JOptionPane.ERROR_MESSAGE);
+        }
     }
 }

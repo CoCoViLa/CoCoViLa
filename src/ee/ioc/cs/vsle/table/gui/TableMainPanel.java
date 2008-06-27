@@ -14,6 +14,8 @@ import javax.swing.event.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
 
+import static ee.ioc.cs.vsle.table.gui.TableConstants.*;
+
 /**
  * @author pavelg
  *
@@ -56,8 +58,8 @@ public class TableMainPanel extends JPanel {
         //TODO add Query panel to layout
         //add( getTestQueryPanel(), BorderLayout.SOUTH );
         
-        hct = new RuleTable( table, RuleTable.HORIZONTAL );
-        vct = new RuleTable( table, RuleTable.VERTICAL );
+        hct = new RuleTable( table, HORIZONTAL );
+        vct = new RuleTable( table, VERTICAL );
         aggregateTablePanel.setLayout(new GridBagLayout());
         GridBagConstraints c = new GridBagConstraints();
         

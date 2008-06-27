@@ -3,6 +3,8 @@
  */
 package ee.ioc.cs.vsle.table.gui;
 
+import static ee.ioc.cs.vsle.table.gui.TableConstants.*;
+
 import java.awt.event.*;
 
 import javax.swing.*;
@@ -11,8 +13,6 @@ import javax.swing.table.*;
 
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
-
-import static ee.ioc.cs.vsle.table.gui.RuleTable.*;
 
 /**
  * @author pavelg
@@ -70,9 +70,8 @@ public class RuleTableHeader extends JTable {
         setColumnSelectionAllowed( orientation == HORIZONTAL );
 
         setModel( dataModelF );
-        RuleTableCellEditor ed = new RuleTableCellEditor();
-        setDefaultEditor( Rule.class, ed );
-        setDefaultRenderer( Rule.class, ed );
+        
+        initRenderer();
         
         lst = new TableModelListener() {
 
@@ -85,6 +84,19 @@ public class RuleTableHeader extends JTable {
         };
         
         delegateModel.addTableModelListener( lst );
+    }
+
+    private void initRenderer() {
+        RuleTableCellEditor ed = new RuleTableCellEditor( getRowHeight() == ROW_HEIGHT_NORM );
+        setDefaultEditor( Rule.class, ed );
+        setDefaultRenderer( Rule.class, ed );
+    }
+    
+    @Override
+    public void setRowHeight( int rowHeight ) {
+        super.setRowHeight( rowHeight );
+        
+        initRenderer();
     }
 
     @Override

@@ -1,11 +1,11 @@
 package ee.ioc.cs.vsle.table.gui;
 
-import static ee.ioc.cs.vsle.table.gui.RuleTable.*;
-
 import javax.swing.table.*;
 
 import ee.ioc.cs.vsle.table.*;
-import ee.ioc.cs.vsle.table.Table.*;
+import ee.ioc.cs.vsle.table.event.*;
+
+import static ee.ioc.cs.vsle.table.gui.TableConstants.*;
 
 /**
  * @author pavelg
@@ -15,7 +15,7 @@ public class RuleTableModel extends AbstractTableModel {
 
     private int orientation = HORIZONTAL;
     private Table storage;
-    private TableEventListener tableListener;
+    private TableEvent.Listener tableListener;
     
     /**
      * Constructor
@@ -184,7 +184,7 @@ public class RuleTableModel extends AbstractTableModel {
     
     private void initTableListener() {
         
-        tableListener = new TableEventListener() {
+        tableListener = new TableEvent.Listener() {
 
             @Override
             public void tableChanged( TableEvent e ) {
@@ -197,7 +197,7 @@ public class RuleTableModel extends AbstractTableModel {
             }
         };
         
-        storage.addTableListener( tableListener );
+        TableEvent.addTableListener( tableListener );
     }
     
     /**
@@ -205,7 +205,7 @@ public class RuleTableModel extends AbstractTableModel {
      */
     public void destroy() {
         
-        storage.removeTableListener( tableListener );
+        TableEvent.removeTableListener( tableListener );
         tableListener = null;
         storage = null;
     }

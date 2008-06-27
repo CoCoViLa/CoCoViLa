@@ -8,6 +8,7 @@ import java.awt.event.*;
 import java.util.*;
 
 import javax.swing.*;
+import javax.swing.border.*;
 import javax.swing.table.*;
 
 import ee.ioc.cs.vsle.table.*;
@@ -19,11 +20,10 @@ import ee.ioc.cs.vsle.table.*;
  */
 public class RuleTableCellEditor extends AbstractCellEditor implements TableCellRenderer, TableCellEditor {
 
-    private DefaultTableCellRenderer renderer;
+    private TableCellRenderer renderer;
     
-    {
-        renderer = new DefaultTableCellRenderer();
-        renderer.setHorizontalAlignment( SwingConstants.CENTER );
+    RuleTableCellEditor( boolean isOneLineRend ) {
+        renderer = isOneLineRend ? createSingleLineRenderer() : new RenderingPanel();
     }
     
     @Override
@@ -70,4 +70,120 @@ public class RuleTableCellEditor extends AbstractCellEditor implements TableCell
         return false;
     }
 
+    /**
+     * @return
+     */
+    private static TableCellRenderer createSingleLineRenderer() {
+        
+      DefaultTableCellRenderer renderer = new DefaultTableCellRenderer();
+      renderer.setHorizontalAlignment( SwingConstants.CENTER );
+      
+      return renderer;
+    }
+    
+    /**
+     * 3-line Rule renderer
+     */
+    private static class RenderingPanel extends JPanel implements TableCellRenderer {
+
+        private static Border noFocusBorder = new EmptyBorder(1, 1, 1, 1); 
+        
+        private JLabel varRend = new JLabel( "", SwingConstants.CENTER );
+        private JLabel condRend = new JLabel( "", SwingConstants.CENTER );
+        private JLabel valRend = new JLabel( "", SwingConstants.CENTER );
+        private boolean init = true;
+
+        RenderingPanel() {
+            setLayout( new GridLayout( 3, 1 ) );
+            add( varRend );
+            add( condRend );
+            add( valRend );
+        }
+        
+        @Override
+        public Component getTableCellRendererComponent( JTable table,
+                Object value, boolean isSelected, boolean hasFocus, int row,
+                int column ) {
+            
+            setForeground( isSelected ? table.getSelectionForeground() : table.getForeground() );
+            setBackground( isSelected ? table.getSelectionBackground() : table.getBackground() );
+            
+            setFont(table.getFont());
+
+            if (hasFocus) {
+                Border border = null;
+                if (isSelected) {
+                    border = UIManager.getBorder("Table.focusSelectedCellHighlightBorder");
+                }
+                if (border == null) {
+                    border = UIManager.getBorder("Table.focusCellHighlightBorder");
+                }
+                
+                setBorder(border);
+
+                if (!isSelected && table.isCellEditable(row, column)) {
+                    Color col;
+                    col = UIManager.getColor("Table.focusCellForeground");
+                    if (col != null) {
+                        super.setForeground(col);
+                    }
+                    col = UIManager.getColor("Table.focusCellBackground");
+                    if (col != null) {
+                        super.setBackground(col);
+                    }
+                }
+            } else {
+                setBorder(noFocusBorder);
+            }
+
+            setValue((Rule)value); 
+            
+            return this;
+        }
+        
+        private void setValue( Rule rule ) {
+            
+            if( !init ) return;
+            
+            varRend.setText( rule.getField().getId() );
+            condRend.setText( rule.toStringCond() );
+            valRend.setText( rule.toStringValue() );
+        }
+
+        @Override
+        public void setBackground( Color bg ) {
+            
+            super.setBackground( bg );
+            
+            if( !init ) return;
+            
+            varRend.setBackground( bg );
+            condRend.setBackground( bg );
+            valRend.setBackground( bg );
+        }
+
+        @Override
+        public void setForeground( Color fg ) {
+            
+            super.setForeground( fg );
+            
+            if( !init ) return;
+            
+            varRend.setForeground( fg );
+            condRend.setForeground( fg );
+            valRend.setForeground( fg ); 
+        }
+        
+        @Override
+        public void setFont( Font font ) {
+            
+            super.setFont( font );
+            
+            if( !init ) return;
+            
+            varRend.setFont( font );
+            condRend.setFont( font );
+            valRend.setFont( font ); 
+        }
+    }
 }
