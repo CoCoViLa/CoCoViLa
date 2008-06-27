@@ -164,9 +164,8 @@ public class ProgramRunner {
 
                 } finally {
                     setWorking( false );
+                    RunningThreadManager.removeThread( ProgramRunner.this.getId(), false );
                 }
-
-                RunningThreadManager.removeThread( ProgramRunner.this.getId(), false );
 
                 if ( event.isRequestFeedback() ) {
                     ProgramRunnerFeedbackEvent evt = new ProgramRunnerFeedbackEvent( this, event.getId(),
@@ -609,13 +608,12 @@ public class ProgramRunner {
                                 && !(ex.getCause() instanceof TerminateProgramException)) {
                             ex.printStackTrace();
                         }
+                    } finally {
+                        RunningThreadManager.removeThread( ProgramRunner.this.getId(), false );
+                        setWorking( false );
+                        db.p( "--> Finished!!! " + Thread.currentThread().getName() );
                     }
 
-                    RunningThreadManager.removeThread( ProgramRunner.this.getId(), false );
-
-                    setWorking( false );
-
-                    db.p( "--> Finished!!! " + Thread.currentThread().getName() );
 
                     if ( sendFeedback ) {
 
