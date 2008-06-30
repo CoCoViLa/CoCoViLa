@@ -395,4 +395,17 @@ public class FileFuncs {
         }
         return buf;
     }
+
+    /**
+     * Translates arbitrary non-null strings to strings that should be suitable
+     * for usage in file names.
+     * @param s non-null string
+     * @return a lowercase string with non-word characters replaced with
+     * underscores
+     */
+    public static String toFileName(String s) {
+        s = s.toLowerCase();
+        s = s.replaceAll("[^-\\w]+", "_");
+        return s;
+    }
 }
