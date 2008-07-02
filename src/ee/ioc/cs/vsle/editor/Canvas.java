@@ -1750,9 +1750,19 @@ public class Canvas extends JPanel {
         objects.clearSelected();
         if (obj != null) {
             obj.setSelected(true);
-            drawingArea.scrollRectToVisible(
-                    new Rectangle(obj.getX(), obj.getY(),
-                        obj.getRealWidth(), obj.getRealHeight()));
+
+            // Scroll the center of the object as close to the center of
+            // the visible area as possible.  To achieve this using
+            // scrollRectToVisible() method the coordinates of the object
+            // will need to be padded by half of the dimensions of the visible
+            // area.  Unlike object dimensions the visible area is independent
+            // of the scale.
+            Rectangle vr = drawingArea.getVisibleRect();
+            vr.x = (int) (obj.getX() * scale + 0.5) - vr.width / 2
+                    + (int) (obj.getRealWidth() * scale / 2.0);
+            vr.y = (int) (obj.getY() * scale + 0.5) - vr.height / 2
+                    + (int) (obj.getRealHeight() * scale / 2.0);
+            drawingArea.scrollRectToVisible(vr);
         }
         drawingArea.repaint();
     }
