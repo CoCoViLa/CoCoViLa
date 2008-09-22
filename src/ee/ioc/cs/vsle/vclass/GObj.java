@@ -23,6 +23,10 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     private static final float MIN_SCALE = 0.1f; // the minimal value for
                                                     // X|Ysize
 
+    // Default coordinates to be used when there are no better values 
+    private static final int DEFAULT_X = 10;
+    private static final int DEFAULT_Y = 10;
+
     /*
      * difWithMasterX, difWithMasterY variables are for resizeing an object
      * group, we need to know the intitial difference to make it work correctly
@@ -440,11 +444,13 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     }
 
     public void setX( int x ) {
-        this.x = x;
+        // Editor GUI does not support negative coordinates properly
+        this.x = x < 0 ? DEFAULT_X : x;
     }
 
     public void setY( int y ) {
-        this.y = y;
+        // Editor GUI does not support negative coordinates properly
+        this.y = y < 0 ? DEFAULT_Y : y;
     }
 
     public void setWidth( int width ) {
