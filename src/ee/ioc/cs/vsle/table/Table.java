@@ -488,9 +488,23 @@ public final class Table implements IStructuralExpertTable {
         if( rowId == -1 || colId == -1 ) {
             throw new TableException( "No valid rules for current input: " + Arrays.toString( args ) );
         }
-        
-        DataCell cell = data.get( rowId ).getCell( colId );
-        
+
+        // Get row by rowId which is not always the same as array index
+        DataRow row = null;
+        for (DataRow r : data) {
+            if (r.getId() == rowId) {
+                row = r;
+                break;
+            }
+        }
+
+        if (row == null) {
+            // should never happen, or checkRules returned invalid rowId
+            throw new TableException("Cannot find row with id = " + rowId);
+        }
+
+        DataCell cell = row.getCell(colId);
+
         if( cell == null || cell.getValue() == null ) {
             throw new TableException( "Cell value not specified" );
         }
