@@ -25,6 +25,7 @@ public class Var implements //Cloneable,
     private ClassField field;
     private int varNumber;
     private Var parent;
+    private String parentObject;
     
     private Var() {
 
@@ -102,15 +103,19 @@ public class Var implements //Cloneable,
     }
     
     /**
-     * <UNCOMMENTED>
+     * Lazily initialize the chain of parent objects. Once created, it does not change.
+     * 
      * @return String
      */
     public String getObject() {
-    	if( parent != null ) {
-    		String obj = parent.getObject();
-    		return ( ( obj != null ) ? obj + "." : "" ) + parent.getName();
-    	} 
-    	return null;
+
+        if( parentObject != null ) return parentObject;
+
+        if( parent != null ) {
+            String obj = parent.getObject();
+            return parentObject = ((obj != null) ? obj + "." : "") + parent.getName();
+        }
+        return null;
     } // getObj
 
     public String getDeclaration() {
@@ -120,8 +125,8 @@ public class Var implements //Cloneable,
     public String getFullName() {
     	String obj = getObject();
     	return ( ( ( obj != null ) ? ( obj + "." ).substring( 5 ) : "" ) + field.getName() );
-    }
-    
+        }
+        
     public String getFullNameForConcat() {
     	String s = getFullName();
         if ( TYPE_THIS.equals( s ) ) {
@@ -137,15 +142,18 @@ public class Var implements //Cloneable,
      * PLEASE USE THIS ONLY FOR DEBUGGING!!!
      * @return String
      */
+    @Override
     public String toString() {
     	String obj = getObject();
     	return ( ( ( obj != null ) ? ( obj + "." ) : "" ) + field.getName() );
     } // toString
 
+    @Override
     public boolean equals( Object e ) {
         return this.varNumber == ( ( Var ) e ).varNumber;
     }
 
+    @Override
     public int hashCode() {
         return RelType.VAR_HASH + varNumber;
     }
