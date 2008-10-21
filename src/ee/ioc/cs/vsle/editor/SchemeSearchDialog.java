@@ -305,7 +305,7 @@ public class SchemeSearchDialog extends SearchDialogBase {
             ObjectList list = null;
             Canvas canvas = Editor.getInstance().getCurrentCanvas();
             if (canvas != null) {
-                list = canvas.objects;
+                list = canvas.getObjects();
             }
             return list;
         }

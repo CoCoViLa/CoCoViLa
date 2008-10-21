@@ -45,7 +45,8 @@ public class Editor extends JFrame implements ChangeListener {
 
     private JCheckBoxMenuItem gridCheckBox;
     private JCheckBoxMenuItem showPortCheckBox;
-
+    private JCheckBoxMenuItem showObjectNamesCheckBox;
+    
     /**
      * Class constructor [1].
      */
@@ -179,7 +180,7 @@ public class Editor extends JFrame implements ChangeListener {
 
             public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
                 Canvas canvas = Editor.getInstance().getCurrentCanvas();
-                if ( canvas == null || !canvas.getCurrentPackage().hasPainters() ) {
+                if ( canvas == null || !canvas.getPackage().hasPainters() ) {
                     painterEnabled.setVisible( false );
                 } else {
                     painterEnabled.setVisible( true );
@@ -202,6 +203,10 @@ public class Editor extends JFrame implements ChangeListener {
         showPortCheckBox.addActionListener( aListener );
         menu.add( showPortCheckBox );
         
+        showObjectNamesCheckBox = new JCheckBoxMenuItem( Menu.SHOW_NAMES, false );
+        showObjectNamesCheckBox.addActionListener( aListener );
+        menu.add( showObjectNamesCheckBox );
+        
         //sync View with current canvas
         menu.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
 
@@ -213,6 +218,7 @@ public class Editor extends JFrame implements ChangeListener {
                 
                 gridCheckBox.setSelected( canvas.isGridVisible() );
                 showPortCheckBox.setSelected( canvas.isDrawPorts() );
+                showObjectNamesCheckBox.setSelected( canvas.isShowObjectNames() );
             }
 
             public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {
@@ -563,7 +569,7 @@ public class Editor extends JFrame implements ChangeListener {
                     int count = 0;
 
                     for ( Component canv : tabbedPane.getComponents() ) {
-                        if ( packageName.equals( ( (Canvas) canv ).getCurrentPackage().getName() ) ) {
+                        if ( packageName.equals( ( (Canvas) canv ).getPackage().getName() ) ) {
                             count++;
                         }
                     }
@@ -732,7 +738,7 @@ public class Editor extends JFrame implements ChangeListener {
 
     public VPackage getCurrentPackage() {
         if ( getCurrentCanvas() != null ) {
-            return getCurrentCanvas().getCurrentPackage();
+            return getCurrentCanvas().getPackage();
         }
         return null;
     }

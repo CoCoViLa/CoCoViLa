@@ -3,7 +3,6 @@ package ee.ioc.cs.vsle.editor;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
-import java.net.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
@@ -17,7 +16,6 @@ import javax.xml.transform.stream.*;
 
 import org.xml.sax.helpers.*;
 
-import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -25,16 +23,17 @@ import ee.ioc.cs.vsle.vclass.Point;
 
 /**
  */
-public class Canvas extends JPanel {
+public class Canvas extends JPanel implements ISchemeContainer {
+    
     private static final long serialVersionUID = 1L;
     int mouseX; // Mouse X coordinate.
     int mouseY; // Mouse Y coordinate.
     private String workDir;
-    VPackage vPackage;
+    private VPackage vPackage;
     Palette palette;
-    Scheme scheme;
+    private Scheme scheme;
     private ConnectionList connections;
-    ObjectList objects;
+    private ObjectList objects;
     Map<GObj, ClassPainter> classPainters;
     ClassPainter currentPainter;
     GObj currentObj;
@@ -55,6 +54,7 @@ public class Canvas extends JPanel {
     private boolean actionInProgress = false;
     private JScrollPane areaScrollPane;
     private boolean drawPorts = true;
+    private boolean showObjectNames = false;
     
     /*
      * The Edit classes implementing undo-redo could be moved somewhere else but
@@ -505,7 +505,7 @@ public class Canvas extends JPanel {
 
     void initialize() {
         scheme = new Scheme( vPackage );
-        objects = scheme.getObjects();
+        setObjects( scheme.getObjects() );
         connections = scheme.getConnections();
         mListener = new MouseOps( this );
         keyListener = new KeyOps( this );
@@ -585,7 +585,7 @@ public class Canvas extends JPanel {
         return success;
     }
 
-    public VPackage getCurrentPackage() {
+    public VPackage getPackage() {
         return vPackage;
     }
 
@@ -1042,8 +1042,8 @@ public class Canvas extends JPanel {
     public boolean loadScheme( File file ) {
         scheme = null;
 
-        SchemeLoader loader = new SchemeLoader();
-        loader.setVPackage( vPackage );
+        SchemeLoader loader = new SchemeLoader( vPackage );
+        
         if ( loader.load( file ) ) {
             if ( loader.getDiagnostics().hasProblems() ) {
                 if ( DiagnosticsCollector.promptLoad( this, loader.getDiagnostics(), "Warning: Inconsistent scheme", "scheme" ) ) {
@@ -1069,7 +1069,10 @@ public class Canvas extends JPanel {
         undoManager.discardAllEdits();
         Editor.getInstance().refreshUndoRedo();
         connections = scheme.getConnections();
-        objects = scheme.getObjects();
+        setObjects( scheme.getObjects() );
+        for( GObj obj: scheme.getObjects() ) {
+            setViewAttributes( obj );
+        }
         initClassPainters();
         mListener.setState( State.selection );
         recalcPreferredSize();
@@ -1194,6 +1197,24 @@ public class Canvas extends JPanel {
         }
         
         drawingArea.repaint();
+    }
+
+    public void showObjectNames( boolean b ) {
+        
+        showObjectNames = b;
+        
+        for ( GObj obj : getObjects() ) {
+            obj.setDrawInstanceName( b );
+        }
+        
+        drawingArea.repaint();
+    }
+
+    /**
+     * @return the showObjectNames
+     */
+    public boolean isShowObjectNames() {
+        return showObjectNames;
     }
 
     /**
@@ -1370,7 +1391,7 @@ public class Canvas extends JPanel {
     /**
      * @return the workDir
      */
-    String getWorkDir() {
+    public String getWorkDir() {
         return workDir;
     }
 
@@ -1676,11 +1697,16 @@ public class Canvas extends JPanel {
 
         currentObj.setName( genObjectName( pClass, currentObj ) );
 
-        currentObj.setDrawPorts( drawPorts );
+        setViewAttributes( currentObj );
         
         currentPainter = pClass.getPainterFor( scheme, currentObj );
     }
 
+    private void setViewAttributes( GObj obj ) {
+        obj.setDrawPorts( drawPorts );
+        obj.setDrawInstanceName( showObjectNames );
+    }
+    
     /**
      * Returns true if the object can be set as the superclass.
      * 
@@ -1765,5 +1791,26 @@ public class Canvas extends JPanel {
             drawingArea.scrollRectToVisible(vr);
         }
         drawingArea.repaint();
+    }
+
+    /**
+     * @param objects the objects to set
+     */
+    void setObjects( ObjectList objects ) {
+        this.objects = objects;
+    }
+
+    /**
+     * @return the objects
+     */
+    public ObjectList getObjects() {
+        return objects;
+    }
+    
+    /**
+     * @return the scheme
+     */
+    public Scheme getScheme() {
+        return scheme;
     }
 }

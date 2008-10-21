@@ -199,6 +199,8 @@ public class Text extends Shape implements Serializable {
         this.h = (int) r.getHeight();
         this.w = (int) r.getWidth();
 
+        Font origFont = g2.getFont();
+        
         g2.setFont( getFont() );
         g2.setColor( getColor() );
 
@@ -210,6 +212,8 @@ public class Text extends Shape implements Serializable {
         if ( isSelected() ) {
             drawSelection( g2, new Rectangle( a, b, w, h ) );
         }
+        
+        g2.setFont( origFont );
 
     } // draw
 

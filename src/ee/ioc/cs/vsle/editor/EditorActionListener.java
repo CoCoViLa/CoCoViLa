@@ -226,6 +226,10 @@ public class EditorActionListener implements ActionListener {
                 if ( Editor.getInstance().getCurrentCanvas() != null ) {
                     Editor.getInstance().getCurrentCanvas().setDrawPorts( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
                 }
+            } else if ( e.getActionCommand().equals( Menu.SHOW_NAMES ) ) {
+                if ( Editor.getInstance().getCurrentCanvas() != null ) {
+                    Editor.getInstance().getCurrentCanvas().showObjectNames( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
+                }
             } else if ( e.getActionCommand().equals( Menu.CLEAR_ALL ) ) {
                 if ( Editor.getInstance().getCurrentCanvas() != null ) {
                     Editor.getInstance().getCurrentCanvas().clearObjects();
@@ -457,7 +461,7 @@ public class EditorActionListener implements ActionListener {
         Editor editor = Editor.getInstance();
         Canvas canvas = editor.getCurrentCanvas();
         if ( canvas != null ) {
-            String lastScheme = canvas.vPackage.getLastScheme();
+            String lastScheme = canvas.getPackage().getLastScheme();
             if ( lastScheme == null ) {
                 int rv = JOptionPane.showConfirmDialog( canvas, "The scheme is not saved. Are you sure you want to "
                         + "close it?", "Confirm Delete", JOptionPane.YES_NO_OPTION );

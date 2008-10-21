@@ -175,7 +175,7 @@ public class SchemeSettingsDialog extends JDialog {
                 chooseImage.setEnabled(false);
 
                 if (fileChooser == null) {
-                    fileChooser = new JFileChooser(canvas.getCurrentPackage().getPath());
+                    fileChooser = new JFileChooser(canvas.getPackage().getPath());
                     fileChooser.setFileFilter(new FileFilter() {
 
                         private final String[] extensions = new String[] {"jpg", "jpeg", "png", "gif", "tif", "tiff"};

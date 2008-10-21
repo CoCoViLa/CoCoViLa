@@ -21,8 +21,8 @@ import ee.ioc.cs.vsle.vclass.*;
 
 public class PackageParser implements DiagnosticsCollector.Diagnosable {
 
-    protected VPackage pack;
-    protected String path;
+    private VPackage pack;
+    private String path;
     private DiagnosticsCollector collector = new DiagnosticsCollector();
 
     public static final EntityResolver ENTITY_RESOLVER = new EntityResolver() {
@@ -56,7 +56,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         // factory.setFeature("http://xml.org/sax/features/validation", true);
         factory.setValidating( true );
-        path = file.getParent();
+        path = file.getParent() + File.separator;
 
         try {
             // Parse the input
@@ -384,21 +384,12 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 //                String width = attrs.getValue( ATR_WIDTH );
 //                String height = attrs.getValue( ATR_HEIGHT );
                 String fixed = attrs.getValue( ATR_FIXED );
-                String path = attrs.getValue( ATR_PATH );
+                String imgPath = attrs.getValue( ATR_PATH );
                 
-                String fullPath;
-                
-                if ( !PackageParser.this.path.endsWith( File.separator )
-                        && !path.startsWith( File.separator ) ) {
-                    fullPath = PackageParser.this.path + File.separator + path;
-                } else {
-                    fullPath = PackageParser.this.path + path;
-                }
-                
-                fullPath = FileFuncs.preparePathOS( fullPath );
+                String fullPath = FileFuncs.preparePathOS( PackageParser.this.path + imgPath );
                 
                 Image newImg = new Image( Integer.parseInt( x ), Integer.parseInt( y ), 
-                        fullPath, path,
+                        fullPath, imgPath,
                         ( fixed != null ) ? Boolean.parseBoolean( fixed ) : true );
                 
                 newGraphics.addShape( newImg );
@@ -718,7 +709,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                     Collection<ClassField> specFields;
 
                     try {
-                        specFields = SpecParser.getFields( path + File.separator, newClass.name, ".java" );
+                        specFields = SpecParser.getFields( path, newClass.name, ".java" );
                         newClass.setSpecFields( specFields );
 
                     } catch ( IOException e ) {
@@ -769,5 +760,12 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
     public VPackage getPackage() {
         return pack;
     } // getPackage
+
+    /**
+     * @return the path
+     */
+    public String getPath() {
+        return path;
+    }
 
 }

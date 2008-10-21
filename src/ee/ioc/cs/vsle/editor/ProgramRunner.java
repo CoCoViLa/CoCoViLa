@@ -42,10 +42,10 @@ public class ProgramRunner {
     private List<Var> assumptions = new ArrayList<Var>();
     private Object[] arguments;
     private String mainClassName = new String();
-    private Canvas m_canvas;
+    private ISchemeContainer m_canvas;
     private GenStorage storage;
 
-    public ProgramRunner( Canvas canvas ) {
+    public ProgramRunner( ISchemeContainer canvas ) {
 
         m_id = System.currentTimeMillis();
         ProgramRunnerEvent.registerListener( m_lst );
@@ -55,13 +55,13 @@ public class ProgramRunner {
         m_canvas.registerRunner( m_id );
 
         //TODO tmp:parse tables each time new runner is created
-        TableManager.updateTables( m_canvas.getCurrentPackage() );
+        TableManager.updateTables( m_canvas.getPackage() );
         
         updateFromCanvas();
     }
 
     private void updateFromCanvas() {
-        objects = GroupUnfolder.unfold( m_canvas.objects );
+        objects = GroupUnfolder.unfold( m_canvas.getObjects() );
     }
 
     public void destroy() {
@@ -93,8 +93,8 @@ public class ProgramRunner {
 
         updateFromCanvas();
 
-        return SpecGenFactory.getInstance().getCurrentSpecGen().generateSpec( m_canvas.scheme,
-                m_canvas.scheme.getVPackage().getPackageClassName() );
+        return SpecGenFactory.getInstance().getCurrentSpecGen().generateSpec( m_canvas.getScheme(),
+                m_canvas.getPackage().getPackageClassName() );
     }
 
     private Object[] getArguments() throws Exception {
@@ -122,12 +122,12 @@ public class ProgramRunner {
         try {
             GenStorage fs = getStorage();
             Synthesizer.makeProgram( genCode, classList, mainClassName, m_canvas.getWorkDir(), fs );
-            ClassLoader classLoader = m_canvas.vPackage.newRunnerClassLoader(fs);
+            ClassLoader classLoader = m_canvas.getPackage().newRunnerClassLoader(fs);
             genObject = null;
             Class<?> pc = classLoader.loadClass(CCL.PROGRAM_CONTEXT);
             Class<?> clas = classLoader.loadClass( mainClassName );
             genObject = clas.newInstance();
-            pc.getMethod( "setScheme", Scheme.class ).invoke( null, m_canvas.scheme );
+            pc.getMethod( "setScheme", Scheme.class ).invoke( null, m_canvas.getScheme() );
         } catch ( NoClassDefFoundError e ) {
             JOptionPane.showMessageDialog( null, "Class not found:\n" + e.getMessage(), "Execution error", JOptionPane.ERROR_MESSAGE );
             e.printStackTrace( System.err );
@@ -197,7 +197,7 @@ public class ProgramRunner {
 
             Set<String> schemeObjects = new HashSet<String>();
 
-            for ( GObj gObj : m_canvas.objects ) {
+            for ( GObj gObj : m_canvas.getObjects() ) {
                 schemeObjects.add( gObj.getName() );
             }
 

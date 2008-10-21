@@ -63,6 +63,7 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     protected double angle = 0d;
 
     private boolean drawPorts = true;
+    private boolean drawInstanceName = false;
     
     public GObj() {
         // default constructor
@@ -321,10 +322,16 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
         g2.setColor( Color.black );
 
         if ( isStatic() ) {
+            Font font = g2.getFont();
             g2.setFont( new Font( "Times New Roman", Font.ITALIC, 20 ) );
             g2.drawString( "s", xModifier, yModifier );
+            g2.setFont( font );
         }
-
+        
+        if( drawInstanceName ) {
+            g2.drawString( name, xModifier + ( isStatic() ? 20 : 5 ), yModifier - 5 );
+        }
+        
         if( isDrawPorts() ) {
             for ( int i = 0; i < getPorts().size(); i++ ) {
                 ClassGraphics graphics;
@@ -724,5 +731,12 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
      */
     public void setDrawPorts( boolean drawPorts ) {
         this.drawPorts = drawPorts;
+    }
+
+    /**
+     * @param drawInstanceName the drawInstanceName to set
+     */
+    public void setDrawInstanceName( boolean drawInstanceName ) {
+        this.drawInstanceName = drawInstanceName;
     }
 }

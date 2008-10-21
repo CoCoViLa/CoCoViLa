@@ -48,6 +48,7 @@ public class Menu {
     // VIEW
     public static final String GRID = "Grid";
     public static final String SHOW_PORTS = "Ports";
+    public static final String SHOW_NAMES = "Object Names";
     
     // PACKAGE
     public static final String LOAD = "Load";

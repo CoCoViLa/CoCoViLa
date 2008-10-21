@@ -32,7 +32,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 	 * Sets the package description
 	 * @param vpackage package description
 	 */
-	public void setVPackage(VPackage vpackage) {
+	public SchemeLoader(VPackage vpackage) {
 		this.vpackage = vpackage;
 	}
 
