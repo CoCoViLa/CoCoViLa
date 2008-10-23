@@ -79,13 +79,19 @@ public class Alias extends ClassField {
             } else if (input[i].indexOf(".") >= 1) {
                 String[] split = input[i].trim().split("\\.", -1);
                 ClassField thisVar = getVar(split[0], varList);
+
                 if (thisVar == null) {
                     throw new UnknownVariableException(split[0]);
                 }
                 String newType = "";
                 for (int k = 1; k < split.length; k++) {
-                    ClassField cf = classList.getType(thisVar.getType() )
-                            .getFieldByName(split[k]);
+                    AnnotatedClass type;
+                    type = classList.getType(thisVar.getType() );
+                    if (type == null) {
+                        throw new UnknownVariableException("Unable to find the corresponding class for " + thisVar.getType() 
+                                + " while adding " + input[i] + " to " + this.toString() );
+                    }
+                    ClassField cf = type.getFieldByName(split[k]);
                     if (cf != null) {
                         newType = cf.getType();
                     }

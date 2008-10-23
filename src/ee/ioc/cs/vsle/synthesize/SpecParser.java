@@ -927,6 +927,8 @@ public class SpecParser {
                             //        alias.addVar( aliasCF );
                             //}
                         } catch ( UnknownVariableException e ) {
+                            if( RuntimeProperties.isLogInfoEnabled() )
+                                db.p( "Line: " + e.getLine() + ", " + e.excDesc );
                         } catch ( AliasException e ) {
                         }
                     }
