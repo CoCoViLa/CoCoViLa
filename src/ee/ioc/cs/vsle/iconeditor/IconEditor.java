@@ -339,7 +339,7 @@ public class IconEditor extends JFrame {
 
             File file = selectFile();
 
-            if ( file != null ) {
+            if ( file != null && file.exists()) {
                 // Check if the file name ends with a required extension. If
                 // not,
                 // append the default extension to the file name.
@@ -1045,6 +1045,9 @@ public class IconEditor extends JFrame {
         String className = IconEditor.className;
         
         if( !checkPackage() ) {
+            JOptionPane.showMessageDialog(this,
+                    "No package selected. Aborting.",
+                    "Package not selected!", JOptionPane.WARNING_MESSAGE);
             return;
         }
        
