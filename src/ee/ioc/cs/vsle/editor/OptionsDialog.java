@@ -33,6 +33,7 @@ public class OptionsDialog extends JDialog {
     private static final JCheckBox chbDebugInfo = new JCheckBox();
     private static final JCheckBox chbAntiAlias = new JCheckBox();
     private static final JCheckBox chbShowGrid = new JCheckBox();
+    private static final JCheckBox chbSnapToGrid = new JCheckBox();
     private static final JCheckBox chbSyntaxColor = new JCheckBox();
     private static final JCheckBox chbDumpGen = new JCheckBox();
 
@@ -112,6 +113,10 @@ public class OptionsDialog extends JDialog {
         pnlSettings.add(lblShowGrid, cLabels);
         pnlSettings.add(chbShowGrid, cSettings);
 
+        // snapToGrid
+        pnlSettings.add(lblSnapToGrid, cLabels);
+        pnlSettings.add(chbSnapToGrid, cSettings);
+        
         // gridStep
         pnlSettings.add(lblGridStep, cLabels);
         pnlSettings.add(spinnerGridStep, cSettings);
@@ -196,7 +201,7 @@ public class OptionsDialog extends JDialog {
 
         // Initialize show grid checkbox.
         chbShowGrid.setSelected( RuntimeProperties.isShowGrid() );
-
+        chbSnapToGrid.setSelected( RuntimeProperties.getSnapToGrid() );
         chbSyntaxColor.setSelected( RuntimeProperties.isSyntaxHighlightingOn() );
         chbDumpGen.setSelected(RuntimeProperties.isDumpGenerated());
     } // initializeSettings
@@ -212,6 +217,7 @@ public class OptionsDialog extends JDialog {
         RuntimeProperties.setAntialiasingOn( chbAntiAlias.isSelected() );
         RuntimeProperties.setShowGrid( chbShowGrid.isSelected() );
         RuntimeProperties.setGridStep( ((Integer) spinnerGridStep.getModel().getValue()).intValue() );
+        RuntimeProperties.setSnapToGrid( chbSnapToGrid.isSelected() );
         RuntimeProperties.setNudgeStep( ((Integer) spinnerNudgeStep.getModel().getValue()).intValue() );
         RuntimeProperties.setZoomFactor( Palette.ZOOM_LEVELS[ cbDfltZoom.getSelectedIndex() ] );
         RuntimeProperties.setSyntaxHighlightingOn( chbSyntaxColor.isSelected() );
