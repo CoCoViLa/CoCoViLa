@@ -323,6 +323,10 @@ public class Editor extends JFrame implements ChangeListener {
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_J, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
 
+        menuItem = new JMenuItem( Menu.FONTS );
+        menuItem.addActionListener( aListener );
+        menu.add( menuItem );
+        
         menuItem = new JMenuItem( Menu.SAVE_SETTINGS );
         menuItem.addActionListener( aListener );
         menu.add( menuItem );

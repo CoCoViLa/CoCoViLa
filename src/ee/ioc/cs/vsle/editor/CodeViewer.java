@@ -14,10 +14,20 @@ import java.io.*;
  */
 public class CodeViewer extends JFrame implements ActionListener {
 
-	JTextComponent		textArea;
-	JPanel				specText;
-	File				file;
+	private JTextComponent		textArea;
+	private JPanel				specText;
+	private File				file;
+	
+	private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
 
+        @Override
+        public void fontChanged( FontChangeEvent e ) {
+            if( e.getElement() == RuntimeProperties.Fonts.CODE ) {
+                textArea.setFont( e.getFont() );
+            }
+        }
+    };
+    
 	private CodeViewer(String name, String path, String extension) {
 		
 		super();
@@ -47,7 +57,8 @@ public class CodeViewer extends JFrame implements ActionListener {
         }
 		
 		textArea.addKeyListener(new ProgramTextEditor.CommentKeyListener());
-		textArea.setFont(RuntimeProperties.getFont());
+		textArea.setFont(RuntimeProperties.getFont(RuntimeProperties.Fonts.CODE));
+		FontChangeEvent.addFontChangeListener( fontListener );
 		
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
 		areaScrollPane.setRowHeaderView(new LineNumberView(textArea));
@@ -57,7 +68,6 @@ public class CodeViewer extends JFrame implements ActionListener {
 		specText.add(areaScrollPane, BorderLayout.CENTER);
 		JToolBar toolBar = new JToolBar();
 		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
-		toolBar.add(new FontResizePanel(textArea));
 		toolBar.add(new UndoRedoDocumentPanel(textArea.getDocument()));
 
 		specText.add(toolBar, BorderLayout.NORTH);
@@ -199,8 +209,8 @@ public class CodeViewer extends JFrame implements ActionListener {
 	@Override
 	public void dispose() {
 		if (textArea != null) {
-//			textArea.destroy();
-
+		    FontChangeEvent.removeFontChangeListener( fontListener );
+		    fontListener = null;
 			textArea = null;
 		}
 		super.dispose();

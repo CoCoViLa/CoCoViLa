@@ -13,6 +13,16 @@ public class ErrorWindow extends JFrame {
     JPanel errorText;
     JScrollPane areaScrollPane;
 
+    private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
+
+        @Override
+        public void fontChanged( FontChangeEvent e ) {
+            if( e.getElement() == RuntimeProperties.Fonts.ERRORS ) {
+                textArea.setFont( e.getFont() );
+            }
+        }
+    };
+    
     private static ErrorWindow instance = new ErrorWindow();
 
     private ErrorWindow() {
@@ -21,9 +31,11 @@ public class ErrorWindow extends JFrame {
         addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
             
         textArea = new JTextArea();
-        textArea.setFont( RuntimeProperties.getFont() );
+        textArea.setFont( RuntimeProperties.getFont( RuntimeProperties.Fonts.CODE ) );
         areaScrollPane = new JScrollPane( textArea );
 
+        FontChangeEvent.addFontChangeListener( fontListener );
+        
         areaScrollPane.setVerticalScrollBarPolicy(
                 ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
@@ -43,6 +55,8 @@ public class ErrorWindow extends JFrame {
     @Override
     public void dispose() {
         textArea.setText(null);
+        FontChangeEvent.removeFontChangeListener( fontListener );
+        fontListener = null;
         super.dispose();
     }
 

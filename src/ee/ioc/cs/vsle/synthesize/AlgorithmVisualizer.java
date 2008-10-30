@@ -3,22 +3,16 @@
  */
 package ee.ioc.cs.vsle.synthesize;
 
-import javax.swing.*;
-
-import java.awt.*;
-
-import javax.swing.*;
-
-import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
-
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
 import java.util.List;
 
-import javax.swing.JTabbedPane;
+import javax.swing.*;
 import javax.swing.text.*;
+
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * @author pavelg
@@ -31,6 +25,18 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 	private JPanel jContentPane = null;
 	private JTabbedPane jTabbedPane = null;
 	
+	private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
+
+        @Override
+        public void fontChanged( FontChangeEvent e ) {
+            if( e.getElement() == RuntimeProperties.Fonts.ALGORITHM ) {
+                for( int i = 0; i < getJTabbedPane().getTabCount(); i++ ) {
+                    ((TabPanel)getJTabbedPane().getComponentAt( i )).getJtaAlgorithm().setFont( e.getFont() );
+                }
+            }
+        }
+    };
+    
 	/**
 	 * This method initializes jTabbedPane	
 	 * 	
@@ -71,6 +77,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 	@Override
 	public void dispose() {
 		s_instance = null;
+		FontChangeEvent.removeFontChangeListener( fontListener );
 		super.dispose();
 	}
 
@@ -130,6 +137,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 		this.setContentPane(getJContentPane());
 		this.setTitle("Algorithm Visualizer");
 		this.setVisible(true);
+		FontChangeEvent.addFontChangeListener( fontListener );
 	}
 
 	/**
@@ -159,7 +167,8 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 			
 			new Thread() {
 
-				public void run() {
+				@Override
+                public void run() {
 					
 					final String text = generateAlgorithmText( algorithm );
 					
@@ -183,7 +192,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 		private JTextArea getJtaAlgorithm() {
 			if (jtaAlgorithm == null) {
 				jtaAlgorithm = new JTextArea();
-				jtaAlgorithm.setFont( RuntimeProperties.getFont() );
+				jtaAlgorithm.setFont( RuntimeProperties.getFont( RuntimeProperties.Fonts.CODE ) );
 				jtaAlgorithm.setEditable(false);
 				jtaAlgorithm.setText("Please wait...");
 			}

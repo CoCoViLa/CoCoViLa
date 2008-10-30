@@ -1,8 +1,11 @@
 package ee.ioc.cs.vsle.editor;
 
 import java.awt.*;
+import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+
+import javax.swing.*;
 
 import ee.ioc.cs.vsle.util.*;
 
@@ -45,7 +48,6 @@ public class RuntimeProperties {
     private static final String ZOOM_LEVEL = "defaultzoom";
     private static final String SYNTAX_HIGHLIGHT = "syntax_highlight";
     private static final String SHOW_ALGORITHM = "show_algorithm";
-    private static final String TEXT_FONT = "text_font";
     private static final String SPEC_RECURSION_PARAMS = "spec_recursion";
     private static final String VERSION = "version";
     private static final String VERSION_UNKNOWN = "@project.version@";
@@ -82,13 +84,17 @@ public class RuntimeProperties {
         s_defaultProperties.put( ZOOM_LEVEL, Float.toString( 1.0f ) );
         s_defaultProperties.put( SYNTAX_HIGHLIGHT, Boolean.TRUE.toString() );
         s_defaultProperties.put( SHOW_ALGORITHM, Boolean.FALSE.toString() );
-        s_defaultProperties.put( TEXT_FONT, "Courier New-plain-12" );
         s_defaultProperties.put( VERSION, VERSION_UNKNOWN );
         s_defaultProperties.put( SCHEME_EDITOR_WINDOW_PROPS, ";;650;600;0" );
         s_defaultProperties.put( SPEC_RECURSION_PARAMS, "false;2" );
         s_defaultProperties.put( COMPUTE_GOAL, Boolean.FALSE.toString() );
         s_defaultProperties.put( PROPAGATE_VALUES, Boolean.FALSE.toString() );
         s_defaultProperties.put( DUMP_GENERATED, Boolean.TRUE.toString() );
+        
+        //init default fonts
+        for( Fonts font : Fonts.values() ) {
+            s_defaultProperties.put( font.getPropertyName(), font.getDefaultFont() );
+        }
     }
 
     private static String genFileDir;
@@ -103,7 +109,6 @@ public class RuntimeProperties {
     private static boolean isSyntaxHighlightingOn;
     private static boolean showAlgorithm;
     private static String lnf;
-    private static Font font;
     private static boolean recursiveSpecsAllowed = false;
     private static int maxRecursiveDeclarationDepth = 2;
     private static Set<String> openPackages = new LinkedHashSet<String>();
@@ -111,7 +116,8 @@ public class RuntimeProperties {
     private static boolean computeGoal;
     private static boolean propagateValues;
     private static boolean dumpGenerated;
-
+    private static Map<Fonts, Font> fonts = new Hashtable<Fonts, Font>();
+    
     public static boolean isLogDebugEnabled() {
         return getDebugInfo() >= 1;
     }
@@ -162,10 +168,13 @@ public class RuntimeProperties {
         setNudgeStep( Integer.parseInt( s_runtimeProperties.getProperty( NUDGE_STEP ) ) );
         setShowAlgorithm( Boolean.parseBoolean( s_runtimeProperties.getProperty( SHOW_ALGORITHM ) ) );
         setSyntaxHighlightingOn( Boolean.parseBoolean( s_runtimeProperties.getProperty( SYNTAX_HIGHLIGHT ) ) );
-        setFont( Font.decode( s_runtimeProperties.getProperty( TEXT_FONT ) ) );
         setPropagateValues( Boolean.parseBoolean( s_runtimeProperties.getProperty( PROPAGATE_VALUES ) ) );
         setComputeGoal( Boolean.parseBoolean( s_runtimeProperties.getProperty( COMPUTE_GOAL ) ) );
 
+        for( Fonts font : Fonts.values() ) {
+            fonts.put( font, Font.decode( s_runtimeProperties.getProperty( font.getPropertyName() ) ) );
+        }
+        
         String openPacks = s_runtimeProperties.getProperty( OPEN_PACKAGES );
 
         if ( openPacks != null && openPacks.trim().length() > 0 ) {
@@ -226,18 +235,10 @@ public class RuntimeProperties {
         s_runtimeProperties.setProperty( PROPAGATE_VALUES, Boolean.toString( propagateValues ) );
         s_runtimeProperties.setProperty( DUMP_GENERATED, Boolean.toString(dumpGenerated ));
 
-        String fontString = font.getName() + "-";
-
-        if ( font.isBold() ) {
-            fontString += font.isItalic() ? "bolditalic" : "bold";
-        } else {
-            fontString += font.isItalic() ? "italic" : "plain";
+        for( Fonts font : Fonts.values() ) {
+            s_runtimeProperties.setProperty( font.getPropertyName(), encodeFont( fonts.get( font ) ) );
         }
-
-        fontString += "-" + font.getSize();
-
-        s_runtimeProperties.setProperty( TEXT_FONT, fontString );
-
+        
         String openPackagesString = "";
 
         for ( String open : openPackages ) {
@@ -510,15 +511,15 @@ public class RuntimeProperties {
     /**
      * @param font the font to set
      */
-    public static void setFont( Font font ) {
-        RuntimeProperties.font = font;
+    public static void setFont( Fonts element, Font font ) {
+        fonts.put( element, font );
     }
 
     /**
      * @return the font
      */
-    public static Font getFont() {
-        return font;
+    public static Font getFont( Fonts element ) {
+        return fonts.get( element );
     }
 
     /**
@@ -678,5 +679,106 @@ public class RuntimeProperties {
         }
 
         RuntimeProperties.dumpGenerated = dumpGenerated;
+    }
+    
+    private static FontChooser fontChooser;
+    
+    static void openFontChooser( JFrame parent ) {
+        
+        if( fontChooser != null ) {
+            fontChooser.toFront();
+            return;
+        }
+        
+        fontChooser = new FontChooser( parent, new Hashtable<Fonts, Font>( fonts ) ) {
+            
+            @Override
+            public void dispose() {
+                fontChooser = null;
+                super.dispose();
+            }
+        };
+        
+        fontChooser.setActionListener( new ActionListener() {
+
+            public void actionPerformed(ActionEvent e) {
+                Map<Fonts, Font> newFonts = fontChooser.getElements();
+                
+                for ( final Fonts element : newFonts.keySet() ) {
+                    final Font newFont = newFonts.get( element );
+                    
+                    if( !newFont.equals( fonts.get( element ) ) ) {
+                        
+                        fonts.put( element, newFont );
+                        
+                        SwingUtilities.invokeLater( new Runnable() {
+                            public void run() {
+                                FontChangeEvent.dispatchEvent( new FontChangeEvent( this, element, newFont ) );
+                            }
+                        } );
+                    }
+                }
+            }
+        } );
+        
+        fontChooser.setVisible( true );
+    }
+    
+    static String encodeFont(Font font) {
+        String fontString = font.getName() + "-";
+
+        if (font.isBold()) {
+            fontString += font.isItalic() ? "bolditalic" : "bold";
+        } else {
+            fontString += font.isItalic() ? "italic" : "plain";
+        }
+
+        fontString += "-" + font.getSize();
+
+        return fontString;
+    }
+
+    public static enum Fonts {
+
+        CODE( "text_font", "Java code and specifications", "Courier New-plain-12" ),
+        OBJECTS( "object_names_font", "Object names on canvas", "Arial-plain-12" ),
+        STATIC( "static_font", "\"S\" for static objects on canvas", "Arial-italic-20" ),
+        ALGORITHM( "algorithm_font", "Algorithm visualizer", "Courier New-plain-12" ),
+        ERRORS( "error_font", "Error window", "Courier New-plain-12" );
+        
+        private String propertyName;
+        private String description;
+        private String defaultFont;
+        
+        Fonts( String propertyName, String description, String defaultFont ) {
+            this.propertyName = propertyName;
+            this.description = description;
+            this.defaultFont = defaultFont;
+        }
+        
+        String getPropertyName() {
+            return propertyName;
+        }
+        
+        String getDescription() {
+            return description;
+        }
+        
+        String getDefaultFont() {
+            return defaultFont;
+        }
+        
+        @Override
+        public String toString() {
+            return getDescription();
+        }
+        
+        static Fonts getElementByPropertyName( String name ) {
+            for( Fonts element : Fonts.values() ) {
+                if( element.getPropertyName().equals( name ) )
+                    return element;
+            }
+            return null;
+        }
     }
 }

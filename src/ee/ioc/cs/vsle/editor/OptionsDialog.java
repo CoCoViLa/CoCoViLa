@@ -19,6 +19,7 @@ public class OptionsDialog extends JDialog {
     private static final JLabel lblAntiAlias = new JLabel( "Anti aliasing:" );
     private static final JLabel lblShowGrid = new JLabel( "Show grid:" );
     private static final JLabel lblGridStep = new JLabel( "Grid step:" );
+    private static final JLabel lblSnapToGrid = new JLabel( "Snap to grid:" );
     private static final JLabel lblNudgeStep = new JLabel( "Nudge step:" );
     private static final JLabel lblSyntaxColor = new JLabel( "Syntax Highlighting:" );
     private static final JLabel lblDefaultZoom = new JLabel( "Default Zoom:" );

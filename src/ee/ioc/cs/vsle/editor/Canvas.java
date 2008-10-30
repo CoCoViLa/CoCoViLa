@@ -56,6 +56,18 @@ public class Canvas extends JPanel implements ISchemeContainer {
     private boolean drawPorts = true;
     private boolean showObjectNames = false;
     
+    private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
+
+        @Override
+        public void fontChanged( FontChangeEvent e ) {
+            if( drawingArea != null && ( e.getElement() == RuntimeProperties.Fonts.OBJECTS 
+                    || e.getElement() == RuntimeProperties.Fonts.STATIC ) ) {
+
+                drawingArea.repaint();
+            }
+        }
+    };
+    
     /*
      * The Edit classes implementing undo-redo could be moved somewhere else but
      * as they need to touch the internal state of the Canvas object then maybe
@@ -468,6 +480,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         initialize();
         palette = new Palette( vPackage, this );
         m_canvasTitle = vPackage.getName();
+        FontChangeEvent.addFontChangeListener( fontListener );
         validate();
     }
 
@@ -1471,6 +1484,9 @@ public class Canvas extends JPanel implements ISchemeContainer {
     }
 
     public void destroy() {
+        
+        FontChangeEvent.removeFontChangeListener( fontListener );
+        
         for ( long id : m_runners ) {
             ProgramRunnerEvent event = new ProgramRunnerEvent( this, id, ProgramRunnerEvent.DESTROY );
 

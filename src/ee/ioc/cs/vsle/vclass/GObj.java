@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.graphics.Shape;
 
 import java.io.Serializable;
@@ -321,15 +322,18 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
         int yModifier = getY();
         g2.setColor( Color.black );
 
+        Font origFont = g2.getFont();
+        
         if ( isStatic() ) {
-            Font font = g2.getFont();
-            g2.setFont( new Font( "Times New Roman", Font.ITALIC, 20 ) );
+            g2.setFont( RuntimeProperties.getFont( RuntimeProperties.Fonts.STATIC ) );
             g2.drawString( "s", xModifier, yModifier );
-            g2.setFont( font );
+            g2.setFont( origFont );
         }
         
         if( drawInstanceName ) {
+            g2.setFont( RuntimeProperties.getFont( RuntimeProperties.Fonts.OBJECTS ) );
             g2.drawString( name, xModifier + ( isStatic() ? 20 : 5 ), yModifier - 5 );
+            g2.setFont( origFont );
         }
         
         if( isDrawPorts() ) {

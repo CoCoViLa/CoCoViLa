@@ -32,6 +32,18 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
     // ID for managing frames
     private String m_title;
 
+    private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
+
+        @Override
+        public void fontChanged( FontChangeEvent e ) {
+            if( e.getElement() == RuntimeProperties.Fonts.CODE ) {
+                jta_runResult.setFont( e.getFont() );
+                jta_spec.setFont( e.getFont() );
+                jta_generatedCode.setFont( e.getFont() );
+            }
+        }
+    };
+    
     private static HashMap<String, JFrame> s_frames = new HashMap<String, JFrame>();
 
     public ProgramTextEditor( long prunnerID, String title ) {
@@ -81,7 +93,8 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
         }
 
         jta_spec.addKeyListener( new CommentKeyListener() );
-        jta_spec.setFont( RuntimeProperties.getFont() );
+        Font font = RuntimeProperties.getFont( RuntimeProperties.Fonts.CODE );
+        jta_spec.setFont( font );
         JScrollPane areaScrollPane = new JScrollPane( jta_spec );
         areaScrollPane.setRowHeaderView( new LineNumberView( jta_spec ) );
         areaScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
@@ -102,7 +115,6 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
         refreshSpec = new JButton( "Update from Scheme" );
         refreshSpec.addActionListener( this );
         progToolBar.add( refreshSpec );
-        progToolBar.add( new FontResizePanel( jta_spec ) );
 
         specText.add( progToolBar, BorderLayout.NORTH );
         tabbedPane.addTab( "Specification", specText );
@@ -118,7 +130,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
         }
 
         jta_generatedCode.addKeyListener( new CommentKeyListener() );
-        jta_generatedCode.setFont( RuntimeProperties.getFont() );
+        jta_generatedCode.setFont( font );
         JToolBar toolBar = new JToolBar();
         toolBar.setLayout( new FlowLayout( FlowLayout.LEFT ) );
         runProg = new JButton( "Compile & Run" );
@@ -128,7 +140,6 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
         propagateOnRunNew.setOpaque( false );
         toolBar.add( propagateOnRunNew );
         toolBar.add( new UndoRedoDocumentPanel( jta_generatedCode.getDocument() ) );
-        toolBar.add( new FontResizePanel( jta_generatedCode ) );
         JScrollPane programAreaScrollPane = new JScrollPane( jta_generatedCode );
         programAreaScrollPane.setRowHeaderView( new LineNumberView( jta_generatedCode ) );
         programAreaScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
@@ -143,7 +154,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
         tabbedPane.addTab( "Program", progText );
 
         jta_runResult = new JTextArea();
-        jta_runResult.setFont( RuntimeProperties.getFont() );
+        jta_runResult.setFont( font );
         JToolBar resultToolBar = new JToolBar();
         propagate = new JButton( "Propagate values" );
         propagate.addActionListener( this );
@@ -180,10 +191,13 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
 
         TextSearchDialog.attachTo(this, this);
 
+        FontChangeEvent.addFontChangeListener( fontListener );
+        
         setContentPane( contentPane );
         validate();
     }
 
+    @Override
     public void dispose() {
         super.dispose();
 
@@ -204,6 +218,8 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
             m_lst = null;
         }
 
+        FontChangeEvent.removeFontChangeListener( fontListener );
+        
         ProgramRunnerEvent event = new ProgramRunnerEvent( this, m_progRunnerID, ProgramRunnerEvent.DESTROY );
 
         EventSystem.queueEvent( event );

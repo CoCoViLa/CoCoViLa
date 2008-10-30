@@ -139,6 +139,7 @@ class SyntaxDocument extends DefaultStyledDocument {
 			StyleConstants.setFontFamily(style, m_font.getFamily());
 			StyleConstants.setFontSize(style, m_font.getSize());
 			StyleConstants.setBold(style, m_font.isBold());
+			StyleConstants.setItalic(style, m_font.isItalic());
 		}
 	}
 

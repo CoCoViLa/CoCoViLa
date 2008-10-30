@@ -72,6 +72,7 @@ public class Menu {
     
     // OPTIONS
     public static final String SETTINGS = "Settings";
+    public static final String FONTS = "Fonts";
     public static final String SAVE_SETTINGS = "Save As Default";
 
     // HELP
