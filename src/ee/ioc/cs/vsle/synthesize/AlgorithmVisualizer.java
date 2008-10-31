@@ -192,7 +192,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 		private JTextArea getJtaAlgorithm() {
 			if (jtaAlgorithm == null) {
 				jtaAlgorithm = new JTextArea();
-				jtaAlgorithm.setFont( RuntimeProperties.getFont( RuntimeProperties.Fonts.CODE ) );
+				jtaAlgorithm.setFont( RuntimeProperties.getFont( RuntimeProperties.Fonts.ALGORITHM ) );
 				jtaAlgorithm.setEditable(false);
 				jtaAlgorithm.setText("Please wait...");
 			}

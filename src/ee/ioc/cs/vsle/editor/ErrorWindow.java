@@ -31,7 +31,7 @@ public class ErrorWindow extends JFrame {
         addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
             
         textArea = new JTextArea();
-        textArea.setFont( RuntimeProperties.getFont( RuntimeProperties.Fonts.CODE ) );
+        textArea.setFont( RuntimeProperties.getFont( RuntimeProperties.Fonts.ERRORS ) );
         areaScrollPane = new JScrollPane( textArea );
 
         FontChangeEvent.addFontChangeListener( fontListener );
