@@ -34,7 +34,10 @@ public final class ProgramContext {
      * Reference to the scheme the program was generated from
      */
     private static Scheme scheme;
-
+    
+    private static Thread thread;
+    private static long runnerId;
+    
     /**
      * Sets the static scheme reference.
      * This method cannot be called by user code.
@@ -45,6 +48,20 @@ public final class ProgramContext {
             ProgramContext.scheme = scheme;
         else
             throw new RuntimeException("ProgramContext already initialized");
+    }
+
+    /**
+     * @param thread the thread to set
+     */
+    public static void setThread( Thread thread ) {
+        ProgramContext.thread = thread;
+    }
+
+    /**
+     * @param runnerId the runnerId to set
+     */
+    public static void setRunnerId( long runnerId ) {
+        ProgramContext.runnerId = runnerId;
     }
 
     /**
@@ -94,13 +111,25 @@ public final class ProgramContext {
      * and reruns the scheme.
      */
     public static final void rerun() {
-        throw new RerunProgramException();
+        if( !isRunningThread() ) {
+            scheme.rerun();
+        } else {
+            throw new RerunProgramException();
+        }
     }
 
     /**
      * Terminates the current execution of the generated program.
      */
     public static final void terminate() {
-        throw new TerminateProgramException();
+        if( !isRunningThread() ) {
+            scheme.terminate( runnerId );
+        } else {
+            throw new TerminateProgramException();
+        }
+    }
+    
+    private static boolean isRunningThread() {
+        return Thread.currentThread() == thread;
     }
 }

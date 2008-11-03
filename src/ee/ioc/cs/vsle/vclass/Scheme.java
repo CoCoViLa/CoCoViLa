@@ -3,8 +3,8 @@ package ee.ioc.cs.vsle.vclass;
 import java.io.Serializable;
 
 import ee.ioc.cs.vsle.api.SchemeObject;
-import ee.ioc.cs.vsle.editor.Canvas;
-import ee.ioc.cs.vsle.editor.Editor;
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.table.*;
 
 /**
@@ -13,20 +13,21 @@ import ee.ioc.cs.vsle.table.*;
 public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
 
     private static final long serialVersionUID = 1L;
-    private final VPackage vpackage;
     private ObjectList objects;
 	private ConnectionList connections;
-
-	public Scheme(VPackage vpackage, ObjectList objects,
+	private ISchemeContainer canvas;
+	
+	public Scheme( ISchemeContainer canvas, ObjectList objects,
 			ConnectionList connections) {
 
-		this.vpackage = vpackage;
+	    this( canvas );
+	    
 		this.objects = objects;
 		this.connections = connections;
 	}
 
-	public Scheme(VPackage vpackage) {
-		this.vpackage = vpackage;
+	public Scheme( ISchemeContainer canvas ) {
+	    this.canvas = canvas;
 	}
 
 	@Override
@@ -34,12 +35,8 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
 		return "Objects: " + objects + " Connections: " + connections;
 	}
 
-	public VPackage getVPackage() {
-		return vpackage;
-	}
-
 	public ee.ioc.cs.vsle.api.Package getPackage() {
-		return vpackage;
+		return canvas.getPackage();
 	}
 
 	public ObjectList getObjects() {
@@ -82,17 +79,14 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
      * changed.
      */
     public void repaint() {
-        // We are repainting the canvas that happens to be active instead of
-        // the correct one because currently the scheme does not have a
-        // reference to the proper canvas drawingarea instance.
-        // The worst problem is that we could end up repainting the
-        // foreground scheme more often than needed.
-        Canvas canvas = Editor.getInstance().getCurrentCanvas();
-        if (canvas != null)
+        if (canvas == Editor.getInstance().getCurrentCanvas()) {
             canvas.repaint(); // TODO should repaint only the drawingarea
+        }
     }
 
     /*
+     * TODO do we need this method?
+     * 
      * @see ee.ioc.cs.vsle.api.Scheme#repaint(int, int, int, int)
      */
     public void repaint(int x, int y, int width, int height) {
@@ -132,5 +126,16 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
      */
     public Object queryTable( String tableName, Object[] args ) {
         return TableManager.getTable( getPackage(), tableName ).queryTable( args );
+    }
+
+    @Override
+    public void rerun() {
+        ProgramRunner.rerun( canvas );
+    }
+
+    @Override
+    public void terminate( long runnerId ) {
+        ProgramRunnerEvent event = new ProgramRunnerEvent( canvas, runnerId, ProgramRunnerEvent.DESTROY );
+        EventSystem.queueEvent( event );
     }
 }

@@ -7,7 +7,7 @@ import ee.ioc.cs.vsle.vclass.*;
  * 
  * Interface used by ProgramRunner
  */
-interface ISchemeContainer {
+public interface ISchemeContainer {
 
     /**
      * Returns a loaded package

@@ -567,6 +567,8 @@ public class ProgramRunner {
             return;
 
         new Thread() {
+            
+            @Override
             public void run() {
                 Thread.currentThread().setName( "RunningThread_" + System.currentTimeMillis() );
 
@@ -579,6 +581,12 @@ public class ProgramRunner {
                     }
 
                     Class<?> clas = genObject.getClass();
+                    
+                    ClassLoader cl = clas.getClassLoader();
+                    Class<?> pc = cl.loadClass(CCL.PROGRAM_CONTEXT);
+                    pc.getMethod( "setThread", Thread.class ).invoke( null, this );
+                    pc.getMethod( "setRunnerId", long.class ).invoke( null, ProgramRunner.this.getId() );
+                    
                     Method method = clas.getMethod( "compute", Object[].class );
                     db.p( "Running... ( NB! The thread is alive until the next message --> ) " + Thread.currentThread().getName() );
 
@@ -596,13 +604,7 @@ public class ProgramRunner {
                          * stopped manually or a rerun was requested.
                          */
                         if (ex.getCause() instanceof RerunProgramException) {
-                            ProgramRunner pr = new ProgramRunner(m_canvas);
-                            int op = ( RuntimeProperties.isComputeGoal() ? ProgramRunnerEvent.COMPUTE_GOAL : ProgramRunnerEvent.COMPUTE_ALL ) 
-                                | ProgramRunnerEvent.RUN_NEW
-                                | ( RuntimeProperties.isPropagateValues() ? ProgramRunnerEvent.PROPAGATE : 0 );
-
-                            ProgramRunnerEvent evt = new ProgramRunnerEvent( this, pr.getId(), op );
-                            EventSystem.queueEvent( evt );
+                            rerun( m_canvas );
                             rerun = true;
                         } else if ( !( ex.getCause() instanceof ThreadDeath )
                                 && !(ex.getCause() instanceof TerminateProgramException)) {
@@ -636,6 +638,28 @@ public class ProgramRunner {
 
     }
 
+    /**
+     * Creates new ProgramRunner instance and sends an event for running a program from the given canvas
+     * 
+     * @param canvas
+     */
+    public static void rerun( ISchemeContainer canvas ) {
+        
+        ProgramRunner pr = new ProgramRunner( canvas );
+        
+        int op = ( RuntimeProperties.isComputeGoal() ? ProgramRunnerEvent.COMPUTE_GOAL : ProgramRunnerEvent.COMPUTE_ALL ) 
+            | ProgramRunnerEvent.RUN_NEW
+            | ( RuntimeProperties.isPropagateValues() ? ProgramRunnerEvent.PROPAGATE : 0 );
+
+        ProgramRunnerEvent evt = new ProgramRunnerEvent( canvas, pr.getId(), op );
+        EventSystem.queueEvent( evt );
+    }
+    
+    /**
+     * Prints Watch Fields
+     * 
+     * @return
+     */
     private String printWatchFields() {
 
         StringBuilder result = new StringBuilder( "---------- Watch Fields ----------\n" );

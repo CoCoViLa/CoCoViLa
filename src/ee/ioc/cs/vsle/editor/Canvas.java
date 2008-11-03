@@ -517,7 +517,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     }
 
     void initialize() {
-        scheme = new Scheme( vPackage );
+        scheme = new Scheme( this );
         setObjects( scheme.getObjects() );
         connections = scheme.getConnections();
         mListener = new MouseOps( this );
@@ -1060,10 +1060,10 @@ public class Canvas extends JPanel implements ISchemeContainer {
         if ( loader.load( file ) ) {
             if ( loader.getDiagnostics().hasProblems() ) {
                 if ( DiagnosticsCollector.promptLoad( this, loader.getDiagnostics(), "Warning: Inconsistent scheme", "scheme" ) ) {
-                    scheme = new Scheme( vPackage, loader.getObjectList(), loader.getConnectionList() );
+                    scheme = new Scheme( this, loader.getObjectList(), loader.getConnectionList() );
                 }
             } else {
-                scheme = new Scheme( vPackage, loader.getObjectList(), loader.getConnectionList() );
+                scheme = new Scheme( this, loader.getObjectList(), loader.getConnectionList() );
             }
         } else {
             List<String> msgs = loader.getDiagnostics().getMessages();

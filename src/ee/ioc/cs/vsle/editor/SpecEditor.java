@@ -90,7 +90,7 @@ public class SpecEditor {
         private SchemeContainer( VPackage _package, String dir ) {
             this._package = _package;
             this.dir = dir;
-            scheme = new Scheme( _package, new ObjectList(), new ConnectionList() );
+            scheme = new Scheme( this, new ObjectList(), new ConnectionList() );
         }
         
         private void loadScheme( File schemeFile ) {
@@ -98,7 +98,7 @@ public class SpecEditor {
             SchemeLoader schemeLoader = new SchemeLoader( _package );
             
             if ( schemeLoader.load( schemeFile ) ) {
-                scheme = new Scheme( _package, schemeLoader.getObjectList(), schemeLoader.getConnectionList() );
+                scheme = new Scheme( this, schemeLoader.getObjectList(), schemeLoader.getConnectionList() );
             } else {
                 JOptionPane.showMessageDialog( null, "Error loading scheme", "Error", JOptionPane.ERROR_MESSAGE );
             }

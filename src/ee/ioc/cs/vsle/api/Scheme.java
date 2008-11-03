@@ -60,4 +60,16 @@ public interface Scheme {
      */
     public Object queryTable( String tableName, Object[] args );
     
+    /**
+     * Terminates the execution of a program from any thread
+     * 
+     * @param runnerId
+     */
+    public void terminate( long runnerId );
+    
+    /**
+     * Terminates and reruns a program from any thread
+     */
+    public void rerun();
+    
 }
