@@ -356,9 +356,8 @@ class SyntaxDocument extends DefaultStyledDocument {
 			return;
 		}
 
-		// set normal attributes for the line
-
-		doc.setCharacterAttributes(startOffset, lineLength, normal, true);
+		// set normal attributes for the line, including newline
+		doc.setCharacterAttributes(startOffset, lineLength + 1, normal, true);
 
 		// check for single line comment
 
