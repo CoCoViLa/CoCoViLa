@@ -443,11 +443,10 @@ public class CodeGenerator {
         int count = 0;
         for ( Var var : aliasVar.getChildVars() ) {
 
-            if ( var.getField().isVoid() )
-                continue;
-
             String varName;
-            if ( var.getField().isAlias() ) {
+            if ( var.getField().isVoid() )
+                varName = "/*void:" + var.getField().getName() + "*/null";
+            else if ( var.getField().isAlias() ) {
                 varName = getAliasTmpName( aliasVar.getName() );
                 before += getVarsToAlias( var, varName );
             } else {
