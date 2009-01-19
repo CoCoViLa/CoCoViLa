@@ -330,21 +330,31 @@ public abstract class CCL extends URLClassLoader {
         File javaHome = new File(System.getProperty("java.home"));
         File libDir = new File(javaHome, "lib");
         File extDir = new File(libDir, "ext");
-        File[] libs = getLibraryFiles(libDir);
-        File[] extLibs = getLibraryFiles(extDir);
+        File osxDir = new File(javaHome.getParentFile(), "Classes");
 
-        if (libs == null || libs.length < 1) {
-            return extLibs;
-        } else if (extLibs == null || extLibs.length < 1) {
-            return libs;
-        } else {
-            int nLib = libs.length;
-            libs = Arrays.copyOf(libs, libs.length + extLibs.length);
-            for (int i = 0; i < extLibs.length; i++) {
-                libs[nLib + i] = extLibs[i];
+        File[][] libsArray = new File[][] {
+            getLibraryFiles(libDir),
+            getLibraryFiles(osxDir),
+            getLibraryFiles(extDir),
+        };
+
+        int nLibs = 0;
+        for (int i = 0; i < libsArray.length; i++) {
+            if (libsArray[i] != null) {
+                nLibs += libsArray[i].length;
             }
-            return libs;
         }
+
+        File[] libs = new File[nLibs];
+        int destPos = 0;
+        for (int i = 0; i < libsArray.length; i++) {
+            if (libsArray[i] != null) {
+                System.arraycopy(libsArray[i], 0, libs, destPos,
+                        libsArray[i].length);
+                destPos += libsArray[i].length;
+            }
+        }
+        return libs;
     }
 
     public static File[] getLibraryFiles(File searchDir) {
