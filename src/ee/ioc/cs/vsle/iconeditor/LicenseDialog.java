@@ -57,8 +57,7 @@ public class LicenseDialog extends JDialog {
 		taLicenseText.setWrapStyleWord(true);
 
 		getContentPane().add(pnlMain);
-		setSize(new Dimension(500, 600));
-		setResizable(false);
+		setPreferredSize(new Dimension(500, 600));
 		setLocationRelativeTo(parent);
 
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -82,6 +81,7 @@ public class LicenseDialog extends JDialog {
 			}
 		}); // end cbLang item listener
 
+        pack();
 		setVisible(true);
 	} // PortPropertiesDialog
 
