@@ -50,6 +50,16 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 			throw new IllegalStateException("Package must be set to a "
 					+ "non-null value!");
 
+		// Give a meaningful error message in case of empty files because
+		// it has been possible to generate empty .syn files from Scheme
+		// Editor. Named pipes etc also have zero length, ignore these.
+		if (file.isFile() && file.length() == 0L) {
+		    collector.collectDiagnostic("The file " + file.getName() +
+		            " is empty!", true);
+
+		    return false;
+		}
+
 		if (parser == null) {
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 
