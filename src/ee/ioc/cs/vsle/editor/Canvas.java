@@ -508,7 +508,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
             int ip = lastFile.lastIndexOf( '.' );
 
             is = is > 0 ? is + 1 : 0;
-            ip = ip > 0 ? ip : lastFile.length() - 1;
+            ip = ip > 0 ? ip : lastFile.length();
 
             if ( is <= ip )
                 title = lastFile.substring( is, ip );
