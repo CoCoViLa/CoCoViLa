@@ -517,9 +517,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     }
 
     void initialize() {
-        scheme = new Scheme( this );
-        setObjects( scheme.getObjects() );
-        connections = scheme.getConnections();
+        setScheme(new Scheme(this));
         mListener = new MouseOps( this );
         keyListener = new KeyOps( this );
         drawingArea = new DrawingArea();
@@ -1053,37 +1051,40 @@ public class Canvas extends JPanel implements ISchemeContainer {
     } // print
 
     public boolean loadScheme( File file ) {
-        scheme = null;
-
+        Scheme newScheme = null;
         SchemeLoader loader = new SchemeLoader( vPackage );
-        
+
         if ( loader.load( file ) ) {
             if ( loader.getDiagnostics().hasProblems() ) {
                 if ( DiagnosticsCollector.promptLoad( this, loader.getDiagnostics(), "Warning: Inconsistent scheme", "scheme" ) ) {
-                    scheme = new Scheme( this, loader.getObjectList(), loader.getConnectionList() );
+                    newScheme = new Scheme( this, loader.getObjectList(), loader.getConnectionList() );
                 }
             } else {
-                scheme = new Scheme( this, loader.getObjectList(), loader.getConnectionList() );
+                newScheme = new Scheme( this, loader.getObjectList(), loader.getConnectionList() );
             }
         } else {
             List<String> msgs = loader.getDiagnostics().getMessages();
             String msg;
-            if ( msgs.size() > 0 )
-                msg = msgs.get( 0 );
-            else
+            if (msgs.size() > 0) {
+                msg = "Scheme loader returned the following error message:\n";
+                for (String s : msgs) {
+                    msg += s + "\n";
+                }
+            } else {
                 msg = "An error occured. See the log for details.";
+            }
 
             JOptionPane.showMessageDialog( this, msg, "Error loading scheme", JOptionPane.ERROR_MESSAGE );
         }
 
-        if ( scheme == null )
+        if (newScheme == null) {
             return false;
+        }
 
         undoManager.discardAllEdits();
         Editor.getInstance().refreshUndoRedo();
-        connections = scheme.getConnections();
-        setObjects( scheme.getObjects() );
-        for( GObj obj: scheme.getObjects() ) {
+        setScheme(newScheme);
+        for (GObj obj : newScheme.getObjects()) {
             setViewAttributes( obj );
         }
         initClassPainters();
@@ -1810,9 +1811,14 @@ public class Canvas extends JPanel implements ISchemeContainer {
     }
 
     /**
+     * Sets the object list.
+     * The argument cannot be null.
      * @param objects the objects to set
      */
-    void setObjects( ObjectList objects ) {
+    void setObjectList(ObjectList objects) {
+        if (objects == null) {
+            throw new IllegalArgumentException("ObjectList cannot be null");
+        }
         this.objects = objects;
     }
 
@@ -1828,5 +1834,31 @@ public class Canvas extends JPanel implements ISchemeContainer {
      */
     public Scheme getScheme() {
         return scheme;
+    }
+
+    /**
+     * Sets the connection list.
+     * The argument cannot be null.
+     * @param connectionList the new connection list
+     */
+    private void setConnectionList(ConnectionList connectionList) {
+        if (connectionList == null) {
+            throw new IllegalArgumentException("ConnectionList cannot be null");
+        }
+        this.connections = connectionList;
+    }
+
+    /**
+     * Sets the scheme of this canvas.
+     * The argument cannot be null.
+     * @param scheme the new scheme
+     */
+    private void setScheme(Scheme scheme) {
+        if (scheme == null) {
+            throw new IllegalArgumentException("Scheme cannot be null");
+        }
+        this.scheme = scheme;
+        setObjectList(scheme.getObjects());
+        setConnectionList(scheme.getConnections());
     }
 }
