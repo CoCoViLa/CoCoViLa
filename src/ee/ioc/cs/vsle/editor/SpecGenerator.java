@@ -16,30 +16,32 @@ import static ee.ioc.cs.vsle.util.TypeUtil.*;
  */
 public class SpecGenerator implements ISpecGenerator {
 	
+	private static final String OFFSET1 = CodeGenerator.OT_TAB;
+	private static final String OFFSET2 = OFFSET1 + OFFSET1;
+	private static final String OFFSET3 = OFFSET2 + OFFSET1;
+	
 	private SpecGenerator() {
 		// use the factory to get instances
 	}
 	
 	public String generateSpec(Scheme scheme, String className) {
-	    String goalAxiom = null;
+	    StringBuilder goalAxiom = null;
+	    StringBuilder inputs = null;
 	    
     	ObjectList objects = scheme.getObjects();
     	ConnectionList relations = scheme.getConnections();
 
     	GObj superClass = scheme.getSuperClass();
     	
-		StringBuffer s = new StringBuffer();
+    	StringBuilder s = new StringBuilder();
 		
 		// construct class and spec declarations
-		s.append("public class " + className);
+		s.append("public class " ).append( className);
 		if (superClass != null) {
 			s.append(" extends ");
 			s.append(superClass.getClassName());
 		}
-		s.append(" {");
-
-		s.append("\n    /*@ specification  ");
-		s.append(className);
+		s.append(" {\n").append( OFFSET1 ).append("/*@ specification  ").append(className);
 		
 		if (superClass != null) {
 			s.append(" super ");
@@ -52,34 +54,42 @@ public class SpecGenerator implements ISpecGenerator {
 			obj = objects.get(i);
 
 			if (!obj.isSuperClass()) {
-				s.append("    " + ( obj.isStatic() ? "static " : "" ) 
-						+ obj.getClassName() + " " + obj.getName() + ";\n");
+				s.append( OFFSET2 ).append( ( obj.isStatic() ? "static " : "" ) 
+						).append( obj.getClassName() ).append( " " ).append( obj.getName() ).append( ";\n");
 			}
 
 			for ( ClassField field : obj.getFields() ) {
 			    
-			    if( field.isGoal() ) {
+			    if( field.isGoal() || field.isInput() ) {
 			        
-			        String goal = "";
+			        String var = "";
                     if (!obj.isSuperClass()) {
-                        goal += obj.getName() + ".";
+                        var += obj.getName() + ".";
                     }
-                    goal += field.getName() ;
+                    var += field.getName() ;
                     
-			        if( goalAxiom == null ) {
-			            goalAxiom = CodeGenerator.OT_TAB + "-> " + goal;
-			        } else {
-			            goalAxiom += ", " + goal;
-			        }
-			        
-			        continue;
+                    if( field.isGoal() ) {
+                    	if( goalAxiom == null ) {
+                    		goalAxiom = new StringBuilder( "-> " ).append( var );
+                    	} else {
+                    		goalAxiom.append( ", " ).append( var );
+                    	}
+
+                    	continue;
+                    }
+                    
+                    if( inputs == null ) {
+                    	inputs = new StringBuilder( var );
+                	} else {
+                		inputs.append( ", " ).append( var );
+                	}
 			    }
 			    
 				if ( field.getValue() != null ) {
 					appendSpecFieldLHS(obj, field, s);
 
 					if (field.getType().equals(TYPE_STRING)) {
-						s.append("\"" + field.getValue() + "\";\n");
+						s.append("\"" ).append( field.getValue() ).append( "\";\n");
 					} else if (field.isPrimitiveArray()) {
 						s.append("{");
 						String[] split = field.getValue().split( TypeUtil.ARRAY_TOKEN );
@@ -87,7 +97,7 @@ public class SpecGenerator implements ISpecGenerator {
 							if (k == 0) {
 								s.append(split[k]);
 							} else
-								s.append(", " + split[k]);
+								s.append(", " ).append( split[k]);
 						}
 						s.append("};\n");
 						
@@ -96,13 +106,13 @@ public class SpecGenerator implements ISpecGenerator {
 						String[] split = field.getValue().split( TypeUtil.ARRAY_TOKEN );
 						for (int k = 0; k < split.length; k++) {
 							if (k == 0) {
-								s.append("\"" + split[k] + "\"");
+								s.append("\"" ).append( split[k] ).append( "\"");
 							} else
-								s.append(", \"" + split[k] + "\"");
+								s.append(", \"" ).append( split[k] ).append( "\"");
 						}
 						s.append("};\n");
 					} else {
-						s.append(field.getValue() + ";\n");
+						s.append(field.getValue() ).append( ";\n");
 					}
 				}
 			}
@@ -113,15 +123,15 @@ public class SpecGenerator implements ISpecGenerator {
 		for (Connection rel : relations) {
 			if (rel.endPort.getName().equals("any")) {
 				s.append(
-						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.beginPort.getName()
-						+ " = " + rel.beginPort.getObject().getName() + "."
-						+ rel.beginPort.getName() + ";\n");
+						OFFSET2 ).append( rel.endPort.getObject().getName() ).append( "." ).append( rel.beginPort.getName()
+						).append( " = " ).append( rel.beginPort.getObject().getName() ).append( "."
+						).append( rel.beginPort.getName() ).append( ";\n");
 				
 			}  else if  (rel.beginPort.getName().equals("any")) {
 				s.append(
-						CodeGenerator.OT_TAB + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
-						+ " = " + rel.beginPort.getObject().getName() + "."
-						+ rel.endPort.getName() + ";\n");
+						OFFSET2 ).append( rel.endPort.getObject().getName() ).append( "." ).append( rel.endPort.getName()
+						).append( " = " ).append( rel.beginPort.getObject().getName() ).append( "."
+						).append( rel.endPort.getName() ).append( ";\n");
 
 			} else if( rel.beginPort.isMulti() || rel.endPort.isMulti() ) {
 				
@@ -154,7 +164,7 @@ public class SpecGenerator implements ISpecGenerator {
 							? rel.endPort.getName()
 							: rel.endPort.getObject().getName() + "." + rel.endPort.getName();
 				
-				s.append( CodeGenerator.OT_TAB + endObjName + " = " + startObjName + ";\n" );
+				s.append( OFFSET2 ).append( endObjName ).append( " = " ).append( startObjName ).append( ";\n" );
 			}
 			
 		}
@@ -171,14 +181,21 @@ public class SpecGenerator implements ISpecGenerator {
 					portarray += port;
 				}
 			}
-			s.append( CodeGenerator.OT_TAB + multiport + " = [ " + portarray + " ];\n");
+			s.append( OFFSET2 ).append( multiport ).append( " = [ " ).append( portarray ).append( " ];\n");
 		}
 		
 		if( goalAxiom != null ) {
+			
+			s.append( OFFSET2 );
+			
+			if( inputs != null ) {
+				s.append( inputs ).append( " " );
+			}
+			
 		    s.append( goalAxiom ).append( ";\n" );
 		}
 		
-		s.append("    }@*/\n}\n");
+		s.append( OFFSET1 ).append("}@*/\n}\n");
 		
 		return s.toString();
 	}
@@ -191,8 +208,8 @@ public class SpecGenerator implements ISpecGenerator {
 	 * @param buf accumulator
 	 */
 	private void appendSpecFieldLHS(GObj obj, ClassField field,
-			StringBuffer buf) {
-		buf.append("        ");
+			StringBuilder buf) {
+		buf.append(OFFSET3);
 
 		if (!obj.isSuperClass()) {
 			buf.append(obj.getName());
