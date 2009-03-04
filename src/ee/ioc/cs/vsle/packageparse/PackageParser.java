@@ -450,7 +450,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 String color = attrs.getValue( ATR_COLOUR );
                 String filled = attrs.getValue( ATR_FILLED );
                 String stroke = attrs.getValue( ATR_STROKE );
-                String lineType = attrs.getValue( ATR_LINE_TYPE );
+                String lineType = attrs.getValue( ATR_LINETYPE );
                 float str = 1.0f;
                 if ( stroke != null ) {
                     str = Float.parseFloat( stroke );
