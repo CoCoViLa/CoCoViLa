@@ -10,30 +10,36 @@ import java.awt.event.*;
 import java.io.*;
 
 /**
- * Created by IntelliJ IDEA. User: Ando Date: 28.03.2005 Time: 21:12:15
+ * Source code viewer and editor for package component metaclasses.
  */
 public class CodeViewer extends JFrame implements ActionListener {
 
 	private JTextComponent		textArea;
 	private JPanel				specText;
-	private File				file;
+	private File				openFile;
+	private UndoRedoDocumentPanel undoRedo;
 	
 	private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
 
         @Override
         public void fontChanged( FontChangeEvent e ) {
             if( e.getElement() == RuntimeProperties.Fonts.CODE ) {
-                textArea.setFont( e.getFont() );
+                getTextArea().setFont( e.getFont() );
             }
         }
     };
-    
+
+    /**
+     * Returns the main text component for editing the source code.
+     * @return the main text component
+     */
+    JTextComponent getTextArea() {
+        return textArea;
+    }
+
 	private CodeViewer(String name, String path, String extension) {
-		
 		super();
-		
 		initLayout();
-		
 		openFile( new File( path + name + extension ) );
 	}
 
@@ -44,8 +50,6 @@ public class CodeViewer extends JFrame implements ActionListener {
 	private void initLayout() {
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setLocationByPlatform(true);
-		
-		addComponentListener(new ComponentResizer(ComponentResizer.CARE_FOR_MINIMUM));
 
 		if( RuntimeProperties.isSyntaxHighlightingOn() ) {
 			textArea = SyntaxDocument.createEditor();
@@ -66,11 +70,6 @@ public class CodeViewer extends JFrame implements ActionListener {
 
 		specText = new JPanel(new BorderLayout());
 		specText.add(areaScrollPane, BorderLayout.CENTER);
-		JToolBar toolBar = new JToolBar();
-		toolBar.setLayout(new FlowLayout(FlowLayout.LEFT));
-		toolBar.add(new UndoRedoDocumentPanel(textArea.getDocument()));
-
-		specText.add(toolBar, BorderLayout.NORTH);
 
 		getContentPane().add(specText);
 		
@@ -128,22 +127,27 @@ public class CodeViewer extends JFrame implements ActionListener {
 		        InputEvent.CTRL_DOWN_MASK));
 		editMenu.add(find);
 
+		undoRedo = new UndoRedoDocumentPanel(textArea.getDocument());
+		editMenu.add(undoRedo.getUndoAction());
+		editMenu.add(undoRedo.getRedoAction());
+
 		menuBar.add(editMenu);
 
 		setJMenuBar( menuBar );
 	}
 	
 	private void openFile( File file ) {
-		this.file = file;
+		this.openFile = file;
 		setTitle(file.getAbsolutePath());
 		
 		final String fileText = FileFuncs.getFileContents(file);
 		
 		SwingUtilities.invokeLater( new Runnable() {
 			public void run() {
-				textArea.setText(fileText);
-				textArea.setCaretPosition( 0 );
-				textArea.requestFocusInWindow();
+			    JTextComponent ta = getTextArea();
+			    ta.setText(fileText);
+			    ta.setCaretPosition( 0 );
+			    ta.requestFocusInWindow();
 			}
 		} );
 	}
@@ -151,19 +155,19 @@ public class CodeViewer extends JFrame implements ActionListener {
 	private void saveFile( boolean saveAs ) {
 		
 		if( saveAs ) {
-			JFileChooser fc = new JFileChooser( ( file != null ) ? file.getParent() : null );
-			fc.setSelectedFile( file );
+			JFileChooser fc = new JFileChooser( ( openFile != null ) ? openFile.getParent() : null );
+			fc.setSelectedFile( openFile );
 			fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.JAVA ) );
 
 			if ( fc.showSaveDialog( CodeViewer.this ) == JFileChooser.APPROVE_OPTION ) {
-				this.file = fc.getSelectedFile();
-				setTitle( file.getAbsolutePath() );
+				this.openFile = fc.getSelectedFile();
+				setTitle( openFile.getAbsolutePath() );
 			} else {
 				return;
 			}
 		}
 		
-		FileFuncs.writeFile( file, textArea.getText() );
+		FileFuncs.writeFile( openFile, textArea.getText() );
 	}
 	
 	public void actionPerformed(ActionEvent e) {
@@ -171,17 +175,17 @@ public class CodeViewer extends JFrame implements ActionListener {
 		if ( e.getActionCommand().equals( "New" ) ) {
 			textArea.setText("");
 			setTitle( "" );
-			JFileChooser fc = new JFileChooser( ( file != null ) ? file.getParent() : null );
-			file = null;
+			JFileChooser fc = new JFileChooser( ( openFile != null ) ? openFile.getParent() : null );
+			openFile = null;
 			fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.JAVA ) );
 
 			if ( fc.showSaveDialog( CodeViewer.this ) == JFileChooser.APPROVE_OPTION ) {
-				this.file = fc.getSelectedFile();
-				setTitle( file.getAbsolutePath() );
+				this.openFile = fc.getSelectedFile();
+				setTitle( openFile.getAbsolutePath() );
 			}			
 		} else if ( e.getActionCommand().equals( "Open" ) ) {
 			
-			JFileChooser fc = new JFileChooser( ( file != null ) ? file.getParent() : null );
+			JFileChooser fc = new JFileChooser( ( openFile != null ) ? openFile.getParent() : null );
 			fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.JAVA ) );
 			fc.setDialogType(JFileChooser.OPEN_DIALOG);
 			
