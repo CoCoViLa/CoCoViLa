@@ -6,6 +6,10 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.imageio.stream.FileImageInputStream;
+import javax.imageio.stream.FileImageOutputStream;
+import javax.imageio.stream.ImageInputStream;
+import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
@@ -339,16 +343,14 @@ public class FileFuncs {
     */
     public static void copyImageFile(File fileIn, File fileOut) {
     	try {
-    		FileInputStream in = new FileInputStream(fileIn);
-    		FileOutputStream out = new FileOutputStream(fileOut);
-			
+    		ImageInputStream in = new FileImageInputStream(fileIn);
+    		ImageOutputStream out = new FileImageOutputStream(fileOut);
 			int b;
 			while ((b = in.read()) != -1) {
 				out.write((byte)b);
 			}
 			in.close();
 			out.close();
-			
 		} catch (IOException e) {
 			db.p(e);
 		} 
