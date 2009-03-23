@@ -28,6 +28,7 @@ public class ClassImport {
 	IconClass classIcon;
 	ArrayList <IconPort> ports;
 	ArrayList <ClassField> fields;
+	ClassField field;
 	String path;
 /*
  * Takes the package file and gives a list of class names and a list of classes information
@@ -64,6 +65,7 @@ public class ClassImport {
 		boolean inName = false;
 		boolean inGraphics = false;
 		boolean inPort = false;
+		boolean inField = false;
 		boolean inDesc = false;
 		boolean inIcon = false;
 		boolean isRelation = false;
@@ -249,8 +251,13 @@ public class ClassImport {
 					font = new Font(fontName, Font.BOLD, fontSize);
 				else if (fontStyle.equalsIgnoreCase("2")) font = new Font(fontName, Font.ITALIC, fontSize);
 				if (font != null) {
-					Text text = new Text(x, y, font, new Color(col), tr, textStr);
-					shapeList.add(text);
+				    Text text;
+				    if (inField) {
+				        text = new Text(x, y, font, new Color(col), tr, "*".concat(field.getName()));
+				    } else {
+				        text = new Text(x, y, font, new Color(col), tr, textStr);
+				    }
+				    shapeList.add(text);
 				}
 				
 			} else if(element.equals("image")) { 
@@ -286,12 +293,15 @@ public class ClassImport {
                 port.setType(attrs.getValue("type"));
 				ports.add(port);
 			}else if (element.equals("field")){
-				
+			    inField = true;
 				name = attrs.getValue("name");
 				type = attrs.getValue("type");
 				value = attrs.getValue("value");
-				ClassField field = new ClassField (name, type, value);
-				fields.add(field);
+				field = new ClassField(name);
+				
+				field.setType(type);
+				field.setValue(value);
+				
 			}
 			
 		}
@@ -314,6 +324,10 @@ public class ClassImport {
 			}
 			if(element.equals("graphics")){
 				inGraphics = false;
+			}
+			if(element.equals("field")){
+			    fields.add(field);
+			    inField = false;
 			}
 			if(element.equals("description") && inClass){
 				classIcon.setDescription(charBuf.toString());
