@@ -27,6 +27,8 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
     private JTabbedPane tabbedPane;
     private JCheckBox propagateOnRunNew;
     private long m_progRunnerID;
+    private UndoRedoDocumentPanel codeUndoRedoSupport;
+    private UndoRedoDocumentPanel specUndoRedoSupport;
 
     // the title should be unique for each spec window because it is used as an
     // ID for managing frames
@@ -110,8 +112,9 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
         computeAll = new JButton( "Compute all" );
         computeAll.addActionListener( this );
 
+        specUndoRedoSupport = new UndoRedoDocumentPanel(jta_spec.getDocument());
         progToolBar.add( computeAll );
-        progToolBar.add( new UndoRedoDocumentPanel( jta_spec.getDocument() ) );
+        progToolBar.add(specUndoRedoSupport.getUndoRedoPanel());
         refreshSpec = new JButton( "Update from Scheme" );
         refreshSpec.addActionListener( this );
         progToolBar.add( refreshSpec );
@@ -139,7 +142,8 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
         propagateOnRunNew = new JCheckBox( "Propagate", RuntimeProperties.isPropagateValues() );
         propagateOnRunNew.setOpaque( false );
         toolBar.add( propagateOnRunNew );
-        toolBar.add( new UndoRedoDocumentPanel( jta_generatedCode.getDocument() ) );
+        codeUndoRedoSupport = new UndoRedoDocumentPanel(jta_generatedCode.getDocument());
+        toolBar.add(codeUndoRedoSupport.getUndoRedoPanel());
         JScrollPane programAreaScrollPane = new JScrollPane( jta_generatedCode );
         programAreaScrollPane.setRowHeaderView( new LineNumberView( jta_generatedCode ) );
         programAreaScrollPane.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_ALWAYS );
