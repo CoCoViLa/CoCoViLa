@@ -430,7 +430,7 @@ public class IconEditor extends JFrame {
             buf.append( boundingbox.toFile( 0, 0 ) );
         for ( int i = 0; i < shapeList.size(); i++ ) {
             Shape shape = shapeList.get( i );
-            if ( ! ( shape instanceof BoundingBox ) ) {
+            if ( ! ( shape instanceof BoundingBox || isSpecialFieldShape(shape) ) ) {
                 String shapeXML = null;
                 shapeXML = shape.toFile( boundingbox.getX(), boundingbox.getY() );
 
@@ -487,8 +487,25 @@ public class IconEditor extends JFrame {
         return buf;
     } // appendPorts
 
+    public Boolean isSpecialFieldShape(Shape s) {
+        if( s instanceof Text) {
+            dbrClassFields.removeEmptyRows();
+            if ( dbrClassFields != null && dbrClassFields.getRowCount() > 0 ) {
+                for ( int i = 0 ; i < dbrClassFields.getRowCount(); i++ ) {
+                    Object fieldName = dbrClassFields.getValueAt( i, 0 );
+                    if ("*".concat((String)fieldName).equals(((Text)s).getText()))
+                        return true;
+                }
+                return false;
+            }
+            return false;
+        }
+        return false;
+    }
+
     public StringBuffer appendClassFields( StringBuffer buf ) {
         dbrClassFields.removeEmptyRows();
+        Boolean hasGraphics = false;
         if ( dbrClassFields != null && dbrClassFields.getRowCount() > 0 ) {
             buf.append( "	<fields>\n" );
             for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
@@ -500,12 +517,44 @@ public class IconEditor extends JFrame {
                     fieldType = "";
                 if ( fieldValue == null )
                     fieldValue = "";
-                if ( fieldValue.equals( "" ) )
-                    buf.append( "		<field name=\"" + fieldName + "\" type=\"" + fieldType + "\"/>\n" );
-                else
-                    buf.append( "		<field name=\"" + fieldName + "\" type=\"" + fieldType + "\" value=\"" + fieldValue
-                            + "\" />\n" );
 
+                for ( int j = 0; j < shapeList.size(); j++ ){
+                   if( shapeList.get(j) instanceof Text) {
+                       /* "*fieldname" as text shows that it is special text that belongs to field
+                        * (i.e field with known graphics)
+                        */ 
+                       if ("*".concat((String)fieldName).equals(((Text)shapeList.get(j)).getText())) {
+                           if (!hasGraphics) {
+                              if ( fieldValue.equals( "" ) )
+                                  buf.append( "       <field name=\"" + fieldName + "\" type=\"" + fieldType + "\">\n" );
+                              else
+                                  buf.append( "       <field name=\"" + fieldName + "\" type=\"" + fieldType + "\" value=\"" + fieldValue
+                                           + "\">\n" );
+                              buf.append( "        <known>\n" );
+                              buf.append( "          <graphics>\n" );
+                           }
+                           ((Text)shapeList.get(j)).setText("*self");
+                           buf.append("            " + shapeList.get(j).toFile(boundingbox.getX(), boundingbox.getY()));
+                           ((Text)shapeList.get(j)).setText("*".concat((String)fieldName));
+                           if (!hasGraphics) {
+                               buf.append( "          </graphics>\n" );
+                               buf.append( "        </known>\n" );
+                               buf.append( "      </field>\n" );
+                           }
+                           hasGraphics = true;
+                       }
+                   }
+                }
+
+                if ( !hasGraphics ) {
+                    if ( fieldValue.equals( "" ) )
+                        buf.append( "		<field name=\"" + fieldName + "\" type=\"" + fieldType + "\"/>\n" );
+                    else
+                        buf.append( "		<field name=\"" + fieldName + "\" type=\"" + fieldType + "\" value=\"" + fieldValue
+                               + "\" />\n" );
+                }
+
+                hasGraphics = false;
             }
             buf.append( "	</fields>\n" );
         }
