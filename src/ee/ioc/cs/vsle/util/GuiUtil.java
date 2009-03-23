@@ -95,4 +95,10 @@ public final class GuiUtil {
         
         return null;
     }
+    
+    public static Component addComponentAsFlow( Component comp, int align ) {
+        JPanel panel = new JPanel( new FlowLayout( align ) );
+        panel.add( comp );
+        return panel;
+    }
 }
