@@ -1179,7 +1179,9 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
     void openClassCodeViewer( String className ) {
         CodeViewer cv = new CodeViewer( className, getWorkDir() );
-        cv.setSize( 550, 450 );
+        cv.setPreferredSize(new Dimension(550, 450));
+        cv.setMinimumSize(cv.getMinimumSize());
+        cv.pack();
         cv.setVisible( true );
     }
     
