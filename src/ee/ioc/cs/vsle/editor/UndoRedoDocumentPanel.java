@@ -55,8 +55,8 @@ public class UndoRedoDocumentPanel {
         if (undoRedoPanel == null) {
             undoRedoPanel = new JPanel();
             undoRedoPanel.setOpaque(false);
-            undoRedoPanel.add(getUndoButton());
-            undoRedoPanel.add(getRedoButton());
+            undoRedoPanel.add(getUndoButton(true));
+            undoRedoPanel.add(getRedoButton(true));
         }
         return undoRedoPanel;
     }
@@ -106,7 +106,12 @@ public class UndoRedoDocumentPanel {
         discardAllEdits();
     }
 
-    private JButton getUndoButton() {
+    /**
+     * Creates and returns the undo button instance.
+     * @param hideText true to hide the action text; false to show it.
+     * @return the undo button instance
+     */
+    private JButton getUndoButton(boolean hideText) {
         if (m_buttonUndo == null) {
             Action action = getUndoAction();
             if (action.getValue(Action.LARGE_ICON_KEY) == null) {
@@ -114,18 +119,25 @@ public class UndoRedoDocumentPanel {
                         FileFuncs.getImageIcon("images/undo.png", false));
             }
             m_buttonUndo = new JButton(action);
+            m_buttonUndo.setHideActionText(hideText);
         }
         return m_buttonUndo;
     }
 
-    private JButton getRedoButton() {
+    /**
+     * Creates and returns the redo button instance.
+     * @param hideText true to hide the action text; false to show it.
+     * @return the redo button instance
+     */
+    private JButton getRedoButton(boolean hideText) {
         if (m_buttonRedo == null) {
             Action action = getRedoAction();
             if (action.getValue(Action.LARGE_ICON_KEY) == null) {
                 action.putValue(Action.LARGE_ICON_KEY,
                         FileFuncs.getImageIcon("images/redo.png", false));
             }
-            m_buttonRedo = new JButton(getRedoAction());
+            m_buttonRedo = new JButton(action);
+            m_buttonRedo.setHideActionText(hideText);
         }
         return m_buttonRedo;
     }
@@ -146,7 +158,13 @@ public class UndoRedoDocumentPanel {
      */
     void updateUndoState() {
         if (undoAction != null) {
-            undoAction.setEnabled(getUndoManager().canUndo());
+            if (undoManager != null && undoManager.canUndo()) {
+                undoAction.setEnabled(true);
+                undoAction.putValue(Action.NAME, undoManager.getUndoPresentationName());
+            } else {
+                undoAction.setEnabled(false);
+                undoAction.putValue(Action.NAME, Menu.UNDO);
+            }
         }
     }
 
@@ -155,7 +173,13 @@ public class UndoRedoDocumentPanel {
      */
     void updateRedoState() {
         if (redoAction != null) {
-            redoAction.setEnabled(getUndoManager().canRedo());
+            if (undoManager != null && undoManager.canRedo()) {
+                redoAction.setEnabled(true);
+                redoAction.putValue(Action.NAME, undoManager.getRedoPresentationName());
+            } else {
+                redoAction.setEnabled(false);
+                redoAction.putValue(Action.NAME, Menu.REDO);
+            }
         }
     }
 
