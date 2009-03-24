@@ -1108,7 +1108,7 @@ public class IconEditor extends JFrame {
         
         if ( (IconEditor.getClassIcon() == null) || !prevIconFile.exists() ) {
             IconEditor.setClassIcon( "default.gif" );
-        } else if (prevIconFile.exists()) {
+        } else if (prevIconFile.exists() && (prevIconFile.compareTo(iconFile) != 0)) {
         	FileFuncs.copyImageFile(prevIconFile, iconFile);        	
         }
                 
