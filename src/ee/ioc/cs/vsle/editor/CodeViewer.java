@@ -153,21 +153,32 @@ public class CodeViewer extends JFrame implements ActionListener {
 	}
 	
 	private void saveFile( boolean saveAs ) {
-		
+	    File openFileNew = openFile;
+
 		if( saveAs ) {
 			JFileChooser fc = new JFileChooser( ( openFile != null ) ? openFile.getParent() : null );
 			fc.setSelectedFile( openFile );
 			fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.JAVA ) );
 
 			if ( fc.showSaveDialog( CodeViewer.this ) == JFileChooser.APPROVE_OPTION ) {
-				this.openFile = fc.getSelectedFile();
-				setTitle( openFile.getAbsolutePath() );
+			    openFileNew = fc.getSelectedFile();
 			} else {
 				return;
 			}
 		}
-		
-		FileFuncs.writeFile( openFile, textArea.getText() );
+
+		if (FileFuncs.writeFile(openFileNew, textArea.getText())) {
+		    openFile = openFileNew;
+		    setTitle(openFile.getAbsolutePath());
+		    //undoRedo.markSaved();
+		} else {
+		    JOptionPane.showMessageDialog(this,
+		            "Saving to file \"" + openFileNew + "\" failed.\n" +
+		            "Make sure the disk is not full and " +
+		            "file permissions are correct,\n" +
+		            "or try saving with a different file name.",
+		            "Error Saving File", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	
 	public void actionPerformed(ActionEvent e) {
