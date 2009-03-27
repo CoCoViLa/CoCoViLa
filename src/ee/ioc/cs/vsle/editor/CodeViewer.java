@@ -7,12 +7,15 @@ import javax.swing.text.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.*;
 
 /**
  * Source code viewer and editor for package component metaclasses.
  */
-public class CodeViewer extends JFrame implements ActionListener {
+public class CodeViewer extends JFrame implements ActionListener,
+        PropertyChangeListener {
 
 	private JTextComponent		textArea;
 	private JPanel				specText;
@@ -127,7 +130,10 @@ public class CodeViewer extends JFrame implements ActionListener {
 		        InputEvent.CTRL_DOWN_MASK));
 		editMenu.add(find);
 
-		undoRedo = new UndoRedoDocumentPanel(textArea.getDocument());
+		undoRedo = new UndoRedoDocumentPanel(textArea.getDocument(),
+		        this);
+
+		undoRedo.addPropertyChangeListener(this);
 		editMenu.add(undoRedo.getUndoAction());
 		editMenu.add(undoRedo.getRedoAction());
 
@@ -148,10 +154,25 @@ public class CodeViewer extends JFrame implements ActionListener {
 			    ta.setText(fileText);
 			    ta.setCaretPosition( 0 );
 			    ta.requestFocusInWindow();
+
+			    // Assume the document is saved initially
+			    // and the already existing edit history does not
+			    // make sense for the new content, hence it is
+			    // discarded.
+			    markSaved();
+			    discardAllEdits();
 			}
 		} );
 	}
-	
+
+	void markSaved() {
+	    undoRedo.markSaved();
+	}
+
+	void discardAllEdits() {
+	    undoRedo.discardAllEdits();
+	}
+
 	private void saveFile( boolean saveAs ) {
 	    File openFileNew = openFile;
 
@@ -170,7 +191,7 @@ public class CodeViewer extends JFrame implements ActionListener {
 		if (FileFuncs.writeFile(openFileNew, textArea.getText())) {
 		    openFile = openFileNew;
 		    setTitle(openFile.getAbsolutePath());
-		    //undoRedo.markSaved();
+		    markSaved();
 		} else {
 		    JOptionPane.showMessageDialog(this,
 		            "Saving to file \"" + openFileNew + "\" failed.\n" +
@@ -230,4 +251,18 @@ public class CodeViewer extends JFrame implements ActionListener {
 		}
 		super.dispose();
 	}
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if (UndoRedoDocumentPanel.PROPERTY_SAVED.equals(evt.getPropertyName())) {
+            // Put an asterisk in front of the title for unsaved files
+            if (openFile != null) {
+                if (Boolean.TRUE.equals(evt.getNewValue())) {
+                    setTitle(openFile.getAbsolutePath());
+                } else {
+                    setTitle("*" + openFile.getAbsolutePath());
+                }
+            }
+        }
+    }
 }
