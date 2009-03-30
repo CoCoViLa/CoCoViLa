@@ -173,7 +173,7 @@ public class CodeViewer extends JFrame implements ActionListener,
 	    undoRedo.discardAllEdits();
 	}
 
-	private void saveFile( boolean saveAs ) {
+	private boolean saveFile( boolean saveAs ) {
 	    File openFileNew = openFile;
 
 		if( saveAs ) {
@@ -184,7 +184,7 @@ public class CodeViewer extends JFrame implements ActionListener,
 			if ( fc.showSaveDialog( CodeViewer.this ) == JFileChooser.APPROVE_OPTION ) {
 			    openFileNew = fc.getSelectedFile();
 			} else {
-				return;
+				return false;
 			}
 		}
 
@@ -192,16 +192,19 @@ public class CodeViewer extends JFrame implements ActionListener,
 		    openFile = openFileNew;
 		    setTitle(openFile.getAbsolutePath());
 		    markSaved();
-		} else {
-		    JOptionPane.showMessageDialog(this,
-		            "Saving to file \"" + openFileNew + "\" failed.\n" +
-		            "Make sure the disk is not full and " +
-		            "file permissions are correct,\n" +
-		            "or try saving with a different file name.",
-		            "Error Saving File", JOptionPane.ERROR_MESSAGE);
+		    return true;
 		}
+
+		JOptionPane.showMessageDialog(this,
+		        "Saving to file \"" + openFileNew + "\" failed.\n" +
+		        "Make sure the disk is not full and " +
+		        "file permissions are correct,\n" +
+		        "or try saving with a different file name.",
+		        "Error Saving File", JOptionPane.ERROR_MESSAGE);
+
+		return false;
 	}
-	
+
 	public void actionPerformed(ActionEvent e) {
 		
 		if ( e.getActionCommand().equals( "New" ) ) {
@@ -236,7 +239,9 @@ public class CodeViewer extends JFrame implements ActionListener,
 			saveFile( true );
 			
 		} else if ( e.getActionCommand().equals( "Close" ) ) {
+		    if (confirmClose()) {
 			dispose();
+		    }
 		} else if ("Find...".equals(e.getActionCommand())) {
 		    TextSearchDialog.showDialog(this, textArea);
 		}
@@ -263,6 +268,46 @@ public class CodeViewer extends JFrame implements ActionListener,
                     setTitle("*" + openFile.getAbsolutePath());
                 }
             }
+        }
+    }
+
+    /**
+     * Confirm close action. If the file is saved, true is returned.
+     * Otherwise the user is prompted for a Yes/No/Cancel answer.  True
+     * is returned if the user was able to save the file or chose not to save.
+     * @return true if it is ok to close, false otherwise
+     */
+    boolean confirmClose() {
+        boolean rv = true; // close silently if there are no changes
+
+        if (undoRedo != null && !undoRedo.isSaved()) {
+            int answer = JOptionPane.showConfirmDialog(this,
+                    "The file " 
+                    + (openFile == null ? "" : "'" + openFile.getName() + "' ")
+                    + "has been modified. Save changes?",
+                    "Save File", JOptionPane.YES_NO_CANCEL_OPTION);
+
+            switch (answer) {
+            case JOptionPane.YES_OPTION:
+                rv = saveFile(false);
+                break;
+            case JOptionPane.NO_OPTION:
+                rv = true;
+                break;
+            case JOptionPane.CANCEL_OPTION:
+            case JOptionPane.CLOSED_OPTION:
+                rv = false;
+                break;
+            }
+        }
+        return rv;
+    }
+
+    @Override
+    protected void processWindowEvent(WindowEvent e) {
+        // ask confirmation when window is closed with unsaved content
+        if (WindowEvent.WINDOW_CLOSING != e.getID() || confirmClose()) {
+            super.processWindowEvent(e);
         }
     }
 }
