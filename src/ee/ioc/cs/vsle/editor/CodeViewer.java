@@ -143,7 +143,12 @@ public class CodeViewer extends JFrame implements ActionListener,
 	}
 	
 	private void openFile( File file ) {
-		this.openFile = file;
+	    if (openFile != null && undoRedo != null 
+	            && !undoRedo.isSaved() && !confirmClose()) {
+	        return;
+	    }
+
+	    this.openFile = file;
 		setTitle(file.getAbsolutePath());
 		
 		final String fileText = FileFuncs.getFileContents(file);
