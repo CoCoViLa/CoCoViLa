@@ -56,6 +56,7 @@ public class RuntimeProperties {
     private static final String COMPUTE_GOAL = "computeGoal";
     private static final String PROPAGATE_VALUES = "propagateValues";
     private static final String DUMP_GENERATED = "dumpGeneratedFiles";
+    private static final String DEFAULT_EDITOR = "defaultEditor";
 
     private static boolean fromWebstart = false;
     private static String workingDirectory = System.getProperty( "user.dir" ) 
@@ -117,6 +118,7 @@ public class RuntimeProperties {
     private static boolean propagateValues;
     private static boolean dumpGenerated;
     private static Map<Fonts, Font> fonts = new Hashtable<Fonts, Font>();
+    private static String defaultEditor;
     
     public static boolean isLogDebugEnabled() {
         return getDebugInfo() >= 1;
@@ -170,6 +172,7 @@ public class RuntimeProperties {
         setSyntaxHighlightingOn( Boolean.parseBoolean( s_runtimeProperties.getProperty( SYNTAX_HIGHLIGHT ) ) );
         setPropagateValues( Boolean.parseBoolean( s_runtimeProperties.getProperty( PROPAGATE_VALUES ) ) );
         setComputeGoal( Boolean.parseBoolean( s_runtimeProperties.getProperty( COMPUTE_GOAL ) ) );
+        setDefaultEditor(s_runtimeProperties.getProperty(DEFAULT_EDITOR));
 
         for( Fonts font : Fonts.values() ) {
             fonts.put( font, Font.decode( s_runtimeProperties.getProperty( font.getPropertyName() ) ) );
@@ -234,6 +237,12 @@ public class RuntimeProperties {
         s_runtimeProperties.setProperty( COMPUTE_GOAL, Boolean.toString( computeGoal ) );
         s_runtimeProperties.setProperty( PROPAGATE_VALUES, Boolean.toString( propagateValues ) );
         s_runtimeProperties.setProperty( DUMP_GENERATED, Boolean.toString(dumpGenerated ));
+
+        if (defaultEditor == null) {
+            s_runtimeProperties.remove(DEFAULT_EDITOR);
+        } else {
+            s_runtimeProperties.setProperty(DEFAULT_EDITOR, defaultEditor);
+        }
 
         for( Fonts font : Fonts.values() ) {
             s_runtimeProperties.setProperty( font.getPropertyName(), encodeFont( fonts.get( font ) ) );
@@ -780,5 +789,30 @@ public class RuntimeProperties {
             }
             return null;
         }
+    }
+
+    /**
+     * Returns the default editor command, or null if the editor
+     * preference is not set.
+     * @return the editor command, or null
+     */
+    public static String getDefaultEditor() {
+        return defaultEditor;
+    }
+
+    /**
+     * Sets the default editor command. If set to null the built-in
+     * editor is used. Leading and trailing spaces are removed, empty strings
+     * are considered equal to null.
+     * @param editorCmd the new default editor
+     */
+    public static void setDefaultEditor(String editorCmd) {
+        if (editorCmd != null) {
+            editorCmd = editorCmd.trim();
+            if (editorCmd.length() < 1) {
+                editorCmd = null;
+            }
+        }
+        defaultEditor = editorCmd;
     }
 }

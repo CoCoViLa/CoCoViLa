@@ -24,10 +24,12 @@ public class OptionsDialog extends JDialog {
     private static final JLabel lblSyntaxColor = new JLabel( "Syntax Highlighting:" );
     private static final JLabel lblDefaultZoom = new JLabel( "Default Zoom:" );
     private static final JLabel lblDumpGen = new JLabel("Dump generated files:");
+    private static final JLabel lblDefaultEditor = new JLabel("Editor:");
 
     // Text Fields.
     private static final JTextField tfGenFilesDir = new JTextField( 40 );
     private static final JTextField tfCompClasspath = new JTextField( 40 );
+    private static final JTextField tfDefaultEditor = new JTextField(40);
 
     // Checkboxes.
     private static final JCheckBox chbDebugInfo = new JCheckBox();
@@ -133,6 +135,9 @@ public class OptionsDialog extends JDialog {
         pnlSettings.add(lblDefaultZoom, cLabels);
         pnlSettings.add(cbDfltZoom, cSettings);
 
+        // defaultEditor
+        pnlSettings.add(lblDefaultEditor, cLabels);
+        pnlSettings.add(tfDefaultEditor, cSettings);
 
         // Window layout
 
@@ -204,12 +209,13 @@ public class OptionsDialog extends JDialog {
         chbSnapToGrid.setSelected( RuntimeProperties.getSnapToGrid() );
         chbSyntaxColor.setSelected( RuntimeProperties.isSyntaxHighlightingOn() );
         chbDumpGen.setSelected(RuntimeProperties.isDumpGenerated());
+        tfDefaultEditor.setText(RuntimeProperties.getDefaultEditor());
     } // initializeSettings
 
     /**
      * Store settings.
      */
-    private void saveSettings() {
+    void saveSettings() {
 
         RuntimeProperties.setGenFileDir( tfGenFilesDir.getText() );
         RuntimeProperties.setCompilationClasspath( tfCompClasspath.getText() );
@@ -222,6 +228,7 @@ public class OptionsDialog extends JDialog {
         RuntimeProperties.setZoomFactor( Palette.ZOOM_LEVELS[ cbDfltZoom.getSelectedIndex() ] );
         RuntimeProperties.setSyntaxHighlightingOn( chbSyntaxColor.isSelected() );
         RuntimeProperties.setDumpGenerated(chbDumpGen.isSelected());
+        RuntimeProperties.setDefaultEditor(tfDefaultEditor.getText());
         RuntimeProperties.save();
 
         closeDialog();
@@ -230,7 +237,7 @@ public class OptionsDialog extends JDialog {
     /**
      * Close the dialog window.
      */
-    private void closeDialog() {
+    void closeDialog() {
         dispose();
     }
 }

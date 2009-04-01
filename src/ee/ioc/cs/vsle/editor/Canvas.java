@@ -1177,14 +1177,41 @@ public class Canvas extends JPanel implements ISchemeContainer {
         ObjectPropertiesEditor.show( obj, this );
     }
 
+    /**
+     * Opens the source file of the specified metaclass.
+     * The user set default editor is used, if set. Otherwise the
+     * built-in CodeViewer is started.
+     * @param className the name of the metaclass to be edited
+     */
     void openClassCodeViewer( String className ) {
-        CodeViewer cv = new CodeViewer( className, getWorkDir() );
-        cv.setPreferredSize(new Dimension(550, 450));
-        cv.setMinimumSize(cv.getMinimumSize());
-        cv.pack();
-        cv.setVisible( true );
+        String editor = RuntimeProperties.getDefaultEditor();
+        if (editor == null) {
+            CodeViewer cv = new CodeViewer(className, getWorkDir());
+            cv.setPreferredSize(new Dimension(550, 450));
+            cv.setMinimumSize(cv.getMinimumSize());
+            cv.pack();
+            cv.setVisible(true);
+        } else {
+            File wd = new File(getWorkDir());
+            String editCmd = editor.replace("%f",
+                    new File(className + ".java").getPath());
+
+            try {
+                Runtime.getRuntime().exec(editCmd, null, wd);
+            } catch (IOException ex) {
+                if (RuntimeProperties.isLogDebugEnabled()) {
+                    db.p(ex);
+                }
+                JOptionPane.showMessageDialog(this, 
+                        "Execution of the command \"" + editCmd
+                        + "\" failed:\n" + ex.getMessage() +
+                        "\nYou may need to revise the application settings.",
+                        "Error Running External Editor",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
-    
+
     /**
      * Opens the object properties dialog on the first selected object if there
      * is one.
