@@ -17,13 +17,16 @@ import java.io.*;
 public class CodeViewer extends JFrame implements ActionListener,
         PropertyChangeListener {
 
-	private JTextComponent		textArea;
-	private JPanel				specText;
-	private File				openFile;
-	private UndoRedoDocumentPanel undoRedo;
-	
-	private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
+    // OS X specific properties
+    private static final String DOC_FILE = "Window.documentFile";
+    private static final String MODIFIED = "Window.documentModified";
 
+    private JTextComponent		textArea;
+    private JPanel				specText;
+    private File				openFile;
+    private UndoRedoDocumentPanel undoRedo;
+    
+    private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
         @Override
         public void fontChanged( FontChangeEvent e ) {
             if( e.getElement() == RuntimeProperties.Fonts.CODE ) {
@@ -149,6 +152,8 @@ public class CodeViewer extends JFrame implements ActionListener,
 	    }
 
 	    this.openFile = file;
+	    getRootPane().putClientProperty(DOC_FILE, file);
+
 		setTitle(file.getAbsolutePath());
 		
 		final String fileText = FileFuncs.getFileContents(file);
@@ -269,8 +274,10 @@ public class CodeViewer extends JFrame implements ActionListener,
             if (openFile != null) {
                 if (Boolean.TRUE.equals(evt.getNewValue())) {
                     setTitle(openFile.getAbsolutePath());
+                    getRootPane().putClientProperty(MODIFIED, Boolean.FALSE);
                 } else {
                     setTitle("*" + openFile.getAbsolutePath());
+                    getRootPane().putClientProperty(MODIFIED, Boolean.TRUE);
                 }
             }
         }
