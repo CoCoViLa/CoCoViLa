@@ -181,6 +181,9 @@ public class IconEditor extends JFrame {
         menuItem.addActionListener( mListener );
         exportmenu.add( menuItem );
 
+        // Export window graphics
+        exportmenu.add(GraphicsExporter.getExportMenu());
+
         menu.add( exportmenu );
 
         importmenu = new JMenu( Menu.IMPORT_MENU );
