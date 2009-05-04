@@ -284,32 +284,36 @@ public class SpecParser {
 
         // remove comments before removing line brake \n
         String[] s = fileString.split( "\n" );
-        fileString = "";
+        StringBuilder tmpBuf = new StringBuilder(fileString.length() / 2);
         for ( int i = 0; i < s.length; i++ ) {
             if ( !s[ i ].trim().startsWith( "//" ) ) {
-                fileString += s[ i ];
+                tmpBuf.append(s[i]);
             }
         }
 
         // remove unneeded whitespace
-        matcher = PATTERN_WHITESPACE.matcher( fileString );
-        fileString = matcher.replaceAll( " " );
+        matcher = PATTERN_WHITESPACE.matcher(tmpBuf);
+        // This is broken as spaces should not be replaced in,
+        // e.g. string literals. Keeping it now for compatibility.
+        tmpBuf.replace(0, tmpBuf.length(), matcher.replaceAll(" "));
 
         // find spec
-        matcher = PATTERN_SPEC.matcher( fileString );
+        matcher = PATTERN_SPEC.matcher(tmpBuf);
         if ( matcher.find() ) {
-            String sc = "";
+            StringBuilder sc = new StringBuilder();
             if ( matcher.group( 2 ) != null ) {
-                sc += "super";
+                sc.append("super");
                 String[] superclasses = matcher.group( 2 ).split( "," );
                 for ( int i = 0; i < superclasses.length; i++ ) {
                     String t = superclasses[ i ].trim();
-                    if ( t.length() > 0 )
-                        sc += "#" + t;
+                    if ( t.length() > 0 ) {
+                        sc.append("#");
+                        sc.append(t);
+                    }
                 }
-                sc += ";\n";
+                sc.append(";\n");
             }
-            return sc + matcher.group( 3 );
+            return sc.append(matcher.group(3)).toString();
         }
         
         throw new SpecParseException( "Specification parsing error" );
