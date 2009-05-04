@@ -153,26 +153,53 @@ public class FileFuncs {
         }
     }
 
+    /**
+     * Reads the contents of the specified (text) file into memory.
+     * Reading is done line by line using a buffered character stream.
+     * Files bigger than 2GB cannot currently be read with this method.
+     * @param file the file to be read
+     * @return the contents of the file as a string,
+     * or the empty string on error
+     */
     public static String getFileContents(File file) {
         if (RuntimeProperties.isLogDebugEnabled()) {
             db.p("Retrieving " + file);
         }
 
-        String fileString = new String();
-        if( file != null && file.exists() && !file.isDirectory() ) {
+        StringBuilder fileString = null;
+        if (file != null && file.exists() && !file.isDirectory()) {
+            BufferedReader in = null;
             try {
-                BufferedReader in = new BufferedReader(new FileReader(file));
-                String lineString = new String();
+                long len = file.length();
+                if (len > Integer.MAX_VALUE) {
+                    db.p("File " + file.getAbsolutePath() + " is too large!");
+                    return "";
+                }
+                // StringBuilder can handle the value 0L for special files
+                fileString = new StringBuilder((int) file.length());
+
+                in = new BufferedReader(new FileReader(file));
+                String lineString;
 
                 while ((lineString = in.readLine()) != null) {
-                    fileString += lineString+"\n";
+                    fileString.append(lineString);
+                    fileString.append("\n");
                 }
-                in.close();
             } catch (IOException ioe) {
                 db.p("Couldn't open file "+ file.getAbsolutePath());
+            } finally {
+                if (in != null) {
+                    try {
+                        in.close();
+                    } catch (IOException e) {
+                        db.p(e);
+                    }
+                    in = null;
+                }
             }
         }
-        return fileString;
+
+        return fileString == null ? "" : fileString.toString();
     }
 
 	/**
