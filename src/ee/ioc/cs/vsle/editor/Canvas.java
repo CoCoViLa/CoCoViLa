@@ -1523,6 +1523,12 @@ public class Canvas extends JPanel implements ISchemeContainer {
             EventSystem.queueEvent( event );
         }
         m_runners.clear();
+
+        // Flush icons, otherwise updated icons will not get displayed.
+        for (JToggleButton b : palette.buttons) {
+            ((ImageIcon) b.getIcon()).getImage().flush();
+        }
+
         drawingArea = null;
     }
 
