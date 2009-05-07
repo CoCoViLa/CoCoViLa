@@ -70,6 +70,7 @@ public class IconEditor extends JFrame {
     private static File packageFile;
     
     public static String prevPackagePath;
+    float scale = 1.0f; // zoom level
         
     /**
      * Class constructor [1].
@@ -1661,17 +1662,64 @@ public class IconEditor extends JFrame {
             super.setTitle( title + " - " + WINDOW_TITLE );
         }
     }
-    
-    public void zoom( double newZ, double oldZ ) {
+
+    public void setScale(float scale) {
+        float oldScale = this.scale;
+        this.scale = scale;
+
+        // This code needs work and should probably be unified with Scheme Editor
         for ( int i = 0; i < shapeList.size(); i++ ) {
             Shape s = shapeList.get( i );
-            s.setMultSize( (float) newZ, (float) oldZ );
+            s.setMultSize(scale * 100f, oldScale * 100f);
         }
         for ( int i = 0; i < ports.size(); i++ ) {
             IconPort p = ports.get( i );
-            p.setMultSize( (float) newZ, (float) oldZ );
+            p.setMultSize(scale * 100f, oldScale * 100f);
         }
+
+        recalcPreferredSize();
+        drawingArea.repaint();
     } // zoom
+
+    public void recalcPreferredSize() {
+        int maxx = Integer.MIN_VALUE;
+        int maxy = Integer.MIN_VALUE;
+
+        for (int i = 0; i < shapeList.size(); i++) {
+            Shape s = shapeList.get(i);
+            int tmp = s.getX() + s.getRealWidth();
+            if (tmp > maxx) {
+                maxx = tmp;
+            }
+
+            tmp = s.getY() + s.getRealHeight();
+            if (tmp > maxy) {
+                maxy = tmp;
+            }
+        }
+
+        for (int i = 0; i < ports.size(); i++) {
+            IconPort p = ports.get(i);
+            int tmp = p.getX() + p.getWidth();
+            if (tmp > maxx) {
+                maxx = tmp;
+            }
+            tmp = p.getY() + p.getHeight();
+            if (tmp > maxy) {
+                maxy = tmp;
+            }
+        }
+    
+        drawAreaSize.width = Math.round(
+            // scale *
+            (maxx > 0 ? maxx + RuntimeProperties.getGridStep() : drawAreaSize.width /* this.scale */));
+
+        drawAreaSize.height = Math.round(// scale *
+            (maxy > 0 ? maxy + RuntimeProperties.getGridStep() : drawAreaSize.height /* this.scale*/));
+
+        drawingArea.setPreferredSize(drawAreaSize);
+        drawingArea.revalidate();
+    }
 
     public void loadClass() {
         JFileChooser fc = new JFileChooser( RuntimeProperties.getLastPath() );
