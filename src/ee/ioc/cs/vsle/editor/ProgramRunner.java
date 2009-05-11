@@ -10,8 +10,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.tree.*;
 
-import ee.ioc.cs.vsle.api.TerminateProgramException;
-import ee.ioc.cs.vsle.api.RerunProgramException;
+import ee.ioc.cs.vsle.api.*;
 import ee.ioc.cs.vsle.api.Scheme;
 import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
@@ -606,6 +605,8 @@ public class ProgramRunner {
                         if (ex.getCause() instanceof RerunProgramException) {
                             rerun( m_canvas );
                             rerun = true;
+                        } else if ( ex.getCause() instanceof RunningProgramException ) {
+                            ex.getCause().printStackTrace();
                         } else if ( !( ex.getCause() instanceof ThreadDeath )
                                 && !(ex.getCause() instanceof TerminateProgramException)) {
                             ex.printStackTrace();
@@ -615,7 +616,6 @@ public class ProgramRunner {
                         setWorking( false );
                         db.p( "--> Finished!!! " + Thread.currentThread().getName() );
                     }
-
 
                     if ( sendFeedback ) {
 

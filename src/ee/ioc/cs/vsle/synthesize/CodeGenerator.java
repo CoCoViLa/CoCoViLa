@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.synthesize;
 
 import java.util.*;
 
+import ee.ioc.cs.vsle.api.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -56,7 +57,7 @@ public class CodeGenerator {
         for ( Rel rel : algRelList ) {
 
             if ( rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) {
-                appendRelToAlg( rel, alg, false );
+                appendRelToAlg( rel.toString(), rel.getExceptions(), alg, false );
             }
 
             else if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
@@ -142,7 +143,7 @@ public class CodeGenerator {
                         genSubTasks( trel, bufSbtBody, true, sbName, currentUsedVars, currentProblem );
 
                     } else {
-                        appendRelToAlg( trel, bufSbtBody, true );
+                        appendRelToAlg( trel.toString(), trel.getExceptions(), bufSbtBody, true );
                     }
                     unfoldVarsToSet( trel.getInputs(), currentUsedVars );
                     unfoldVarsToSet( trel.getOutputs(), currentUsedVars );
@@ -180,7 +181,12 @@ public class CodeGenerator {
                     .append( sbName ).append( "();\n\n" );
         }
 
-        appendSubtaskRelToAlg( rel, subInstanceNames, alg, isNestedSubtask );
+        String relString = rel.toString();
+        for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
+            relString = relString.replaceFirst( RelType.TAG_SUBTASK, subInstanceNames.get( i ) );
+        }
+        
+        appendRelToAlg( relString, rel.getExceptions(), alg, isNestedSubtask );
     }
 
     private static String _this_ = "." + TYPE_THIS + ".";
@@ -213,7 +219,7 @@ public class CodeGenerator {
                         } else {
                             bufConstr.append( "try {\n" ).append( consOT ).append( OT_TAB ).append( var.getName() ).append( " = " ).append(
                                     "DeepCopy.copy( " ).append( parent ).append( " );\n" ).append( consOT ).append(
-                                    "} catch( Exception e ) { e.printStackTrace(); }\n" );
+                                    "} catch( Exception e ) { throw new SubtaskExecutionException(e); }\n" );
                         }
                     } else {
                         bufConstr.append( var.getName() ).append( " = " ).append( parent ).append( ";\n" );
@@ -279,45 +285,31 @@ public class CodeGenerator {
         return offset;
     }
 
-    private void appendRelToAlg( Rel rel, StringBuilder buf, boolean isInSubtask ) {
-        String s = rel.toString();
-        if ( !s.equals( "" ) ) {
-            if ( isInSubtask || rel.getExceptions().size() == 0 ) {
-                buf.append( same() ).append( s ).append( ";\n" );
+    private void appendRelToAlg( String relString, Collection<Var> exceptions, StringBuilder buf, boolean isInSubtask ) {
+        
+        if ( !relString.equals( "" ) ) {
+            
+            String exceptionClassName = isInSubtask ? SubtaskExecutionException.class.getSimpleName()
+                    : RunningProgramException.class.getSimpleName();   
+            
+            if (exceptions.isEmpty()) {
+                buf.append( same() ).append( relString );                
             } else {
-                buf.append( appendExceptions( rel, s ) );
+                buf.append( appendExceptionHandler( relString, exceptionClassName ) );
             }
         }
     }
-
-    private void appendSubtaskRelToAlg( Rel rel, List<String> names, StringBuilder buf, boolean isNestedSubtask ) {
-
-        String relString = rel.toString();
-        for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
-            relString = relString.replaceFirst( RelType.TAG_SUBTASK, names.get( i ) );
-        }
-        if ( isNestedSubtask || rel.getExceptions().size() == 0 ) {
-            buf.append( same() ).append( relString ).append( "\n" );
-        } else {
-            buf.append( appendExceptions( rel, relString ) ).append( "\n" );
-        }
-    }
-
-    private String appendExceptions( Rel rel, String s ) {
+    
+    private String appendExceptionHandler( String s, String exceptionClassName ) {
         StringBuilder buf = new StringBuilder();
-        buf.append( same() ).append( "try {\n" ).append( right() ).append( s ).append( ";\n" ).append( left() ).append( "}\n" );
+        buf.append( same() ).append( "try {\n" ).append( right() ).append( s ).append( left() ).append( "}\n" );
 
-        int i = 0;
-        for ( Var ex : rel.getExceptions() ) {
-            String excp = ex.getName();
-            String instanceName = "ex" + i;
-            buf.append( same() ).append( "catch( " ).append( excp ).append( " " ).append( instanceName ).append( " ) {\n" ).append( right() ).append(
-                    instanceName ).append( ".printStackTrace();\n" ).append( same() ).append( "return;\n" ).append( left() ).append( "}\n" );
-        }
+        buf.append( same() ).append( "catch(Exception e) {\n" )
+            .append( right() ).append( "throw new " ).append( exceptionClassName ).append( "(e);\n" ).append( left() ).append( "}\n" );
 
         return buf.toString();
     }
-
+    
     /**
      * Generates code for value extraction from assumptions or subtask input object array
      * 
@@ -518,7 +510,7 @@ public class CodeGenerator {
     
     
     public static String getRunMethodSignature( String argName ) {
-        return "public Object[] run(Object[] " + argName + ") throws Exception";
+        return "public Object[] run(Object[] " + argName + ")";
     }
     
     public static String getComputeMethodSignature( String argName ) {

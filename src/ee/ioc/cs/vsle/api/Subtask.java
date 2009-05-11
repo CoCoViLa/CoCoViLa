@@ -9,6 +9,6 @@ package ee.ioc.cs.vsle.api;
  */
 public interface Subtask {
 
-	Object[] run(Object[] in) throws Exception;
+	Object[] run(Object[] in);
 	
 }
