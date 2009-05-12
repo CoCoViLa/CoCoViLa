@@ -149,7 +149,7 @@ public class CodeGenerator {
                     unfoldVarsToSet( trel.getOutputs(), currentUsedVars );
                 }
                 // apend subtask outputs to algorithm
-                bufSbtBody.append( getSubtaskOutputs( subOutputs, same() ) );
+                bufSbtBody.append( getSubtaskOutputs( subOutputs) );
                 // end of run()
                 bufSbtBody.append( left() ).append( "}\n" );
 
@@ -258,16 +258,14 @@ public class CodeGenerator {
     private String cOT( OFFSET ot, int times ) {
 
         switch ( ot ) {
-            case OT_INC:
-                for ( int i = 0; i < times; i++ ) {
-                    offset += OT_TAB;
-                }
-                break;
-            case OT_DEC:
-                for ( int i = 0; i < times; i++ ) {
-                    offset = offset.substring( OT_TAB.length() );
-                }
-                break;
+        case OT_INC:
+            for ( int i = 0; i < times; i++ ) {
+                offset += OT_TAB;
+            }
+            break;
+        case OT_DEC:
+            offset = offset.substring( OT_TAB.length() * times );
+            break;
         }
 
         return offset;
@@ -317,14 +315,15 @@ public class CodeGenerator {
      * @param vars
      * @param inputArgName
      */
-    private void genInputs( StringBuilder alg, List<Var> vars, String inputArgName ) {
-        
+    private void genInputs( StringBuilder alg, List<Var> vars,
+            String inputArgName ) {
+
         if ( vars.isEmpty() ) {
             return;
         }
 
-        StringBuilder result = new StringBuilder( "" );
-        
+        StringBuilder result = new StringBuilder();
+
         for ( int i = 0; i < vars.size(); i++ ) {
             Var var = vars.get( i );
 
@@ -333,17 +332,23 @@ public class CodeGenerator {
                 result.append( getVarsFromAlias( var, aliasTmp, inputArgName, i ) );
                 continue;
             }
-            
+
             String varType = var.getType();
             TypeToken token = TypeToken.getTypeToken( varType );
 
             result.append( offset );
 
-            if ( token == TypeToken.TOKEN_OBJECT || token == TypeToken.TOKEN_STRING ) {
-                result.append( var.getFullName() ).append( " = (" ).append( varType ).append( ")" + inputArgName + "[" ).append( i ).append( "];\n" );
+            if ( token == TypeToken.TOKEN_OBJECT
+                    || token == TypeToken.TOKEN_STRING ) {
+                result.append( var.getFullName() ).append( " = (" ).append(
+                        varType ).append( ")" ).append( inputArgName ).append(
+                        "[" ).append( i ).append( "];\n" );
             } else {
-                result.append( var.getFullName() ).append( " = ((" ).append( token.getObjType() ).append( ")" + inputArgName + "[" ).append( i ).append( "])." )
-                        .append( token.getMethod() ).append( "();\n" );
+                result.append( var.getFullName() ).append( " = ((" ).append(
+                        token.getObjType() ).append( ")" )
+                        .append( inputArgName ).append( "[" ).append( i )
+                        .append( "])." ).append( token.getMethod() ).append(
+                                "();\n" );
             }
         }
 
@@ -351,15 +356,19 @@ public class CodeGenerator {
     }
 
     // getAliasSubtaskInput
-    public static String getVarsFromAlias( Var aliasVar, String aliasTmp, String parentVar, int num ) {
-        
-        if( aliasVar.getChildVars().isEmpty() ) {
+    public static String getVarsFromAlias( Var aliasVar, String aliasTmp,
+            String parentVar, int num ) {
+
+        if ( aliasVar.getChildVars().isEmpty() ) {
             return "";
         }
-        
+
         String aliasType = aliasVar.getType();
 
-        String out = offset + aliasType + " " + aliasTmp + " = (" + aliasType + ")" + parentVar + "[" + num + "];\n";
+        StringBuilder out = new StringBuilder( offset ).append( aliasType )
+                .append( " " ).append( aliasTmp ).append( " = (" ).append(
+                        aliasType ).append( ")" ).append( parentVar ).append(
+                        "[" ).append( num ).append( "];\n" );
 
         Var var;
 
@@ -375,24 +384,29 @@ public class CodeGenerator {
             if ( var.getField().isAlias() ) {
                 // recursion
                 String tmp = getAliasTmpName( var.getName() );
-                out += getVarsFromAlias( var, tmp, aliasTmp, i );
-
-            } else if ( token == TypeToken.TOKEN_OBJECT || token == TypeToken.TOKEN_STRING ) {
-
-                out += offset + var.getFullName() + " = (" + varType + ")" + aliasTmp + "[" + i + "];\n";
+                out.append( getVarsFromAlias( var, tmp, aliasTmp, i ) );
+            } else if ( token == TypeToken.TOKEN_OBJECT
+                    || token == TypeToken.TOKEN_STRING ) {
+                out.append( offset ).append( var.getFullName() )
+                        .append( " = (" ).append( varType ).append( ")" )
+                        .append( aliasTmp ).append( "[" ).append( i ).append(
+                                "];\n" );
             } else {
-                out += offset + var.getFullName() + " = ((" + token.getObjType() + ")" + aliasTmp + "[" + i + "])." + token.getMethod() + "();\n";
+                out.append( offset ).append( var.getFullName() ).append(
+                        " = ((" ).append( token.getObjType() ).append( ")" )
+                        .append( aliasTmp ).append( "[" ).append( i ).append(
+                                "])." ).append( token.getMethod() ).append(
+                                "();\n" );
             }
 
         }
-        return out;
+        return out.toString();
     }
 
-    private String getSubtaskOutputs( List<Var> vars, String offset ) {
+    private String getSubtaskOutputs( List<Var> vars ) {
 
-        String declarations = "\n";
-        String varList = "";
-        String result = offset + "return new Object[]{ ";
+        StringBuilder declarations = new StringBuilder( "\n" );
+        StringBuilder varList = new StringBuilder();
 
         for ( int i = 0; i < vars.size(); i++ ) {
             Var var = vars.get( i );
@@ -401,58 +415,59 @@ public class CodeGenerator {
 
             if ( var.getField().isAlias() ) {
                 String aliasTmp = getAliasTmpName( var.getName() );
-
-                declarations += getVarsToAlias( var, aliasTmp );
-
+                declarations.append( getVarsToAlias( var, aliasTmp ) );
                 varName = aliasTmp;
-
             } else {
                 varName = var.getFullName();
             }
-            if ( i == 0 ) {
-                varList += varName;
-            } else {
-                varList += ", " + varName;
-            }
 
+            if ( i == 0 ) {
+                varList.append( varName );
+            } else {
+                varList.append( ", " ).append( varName );
+            }
         }
 
-        return declarations + result + varList + " };\n";
+        return declarations.append( same() ).append( "return new Object[]{ " )
+                .append( varList ).append( " };\n" ).toString();
     }
 
     // getAliasSubtaskOutput
     public static String getVarsToAlias( Var aliasVar, String aliasTmp ) {
 
         String aliasType = aliasVar.getType();
-        String before = "";
-        
-        if( aliasVar.getChildVars().isEmpty() && !((Alias)aliasVar.getField()).isInitialized() ) {
-            return offset + aliasType + " " + aliasTmp + " = null;\n";
+        StringBuilder before = new StringBuilder();
+        StringBuilder out = new StringBuilder( offset );
+
+        if ( aliasVar.getChildVars().isEmpty()
+                && !( (Alias) aliasVar.getField() ).isInitialized() ) {
+            return out.append( aliasType ).append( " " ).append( aliasTmp )
+                    .append( " = null;\n" ).toString();
         }
 
-        String out = offset + aliasType + " " + aliasTmp + " = new " + aliasType + "{ ";
+        out.append( aliasType ).append( " " ).append( aliasTmp ).append(
+                " = new " ).append( aliasType ).append( "{ " );
 
         int count = 0;
         for ( Var var : aliasVar.getChildVars() ) {
 
-            String varName;
-            if ( var.getField().isVoid() )
-                varName = "/*void:" + var.getField().getName() + "*/null";
-            else if ( var.getField().isAlias() ) {
-                varName = getAliasTmpName( aliasVar.getName() );
-                before += getVarsToAlias( var, varName );
-            } else {
-                varName = var.getFullName();
+            if ( count++ > 0 ) {
+                out.append( ", " );
             }
-            if ( count++ == 0 ) {
-                out += varName;
+
+            if ( var.getField().isVoid() )
+                out.append( "/*void:" ).append( var.getField().getName() )
+                        .append( "*/null" );
+            else if ( var.getField().isAlias() ) {
+                String varName = getAliasTmpName( aliasVar.getName() );
+                out.append( varName );
+                before.append( getVarsToAlias( var, varName ) );
             } else {
-                out += ", " + varName;
+                out.append( var.getFullName() );
             }
         }
-        out += " };\n";
 
-        return before + out;
+        return before.append( out ).append( " };\n" ).toString();
     }
 
     /**
