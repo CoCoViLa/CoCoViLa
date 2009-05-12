@@ -211,7 +211,6 @@ public class SchemeSearchDialog extends SearchDialogBase {
                 offset = 0;
             }
 
-            System.err.println("A: " + offset + ", " + objects.size());
             int indexBound = objects.size();
 
             boolean found = false;
