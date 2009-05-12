@@ -568,7 +568,6 @@ class Rel implements Serializable {
 	                }
 
 	            }
-	            assigns.append( CodeGenerator.getOffset() );
 	        }
 
 	        return assigns.toString();
