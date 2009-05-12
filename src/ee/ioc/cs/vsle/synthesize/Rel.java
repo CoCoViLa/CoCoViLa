@@ -7,7 +7,6 @@ import ee.ioc.cs.vsle.vclass.*;
 import java.io.Serializable;
 import java.util.*;
 import java.util.regex.*;
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 class Rel implements Serializable {
@@ -24,6 +23,7 @@ class Rel implements Serializable {
     //see RelType
     private int type;
     private Set<Var> unknownInputs = new LinkedHashSet<Var>();
+    private CodeEmitter emitter;
     
     Rel( Var parent, String declaration ) {
         relID = RelType.relCounter++;
@@ -38,11 +38,6 @@ class Rel implements Serializable {
     void setType(int t) {
         type = t;
     }
-    
-    //for debug!!!
-    String printUnknownInputs() {
-		return unknownInputs.toString();
-	}
     
     int getUnknownInputCount() {
         return unknownInputs.size();
@@ -81,9 +76,6 @@ class Rel implements Serializable {
 
     void addOutputs( Collection<Var> vars ) {
     	outputs.addAll( vars );
-//    	for (Var var : vars) {
-//			addOutput(var);
-//		}
     }
     
     /**
@@ -118,10 +110,12 @@ class Rel implements Serializable {
         return method;
     }
 
+    @Override
     public boolean equals(Object e) {
         return this.relID == ((Rel) e).relID;
     }
 
+    @Override
     public int hashCode() {
         return RelType.REL_HASH + relID;
     }
@@ -133,419 +127,451 @@ class Rel implements Serializable {
     Var getFirstOutput() {
         return outputs.iterator().next();
     }
-//    Var input;
-//    
-//    Var getFirstInput() {
-//    	
-//    	if( input == null ) {
-//    		input = inputs.iterator().next();
-//    	}
-//    	
-//        return input;
-//    }
-//    
-//    Var output;
-//    
-//    Var getFirstOutput() {
-//        
-//    	if( output == null ) {
-//    		output = outputs.iterator().next();
-//    	}
-//    	
-//        return output;
-//    }
+
+    public String getDeclaration() {
+        return declaration;
+    }
+    
+    public String getParentObjectName()
+    {
+        return parent.getFullName();
+    }
+    
+    @Override
+    public String toString()
+    {
+        return getCodeEmitter().emitCode();
+    }
+    
+    
+    //for debug!!!
+    String printUnknownInputs() {
+        return unknownInputs.toString();
+    }
+    
     /**************** The code below is related to the code generation ************************************/
-    
-    String getMaxType(Collection<Var> inputs) {
-
-        for ( Var var : inputs ) {
-            if (!var.getType().equals(TYPE_INT)) {
-                return TYPE_DOUBLE;
-            }
-        }
-        return TYPE_INT;
+    private CodeEmitter getCodeEmitter()
+    {
+        if(emitter == null)
+            emitter = new CodeEmitter();
+        return emitter;
     }
+	
+	private class CodeEmitter
+	{
+	    
+	    private String getMaxType(Collection<Var> _inputs) {
 
-    private String getOutputString() {
+	        for ( Var var : _inputs ) {
+	            if (!var.getType().equals(TYPE_INT)) {
+	                return TYPE_DOUBLE;
+	            }
+	        }
+	        return TYPE_INT;
+	    }
 
-        String outputString = "";
-        Var var = getFirstOutput();
+	    private String getOutputString() {
 
-        if (!TypeUtil.TYPE_VOID.equals( var.getType() )) {
-            if (var.getField().isAlias()) {
-                String alias_tmp = getAliasTmpName( var );
+            StringBuilder outputString = new StringBuilder();
+            Var var = getFirstOutput();
 
-                if (!var.getChildVars().isEmpty()) {
-
-                    outputString = ((Alias)var.getField()).getType()
-                            + " " + alias_tmp + " ";
-                }
-
-            } else {
-                outputString = var.getFullName();
-            }
-
-        }
-        return outputString;
-
-    }
-
-    private String getAliasTmpName( Var var ) {
-    	String varName = var.getFullNameForConcat().replaceAll( "\\.", "_" );
-        return TypeUtil.TYPE_ALIAS + "_" + varName + relID;
-    }
-
-    String getParametersString(boolean useBrackets) {
-        String params = "";
-        if (useBrackets)
-            params += "(";
-        int j = 0;
-
-        String paramString = "";
-        for ( Var var : inputs ) {
-
-            if (!TypeUtil.TYPE_VOID.equals( var.getType() ) ) {
+            if ( !TypeUtil.TYPE_VOID.equals( var.getType() ) ) {
                 if ( var.getField().isAlias() ) {
-                    paramString = getAliasTmpName( var );
+                    String alias_tmp = getAliasTmpName( var );
+
+                    if ( !var.getChildVars().isEmpty() ) {
+
+                        outputString.append(
+                                ( (Alias) var.getField() ).getType() ).append(
+                                " " ).append( alias_tmp ).append( " " );
+                    }
+
                 } else {
-                    paramString = var.getFullName();
+                    outputString.append( var.getFullName() );
                 }
-                if (j == 0) {
-                    params += paramString;
-                } else {
-                    params += ", " + paramString;
-                }
-                j++;
+
             }
+            return outputString.toString();
         }
-        if (useBrackets)
-            return params += ")";
-        return params;
 
-    }
+	    private String getAliasTmpName( Var var ) {
+	        
+            String varName = var.getFullNameForConcat().replaceAll( "\\.", "_" );
+            return new StringBuilder( TypeUtil.TYPE_ALIAS ).append( "_" )
+                    .append( varName ).append( relID ).toString();
+        }
 
-    String getSubtaskParametersString() {
-        String params = "(";
-        boolean subExist = false;
-        for (int i = 0; i < subtasks.size(); i++) {
-            if (i == 0) {
-                params += RelType.TAG_SUBTASK;
-                subExist = true;
+	    private String getParametersString( boolean useBrackets ) {
+	        
+            StringBuilder params = new StringBuilder();
+            if ( useBrackets )
+                params.append( "(" );
+
+            int j = 0;
+            for ( Var var : inputs ) {
+
+                if ( !TypeUtil.TYPE_VOID.equals( var.getType() ) ) {
+                    if ( j++ > 0 )
+                        params.append( ", " );
+
+                    if ( var.getField().isAlias() ) {
+                        params.append( getAliasTmpName( var ) );
+                    } else {
+                        params.append( var.getFullName() );
+                    }
+                }
+            }
+            if ( useBrackets )
+                params.append( ")" );
+
+            return params.toString();
+        }
+
+	    private String getSubtaskParametersString() {
+
+            StringBuilder params = new StringBuilder( "(" );
+
+            boolean subExist = false;
+            for ( int i = 0; i < subtasks.size(); i++ ) {
+                if ( i == 0 ) {
+                    subExist = true;
+                } else {
+                    params.append( ", " );
+                }
+                params.append( RelType.TAG_SUBTASK );
+            }
+            if ( subExist && inputs.size() > 0 ) {
+                params.append( ", " );
+            }
+
+            return params.append( getParametersString( false ) ).append( ")" )
+                    .toString();
+        }
+	    
+	    /* 
+	     * Emits code for a given relation class
+	     */
+	    private String emitCode() {
+
+	        if (type == RelType.TYPE_ALIAS) {
+	            return "";
+	        }
+	        else if (type == RelType.TYPE_EQUATION) {
+	            return emitEquation();
+	            
+	        } else if (type == RelType.TYPE_SUBTASK) {
+	            // this should not be used in code generation
+	            return inputs + " -> " + outputs;
+
+	        } else if ( ( type == RelType.TYPE_JAVAMETHOD )
+	                || ( type == RelType.TYPE_METHOD_WITH_SUBTASK )) {
+
+	            return emitMethod();
+
+	        } else {
+	            return emitAssignment();
+	        }
+	    }
+
+        private String emitAssignment() {
+
+            Var ip = getFirstInput();
+            Var op = getFirstOutput();
+            StringBuilder assigns = new StringBuilder();
+            int i = 0;
+
+            if ( ip.getField().isArray() && op.getField().isAlias() ) {
+                for ( Var childVar : op.getChildVars() ) {
+                    assigns.append( CodeGenerator.OT_TAB ).append( childVar )
+                            .append( " = " ).append( ip.getFullName() ).append(
+                                    "[" ).append( Integer.toString( i++ ) )
+                            .append( "];\n" );
+                }
+            } else if ( op.getField().isArray() && ip.getField().isAlias() ) {
+                for ( Var childVar : ip.getChildVars() ) {
+                    assigns.append( CodeGenerator.OT_TAB ).append(
+                            op.getFullName() ).append( "[" ).append(
+                            Integer.toString( i++ ) ).append( "] = " ).append(
+                            childVar ).append( ";\n" );
+                }
+            } else if ( op.getField().isAlias() && ip.getField().isAlias() ) {
+                for ( Var inpChildVar : ip.getChildVars() ) {
+                    assigns.append( CodeGenerator.OT_TAB ).append(
+                            op.getChildVars().get( i++ ) ).append( " = " )
+                            .append( inpChildVar ).append( ";\n" );
+                }
+            } else
+                assigns.append( op.getFullName() ).append( " = " ).append(
+                        ip.getFullName() ).append( ";\n" );
+
+            return assigns.toString();
+        }
+
+        private String emitMethod() {
+
+            String output = getOutputString();
+            String meth;
+
+            if ( Table.TABLE_KEYWORD.equals( method ) ) {
+
+                StringBuilder cast = new StringBuilder();
+
+                if ( !getOutputs().isEmpty() ) {
+
+                    cast.append( "(" );
+
+                    String _type = getFirstOutput().getType();
+
+                    TypeToken token = TypeToken.getTypeToken( _type );
+
+                    if ( token == TypeToken.TOKEN_OBJECT ) {
+                        cast.append( _type );
+                    } else {
+                        cast.append( token.getObjType() );
+                    }
+
+                    cast.append( ")" );
+                }
+                meth = cast.append( "ProgramContext.queryTable" ).toString();
             } else {
-                params += ", " + RelType.TAG_SUBTASK;
+                meth = parent.getFullNameForConcat() + method;
             }
+            
+            String params = ( type == RelType.TYPE_JAVAMETHOD ) ? getParametersString( true )
+                    : getSubtaskParametersString();
+            
+            return new StringBuilder( checkAliasInputs() ).append(
+                    output.length() > 0 ? output + " = " : "" ).append( meth )
+                    .append( params ).append( ";\n" ).append(
+                            checkAliasOutputs() ).toString();
         }
-        if (subExist && inputs.size() > 0) {
-            params += ", ";
-        }
-        params += getParametersString(false);
-        return params += ")";
-    }
 
-    String getParentObjectName() {
-    	return parent.getFullName();
-    }
-    
-    /* 
-     * TODO: Refactor string concatenation!
-     */
-    public String toString() {
-        Pattern pattern;
-        Matcher matcher;
-
-        if (type == RelType.TYPE_ALIAS) {
-            return "";
-        }
-        else if (type == RelType.TYPE_EQUATION) {
+        private String emitEquation() {
+            
+            StringBuilder result = new StringBuilder();
             // if its an array assingment
-            if (inputs.size() == 0 && outputs.size() == 1) {
-                String assign;
+            if ( inputs.size() == 0 && outputs.size() == 1 ) {
                 Var op = getFirstOutput();
 
-                if (op.getField().isPrimOrStringArray()) {
-                    String[] split = method.split("=");
-                    assign = op.getField().getType() + " " + " TEMP"
-                            + Integer.toString(RelType.auxVarCounter) + "="
-                            + split[1] + ";\n";
-                    assign += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
-                            + op.getFullName() + " = TEMP" + Integer.toString(RelType.auxVarCounter) + ";\n";
+                if ( op.getField().isPrimOrStringArray() ) {
+                    String[] split = method.split( "=" );
+                    result.append( op.getField().getType() ).append( " " )
+                            .append( " TEMP" ).append(
+                                    Integer.toString( RelType.auxVarCounter ) )
+                            .append( "=" ).append( split[1] ).append( ";\n" );
+                    result.append( CodeGenerator.OT_TAB ).append(
+                            CodeGenerator.OT_TAB ).append( op.getFullName() )
+                            .append( " = TEMP" ).append(
+                                    Integer.toString( RelType.auxVarCounter ) )
+                            .append( ";\n" );
                     RelType.auxVarCounter++;
-                    return assign;
+                    return result.toString();
 
                 }
             }
 
-            if (inputs.size() == 1 && outputs.size() == 1) {
-                String s1, assigns = "";
+            if ( inputs.size() == 1 && outputs.size() == 1 ) {
                 Var ip = getFirstInput();
                 Var op = getFirstOutput();
 
-                if (ip.getField().isArray() && op.getField().isAlias()) {
+                if ( ip.getField().isArray() && op.getField().isAlias() ) {
 
-                    for (int i = 0; i < getFirstOutput().getChildVars().size(); i++) {
-                        s1 = op.getChildVars().get(i).toString();
-                        assigns += s1 + " = " + ip.getFullName() + "[" + Integer.toString(i) + "];\n";
+                    for ( int i = 0; i < getFirstOutput().getChildVars().size(); i++ ) {
+                        result.append( op.getChildVars().get( i ) ).append(
+                                " = " ).append( ip.getFullName() ).append( "[" )
+                                .append( i ).append( "];\n" );
                     }
-                    return assigns;
-                }
-                else if (op.getField().isArray() && ip.getField().isAlias()) {
+                    return result.toString();
+                } else if ( op.getField().isArray() && ip.getField().isAlias() ) {
 
-                    assigns += op.getField().getType() + " TEMP"
-                            + Integer.toString(relID) + " = new "
-                            + op.getField().arrayType() + "["
-                            + ip.getChildVars().size() + "];\n";
-                    for (int i = 0; i < ip.getChildVars().size(); i++) {
-                        s1 = ip.getChildVars().get(i).toString();
-                        assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB
-                                + " TEMP" + Integer.toString(relID) + "["
-                                + Integer.toString(i) + "] = " + s1 + ";\n";
+                    result.append( op.getField().getType() ).append( " TEMP" )
+                            .append( relID ).append( " = new " ).append(
+                                    op.getField().arrayType() ).append( "[" )
+                            .append( ip.getChildVars().size() ).append( "];\n" );
+                    for ( int i = 0; i < ip.getChildVars().size(); i++ ) {
+                        result.append( CodeGenerator.OT_TAB ).append(
+                                CodeGenerator.OT_TAB ).append( " TEMP" )
+                                .append( relID ).append( "[" ).append( i )
+                                .append( "] = " ).append(
+                                        ip.getChildVars().get( i ) ).append(
+                                        ";\n" );
                     }
-                    assigns += CodeGenerator.OT_TAB + CodeGenerator.OT_TAB + op.getFullName()
-                            + " = " + " TEMP" + Integer.toString(relID) + ";\n";
-                    // RelType.auxVarCounter++;
-                    return assigns;
-                }
-                else if( method == null ) {
-                	return op.getFullName() + " = " + ip.getFullName() + ";\n";
+
+                    return result.append( CodeGenerator.OT_TAB ).append(
+                            CodeGenerator.OT_TAB ).append( op.getFullName() )
+                            .append( " = " ).append( " TEMP" ).append( relID )
+                            .append( ";\n" ).toString();
+                } else if ( method == null ) {
+                    return result.append( op.getFullName() ).append( " = " )
+                            .append( ip.getFullName() ).append( ";\n" )
+                            .toString();
                 }
             }
 
-            
             Set<String> varNames = new LinkedHashSet<String>();
-            for( Var out : getOutputs() ) {
-            	varNames.add( out.getFullName() );
+            for ( Var out : getOutputs() ) {
+                varNames.add( out.getFullName() );
             }
-            for( Var inps : getInputs() ) {
-            	varNames.add( inps.getFullName() );
+            for ( Var inps : getInputs() ) {
+                varNames.add( inps.getFullName() );
             }
-            
-            pattern = Pattern.compile("[^a-zA-Z_]*([a-zA-Z_]{1}[a-zA-Z_0-9\\.]*)");
-            matcher = pattern.matcher( method );
-            
+
+            Pattern pattern = Pattern
+                    .compile( "[^a-zA-Z_]*([a-zA-Z_]{1}[a-zA-Z_0-9\\.]*)" );
+            Matcher matcher = pattern.matcher( method );
+
             boolean methodCallExist = false;
-            
+
+            String parentFullName = parent.getFullNameForConcat();
             StringBuffer sb = new StringBuffer();
             //take each variable and replace it with the real instance name
-            while( matcher.find() ) {
-            	
-            	String rep = parent.getFullNameForConcat() + matcher.group(1);
-            	
-            	if( !varNames.contains( rep ) ) {
-            		rep = "$1";
-            		methodCallExist = true;
-            	}
-            	
-            	matcher.appendReplacement( sb, 
-            			method.substring( matcher.start(), matcher.start(1) ) //
-            			+ rep // 
-            			+ method.substring( matcher.end(1), matcher.end() ) ); //
+            while ( matcher.find() ) {
+
+                String rep = parentFullName + matcher.group( 1 );
+
+                if ( !varNames.contains( rep ) ) {
+                    rep = "$1";
+                    methodCallExist = true;
+                }
+
+                matcher.appendReplacement( sb, method.substring( matcher
+                        .start(), matcher.start( 1 ) ) //
+                        + rep // 
+                        + method.substring( matcher.end( 1 ), matcher.end() ) ); //
             }
-            
+
             matcher.appendTail( sb );
 
             // TODO - add casting to other types as well
-            if ( getFirstOutput().getType().equals(TYPE_INT)
-                    && ( methodCallExist || !getMaxType(inputs).equals(TYPE_INT) ) ) {
-            	
-            	String[] eq = sb.toString().split( "=" );
-            	return eq[0] + " = (" + TYPE_INT + ") (" + eq[1] + " );\n";
-            } 
-            
+            if ( getFirstOutput().getType().equals( TYPE_INT )
+                    && ( methodCallExist || !getMaxType( inputs ).equals(
+                            TYPE_INT ) ) ) {
+
+                String[] eq = sb.toString().split( "=" );
+                return result.append( eq[0] ).append( " = (" )
+                        .append( TYPE_INT ).append( ") (" ).append( eq[1] )
+                        .append( " );\n" ).toString();
+            }
+
             return sb.append( ";\n" ).toString();
-            
-        } else if (type == RelType.TYPE_SUBTASK) {
-
-            // this should not be used in code generation
-            return inputs + " -> " + outputs;
-
-        } else if ( ( type == RelType.TYPE_JAVAMETHOD )
-        		|| ( type == RelType.TYPE_METHOD_WITH_SUBTASK )) {
-
-        	String output = getOutputString();
-        	String meth;
-        	
-        	if( Table.TABLE_KEYWORD.equals( method ) ) {
-        	    
-        	    String cast = "";
-        	    
-        	    if( !getOutputs().isEmpty() ) {
-        	        
-        	        cast += "(";
-        	            
-        	        String type = getFirstOutput().getType();
-        	        
-        	        TypeToken token = TypeToken.getTypeToken( type );
-        	        
-        	        if( token == TypeToken.TOKEN_OBJECT ) {
-        	            cast += type;
-        	        } else {
-        	            cast += token.getObjType();
-        	        }
-        	        
-        	        cast += ")";
-        	    }
-        	    meth = cast + "ProgramContext.queryTable";
-        	} else {
-        	    meth = parent.getFullNameForConcat() + method;
-        	}
-        	String params = ( type == RelType.TYPE_JAVAMETHOD ) ? getParametersString(true) : getSubtaskParametersString();
-        	return ( checkAliasInputs()
-        			+ ( output.length() > 0 ? output + " = " : "" ) 
-        			+ meth + params )
-        			+ ";\n" + checkAliasOutputs();
-
-        } else {
-            if (RuntimeProperties.isLogDebugEnabled())
-                db.p(method);
-            Var ip = getFirstInput();
-            Var op = getFirstOutput();
-            String assigns = "";
-            int i = 0;
-            
-            if (ip.getField().isArray() && op.getField().isAlias()) {
-                for ( Var childVar : op.getChildVars() ) {
-                    assigns += CodeGenerator.OT_TAB + childVar 
-                            + " = " + ip.getFullName() + "[" + Integer.toString(i++) + "];\n";
-                }
-                return assigns;
-            }
-            else if (op.getField().isArray() && ip.getField().isAlias()) {
-                for ( Var childVar : ip.getChildVars() ) {
-                    assigns += CodeGenerator.OT_TAB + op.getFullName() + "["
-                            + Integer.toString(i++) + "] = " + childVar + ";\n";
-                }
-                return assigns;
-            }
-            else if (op.getField().isAlias() && ip.getField().isAlias()) {
-                for ( Var inpChildVar : ip.getChildVars() ) {
-                    assigns += CodeGenerator.OT_TAB + op.getChildVars().get(i++) + " = " + inpChildVar + ";\n";
-                }
-                return assigns;
-            }
-
-            return op.getFullName() + " = " + ip.getFullName() + ";\n";
         }
-    }
+	    
+	    private String checkAliasInputs() {
+	        StringBuilder assigns = new StringBuilder();
+	        for ( Var input : inputs ) {
+	            if ( input.getField().isAlias() ) {
 
-    private String checkAliasInputs() {
-        StringBuilder assigns = new StringBuilder();
-        for ( Var input : inputs ) {
-            if ( input.getField().isAlias() ) {
+	                String alias_tmp = getAliasTmpName( input );
 
-                String alias_tmp = getAliasTmpName( input );
+	                if ( input.getChildVars().isEmpty()
+	                        && !( (Alias) input.getField() ).isInitialized() ) {
+	                    //TODO check assigns overwrite (before refactoring, 1.75.2.2)
+	                    assigns.append( input.getType() ).append( " " ).append(
+	                            alias_tmp ).append( " = null;\n" ).append(
+	                            CodeGenerator.getOffset() );
+	                } else {
 
-                if ( input.getChildVars().isEmpty()
-                        && !( (Alias) input.getField() ).isInitialized() ) {
-                    //TODO check assigns overwrite (before refactoring, 1.75.2.2)
-                    assigns.append( input.getType() ).append( " " ).append(
-                            alias_tmp ).append( " = null;\n" ).append(
-                            CodeGenerator.getOffset() );
-                } else {
+	                    assigns.append( checkObjectArrayDimension( alias_tmp, input
+	                            .getType(), input.getChildVars().size() ) );
+	                    
+	                    StringBuilder declarations = new StringBuilder();
+	                    StringBuilder varList = new StringBuilder();
 
-                    assigns.append( checkObjectArrayDimension( alias_tmp, input
-                            .getType(), input.getChildVars().size() ) );
-                    
-                    StringBuilder declarations = new StringBuilder();
-                    StringBuilder varList = new StringBuilder();
+	                    for ( int k = 0; k < input.getChildVars().size(); k++ ) {
+	                        Var var = input.getChildVars().get( k );
 
-                    for ( int k = 0; k < input.getChildVars().size(); k++ ) {
-                        Var var = input.getChildVars().get( k );
+	                        if ( var.getField().isVoid() )
+	                            continue;
 
-                        if ( var.getField().isVoid() )
-                            continue;
+	                        String varName;
 
-                        String varName;
+	                        if ( var.getField().isAlias() ) {
+	                            String aliasTmpFromInput = getAliasTmpName( var );
 
-                        if ( var.getField().isAlias() ) {
-                            String aliasTmpFromInput = getAliasTmpName( var );
+	                            declarations.append( CodeGenerator.getVarsToAlias(
+	                                    var, aliasTmpFromInput ) );
 
-                            declarations.append( CodeGenerator.getVarsToAlias(
-                                    var, aliasTmpFromInput ) );
+	                            varName = aliasTmpFromInput;
 
-                            varName = aliasTmpFromInput;
+	                        } else {
+	                            varName = var.getFullName();
+	                        }
 
-                        } else {
-                            varName = var.getFullName();
-                        }
+	                        varList.append( CodeGenerator.getOffset() ).append(
+	                                alias_tmp ).append( "[" ).append(
+	                                Integer.toString( k ) ).append( "] = " )
+	                                .append( varName ).append( ";\n" );
+	                    }
+	                    assigns.append( declarations ).append( varList ).append(
+	                            CodeGenerator.getOffset() );
+	                }
+	            }
+	        }
+	        return assigns.toString();
+	    }
 
-                        varList.append( CodeGenerator.getOffset() ).append(
-                                alias_tmp ).append( "[" ).append(
-                                Integer.toString( k ) ).append( "] = " )
-                                .append( varName ).append( ";\n" );
-                    }
-                    assigns.append( declarations ).append( varList ).append(
-                            CodeGenerator.getOffset() );
-                }
-            }
-        }
-        return assigns.toString();
-    }
+	    private String checkObjectArrayDimension( String name, String _type, int size ) {
 
-    private String checkObjectArrayDimension( String name, String type, int size ) {
+	        StringBuilder result = 
+	            new StringBuilder( _type ).append( " " ).append( name ).append( " = new " );
+	        
+	        /*
+	         * if we have alias as a set of arrays, we should change the declaration
+	         * as follows: from double[][] tmp = new double[][2]; to double[][] tmp =
+	         * new double[2][];
+	         */
+	        if ( _type.endsWith( "[][]" ) ) {
+	            return result.append( _type.substring( 0, _type.length() - 4 ) ).append(
+	                            "[" ).append( size ).append( "][];\n" ).toString();
+	        }
+	        return result.append( _type.substring( 0, _type.length() - 2 ) )
+	                .append( "[" ).append( size ).append( "];\n" ).toString();
+	    }
 
-        StringBuilder result = 
-            new StringBuilder( type ).append( " " ).append( name ).append( " = new " );
-        
-        /*
-         * if we have alias as a set of arrays, we should change the declaration
-         * as follows: from double[][] tmp = new double[][2]; to double[][] tmp =
-         * new double[2][];
-         */
-        if ( type.endsWith( "[][]" ) ) {
-            return result.append( type.substring( 0, type.length() - 4 ) ).append(
-                            "[" ).append( size ).append( "][];\n" ).toString();
-        }
-        return result.append( type.substring( 0, type.length() - 2 ) )
-                .append( "[" ).append( size ).append( "];\n" ).toString();
-    }
+	    private String checkAliasOutputs() {
+	        StringBuilder assigns = new StringBuilder();
+	        Var output = getFirstOutput();
+	        if ( output.getField().isAlias() ) {
 
-    private String checkAliasOutputs() {
-        StringBuilder assigns = new StringBuilder();
-        Var output = getFirstOutput();
-        if ( output.getField().isAlias() ) {
+	            String alias_tmp = getAliasTmpName( output );
 
-            String alias_tmp = getAliasTmpName( output );
+	            for ( int k = 0; k < output.getChildVars().size(); k++ ) {
+	                Var varFromAlias = output.getChildVars().get( k );
 
-            for ( int k = 0; k < output.getChildVars().size(); k++ ) {
-                Var varFromAlias = output.getChildVars().get( k );
+	                if ( varFromAlias.getField().isVoid() )
+	                    continue;
 
-                if ( varFromAlias.getField().isVoid() )
-                    continue;
+	                String varType = varFromAlias.getType();
+	                TypeToken token = TypeToken.getTypeToken( varType );
 
-                String varType = varFromAlias.getType();
-                TypeToken token = TypeToken.getTypeToken( varType );
+	                if ( token == TypeToken.TOKEN_OBJECT
+	                        || token == TypeToken.TOKEN_STRING ) {
+	                    if ( varFromAlias.getField().isAlias() ) {
+	                        assigns.append( CodeGenerator.getVarsFromAlias(
+	                                varFromAlias, CodeGenerator
+	                                        .getAliasTmpName( varFromAlias
+	                                                .getName() ), alias_tmp, k ) );
+	                    } else {
+	                        assigns.append( CodeGenerator.getOffset() ).append(
+	                                varFromAlias.getFullName() ).append( " = (" )
+	                                .append( varType ).append( ")" ).append(
+	                                        alias_tmp ).append( "[" ).append( k )
+	                                .append( "];\n" );
+	                    }
+	                } else {
+	                    assigns.append( CodeGenerator.getOffset() ).append(
+	                            varFromAlias.getFullName() ).append( " = ((" )
+	                            .append( token.getObjType() ).append( ")" ).append(
+	                                    alias_tmp ).append( "[" ).append( k )
+	                            .append( "])." ).append( token.getMethod() )
+	                            .append( "();\n" );
+	                }
 
-                if ( token == TypeToken.TOKEN_OBJECT
-                        || token == TypeToken.TOKEN_STRING ) {
-                    if ( varFromAlias.getField().isAlias() ) {
-                        assigns.append( CodeGenerator.getVarsFromAlias(
-                                varFromAlias, CodeGenerator
-                                        .getAliasTmpName( varFromAlias
-                                                .getName() ), alias_tmp, k ) );
-                    } else {
-                        assigns.append( CodeGenerator.getOffset() ).append(
-                                varFromAlias.getFullName() ).append( " = (" )
-                                .append( varType ).append( ")" ).append(
-                                        alias_tmp ).append( "[" ).append( k )
-                                .append( "];\n" );
-                    }
-                } else {
-                    assigns.append( CodeGenerator.getOffset() ).append(
-                            varFromAlias.getFullName() ).append( " = ((" )
-                            .append( token.getObjType() ).append( ")" ).append(
-                                    alias_tmp ).append( "[" ).append( k )
-                            .append( "])." ).append( token.getMethod() )
-                            .append( "();\n" );
-                }
+	            }
+	            assigns.append( CodeGenerator.getOffset() );
+	        }
 
-            }
-            assigns.append( CodeGenerator.getOffset() );
-        }
-
-        return assigns.toString();
-    }
-
-	public String getDeclaration() {
-		return declaration;
+	        return assigns.toString();
+	    }
 	}
 }
