@@ -297,10 +297,8 @@
       Web Start
   -->
 	
-  <target name="webstart" depends="runtime-dep,copy-resources,genkey"
+  <target name="webstart" depends="check-ws-dirs,runtime-dep,copy-resources,genkey"
           description="Generate distribution files" >
-
-    <mkdir dir="${webstart}/lib"/>
 
     <jar destfile="${webstart}/cocovila-se.jar"
             basedir="${build}"
@@ -355,6 +353,11 @@
   	</signjar>
 
   </target>
+
+	<target name="check-ws-dirs">
+		<mkdir dir="${webstart}"/>
+		<mkdir dir="${webstart}/lib"/>
+	</target>
 
 	<target name="genkey" depends="check-genkey,set-genkey-pass" if="need.genkey">
 		<genkey alias="${key-alias}" keystore="${keystore.location}" storepass="${keystore.password}" 
