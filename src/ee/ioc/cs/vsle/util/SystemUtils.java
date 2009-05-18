@@ -4,7 +4,6 @@ import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
-import java.util.List;
 import java.util.jar.*;
 
 import javax.swing.*;
@@ -12,138 +11,89 @@ import javax.swing.*;
 import ee.ioc.cs.vsle.editor.*;
 
 public class SystemUtils {
-
-	private static ClassLoader cl = SystemUtils.class.getClassLoader();
 	
-	/**
-	 * Method <code>checkDir</code>
-	 * If directory s does not exist, create it along with all missing directories
-	 * in the path above.
-	 */
-	public static void createDir( String s )
-	{
+	public static void unpackPackages() {
 
-		try
-		{
-			File file = new File( s );
+        URL u = Thread.currentThread().getContextClassLoader().getResource(
+                RuntimeProperties.PACKAGE_LOCATOR );
+        
+        String urlString = u.toExternalForm();
 
-			file.mkdirs();
-		}
-		catch ( SecurityException e )
-		{
+        String jarExt = ".jar";
 
-			//logCategory.logError( "Security violation. ", e );
-			System.err.println( "Security violation. " );
-			e.printStackTrace();
-		}
-	}
-	
-	/**
-	 * Method <code>unpackConfigFiles</code>
-	 *
-	 *
-	 */
-	public static void unpackPackages()
-	{
+        int jarIndex = urlString.lastIndexOf( jarExt );
 
-		// determine the location of the FTOconfig.jar
-		URL jarUrl = cl.getResource( RuntimeProperties.PACKAGE_LOCATOR );
+        if ( jarIndex < 1 ) {
+            return;
+        }
 
-		System.out.println( "jarUrl=" + jarUrl );
-		
-		if( jarUrl == null ) return;
-//		;
-//		// extract path+filename of the jar file
-		String jarFn = parsePath( jarUrl );
-//
-		if ( jarFn.length() == 0 )
-		{
-			return;
-		}
+        try {
 
-		
-		//      if ( ( jarUrl == null ) || ( jarUrl.toString().length() <= 10 ) )
-		//          return;
-		try
-		{
-			System.out.println( " jarFn: " + jarFn );
-			// extract path+filename of the jar file
-			//          String  jarFn = jarUrl.toString().substring( 10,
-			//                              jarUrl.toString().indexOf( "!" ) );
-			JarFile jarF = new JarFile( new File( jarFn ) );
+            JarFile jarF;
+            String prefix = "jar:file:";
 
-			// loop through the jar file entries and copy them to files
-			for (Enumeration<JarEntry> e = jarF.entries(); e.hasMoreElements(); )
-			{
-				String entryName   = e.nextElement().toString();
-				String newFileName = RuntimeProperties.getWorkingDirectory() 
-										+ "packages" + File.separator + entryName;
+            if ( urlString.startsWith( prefix ) ) {
+                
+                jarF = new JarFile( new File( urlString.substring( prefix
+                        .length(), jarIndex + jarExt.length() ) ) );
+            } else {
 
-				// ignore CVS directories
-				if ( entryName.indexOf( "CVS" ) != -1 )
-				{
-					continue;
-				}
+                jarF = ( (JarURLConnection) u.openConnection() ).getJarFile();
+            }
 
-				// ignore META-INF directory
-				if ( entryName.indexOf( "META-INF" ) != -1 )
-				{
-					continue;
-				}
+            System.err.println( "Unpacking packages from: " + jarF.getName() );
 
-				// create missing directories
-				if ( entryName.charAt( entryName.length() - 1 ) == '/' )
-				{
-					File fi = new File( newFileName );
+            // loop through the jar file entries and copy them to files
+            for ( Enumeration<JarEntry> e = jarF.entries(); e.hasMoreElements(); ) {
+                String entryName = e.nextElement().toString();
+                String newFileName = RuntimeProperties.getWorkingDirectory()
+                        + "packages" + File.separator + entryName;
 
-					fi.mkdirs();
+                // ignore CVS directories
+                if ( entryName.indexOf( "CVS" ) != -1
+                        || entryName.indexOf( "META-INF" ) != -1 ) {
+                    continue;
+                }
 
-					continue;
-				}
+                // create missing directories
+                if ( entryName.charAt( entryName.length() - 1 ) == '/' ) {
+                    File fi = new File( newFileName );
+                    fi.mkdirs();
+                    continue;
+                }
 
-				// if the file already exists, leave it alone
-				File fi = new File( newFileName );
+                // if the file already exists, leave it alone
+                File fi = new File( newFileName );
+                if ( fi.exists() ) {
+                    continue;
+                }
 
-				if ( fi.exists() )
-				{
-					continue;
-				}
+                if ( RuntimeProperties.isLogDebugEnabled() )
+                    db.p( "entryName=" + newFileName );
 
-				if( RuntimeProperties.isLogDebugEnabled() )
-					db.p( "entryName=" + newFileName );
+                // create input stream associated with the jar file entry
+                InputStream source = jarF.getInputStream( jarF
+                        .getEntry( entryName ) );
 
-				// create input stream associated with the jar file entry
-				InputStream source = jarF.getInputStream( jarF.getEntry( entryName ) );
+                // create output stream associated with the new file
+                FileOutputStream target = new FileOutputStream( newFileName );
+                int chunkSize = 1024;
+                int bytesRead;
+                byte[] ba = new byte[chunkSize];
 
-				// create output stream associated with the new file
-				FileOutputStream target    = new FileOutputStream( newFileName );
-				int              chunkSize = 1024;
-				int              bytesRead;
-				byte[]           ba = new byte[ chunkSize ];
-				
-				while ( ( bytesRead = readBlocking( source, ba, 0, chunkSize ) ) > 0 )
-				{
-					target.write( ba, 0 /* offset in ba */, bytesRead /* bytes to write */ );
-				}
+                while ( ( bytesRead = readBlocking( source, ba, 0, chunkSize ) ) > 0 ) {
+                    target.write( ba, 0, bytesRead );
+                }
 
-				// done copying -- close streams
-				source.close();
-				target.close();
-			}    // for
-		}
-		catch ( FileNotFoundException ex1 )
-		{
-			System.out.println( ex1 );
-		}
-		catch ( IOException ex2 )
-		{
-			System.out.println( ex2 );
-		}
-		catch ( SecurityException ex3 )
-		{
-			System.out.println( ex3 );
-		} 
-	}
+                // done copying -- close streams
+                source.close();
+                target.close();
+            }
+        } catch ( IOException e ) {
+            e.printStackTrace();
+            return;
+        }
+    }
 	
 	private static final String parsePath( URL url )
 	{
@@ -182,7 +132,7 @@ public class SystemUtils {
 	 *
 	 * @return the value of <code>String</code> type
 	 */
-	public static final String parsePath( String path )
+	private static final String parsePath( String path )
 	{
 
 		if ( path == null )
@@ -239,34 +189,6 @@ public class SystemUtils {
 
 		return totalBytesRead;
 	}    // end readBlocking
-
-    /**
-     * Attempts to find all windows the application has created.
-     * Java 1.6 has Window.getWindows() which should be used instead of
-     * this method.
-     * @return an probably empty array of windows
-     */
-    public static List<Window> getAllWindows() {
-        List<Window> list = new ArrayList<Window>();
-
-        for (Window window : Frame.getFrames())
-            addAllOwnedWindows(window, list);
-
-        return list;
-    }
-
-    /**
-     * Adds recursively all owned windows of the specified window to the list
-     * including the specified parent window.
-     * @param window parent window
-     * @param list accumulator
-     */
-    private static void addAllOwnedWindows(Window window, List<Window> list) {
-        list.add(window);
-        for (Window w : window.getOwnedWindows())
-            addAllOwnedWindows(w, list);
-    }
-    
 
     /**
      * Upon platform, use OS-specific methods for opening the URL in required

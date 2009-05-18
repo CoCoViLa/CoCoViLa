@@ -629,8 +629,7 @@ public class Editor extends JFrame implements ChangeListener {
         for ( int i = 0; i < args.length; i++ ) {
             if ( args[ i ].equals( "-webstart" ) ) {
                 RuntimeProperties.setFromWebstart();
-
-                SystemUtils.unpackPackages();
+                break;
             }
         }
 
@@ -659,6 +658,19 @@ public class Editor extends JFrame implements ChangeListener {
 
         Look.getInstance().initDefaultLnF();
 
+        //if apps was run for the first time from webstart
+        //ask user if he wants to unpack demo packages
+        if ( RuntimeProperties.isFromWebstart() && RuntimeProperties.isCleanInstall() ) {
+            int res = JOptionPane.showConfirmDialog( null,
+                    "Extract demo packages into \""
+                    + ( RuntimeProperties.getWorkingDirectory()
+                            + "packages" + File.separator ) + "\" ?",
+                            "", JOptionPane.YES_NO_OPTION );
+
+            if ( res == JOptionPane.YES_OPTION )
+                SystemUtils.unpackPackages();
+        }
+        
         final Editor window = new Editor();
 
         if ( !RuntimeProperties.isFromWebstart() && args.length > 0 ) {

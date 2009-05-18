@@ -58,6 +58,7 @@ public class RuntimeProperties {
     private static final String DUMP_GENERATED = "dumpGeneratedFiles";
     private static final String DEFAULT_EDITOR = "defaultEditor";
 
+    private static boolean isCleanInstall = false;
     private static boolean fromWebstart = false;
     private static String workingDirectory = System.getProperty( "user.dir" ) 
             + File.separator;
@@ -563,7 +564,9 @@ public class RuntimeProperties {
                 FileInputStream in = new FileInputStream( file );
 
                 try {
-                    props.loadFromXML( in );
+                    props.loadFromXML( in );    
+                    isCleanInstall = false;
+                    return;
                 } finally {
                     in.close();
                 }
@@ -572,6 +575,8 @@ public class RuntimeProperties {
                 e.printStackTrace();
             }
         }
+        
+        isCleanInstall = true;
     }
 
     public static void writeProperties( String propFile, Properties props ) {
@@ -814,5 +819,12 @@ public class RuntimeProperties {
             }
         }
         defaultEditor = editorCmd;
+    }
+
+    /**
+     * @return the isCleanInstall
+     */
+    public static boolean isCleanInstall() {
+        return isCleanInstall;
     }
 }

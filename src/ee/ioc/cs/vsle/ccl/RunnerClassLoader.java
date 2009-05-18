@@ -7,6 +7,7 @@ import java.util.*;
 import org.eclipse.jdt.internal.compiler.batch.*;
 import org.eclipse.jdt.internal.compiler.env.*;
 
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.util.FileFuncs.*;
 
@@ -44,8 +45,13 @@ public class RunnerClassLoader extends CCL {
         // version of this class present in the classpath and we should ignore
         // other (source) versions there might exist.
         if (PROGRAM_CONTEXT.equals(className)) {
-            InputStream is = getSystemResourceAsStream(
-                    classToClassResource(className));
+            String resString = classToClassResource(className);
+            
+            InputStream is = getSystemResourceAsStream(resString);
+
+            if( is == null && RuntimeProperties.isFromWebstart() ) {
+                is = Thread.currentThread().getContextClassLoader().getResourceAsStream( resString );
+            }
 
             if (is != null) {
                 byte[] classData = FileFuncs.getByteStreamContents(is);

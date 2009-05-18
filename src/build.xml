@@ -19,6 +19,7 @@
   <property name="lib" location="lib"/>
   <property name="build" location="classes"/>
   <property name="dist" location="dist"/>
+  <property name="webstart" location="webstart"/>
   <property name="packages" location="packages"/>
   <property name="reports" location="${dist}/reports"/>
   <property name="reports.junit" location="${reports}/junit"/>
@@ -151,7 +152,7 @@
 
       <batchtest todir="${reports.junit}/xml">
         <fileset dir="${src.tests}">
-          <include name="**/*Test*.java"/>
+          <!--include name="**/*Test*.java"/-->
           <exclude name="**/AllTests.java"/>
         </fileset>
       </batchtest>
@@ -261,7 +262,7 @@
     <jar destfile="${dist}/lib/${project.se.jar}"
             basedir="${build}"
             duplicate="fail">
-        <exclude name="**/*Test*.class"/>
+        <!--exclude name="**/*Test*.class"/-->
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
           <attribute name="Class-Path" value="lib/ejc.jar lib/jfreechart.jar lib/jcommon.jar"/>
@@ -292,6 +293,96 @@
   </target>
 
 
+  <!--
+      Web Start
+  -->
+	
+  <target name="webstart" depends="runtime-dep,copy-resources,genkey"
+          description="Generate distribution files" >
+
+    <mkdir dir="${webstart}/lib"/>
+
+    <jar destfile="${webstart}/cocovila-se.jar"
+            basedir="${build}"
+            duplicate="fail">
+        <manifest>
+          <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
+          <attribute name="Class-Path" value="lib/ejc.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+    <jar destfile="${webstart}/cocovila-ce.jar"
+            basedir="${build}"
+            duplicate="fail">
+        <exclude name="**"/>
+        <manifest>
+          <attribute name="Main-Class" value="ee.ioc.cs.vsle.iconeditor.IconEditor"/>
+          <attribute name="Class-Path" value="${project.se.jar}"/>
+          <attribute name="Implementation-Title" value="${project.title} ${project.title.ce}"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+  	<jar destfile="${webstart}/packages.jar"
+            basedir="${packages}"
+            duplicate="fail">
+        <manifest>
+          <attribute name="Implementation-Title" value="${project.title} Packages"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+  	<copy todir="${webstart}/lib">
+      <fileset dir="${lib}">
+        <include name="ejc.jar"/>
+      	<include name="jcommon.jar"/>
+        <include name="jfreechart.jar"/>
+      </fileset>
+    </copy>
+
+  	<signjar
+  		alias="${key-alias}" 
+  		keystore="${keystore.location}" 
+  		storepass="${keystore.password}"
+  	    preservelastmodified="true">
+  	  <fileset dir="${webstart}" includes="**/*.jar" />
+  	  <fileset dir="${webstart}/lib" includes="**/*.jar" />
+  	</signjar>
+
+  </target>
+
+	<target name="genkey" depends="check-genkey,set-genkey-pass" if="need.genkey">
+		<genkey alias="${key-alias}" keystore="${keystore.location}" storepass="${keystore.password}" 
+		  		validity="365" dname="CN=Institute of Cybernetics, OU=Software Department, O=www.ioc.ee, C=EE"/>
+	</target>
+
+	<target name="check-genkey">
+		<property name="key.alias" value="CoCoViLa-Dev-Group"/>
+		<property name="keystore.location" value="${webstart}/${key.alias}.key"/>
+		
+		<condition property="need.genkey">
+			<not>
+				<available file="${keystore.location}"/>
+			</not>
+		</condition>
+	</target>
+	
+	<target name="set-genkey-pass">
+	  <input
+	    message="Please enter a key password for signing Web Start jar files:"
+	    addproperty="keystore.password"
+	  />
+	  <condition property="keystore.password.empty">
+	  	<length string="${keystore.password}" trim="true" length="0" />
+	  </condition>
+	  <fail if="keystore.password.empty">Key password cannot be empty, aborting.</fail>
+	</target>
+	
   <!--
       Clean up
   -->

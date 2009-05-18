@@ -35,7 +35,7 @@ public class Look {
         try {
             UIManager.setLookAndFeel( lnf );
 
-            for ( Window window : SystemUtils.getAllWindows() ) {
+            for ( Window window : Window.getWindows() ) {
                 SwingUtilities.updateComponentTreeUI( window );
                 window.pack();
             }
