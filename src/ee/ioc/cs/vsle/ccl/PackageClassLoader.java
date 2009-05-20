@@ -1,11 +1,10 @@
 package ee.ioc.cs.vsle.ccl;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.*;
 
 import org.eclipse.jdt.internal.compiler.batch.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.batch.FileSystem;
@@ -13,8 +12,7 @@ import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
 import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
-import ee.ioc.cs.vsle.util.FileFuncs;
-import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * Package classloader.  Loads classes from the package directory and
@@ -99,10 +97,130 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
             }
         }
 
+        if(RuntimeProperties.isFromWebstart())
+        {
+            urls.addAll( getWebStartClasspath() );
+        }
+        
         return urls.toArray(new URL[urls.size()]);
     }
 
+    private static boolean isJarsLoadedLocal = false;
+    private static List<URL> localJarsClassPath = null;
     
+    /**
+     * Prepares classpath if the application has been started 
+     * from Java Web Start
+     * @return
+     */
+    private static synchronized List<URL> getWebStartClasspath() {
+        if (isJarsLoadedLocal) {
+            return localJarsClassPath;
+        }
+
+        List<URL> classpathJars = new ArrayList<URL>();
+
+        try {
+            
+            Set<String> systemLibs = new HashSet<String>();
+            for ( File file : getSystemLibs() ) {
+                systemLibs.add( file.getAbsolutePath() );
+            }
+            
+            for (Enumeration<?> e = PackageClassLoader.class
+                    .getClassLoader().getResources("META-INF/MANIFEST.MF"); e
+                    .hasMoreElements();) {
+                URL url = (URL) e.nextElement();
+                
+                URL localJarURL = getLocalJarURL(url, systemLibs);
+                
+                if (localJarURL != null) {
+                    classpathJars.add(localJarURL);
+                }
+            }
+        } catch (IOException exc) {
+            exc.printStackTrace();
+        }
+
+        isJarsLoadedLocal = true;
+        localJarsClassPath = classpathJars;
+
+        System.err.println("localJarsClassPath: " + localJarsClassPath);
+        
+        return localJarsClassPath;
+    }
+
+    /**
+     * Helper method for getWebStartClasspath() method.
+     * Returns a local URL of a jar for the classpath.
+     * If jar is a system lib, it is ignored.
+     * @param url
+     * @param systemLibs
+     * @return
+     */
+    private static URL getLocalJarURL(URL url, Collection<String> systemLibs) {
+        
+        String urlStrJar = SystemUtils.getJarPath( url );
+        
+        //ignore if it is a system lib
+        if(systemLibs.contains( urlStrJar ))
+            return null;
+        
+        InputStream inputStreamJar = null;
+        File tempJar;
+        FileOutputStream fosJar = null;
+        try {
+            //check if the file is already local
+            if(url.getPath().startsWith( "file:" )) 
+                return new File( urlStrJar ).toURI().toURL();
+            
+            URL urlJar = new URL(urlStrJar);
+            
+            inputStreamJar = urlJar.openStream();
+            String strippedName = urlStrJar;
+            int dotIndex = strippedName.lastIndexOf('.');
+            if (dotIndex >= 0) {
+                strippedName = strippedName.substring(0, dotIndex);
+                strippedName = strippedName.replace("/", File.separator);
+                strippedName = strippedName.replace("\\", File.separator);
+                int slashIndex = strippedName.lastIndexOf(File.separator);
+                if (slashIndex >= 0) {
+                    strippedName = strippedName.substring(slashIndex + 1);
+                }
+            }
+            tempJar = File.createTempFile(strippedName, ".jar");
+            tempJar.deleteOnExit();
+            fosJar = new FileOutputStream(tempJar);
+            byte[] ba = new byte[1024];
+            int bytesWritten = 0;
+            while (true) {
+                int bytesRead = inputStreamJar.read(ba);
+                if (bytesRead < 0) {
+                    break;
+                }
+                fosJar.write(ba, 0, bytesRead);
+                bytesWritten += bytesRead;
+            }
+            return tempJar.toURI().toURL();
+        } catch (Exception ioe) {
+            ioe.printStackTrace();
+        } finally {
+            try {
+                if (inputStreamJar != null) {
+                    inputStreamJar.close();
+                }
+            } catch (IOException ioe) {
+            }
+            try {
+                if (fosJar != null) {
+                    fosJar.close();
+                }
+            } catch (IOException ioe) {
+            }
+        }
+        return null;
+    }
+
     @Override
     protected INameEnvironment getNameEnvironment() {
         return this;

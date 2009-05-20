@@ -72,8 +72,8 @@ public class RuntimeProperties {
         s_runtimeProperties = new Properties( s_defaultProperties );
 
         s_defaultProperties.put( DOCUMENTATION_URL, "http://www.cs.ioc.ee/~cocovila/" );
-        s_defaultProperties.put( GENERATED_FILES_DIR, isFromWebstart() ? getWorkingDirectory() + "generated" : "generated" );
-        s_defaultProperties.put( COMPILATION_CLASSPATH, isFromWebstart() ? "" : "lib/jcommon.jar;lib/jfreechart.jar" );
+        s_defaultProperties.put( GENERATED_FILES_DIR, "generated" );
+        s_defaultProperties.put( COMPILATION_CLASSPATH, "lib/jcommon.jar;lib/jfreechart.jar" );
         s_defaultProperties.put( OPEN_PACKAGES, "" );
         s_defaultProperties.put( DEBUG_INFO, Integer.toString( 0 ) );
         s_defaultProperties.put( DEFAULT_LNF, "javax.swing.plaf.metal.MetalLookAndFeel" );
@@ -145,6 +145,9 @@ public class RuntimeProperties {
         file.mkdirs();
 
         System.setProperty( "user.dir", workingDirectory );
+        
+        s_defaultProperties.put( GENERATED_FILES_DIR, workingDirectory + "generated" );
+        s_defaultProperties.put( COMPILATION_CLASSPATH, "" );
     }
 
     public static String getWorkingDirectory() {

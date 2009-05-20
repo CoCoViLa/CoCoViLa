@@ -626,12 +626,7 @@ public class Editor extends JFrame implements ChangeListener {
         // instances combined with PropertyChangeListeners is definitely
         // unsafe in the main thread and has caused real problems.
 
-        for ( int i = 0; i < args.length; i++ ) {
-            if ( args[ i ].equals( "-webstart" ) ) {
-                RuntimeProperties.setFromWebstart();
-                break;
-            }
-        }
+        checkWebStart( args );
 
         String version = System.getProperty( "java.version" );
 
@@ -658,18 +653,7 @@ public class Editor extends JFrame implements ChangeListener {
 
         Look.getInstance().initDefaultLnF();
 
-        //if apps was run for the first time from webstart
-        //ask user if he wants to unpack demo packages
-        if ( RuntimeProperties.isFromWebstart() && RuntimeProperties.isCleanInstall() ) {
-            int res = JOptionPane.showConfirmDialog( null,
-                    "Extract demo packages into \""
-                    + ( RuntimeProperties.getWorkingDirectory()
-                            + "packages" + File.separator ) + "\" ?",
-                            "", JOptionPane.YES_NO_OPTION );
-
-            if ( res == JOptionPane.YES_OPTION )
-                SystemUtils.unpackPackages();
-        }
+        extractPackages();
         
         final Editor window = new Editor();
 
@@ -735,6 +719,31 @@ public class Editor extends JFrame implements ChangeListener {
         XMLSpecGenerator.init();
     }
 
+    public static void checkWebStart(String[] args) {
+        for ( int i = 0; i < args.length; i++ ) {
+            if ( args[ i ].equals( "-webstart" ) ) {
+                RuntimeProperties.setFromWebstart();
+                break;
+            }
+        }
+    }
+    
+    public static void extractPackages()
+    {
+        //if apps was run for the first time from webstart
+        //ask user if he wants to unpack demo packages
+        if ( RuntimeProperties.isFromWebstart() && RuntimeProperties.isCleanInstall() ) {
+            int res = JOptionPane.showConfirmDialog( null,
+                    "Extract demo packages into \""
+                    + ( RuntimeProperties.getWorkingDirectory()
+                            + "packages" + File.separator ) + "\" ?",
+                            "", JOptionPane.YES_NO_OPTION );
+
+            if ( res == JOptionPane.YES_OPTION )
+                SystemUtils.unpackPackages();
+        }
+    }
+    
     public void clearPane() {
 
         Canvas canv = getCurrentCanvas();

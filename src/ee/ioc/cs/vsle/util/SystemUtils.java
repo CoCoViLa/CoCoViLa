@@ -95,6 +95,27 @@ public class SystemUtils {
         }
     }
 	
+	/**
+	 * Returns a path for a jar from a given url.
+	 * 
+	 * @param url
+	 * @return
+	 */
+	public static String getJarPath( URL url )
+	{
+	    String urlString = url.getFile();
+	    
+	    int idx;
+	    
+	    if((idx = urlString.indexOf( "!/" )) >= 0)
+	        urlString = urlString.substring( 0, idx );
+	    
+	    if(urlString.startsWith("file:"))
+            return urlString.substring( 5 );
+	    
+	    return urlString;
+	}
+	
 	private static final String parsePath( URL url )
 	{
 

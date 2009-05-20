@@ -1638,14 +1638,13 @@ public class IconEditor extends JFrame {
     static void createAndInitGUI( String[] args ) {
         assert SwingUtilities.isEventDispatchThread();
 
-        for ( int i = 0; i < args.length; i++ ) {
-            if ( args[ i ].equals( "-webstart" ) ) {
-                RuntimeProperties.setFromWebstart();
-                SystemUtils.unpackPackages();
-            }
-        }
+        Editor.checkWebStart( args );
 
         RuntimeProperties.init();
+
+        Look.getInstance().initDefaultLnF();
+
+        Editor.extractPackages();
 
         IconEditor window = new IconEditor();
         window.setTitle( null );
