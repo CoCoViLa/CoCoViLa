@@ -234,7 +234,7 @@ public class DepthFirstPlanner implements IPlanner {
             db.p( "algorithm " + algorithm );
 
         if ( !computeAll ) {
-            Optimizer.optimize( p, algorithm, new HashSet<Var>( allTargetVars ) );
+            Optimizer.optimize( p, algorithm, allTargetVars );
 
             if ( isLinearLoggingOn() )
                 db.p( "optimized algorithm " + algorithm );
@@ -437,7 +437,7 @@ public class DepthFirstPlanner implements IPlanner {
                             if ( RuntimeProperties.isLogInfoEnabled() ) {
                                 db.p( "Start solving independent subtask " + subtask.getDeclaration() );
                             }
-                            ArrayList<Rel> alg = invokePlaning( context, isOptDisabled );
+                            ArrayList<Rel> alg = getInstance().invokePlaning( context, isOptDisabled );
                             boolean solved = context.getFoundVars().containsAll( context.getGoals() );
                             if ( solved ) {
                                 subtask.setSolvable( Boolean.TRUE );

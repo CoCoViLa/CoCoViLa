@@ -17,7 +17,7 @@ public class Optimizer {
 	 @param goals the variables which the algorithm has to calculate (other branches are removed)
 	 */   
     public static void optimize( Problem problem, List<Rel> algorithm, Set<Var> goals ) {
-    	optimize( problem, algorithm, goals, "" );
+    	optimize( problem, algorithm, new HashSet<Var>( goals ), "" );
     }
     
 	private static void optimize( Problem problem, List<Rel> algorithm, Set<Var> goals, String p ) {
