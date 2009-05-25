@@ -46,8 +46,6 @@ public class IconPalette extends PaletteBase {
     JToggleButton addport;
     JToggleButton image;
 
-    JComponent toolBar;
-
     public IconPalette(IconMouseOps mListener, IconEditor ed) {
         super();
         toolBar = new JToolBar();

@@ -67,6 +67,20 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
      */
     public void setState( String state ) {
         this.state = state;
+
+        if (State.chooseColor.equals(state)) {
+            Color col = JColorChooser.showDialog(editor, "Choose Color",
+                    Color.black);
+
+            // col is null when the dialog was cancelled or closed
+            if (col != null) {
+                this.color = col;
+                changeObjectColors(col);
+            }
+
+            editor.palette.resetButtons();
+            this.state = State.selection;
+        }
     } // setState
 
     /**
@@ -846,7 +860,6 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
      * @param col Color - color for selected object(s).
      */
     public void changeObjectColors( Color col ) {
-        state = State.selection;
         if ( editor.shapeList != null && editor.shapeList.size() > 0 ) {
             for ( int i = 0; i < editor.shapeList.size(); i++ ) {
                 Shape s = editor.shapeList.get( i );
@@ -952,48 +965,6 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
                 editor.selectPackage();
             } else if ( e.getActionCommand().equals( Menu.DELETE_FROM_PACKAGE ) ) {
                 editor.deleteClass();
-            }
-
-        }
-
-        //Jbutton pressed
-        if ( e.getSource().getClass().getName() == "javax.swing.JButton" ) {
-            if ( e.getActionCommand().equals( State.selection ) ) {
-                editor.mListener.setState( State.selection );
-            } else if ( e.getActionCommand().equals( State.magnifier ) ) {
-                editor.mListener.setState( State.magnifier );
-            } else if ( e.getActionCommand().equals( State.drawLine ) ) {
-                editor.mListener.setState( State.drawLine );
-            } else if ( e.getActionCommand().equals( State.drawArc ) ) {
-                editor.mListener.setState( State.drawArc );
-            } else if ( e.getActionCommand().equals( State.drawFilledArc ) ) {
-                editor.mListener.setState( State.drawFilledArc );
-            } else if ( e.getActionCommand().equals( State.drawRect ) ) {
-                editor.mListener.setState( State.drawRect );
-            } else if ( e.getActionCommand().equals( State.boundingbox ) ) {
-                editor.mListener.setState( State.boundingbox );
-            } else if ( e.getActionCommand().equals( State.drawOval ) ) {
-                editor.mListener.setState( State.drawOval );
-            } else if ( e.getActionCommand().equals( State.drawFilledRect ) ) {
-                editor.mListener.setState( State.drawFilledRect );
-            } else if ( e.getActionCommand().equals( State.drawFilledOval ) ) {
-                editor.mListener.setState( State.drawFilledOval );
-            } else if ( e.getActionCommand().equals( State.chooseColor ) ) {
-                Color col = JColorChooser.showDialog( editor, "Choose Color", Color.black );
-                if ( col != null ) {
-                    this.color = col;
-                }
-                changeObjectColors( col );
-            } else if ( e.getActionCommand().equals( State.freehand ) ) {
-                editor.mListener.setState( State.freehand );
-            } else if ( e.getActionCommand().equals( State.eraser ) ) {
-                editor.mListener.setState( State.eraser );
-            } else if ( e.getActionCommand().equals( State.drawText ) ) {
-                editor.mListener.setState( State.drawText );
-            } else if ( e.getActionCommand().equals( State.addPort ) ) {
-                editor.mListener.setState( State.addPort );
-            } else if ( e.getActionCommand().equals( State.insertImage ) ) {
-                editor.mListener.setState( State.insertImage );
             }
         }
         IconEditor.drawingArea.grabFocus();
