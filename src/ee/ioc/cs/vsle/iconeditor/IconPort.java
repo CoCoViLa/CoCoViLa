@@ -116,7 +116,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return int - port width.
 	 */
 	int getWidth() {
-		return openGraphics.boundWidth;
+	    return width;
 	} // getWidth
 
 	/**
@@ -124,7 +124,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return int - port height.
 	 */
 	int getHeight() {
-		return openGraphics.boundHeight;
+	    return height;
 	} // getHeight
 
 	/**
