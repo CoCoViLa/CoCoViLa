@@ -89,7 +89,7 @@ public abstract class PaletteBase implements ActionListener {
         return button;
     }
 
-    protected void resetButtons() {
+    public void resetButtons() {
         for (int i = 0; i < buttons.size(); i++) {
             buttons.get(i).setSelected(i == 0);
         }
@@ -161,7 +161,7 @@ public abstract class PaletteBase implements ActionListener {
 
         JComboBox zoom = getZoomComboBox(RuntimeProperties.getZoomFactor());
         zoom.addActionListener(getZoomListener());
-        zoom.setMaximumSize(zoom.getPreferredSize());
+        // No need to set size as get*Size methods are overriden
         zoomPanel.add(zoom);
 
         return zoomPanel;
