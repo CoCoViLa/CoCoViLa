@@ -34,16 +34,25 @@ public class CodeGenerator {
 
     private Map<SubtaskRel, IndSubt> independentSubtasks = new HashMap<SubtaskRel, IndSubt>();
 
-    public CodeGenerator( List<Rel> algRelList, Problem problem, String className ) {
-
-        this.algRelList = algRelList;
-        this.problem = problem;
-        this.className = className;
-
+    private CodeGenerator() {
+        
         ALIASTMP_NR = 0;
         offset = "";
     }
+    
+    public CodeGenerator( List<Rel> algRelList, Problem problem, String className ) {
+        
+        this();
+        this.algRelList = algRelList;
+        this.problem = problem;
+        this.className = className;
+    }
 
+    /**
+     * Generates a Java program for a given algorithm
+     * 
+     * @return
+     */
     public String generate() {
 
         db.p( "Starting code generation" );
@@ -67,7 +76,7 @@ public class CodeGenerator {
                 unfoldVarsToSet( rel.getInputs(), usedVars );
                 unfoldVarsToSet( rel.getOutputs(), usedVars );
 
-                genSubTasks( rel, alg, false, className, usedVars, problem );
+                genRelWithSubtasks( rel, alg, false, className, usedVars, problem );
             }
 
         }
@@ -77,6 +86,11 @@ public class CodeGenerator {
         return alg.toString();
     }
 
+    /**
+     * Returns code of generated independent subtasks
+     * 
+     * @return
+     */
     public String getIndependentSubtasks() {
         StringBuilder buf = new StringBuilder();
 
@@ -87,111 +101,157 @@ public class CodeGenerator {
         return buf.toString();
     }
 
-    private void genSubTasks( Rel rel, StringBuilder alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars, Problem problem ) {
+    /**
+     * Generates code for axiom with subtasks
+     * 
+     * @param rel
+     * @param alg
+     * @param isNestedSubtask
+     * @param parentClassName
+     * @param usedVars
+     * @param _problem
+     */
+    private void genRelWithSubtasks( Rel rel, StringBuilder alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars, Problem _problem ) {
 
-        List<String> subInstanceNames = new ArrayList<String>();
-
+        String relString = rel.toString();
+        
         for ( SubtaskRel subtask : rel.getSubtasks() ) {
 
             int subNum = subCount++;
-
-            String sbName = ( subtask.isIndependent() ? "Independent" : "" ) + SUBTASK_INTERFACE_NAME + "_" + subNum;
-            subInstanceNames.add( "subtask_" + subNum );
-
+            
+            StringBuilder bufSbtClass = new StringBuilder();
+            
+            String sbClassName;
             if ( !subtask.isIndependent() || ( subtask.isIndependent() && !independentSubtasks.containsKey( subtask ) ) ) {
-
-                String offsetBak = offset;
-                if ( subtask.isIndependent() )
-                    offset = "";
-
-                Problem currentProblem = subtask.isIndependent() ? subtask.getContext() : problem;
-                Set<Var> currentUsedVars = subtask.isIndependent() ? new HashSet<Var>() : usedVars;
-
-                StringBuilder bufSbtClass = new StringBuilder();
-
-                bufSbtClass.append( "\n" ).append( same() ).append( "class " ).append( sbName ).append( " implements " ).append(
-                        SUBTASK_INTERFACE_NAME ).append( " {\n\n" );
-
-                right();
-
-                // start generating run()
-
-                StringBuilder bufSbtBody = new StringBuilder();
-
-                String subtaskInputArrayName = "cocovilaSubtaskInput" + subNum;
                 
-                bufSbtBody.append( same() ).append( getRunMethodSignature( subtaskInputArrayName ) ).append( " {\n" );
-
-                List<Var> subInputs = subtask.getInputs();
-                List<Var> subOutputs = subtask.getOutputs();
-
-                unfoldVarsToSet( subInputs, currentUsedVars );
-                unfoldVarsToSet( subOutputs, currentUsedVars );
-
-                List<Rel> subAlg = subtask.getAlgorithm();
-                right();
-                bufSbtBody.append( same() ).append( "//Subtask: " ).append( subtask ).append( "\n" );
-                // apend subtask inputs to algorithm
-                genInputs( bufSbtBody, subInputs, subtaskInputArrayName );
+                sbClassName = genSubtask( bufSbtClass, parentClassName, usedVars, _problem,
+                        subtask, subNum );
                 
-                for ( int i = 0; i < subAlg.size(); i++ ) {
-                    Rel trel = subAlg.get( i );
-                    if ( RuntimeProperties.isLogDebugEnabled() )
-                        db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs() );
-                    if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
-                        // recursion
-                        genSubTasks( trel, bufSbtBody, true, sbName, currentUsedVars, currentProblem );
-
-                    } else {
-                        appendRelToAlg( trel.toString(), trel.getExceptions(), bufSbtBody, true );
-                    }
-                    unfoldVarsToSet( trel.getInputs(), currentUsedVars );
-                    unfoldVarsToSet( trel.getOutputs(), currentUsedVars );
-                }
-                // apend subtask outputs to algorithm
-                bufSbtBody.append( getSubtaskOutputs( subOutputs) );
-                // end of run()
-                bufSbtBody.append( left() ).append( "}\n" );
-
-                if ( !subtask.isIndependent() ) {
-                    // variable declaration & constructor
-                    bufSbtClass.append( generateFieldDeclaration( parentClassName, sbName, currentUsedVars, currentProblem ) );
-                } else {
-                    bufSbtClass.append( same() ).append( getDeclaration( subtask.getContextCF(), "private" ) ).append( "\n" );
-                }
-
-                // append run() after subtasks' constructor
-                bufSbtClass.append( bufSbtBody );
-                // end of class
-                bufSbtClass.append( left() ).append( "} //End of subtask: " ).append( subtask ).append( "\n" );
-
                 if ( subtask.isIndependent() ) {
-                    independentSubtasks.put( subtask, new IndSubt( sbName, bufSbtClass.toString() ) );
+                    independentSubtasks.put( subtask, new IndSubt( sbClassName, bufSbtClass.toString() ) );
                 } else {
                     alg.append( bufSbtClass );
                 }
-
-                if ( subtask.isIndependent() )
-                    offset = offsetBak;
-            } else {
+            }        
+            else {
                 IndSubt sub = independentSubtasks.get( subtask );
-                sbName = sub.getClassName();
+                sbClassName = sub.getClassName();
             }
-            alg.append( same() ).append( sbName ).append( " " ).append( subInstanceNames.get( subInstanceNames.size() - 1 ) ).append( " = new " )
-                    .append( sbName ).append( "();\n\n" );
-        }
-
-        String relString = rel.toString();
-        for ( int i = 0; i < rel.getSubtasks().size(); i++ ) {
-            relString = relString.replaceFirst( RelType.TAG_SUBTASK, subInstanceNames.get( i ) );
+            
+            String sbInstanceName = "subtask_" + subNum;
+            
+            alg.append( same() ).append( sbClassName ).append( " " ).append(
+                    sbInstanceName ).append( " = new " ).append( sbClassName )
+                    .append( "();\n\n" );
+            
+            relString = relString.replaceFirst( RelType.TAG_SUBTASK, sbInstanceName );
         }
         
         appendRelToAlg( relString, rel.getExceptions(), alg, isNestedSubtask );
     }
 
+    /**
+     * Generates code for a subtask (both independent/dependent)
+     * @param bufSbtInst
+     * @param bufSbtClass
+     * @param parentClassName
+     * @param usedVars
+     * @param _problem
+     * @param subtask
+     * @param subNum
+     * @return
+     */
+    private String genSubtask( StringBuilder bufSbtClass, String parentClassName,
+            Set<Var> usedVars, Problem _problem,
+            SubtaskRel subtask, int subNum ) {
+        
+        String sbClassName = ( subtask.isIndependent() ? "Independent" : "" ) + SUBTASK_INTERFACE_NAME + "_" + subNum;
+
+        String offsetBak = offset;
+        if ( subtask.isIndependent() )
+            offset = "";
+
+        Problem currentProblem = subtask.isIndependent() ? subtask.getContext() : _problem;
+        Set<Var> currentUsedVars = subtask.isIndependent() ? new HashSet<Var>() : usedVars;
+
+        bufSbtClass.append( "\n" ).append( same() ).append( "class " ).append( sbClassName ).append( " implements " ).append(
+                SUBTASK_INTERFACE_NAME ).append( " {\n\n" );
+
+        right();
+
+        // start generating run()
+
+        StringBuilder bufSbtBody = new StringBuilder();
+
+        String subtaskInputArrayName = "cocovilaSubtaskInput" + subNum;
+
+        bufSbtBody.append( same() ).append( getRunMethodSignature( subtaskInputArrayName ) ).append( " {\n" );
+
+        List<Var> subInputs = subtask.getInputs();
+        List<Var> subOutputs = subtask.getOutputs();
+
+        unfoldVarsToSet( subInputs, currentUsedVars );
+        unfoldVarsToSet( subOutputs, currentUsedVars );
+
+        List<Rel> subAlg = subtask.getAlgorithm();
+        right();
+        bufSbtBody.append( same() ).append( "//Subtask: " ).append( subtask ).append( "\n" );
+        // apend subtask inputs to algorithm
+        genInputs( bufSbtBody, subInputs, subtaskInputArrayName );
+
+        for ( int i = 0; i < subAlg.size(); i++ ) {
+            Rel trel = subAlg.get( i );
+            if ( RuntimeProperties.isLogDebugEnabled() )
+                db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs() );
+            if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
+                // recursion
+                genRelWithSubtasks( trel, bufSbtBody, true, sbClassName, currentUsedVars, currentProblem );
+
+            } else {
+                appendRelToAlg( trel.toString(), trel.getExceptions(), bufSbtBody, true );
+            }
+            unfoldVarsToSet( trel.getInputs(), currentUsedVars );
+            unfoldVarsToSet( trel.getOutputs(), currentUsedVars );
+        }
+        // apend subtask outputs to algorithm
+        bufSbtBody.append( getSubtaskOutputs( subOutputs) );
+        // end of run()
+        bufSbtBody.append( left() ).append( "}\n" );
+
+        if ( !subtask.isIndependent() ) {
+            // variable declaration & constructor
+            bufSbtClass.append( generateFieldDeclaration( parentClassName, sbClassName, currentUsedVars, currentProblem ) );
+        } else {
+            bufSbtClass.append( same() ).append( getDeclaration( subtask.getContextCF(), "private" ) ).append( "\n" );
+        }
+
+        // append run() after subtasks' constructor
+        bufSbtClass.append( bufSbtBody );
+        // end of class
+        bufSbtClass.append( left() ).append( "} //End of subtask: " ).append( subtask ).append( "\n" );
+
+        if ( subtask.isIndependent() )
+            offset = offsetBak;
+       
+        return sbClassName;
+    }
+
+    /**
+     * Generates code of an independent subtask
+     * TODO check nested independent subtasks' code generation
+     * 
+     * @param subtask
+     * @param classCode
+     * @return name of the generated class
+     */
+    static String genIndependentSubtask(SubtaskRel subtask, StringBuilder classCode) {
+        
+        return new CodeGenerator().genSubtask( classCode, null, null, null, subtask, 0 );
+    }
+    
     private static String _this_ = "." + TYPE_THIS + ".";
 
-    private String generateFieldDeclaration( String parentClassName, String sbName, Set<Var> usedVars, Problem problem ) {
+    private String generateFieldDeclaration( String parentClassName, String sbName, Set<Var> usedVars, Problem _problem ) {
 
         String declOT = same();
         String consOT = right();
@@ -203,7 +263,7 @@ public class CodeGenerator {
 
             boolean allow = !var.getField().isAlias() && !var.getField().isConstant() && !var.getField().isVoid() && !var.getField().isStatic();
 
-            if ( var.getParent().equals( problem.getRootVar() ) ) {
+            if ( var.getParent().equals( _problem.getRootVar() ) ) {
                 if ( allow ) {
                     bufDecl.append( declOT );
                     bufDecl.append( var.getDeclaration() );
@@ -228,7 +288,7 @@ public class CodeGenerator {
             } else {
                 Var parent = var.getParent();
 
-                while ( parent.getParent() != null && !parent.getParent().equals( problem.getRootVar() ) ) {
+                while ( parent.getParent() != null && !parent.getParent().equals( _problem.getRootVar() ) ) {
                     parent = parent.getParent();
                 }
 

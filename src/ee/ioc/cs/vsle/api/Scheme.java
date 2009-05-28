@@ -72,4 +72,10 @@ public interface Scheme {
      */
     public void rerun();
     
+    /**
+     * ProgramContext.computeModel delegate
+     */
+    public Object[] computeModel(
+            Class<?> context, String[] inputNames,
+            String[] outputNames, Object[] inputValues);
 }

@@ -16,7 +16,7 @@ public class ClassList
 	/**
 	 * Class constructor.
 	 */
-	ClassList() {
+	public ClassList() {
 		super();
 	} // ee.ioc.cs.editor.synthesize.ClassList
 

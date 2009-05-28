@@ -132,4 +132,19 @@ public final class ProgramContext {
     private static boolean isRunningThread() {
         return Thread.currentThread() == thread;
     }
+    
+    /**
+     * Computes a given model at runtime and executes a generated program
+     * 
+     * @param context
+     * @param inputNames
+     * @param outputNames
+     * @param inputValues
+     * @return Object array of computed values
+     */
+    public static final Object[] computeModel(
+            Class<?> context, String[] inputNames,
+            String[] outputNames, Object[] inputValues) {
+        return scheme.computeModel( context, inputNames, outputNames, inputValues );
+    }
 }

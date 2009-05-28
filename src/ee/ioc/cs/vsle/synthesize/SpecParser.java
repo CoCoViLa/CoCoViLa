@@ -740,7 +740,21 @@ public class SpecParser {
     }
 
     /**
+     * Parses a given specification class and fills a list of classes
+     * 
      * @param className
+     * @param path
+     * @param classList
+     * @throws IOException
+     * @throws SpecParseException
+     */
+    static void parseSpecClass(String className, String path, ClassList classList) throws IOException, SpecParseException {
+
+        checkSpecClass(null, path, null, classList, className);
+    }
+    
+    /**
+     * @param parentClassName
      * @param path
      * @param checkedClasses
      * @param classList
@@ -750,15 +764,20 @@ public class SpecParser {
      * @throws SpecParseException 
      * @throws SpecParseException
      */
-    private static boolean checkSpecClass( String className, String path, Set<String> checkedClasses, ClassList classList,
+    private static boolean checkSpecClass( String parentClassName, String path, Set<String> checkedClasses, ClassList classList,
             String type ) throws IOException, SpecParseException {
+        
         if ( RuntimeProperties.isLogDebugEnabled() )
             db.p( "Checking existence of " + path + type + ".java" );
+        
+        if(checkedClasses == null)
+            checkedClasses = new LinkedHashSet<String>();
+        
         if ( checkedClasses.contains( type ) ) {
         	if( RuntimeProperties.isRecursiveSpecsAllowed() ) {
         		return true;
         	}
-            throw new MutualDeclarationException( className + " <-> " + type );
+            throw new MutualDeclarationException( parentClassName + " <-> " + type );
         } else if ( classList.getType( type ) != null ) {
             // do not need to parse already parsed class again
             return true;

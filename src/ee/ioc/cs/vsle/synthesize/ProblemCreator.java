@@ -211,6 +211,8 @@ public class ProblemCreator {
     }
 
     /**
+     * Creates an instance of an independent subtask
+     * 
      * @param classes
      * @param indpSubtasks
      * @param subtask
@@ -218,7 +220,7 @@ public class ProblemCreator {
      * @throws UnknownVariableException
      * @throws SpecParseException
      */
-    private static SubtaskRel makeIndependentSubtask( ClassList classes, Map<SubtaskClassRelation, SubtaskRel> indpSubtasks,
+    static SubtaskRel makeIndependentSubtask( ClassList classes, Map<SubtaskClassRelation, SubtaskRel> indpSubtasks,
             SubtaskClassRelation subtask ) throws UnknownVariableException, SpecParseException {
         SubtaskRel subtaskRel;
         ClassField context = subtask.getContext();
@@ -260,7 +262,9 @@ public class ProblemCreator {
         subtaskRel.setContextCF( context );
         subtaskRel.setContext( contextProblem );
         
-        indpSubtasks.put( subtask, subtaskRel );
+        if ( indpSubtasks != null )
+            indpSubtasks.put( subtask, subtaskRel );
+        
         return subtaskRel;
     }
     

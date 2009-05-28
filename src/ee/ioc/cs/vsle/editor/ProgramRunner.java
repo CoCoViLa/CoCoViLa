@@ -41,7 +41,7 @@ public class ProgramRunner {
     private List<Var> assumptions = new ArrayList<Var>();
     private Object[] arguments;
     private String mainClassName = new String();
-    private ISchemeContainer m_canvas;
+    private ISchemeContainer schemeContainer;
     private GenStorage storage;
 
     public ProgramRunner( ISchemeContainer canvas ) {
@@ -49,18 +49,18 @@ public class ProgramRunner {
         m_id = System.currentTimeMillis();
         ProgramRunnerEvent.registerListener( m_lst );
 
-        m_canvas = canvas;
+        schemeContainer = canvas;
 
-        m_canvas.registerRunner( m_id );
+        schemeContainer.registerRunner( m_id );
 
         //TODO tmp:parse tables each time new runner is created
-        TableManager.updateTables( m_canvas.getPackage() );
+        TableManager.updateTables( schemeContainer.getPackage() );
         
         updateFromCanvas();
     }
 
     private void updateFromCanvas() {
-        objects = GroupUnfolder.unfold( m_canvas.getObjects() );
+        objects = GroupUnfolder.unfold( schemeContainer.getObjects() );
     }
 
     public void destroy() {
@@ -69,8 +69,8 @@ public class ProgramRunner {
         
         SwingUtilities.invokeLater( new Runnable() {
             public void run() {
-                m_canvas.unregisterRunner( m_id );
-                m_canvas = null;
+                schemeContainer.unregisterRunner( m_id );
+                schemeContainer = null;
             }
         } );
 
@@ -92,8 +92,8 @@ public class ProgramRunner {
 
         updateFromCanvas();
 
-        return SpecGenFactory.getInstance().getCurrentSpecGen().generateSpec( m_canvas.getScheme(),
-                m_canvas.getPackage().getPackageClassName() );
+        return SpecGenFactory.getInstance().getCurrentSpecGen().generateSpec( schemeContainer.getScheme(),
+                schemeContainer.getPackage().getPackageClassName() );
     }
 
     private Object[] getArguments() throws Exception {
@@ -114,33 +114,42 @@ public class ProgramRunner {
         return arguments;
     }
 
-    private String compile( String genCode ) {
+    private void compile( String genCode ) {
 
         arguments = null;
 
         try {
             GenStorage fs = getStorage();
-            Synthesizer.makeProgram( genCode, classList, mainClassName, m_canvas.getWorkDir(), fs );
-            ClassLoader classLoader = m_canvas.getPackage().newRunnerClassLoader(fs);
-            genObject = null;
-            Class<?> pc = classLoader.loadClass(CCL.PROGRAM_CONTEXT);
-            Class<?> clas = classLoader.loadClass( mainClassName );
-            genObject = clas.newInstance();
-            pc.getMethod( "setScheme", Scheme.class ).invoke( null, m_canvas.getScheme() );
+            Synthesizer.makeProgram( genCode, classList, mainClassName, schemeContainer.getWorkDir(), fs );
+            genObject = compile( fs, schemeContainer, mainClassName );
         } catch ( NoClassDefFoundError e ) {
-            JOptionPane.showMessageDialog( null, "Class not found:\n" + e.getMessage(), "Execution error", JOptionPane.ERROR_MESSAGE );
+            JOptionPane.showMessageDialog( null, "Class not found:\n"
+                    + e.getMessage(), "Execution error",
+                    JOptionPane.ERROR_MESSAGE );
             e.printStackTrace( System.err );
-
         } catch ( CompileException ce ) {
             ErrorWindow.showErrorMessage( "Compilation failed:\n " + ce.excDesc );
         } catch ( SpecParseException e ) {
             ErrorWindow.showErrorMessage( "Compilation failed:\n " + e.excDesc );
-        } catch ( Exception ce ) {
-            ErrorWindow.showErrorMessage( ce.getMessage() );
-            ce.printStackTrace( System.err );
-        }
+        } catch ( Exception e ) {
+            ErrorWindow.showErrorMessage( "Compilation failed:\n " + e.getMessage() );
+        } 
+    }
+    
+    private static Object compile( GenStorage fs, ISchemeContainer cont,
+            String className ) throws ClassNotFoundException,
+            InstantiationException, IllegalAccessException,
+            IllegalArgumentException, SecurityException,
+            InvocationTargetException, NoSuchMethodException {
 
-        return null;
+        ClassLoader classLoader = cont.getPackage().newRunnerClassLoader( fs );
+        Class<?> pc = classLoader.loadClass( CCL.PROGRAM_CONTEXT );
+        Class<?> clas = classLoader.loadClass( className );
+        Object object = clas.newInstance();
+        pc.getMethod( "setScheme", Scheme.class ).invoke( null,
+                cont.getScheme() );
+
+        return object;
     }
 
     private void generateProgramSource( final ProgramRunnerEvent event, final int operation, final boolean compute ) {
@@ -196,42 +205,57 @@ public class ProgramRunner {
 
             Set<String> schemeObjects = new HashSet<String>();
 
-            for ( GObj gObj : m_canvas.getObjects() ) {
+            for ( GObj gObj : schemeContainer.getObjects() ) {
                 schemeObjects.add( gObj.getName() );
             }
 
-            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, m_canvas.getWorkDir() );
+            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
             getAssumptions().clear();
 
             return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, this );
-
-        } catch ( UnknownVariableException uve ) {
-
-            db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
-            String line = uve.getLine();
-            ErrorWindow.showErrorMessage( "Fatal error: variable " + uve.excDesc + " not declared"
-                    + ( line != null ? ", line: " + line : "" ) );
-
-        } catch ( LineErrorException lee ) {
-            db.p( "Fatal error on line " + lee.excDesc );
-            ErrorWindow.showErrorMessage( "Syntax error on line '" + lee.excDesc + "'" );
-
-        } catch ( EquationException ee ) {
-            ErrorWindow.showErrorMessage( ee.excDesc );
-
-        } catch ( MutualDeclarationException lee ) {
-            db.p( "Mutual recursion in specifications, between classes " + lee.excDesc );
-            ErrorWindow.showErrorMessage( "Mutual recursion in specifications, classes " + lee.excDesc );
-
-        } catch ( SpecParseException spe ) {
-            db.p( spe.excDesc );
-            ErrorWindow.showErrorMessage( spe.excDesc );
-
-        } catch ( Exception ex ) {
-            ex.printStackTrace();
+            
+        } catch ( Throwable ex ) {
+            reportException(ex);
         }
 
         return null;
+    }
+
+    private static void reportException(Throwable e) {
+        String msg;
+        if( e instanceof UnknownVariableException ) {
+            UnknownVariableException uve = (UnknownVariableException)e;
+            String line = uve.getLine();
+            msg = "Fatal error: variable " + uve.excDesc + " not declared"
+                    + ( line != null ? ", line: " + line : "" );
+            db.p( msg );
+            ErrorWindow.showErrorMessage( msg );
+        }
+        else if( e instanceof  LineErrorException ) {
+            LineErrorException lee = (LineErrorException)e;
+            msg = "Syntax error on line '" + lee.excDesc + "'";
+            db.p( msg );
+            ErrorWindow.showErrorMessage( msg );
+        }
+        else if( e instanceof  EquationException ) {
+            EquationException ee = (EquationException)e;
+            msg = "EquationException " + ee.excDesc;
+            ErrorWindow.showErrorMessage( msg );
+        }
+        else if( e instanceof  MutualDeclarationException ) {
+            MutualDeclarationException lee = (MutualDeclarationException)e;
+            msg = "Mutual recursion in specifications, between classes " + lee.excDesc;
+            db.p( msg );
+            ErrorWindow.showErrorMessage( msg );
+        }
+        else if( e instanceof  SpecParseException ) {
+            SpecParseException spe = (SpecParseException)e;
+            msg = "Specification parsing error: " + spe.excDesc; 
+            db.p( msg );
+            ErrorWindow.showErrorMessage( msg );
+        }
+        else
+            e.printStackTrace();
     }
 
     private Collection<String> watchableFields() {
@@ -429,9 +453,8 @@ public class ProgramRunner {
                     if ( o instanceof Object[] ) {
 
                         return Arrays.deepToString( (Object[]) o );
-                    } else {
-                        return o.toString();
                     }
+                    return o.toString();
                 }
             }
         }
@@ -556,7 +579,7 @@ public class ProgramRunner {
                 e.printStackTrace( System.err );
             }
         } finally {
-            m_canvas.repaint();
+            schemeContainer.repaint();
         }
     }
 
@@ -582,10 +605,7 @@ public class ProgramRunner {
                     Class<?> clas = genObject.getClass();
                     
                     ClassLoader cl = clas.getClassLoader();
-                    Class<?> pc = cl.loadClass(CCL.PROGRAM_CONTEXT);
-                    pc.getMethod( "setThread", Thread.class ).invoke( null, this );
-                    pc.getMethod( "setRunnerId", long.class ).invoke( null, ProgramRunner.this.getId() );
-                    
+                    initProgramContext(ProgramRunner.this, cl);
                     Method method = clas.getMethod( "compute", Object[].class );
                     db.p( "Running... ( NB! The thread is alive until the next message --> ) " + Thread.currentThread().getName() );
 
@@ -603,7 +623,7 @@ public class ProgramRunner {
                          * stopped manually or a rerun was requested.
                          */
                         if (ex.getCause() instanceof RerunProgramException) {
-                            rerun( m_canvas );
+                            rerun( schemeContainer );
                             rerun = true;
                         } else if ( ex.getCause() instanceof RunningProgramException ) {
                             ex.getCause().printStackTrace();
@@ -653,6 +673,73 @@ public class ProgramRunner {
 
         ProgramRunnerEvent evt = new ProgramRunnerEvent( canvas, pr.getId(), op );
         EventSystem.queueEvent( evt );
+    }
+    
+    /**
+     * Computes a given model and returns the result
+     * 
+     * @param context
+     * @param inputNames
+     * @param outputNames
+     * @param inputValues
+     * @return
+     */
+    public Object[] computeModel(Class<?> context, String[] inputNames,
+            String[] outputNames, Object[] inputValues)
+    {
+        long start = System.currentTimeMillis();
+        String contextClassName = context.getName();
+        try {
+            //synthesize
+            StringBuilder result = new StringBuilder();
+            ClassList classes = new ClassList();
+            String generatedClassName = Synthesizer.computeIndependentModel( contextClassName, schemeContainer.getWorkDir(), inputNames, outputNames, classes, result );
+            //save generated code
+            GenStorage fs = getStorage();
+            Synthesizer.makeProgram( result.toString(), classes, generatedClassName, schemeContainer.getWorkDir(), fs );
+            //compile
+            Object genObj = compile( fs, schemeContainer, generatedClassName );
+            if(genObj == null)
+                throw new ComputeModelException( "Unable to compile " + contextClassName );
+            //execute
+            Class<?> clas = genObj.getClass();        
+            ClassLoader cl = clas.getClassLoader();
+            initProgramContext(ProgramRunner.this, cl);
+            Method method = clas.getMethod( "run", Object[].class );
+            return (Object[])method.invoke( genObj, new Object[] { inputValues } );
+        } catch ( SpecParseException e ) {
+            reportException( e );
+            throw new ComputeModelException( "Error computing model " + contextClassName, e );
+        } catch ( Exception ex ) {
+            ErrorWindow.showErrorMessage( "Computing model failed:\n " + ex.getMessage() );
+            throw new ComputeModelException( "Error computing model " + contextClassName, ex );
+        } finally {
+            if(RuntimeProperties.isLogDebugEnabled())
+                db.p( "Computed independent model in " + (System.currentTimeMillis() - start) + "ms." );
+        }
+    }
+    
+    /**
+     * Sets required attributes to ProgramContext before execution
+     * 
+     * @param runner
+     * @param cl
+     * @throws ClassNotFoundException
+     * @throws IllegalArgumentException
+     * @throws SecurityException
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     */
+    private static void initProgramContext( ProgramRunner runner, ClassLoader cl )
+            throws ClassNotFoundException, IllegalArgumentException,
+            SecurityException, IllegalAccessException,
+            InvocationTargetException, NoSuchMethodException {
+        
+        Class<?> pc = cl.loadClass( CCL.PROGRAM_CONTEXT );
+        pc.getMethod( "setThread", Thread.class ).invoke( null,
+                Thread.currentThread() );
+        pc.getMethod( "setRunnerId", long.class ).invoke( null, runner.getId() );
     }
     
     /**

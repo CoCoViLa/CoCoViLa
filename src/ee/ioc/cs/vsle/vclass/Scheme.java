@@ -2,7 +2,7 @@ package ee.ioc.cs.vsle.vclass;
 
 import java.io.Serializable;
 
-import ee.ioc.cs.vsle.api.SchemeObject;
+import ee.ioc.cs.vsle.api.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.table.*;
@@ -137,5 +137,13 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
     public void terminate( long runnerId ) {
         ProgramRunnerEvent event = new ProgramRunnerEvent( canvas, runnerId, ProgramRunnerEvent.DESTROY );
         EventSystem.queueEvent( event );
+    }
+    
+    @Override
+    public Object[] computeModel(
+            Class<?> context, String[] inputNames,
+            String[] outputNames, Object[] inputValues) {
+        
+        return new ProgramRunner(canvas).computeModel( context, inputNames, outputNames, inputValues );
     }
 }

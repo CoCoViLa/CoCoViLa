@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.regex.*;
 
+import ee.ioc.cs.vsle.api.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.util.FileFuncs.*;
@@ -188,6 +189,65 @@ public class Synthesizer {
         }
     }
 
+    /**
+     * Parses and tries to solve a given computational problem
+     * 
+     * @param contextClassName
+     * @param path
+     * @param inputs
+     * @param outputs
+     * @param classList
+     * @param result
+     * @return
+     * @throws IOException
+     * @throws SpecParseException
+     */
+    public static String computeIndependentModel( String contextClassName,
+            String path, String[] inputs, String[] outputs,
+            ClassList classList, StringBuilder result ) throws IOException,
+            SpecParseException {
+        
+        //create an instance of current subtask relation
+        SubtaskRel subtask;
+        //parse context specification
+        SpecParser.parseSpecClass( contextClassName, path, classList );
+        //create context classfield
+        ClassField contextCF = new ClassField( "_"
+                + contextClassName.toLowerCase(), contextClassName );
+        //create subtask class relation
+        SubtaskClassRelation subtaskCR = SubtaskClassRelation
+                .createIndependentSubtask( contextClassName + " |- "
+                        + Arrays.toString( inputs ) + " -> "
+                        + Arrays.toString( outputs ), contextCF );
+        Collection<ClassField> varsForSubtask = classList.getType(
+                contextClassName ).getFields();
+        subtaskCR.addInputs( inputs, varsForSubtask );
+        subtaskCR.addOutputs( outputs, varsForSubtask );
+        subtask = ProblemCreator.makeIndependentSubtask( classList, null,
+                subtaskCR );
+        //get problem graph
+        Problem context = subtask.getContext();
+        //construct an algorithm
+        ArrayList<Rel> alg = PlannerFactory.getInstance().getCurrentPlanner()
+                .invokePlaning( context, false );
+        boolean solved = context.getFoundVars()
+                .containsAll( context.getGoals() );
+        if ( solved ) {
+            subtask.getAlgorithm().addAll( alg );
+        } else {
+            throw new ComputeModelException( contextClassName
+                    + " problem is not solvable!" );
+        }
+        //generate code
+        StringBuilder classCode = new StringBuilder();
+        String className = CodeGenerator.genIndependentSubtask( subtask,
+                classCode );
+        result.append( "import ee.ioc.cs.vsle.util.*;\n" ).append(
+                "import ee.ioc.cs.vsle.api.*;\n\npublic " ).append( classCode );
+
+        return className;
+    }
+    
     /**
      * @param fileName -
      */
