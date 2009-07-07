@@ -52,7 +52,7 @@ public class Synthesizer {
         // call the packageParser to create a problem from the specification
 
         try {
-            problem = ProblemCreator.makeProblem( classList );
+            problem = new ProblemCreator(classList).makeProblem();
         } catch ( Exception e ) {
             e.printStackTrace();
             
@@ -223,8 +223,7 @@ public class Synthesizer {
                 contextClassName ).getFields();
         subtaskCR.addInputs( inputs, varsForSubtask );
         subtaskCR.addOutputs( outputs, varsForSubtask );
-        subtask = ProblemCreator.makeIndependentSubtask( classList, null,
-                subtaskCR );
+        subtask = new ProblemCreator(classList).makeIndependentSubtask( subtaskCR );
         //get problem graph
         Problem context = subtask.getContext();
         //construct an algorithm

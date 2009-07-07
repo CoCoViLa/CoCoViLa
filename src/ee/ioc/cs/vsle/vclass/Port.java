@@ -32,7 +32,8 @@ public class Port implements Cloneable, Serializable {
 
 		this.y = y;
 		
-		area = portConnection.equals("area");
+		if ( portConnection != null )
+            area = portConnection.equals("area");
 
 		this.strict = Boolean.parseBoolean( strict );
 

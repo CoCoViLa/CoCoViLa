@@ -83,30 +83,45 @@ public class Alias extends ClassField {
                 if (thisVar == null) {
                     throw new UnknownVariableException(split[0]);
                 }
+                boolean isElementAccess = false;
                 String newType = "";
                 for (int k = 1; k < split.length; k++) {
-                    AnnotatedClass type;
-                    type = classList.getType(thisVar.getType() );
-                    if (type == null) {
+                    AnnotatedClass thisType = classList.getType(thisVar.getType() );
+                    if (thisType == null) {
                         throw new UnknownVariableException("Unable to find the corresponding class for " + thisVar.getType() 
                                 + " while adding " + input[i] + " to " + this.toString() );
                     }
-                    ClassField cf = type.getFieldByName(split[k]);
+                    ClassField cf = thisType.getFieldByName(split[k]);
                     if (cf != null) {
                         newType = cf.getType();
                     }
                     thisVar = cf;
+                    
+                    //alias element access, i.e. <alias>.# or <alias>.*
+                    if( thisVar.isAlias() && split.length > k+1 ) {
+                        //make sure this element does not refer to its own alias
+                        if(input[i].startsWith( this.getName() )) {
+                            throw new AliasException( input[i] + " cannot be an element of " + getName() );
+                        }
+                        isElementAccess = true;
+                        newType = "";
+                        break;
+                    }
                 }
 
                 ClassField cfNew = new ClassField(input[i], newType);
 
-                addVar(cfNew);
+                if(isElementAccess) {
+                    //this is to avoid type checking, it will be done later
+                    vars.add( cfNew );
+                } else {
+                    addVar( cfNew );
+                }
             } else {
                 throw new UnknownVariableException(input[i]);
             }
         }
     } // addAll
-
 
 	/**
 	 * Converts the ee.ioc.cs.editor.vclass.Alias into string, returning the alias's name.

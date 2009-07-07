@@ -7,6 +7,10 @@ public class SpecParseException
 	SpecParseException(String s) {
 		excDesc = s;
 	}
+	SpecParseException(String s, String line) {
+        excDesc = s;
+        setLine( line );
+    }
     /**
      * @return the line
      */

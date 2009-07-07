@@ -250,7 +250,8 @@ public class ProgramRunner {
         }
         else if( e instanceof  SpecParseException ) {
             SpecParseException spe = (SpecParseException)e;
-            msg = "Specification parsing error: " + spe.excDesc; 
+            String line = spe.getLine();
+            msg = "Specification parsing error: " + spe.excDesc + ( line != null ? ", line: " + line : "" ); 
             db.p( msg );
             ErrorWindow.showErrorMessage( msg );
         }

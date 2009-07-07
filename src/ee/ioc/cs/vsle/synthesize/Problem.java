@@ -19,17 +19,6 @@ class Problem implements Serializable {
 	private Set<Var> foundVars = new LinkedHashSet<Var>();
 	private Var rootVarThis;
 	
-	Var getVarByFullName( String field ) {
-		
-		for (Var var : allVars.values() ) {
-
-			if ( var.getFullName().equals( field ) ) {
-				return var;
-			}
-		}
-		return null;
-	}
-
 	Problem( Var varThis ) {
 		rootVarThis = varThis;
 	}
@@ -37,13 +26,28 @@ class Problem implements Serializable {
 	Var getRootVar() {
 		return rootVarThis;
 	}
-	
-	void addSubtask(SubtaskRel rel) {
-		subtasks.add(rel);
+
+	void addVar(Var var) {
+	    allVars.put(var.getFullName(), var);
 	}
 
-	Map<String, Var> getAllVars() {
-		return allVars;
+	Var getVar(String varName) {
+	    return allVars.get( varName );
+	}
+	
+	boolean containsVar(String varName) {
+	    return allVars.containsKey( varName );
+	}
+
+	Var getVarByFullName( String field ) {
+
+	    for (Var var : allVars.values() ) {
+
+	        if ( var.getFullName().equals( field ) ) {
+	            return var;
+	        }
+	    }
+	    return null;
 	}
 
 	Set<Rel> getAxioms() {
@@ -90,10 +94,10 @@ class Problem implements Serializable {
 		relWithSubtasks.add(rel);
 	}
 
-	void addVar(Var var) {
-		allVars.put(var.getFullName(), var);
-	}
-
+    void addSubtask(SubtaskRel rel) {
+        subtasks.add(rel);
+    }
+    
 	SubtaskRel getSubtask(SubtaskRel subt) {
 		for (Iterator<SubtaskRel> iter = subtasks.iterator(); iter.hasNext();) {
 			SubtaskRel subtask = iter.next();
@@ -127,7 +131,8 @@ class Problem implements Serializable {
 		}
 	}
 
-	public String toString() {
+	@Override
+    public String toString() {
 		return ("All: " + allVars + "\n Rels: " + allRels + "\n Known: "
 				+ knownVars + "\n Targets:" + goals + "\n Axioms:"
 				+ axioms + "\n Subtasks:" + relWithSubtasks );

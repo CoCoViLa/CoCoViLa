@@ -65,6 +65,7 @@ public class ClassField implements Cloneable, Serializable {
 	
 	protected boolean isStatic = false;
 	
+	protected boolean isAliasLength = false;
 	/**
 	 * Class constructor.
 	 */
@@ -336,4 +337,18 @@ public class ClassField implements Cloneable, Serializable {
 	public void setStatic(boolean isStatic) {
 		this.isStatic = isStatic;
 	}
+
+    /**
+     * @return the isAliasLength
+     */
+    public boolean isAliasLength() {
+        return isAliasLength;
+    }
+
+    /**
+     * @param isAliasLength the isAliasLength to set
+     */
+    public void setAliasLength( boolean isAliasLength ) {
+        this.isAliasLength = isAliasLength;
+    }
 }

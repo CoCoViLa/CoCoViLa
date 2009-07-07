@@ -66,7 +66,6 @@ public class SpecParser {
         } catch ( Exception e ) {
             db.p( e );
         } catch ( SpecParseException e ) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
     }
@@ -178,7 +177,6 @@ public class SpecParser {
             // lets check if it's an alias, e.g. x = [a,b,c];
             matcher = PATTERN_ALIAS_VARS.matcher( line );
             if ( matcher.find() ) {
-                // TODO here is no check against existence of alias we try to use
                 LineType.Alias st = new LineType.Alias();
                 st.setName( matcher.group( 1 ) );
                 String vars = matcher.group( 2 ).trim();
@@ -796,7 +794,7 @@ public class SpecParser {
                 try {
                     classList.addAll( parseSpecificationImpl( refineSpec( s ), type, null, path, checkedClasses ) );
                 } catch ( SpecParseException e ) {
-                    throw new SpecParseException( "Class \"" + type + "\": " + e.excDesc );
+                    throw new SpecParseException( "Class \"" + type + "\": " + e.excDesc, e.getLine() );
                 }
                 checkedClasses.remove( type );
             }
@@ -876,17 +874,16 @@ public class SpecParser {
             ClassField field = getVar( aliasName, thisClass.getFields() );
             if ( field != null && field.isAlias() ) {
                 Alias alias = (Alias) field;
-                String aliasLengthName = ( ( alias.isWildcard() ? "*" : "" ) + aliasName + "_LENGTH" );
+                String aliasLengthName = aliasName + "_LENGTH";
                 if ( containsVar( thisClass.getFields(), aliasLengthName ) ) {
                     return aliasLengthName;
                 }
-
                 int length = alias.getVars().size();
-
-                ClassField var = new ClassField( aliasLengthName, TYPE_INT, "" + length, true );
-
+                //if value cannot be determined here, it will be defined in ProgramCreator
+                String value = (alias.isWildcard() || !alias.isInitialized()) ? null : "" + length;
+                ClassField var = new ClassField( aliasLengthName, TYPE_INT, value, true );
+                var.setAliasLength( true );
                 thisClass.addField( var );
-
                 return aliasLengthName;
 
             }

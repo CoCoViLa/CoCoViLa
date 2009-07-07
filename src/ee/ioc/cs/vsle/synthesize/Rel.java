@@ -16,7 +16,7 @@ class Rel implements Serializable {
     private Collection<SubtaskRel> subtasks = new LinkedHashSet<SubtaskRel>();
     private Collection<Var> exceptions = new LinkedHashSet<Var>();
     private int relID = 0;
-    private Var parent;
+    protected Var parent;
     private String method;
     //declaration in specification
     private String declaration;

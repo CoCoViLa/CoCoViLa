@@ -175,8 +175,14 @@ class MouseOps extends MouseInputAdapter {
                 } else {
                     GObj obj = canvas.getObjects().checkInside( x, y );
 
-                    if ( obj != null )
+                    if ( obj != null ) {
                         obj.setSelected( true );
+                        if (SwingUtilities.isLeftMouseButton(e)
+                                && e.getClickCount() >= 2)
+                            canvas.openPropertiesDialog(obj);
+                        else if (SwingUtilities.isMiddleMouseButton(e))
+                            canvas.openClassCodeViewer(obj.getClassName());
+                    }
                 }
 
             } else {

@@ -57,13 +57,6 @@ public class Var implements //Cloneable,
     	return vars;
     }
     
-    public void swapAliasDeclaration( Alias alias ) {
-        if( !field.isAlias() || ((Alias)field).isInitialized() || !alias.isInitialized() ) {
-            throw new IllegalStateException( "Only uninitialized alias declaration can be swapped with corresponding initialized alias!" );
-        }
-        field = alias;
-    }
-    
     public void addVar( Var var ) {
     	if( !field.isAlias() ) {
 			throw new IllegalStateException( "addVar(): Var " + getName() + " is not alias, but " + getType() );
@@ -74,7 +67,7 @@ public class Var implements //Cloneable,
      * <UNCOMMENTED>
      * @param field ClassField
      */
-    void setField( ClassField field ) {
+    private void setField( ClassField field ) {
         this.field = field;
     } // setField
 

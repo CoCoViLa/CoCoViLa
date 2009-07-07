@@ -63,11 +63,7 @@ public class SubtaskRel extends Rel {
 	}
 
 	public ClassField getContextCF() {
-		return contextCF;
-	}
-
-	public void setContextCF(ClassField contextCF) {
-		this.contextCF = contextCF;
+		return parent.getField();
 	}
     
 }
