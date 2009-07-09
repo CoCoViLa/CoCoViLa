@@ -169,6 +169,9 @@ public class ProgramRunner {
                     RunningThreadManager.addThread( ProgramRunner.this.getId(), this );
 
                     programSource = compute( spec, compute );
+                    
+                    if ( programSource == null )
+                        return;
 
                 } finally {
                     setWorking( false );
@@ -255,8 +258,10 @@ public class ProgramRunner {
             db.p( msg );
             ErrorWindow.showErrorMessage( msg );
         }
-        else
+        else {
+            ErrorWindow.showErrorMessage( e.getMessage() );
             e.printStackTrace();
+        }
     }
 
     private Collection<String> watchableFields() {
