@@ -20,9 +20,9 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 	
     private static final long           serialVersionUID  = 1L;
     private ArrayList<JTextField>       textFields        = new ArrayList<JTextField>();
-    private ArrayList<JCheckBox>        watchFields       = new ArrayList<JCheckBox>();
-    private ArrayList<JCheckBox>        inputs            = new ArrayList<JCheckBox>();
-    private ArrayList<JCheckBox>        goals             = new ArrayList<JCheckBox>();
+//    private ArrayList<JCheckBox>        watchFields       = new ArrayList<JCheckBox>();
+    private ArrayList<JCheckBox>        goalInputs            = new ArrayList<JCheckBox>();
+    private ArrayList<JCheckBox>        goalOutputs             = new ArrayList<JCheckBox>();
     private ArrayList<JComboBox>        comboBoxes        = new ArrayList<JComboBox>();
     private ArrayList<ClassField>       primitiveNameList = new ArrayList<ClassField>();
     private ArrayList<ClassField>       arrayNameList     = new ArrayList<ClassField>();
@@ -109,29 +109,17 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		
 		addComponentListener( lst );
 		
-		JPanel westPanel = new JPanel();
-		westPanel.setLayout( new BoxLayout( westPanel, BoxLayout.X_AXIS ) );
-		
-		JPanel centerPanel = new JPanel();
-		centerPanel.setLayout( new BoxLayout( centerPanel, BoxLayout.X_AXIS ) );
-		
-		JPanel eastPanel = new JPanel();
-		eastPanel.setLayout( new BoxLayout( eastPanel, BoxLayout.X_AXIS ) );
-		
-		JPanel buttonPane = new JPanel();
-		JPanel fullPane = new JPanel();
-
 		JPanel labelPane = new JPanel();
-		JPanel watchPane = new JPanel();
+//		JPanel watchPane = new JPanel();
 		JPanel inputPane = new JPanel();
-		JPanel goalsPane = new JPanel();
+		JPanel outputPane = new JPanel();
 		JPanel textFieldPane = new JPanel();
 		JPanel typePane = new JPanel();
 
 		labelPane.setLayout(new GridLayout(0, 1));
-		watchPane.setLayout(new GridLayout(0, 1));
+//		watchPane.setLayout(new GridLayout(0, 1));
 		inputPane.setLayout(new GridLayout(0, 1));
-		goalsPane.setLayout(new GridLayout(0, 1));
+		outputPane.setLayout(new GridLayout(0, 1));
 		typePane.setLayout(new GridLayout(0, 1));
 		textFieldPane.setLayout(new GridLayout(0, 1));
 
@@ -146,15 +134,15 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		label = new JLabel( "  Input  ", SwingConstants.CENTER );
 		inputPane.add(label);
 		
-		label = new JLabel( "  Goal  ", SwingConstants.CENTER );
-		goalsPane.add(label);
+		label = new JLabel( "  Output  ", SwingConstants.CENTER );
+		outputPane.add(label);
 		
-		label = new JLabel( "  Watch", SwingConstants.CENTER );
-		watchPane.add(label);
+//		label = new JLabel( "  Watch", SwingConstants.CENTER );
+//		watchPane.add(label);
 
 		JTextField textField;
 		JComboBox comboBox;
-		JCheckBox watch;
+//		JCheckBox watch;
 		
 		for (ClassField field : object.getFields()) {
 			if (field.isArray()) {
@@ -180,11 +168,11 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 				label = new JLabel("(" + field.getType() + ")");
 				typePane.add(label);
 
-				watch = new JCheckBox();
-				watch.setHorizontalAlignment( SwingConstants.CENTER );
-				watch.setEnabled(false);
-				watchPane.add(watch);
-				watchFields.add(watch);
+//				watch = new JCheckBox();
+//				watch.setHorizontalAlignment( SwingConstants.CENTER );
+//				watch.setEnabled(false);
+//				watchPane.add(watch);
+//				watchFields.add(watch);
 
 				textFieldPane.add(comboBox);
 			} else if (field.isPrimitiveOrString()) {
@@ -200,12 +188,11 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 				textFieldPane.add(textField);
 				label = new JLabel("(" + field.getType() + ")");
 				typePane.add(label);
-				boolean b = field.isWatched();
-
-				watch = new JCheckBox((String)null, b);
-				watch.setHorizontalAlignment( SwingConstants.CENTER );
-				watchPane.add(watch);
-				watchFields.add(watch);
+//				boolean b = field.isWatched();
+//				watch = new JCheckBox((String)null, b);
+//				watch.setHorizontalAlignment( SwingConstants.CENTER );
+//				watchPane.add(watch);
+//				watchFields.add(watch);
 			}
 			
 			boolean enable = field.isPrimitiveOrString();//TODO - tmp until combos are refactored
@@ -214,22 +201,22 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			input.setEnabled( enable );
 			input.setHorizontalAlignment( SwingConstants.CENTER );
 			inputPane.add(input);
-			inputs.add(input);
+			goalInputs.add(input);
 			
-			final JCheckBox goal = new JCheckBox( (String)null, field.isGoal() );
-			goal.setEnabled( enable );
-			goal.setHorizontalAlignment( SwingConstants.CENTER );
-			goalsPane.add(goal);
-			goals.add(goal);
+			final JCheckBox output = new JCheckBox( (String)null, field.isGoal() );
+			output.setEnabled( enable );
+			output.setHorizontalAlignment( SwingConstants.CENTER );
+			outputPane.add(output);
+			goalOutputs.add(output);
 			
 			ActionListener chkBoxlst = new ActionListener() {
 
 				public void actionPerformed(ActionEvent e) {
 					if( e.getSource() == input && input.isSelected() ) {
 						
-						goal.setSelected( false );
+						output.setSelected( false );
 						
-					} else if( e.getSource() == goal && goal.isSelected() ) {
+					} else if( e.getSource() == output && output.isSelected() ) {
 						
 						input.setSelected( false );
 						
@@ -238,33 +225,42 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			};
 			
 			input.addActionListener(chkBoxlst);
-			goal.addActionListener(chkBoxlst);
+			output.addActionListener(chkBoxlst);
 		}
 		
 		isStatic = new JCheckBox( "Static", object.isStatic() );
 		textFieldPane.add(isStatic);
 		labelPane.add( new JLabel() );
-		watchPane.add( new JLabel() );
+//		watchPane.add( new JLabel() );
 		inputPane.add( new JLabel() );
-		goalsPane.add( new JLabel() );
+		outputPane.add( new JLabel() );
 		typePane.add( new JLabel() );
 		
 		JPanel contentPane = new JPanel();
-		JScrollPane areaScrollPane = new JScrollPane(contentPane,
-		        ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
-		        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-
-		contentPane.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-		fullPane.setLayout(new BorderLayout());
-		contentPane.setLayout( new BorderLayout() );
+		contentPane.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        contentPane.setLayout( new BorderLayout() );
+		JPanel westPanel = new JPanel();
+		westPanel.setLayout( new BoxLayout( westPanel, BoxLayout.X_AXIS ) );
+		JPanel centerPanel = new JPanel();
+		centerPanel.setLayout( new BoxLayout( centerPanel, BoxLayout.X_AXIS ) );
+		JPanel eastPanel = new JPanel();
+		eastPanel.setLayout( new BoxLayout( eastPanel, BoxLayout.X_AXIS ) );
+		JPanel buttonPane = new JPanel();
 		westPanel.add(labelPane);
 		centerPanel.add(textFieldPane);
-		eastPanel.add(typePane);
-		eastPanel.add(inputPane);
-		eastPanel.add(goalsPane);
-		eastPanel.add(watchPane);
-		contentPane.add( westPanel, BorderLayout.WEST );
-		contentPane.add( centerPanel, BorderLayout.CENTER );
+		JPanel goalPane = new JPanel();
+		goalPane.setLayout( new BoxLayout( goalPane, BoxLayout.X_AXIS ) );
+		goalPane.setBorder( BorderFactory.createTitledBorder( "Goal" ) );
+		goalPane.add(inputPane);
+		goalPane.add(outputPane);
+		eastPanel.add(goalPane);
+//		eastPanel.add(watchPane);
+		JPanel propsPane = new JPanel(new BorderLayout());
+		propsPane.setBorder( BorderFactory.createTitledBorder( "Properties" ) );
+		propsPane.add( westPanel, BorderLayout.WEST );
+		propsPane.add( centerPanel, BorderLayout.CENTER );
+		propsPane.add( typePane, BorderLayout.EAST );
+		contentPane.add( propsPane, BorderLayout.CENTER );
 		contentPane.add( eastPanel, BorderLayout.EAST );
 		ok = new JButton("OK");
 		ok.addActionListener(this);
@@ -283,6 +279,11 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			clear.setEnabled(true);
 		}
 		buttonPane.add(clear);
+		JScrollPane areaScrollPane = new JScrollPane(contentPane,
+		        ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
+		        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        JPanel fullPane = new JPanel();
+        fullPane.setLayout(new BorderLayout());
 		fullPane.add(areaScrollPane, BorderLayout.CENTER);
 		fullPane.add(buttonPane, BorderLayout.SOUTH);
 		setContentPane(fullPane);
@@ -369,13 +370,13 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 
 		    for (ClassField fld : controlledObject.getFields()) {
 		        if (fld.isArray()) {
-		            fld.setInput(inputs.get(i).isSelected());
-		            fld.setGoal(goals.get(i).isSelected());
+		            fld.setInput(goalInputs.get(i).isSelected());
+		            fld.setGoal(goalOutputs.get(i).isSelected());
 		            i++;
 		        } else if (fld.isPrimitiveOrString()) { 
-		            fld.setWatched(watchFields.get(i).isSelected());
-		            fld.setInput(inputs.get(i).isSelected());
-		            fld.setGoal(goals.get(i).isSelected());
+//		            fld.setWatched(watchFields.get(i).isSelected());
+		            fld.setInput(goalInputs.get(i).isSelected());
+		            fld.setGoal(goalOutputs.get(i).isSelected());
 		            textField = textFields.get(txtIdx);
 		            if (!textField.getText().trim().equals("")) {
 		                fld.setValue(textField.getText());
@@ -446,9 +447,9 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			for (int i = 0; i < textFields.size(); i++) {
 				textField = textFields.get(i);
 				field = primitiveNameList.get(i);
-				watchFields.get(i).setSelected(false);
-				inputs.get(i).setSelected(false);
-				goals.get(i).setSelected(false);
+//				watchFields.get(i).setSelected(false);
+				goalInputs.get(i).setSelected(false);
+				goalOutputs.get(i).setSelected(false);
 				field.setWatched(false);
 				field.setValue(null);
 				textField.setText("");
