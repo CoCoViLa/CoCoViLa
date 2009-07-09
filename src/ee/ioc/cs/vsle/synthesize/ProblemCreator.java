@@ -494,16 +494,21 @@ public class ProblemCreator {
         if( ( var = problem.getVar( parent.getFullNameForConcat() + alias.getName() ) ) == null ) {
             var = new Var( alias, parent );
         } else {
-            Alias currentAlias;
             if (!var.getField().isAlias()
-                    || (currentAlias = (Alias) var.getField()).isInitialized()
+                    || ((Alias) var.getField()).isInitialized()
                     || !alias.isInitialized()) {
-                throw new IllegalStateException(
-                        "Only uninitialized alias declaration can be swapped with corresponding initialized alias!");
+                throw new AliasException(
+                        "Only uninitialized alias declaration can be swapped with corresponding initialized alias! " + var.getFullName());
             }
-            currentAlias.setInitialized(true);
-            currentAlias.getVars().addAll(alias.getVars());
+            Alias newAlias = new Alias(alias.getName(), alias.getVarType());
+            newAlias.setInitialized(true);
+            newAlias.getVars().addAll(alias.getVars());
+            //replace existing var with a new one 
+            //(because we have to make changes in the underlying class field)
+            var = new Var( newAlias, parent );
         }
+
+        problem.addVar( var );
         
         if( alias.isWildcard() ) {
             rewriteWildcardAliasVar( var, ac, problem );
@@ -516,8 +521,6 @@ public class ProblemCreator {
                 }
             }
         }
-        
-        problem.addVar( var );
         
         //if an alias has been initialized with an empty list of elements it is always computable
         if( var.getChildVars().isEmpty() && alias.isInitialized() ) {
