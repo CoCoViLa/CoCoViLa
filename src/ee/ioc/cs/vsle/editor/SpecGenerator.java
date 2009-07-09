@@ -49,6 +49,8 @@ public class SpecGenerator implements ISpecGenerator {
 		}
 		s.append(" {\n");
 
+		Hashtable<String, List<String>> multiRels = new Hashtable<String, List<String>>();
+		
 		GObj obj;
 		for (int i = 0; i < objects.size(); i++) {
 			obj = objects.get(i);
@@ -116,9 +118,17 @@ public class SpecGenerator implements ISpecGenerator {
 					}
 				}
 			}
+			
+			//not connected multiport is an empty array and can be used in computations
+			for(Port port : obj.getPorts()) {
+			    if(port.isMulti()) {
+			        String multiport = ( port.getObject().isSuperClass() ? ""
+	                        : port.getObject().getName() + "." ) + port.getName();
+			        multiRels.put( multiport, new ArrayList<String>() );
+			    }
+			        
+			}
 		}
-		
-		Hashtable<String, String> multiRels = new Hashtable<String, String>();
 		
 		for (Connection rel : relations) {
 			if (rel.endPort.getName().equals("any")) {
@@ -141,14 +151,13 @@ public class SpecGenerator implements ISpecGenerator {
 				String multiport = ( multi.getObject().isSuperClass() ? ""
                         : multi.getObject().getName() + "." ) + multi.getName();
 				String port = simple.getObject().getName() + "." + simple.getName();
-				String list = multiRels.get( multiport );
 				
+				List<String> list = multiRels.get( multiport );
 				if( list == null ) {
-					list = port;
-				} else {
-					list += " " + port;
-				}
-				multiRels.put( multiport, list );
+					list = new ArrayList<String>(); 
+	                multiRels.put( multiport, list );
+				} 
+				list.add( port );
 			} else {
 				String startObjName = 
 				    TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.beginPort.getName() ) 
@@ -170,12 +179,11 @@ public class SpecGenerator implements ISpecGenerator {
 		}
 		
 		for (String multiport : multiRels.keySet() ) {
-			String portlist = multiRels.get( multiport );
-			String[] ports = portlist.split( " " );
+			List<String> portlist = multiRels.get( multiport );
 			String portarray = "";
-			for (int i = 0; i < ports.length; i++) {
-				String port = ports[i];
-				if( i != ports.length - 1 ) {
+			for (int i = 0, len = portlist.size(); i < len; i++) {
+				String port = portlist.get( i );
+				if( i != len - 1 ) {
 					portarray += port + ", ";
 				} else {
 					portarray += port;
