@@ -51,14 +51,8 @@ public class Synthesizer {
         Problem problem = null;
         // call the packageParser to create a problem from the specification
 
-        try {
-            problem = new ProblemCreator(classList).makeProblem();
-        } catch ( Exception e ) {
-            e.printStackTrace();
+        problem = new ProblemCreator(classList).makeProblem();
             
-            problem = new Problem( null );
-        }
-
         // run the planner on the obtained problem
         ArrayList<Rel> algorithmList = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
         if( RuntimeProperties.isShowAlgorithm() ) {
