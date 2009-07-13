@@ -253,4 +253,22 @@ public class ObjectList extends ArrayList<GObj> {
 
 		return true;
 	}
+
+    /**
+     *  Adds GObj to the list.
+     *  If it is a RelObj, push it into the beginning of the list,
+     *  i.e. "sendToBack". This fixes the bug when a relClass
+     *  needs to be connected to a port with already existing
+     *  connection to another relClass.
+     */
+    @Override
+    public boolean add( GObj e ) {
+        if(e instanceof RelObj)
+            super.add( 0, e );
+        else 
+            super.add( e );
+        
+        return true;
+    }
+	
 }
