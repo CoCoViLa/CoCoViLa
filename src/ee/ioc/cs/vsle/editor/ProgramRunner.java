@@ -29,7 +29,7 @@ import ee.ioc.cs.vsle.vclass.*;
 public class ProgramRunner {
 
     private final static Object s_lock = new Object();
-    private boolean isWorking = false;
+    private volatile boolean isWorking = false;
 
     private long m_id;
     private ProgramRunnerEventListener m_lst = new ProgramRunnerEventListener();
@@ -495,16 +495,23 @@ public class ProgramRunner {
 
             Field fieldOfGobj, fieldOfCf;
             Object lastObj;
-
+            Class<?> classOfGobj;
+            String namePrefix;
+            
             for ( GObj gObj : objects ) {
 
                 // superclass object is a special case that has no field
                 // declaration in the generated code so we have to skip it here
-                if ( gObj.isSuperClass() )
-                    continue;
-
-                fieldOfGobj = clas.getDeclaredField( gObj.getName() );
-                lastObj = fieldOfGobj.get( genObject );
+                if ( gObj.isSuperClass() ) {
+                    classOfGobj = clas;
+                    lastObj = genObject;
+                    namePrefix = gObj.getName() + ".";
+                } else {
+                    fieldOfGobj = clas.getDeclaredField( gObj.getName() );
+                    classOfGobj = fieldOfGobj.getType();
+                    lastObj = fieldOfGobj.get( genObject );
+                    namePrefix = "";
+                }
 
                 for ( ClassField cf : gObj.getFields() ) {
 
@@ -512,13 +519,16 @@ public class ProgramRunner {
                         continue;
                     }
 
-                    fieldOfCf = fieldOfGobj.getType().getField( cf.getName() );
+                    fieldOfCf = classOfGobj.getField( cf.getName() );
 
                     boolean varIsComputed = false;
 
                     for ( Var var : foundVars ) {
 
-                        if ( var.getFullName().equals( gObj.getName() + "." + cf.getName() ) ) {
+                        String fullName = namePrefix + var.getFullName();
+                        String fieldName = gObj.getName() + "." + cf.getName();
+                        
+                        if ( fullName.equals( fieldName ) ) {
                             varIsComputed = true;
                             break;
                         }
@@ -696,15 +706,25 @@ public class ProgramRunner {
         long start = System.currentTimeMillis();
         String contextClassName = context.getName();
         try {
-            //synthesize
-            StringBuilder result = new StringBuilder();
-            ClassList classes = new ClassList();
-            String generatedClassName = Synthesizer.computeIndependentModel( contextClassName, schemeContainer.getWorkDir(), inputNames, outputNames, classes, result );
-            //save generated code
-            GenStorage fs = getStorage();
-            Synthesizer.makeProgram( result.toString(), classes, generatedClassName, schemeContainer.getWorkDir(), fs );
-            //compile
-            Object genObj = compile( fs, schemeContainer, generatedClassName );
+            int hash = calcHashForSubtask( contextClassName, inputNames, outputNames );
+            Object genObj = getFromCache( hash );
+            if ( genObj == null ) {
+                //synthesize
+                StringBuilder result = new StringBuilder();
+                ClassList classes = new ClassList();
+                String generatedClassName = Synthesizer
+                        .computeIndependentModel( contextClassName,
+                                schemeContainer.getWorkDir(), inputNames,
+                                outputNames, classes, result );
+                //save generated code
+                GenStorage fs = getStorage();
+                Synthesizer.makeProgram( result.toString(), classes,
+                        generatedClassName, schemeContainer.getWorkDir(), fs );
+                //compile
+                genObj = compile( fs, schemeContainer, generatedClassName );
+                cacheObject( hash, genObj );
+            }
+
             if(genObj == null)
                 throw new ComputeModelException( "Unable to compile " + contextClassName );
             //execute
@@ -723,6 +743,26 @@ public class ProgramRunner {
             if(RuntimeProperties.isLogDebugEnabled())
                 db.p( "Computed independent model in " + (System.currentTimeMillis() - start) + "ms." );
         }
+    }
+    
+    private static Map<Integer, Object> objectCache = new HashMap<Integer, Object>();
+    
+    private Object getFromCache( int hash ) {
+        synchronized ( s_lock ) {
+            return objectCache.get( hash );
+        }
+    }
+    
+    private void cacheObject( int hash, Object obj ) {
+        synchronized ( s_lock ) {
+            objectCache.put( hash, obj );
+        }
+    }
+    
+    private int calcHashForSubtask( String name, String[] inputNames,
+            String[] outputNames ) {
+        return new StringBuilder( name ).append( Arrays.toString( inputNames ) )
+                .append( Arrays.toString( outputNames ) ).toString().hashCode();
     }
     
     /**
