@@ -66,10 +66,16 @@ public class DepthFirstPlanner implements IPlanner {
         Collection<Var> flattened = new HashSet<Var>();
         for ( Iterator<Rel> axiomIter = problem.getAxioms().iterator(); axiomIter.hasNext(); ) {
             Rel rel = axiomIter.next();
-            //do not overwrite values of variables that come via args of compute() or as inputs of independent subtasks
+            
             unfoldVarsToSet( rel.getOutputs(), flattened );
             
-            if( !problem.getAssumptions().containsAll( flattened ) ) {
+            //do not overwrite values of variables that come via args of compute() or as inputs of independent subtasks
+            if( !problem.getAssumptions().containsAll( flattened ) 
+                    //do not overwrite values of already known variables.
+                    //typically this is the case when a value of a variable 
+                    //is given in a scheme via a properties window
+//                    && !problem.getKnownVars().containsAll( flattened ) 
+               ) {
                 algorithm.add( rel );
             }
             axiomIter.remove();

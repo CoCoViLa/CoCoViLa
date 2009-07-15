@@ -130,8 +130,16 @@ public class ProblemCreator {
                 length.getField().setValue( "" + aliasVar.getChildVars().size() );
             }
             
-            for (Var parentVar : parentVars) {
-                makeFromClassRelations(parentVar, problem);
+            
+//            for (Var parentVar : parentVars) {
+//                makeFromClassRelations(parentVar, problem);
+//            }
+            //backward traversal is needed in order to override 
+            //default values of variables given in specifications 
+            //TODO but this may be temporary solution, 
+            //see axiom application in DepthFirstPlanner.invokePlanning()
+            for ( int i = parentVars.size() - 1; i >= 0; i-- ) {
+                makeFromClassRelations( parentVars.get( i ), problem );
             }
         }
     }
@@ -232,7 +240,6 @@ public class ProblemCreator {
             else if ( rel != null && classRelation.getInputs().isEmpty() &&
                         rel.getSubtasks().size() == 0 ) { 
                 problem.addAxiom( rel );
-                problem.addRel( rel );
             }
             else if ( rel != null ) {
                 problem.addRel( rel );
@@ -264,15 +271,7 @@ public class ProblemCreator {
         SubtaskRel subtaskRel;
         ClassField context = subtask.getContext();
 
-        ClassList newClassList = new ClassList();
-        newClassList.addAll( classes );
-        //remove annotated class for current context...
-        newClassList.remove( classes.getType( TYPE_THIS ) );
-        //[current context can be either THIS of the main scheme class or another independent subtask]
-        newClassList.remove( classes.getType( CodeGenerator.INDEPENDENT_SUBTASK ) );
-        //...and create a new one as new root context
-        AnnotatedClass newAnnClass = new AnnotatedClass( CodeGenerator.INDEPENDENT_SUBTASK );
-        newAnnClass.addField( context );
+        //construct a new goal
         ClassRelation newCR = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, subtask.getSpecLine() );
 
         List<ClassField> empty = new ArrayList<ClassField>();
@@ -285,8 +284,26 @@ public class ProblemCreator {
             newCR.addOutput( context.getName() + "." + output.getName(), empty );
         }
 
+        //create a new annotated class as a new root context
+        AnnotatedClass newAnnClass = new AnnotatedClass(
+                CodeGenerator.INDEPENDENT_SUBTASK );
+        newAnnClass.addField( context );
         newAnnClass.addClassRelation( newCR );
+        
+        //build a new list of classes
+        ClassList newClassList = new ClassList();
         newClassList.add(newAnnClass);
+        for ( AnnotatedClass ac : classes ) {
+            //do not add annotated class for current context...
+            if(TYPE_THIS.equals(ac.getName())
+                  //[current context can be either THIS of the main scheme class 
+                    //or another independent subtask]
+                    || CodeGenerator.INDEPENDENT_SUBTASK.equals(ac.getName())) {
+                continue;
+            }
+            newClassList.add( ac );
+        }
+        
         Problem contextProblem = 
             new Problem( new Var( new ClassField( TYPE_THIS, CodeGenerator.INDEPENDENT_SUBTASK ), null ) );
 
