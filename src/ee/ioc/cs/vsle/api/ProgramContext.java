@@ -135,6 +135,7 @@ public final class ProgramContext {
     
     /**
      * Computes a given model at runtime and executes a generated program
+     * Static approach
      * 
      * @param context
      * @param inputNames
@@ -144,6 +145,22 @@ public final class ProgramContext {
      */
     public static final Object[] computeModel(
             Class<?> context, String[] inputNames,
+            String[] outputNames, Object[] inputValues) {
+        return scheme.computeModel( context, inputNames, outputNames, inputValues );
+    }
+    
+    /**
+     * Computes a given model at runtime and executes a generated program
+     * Dynamic approach
+     * 
+     * @param context
+     * @param inputNames
+     * @param outputNames
+     * @param inputValues
+     * @return
+     */
+    public static final Object[] computeModel(
+            String context, String[] inputNames,
             String[] outputNames, Object[] inputValues) {
         return scheme.computeModel( context, inputNames, outputNames, inputValues );
     }

@@ -78,4 +78,8 @@ public interface Scheme {
     public Object[] computeModel(
             Class<?> context, String[] inputNames,
             String[] outputNames, Object[] inputValues);
+    
+    public Object[] computeModel(
+            String context, String[] inputNames,
+            String[] outputNames, Object[] inputValues);
 }

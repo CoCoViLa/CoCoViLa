@@ -146,4 +146,12 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
         
         return new ProgramRunner(canvas).computeModel( context, inputNames, outputNames, inputValues );
     }
+    
+    @Override
+    public Object[] computeModel(
+            String context, String[] inputNames,
+            String[] outputNames, Object[] inputValues) {
+
+        return new ProgramRunner(canvas).computeModel( context, inputNames, outputNames, inputValues );
+    }
 }

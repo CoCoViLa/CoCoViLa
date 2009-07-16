@@ -691,20 +691,25 @@ public class ProgramRunner {
         EventSystem.queueEvent( evt );
     }
     
+    public Object[] computeModel(Class<?> context, String[] inputNames,
+            String[] outputNames, Object[] inputValues)
+    {
+        return computeModel( context.getName(), inputNames, outputNames, inputValues );
+    }
+    
     /**
      * Computes a given model and returns the result
      * 
-     * @param context
+     * @param contextClassName
      * @param inputNames
      * @param outputNames
      * @param inputValues
      * @return
      */
-    public Object[] computeModel(Class<?> context, String[] inputNames,
+    public Object[] computeModel(String contextClassName, String[] inputNames,
             String[] outputNames, Object[] inputValues)
     {
         long start = System.currentTimeMillis();
-        String contextClassName = context.getName();
         try {
             int hash = calcHashForSubtask( contextClassName, inputNames, outputNames );
             Object genObj = getFromCache( hash );
