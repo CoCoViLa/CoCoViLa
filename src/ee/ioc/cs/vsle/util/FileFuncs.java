@@ -92,9 +92,9 @@ public class FileFuncs {
                 }
                 return getCharStreamContents(new FileInputStream(file));
             } catch (FileNotFoundException e) {
-                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
+//                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
             } catch (SecurityException e) {
-                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
+//                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
             }
             return null;
         }
