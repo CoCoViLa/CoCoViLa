@@ -684,7 +684,7 @@ public class SpecParser {
                                     }
                                     varsForSubtask = classList.getType( context ).getFields();
 
-                                    ClassField contextCF = new ClassField( "_" + context.toLowerCase(), context );
+                                    ClassField contextCF = new ClassField( "_" + context.toLowerCase(), context, true );
 
                                     subtask = SubtaskClassRelation.createIndependentSubtask( subtaskString, contextCF );
                                 } else {

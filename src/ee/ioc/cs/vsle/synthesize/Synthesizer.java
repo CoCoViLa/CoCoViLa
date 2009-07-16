@@ -207,7 +207,7 @@ public class Synthesizer {
         SpecParser.parseSpecClass( contextClassName, path, classList );
         //create context classfield
         ClassField contextCF = new ClassField( "_"
-                + contextClassName.toLowerCase(), contextClassName );
+                + contextClassName.toLowerCase(), contextClassName, true );
         //create subtask class relation
         SubtaskClassRelation subtaskCR = SubtaskClassRelation
                 .createIndependentSubtask( contextClassName + " |- "

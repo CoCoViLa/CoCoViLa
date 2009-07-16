@@ -84,13 +84,13 @@ public class TypeUtil {
      * @param varName
      * @param type
      * @param isAlias
-     * @param isClass
+     * @param isSpec
      * @param isStatic
      * @param value
      * @param prx
      * @return
      */
-    public static String getDeclaration( String varName, String type, boolean isAlias, boolean isClass, boolean isStatic,
+    private static String getDeclaration( String varName, String type, boolean isAlias, boolean isSpec, boolean isStatic,
     									/*for constant*/String value, String prx ) {
     	
     	if( prx == null ) 
@@ -111,10 +111,10 @@ public class TypeUtil {
     		return prx + type + " " + varName + ";\n";
     	} else if ( TypeUtil.isArray( type ) ) {
     		return prx + type + " " + varName + ";\n";
-    	} else if ( isClass ) {
+    	} else if ( isSpec ) {
             return prx + type + " " + varName + " = new " + type + "();\n";
     	} else {
-    		return prx + type + " " + varName + " = new " + type + "();\n";
+    		return prx + type + " " + varName /*+ " = new " + type + "()"*/ + ";\n";
     	}
     }
     
