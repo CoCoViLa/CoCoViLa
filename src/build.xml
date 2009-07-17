@@ -303,6 +303,7 @@
     <jar destfile="${webstart}/cocovila-se.jar"
             basedir="${build}"
             duplicate="fail">
+    	<exclude name="ee/ioc/cs/vsle/iconeditor/**" />
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
           <attribute name="Class-Path" value="lib/ejc.jar lib/jfreechart.jar lib/jcommon.jar"/>
@@ -314,8 +315,9 @@
 
     <jar destfile="${webstart}/cocovila-ce.jar"
             basedir="${build}"
-            duplicate="fail">
-        <exclude name="**"/>
+            duplicate="fail"
+    	    >    	
+    	<include name="ee/ioc/cs/vsle/iconeditor/**" />
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.iconeditor.IconEditor"/>
           <attribute name="Class-Path" value="${project.se.jar}"/>
