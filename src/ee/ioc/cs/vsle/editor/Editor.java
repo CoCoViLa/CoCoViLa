@@ -627,7 +627,16 @@ public class Editor extends JFrame implements ChangeListener {
         // unsafe in the main thread and has caused real problems.
 
         checkWebStart( args );
-
+        
+        /*
+         * Remove security manager, because all permissions
+         * are required. This is especially critical when
+         * running from the Java Web Start. (Otherwise
+         * all classes loaded by our own class loaders
+         * will have default sandbox permissions.)
+         */
+        System.setSecurityManager( null );
+        
         String version = System.getProperty( "java.version" );
 
         System.err.println( "Java Version: " + version );
