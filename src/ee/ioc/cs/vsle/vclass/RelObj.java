@@ -18,9 +18,10 @@ import ee.ioc.cs.vsle.util.*;
  */
 public class RelObj extends GObj {
     private static final long serialVersionUID = 1L;
-	public Port startPort;
-	public Port endPort;
-	public int endX, endY;
+	private Port startPort;
+	private Port endPort;
+	private int endY;
+    private int endX;
 
 //	public RelObj(int x, int y, int width, int height, String name) {
 //		super(x, y, width, height, name);
@@ -32,19 +33,19 @@ public class RelObj extends GObj {
 
 	@Override
 	public boolean contains(int pointX, int pointY) {
-		float f = VMath.pointDistanceFromLine(x, y, endX, endY, pointX, pointY);
-		if (f < height + 4) {
+		float f = VMath.pointDistanceFromLine(getX(), getY(), getEndX(), getEndY(), pointX, pointY);
+		if (f < getHeight() + 4) {
 			return true;
 		}
 		return false;
 	}
 
 	@Override
-	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
+	protected void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
         AffineTransform origTransform = g2.getTransform();
-        g2.rotate(angle, xPos, yPos);
+        g2.rotate(getAngle(), xPos, yPos);
 
-		for (Shape s: shapes)
+		for (Shape s: getShapes())
 			s.draw(xPos, yPos, Xsize, Ysize, g2);
 
 		g2.setTransform(origTransform);
@@ -59,12 +60,12 @@ public class RelObj extends GObj {
 
 		for (ClassField field: getFields()) {
 			if (field.getDefaultGraphics() != null) {
-				field.getDefaultGraphics().angle = angle;
+				field.getDefaultGraphics().setAngle( getAngle() );
 				field.getDefaultGraphics().drawSpecial(xModifier,
 					yModifier, getXsize(), getYsize(), g, field.getName(), field.value);
 			}
 			if (field.isKnown() && field.getKnownGraphics() != null) {
-				field.getKnownGraphics().angle = angle;
+				field.getKnownGraphics().setAngle( getAngle() );
 				field.getKnownGraphics().drawSpecial(xModifier,
 					yModifier, getXsize(), getYsize(), g, field.getName(), field.value);
 			}
@@ -102,30 +103,30 @@ public class RelObj extends GObj {
 	 *            Y coordinate of the start point
 	 */
 	public void setEndPoints(int x1, int y1, int x2, int y2) {
-		x = x1;
-		y = y1;
-		endX = x2;
-		endY = y2;
+		setX( x1 );
+		setY( y1 );
+		setEndX( x2 );
+		setEndY( y2 );
 
-		Xsize = (float) Math.sqrt(Math.pow((x - endX), 2.0) 
-				+ Math.pow((y - endY), 2.0)) / width;
-		angle = VMath.calcAngle(x, y, endX, endY);
+		setXsize( (float) Math.sqrt(Math.pow((getX() - getEndX()), 2.0) 
+				+ Math.pow((getY() - getEndY()), 2.0)) / getWidth() );
+		setAngle( VMath.calcAngle(getX(), getY(), getEndX(), getEndY()) );
 	}
 
 	private void drawSelectionMarks(Graphics g) {
-		g.fillRect(x - CORNER_SIZE / 2, y - CORNER_SIZE / 2,
+		g.fillRect(getX() - CORNER_SIZE / 2, getY() - CORNER_SIZE / 2,
 				CORNER_SIZE,  CORNER_SIZE);
-		g.fillRect((int) (x + width * Xsize * Math.cos(angle)) 
+		g.fillRect((int) (getX() + getWidth() * getXsize() * Math.cos(getAngle())) 
 				- CORNER_SIZE / 2,
-				(int) (y + width * Xsize * Math.sin(angle))
+				(int) (getY() + getWidth() * getXsize() * Math.sin(getAngle()))
 				- CORNER_SIZE / 2, CORNER_SIZE, CORNER_SIZE);
 	}
 
 	@Override
 	public RelObj clone() {
 		RelObj obj = (RelObj) super.clone();
-		obj.startPort = startPort.clone();
-		obj.endPort = endPort.clone();
+		obj.setStartPort( getStartPort().clone() );
+		obj.setEndPort( getEndPort().clone() );
 		return obj;
 	}
 
@@ -138,30 +139,30 @@ public class RelObj extends GObj {
 	public void toXML(TransformerHandler th) throws SAXException {
 		AttributesImpl attrs = new AttributesImpl();
 		
-		attrs.addAttribute("", "", "name", StringUtil.CDATA, name);
-		attrs.addAttribute("", "", "type", StringUtil.CDATA, className);
+		attrs.addAttribute("", "", "name", StringUtil.CDATA, getName());
+		attrs.addAttribute("", "", "type", StringUtil.CDATA, getClassName());
 
 		th.startElement("", "", "relobject", attrs);
 
 		attrs.clear();
 		attrs.addAttribute("", "", "x", StringUtil.CDATA,
-				Integer.toString(x));
+				Integer.toString(getX()));
 		attrs.addAttribute("", "", "y", StringUtil.CDATA,
-				Integer.toString(y));
+				Integer.toString(getY()));
 		attrs.addAttribute("", "", "endX", StringUtil.CDATA,
-				Integer.toString(endX));
+				Integer.toString(getEndX()));
 		attrs.addAttribute("", "", "endY", StringUtil.CDATA,
-				Integer.toString(endY));
+				Integer.toString(getEndY()));
 		attrs.addAttribute("", "", "angle", StringUtil.CDATA,
-				Double.toString(angle));
+				Double.toString(getAngle()));
 		attrs.addAttribute("", "", "width", StringUtil.CDATA,
-				Integer.toString(width));
+				Integer.toString(getWidth()));
 		attrs.addAttribute("", "", "height", StringUtil.CDATA,
-				Integer.toString(height));
+				Integer.toString(getHeight()));
 		attrs.addAttribute("", "", "xsize", StringUtil.CDATA,
-				Double.toString(Xsize));
+				Double.toString(getXsize()));
 		attrs.addAttribute("", "", "ysize", StringUtil.CDATA,
-				Double.toString(Ysize));
+				Double.toString(getYsize()));
 		attrs.addAttribute("", "", "strict", StringUtil.CDATA,
 				Boolean.toString(isStrict()));
 
@@ -177,4 +178,60 @@ public class RelObj extends GObj {
 		th.endElement("", "", "fields");
 		th.endElement("", "", "relobject");
 	}
+
+    /**
+     * @param startPort the startPort to set
+     */
+    public void setStartPort( Port startPort ) {
+        this.startPort = startPort;
+    }
+
+    /**
+     * @return the startPort
+     */
+    public Port getStartPort() {
+        return startPort;
+    }
+
+    /**
+     * @param endPort the endPort to set
+     */
+    public void setEndPort( Port endPort ) {
+        this.endPort = endPort;
+    }
+
+    /**
+     * @return the endPort
+     */
+    public Port getEndPort() {
+        return endPort;
+    }
+
+    /**
+     * @param endX the endX to set
+     */
+    public void setEndX( int endX ) {
+        this.endX = endX;
+    }
+
+    /**
+     * @return the endX
+     */
+    public int getEndX() {
+        return endX;
+    }
+
+    /**
+     * @param endY the endY to set
+     */
+    public void setEndY( int endY ) {
+        this.endY = endY;
+    }
+
+    /**
+     * @return the endY
+     */
+    public int getEndY() {
+        return endY;
+    }
 }

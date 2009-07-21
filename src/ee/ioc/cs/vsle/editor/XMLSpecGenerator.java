@@ -36,21 +36,21 @@ public class XMLSpecGenerator implements ISpecGenerator {
         }
 
         for (Connection rel : relations) {
-            if (rel.endPort.getName().equals("any")) {
-                s.append("<rel obj1 =\"" + rel.endPort.getObject().getName() 
-                        + "\" port1 =\"" +rel.beginPort.getName() + "\""  
-                        + " obj2 =\""  + rel.beginPort.getObject().getName() + "\" port2=\""
-                        + rel.beginPort.getName() + "\"/>\n");
-            } else if (rel.beginPort.getName().equals("any")) {
-                s.append("<rel obj1 =\"" + rel.endPort.getObject().getName() + "\" port1=\""
-                        + rel.endPort.getName() + "\" obj2=\""
-                        + rel.beginPort.getObject().getName() + "\" port2 =\""
-                        + rel.endPort.getName() + "\"/>\n");
+            if (rel.getEndPort().getName().equals("any")) {
+                s.append("<rel obj1 =\"" + rel.getEndPort().getObject().getName() 
+                        + "\" port1 =\"" +rel.getBeginPort().getName() + "\""  
+                        + " obj2 =\""  + rel.getBeginPort().getObject().getName() + "\" port2=\""
+                        + rel.getBeginPort().getName() + "\"/>\n");
+            } else if (rel.getBeginPort().getName().equals("any")) {
+                s.append("<rel obj1 =\"" + rel.getEndPort().getObject().getName() + "\" port1=\""
+                        + rel.getEndPort().getName() + "\" obj2=\""
+                        + rel.getBeginPort().getObject().getName() + "\" port2 =\""
+                        + rel.getEndPort().getName() + "\"/>\n");
             } else {
-                s.append("<rel obj1 =\"" + rel.endPort.getObject().getName() + "\" port1=\""
-                        + rel.endPort.getName() + "\" "
-                        + " obj2=\"" + rel.beginPort.getObject().getName() + "\""
-                        + " port2=\"" + rel.beginPort.getName() + "\"/>\n");
+                s.append("<rel obj1 =\"" + rel.getEndPort().getObject().getName() + "\" port1=\""
+                        + rel.getEndPort().getName() + "\" "
+                        + " obj2=\"" + rel.getBeginPort().getObject().getName() + "\""
+                        + " port2=\"" + rel.getBeginPort().getName() + "\"/>\n");
             }
 
         }

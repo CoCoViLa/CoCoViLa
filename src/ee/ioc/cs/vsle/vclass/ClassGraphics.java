@@ -8,15 +8,14 @@ import ee.ioc.cs.vsle.graphics.*;
 
 public class ClassGraphics implements Serializable {
 
-	public ArrayList<Shape> shapes = new ArrayList<Shape>();
-	public double angle = 0.0;
-	public int boundX;
-	public int boundY;
-	public int boundWidth;
-	public int boundHeight;
-//	PackageClass packageClass;
-	public boolean showFields = false;
-	public boolean relation = false;
+	private ArrayList<Shape> shapes = new ArrayList<Shape>();
+	private double angle = 0.0;
+	private int boundX;
+	private int boundY;
+	private int boundWidth;
+	private int boundHeight;
+	private boolean showFields = false;
+	private boolean relation = false;
 
 	/**
 	 * Set bounds of the graphical object.
@@ -26,10 +25,10 @@ public class ClassGraphics implements Serializable {
 	 * @param height int - object height (difference between starting and ending y coordinates).
 	 */
 	public void setBounds(int x, int y, int width, int height) {
-		boundX = x;
-		boundY = y;
-		boundWidth = width;
-		boundHeight = height;
+		setBoundX( x );
+		setBoundY( y );
+		setBoundWidth( width );
+		setBoundHeight( height );
 	} // setBounds
 
 	/**
@@ -45,7 +44,7 @@ public class ClassGraphics implements Serializable {
 	 * end x coordinates).
 	 * @return int - width of the object.
 	 */
-	public int getWidth() {
+	public int getBoundWidth() {
 		return boundWidth;
 	} // getWidth
 
@@ -54,7 +53,7 @@ public class ClassGraphics implements Serializable {
 	 * end y coordinates).
 	 * @return int - height of the object.
 	 */
-	public int getHeight() {
+	public int getBoundHeight() {
 		return boundHeight;
 	} // getHeight
 
@@ -82,13 +81,102 @@ public class ClassGraphics implements Serializable {
 		for (int i = 0; i < shapes.size(); i++) {
 			s = shapes.get(i);
 			if (s instanceof Text)
-				((Text)s).drawSpecial(xPos, yPos, Xsize, Ysize, g2, name, value, angle);
+				((Text)s).drawSpecial(xPos, yPos, Xsize, Ysize, g2, name, value, getAngle());
 			else
 				s.draw(xPos, yPos, Xsize, Ysize, g2);
 		}
 
 	} // draw
 
+    /**
+     * @return the shapes
+     */
+    public ArrayList<Shape> getShapes() {
+        return shapes;
+    }
 
+    /**
+     * @param angle the angle to set
+     */
+    public void setAngle( double angle ) {
+        this.angle = angle;
+    }
+
+    /**
+     * @return the angle
+     */
+    public double getAngle() {
+        return angle;
+    }
+
+    /**
+     * @param boundX the boundX to set
+     */
+    public void setBoundX( int boundX ) {
+        this.boundX = boundX;
+    }
+
+    /**
+     * @return the boundX
+     */
+    public int getBoundX() {
+        return boundX;
+    }
+
+    /**
+     * @param boundY the boundY to set
+     */
+    public void setBoundY( int boundY ) {
+        this.boundY = boundY;
+    }
+
+    /**
+     * @return the boundY
+     */
+    public int getBoundY() {
+        return boundY;
+    }
+
+    /**
+     * @param boundWidth the boundWidth to set
+     */
+    public void setBoundWidth( int boundWidth ) {
+        this.boundWidth = boundWidth;
+    }
+
+    /**
+     * @param boundHeight the boundHeight to set
+     */
+    public void setBoundHeight( int boundHeight ) {
+        this.boundHeight = boundHeight;
+    }
+
+    /**
+     * @param showFields the showFields to set
+     */
+    public void setShowFields( boolean showFields ) {
+        this.showFields = showFields;
+    }
+
+    /**
+     * @return the showFields
+     */
+    public boolean isShowFields() {
+        return showFields;
+    }
+
+    /**
+     * @param relation the relation to set
+     */
+    public void setRelation( boolean relation ) {
+        this.relation = relation;
+    }
+
+    /**
+     * @return the relation
+     */
+    public boolean isRelation() {
+        return relation;
+    }
 
 }

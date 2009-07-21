@@ -18,9 +18,9 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
 
     private static final long serialVersionUID = 1L;
 
-    public float Xsize = 1; // percentage for resizing, 1 means real size
-    public float Ysize = 1;
-    static final int CORNER_SIZE = 6;
+    private float Xsize = 1; // percentage for resizing, 1 means real size
+    private float Ysize = 1;
+    protected static final int CORNER_SIZE = 6;
     private static final float MIN_SCALE = 0.1f; // the minimal value for
                                                     // X|Ysize
 
@@ -28,14 +28,18 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     private static final int DEFAULT_X = 10;
     private static final int DEFAULT_Y = 10;
 
+    private int x, y;
+    
     /*
      * difWithMasterX, difWithMasterY variables are for resizeing an object
      * group, we need to know the intitial difference to make it work correctly
      */
-    public int x, y, difWithMasterX, difWithMasterY;
-    public int width, height;
-    public String className;
-    protected String name;
+    private int difWithMasterX, difWithMasterY;
+    private int width;
+
+    private int height;
+    private String className;
+    private String name;
     private boolean isStatic = false;
 
     private ArrayList<Port> ports = new ArrayList<Port>();
@@ -43,25 +47,25 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     private Map<String, ClassField> fields = new LinkedHashMap<String, ClassField>();
     // fields declared in the specification of the corresponding java class
     private Map<String, ClassField> specFields = new LinkedHashMap<String, ClassField>();
-    public ArrayList<Shape> shapes = new ArrayList<Shape>();
+    private ArrayList<Shape> shapes = new ArrayList<Shape>();
 
     private boolean selected;
-    public boolean group = false;
+    private boolean group = false;
     private boolean strict;
     /**
      * Is this object the superclass of the scheme?
      */
     private boolean superClass;
 
-    public int portOffsetX1 = 0;
-    public int portOffsetX2 = 0;
-    public int portOffsetY1 = 0;
-    public int portOffsetY2 = 0;
+    private int portOffsetX1 = 0;
+    private int portOffsetX2 = 0;
+    private int portOffsetY1 = 0;
+    private int portOffsetY2 = 0;
 
     /**
      * The rotation of the object in radians
      */
-    protected double angle = 0d;
+    private double angle = 0d;
 
     private boolean drawPorts = true;
     private boolean drawInstanceName = false;
@@ -73,9 +77,9 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     public boolean contains( int pointX, int pointY ) {
         Point p = toObjectSpace( pointX, pointY );
 
-        if ( ( p.x > getX() + (int) ( getXsize() * portOffsetX1 ) ) && ( p.y > getY() + (int) ( getYsize() * portOffsetY1 ) ) ) {
-            if ( ( p.x < getX() + (int) ( getXsize() * ( getWidth() + portOffsetX2 ) ) && ( p.y < getY()
-                    + (int) ( getYsize() * ( getHeight() + portOffsetY2 ) ) ) ) ) {
+        if ( ( p.x > getX() + (int) ( getXsize() * getPortOffsetX1() ) ) && ( p.y > getY() + (int) ( getYsize() * getPortOffsetY1() ) ) ) {
+            if ( ( p.x < getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) ) && ( p.y < getY()
+                    + (int) ( getYsize() * ( getHeight() + getPortOffsetY2() ) ) ) ) ) {
                 return true;
             }
         }
@@ -83,9 +87,9 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     }
 
     public boolean isInside( int x1, int y1, int x2, int y2 ) {
-        if ( ( x1 < getX() + portOffsetX1 ) && ( y1 < getY() + portOffsetY1 ) ) {
-            if ( ( x2 > getX() + (int) ( getXsize() * getWidth() ) + portOffsetX2 )
-                    && ( y2 > getY() + (int) ( getYsize() * getHeight() ) + portOffsetY2 ) ) {
+        if ( ( x1 < getX() + getPortOffsetX1() ) && ( y1 < getY() + getPortOffsetY1() ) ) {
+            if ( ( x2 > getX() + (int) ( getXsize() * getWidth() ) + getPortOffsetX2() )
+                    && ( y2 > getY() + (int) ( getYsize() * getHeight() ) + getPortOffsetY2() ) ) {
                 return true;
             }
         }
@@ -102,19 +106,19 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
         switch ( corner ) { // changeX
         case 1: // top left
         case 3: // bottom left
-            if ( changeX > 0 && ( Xsize - changeX / width < MIN_SCALE ) )
-                changeX = (int) ( ( Xsize - MIN_SCALE ) * width + .5 );
+            if ( changeX > 0 && ( getXsize() - changeX / getWidth() < MIN_SCALE ) )
+                changeX = (int) ( ( getXsize() - MIN_SCALE ) * getWidth() + .5 );
             if ( changeX != 0 ) {
-                setX( x + changeX );
-                setXsize( Xsize - (float) changeX / width );
+                setX( getX() + changeX );
+                setXsize( getXsize() - (float) changeX / getWidth() );
             }
             break;
         case 2: // top right
         case 4: // bottom right
-            if ( changeX < 0 && ( Xsize + changeX / width < MIN_SCALE ) )
-                changeX = (int) ( ( MIN_SCALE - Xsize ) * width - .5 );
+            if ( changeX < 0 && ( getXsize() + changeX / getWidth() < MIN_SCALE ) )
+                changeX = (int) ( ( MIN_SCALE - getXsize() ) * getWidth() - .5 );
             if ( changeX != 0 )
-                setXsize( Xsize + (float) changeX / width );
+                setXsize( getXsize() + (float) changeX / getWidth() );
             break;
         default:
             throw new IllegalArgumentException( "The argument corner can have values 1, 2, 3 or 4." );
@@ -123,19 +127,19 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
         switch ( corner ) { // changeY
         case 1: // top left
         case 2: // top right
-            if ( changeY > 0 && ( Ysize - changeY / width < MIN_SCALE ) )
-                changeY = (int) ( ( Ysize - MIN_SCALE ) * width + .5 );
+            if ( changeY > 0 && ( getYsize() - changeY / getWidth() < MIN_SCALE ) )
+                changeY = (int) ( ( getYsize() - MIN_SCALE ) * getWidth() + .5 );
             if ( changeY != 0 ) {
-                setY( y + changeY );
-                setYsize( Ysize - (float) changeY / height );
+                setY( getY() + changeY );
+                setYsize( getYsize() - (float) changeY / getHeight() );
             }
             break;
         case 3: // bottom left
         case 4: // bottom right
-            if ( changeY < 0 && ( Ysize + changeY / width < MIN_SCALE ) )
-                changeY = (int) ( ( MIN_SCALE - Ysize ) * height - .5 );
+            if ( changeY < 0 && ( getYsize() + changeY / getWidth() < MIN_SCALE ) )
+                changeY = (int) ( ( MIN_SCALE - getYsize() ) * getHeight() - .5 );
             if ( changeY != 0 )
-                setYsize( Ysize + (float) changeY / height );
+                setYsize( getYsize() + (float) changeY / getHeight() );
             break;
         default:
             // an exception was already thrown in previous switch statement
@@ -158,29 +162,29 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     public int controlRectContains( int pointX, int pointY ) {
         Point p = toObjectSpace( pointX, pointY );
 
-        if ( ( p.x >= getX() + portOffsetX1 - CORNER_SIZE - 1 ) && ( p.y >= getY() + portOffsetY1 - CORNER_SIZE - 1 ) ) {
-            if ( ( p.x <= getX() + portOffsetX1 - 1 ) && ( p.y <= getY() + portOffsetY1 - 1 ) ) {
+        if ( ( p.x >= getX() + getPortOffsetX1() - CORNER_SIZE - 1 ) && ( p.y >= getY() + getPortOffsetY1() - CORNER_SIZE - 1 ) ) {
+            if ( ( p.x <= getX() + getPortOffsetX1() - 1 ) && ( p.y <= getY() + getPortOffsetY1() - 1 ) ) {
                 return 1;
             }
         }
-        if ( ( p.x >= getX() + (int) ( getXsize() * ( getWidth() + portOffsetX2 ) ) + 1 )
-                && ( p.y >= getY() + portOffsetY1 - CORNER_SIZE - 1 ) ) {
-            if ( ( p.x <= getX() + (int) ( getXsize() * ( getWidth() + portOffsetX2 ) + CORNER_SIZE + 1 ) )
-                    && ( p.y <= getY() + portOffsetY1 + CORNER_SIZE ) ) {
+        if ( ( p.x >= getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) ) + 1 )
+                && ( p.y >= getY() + getPortOffsetY1() - CORNER_SIZE - 1 ) ) {
+            if ( ( p.x <= getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) + CORNER_SIZE + 1 ) )
+                    && ( p.y <= getY() + getPortOffsetY1() + CORNER_SIZE ) ) {
                 return 2;
             }
         }
-        if ( ( p.x >= getX() + portOffsetX1 - CORNER_SIZE - 1 )
-                && ( p.y >= getY() + (int) ( getYsize() * ( getHeight() + portOffsetY2 ) ) + 1 ) ) {
-            if ( ( p.x <= getX() + portOffsetX1 - 1 )
-                    && ( p.y <= getY() + (int) ( getYsize() * ( getHeight() + portOffsetY2 ) + CORNER_SIZE + 1 ) ) ) {
+        if ( ( p.x >= getX() + getPortOffsetX1() - CORNER_SIZE - 1 )
+                && ( p.y >= getY() + (int) ( getYsize() * ( getHeight() + getPortOffsetY2() ) ) + 1 ) ) {
+            if ( ( p.x <= getX() + getPortOffsetX1() - 1 )
+                    && ( p.y <= getY() + (int) ( getYsize() * ( getHeight() + getPortOffsetY2() ) + CORNER_SIZE + 1 ) ) ) {
                 return 3;
             }
         }
-        if ( ( p.x >= getX() + (int) ( getXsize() * ( getWidth() + portOffsetX2 ) ) + 1 )
-                && ( p.y >= getY() + (int) ( getYsize() * ( getHeight() + portOffsetY2 ) ) + 1 ) ) {
-            if ( ( p.x <= getX() + (int) ( getXsize() * ( getWidth() + portOffsetX2 ) + CORNER_SIZE + 1 ) )
-                    && ( p.y <= getY() + (int) ( getYsize() * ( getHeight() + portOffsetY2 ) + CORNER_SIZE + 1 ) ) ) {
+        if ( ( p.x >= getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) ) + 1 )
+                && ( p.y >= getY() + (int) ( getYsize() * ( getHeight() + getPortOffsetY2() ) ) + 1 ) ) {
+            if ( ( p.x <= getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) + CORNER_SIZE + 1 ) )
+                    && ( p.y <= getY() + (int) ( getYsize() * ( getHeight() + getPortOffsetY2() ) + CORNER_SIZE + 1 ) ) ) {
                 return 4;
             }
         }
@@ -287,11 +291,11 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
         return ports;
     }
 
-    void draw( int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2 ) {
+    protected void draw( int xPos, int yPos, float _Xsize, float _Ysize, Graphics2D g2 ) {
         Shape s;
-        for ( int i = 0; i < shapes.size(); i++ ) {
-            s = shapes.get( i );
-            s.draw( xPos, yPos, Xsize, Ysize, g2 );
+        for ( int i = 0; i < getShapes().size(); i++ ) {
+            s = getShapes().get( i );
+            s.draw( xPos, yPos, _Xsize, _Ysize, g2 );
         }
     } // draw
 
@@ -305,7 +309,7 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
 
     public void drawClassGraphics( Graphics2D g2, float scale ) {
         AffineTransform origTransform = g2.getTransform();
-        g2.rotate( angle, getCenterX(), getCenterY() );
+        g2.rotate( getAngle(), getCenterX(), getCenterY() );
 
         // hilight superclass
         if ( isSuperClass() ) {
@@ -332,7 +336,7 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
         
         if( drawInstanceName ) {
             g2.setFont( RuntimeProperties.getFont( RuntimeProperties.Fonts.OBJECTS ) );
-            g2.drawString( name, xModifier + ( isStatic() ? 20 : 5 ), yModifier - 5 );
+            g2.drawString( getName(), xModifier + ( isStatic() ? 20 : 5 ), yModifier - 5 );
             g2.setFont( origFont );
         }
         
@@ -348,8 +352,8 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
                 } else
                     graphics = port.getOpenGraphics();
 
-                graphics.draw( xModifier + (int) ( getXsize() * port.x ), 
-                        yModifier + (int) ( getYsize() * port.y ), 
+                graphics.draw( xModifier + (int) ( getXsize() * port.getX() ), 
+                        yModifier + (int) ( getYsize() * port.getY() ), 
                         getXsize(), getYsize(), g2 );
             }
         }
@@ -392,16 +396,16 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     }
 
     private void drawSelectionMarks( Graphics g, float scale ) {
-        g.fillRect( getX() + portOffsetX1 - CORNER_SIZE - 1, getY() + portOffsetY1 - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
+        g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
 
-        g.fillRect( getX() + (int) ( getXsize() * ( getWidth() + portOffsetX2 ) ) + 1, getY() + portOffsetY1 - CORNER_SIZE - 1,
+        g.fillRect( getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) ) + 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1,
                 CORNER_SIZE, CORNER_SIZE );
 
-        g.fillRect( getX() + portOffsetX1 - CORNER_SIZE - 1, getY() + (int) ( getYsize() * ( portOffsetY2 + getHeight() ) ) + 1,
+        g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + (int) ( getYsize() * ( getPortOffsetY2() + getHeight() ) ) + 1,
                 CORNER_SIZE, CORNER_SIZE );
 
-        g.fillRect( getX() + (int) ( getXsize() * ( portOffsetX2 + getWidth() ) ) + 1, getY()
-                + (int) ( getYsize() * ( portOffsetY2 + getHeight() ) ) + 1, CORNER_SIZE, CORNER_SIZE );
+        g.fillRect( getX() + (int) ( getXsize() * ( getPortOffsetX2() + getWidth() ) ) + 1, getY()
+                + (int) ( getYsize() * ( getPortOffsetY2() + getHeight() ) ) + 1, CORNER_SIZE, CORNER_SIZE );
     }
 
     @Override
@@ -523,8 +527,8 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     /**
      * @return the specFields
      */
-    public ClassField getSpecField( String name ) {
-        return specFields.get( name );
+    public ClassField getSpecField( String specName ) {
+        return specFields.get( specName );
     }
 
     public void setGroup( boolean group ) {
@@ -541,22 +545,22 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     public void toXML( TransformerHandler th ) throws SAXException {
         AttributesImpl attrs = new AttributesImpl();
 
-        attrs.addAttribute("", "", "name", StringUtil.CDATA, name);
-        attrs.addAttribute("", "", "type", StringUtil.CDATA, className);
+        attrs.addAttribute("", "", "name", StringUtil.CDATA, getName());
+        attrs.addAttribute("", "", "type", StringUtil.CDATA, getClassName());
         attrs.addAttribute("", "", "static", StringUtil.CDATA, Boolean.toString(isStatic()));
 
         th.startElement("", "", "object", attrs);
 
         attrs.clear();
-        attrs.addAttribute("", "", "x", StringUtil.CDATA, Integer.toString(x));
-        attrs.addAttribute("", "", "y", StringUtil.CDATA, Integer.toString(y));
-        attrs.addAttribute("", "", "width", StringUtil.CDATA, Integer.toString(width));
-        attrs.addAttribute("", "", "height", StringUtil.CDATA, Integer.toString(height));
-        attrs.addAttribute("", "", "xsize", StringUtil.CDATA, Double.toString(Xsize));
-        attrs.addAttribute("", "", "ysize", StringUtil.CDATA, Double.toString(Ysize));
+        attrs.addAttribute("", "", "x", StringUtil.CDATA, Integer.toString(getX()));
+        attrs.addAttribute("", "", "y", StringUtil.CDATA, Integer.toString(getY()));
+        attrs.addAttribute("", "", "width", StringUtil.CDATA, Integer.toString(getWidth()));
+        attrs.addAttribute("", "", "height", StringUtil.CDATA, Integer.toString(getHeight()));
+        attrs.addAttribute("", "", "xsize", StringUtil.CDATA, Double.toString(getXsize()));
+        attrs.addAttribute("", "", "ysize", StringUtil.CDATA, Double.toString(getYsize()));
         attrs.addAttribute("", "", "strict", StringUtil.CDATA, Boolean.toString(isStrict()));
-        if ( angle != 0.0 )
-            attrs.addAttribute("", "", "angle", StringUtil.CDATA, Double.toString(angle));
+        if ( getAngle() != 0.0 )
+            attrs.addAttribute("", "", "angle", StringUtil.CDATA, Double.toString(getAngle()));
 
         th.startElement("", "", "properties", attrs);
         th.endElement("", "", "properties");
@@ -642,12 +646,12 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     public Point toObjectSpace( int pointX, int pointY ) {
         Point p = new Point( pointX, pointY );
 
-        if ( angle != 0.0 ) {
+        if ( getAngle() != 0.0 ) {
             double cx = getCenterX();
             double cy = getCenterY();
 
-            double sin = Math.sin( angle );
-            double cos = Math.cos( angle );
+            double sin = Math.sin( getAngle() );
+            double cos = Math.cos( getAngle() );
 
             p.x = (int) Math.round( pointX * cos + pointY * sin + cx - cx * cos - cy * sin );
             p.y = (int) Math.round( -pointX * sin + pointY * cos + cy + cx * sin - cy * cos );
@@ -668,12 +672,12 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
     public Point toCanvasSpace( int pointX, int pointY ) {
         Point p = new Point( pointX, pointY );
 
-        if ( angle != 0.0 ) {
+        if ( getAngle() != 0.0 ) {
             double cx = getCenterX();
             double cy = getCenterY();
 
-            double sin = Math.sin( angle );
-            double cos = Math.cos( angle );
+            double sin = Math.sin( getAngle() );
+            double cos = Math.cos( getAngle() );
 
             p.x = (int) Math.round( pointX * cos - pointY * sin + cx - cx * cos + cy * sin );
             p.y = (int) Math.round( pointX * sin + pointY * cos + cy - cx * sin - cy * cos );
@@ -742,5 +746,103 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
      */
     public void setDrawInstanceName( boolean drawInstanceName ) {
         this.drawInstanceName = drawInstanceName;
+    }
+
+    /**
+     * @param difWithMasterX the difWithMasterX to set
+     */
+    public void setDifWithMasterX( int difWithMasterX ) {
+        this.difWithMasterX = difWithMasterX;
+    }
+
+    /**
+     * @return the difWithMasterX
+     */
+    public int getDifWithMasterX() {
+        return difWithMasterX;
+    }
+
+    /**
+     * @param difWithMasterY the difWithMasterY to set
+     */
+    public void setDifWithMasterY( int difWithMasterY ) {
+        this.difWithMasterY = difWithMasterY;
+    }
+
+    /**
+     * @return the difWithMasterY
+     */
+    public int getDifWithMasterY() {
+        return difWithMasterY;
+    }
+
+    /**
+     * @param shapes the shapes to set
+     */
+    public void setShapes( ArrayList<Shape> shapes ) {
+        this.shapes = shapes;
+    }
+
+    /**
+     * @return the shapes
+     */
+    public ArrayList<Shape> getShapes() {
+        return shapes;
+    }
+
+    /**
+     * @param portOffsetX1 the portOffsetX1 to set
+     */
+    public void setPortOffsetX1( int portOffsetX1 ) {
+        this.portOffsetX1 = portOffsetX1;
+    }
+
+    /**
+     * @return the portOffsetX1
+     */
+    public int getPortOffsetX1() {
+        return portOffsetX1;
+    }
+
+    /**
+     * @param portOffsetX2 the portOffsetX2 to set
+     */
+    public void setPortOffsetX2( int portOffsetX2 ) {
+        this.portOffsetX2 = portOffsetX2;
+    }
+
+    /**
+     * @return the portOffsetX2
+     */
+    public int getPortOffsetX2() {
+        return portOffsetX2;
+    }
+
+    /**
+     * @param portOffsetY1 the portOffsetY1 to set
+     */
+    public void setPortOffsetY1( int portOffsetY1 ) {
+        this.portOffsetY1 = portOffsetY1;
+    }
+
+    /**
+     * @return the portOffsetY1
+     */
+    public int getPortOffsetY1() {
+        return portOffsetY1;
+    }
+
+    /**
+     * @param portOffsetY2 the portOffsetY2 to set
+     */
+    public void setPortOffsetY2( int portOffsetY2 ) {
+        this.portOffsetY2 = portOffsetY2;
+    }
+
+    /**
+     * @return the portOffsetY2
+     */
+    public int getPortOffsetY2() {
+        return portOffsetY2;
     }
 }

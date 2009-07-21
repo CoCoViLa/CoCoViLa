@@ -129,11 +129,11 @@ public class ObjectList extends ArrayList<GObj> {
 			if (o instanceof RelObj) {
                 obj = (RelObj) o;
 
-                Point start = VMath.getRelClassStartPoint(obj.startPort,
-                		obj.endPort);
+                Point start = VMath.getRelClassStartPoint(obj.getStartPort(),
+                		obj.getEndPort());
                 
-                Point end = VMath.getRelClassStartPoint(obj.endPort,
-                		obj.startPort);
+                Point end = VMath.getRelClassStartPoint(obj.getEndPort(),
+                		obj.getStartPort());
 
                 obj.setEndPoints(start, end);
 			}
@@ -150,8 +150,8 @@ public class ObjectList extends ArrayList<GObj> {
 		for (GObj obj : this) {
 			if (obj instanceof RelObj) {
 				RelObj ro = (RelObj) obj;
-				if (!contains(ro.startPort.getObject()) 
-						|| !contains(ro.endPort.getObject())) {
+				if (!contains(ro.getStartPort().getObject()) 
+						|| !contains(ro.getEndPort().getObject())) {
 					toBeRemoved.add(ro);
 				}
 			}

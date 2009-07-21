@@ -12,11 +12,10 @@ public class Port implements Cloneable, Serializable {
 	private String id;
 	private GObj obj;
 	private ClassField field;
-	//private int width, height;
 	private String name;
 	private String type;
-	public int x;
-	public int y;
+	private int x;
+	private int y;
 	private boolean strict, area, isMulti;
 	private ClassGraphics openGraphics, closedGraphics;
 	private ArrayList<Connection> connections = new ArrayList<Connection>();
@@ -45,17 +44,17 @@ public class Port implements Cloneable, Serializable {
 
 		for (Connection con : connections) {
 			if (con.isStrict())
-				ports.add(con.beginPort == this ? con.endPort : con.beginPort);
+				ports.add(con.getBeginPort() == this ? con.getEndPort() : con.getBeginPort());
 		}
 		return ports;
 	}
 
 	public int getX() {
-		return (int) (obj.getXsize() * x);
+		return x;
 	}
 
 	public int getY() {
-		return (int) (obj.getYsize() * y);
+		return y;
 	}
 
 	public int getAbsoluteX() {
@@ -73,50 +72,50 @@ public class Port implements Cloneable, Serializable {
 
     public int getCenterX() {
 		return (int) (obj.getXsize()
-			* (x + openGraphics.boundX + (openGraphics.boundWidth) / 2));
+			* (x + openGraphics.getBoundX() + (openGraphics.getBoundWidth()) / 2));
 	}
 
 	public int getCenterY() {
 		return (int) (obj.getYsize()
-			* (y + openGraphics.boundY + (openGraphics.boundHeight) / 2));
+			* (y + openGraphics.getBoundY() + (openGraphics.getBoundHeight()) / 2));
 	}
 
 	public int getRealCenterX() {
 		return (int) (obj.getX() + obj.getXsize() 
-				* (x + openGraphics.boundX + (openGraphics.boundWidth / 2)));
+				* (x + openGraphics.getBoundX() + (openGraphics.getBoundWidth() / 2)));
 	}
 
 	public int getRealCenterY() {
 		return (int) (obj.getY() + obj.getYsize()
-				* (y + openGraphics.boundY + (openGraphics.boundHeight / 2)));
+				* (y + openGraphics.getBoundY() + (openGraphics.getBoundHeight() / 2)));
 	}
 
 	public int getStartX() {
-		return (int) (obj.getXsize() * (openGraphics.boundX + x) + obj.getX());
+		return (int) (obj.getXsize() * (openGraphics.getBoundX() + x) + obj.getX());
 	}
 
 	public int getStartY() {
-		return (int) (obj.getYsize() * (openGraphics.boundY + y) + obj.getY());
+		return (int) (obj.getYsize() * (openGraphics.getBoundY() + y) + obj.getY());
 	}
 
 	public int getWidth() {
-		return (int) (obj.getXsize() * openGraphics.boundWidth);
+		return (int) (obj.getXsize() * openGraphics.getBoundWidth());
 	}
 
 	public int getHeight() {
-		return (int) (obj.getYsize() * openGraphics.boundHeight);
+		return (int) (obj.getYsize() * openGraphics.getBoundHeight());
 	}
 
 	public boolean inBoundsX(int pointX) {
-		return (obj.getX() + obj.getXsize() * (x + openGraphics.boundX) < pointX
-			&& (obj.getX() + obj.getXsize() * (x + openGraphics.boundX + openGraphics.boundWidth) > pointX));
+		return (obj.getX() + obj.getXsize() * (x + openGraphics.getBoundX()) < pointX
+			&& (obj.getX() + obj.getXsize() * (x + openGraphics.getBoundX() + openGraphics.getBoundWidth()) > pointX));
 	}
 
 	public boolean inBoundsY(int pointY) {
-		return (obj.getY() + (obj.getYsize() * (y + openGraphics.boundY)) < pointY
+		return (obj.getY() + (obj.getYsize() * (y + openGraphics.getBoundY())) < pointY
 			&& (obj.getY()
 			+ obj.getYsize()
-			* (y + openGraphics.boundY + openGraphics.boundHeight))
+			* (y + openGraphics.getBoundY() + openGraphics.getBoundHeight()))
 			> pointY);
 	}
 
@@ -319,7 +318,7 @@ public class Port implements Cloneable, Serializable {
 	 */
 	public boolean isConnectedTo(Port port) {
 		for (Connection conn : connections) {
-			if (conn.beginPort == port || conn.endPort == port)
+			if (conn.getBeginPort() == port || conn.getEndPort() == port)
 				return true;
 		}
 		return false;
@@ -378,16 +377,14 @@ public class Port implements Cloneable, Serializable {
 		else if ( port1.field != null && port1.field.isAlias() ) {
 		    if( port2.field != null && port2.field.isAlias() && ((Alias)port2.field).equalsByTypes( (Alias)port1.field ) ) {
 		        return true;
-		    } else {
-		        return ((Alias)port1.field).acceptsType( port2.getType() );
 		    }
+            return ((Alias)port1.field).acceptsType( port2.getType() );
 		}
 		else if ( port2.field != null && port2.field.isAlias() ) {
             if( port1.field != null && port1.field.isAlias() && ((Alias)port1.field).equalsByTypes( (Alias)port2.field ) ) {
                 return true;
-            } else {
-                return ((Alias)port2.field).acceptsType( port1.getType() );
             }
+            return ((Alias)port2.field).acceptsType( port1.getType() );
         }
 		else 
 			return port1.getType().equals(port2.getType());

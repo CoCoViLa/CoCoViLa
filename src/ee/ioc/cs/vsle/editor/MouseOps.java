@@ -112,17 +112,12 @@ class MouseOps extends MouseInputAdapter {
                         openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
                     }
                 }
-            } else if ( State.addRelation.equals( state ) ) {
+            } else if ( State.addRelation.equals( state ) && canvas.currentCon != null) {
                 // remove last breakpoint or stop adding the relation
                 // when only the first breakpoints is left
-                if ( canvas.currentCon != null ) {
-                    if ( canvas.currentCon.getBreakpointCount() > 0 )
-                        canvas.currentCon.removeBreakPoint();
-                    else
-                        canvas.mListener.setState( State.selection );
-                }
-            } else if ( State.isAddRelClass( state ) ) {
-                if ( canvas.currentObj != null )
+                if ( canvas.currentCon.getBreakpointCount() > 0 )
+                    canvas.currentCon.removeBreakPoint();
+                else
                     canvas.mListener.setState( State.selection );
             } else {
                 canvas.mListener.setState( State.selection );
@@ -138,7 +133,7 @@ class MouseOps extends MouseInputAdapter {
                         if ( port.canBeConnected() )
                             canvas.startAddingConnection( port );
                     } else {
-                        Port firstPort = canvas.currentCon.beginPort;
+                        Port firstPort = canvas.currentCon.getBeginPort();
                         if ( port.canBeConnectedTo( firstPort ) ) {
                             if ( port == firstPort ) {
                                 // Connecting a port to itself does not make
@@ -195,14 +190,14 @@ class MouseOps extends MouseInputAdapter {
                         // Relation classes must have exactly 2 ports. Although
                         // package parser should have already catched this an
                         // additional check does not hurt.
-                        if ( obj.ports.size() != 2 )
+                        if ( obj.getPorts().size() != 2 )
                             return;
 
                         if ( canvas.currentObj == null ) {
-                            if ( port.canBeConnectedTo( obj.ports.get( 0 ) ) )
+                            if ( port.canBeConnectedTo( obj.getPorts().get( 0 ) ) )
                                 canvas.startAddingRelObject( port );
                         } else {
-                            if ( port.canBeConnectedTo( obj.ports.get( 1 ) ) )
+                            if ( port.canBeConnectedTo( obj.getPorts().get( 1 ) ) )
                                 canvas.addCurrentObject( port );
                         }
                     }
@@ -375,11 +370,11 @@ class MouseOps extends MouseInputAdapter {
             // if we're adding a new object...
 
             if ( RuntimeProperties.getSnapToGrid() ) {
-                canvas.currentObj.x = Math.round( x / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep();
-                canvas.currentObj.y = Math.round( y / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep();
+                canvas.currentObj.setX( Math.round( x / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep() );
+                canvas.currentObj.setY( Math.round( y / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep() );
             } else {
-                canvas.currentObj.y = y;
-                canvas.currentObj.x = x;
+                canvas.currentObj.setY( y );
+                canvas.currentObj.setX( x );
             }
 
             if ( canvas.currentObj.isStrict() )
@@ -425,7 +420,7 @@ class MouseOps extends MouseInputAdapter {
         RelObj curObj = (RelObj) canvas.currentObj;
 
         if ( currentPort != null && currentPort != port ) {
-            if ( curObj == null || curObj.startPort != currentPort )
+            if ( curObj == null || curObj.getStartPort() != currentPort )
                 currentPort.setSelected( false );
 
             currentPort = null;
@@ -435,7 +430,7 @@ class MouseOps extends MouseInputAdapter {
             if ( curObj != null ) {
                 // hilight the second port only if its type is compatible
                 // with the first already connected port
-                if ( port.canBeConnectedTo( curObj.startPort ) ) {
+                if ( port.canBeConnectedTo( curObj.getStartPort() ) ) {
                     port.setSelected( true );
                     currentPort = port;
                 }
@@ -461,7 +456,7 @@ class MouseOps extends MouseInputAdapter {
         Port port = canvas.getObjects().getPort( x, y );
 
         if ( currentPort != null && currentPort != port ) {
-            if ( canvas.currentCon == null || canvas.currentCon.beginPort != currentPort ) {
+            if ( canvas.currentCon == null || canvas.currentCon.getBeginPort() != currentPort ) {
                 currentPort.setSelected( false );
             }
             currentPort = null;
@@ -471,7 +466,7 @@ class MouseOps extends MouseInputAdapter {
             if ( canvas.currentCon != null ) {
                 // hilight the second port only if its type is compatible
                 // with the first already connected port
-                Port firstPort = canvas.currentCon.beginPort;
+                Port firstPort = canvas.currentCon.getBeginPort();
                 if ( port.canBeConnectedTo( firstPort ) ) {
                     port.setSelected( true );
                     currentPort = port;
@@ -511,8 +506,10 @@ class MouseOps extends MouseInputAdapter {
 
                 if ( !ignore ) {
                     port.setSelected( true );
-                    canvas.currentObj.x += port2.getRealCenterX() - port.getRealCenterX();
-                    canvas.currentObj.y += port2.getRealCenterY() - port.getRealCenterY();
+                    canvas.currentObj.setX( canvas.currentObj.getX()
+                            + ( port2.getRealCenterX() - port.getRealCenterX() ) );
+                    canvas.currentObj.setY( canvas.currentObj.getY()
+                            + ( port2.getRealCenterY() - port.getRealCenterY() ) );
                 }
             }
         }

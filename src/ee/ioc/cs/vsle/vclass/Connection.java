@@ -33,8 +33,8 @@ public class Connection implements Serializable {
 	 */
 	public static final float NEAR_DISTANCE = 5.0f;
 	
-	public Port beginPort;
-	public Port endPort;
+	private Port beginPort;
+	private Port endPort;
 	private boolean selected;
 	private ArrayList<Point> breakPoints = new ArrayList<Point>();
 	
@@ -50,7 +50,7 @@ public class Connection implements Serializable {
 	 * @param beginPort the first port the connection is connected to
 	 */
 	public Connection(Port beginPort) {
-		this.beginPort = beginPort;
+		this.setBeginPort( beginPort );
 	}
 
 	/**
@@ -59,8 +59,8 @@ public class Connection implements Serializable {
 	 * @param endPort the second port the connection is connected to
 	 */
 	public Connection(Port beginPort, Port endPort) {
-		this.beginPort = beginPort;
-		this.endPort = endPort;
+		this.setBeginPort( beginPort );
+		this.setEndPort( endPort );
 	} // ee.ioc.cs.editor.vclass.Connection
 
 	/**
@@ -70,8 +70,8 @@ public class Connection implements Serializable {
 	 * @param strict if true the connections is strict
 	 */
 	public Connection(Port beginPort, Port endPort, boolean strict) {
-		this.beginPort = beginPort;
-		this.endPort = endPort;
+		this.setBeginPort( beginPort );
+		this.setEndPort( endPort );
 		this.strict = strict;
 	} // ee.ioc.cs.editor.vclass.Connection
 
@@ -100,9 +100,9 @@ public class Connection implements Serializable {
 
 		if (breakPoints == null || breakPoints.size() < 1) {
 			// there is only one line between the start and end points
-			minDistance = VMath.pointDistanceFromLine(beginPort.getAbsoluteX(),
-					beginPort.getAbsoluteY(), endPort.getAbsoluteX(),
-					endPort.getAbsoluteY(), pointX, pointY);
+			minDistance = VMath.pointDistanceFromLine(getBeginPort().getAbsoluteX(),
+					getBeginPort().getAbsoluteY(), getEndPort().getAbsoluteX(),
+					getEndPort().getAbsoluteY(), pointX, pointY);
 			if (sindex != null)
 				sindex[0] = 0;
 		} else {
@@ -110,8 +110,8 @@ public class Connection implements Serializable {
 			Point p1 = breakPoints.get(0);
 			
 			// line from start point to the first breakpoint
-			minDistance = VMath.pointDistanceFromLine(beginPort.getAbsoluteX(),
-					beginPort.getAbsoluteY(), p1.x, p1.y, pointX, pointY);
+			minDistance = VMath.pointDistanceFromLine(getBeginPort().getAbsoluteX(),
+					getBeginPort().getAbsoluteY(), p1.x, p1.y, pointX, pointY);
 			if (sindex != null)
 				sindex[0] = 0;
 
@@ -134,7 +134,7 @@ public class Connection implements Serializable {
 			p2 = breakPoints.get(breakPoints.size() - 1);
 
 			distance = VMath.pointDistanceFromLine(p2.x, p2.y,
-					endPort.getAbsoluteX(), endPort.getAbsoluteY(),
+					getEndPort().getAbsoluteX(), getEndPort().getAbsoluteY(),
 					pointX, pointY);
 
 			if (distance < minDistance) {
@@ -252,13 +252,13 @@ public class Connection implements Serializable {
 		AttributesImpl attrs = new AttributesImpl();
 		
 		attrs.addAttribute("", "", "obj1", StringUtil.CDATA,
-				beginPort.getObject().getName());
+				getBeginPort().getObject().getName());
 		attrs.addAttribute("", "", "port1", StringUtil.CDATA,
-				beginPort.toString());
+				getBeginPort().toString());
 		attrs.addAttribute("", "", "obj2", StringUtil.CDATA,
-				endPort.getObject().getName());
+				getEndPort().getObject().getName());
 		attrs.addAttribute("", "", "port2", StringUtil.CDATA,
-				endPort.toString());
+				getEndPort().toString());
 
 		th.startElement("", "", "connection", attrs);
 		attrs.clear();
@@ -286,8 +286,8 @@ public class Connection implements Serializable {
 	 * @param g Graphics
 	 */
 	public void drawRelation(Graphics2D g) {
-		drawRelation(g, beginPort.getAbsoluteX(), beginPort.getAbsoluteY(),
-				endPort.getAbsoluteX(), endPort.getAbsoluteY());
+		drawRelation(g, getBeginPort().getAbsoluteX(), getBeginPort().getAbsoluteY(),
+				getEndPort().getAbsoluteX(), getEndPort().getAbsoluteY());
 	}
 
 	/**
@@ -300,7 +300,7 @@ public class Connection implements Serializable {
 	 * @param endY Y coordinate of the end point
 	 */
 	public void drawRelation(Graphics2D g, int endX, int endY) {
-		drawRelation(g, beginPort.getAbsoluteX(), beginPort.getAbsoluteY(),
+		drawRelation(g, getBeginPort().getAbsoluteX(), getBeginPort().getAbsoluteY(),
 				endX, endY);
 	}
 
@@ -438,8 +438,8 @@ public class Connection implements Serializable {
 	public boolean isRelclass() {
 		// the fist port should always be present,
 		// the second port can be missing while the connection is being added
-		return (beginPort.getObject() instanceof RelObj 
-				|| (endPort != null && endPort.getObject() instanceof RelObj));
+		return (getBeginPort().getObject() instanceof RelObj 
+				|| (getEndPort() != null && getEndPort().getObject() instanceof RelObj));
 	}
 
 	/**
@@ -471,4 +471,32 @@ public class Connection implements Serializable {
 
 		return sindex[0];
 	}
+
+    /**
+     * @param beginPort the beginPort to set
+     */
+    public void setBeginPort( Port beginPort ) {
+        this.beginPort = beginPort;
+    }
+
+    /**
+     * @return the beginPort
+     */
+    public Port getBeginPort() {
+        return beginPort;
+    }
+
+    /**
+     * @param endPort the endPort to set
+     */
+    public void setEndPort( Port endPort ) {
+        this.endPort = endPort;
+    }
+
+    /**
+     * @return the endPort
+     */
+    public Port getEndPort() {
+        return endPort;
+    }
 }

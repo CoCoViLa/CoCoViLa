@@ -206,7 +206,7 @@ public class EditorActionListener implements ActionListener {
             } else if ( e.getActionCommand().equals( Menu.INFO ) ) {
                 String message;
                 if ( Editor.getInstance().getCurrentPackage() != null ) {
-                    message = Editor.getInstance().getCurrentPackage().description;
+                    message = Editor.getInstance().getCurrentPackage().getDescription();
                 } else {
                     message = "No packages loaded";
                 }

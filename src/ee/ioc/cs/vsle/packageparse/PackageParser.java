@@ -241,7 +241,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 status = CLASS;
                 String type = attrs.getValue( ATR_TYPE );
                 if ( type != null && type.equals( VAL_RELATION ) ) {
-                    newClass.relation = true;
+                    newClass.setRelation( true );
                 }
 
                 newClass.setStatic( Boolean.parseBoolean( attrs.getValue( ATR_STATIC ) ) );
@@ -252,10 +252,10 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 String type = attrs.getValue( ATR_TYPE );
 
                 if ( showFields != null && showFields.equals( VAL_TRUE ) ) {
-                    newGraphics.showFields = true;
+                    newGraphics.setShowFields( true );
                 }
                 if ( type != null && type.equals( VAL_RELATION ) ) {
-                    newGraphics.relation = true;
+                    newGraphics.setRelation( true );
                 }
             } else if ( element.equals( EL_PORT ) ) {
                 status = PORT_OPEN;
@@ -276,7 +276,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                     String root = name.substring( 0, idx );
 
                     if ( newClass.getSpecField( root ) == null ) {
-                        collector.collectDiagnostic( "Field " + root + " in class " + newClass.name
+                        collector.collectDiagnostic( "Field " + root + " in class " + newClass.getName()
                                 + " is not declared in the specification, variable " + type + " " + name + " ignored " );
                         return;
                     }
@@ -286,13 +286,13 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 } else if ( !TypeUtil.TYPE_THIS.equalsIgnoreCase( name ) ) {
                     if ( cf == null ) {
 
-                        collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.name
+                        collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.getName()
                                 + " does not have the corresponding field in the specification" );
                     } else if ( !cf.getType().equals( type )
                             //type may be declared as "alias", however cf.getType() returns e.g. "double[]", ignore it
                             && !( cf.isAlias() && TypeUtil.TYPE_ALIAS.equals( type )) ) {
 
-                        collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.name
+                        collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.getName()
                                 + " does not match the field declared in the specification: " + cf.getType() + " " + cf.getName() );
                     }
                 }
@@ -328,7 +328,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                     String root = name.substring( 0, idx );
 
                     if ( newClass.getSpecField( root ) == null ) {
-                        collector.collectDiagnostic( "Field " + root + " in class " + newClass.name
+                        collector.collectDiagnostic( "Field " + root + " in class " + newClass.getName()
                                 + " is not declared in the specification, variable " + type + " " + name + " ignored " );
                         return;
                     }
@@ -340,12 +340,12 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 
                     if ( newField == null ) {
 
-                        collector.collectDiagnostic( "Field " + type + " " + name + " in class " + newClass.name
+                        collector.collectDiagnostic( "Field " + type + " " + name + " in class " + newClass.getName()
                                 + " is not declared in the specification" );
                         return;
                     } else if ( !newField.getType().equals( type ) ) {
 
-                        collector.collectDiagnostic( "Field " + type + " " + name + " in class " + newClass.name
+                        collector.collectDiagnostic( "Field " + type + " " + name + " in class " + newClass.getName()
                                 + " does not match the field declared in the specification: " + newField.getType() + " "
                                 + newField.getName() );
                         return;
@@ -482,7 +482,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             String val = attrs.getValue( ATR_X );
             int x, y, fixedX = 0, fixedY = 0;
             if ( val.endsWith( VAL_RF ) ) {
-                x = graphics.boundWidth;
+                x = graphics.getBoundWidth();
                 fixedX = x - Integer.parseInt( val.substring( 0, val.length() - 2 ) );
             } else if ( val.endsWith( VAL_F ) ) {
                 x = Integer.parseInt( val.substring( 0, val.length() - 1 ) );
@@ -492,7 +492,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             }
             val = attrs.getValue( ATR_Y );
             if ( val.endsWith( VAL_RF ) ) {
-                y = graphics.boundWidth;
+                y = graphics.getBoundWidth();
                 fixedY = y - Integer.parseInt( val.substring( 0, val.length() - 2 ) );
             } else if ( val.endsWith( VAL_F ) ) {
                 y = Integer.parseInt( val.substring( 0, val.length() - 1 ) );
@@ -545,7 +545,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             // fixed
             String val = attrs.getValue( ATR_X1 );
             if ( val.endsWith( VAL_RF ) ) {
-                x1 = graphics.boundWidth;
+                x1 = graphics.getBoundWidth();
                 fixedX1 = x1 - Integer.parseInt( val.substring( 0, val.length() - 2 ) );
             } else if ( val.endsWith( VAL_F ) ) {
                 x1 = Integer.parseInt( val.substring( 0, val.length() - 1 ) );
@@ -555,7 +555,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             }
             val = attrs.getValue( ATR_X2 );
             if ( val.endsWith( VAL_RF ) ) {
-                x2 = graphics.boundWidth;
+                x2 = graphics.getBoundWidth();
                 fixedX2 = x2 - Integer.parseInt( val.substring( 0, val.length() - 2 ) );
             } else if ( val.endsWith( VAL_F ) ) {
                 x2 = Integer.parseInt( val.substring( 0, val.length() - 1 ) );
@@ -565,7 +565,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             }
             val = attrs.getValue( ATR_Y1 );
             if ( val.endsWith( VAL_RF ) ) {
-                y1 = graphics.boundHeight;
+                y1 = graphics.getBoundHeight();
                 fixedY1 = y1 - Integer.parseInt( val.substring( 0, val.length() - 2 ) );
             } else if ( val.endsWith( VAL_F ) ) {
                 y1 = Integer.parseInt( val.substring( 0, val.length() - 1 ) );
@@ -575,7 +575,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             }
             val = attrs.getValue( ATR_Y2 );
             if ( val.endsWith( VAL_RF ) ) {
-                y2 = graphics.boundHeight;
+                y2 = graphics.getBoundHeight();
                 fixedY2 = y2 - Integer.parseInt( val.substring( 0, val.length() - 2 ) );
             } else if ( val.endsWith( VAL_F ) ) {
                 y2 = Integer.parseInt( val.substring( 0, val.length() - 1 ) );
@@ -608,7 +608,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
         public void endElement( String namespaceURI, String sName, String qName ) {
 
             if ( qName.equals( EL_CLASS ) ) {
-                pack.classes.add( newClass );
+                pack.getClasses().add( newClass );
             } else if ( qName.equals( EL_PORT ) ) {
                 if ( newPort.getOpenGraphics() == null ) {
                     newGraphics = new ClassGraphics();
@@ -642,8 +642,8 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                     // parse the coordinates and check if they are fixed or
                     // reverse fixed
                     if ( s.endsWith( VAL_RF ) ) {
-                        xs[i] = newGraphics.boundWidth;
-                        fxs[i] = newGraphics.boundWidth - Integer.parseInt( s.substring( 0, s.length() - 2 ) );
+                        xs[i] = newGraphics.getBoundWidth();
+                        fxs[i] = newGraphics.getBoundWidth() - Integer.parseInt( s.substring( 0, s.length() - 2 ) );
                     } else if ( s.endsWith( VAL_F ) ) {
                         xs[i] = Integer.parseInt( s.substring( 0, s.length() - 1 ) );
                         fxs[i] = -1;
@@ -653,8 +653,8 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                     }
                     s = polyYs.get( i );
                     if ( s.endsWith( VAL_RF ) ) {
-                        ys[i] = newGraphics.boundHeight;
-                        fys[i] = newGraphics.boundHeight - Integer.parseInt( s.substring( 0, s.length() - 2 ) );
+                        ys[i] = newGraphics.getBoundHeight();
+                        fys[i] = newGraphics.getBoundHeight() - Integer.parseInt( s.substring( 0, s.length() - 2 ) );
                     } else if ( s.endsWith( VAL_F ) ) {
                         ys[i] = Integer.parseInt( s.substring( 0, s.length() - 1 ) );
                         fys[i] = -1;
@@ -688,13 +688,13 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                     newClass.addGraphics( newGraphics );
                 }
             } else if ( EL_PAINTER.equals( element ) ) {
-                newClass.painterName = charBuf.toString();
+                newClass.setPainterName( charBuf.toString() );
                 pack.setPainters( true );
             } else if ( EL_ICON.equals( element ) ) {
-                newClass.icon = charBuf.toString();
+                newClass.setIcon( charBuf.toString() );
             } else if ( EL_DESCRIPTION.equals( element ) ) {
                 if ( status == PACKAGE )
-                    pack.description = charBuf.toString();
+                    pack.setDescription( charBuf.toString() );
                 else
                     newClass.setDescription( charBuf.toString() );
             } else if ( EL_NAME.equals( element ) ) {
@@ -702,19 +702,19 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 if ( status == PACKAGE )
                     pack.setName( charBuf.toString() );
                 else {// else we a reading a class field
-                    newClass.name = charBuf.toString();
+                    newClass.setName( charBuf.toString() );
 
                     Collection<ClassField> specFields;
 
                     try {
-                        specFields = SpecParser.getFields( path, newClass.name, ".java" );
+                        specFields = SpecParser.getFields( path, newClass.getName(), ".java" );
                         newClass.setSpecFields( specFields );
 
                     } catch ( IOException e ) {
 
-                        collector.collectDiagnostic( "Class " + newClass.name + " specified in package does not exist." );
+                        collector.collectDiagnostic( "Class " + newClass.getName() + " specified in package does not exist." );
                     } catch ( SpecParseException e ) {
-                        collector.collectDiagnostic( "Unable to parse the specification of class " + newClass.name );
+                        collector.collectDiagnostic( "Unable to parse the specification of class " + newClass.getName() );
                     }
                 }
             }

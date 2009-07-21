@@ -74,7 +74,7 @@ public class IconPort implements Cloneable, Serializable {
 	 * @return int - port center x coordinate.
 	 */
 	int getCenterX() {
-		return (x + openGraphics.boundX + (openGraphics.boundWidth) / 2);
+		return (x + openGraphics.getBoundX() + (openGraphics.getBoundWidth()) / 2);
 	} // getCenterX
 
 	/**

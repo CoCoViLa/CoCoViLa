@@ -90,9 +90,6 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
      * @see ee.ioc.cs.vsle.api.Scheme#repaint(int, int, int, int)
      */
     public void repaint(int x, int y, int width, int height) {
-        Canvas canvas = Editor.getInstance().getCurrentCanvas();
-        if (canvas != null)
-            canvas.repaint(x, y, width, height); // TODO repaint drawingarea
     }
 
     /*

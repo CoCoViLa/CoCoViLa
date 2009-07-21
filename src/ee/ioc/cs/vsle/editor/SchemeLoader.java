@@ -282,8 +282,8 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 
 					RelObj relObj = (RelObj) obj;
 					
-					relObj.endX = Integer.parseInt(endX);
-					relObj.endY = Integer.parseInt(endY);
+					relObj.setEndX( Integer.parseInt(endX) );
+					relObj.setEndY( Integer.parseInt(endY) );
                 }
 
 				obj.setXsize(Float.parseFloat(xsize));
@@ -377,11 +377,11 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
                     if ( obj instanceof RelObj ) {
                         Port port = obj.getPorts().get( 0 );
                         Connection con = port.getConnections().get( 0 );
-                        ( (RelObj) obj ).startPort = con.beginPort;
+                        ( (RelObj) obj ).setStartPort( con.getBeginPort() );
                         // ((RelObj)obj).startPort.obj = con.beginPort.obj;
                         port = obj.getPorts().get( 1 );
                         con = port.getConnections().get( 0 );
-                        ( (RelObj) obj ).endPort = con.endPort;
+                        ( (RelObj) obj ).setEndPort( con.getEndPort() );
 
                     }
                 }

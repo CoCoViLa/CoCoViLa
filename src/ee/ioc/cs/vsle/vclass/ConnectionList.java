@@ -94,8 +94,8 @@ public class ConnectionList extends ArrayList<Connection> {
 			Connection relation = (Connection) obj;
 			modified = super.remove(relation);
 			if (modified) {
-				relation.beginPort.getConnections().remove(relation);
-				relation.endPort.getConnections().remove(relation);
+				relation.getBeginPort().getConnections().remove(relation);
+				relation.getEndPort().getConnections().remove(relation);
 			}
 		}
 		return modified;
@@ -111,8 +111,8 @@ public class ConnectionList extends ArrayList<Connection> {
 
 		for (int i = 0; i < this.size(); i++) {
 			con = this.get(i);
-			if ((con.beginPort == p1 && con.endPort == p2)
-				|| (con.beginPort == p2 && con.endPort == p1)) {
+			if ((con.getBeginPort() == p1 && con.getEndPort() == p2)
+				|| (con.getBeginPort() == p2 && con.getEndPort() == p1)) {
 				remove(con);
 			}
 		}
@@ -141,11 +141,11 @@ public class ConnectionList extends ArrayList<Connection> {
 		if (!super.contains(con)) {
 			super.add(con);
 
-			assert !con.beginPort.getConnections().contains(con);
-			assert !con.endPort.getConnections().contains(con);
+			assert !con.getBeginPort().getConnections().contains(con);
+			assert !con.getEndPort().getConnections().contains(con);
 
-			con.beginPort.addConnection(con);
-			con.endPort.addConnection(con);
+			con.getBeginPort().addConnection(con);
+			con.getEndPort().addConnection(con);
 
 			modified = true;
 		}
@@ -187,8 +187,8 @@ public class ConnectionList extends ArrayList<Connection> {
 	@Override
 	public void clear() {
 		for (Connection con : this) {
-			con.beginPort.getConnections().remove(con);
-			con.endPort.getConnections().remove(con);
+			con.getBeginPort().getConnections().remove(con);
+			con.getEndPort().getConnections().remove(con);
 		}
 		super.clear();
 	}

@@ -131,22 +131,22 @@ public class SpecGenerator implements ISpecGenerator {
 		}
 		
 		for (Connection rel : relations) {
-			if (rel.endPort.getName().equals("any")) {
+			if (rel.getEndPort().getName().equals("any")) {
 				s.append(
-						OFFSET2 ).append( rel.endPort.getObject().getName() ).append( "." ).append( rel.beginPort.getName()
-						).append( " = " ).append( rel.beginPort.getObject().getName() ).append( "."
-						).append( rel.beginPort.getName() ).append( ";\n");
+						OFFSET2 ).append( rel.getEndPort().getObject().getName() ).append( "." ).append( rel.getBeginPort().getName()
+						).append( " = " ).append( rel.getBeginPort().getObject().getName() ).append( "."
+						).append( rel.getBeginPort().getName() ).append( ";\n");
 				
-			}  else if  (rel.beginPort.getName().equals("any")) {
+			}  else if  (rel.getBeginPort().getName().equals("any")) {
 				s.append(
-						OFFSET2 ).append( rel.endPort.getObject().getName() ).append( "." ).append( rel.endPort.getName()
-						).append( " = " ).append( rel.beginPort.getObject().getName() ).append( "."
-						).append( rel.endPort.getName() ).append( ";\n");
+						OFFSET2 ).append( rel.getEndPort().getObject().getName() ).append( "." ).append( rel.getEndPort().getName()
+						).append( " = " ).append( rel.getBeginPort().getObject().getName() ).append( "."
+						).append( rel.getEndPort().getName() ).append( ";\n");
 
-			} else if( rel.beginPort.isMulti() || rel.endPort.isMulti() ) {
+			} else if( rel.getBeginPort().isMulti() || rel.getEndPort().isMulti() ) {
 				
-				Port multi = rel.beginPort.isMulti() ? rel.beginPort : rel.endPort;
-				Port simple = !rel.beginPort.isMulti() ? rel.beginPort : rel.endPort;
+				Port multi = rel.getBeginPort().isMulti() ? rel.getBeginPort() : rel.getEndPort();
+				Port simple = !rel.getBeginPort().isMulti() ? rel.getBeginPort() : rel.getEndPort();
 				
 				String multiport = ( multi.getObject().isSuperClass() ? ""
                         : multi.getObject().getName() + "." ) + multi.getName();
@@ -160,18 +160,18 @@ public class SpecGenerator implements ISpecGenerator {
 				list.add( port );
 			} else {
 				String startObjName = 
-				    TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.beginPort.getName() ) 
-				        ? rel.beginPort.getObject().getName()
-				        : ( rel.beginPort.getObject().isSuperClass() ) 
-						    ? rel.beginPort.getName()
-							: rel.beginPort.getObject().getName() + "." + rel.beginPort.getName();
+				    TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.getBeginPort().getName() ) 
+				        ? rel.getBeginPort().getObject().getName()
+				        : ( rel.getBeginPort().getObject().isSuperClass() ) 
+						    ? rel.getBeginPort().getName()
+							: rel.getBeginPort().getObject().getName() + "." + rel.getBeginPort().getName();
 										
 				String endObjName = 
-				    TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.endPort.getName() ) 
-                        ? rel.endPort.getObject().getName()
-                        : ( rel.endPort.getObject().isSuperClass() )
-							? rel.endPort.getName()
-							: rel.endPort.getObject().getName() + "." + rel.endPort.getName();
+				    TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.getEndPort().getName() ) 
+                        ? rel.getEndPort().getObject().getName()
+                        : ( rel.getEndPort().getObject().isSuperClass() )
+							? rel.getEndPort().getName()
+							: rel.getEndPort().getObject().getName() + "." + rel.getEndPort().getName();
 				
 				s.append( OFFSET2 ).append( endObjName ).append( " = " ).append( startObjName ).append( ";\n" );
 			}

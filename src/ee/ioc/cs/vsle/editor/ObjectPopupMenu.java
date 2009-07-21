@@ -81,7 +81,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         itemDrawPorts.addActionListener( this );
         this.add( itemDrawPorts );
 
-        if (object != null && object.className != null) {
+        if (object != null && object.getClassName() != null) {
             itemViewCode = new JMenuItem( Menu.VIEWCODE );
             itemViewCode.addActionListener( this );
             itemViewCode.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK ) );
@@ -98,7 +98,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         // itemMakeClass.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK ) );
         // this.add( itemMakeClass );
 
-        if (object != null && object.className != null) {
+        if (object != null && object.getClassName() != null) {
             this.add(makeSubmenuOrder());
         }
 

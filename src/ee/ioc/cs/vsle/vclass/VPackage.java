@@ -17,10 +17,10 @@ import ee.ioc.cs.vsle.util.FileFuncs.*;
 public class VPackage implements ee.ioc.cs.vsle.api.Package {
 
     private String name;
-    public String description;
+    private String description;
     private String path;
     private String lastScheme;
-    public ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
+    private ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
     private PackageClassLoader classLoader;
 
     /**
@@ -41,9 +41,9 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
 	public boolean hasClass(String className) {
 		PackageClass pClass;
 
-		for (int i = 0; i < classes.size(); i++) {
-			pClass = classes.get(i);
-			if (pClass.name.equals(className)) {
+		for (int i = 0; i < getClasses().size(); i++) {
+			pClass = getClasses().get(i);
+			if (pClass.getName().equals(className)) {
 				return true;
 			}
 		}
@@ -56,11 +56,9 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
 	 * @return the specified class from the package.
 	 */
 	public PackageClass getClass(String className) {
-		PackageClass pClass;
 
-		for (int i = 0; i < classes.size(); i++) {
-			pClass = classes.get(i);
-			if (pClass.name.equals(className)) {
+		for (PackageClass pClass : getClasses()) {
+			if (pClass.getName().equals(className)) {
 				return pClass;
 			}
 		}
@@ -173,5 +171,26 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
     @Override
     public int hashCode() {
         return path.hashCode();
+    }
+
+    /**
+     * @param description the description to set
+     */
+    public void setDescription( String description ) {
+        this.description = description;
+    }
+
+    /**
+     * @return the description
+     */
+    public String getDescription() {
+        return description;
+    }
+
+    /**
+     * @return the classes
+     */
+    public ArrayList<PackageClass> getClasses() {
+        return classes;
     }
 }

@@ -10,7 +10,7 @@ import static ee.ioc.cs.vsle.util.TypeUtil.*;
 public class GObjGroup extends GObj implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-	public ArrayList<GObj> objects;
+	private ArrayList<GObj> objects;
 
 	public GObjGroup(ArrayList<GObj> objects) {
 		super();
@@ -23,24 +23,24 @@ public class GObjGroup extends GObj implements Serializable {
 		GObj obj;
 
 		obj = objects.get(0);
-		x1 = obj.getX() + obj.portOffsetX1;
-		y1 = obj.getY() + obj.portOffsetY1;
-		x2 = obj.getX() + obj.getRealWidth() + obj.portOffsetX2;
-		y2 = obj.getY() + obj.getRealHeight() + obj.portOffsetY2;
+		x1 = obj.getX() + obj.getPortOffsetX1();
+		y1 = obj.getY() + obj.getPortOffsetY1();
+		x2 = obj.getX() + obj.getRealWidth() + obj.getPortOffsetX2();
+		y2 = obj.getY() + obj.getRealHeight() + obj.getPortOffsetY2();
 
 		for (int i = 1; i < objects.size(); i++) {
 			obj = objects.get(i);
 			if (obj.getX() < x1) {
-				x1 = obj.getX() + obj.portOffsetX1;
+				x1 = obj.getX() + obj.getPortOffsetX1();
 			}
 			if (obj.getY() < y1) {
-				y1 = obj.getY() + obj.portOffsetY1;
+				y1 = obj.getY() + obj.getPortOffsetY1();
 			}
 			if (obj.getY() + obj.getRealHeight() > y2) {
-				y2 = obj.getY() + obj.getRealHeight() + obj.portOffsetX2;
+				y2 = obj.getY() + obj.getRealHeight() + obj.getPortOffsetX2();
 			}
 			if (obj.getX() + obj.getRealWidth() > x2) {
-				x2 = obj.getX() + obj.getRealWidth() + obj.portOffsetY2;
+				x2 = obj.getX() + obj.getRealWidth() + obj.getPortOffsetY2();
 
 			}
 		}
@@ -50,8 +50,8 @@ public class GObjGroup extends GObj implements Serializable {
 		setWidth(x2 - x1);
 		for (int i = 0; i < objects.size(); i++) {
 			obj = objects.get(i);
-			obj.difWithMasterX = obj.getX() - getX();
-			obj.difWithMasterY = obj.getY() - getY();
+			obj.setDifWithMasterX( obj.getX() - getX() );
+			obj.setDifWithMasterY( obj.getY() - getY() );
 		}
 	}
 
@@ -186,7 +186,7 @@ public class GObjGroup extends GObj implements Serializable {
 	public void setXsize(float s) {
 		float change = s / getXsize();
 
-		Xsize = s;
+		super.setXsize( s );
 
 		GObj obj;
 
@@ -194,7 +194,7 @@ public class GObjGroup extends GObj implements Serializable {
 			obj = objects.get(j);
 
 			obj.setMultXSize(change);
-			obj.setX(getX() + (int) (getXsize() * obj.difWithMasterX));
+			obj.setX(getX() + (int) (getXsize() * obj.getDifWithMasterX()));
 		}
 	}
 
@@ -203,15 +203,15 @@ public class GObjGroup extends GObj implements Serializable {
 	public void setYsize(float s) {
 		float change = s / getYsize();
 
-		Ysize = s;
-
+		super.setYsize( s );
+		
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
 			obj = objects.get(j);
 
 			obj.setMultYSize(change);
-			obj.setY(getY() + (int) (getYsize() * obj.difWithMasterY));
+			obj.setY(getY() + (int) (getYsize() * obj.getDifWithMasterY()));
 		}
 	}
 
@@ -227,7 +227,7 @@ public class GObjGroup extends GObj implements Serializable {
 			obj = objects.get(j);
 
 			obj.setMultYSize(change);
-			obj.setY(getY() + (int) (getYsize() * obj.difWithMasterY));
+			obj.setY(getY() + (int) (getYsize() * obj.getDifWithMasterY()));
 		}
 	}
 
@@ -243,7 +243,7 @@ public class GObjGroup extends GObj implements Serializable {
 			obj = objects.get(j);
 
 			obj.setMultXSize(change);
-			obj.setX(getX() + (int) (getXsize() * obj.difWithMasterX));
+			obj.setX(getX() + (int) (getXsize() * obj.getDifWithMasterX()));
 		}
 	}
 
@@ -326,22 +326,22 @@ public class GObjGroup extends GObj implements Serializable {
 		Connection rel;
 		for (int j = 0; j < relations.size(); j++) {
 			rel = relations.get(j);
-			if (this.includesObject(rel.endPort.getObject()) && this.includesObject(rel.beginPort.getObject())) {
-				if (rel.endPort.getName().equals("any")) {
+			if (this.includesObject(rel.getEndPort().getObject()) && this.includesObject(rel.getBeginPort().getObject())) {
+				if (rel.getEndPort().getName().equals("any")) {
 					s.append(
-						"    " + rel.endPort.getObject().getName() + "." + rel.beginPort.getName()
-						+ " = " + rel.beginPort.getObject().getName() + "."
-						+ rel.beginPort.getName() + ";\n");
-				} else if (rel.beginPort.getName().equals("any")) {
+						"    " + rel.getEndPort().getObject().getName() + "." + rel.getBeginPort().getName()
+						+ " = " + rel.getBeginPort().getObject().getName() + "."
+						+ rel.getBeginPort().getName() + ";\n");
+				} else if (rel.getBeginPort().getName().equals("any")) {
 					s.append(
-						"    " + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
-						+ " = " + rel.beginPort.getObject().getName() + "."
-						+ rel.endPort.getName() + ";\n");
+						"    " + rel.getEndPort().getObject().getName() + "." + rel.getEndPort().getName()
+						+ " = " + rel.getBeginPort().getObject().getName() + "."
+						+ rel.getEndPort().getName() + ";\n");
 				} else {
 					s.append(
-						"    " + rel.endPort.getObject().getName() + "." + rel.endPort.getName()
-						+ " = " + rel.beginPort.getObject().getName() + "."
-						+ rel.beginPort.getName() + ";\n");
+						"    " + rel.getEndPort().getObject().getName() + "." + rel.getEndPort().getName()
+						+ " = " + rel.getBeginPort().getObject().getName() + "."
+						+ rel.getBeginPort().getName() + ";\n");
 				}
 			}
 		}

@@ -55,31 +55,31 @@ public class Palette extends PaletteBase {
         classPanel.setLayout(new BoxLayout(classPanel, BoxLayout.LINE_AXIS));
 
         // read package info and add it to the palette
-        for (int i = 0; i < vPackage.classes.size(); i++) {
-            PackageClass pClass = vPackage.classes.get(i);
+        for (int i = 0; i < vPackage.getClasses().size(); i++) {
+            PackageClass pClass = vPackage.getClasses().get(i);
 
             ImageIcon icon;
-            if ("default.gif".equals(pClass.icon)) {
+            if ("default.gif".equals(pClass.getIcon())) {
                 icon = FileFuncs.getImageIcon("images/default.gif", false);
             } else {
                 icon = FileFuncs.getImageIcon(canvas.getWorkDir()
-                        + pClass.icon, true);
+                        + pClass.getIcon(), true);
             }
 
             String actionCmd;
-            if (pClass.relation == true) {
+            if (pClass.isRelation() == true) {
                 // to denote a class which is a relation
-                actionCmd = State.addRelObjPrefix + pClass.name;
+                actionCmd = State.addRelObjPrefix + pClass.getName();
             } else {
-                actionCmd = pClass.name;
+                actionCmd = pClass.getName();
             }
 
-            JToggleButton button = createButton(icon, pClass.name + " "
+            JToggleButton button = createButton(icon, pClass.getName() + " "
                     + pClass.getDescription(), actionCmd);
 
             classPanel.add(button);
 
-            if (i < vPackage.classes.size() - 1) {
+            if (i < vPackage.getClasses().size() - 1) {
                 classPanel.add(Box.createRigidArea(BUTTON_SPACE));
             }
         }

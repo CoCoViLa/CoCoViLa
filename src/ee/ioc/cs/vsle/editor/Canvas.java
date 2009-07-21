@@ -212,7 +212,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
                 obj.setY( obj.getY() + dy );
 
                 for ( Connection con : obj.getConnections() ) {
-                    if ( selected.contains( con.beginPort.getObject() ) && selected.contains( con.endPort.getObject() ) ) {
+                    if ( selected.contains( con.getBeginPort().getObject() ) && selected.contains( con.getEndPort().getObject() ) ) {
 
                         con.move( dx, dy );
                     }
@@ -308,7 +308,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
         @Override
         public String getPresentationName() {
-            return "Insert " + object.className;
+            return "Insert " + object.getClassName();
         }
 
         @Override
@@ -664,7 +664,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         // if both endpoints of a connection are moved
         // then move the breakpoints also
         for ( Connection con : connections ) {
-            if ( selectedObjs.contains( con.beginPort.getObject() ) && selectedObjs.contains( con.endPort.getObject() ) ) {
+            if ( selectedObjs.contains( con.getBeginPort().getObject() ) && selectedObjs.contains( con.getEndPort().getObject() ) ) {
                 con.move( moveX, moveY );
             }
         }
@@ -712,15 +712,15 @@ public class Canvas extends JPanel implements ISchemeContainer {
         if ( currentObj instanceof RelObj ) {
             RelObj obj = (RelObj) currentObj;
 
-            obj.endPort = endPort;
+            obj.setEndPort( endPort );
 
-            obj.startPort.setSelected( false );
-            obj.endPort.setSelected( false );
+            obj.getStartPort().setSelected( false );
+            obj.getEndPort().setSelected( false );
 
             ArrayList<Port> ports = currentObj.getPorts();
 
             newConns = new ArrayList<Connection>( 2 );
-            newConns.add( new Connection( obj.startPort, ports.get( 0 ) ) );
+            newConns.add( new Connection( obj.getStartPort(), ports.get( 0 ) ) );
             newConns.add( new Connection( ports.get( 1 ), endPort ) );
             connections.addAll( newConns );
 
@@ -764,7 +764,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
                     boolean ignore = false;
 
                     for ( Connection c : object.getConnections() ) {
-                        if ( c.isStrict() && ( c.beginPort == port2 || c.endPort == port2 ) ) {
+                        if ( c.isStrict() && ( c.getBeginPort() == port2 || c.getEndPort() == port2 ) ) {
                             ignore = true;
                             break;
                         }
@@ -773,7 +773,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
                     if ( !ignore && conns != null ) {
                         for ( Connection c : conns ) {
-                            if ( c.beginPort == port2 || c.endPort == port2 ) {
+                            if ( c.getBeginPort() == port2 || c.getEndPort() == port2 ) {
                                 ignore = true;
                                 break;
                             }
@@ -805,7 +805,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
         for ( Port port : object.getPorts() ) {
             for ( Connection con : port.getConnections() ) {
-                if ( con.isStrict() && ! ( con.beginPort.contains( con.endPort ) || con.endPort.contains( con.beginPort ) ) ) {
+                if ( con.isStrict() && ! ( con.getBeginPort().contains( con.getEndPort() ) || con.getEndPort().contains( con.getBeginPort() ) ) ) {
 
                     if ( removed == null )
                         removed = new ArrayList<Connection>();
@@ -954,7 +954,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         // clone every selected object
         for ( GObj obj : objects.getSelected() ) {
             GObj newObj = obj.clone();
-            newObj.setPosition( newObj.x + 20, newObj.y + 20 );
+            newObj.setPosition( newObj.getX() + 20, newObj.getY() + 20 );
             newObjects.addAll( newObj.getComponents() );
 
             // create new and fresh class painter for cloned object
@@ -975,11 +975,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
             if ( obj instanceof RelObj ) {
                 RelObj robj = (RelObj) obj;
                 for ( GObj obj2 : newObjects ) {
-                    if ( robj.startPort.getObject().getName().equals( obj2.getName() ) ) {
-                        robj.startPort.setObject( obj2 );
+                    if ( robj.getStartPort().getObject().getName().equals( obj2.getName() ) ) {
+                        robj.getStartPort().setObject( obj2 );
                     }
-                    if ( robj.endPort.getObject().getName().equals( obj2.getName() ) ) {
-                        robj.endPort.setObject( obj2 );
+                    if ( robj.getEndPort().getObject().getName().equals( obj2.getName() ) ) {
+                        robj.getEndPort().setObject( obj2 );
                     }
                 }
             }
@@ -992,14 +992,14 @@ public class Canvas extends JPanel implements ISchemeContainer {
             GObj endObj = null;
 
             for ( GObj obj : newObjects ) {
-                if ( obj.getName().equals( con.beginPort.getObject().getName() ) )
+                if ( obj.getName().equals( con.getBeginPort().getObject().getName() ) )
                     beginObj = obj;
-                if ( obj.getName().equals( con.endPort.getObject().getName() ) )
+                if ( obj.getName().equals( con.getEndPort().getObject().getName() ) )
                     endObj = obj;
 
                 if ( beginObj != null && endObj != null ) {
-                    Connection newCon = new Connection( beginObj.getPorts().get( con.beginPort.getNumber() ), endObj.getPorts()
-                            .get( con.endPort.getNumber() ), con.isStrict() );
+                    Connection newCon = new Connection( beginObj.getPorts().get( con.getBeginPort().getNumber() ), endObj.getPorts()
+                            .get( con.getEndPort().getNumber() ), con.isStrict() );
 
                     for ( Point p : con.getBreakPoints() )
                         newCon.addBreakPoint( new Point( p.x + 20, p.y + 20 ) );
@@ -1011,7 +1011,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         }
 
         for ( GObj obj : newObjects )
-            obj.setName( genObjectName( vPackage.getClass( obj.className ), obj ) );
+            obj.setName( genObjectName( vPackage.getClass( obj.getClassName() ), obj ) );
 
         objects.addAll( newObjects );
 
@@ -1337,7 +1337,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
                 // adding relation object, first port connected
 
                 RelObj obj = (RelObj) currentObj;
-                Point point = VMath.getRelClassStartPoint( obj.startPort, mouseX, mouseY );
+                Point point = VMath.getRelClassStartPoint( obj.getStartPort(), mouseX, mouseY );
                 obj.setEndPoints( point.x, point.y, mouseX, mouseY );
 
                 currentObj.drawClassGraphics( g2, scale );
@@ -1367,7 +1367,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         
         if( obj != null ) {
             
-            message += " : " + obj.className + " " + obj.getName();
+            message += " : " + obj.getClassName() + " " + obj.getName();
             
             Port port = obj.portContains( x, y );
             
@@ -1567,10 +1567,10 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * @param endPort the end port of the connection
      */
     public void addCurrentConnection( Port endPort ) {
-        currentCon.endPort = endPort;
+        currentCon.setEndPort( endPort );
         addConnection( currentCon );
         endPort.setSelected( false );
-        currentCon.beginPort.setSelected( false );
+        currentCon.getBeginPort().setSelected( false );
         currentCon = null;
         setActionInProgress( false );
     }
@@ -1593,7 +1593,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      */
     private void cancelAddingConnection() {
         if ( currentCon != null ) {
-            currentCon.beginPort.setSelected( false );
+            currentCon.getBeginPort().setSelected( false );
             currentCon = null;
             drawingArea.repaint();
         }
@@ -1623,7 +1623,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
         createAndInitNewObject( State.getClassName( mListener.state ) );
 
-        ( (RelObj) currentObj ).startPort = port;
+        ( (RelObj) currentObj ).setStartPort( port );
         port.setSelected( true );
 
         setActionInProgress( true );
@@ -1691,7 +1691,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         if ( currentObj != null ) {
             if ( currentObj instanceof RelObj ) {
                 RelObj obj = (RelObj) currentObj;
-                obj.startPort.setSelected( false );
+                obj.getStartPort().setSelected( false );
             }
             currentObj = null;
             currentPainter = null;
@@ -1721,7 +1721,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * @return true if a relation class is being added, false otherwise
      */
     public boolean isRelObjBeingAdded() {
-        return currentObj != null && currentObj instanceof RelObj && ( (RelObj) currentObj ).startPort != null;
+        return currentObj != null && currentObj instanceof RelObj && ( (RelObj) currentObj ).getStartPort() != null;
     }
 
     /**
@@ -1731,7 +1731,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * @return true if a connection is being added, false otherwise
      */
     public boolean isConnectionBeingAdded() {
-        return currentCon != null && currentCon.beginPort != null;
+        return currentCon != null && currentCon.getBeginPort() != null;
     }
 
     /**
@@ -1813,7 +1813,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     private String genObjectName( PackageClass pClass, GObj obj ) {
         String name;
         do {
-            name = pClass.name + "_" + pClass.getNextSerial();
+            name = pClass.getName() + "_" + pClass.getNextSerial();
         } while ( !objects.isUniqueName( name, obj ) );
         return name;
     }

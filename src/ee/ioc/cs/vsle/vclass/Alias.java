@@ -44,8 +44,8 @@ public class Alias extends ClassField {
 		vars.add(f);
 	} // addVar
 
-	public boolean acceptsType( String type ) {
-		return TYPE_OBJECT.equals( this.getVarType() ) || type.equals( this.getVarType() );
+	public boolean acceptsType( String _type ) {
+		return TYPE_OBJECT.equals( this.getVarType() ) || _type.equals( this.getVarType() );
 	}
 	
 	/**
@@ -128,7 +128,8 @@ public class Alias extends ClassField {
 	 * NB! FOR DEBUG ONLY
 	 * @return String - alias's name.
 	 */
-	public String toString() {
+	@Override
+    public String toString() {
 		return "(alias)" + super.toString();
 	} // toString
 
@@ -154,7 +155,8 @@ public class Alias extends ClassField {
 		return type;
 	}
 	
-	public String getType() {
+	@Override
+    public String getType() {
 		return type + "[]";
 	}
 
@@ -184,11 +186,13 @@ public class Alias extends ClassField {
 		return vars.isEmpty();
 	}
 
-	public boolean isAlias() {
+	@Override
+    public boolean isAlias() {
 		return true;
 	} // isAlias
 	
-	public Alias clone() {
+	@Override
+    public Alias clone() {
 		return (Alias) super.clone();
 	} // clone
 

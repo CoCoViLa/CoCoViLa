@@ -6,23 +6,23 @@ import ee.ioc.cs.vsle.graphics.Shape;
 
 public class PackageClass implements Serializable {
     private static final long serialVersionUID = 1L;
-	public String name;
-	public String icon;
+	private String name;
+	private String icon;
 	//fields declared in the xml
     private Map<String, ClassField> propFields = new LinkedHashMap<String, ClassField>();
     //fields declared in the specification of the corresponding java class
     private Map<String, ClassField> specFields = new LinkedHashMap<String, ClassField>();
-	public ClassGraphics graphics;
-	public ArrayList<Port> ports = new ArrayList<Port>();
+	private ClassGraphics graphics;
+	private ArrayList<Port> ports = new ArrayList<Port>();
 	private String description;
-	public boolean relation = false;
-    public String painterName;
+	private boolean relation = false;
+    private String painterName;
     private ClassPainter painterPrototype;
     private int sequence;
     private boolean isStatic; // should the class be static by default?
 
 	public PackageClass(String name) {
-		this.name = name;
+		this.setName( name );
 	}
 
 	public PackageClass() {
@@ -31,11 +31,11 @@ public class PackageClass implements Serializable {
 
 	@Override
 	public String toString() {
-		return name;
+		return getName();
 	}
 
 	public void addPort(Port port) {
-		ports.add(port);
+		getPorts().add(port);
 	}
 
 	public void addGraphics(ClassGraphics gr) {
@@ -76,11 +76,11 @@ public class PackageClass implements Serializable {
 	 * @return a new visual instance of this package class
 	 */
 	public GObj getNewInstance() {
-		GObj obj = relation ? new RelObj() : new GObj();
+		GObj obj = isRelation() ? new RelObj() : new GObj();
 
-		obj.setWidth(graphics.getWidth());
-		obj.setHeight(graphics.getHeight());
-		obj.setClassName(name);
+		obj.setWidth(graphics.getBoundWidth());
+		obj.setHeight(graphics.getBoundHeight());
+		obj.setClassName(getName());
 		obj.setStatic(isStatic);
 
 		// deep clone fields list
@@ -92,36 +92,36 @@ public class PackageClass implements Serializable {
             obj.addSpecField( newField );
         }
         
-		obj.shapes = new ArrayList<Shape>(graphics.shapes.size());
-		for (Shape shape : graphics.shapes)
-			obj.shapes.add(shape.clone());
+		obj.setShapes( new ArrayList<Shape>(graphics.getShapes().size()) );
+		for (Shape shape : graphics.getShapes())
+			obj.getShapes().add(shape.clone());
 
-		ArrayList<Port> newPorts = new ArrayList<Port>(ports.size());
-		for (Port port : ports) {
+		ArrayList<Port> newPorts = new ArrayList<Port>(getPorts().size());
+		for (Port port : getPorts()) {
 			port = port.clone();
 			port.setObject(obj);
 			newPorts.add(port);
 
-			if (port.x + port.getOpenGraphics().boundX < obj.portOffsetX1) {
-				obj.portOffsetX1 = port.x + port.getOpenGraphics().boundX;
+			if (port.getX() + port.getOpenGraphics().getBoundX() < obj.getPortOffsetX1()) {
+				obj.setPortOffsetX1( port.getX() + port.getOpenGraphics().getBoundX() );
 			}
 
-			if (port.y + port.getOpenGraphics().boundY < obj.portOffsetY1) {
-				obj.portOffsetY1 = port.y + port.getOpenGraphics().boundY;
+			if (port.getY() + port.getOpenGraphics().getBoundY() < obj.getPortOffsetY1()) {
+				obj.setPortOffsetY1( port.getY() + port.getOpenGraphics().getBoundY() );
 			}
 
-			if (port.x + port.getOpenGraphics().boundWidth > obj.width
-					+ obj.portOffsetX2) {
-				obj.portOffsetX2 = Math.max((port.x
-						+ port.getOpenGraphics().boundX 
-						+ port.getOpenGraphics().boundWidth) - obj.width, 0);
+			if (port.getX() + port.getOpenGraphics().getBoundWidth() > obj.getWidth()
+					+ obj.getPortOffsetX2()) {
+				obj.setPortOffsetX2( Math.max((port.getX()
+						+ port.getOpenGraphics().getBoundX() 
+						+ port.getOpenGraphics().getBoundWidth()) - obj.getWidth(), 0) );
 			}
 
-			if (port.y + port.getOpenGraphics().boundHeight > obj.height
-					+ obj.portOffsetY2) {
-				obj.portOffsetY2 = Math.max((port.y
-						+ port.getOpenGraphics().boundY 
-						+ port.getOpenGraphics().boundHeight) - obj.height, 0);
+			if (port.getY() + port.getOpenGraphics().getBoundHeight() > obj.getHeight()
+					+ obj.getPortOffsetY2()) {
+				obj.setPortOffsetY2( Math.max((port.getY()
+						+ port.getOpenGraphics().getBoundY() 
+						+ port.getOpenGraphics().getBoundHeight()) - obj.getHeight(), 0) );
 			}
 
 			port.setConnections(new ArrayList<Connection>());
@@ -183,8 +183,8 @@ public class PackageClass implements Serializable {
     /**
      * @return the specFields
      */
-    public ClassField getSpecField( String name ) {
-        return specFields.get( name );
+    public ClassField getSpecField( String specName ) {
+        return specFields.get( specName );
     }
 
     /**
@@ -207,4 +207,67 @@ public class PackageClass implements Serializable {
 	public String getDescription() {
 		return description;
 	}
+
+    /**
+     * @param name the name to set
+     */
+    public void setName( String name ) {
+        this.name = name;
+    }
+
+    /**
+     * @return the name
+     */
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * @param icon the icon to set
+     */
+    public void setIcon( String icon ) {
+        this.icon = icon;
+    }
+
+    /**
+     * @return the icon
+     */
+    public String getIcon() {
+        return icon;
+    }
+
+    /**
+     * @return the ports
+     */
+    public ArrayList<Port> getPorts() {
+        return ports;
+    }
+
+    /**
+     * @param relation the relation to set
+     */
+    public void setRelation( boolean relation ) {
+        this.relation = relation;
+    }
+
+    /**
+     * @return the relation
+     */
+    public boolean isRelation() {
+        return relation;
+    }
+
+    /**
+     * @param painterName the painterName to set
+     */
+    public void setPainterName( String painterName ) {
+        this.painterName = painterName;
+    }
+
+    /**
+     * @return the painterName
+     */
+    public String getPainterName() {
+        return painterName;
+    }
 }
