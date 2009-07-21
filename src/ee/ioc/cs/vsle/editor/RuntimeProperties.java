@@ -12,7 +12,9 @@ import ee.ioc.cs.vsle.util.*;
 public class RuntimeProperties {
 
     public final static String SCHEME_DTD = "scheme.dtd";
-    public final static String PACKAGE_DTD = "package2.dtd";
+    public final static String PACKAGE_DTD = "package.dtd";
+    public final static String TABLE_SCHEMA = "table.xsd";
+    public final static String SCHEMA_LOC = "http://www.cs.ioc.ee/cocovila/dtd/";
     public final static String PACKAGE_LOCATOR = "package.locator";
 
     public static final String APP_PROPS_FILE_NAME = "config.xml";

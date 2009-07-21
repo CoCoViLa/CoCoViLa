@@ -39,6 +39,7 @@ public class Text extends Shape implements Serializable {
      * @param s1 float - set size using zoom multiplication.
      * @param s2 float - set size using zoom multiplication.
      */
+    @Override
     public void setMultSize( float s1, float s2 ) {
         setX( getX() * (int) s1 / (int) s2 );
         setY( getY() * (int) s1 / (int) s2 );
@@ -55,6 +56,7 @@ public class Text extends Shape implements Serializable {
      * @param deltaH int - change of object height.
      * @param cornerClicked int - number of the clicked corner.
      */
+    @Override
     public void resize( int deltaW, int deltaH, int cornerClicked ) {
     } // resize
 
@@ -74,6 +76,7 @@ public class Text extends Shape implements Serializable {
      * @param pointY int - mouse y coordinate.
      * @return int - corner number the mouse was clicked in.
      */
+    @Override
     public int controlRectContains( int pointX, int pointY ) {
         if ( pointX >= getX() && pointY >= getY() && pointX <= getX() + 4 && pointY <= getY() + 4 ) {
             return 1;
@@ -129,6 +132,7 @@ public class Text extends Shape implements Serializable {
         return fixedX;
     }
 
+    @Override
     public boolean contains( int pointX, int pointY ) {
         if ( pointX >= getX() && pointX <= getX() + this.w && pointY >= getY() - this.h && pointY <= getY() ) {
             return true;
@@ -136,10 +140,12 @@ public class Text extends Shape implements Serializable {
         return false;
     } // contains
 
+    @Override
     public boolean isInside( int x1, int y1, int x2, int y2 ) {
         return getX() >= x1 && getY() >= y1 && getX() + this.w <= x2 && getY() - this.h <= y2;
     } // isInside
 
+    @Override
     public boolean isInsideRect( int x1, int y1, int x2, int y2 ) {
         if ( x1 < getX() && y1 < getY() && x2 > getX() + this.w && y2 > getY() + this.h ) {
             return true;
@@ -169,6 +175,7 @@ public class Text extends Shape implements Serializable {
      * @param boundingboxY - y coordinate of the bounding box.
      * @return String - specification of a shape.
      */
+    @Override
     public String toFile( int boundingboxX, int boundingboxY ) {
         int colorInt = 0;
 
@@ -180,6 +187,7 @@ public class Text extends Shape implements Serializable {
                 + getFont().getSize() + "\" transparency=\"" + getTransparency() + "\"/>\n";
     } // toFile
 
+    @Override
     public String toText() {
         int colorInt = 0;
 
@@ -190,6 +198,7 @@ public class Text extends Shape implements Serializable {
                 + getColor().getTransparency() + ":" + getText();
     } // toText
 
+    @Override
     public void draw( int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2 ) {
 
         java.awt.font.FontRenderContext frc = g2.getFontRenderContext();
@@ -273,6 +282,7 @@ public class Text extends Shape implements Serializable {
 
     }
 
+    @Override
     public Text clone() {
         return (Text) super.clone();
     } // clone

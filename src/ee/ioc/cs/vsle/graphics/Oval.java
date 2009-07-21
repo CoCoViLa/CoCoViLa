@@ -8,7 +8,7 @@ public class Oval extends Shape implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    double rotation = 0.0;
+    private double rotation = 0.0;
 
     public Oval( int x, int y, int width, int height, int colorInt, boolean fill, float strokeWidth, int transp, float lineType ) {
         this( x, y, width, height, colorInt, fill, strokeWidth, transp, lineType, false );
@@ -29,6 +29,7 @@ public class Oval extends Shape implements Serializable {
      * @param boundingboxY - y coordinate of the bounding box.
      * @return String - specification of a shape.
      */
+    @Override
     public String toFile( int boundingboxX, int boundingboxY ) {
 
         int colorInt = 0;
@@ -42,6 +43,7 @@ public class Oval extends Shape implements Serializable {
                 + getTransparency() + "\"/>\n";
     } // toFile
 
+    @Override
     public String toText() {
 
         int colorInt = 0;
@@ -61,6 +63,7 @@ public class Oval extends Shape implements Serializable {
      * @param pointY int - mouse y coordinate.
      * @return int - corner number the mouse was clicked in.
      */
+    @Override
     public int controlRectContains( int pointX, int pointY ) {
         if ( pointX >= getX() && pointY >= getY() && pointX <= getX() + 4 && pointY <= getY() + 4 ) {
             return 1;
@@ -78,6 +81,7 @@ public class Oval extends Shape implements Serializable {
         return 0;
     } // controlRectContains
 
+    @Override
     public void draw( int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2 ) {
         g2.setStroke( getStroke() );
         g2.setColor( getColor() );
@@ -106,6 +110,7 @@ public class Oval extends Shape implements Serializable {
 
     } // draw
 
+    @Override
     public Oval clone() {
         return (Oval) super.clone();
     } // clone
@@ -114,6 +119,20 @@ public class Oval extends Shape implements Serializable {
     public Shape getCopy() {
         return new Oval( getX(), getY(), getWidth(), getHeight(), getColor().getRGB(), 
                 isFilled(), getStrokeWidth(), getTransparency(), getLineType() );
+    }
+
+    /**
+     * @param rotation the rotation to set
+     */
+    void setRotation( double rotation ) {
+        this.rotation = rotation;
+    }
+
+    /**
+     * @return the rotation
+     */
+    double getRotation() {
+        return rotation;
     }
 
 }

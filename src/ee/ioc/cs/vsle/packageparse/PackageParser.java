@@ -5,7 +5,6 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
-import javax.swing.*;
 import javax.xml.parsers.*;
 
 import org.xml.sax.*;
@@ -34,7 +33,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                     return new InputSource( url.toString() );
                 }
                 //if unable to find dtd in local fs, try getting it from web
-                return new InputSource( "http://www.cs.ioc.ee/~cocovila/dtd/package.dtd" );
+                return new InputSource( RuntimeProperties.SCHEMA_LOC + RuntimeProperties.PACKAGE_DTD );
             }
             return null;
         }
@@ -121,7 +120,6 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
         private static final String VAL_RF = "rf";
         private static final String ATR_STRING = "string";
         private static final String EL_BOUNDS = "bounds";
-        private static final String ATR_LINE_TYPE = "lineType";
         private static final String ATR_TRANSPARENCY = "transparency";
         private static final String ATR_STROKE = "stroke";
         private static final String ATR_FILLED = "filled";
@@ -599,10 +597,10 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             }
 
             Line newLine = new Line( x1, y1, x2, y2, Integer.parseInt( color ), str, tr, lt );
-            newLine.fixedX1 = fixedX1;
-            newLine.fixedX2 = fixedX2;
-            newLine.fixedY1 = fixedY1;
-            newLine.fixedY2 = fixedY2;
+            newLine.setFixedX1( fixedX1 );
+            newLine.setFixedX2( fixedX2 );
+            newLine.setFixedY1( fixedY1 );
+            newLine.setFixedY2( fixedY2 );
             return newLine;
         }
 

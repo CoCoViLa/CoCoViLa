@@ -57,6 +57,7 @@ public class Dot extends Shape implements Serializable {
      *            y coordinate of the bounding box.
      * @return String - specification of a shape.
      */
+    @Override
     public String toFile( int boundingboxX, int boundingboxY ) {
         int colorInt = 0;
 
@@ -68,11 +69,12 @@ public class Dot extends Shape implements Serializable {
                 + (int) getStrokeWidth() + "\" transparency=\"" + getTransparency() + "\"/>\n";
     } // toFile
 
+    @Override
     public String toText() {
         int colorInt = 0;
         if ( getColor() != null )
             colorInt = getColor().getRGB();
-        return "DOT:" + getX() + ":" + getY() + ":" + getWidth() + ":" + getHeight() + ":" + colorInt + ":" + (int) (int) getStrokeWidth() + ":"
+        return "DOT:" + getX() + ":" + getY() + ":" + getWidth() + ":" + getHeight() + ":" + colorInt + ":" + (int) getStrokeWidth() + ":"
                 + getTransparency() + ":" + isFixed();
     } // toText
 
@@ -92,6 +94,7 @@ public class Dot extends Shape implements Serializable {
      * @param g2
      *            Graphics
      */
+    @Override
     public void draw( int xModifier, int yModifier, float sizeX, float sizeY, Graphics2D g2 ) {
         g2.setStroke( getStroke() );
         g2.setColor( getColor() );
@@ -109,6 +112,7 @@ public class Dot extends Shape implements Serializable {
         }
     }
 
+    @Override
     public Dot clone() {
         return (Dot) super.clone();
     } // clone

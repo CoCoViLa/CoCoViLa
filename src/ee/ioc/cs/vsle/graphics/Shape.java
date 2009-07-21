@@ -148,7 +148,7 @@ public abstract class Shape implements Serializable, Cloneable {
         return stroke;
     }
 
-    public abstract void draw( int x, int y, float Xsize, float Ysize, Graphics2D g );
+    public abstract void draw( int _x, int _y, float Xsize, float Ysize, Graphics2D g );
 
 
     /**
@@ -206,6 +206,7 @@ public abstract class Shape implements Serializable, Cloneable {
 
     public abstract Shape getCopy();
     
+    @Override
     public Shape clone() {
         try {
             return (Shape) super.clone();
@@ -323,6 +324,7 @@ public abstract class Shape implements Serializable, Cloneable {
      * 
      * @return String - the name of the shape.
      */
+    @Override
     public String toString() {
         return getName();
     } // toString
@@ -371,7 +373,7 @@ public abstract class Shape implements Serializable, Cloneable {
             this.stroke = new BasicStroke( strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND, 50, 
                     new float[] { lineType, lineType }, 0 );
         } else {
-            this.stroke = new BasicStroke( (float) strokeWidth );
+            this.stroke = new BasicStroke( strokeWidth );
         }
     }
 

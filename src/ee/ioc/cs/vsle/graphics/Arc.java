@@ -9,7 +9,6 @@ public class Arc extends Shape implements Serializable, Cloneable {
     private static final long serialVersionUID = 1L;
 
     private int startAngle;
-
     private int arcAngle;
 
     /**
@@ -78,6 +77,7 @@ public class Arc extends Shape implements Serializable, Cloneable {
      * @param cornerClicked
      *            int - number of the clicked corner.
      */
+    @Override
     public void resize( int deltaW, int deltaH, int cornerClicked ) {
         if ( !isFixed() ) {
             if ( cornerClicked == 1 ) { // TOP-LEFT
@@ -118,6 +118,7 @@ public class Arc extends Shape implements Serializable, Cloneable {
      *            y coordinate of the bounding box.
      * @return String - specification of a shape.
      */
+    @Override
     public String toFile( int boundingboxX, int boundingboxY ) {
         String fill = "false";
 
@@ -135,6 +136,7 @@ public class Arc extends Shape implements Serializable, Cloneable {
                 + this.getLineType() + "\" transparency=\"" + getTransparency() + "\"/>\n";
     } // toFile
 
+    @Override
     public String toText() {
         String fill = "false";
         if ( isFilled() )
@@ -170,6 +172,7 @@ public class Arc extends Shape implements Serializable, Cloneable {
      * @param g2
      *            Graphics - shape graphics.
      */
+    @Override
     public void draw( int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2 ) {
         g2.setStroke( getStroke() );
         g2.setColor( getColor() );
@@ -192,6 +195,7 @@ public class Arc extends Shape implements Serializable, Cloneable {
 
     } // draw
 
+    @Override
     public Arc clone() {
         return (Arc) super.clone();
     } // clone

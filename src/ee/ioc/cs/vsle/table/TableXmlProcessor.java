@@ -90,9 +90,9 @@ public class TableXmlProcessor {
      */
     private void validateDocument( Document document ) throws SAXException, IOException {
         
-        URL url = FileFuncs.getResource( "table.xsd", true );
+        URL url = FileFuncs.getResource( RuntimeProperties.TABLE_SCHEMA, true );
         if ( url == null ) {
-            url = new URL( "http://www.cs.ioc.ee/~cocovila/dtd/table.xsd" );
+            url = new URL( RuntimeProperties.SCHEMA_LOC + RuntimeProperties.TABLE_SCHEMA );
         }
         
         /*

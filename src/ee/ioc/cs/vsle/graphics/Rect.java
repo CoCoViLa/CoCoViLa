@@ -33,6 +33,7 @@ public class Rect extends Shape implements Serializable {
      * @param boundingboxY - y coordinate of the bounding box.
      * @return String - specification of a shape.
      */
+    @Override
     public String toFile( int boundingboxX, int boundingboxY ) {
         String fill = "false";
 
@@ -50,6 +51,7 @@ public class Rect extends Shape implements Serializable {
                 + getTransparency() + "\"/>\n";
     } // toFile
 
+    @Override
     public String toText() {
         String fill = "false";
         if ( isFilled() )
@@ -69,6 +71,7 @@ public class Rect extends Shape implements Serializable {
      * @param Ysize float - zoom factor.
      * @param g2 Graphics - class graphics.
      */
+    @Override
     public void draw( int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2 ) {
         g2.setStroke( getStroke() );
         g2.setColor( getColor() );
@@ -90,6 +93,7 @@ public class Rect extends Shape implements Serializable {
 
     } // draw
 
+    @Override
     public Rect clone() {
         return (Rect) super.clone();
     } // clone

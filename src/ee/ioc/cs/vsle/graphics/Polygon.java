@@ -13,10 +13,10 @@ public class Polygon extends Shape {
 
     private static final long serialVersionUID = 1L;
 
-    int[] xPoints;
-    int[] yPoints;
-    int[] xFixed;
-    int[] yFixed;
+    private int[] xPoints;
+    private int[] yPoints;
+    private int[] xFixed;
+    private int[] yFixed;
 
     public Polygon( int colorInt, boolean b, float strokeWidth, int transp, float lineType ) {
         super( 0, 0 );
@@ -27,16 +27,18 @@ public class Polygon extends Shape {
     }
 
     public void setPoints( int[] xs, int[] ys, int[] fxs, int[] fys ) {
-        xPoints = xs;
-        yPoints = ys;
-        xFixed = fxs;
-        yFixed = fys;
+        setXPoints( xs );
+        setYPoints( ys );
+        setXFixed( fxs );
+        setYFixed( fys );
     }
 
+    @Override
     public boolean isInside( int x1, int y1, int x2, int y2 ) {
         return false;
     } // isInside
 
+    @Override
     public boolean isInsideRect( int x1, int y1, int x2, int y2 ) {
         return false;
     } // isInsideRect
@@ -46,6 +48,7 @@ public class Polygon extends Shape {
      * @param s1 float - set size using zoom multiplication.
      * @param s2 float - set size using zoom multiplication.
      */
+    @Override
     public void setMultSize( float s1, float s2 ) {
         setWidth( getWidth() * (int) s1 / (int) s2 );
         setHeight( getHeight() * (int) s1 / (int) s2 );
@@ -57,6 +60,7 @@ public class Polygon extends Shape {
      * @param deltaH int - change of object height.
      * @param cornerClicked int - number of the clicked corner.
      */
+    @Override
     public void resize( int deltaW, int deltaH, int cornerClicked ) {
     } // resize
 
@@ -68,13 +72,16 @@ public class Polygon extends Shape {
      * @param pointY int - mouse y coordinate.
      * @return int - corner number the mouse was clicked in.
      */
+    @Override
     public int controlRectContains( int pointX, int pointY ) {
         return 0;
     } // controlRectContains
 
+    @Override
     public void setPosition( int x, int y ) {
     } // setPosition
 
+    @Override
     public boolean contains( int pointX, int pointY ) {
         return false;
     } // contains
@@ -116,15 +123,18 @@ public class Polygon extends Shape {
      * @param boundingboxY - y coordinate of the bounding box.
      * @return String - specification of a shape.
      */
+    @Override
     public String toFile( int boundingboxX, int boundingboxY ) {
 
         return null;
     } // toFile
 
+    @Override
     public String toText() {
         return null;
     } // toText
 
+    @Override
     public void draw( int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2 ) {
         g2.setColor( getColor() );
         g2.setStroke( getStroke() );
@@ -160,6 +170,7 @@ public class Polygon extends Shape {
 
     } // draw
 
+    @Override
     public Polygon clone() {
         return (Polygon) super.clone();
     } // clone
@@ -167,6 +178,62 @@ public class Polygon extends Shape {
     @Override
     public Shape getCopy() {
         throw new IllegalStateException( "Copying not implemented for Polygon" );
+    }
+
+    /**
+     * @param xPoints the xPoints to set
+     */
+    void setXPoints( int[] xPoints ) {
+        this.xPoints = xPoints;
+    }
+
+    /**
+     * @return the xPoints
+     */
+    int[] getXPoints() {
+        return xPoints;
+    }
+
+    /**
+     * @param yPoints the yPoints to set
+     */
+    void setYPoints( int[] yPoints ) {
+        this.yPoints = yPoints;
+    }
+
+    /**
+     * @return the yPoints
+     */
+    int[] getYPoints() {
+        return yPoints;
+    }
+
+    /**
+     * @param xFixed the xFixed to set
+     */
+    void setXFixed( int[] xFixed ) {
+        this.xFixed = xFixed;
+    }
+
+    /**
+     * @return the xFixed
+     */
+    int[] getXFixed() {
+        return xFixed;
+    }
+
+    /**
+     * @param yFixed the yFixed to set
+     */
+    void setYFixed( int[] yFixed ) {
+        this.yFixed = yFixed;
+    }
+
+    /**
+     * @return the yFixed
+     */
+    int[] getYFixed() {
+        return yFixed;
     }
 
 }

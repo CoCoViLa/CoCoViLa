@@ -16,6 +16,7 @@ public class BoundingBox extends Shape implements Serializable {
         this.setFilled( true );
     } // BoundingBox
 
+    @Override
     public String getName() {
         return name;
     } // getName
@@ -26,6 +27,7 @@ public class BoundingBox extends Shape implements Serializable {
      * @param boundingboxY - y coordinate of the bounding box.
      * @return String - specification of a shape.
      */
+    @Override
     public String toFile( int boundingboxX, int boundingboxY ) {
         return "<bounds x=\"0\" y=\"0\" width=\"" + getWidth() + "\" height=\"" + getHeight() + "\"/>\n";
     } // toFile
@@ -36,6 +38,7 @@ public class BoundingBox extends Shape implements Serializable {
      * for continuing the work.
      * @return String - text string representing the shape.
      */
+    @Override
     public String toText() {
         return "BOUNDS:" + getX() + ":" + getY() + ":" + getWidth() + ":" + getHeight();
     } // toText
@@ -48,6 +51,7 @@ public class BoundingBox extends Shape implements Serializable {
      * @param Ysize float - zoom factor.
      * @param g2 Graphics - class graphics.
      */
+    @Override
     public void draw( int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2 ) {
 
         // Set the box color: light-gray, with a transparency defined by "alpha" value.

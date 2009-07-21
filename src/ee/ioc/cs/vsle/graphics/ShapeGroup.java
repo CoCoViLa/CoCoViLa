@@ -26,6 +26,7 @@ public class ShapeGroup extends Shape implements Serializable {
     public void drawSelection() {
     } // drawSelection
 
+    @Override
     public String toText() {
         StringBuffer text = new StringBuffer();
         for ( int i = 0; i < shapes.size(); i++ ) {
@@ -35,6 +36,7 @@ public class ShapeGroup extends Shape implements Serializable {
         return text.toString();
     } // toText
 
+    @Override
     public void setFixed( boolean b ) {
         super.setFixed( b );
         for ( int i = 0; i < shapes.size(); i++ ) {
@@ -43,6 +45,7 @@ public class ShapeGroup extends Shape implements Serializable {
         }
     } // setFixed
 
+    @Override
     public void setStrokeWidth( float d ) {
         for ( int i = 0; i < shapes.size(); i++ ) {
             Shape shape = shapes.get( i );
@@ -50,6 +53,7 @@ public class ShapeGroup extends Shape implements Serializable {
         }
     } // setStrokeWidth
 
+    @Override
     public void setColor( Color col ) {
         for ( int i = 0; i < shapes.size(); i++ ) {
             Shape shape = shapes.get( i );
@@ -57,6 +61,7 @@ public class ShapeGroup extends Shape implements Serializable {
         }
     } // setColor
 
+    @Override
     public void setTransparency( int d ) {
         for ( int i = 0; i < shapes.size(); i++ ) {
             Shape shape = shapes.get( i );
@@ -68,6 +73,7 @@ public class ShapeGroup extends Shape implements Serializable {
      * Specify the line type used at drawing the shape.
      * @param lineType float
      */
+    @Override
     public void setLineType( float lineType ) {
         for ( int i = 0; i < shapes.size(); i++ ) {
             Shape shape = shapes.get( i );
@@ -75,6 +81,7 @@ public class ShapeGroup extends Shape implements Serializable {
         }
     } // setLineType
 
+    @Override
     public String toFile( int boundingboxX, int boundingboxY ) {
         StringBuffer text = new StringBuffer();
         for ( int i = 0; i < shapes.size(); i++ ) {
@@ -84,17 +91,21 @@ public class ShapeGroup extends Shape implements Serializable {
         return text.toString();
     } // toFile
 
+    @Override
     public int getRealHeight() {
         return 0;
     } // getRealHeight
 
+    @Override
     public int getRealWidth() {
         return 0;
     } // getRealWidth
 
+    @Override
     public void resize( int deltaW, int deltaH, int cornerClicked ) {
     } // resize
 
+    @Override
     public int controlRectContains( int pointX, int pointY ) {
         return 0;
     } // controlRectContains
@@ -269,6 +280,7 @@ public class ShapeGroup extends Shape implements Serializable {
         }
     } // setBounds
 
+    @Override
     public boolean contains( int pointX, int pointY ) {
         if ( ( pointX > getX() ) && ( pointY > getY() ) ) {
             if ( ( pointX < getX() + getWidth() ) && ( pointY < getY() + getHeight() ) ) {
@@ -278,6 +290,7 @@ public class ShapeGroup extends Shape implements Serializable {
         return false;
     } // contains
 
+    @Override
     public boolean isInside( int x1, int y1, int x2, int y2 ) {
         if ( x1 > getX() && y1 > getY() && x2 < getX() + getWidth() && y2 < getY() + getHeight() ) {
             return true;
@@ -285,6 +298,7 @@ public class ShapeGroup extends Shape implements Serializable {
         return false;
     } // isInside
 
+    @Override
     public boolean isInsideRect( int x1, int y1, int x2, int y2 ) {
         if ( x1 < getX() && y1 < getY() && x2 > getX() + getWidth() && y2 > getY() + getHeight() ) {
             return true;
@@ -292,10 +306,12 @@ public class ShapeGroup extends Shape implements Serializable {
         return false;
     } // isInsideRect
 
+    @Override
     public ArrayList<Shape> getShapes() {
         return this.shapes;
     } // getShapes
 
+    @Override
     public void setPosition( int deltaX, int deltaY ) {
         Shape shape;
         for ( int j = 0; j < shapes.size(); j++ ) {
@@ -352,6 +368,7 @@ public class ShapeGroup extends Shape implements Serializable {
         return false;
     } // includesObject
 
+    @Override
     public void draw( int x, int y, float Xsize, float Ysize, Graphics2D g ) {
         Shape shape;
         for ( int j = 0; j < shapes.size(); j++ ) {
@@ -360,6 +377,7 @@ public class ShapeGroup extends Shape implements Serializable {
         }
     } // draw
 
+    @Override
     public void setMultSize( float s1, float s2 ) {
         for ( int j = 0; j < shapes.size(); j++ ) {
             Shape shape = shapes.get( j );
@@ -367,6 +385,7 @@ public class ShapeGroup extends Shape implements Serializable {
         }
     } // setMultSize
 
+    @Override
     public String toString() {
         Shape shape;
         String s = name;
@@ -378,6 +397,7 @@ public class ShapeGroup extends Shape implements Serializable {
         return s;
     } // toString
 
+    @Override
     public ShapeGroup clone() {
         ShapeGroup g = (ShapeGroup) super.clone();
         Shape shape;
