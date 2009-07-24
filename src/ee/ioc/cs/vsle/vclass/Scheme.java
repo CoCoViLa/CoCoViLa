@@ -99,11 +99,11 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
     public Object getFieldValue(String objectName, String fieldName) {
         GObj obj = objects.getByName(objectName);
         if (obj == null)
-            throw new RuntimeException("No such object: " + objectName);
+            throw new NoSuchSchemeObjectException(objectName);
 
         ClassField field = obj.getField(fieldName);
         if (field == null)
-            throw new RuntimeException("No such field: " + fieldName);
+            throw new NoSuchClassFieldException(fieldName);
 
         return field.getValue();
     }
@@ -114,7 +114,7 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
     public SchemeObject getObject(String objectName) {
         SchemeObject obj = objects.getByName(objectName);
         if (obj == null)
-            throw new RuntimeException("No such object: " + objectName);
+            throw new NoSuchSchemeObjectException(objectName);
         return obj;
     }
     
