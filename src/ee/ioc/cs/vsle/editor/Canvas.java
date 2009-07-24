@@ -16,6 +16,7 @@ import javax.xml.transform.stream.*;
 
 import org.xml.sax.helpers.*;
 
+import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -567,18 +568,18 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
     private boolean createPainterPrototypes() {
         boolean success = true;
-        /* TODO Will be replaced by more general daemon stuff
+        /* TODO Will be replaced by more general daemon stuff */
         PackageClassLoader pcl = null;
 
-        for ( PackageClass pclass : vPackage.classes ) {
-            if ( pclass.painterName == null )
+        for ( PackageClass pclass : vPackage.getClasses() ) {
+            if ( pclass.getPainterName() == null )
                 continue;
 
             try {
                 if (pcl == null) {
                     pcl = vPackage.getPackageClassLoader();
                 }
-                Class<?> painterClass = pcl.loadClass(pclass.painterName);
+                Class<?> painterClass = pcl.loadClass(pclass.getPainterName());
                 pclass.setPainterPrototype((ClassPainter) painterClass.newInstance());
             } catch ( CompileException e ) {
                 success = false;
@@ -592,7 +593,6 @@ public class Canvas extends JPanel implements ISchemeContainer {
                 }
             }
         }
-        */
         return success;
     }
 
