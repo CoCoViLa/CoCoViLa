@@ -1,11 +1,23 @@
 package ee.ioc.cs.vsle.vclass;
 
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
+
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.sax.SAXTransformerFactory;
+import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.stream.StreamResult;
+
+import org.xml.sax.helpers.AttributesImpl;
 
 import ee.ioc.cs.vsle.api.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.table.*;
+import ee.ioc.cs.vsle.util.StringUtil;
 
 /**
  * The scheme description
@@ -150,5 +162,80 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
             String[] outputNames, Object[] inputValues) {
 
         return new ProgramRunner(canvas).computeModel( context, inputNames, outputNames, inputValues );
+    }
+
+    @Override
+    public void close() {
+        // The following cast should be avoided, but currently ISchemeContainer
+        // has no reference to (but actually is) the canvas that should be closed.
+        Editor.getInstance().closeSchemeTab((Canvas) canvas);
+    }
+
+    @Override
+    public ee.ioc.cs.vsle.api.Scheme load(InputStream inputStream) {
+        Canvas c = Editor.getInstance().newSchemeTab(canvas.getPackage(),
+                inputStream);
+        return c.getScheme();
+    }
+
+    @Override
+    public long run() {
+        final ProgramRunner runner = new ProgramRunner(canvas);
+
+        int op = (RuntimeProperties.isComputeGoal() ? ProgramRunnerEvent.COMPUTE_GOAL
+                : ProgramRunnerEvent.COMPUTE_ALL)
+                | ProgramRunnerEvent.RUN_NEW
+                | (RuntimeProperties.isPropagateValues() ? ProgramRunnerEvent.PROPAGATE
+                        : 0);
+
+        ProgramRunnerEvent evt = new ProgramRunnerEvent(this, runner.getId(),
+                op);
+
+        EventSystem.queueEvent(evt);
+
+        return runner.getId();
+    }
+
+    @Override
+    public void save(OutputStream outputStream) {
+        try {
+            StreamResult result = new StreamResult(outputStream);
+            SAXTransformerFactory tf = 
+                (SAXTransformerFactory) TransformerFactory.newInstance();
+
+            TransformerHandler th = tf.newTransformerHandler();
+            Transformer serializer = th.getTransformer();
+            serializer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+            serializer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
+                    RuntimeProperties.SCHEME_DTD);
+            serializer.setOutputProperty(OutputKeys.INDENT, "yes");
+            th.setResult(result);
+            th.startDocument();
+
+            AttributesImpl attrs = new AttributesImpl();
+            attrs.addAttribute("", "", "package", StringUtil.CDATA,
+                    getPackage().getName());
+
+            GObj superClass = getSuperClass();
+            if ( superClass != null ) {
+                attrs.addAttribute("", "", "superclass", StringUtil.CDATA,
+                        superClass.getName());
+            }
+
+            th.startElement("", "", "scheme", attrs);
+
+            for (GObj obj : objects) {
+                obj.toXML(th);
+            }
+
+            for (Connection con : connections) {
+                con.toXML(th);
+            }
+
+            th.endElement("", "", "scheme");
+            th.endDocument();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

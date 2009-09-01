@@ -569,22 +569,7 @@ public class Editor extends JFrame implements ChangeListener {
                 
                 if( isOK ) {
                     Canvas canvas = new Canvas( loader.getPackage(), f.getParent() + File.separator );
-                    
-                    int count = 0;
-
-                    for ( Component canv : tabbedPane.getComponents() ) {
-                        if ( packageName.equals( ( (Canvas) canv ).getPackage().getName() ) ) {
-                            count++;
-                        }
-                    }
-
-                    if ( count > 0 ) {
-                        packageName = packageName + " (" + ( count + 1 ) + ")";
-                        canvas.setTitle( packageName );
-                    }
-
-                    tabbedPane.addTab( packageName, canvas );
-                    tabbedPane.setSelectedComponent( canvas );
+                    addCanvas(canvas);
                 }
             } catch ( Exception e ) {
                 String message = "Unable to load package \"" + f.getAbsolutePath() + "\"";
@@ -596,6 +581,26 @@ public class Editor extends JFrame implements ChangeListener {
             }
         }
     } // loadPackage
+
+    private void addCanvas(Canvas canvas) {
+        int count = 0;
+
+        String packageName = canvas.getPackage().getName();
+
+        for (Component canv : tabbedPane.getComponents()) {
+            if (packageName.equals(((Canvas) canv).getPackage().getName())) {
+                count++;
+            }
+        }
+
+        if (count > 0) {
+            packageName = packageName + " (" + (count + 1) + ")";
+            canvas.setTitle(packageName);
+        }
+
+        tabbedPane.addTab(packageName, canvas);
+        tabbedPane.setSelectedComponent(canvas);
+    }
 
     /**
      * Main method for module unit-testing.
@@ -752,16 +757,10 @@ public class Editor extends JFrame implements ChangeListener {
                 SystemUtils.unpackPackages();
         }
     }
-    
-    public void clearPane() {
 
+    public void clearPane() {
         Canvas canv = getCurrentCanvas();
-        canv.destroy();
-        tabbedPane.remove( canv );
-        if ( tabbedPane.getTabCount() > 0 ) {
-            tabbedPane.setSelectedIndex( 0 );
-            getCurrentCanvas().drawingArea.grabFocus();
-        }
+        closeSchemeTab(canv);
     }
 
     public void openOptionsDialog() {
@@ -843,5 +842,21 @@ public class Editor extends JFrame implements ChangeListener {
      */
     public void showSchemeSearchDialog() {
         SchemeSearchDialog.getDialog().show();
+    }
+
+    public Canvas newSchemeTab(VPackage pkg, InputStream inputStream) {
+        Canvas c = new Canvas(pkg, pkg.getPath());
+        c.loadScheme(inputStream);
+        addCanvas(c);
+        return c;
+    }
+
+    public void closeSchemeTab(Canvas canv) {
+        canv.destroy();
+        tabbedPane.remove(canv);
+        if (tabbedPane.getTabCount() > 0) {
+            tabbedPane.setSelectedIndex(0);
+            getCurrentCanvas().drawingArea.grabFocus();
+        }
     }
 }

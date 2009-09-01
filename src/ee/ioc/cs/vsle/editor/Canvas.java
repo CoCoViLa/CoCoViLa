@@ -10,11 +10,6 @@ import java.util.concurrent.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
-import javax.xml.transform.*;
-import javax.xml.transform.sax.*;
-import javax.xml.transform.stream.*;
-
-import org.xml.sax.helpers.*;
 
 import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
@@ -1050,17 +1045,21 @@ public class Canvas extends JPanel implements ISchemeContainer {
         PrintUtilities.printComponent( this );
     } // print
 
-    public boolean loadScheme( File file ) {
+    boolean openScheme(SchemeLoader loader) {
         Scheme newScheme = null;
-        SchemeLoader loader = new SchemeLoader( vPackage );
 
-        if ( loader.load( file ) ) {
-            if ( loader.getDiagnostics().hasProblems() ) {
-                if ( DiagnosticsCollector.promptLoad( this, loader.getDiagnostics(), "Warning: Inconsistent scheme", "scheme" ) ) {
-                    newScheme = new Scheme( this, loader.getObjectList(), loader.getConnectionList() );
+        if (loader.isSchemeLoaded()) {
+            if (loader.getDiagnostics().hasProblems()) {
+                if (DiagnosticsCollector.promptLoad(this,
+                        loader.getDiagnostics(),
+                        "Warning: Inconsistent scheme", "scheme")) {
+
+                    newScheme = new Scheme(this, loader.getObjectList(),
+                            loader.getConnectionList());
                 }
             } else {
-                newScheme = new Scheme( this, loader.getObjectList(), loader.getConnectionList() );
+                newScheme = new Scheme(this, loader.getObjectList(),
+                        loader.getConnectionList());
             }
         } else {
             List<String> msgs = loader.getDiagnostics().getMessages();
@@ -1074,7 +1073,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
                 msg = "An error occured. See the log for details.";
             }
 
-            JOptionPane.showMessageDialog( this, msg, "Error loading scheme", JOptionPane.ERROR_MESSAGE );
+            JOptionPane.showMessageDialog(this, msg, "Error loading scheme",
+                    JOptionPane.ERROR_MESSAGE);
         }
 
         if (newScheme == null) {
@@ -1092,6 +1092,18 @@ public class Canvas extends JPanel implements ISchemeContainer {
         recalcPreferredSize();
         drawingArea.repaint();
         return true;
+    }
+
+    public boolean loadScheme(InputStream inputStream) {
+        SchemeLoader loader = new SchemeLoader(vPackage);
+        loader.load(inputStream);
+        return openScheme(loader);
+    }
+
+    public boolean loadScheme(File file) {
+        SchemeLoader loader = new SchemeLoader(vPackage);
+        loader.load(file);
+        return openScheme(loader);
     } // loadScheme
 
     public void exportSchemeSpecification( File file ) {
@@ -1117,42 +1129,14 @@ public class Canvas extends JPanel implements ISchemeContainer {
             e.printStackTrace();
         }
     }
-    
+
     public void saveScheme( File file ) {
         OutputStream output = null;
         try {
             // The stream has to be closed explicitly or the file will
             // remain open probably until the next garbage collection.
             output = new FileOutputStream( file );
-            StreamResult result = new StreamResult( output );
-            SAXTransformerFactory tf = (SAXTransformerFactory) TransformerFactory.newInstance();
-
-            TransformerHandler th = tf.newTransformerHandler();
-            Transformer serializer = th.getTransformer();
-            serializer.setOutputProperty( OutputKeys.ENCODING, "UTF-8" );
-            serializer.setOutputProperty( OutputKeys.DOCTYPE_SYSTEM, RuntimeProperties.SCHEME_DTD );
-            serializer.setOutputProperty( OutputKeys.INDENT, "yes" );
-            th.setResult( result );
-            th.startDocument();
-
-            AttributesImpl attrs = new AttributesImpl();
-            attrs.addAttribute("", "", "package", StringUtil.CDATA, vPackage.getName());
-
-            GObj superClass = scheme.getSuperClass();
-            if ( superClass != null ) {
-                attrs.addAttribute("", "", "superclass", StringUtil.CDATA, superClass.getName());
-            }
-
-            th.startElement("", "", "scheme", attrs);
-
-            for ( GObj obj : objects )
-                obj.toXML( th );
-
-            for ( Connection con : connections )
-                con.toXML( th );
-
-            th.endElement("", "", "scheme");
-            th.endDocument();
+            scheme.save(output);
             posInfo.setText( "Scheme saved to: " + file.getName() );
         } catch ( Exception e ) {
             e.printStackTrace();

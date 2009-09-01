@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.api;
 
+import java.io.InputStream;
+
 /**
  * <p>This class is made available to each synthesized program instance.
  * Generated programs can use the static methods of this class to 
@@ -89,7 +91,8 @@ public final class ProgramContext {
      * 
      * @param tableName
      * @param args
-     * @return
+     * @return value from the table if conditions hold for some row and column
+     * @see ee.ioc.cs.vsle.table.IStructuralExpertTable#queryTable(Object[])
      */
     public static Object queryTable( String tableName, Object... args ) {
         return scheme.queryTable( tableName, args );
@@ -132,7 +135,7 @@ public final class ProgramContext {
     private static boolean isRunningThread() {
         return Thread.currentThread() == thread;
     }
-    
+
     /**
      * Computes a given model at runtime and executes a generated program
      * Static approach
@@ -148,7 +151,7 @@ public final class ProgramContext {
             String[] outputNames, Object[] inputValues) {
         return scheme.computeModel( context, inputNames, outputNames, inputValues );
     }
-    
+
     /**
      * Computes a given model at runtime and executes a generated program
      * Dynamic approach
@@ -157,11 +160,23 @@ public final class ProgramContext {
      * @param inputNames
      * @param outputNames
      * @param inputValues
-     * @return
+     * @return Object array of computed values
      */
     public static final Object[] computeModel(
             String context, String[] inputNames,
             String[] outputNames, Object[] inputValues) {
         return scheme.computeModel( context, inputNames, outputNames, inputValues );
+    }
+
+    /**
+     * Loads a scheme into the Scheme Editor.
+     * The scheme description has to be in .syn format and belong to the
+     * same package as the current scheme.
+     * @param inputStream the source that should output a valid scheme
+     * description
+     * @see Scheme#load(InputStream)
+     */
+    public static final Scheme loadScheme(InputStream inputStream) {
+        return scheme.load(inputStream);
     }
 }

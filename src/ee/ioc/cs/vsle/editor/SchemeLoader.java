@@ -27,7 +27,8 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 	private PackageHandler handler;
 	private VPackage vpackage;
 	private DiagnosticsCollector collector = new DiagnosticsCollector();
-	
+	private boolean schemeLoaded;
+
 	/**
 	 * Sets the package description
 	 * @param vpackage package description
@@ -36,7 +37,16 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 		this.vpackage = vpackage;
 	}
 
-	/**
+    /**
+     * Indicates whether the scheme was successfully loaded.
+     * The method returns the value returned by the load() method.
+     * @return true, when load() returned true, false otherwise
+     */
+    public boolean isSchemeLoaded() {
+        return schemeLoaded;
+    }
+
+    /**
 	 * Reads in the scheme description from a .syn file.
 	 * The setPackage() method must be called with a non-null argument
 	 * before attempting to load any schemes. The results can be asked
@@ -46,65 +56,123 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 	 * @return true, if there were no fatal errors, false otherwise
 	 */
 	public boolean load(File file) {
-		if (vpackage == null)
-			throw new IllegalStateException("Package must be set to a "
-					+ "non-null value!");
+	    if (!checkInitLoad()) {
+	        return false;
+	    }
 
-		// Give a meaningful error message in case of empty files because
-		// it has been possible to generate empty .syn files from Scheme
-		// Editor. Named pipes etc also have zero length, ignore these.
-		if (file.isFile() && file.length() == 0L) {
-		    collector.collectDiagnostic("The file " + file.getName() +
-		            " is empty!", true);
+	    // Give a meaningful error message in case of empty files because
+	    // it has been possible to generate empty .syn files from Scheme
+	    // Editor. Named pipes etc also have zero length, ignore these.
+	    if (file.isFile() && file.length() == 0L) {
+	        collector.collectDiagnostic("The file " + file.getName() +
+	                " is empty!", true);
 
-		    return false;
-		}
+	        return false;
+	    }
 
-		if (parser == null) {
-			SAXParserFactory factory = SAXParserFactory.newInstance();
-
-			// Use the validating parser
-			factory.setValidating(true);
-
-			try {
-				parser = factory.newSAXParser();
-			} catch (Exception e) {
-				db.p(e);
-				return false;
-			}
-			handler = new PackageHandler();
-		}
-
-		handler.setVPackage(vpackage);
-
-		long startParsing = System.currentTimeMillis();
-
-		InputStream input = null;
-		try {
-			input = new FileInputStream(file);
-			parser.parse(input, handler);
-
-			if (RuntimeProperties.isLogDebugEnabled()) 
-				db.p("Scheme parsing completed in "
-						+ (System.currentTimeMillis() - startParsing)
-						+ "ms.\n" );
-		} catch (Exception e) {
-		    collector.collectDiagnostic(e.getMessage());
-			return false;
-		} finally {
-			// The stream must be explicitly closed, otherwise it is not
-			// possible to delete the file on Windows.
-			if (input != null) {
-				try {
-					input.close();
-				} catch (IOException e) {
-					db.p(e);
-				}
-				input = null;
-			}
-		}
-		return true;
+	    InputStream input = null;
+	    try {
+	        input = new FileInputStream(file);
+	        schemeLoaded = parse(input);
+	    } catch (FileNotFoundException e) {
+	        collector.collectDiagnostic(e.getMessage());
+	        return false;
+	    } finally {
+	        // The stream must be explicitly closed, otherwise it is not
+	        // possible to delete the file on Windows.
+	        if (input != null) {
+	            try {
+	                input.close();
+	            } catch (IOException e) {
+	                db.p(e);
+	            }
+	            input = null;
+	        }
+	    }
+	    return schemeLoaded;
 	}
+
+    public boolean load(InputStream input) {
+        schemeLoaded = checkInitLoad() && parse(input);
+        return schemeLoaded;
+    }
+
+    /**
+     * Preparations for loading a scheme.
+     * This method makes sure that a package is set and the parser is
+     * available.
+     * @return true on success, false otherwise
+     */
+    boolean checkInitLoad() {
+        if (vpackage == null) {
+            throw new IllegalStateException("Package must be set to a "
+                    + "non-null value!");
+        }
+
+        if (parser == null) {
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+
+            // Use the validating parser
+            factory.setValidating(true);
+
+            try {
+                parser = factory.newSAXParser();
+            } catch (Exception e) {
+                db.p(e);
+                return false;
+            }
+            handler = new PackageHandler();
+        }
+
+        handler.setVPackage(vpackage);
+
+        return true;
+    }
+
+    /**
+     * Parses the scheme XML.
+     * The method checkInitLoad() must be called at least once before
+     * calling this method.
+     * @param input the stream that produces the scheme XML to parse
+     * @return true on success, false otherwise
+     */
+    boolean parse(InputStream input) {
+        long startParsing = System.currentTimeMillis();
+
+        try {
+            parser.parse(input, handler);
+
+            if (RuntimeProperties.isLogDebugEnabled()) {
+                    db.p("Scheme parsing completed in "
+                            + (System.currentTimeMillis() - startParsing)
+                            + "ms.\n" );
+            }
+        } catch (Exception e) {
+            collector.collectDiagnostic(e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Collects messages
+     * 
+     * @param msg
+     */
+    void collectDiagnostic(String msg) {
+        collector.collectDiagnostic(msg);
+    }
+
+    /**
+     * Collects messages.
+     * Some messages may be fatal.
+     * 
+     * @param msg
+     * @param isFatal
+     */
+    public void collectDiagnostic(String msg, boolean isFatal) {
+        collector.collectDiagnostic(msg, isFatal);
+    }
 
 	public ObjectList getObjectList() {
 		if (handler != null)
@@ -176,7 +244,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 			String msg = "Parsing error, line " + spe.getLineNumber()
 				+ ", uri " + spe.getSystemId();
 			db.p(msg);
-			collector.collectDiagnostic(msg + "\n" + spe.getMessage());
+			collectDiagnostic(msg + "\n" + spe.getMessage());
 
 			// Use the contained exception, if any
 			Exception x = spe;
@@ -210,7 +278,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 		public void endDocument() {
 			if (superClass != null 
 					&& objects.getByName(superClass) == null) {
-			    collector.collectDiagnostic("Superclass " + superClass 
+			    collectDiagnostic("Superclass " + superClass 
 						+ " not found.");
 				superClass = null;
 			}
@@ -231,7 +299,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 
 				// catch duplicate names
 				if (objects.getByName(name) != null) {
-				    collector.collectDiagnostic("Duplicate class name: " + name
+				    collectDiagnostic("Duplicate class name: " + name
 							+ ". Discarding second instance.");
 					ignoreCurrent = true;
 					return;
@@ -241,7 +309,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 				pclass = vPackage.getClass(type);
 				
 				if (pclass == null) {
-				    collector.collectDiagnostic("The type " + type + " not found in "
+				    collectDiagnostic("The type " + type + " not found in "
 							+ "the package. Discarding class " + name + ".");
 					ignoreCurrent = true;
 					return;
@@ -300,7 +368,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 				String value = attrs.getValue(VALUE);
 
 				if (!pclass.hasField(name, type)) {
-				    collector.collectDiagnostic("The class " + obj.getName()
+				    collectDiagnostic("The class " + obj.getName()
 							+ " has saved field " + name + "(" + type + ")"
 							+ " = " + value
 							+ " but there is no corresponding field in the"
@@ -327,7 +395,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 				Port endPort = objects.getPort(obj2, port2);
 
 				if (beginPort == null || endPort == null) {
-				    collector.collectDiagnostic("Discarding connection "
+				    collectDiagnostic("Discarding connection "
 							+ obj1 + "." + port1 + " = " 
 							+ obj2 + "." + port2
 							+ " because of missing object(s) or port(s): "
@@ -354,7 +422,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 		}
 
 		@Override
-		public void endElement( String namespaceURI, String sName, String qName ) throws SAXException {
+		public void endElement( String namespaceURI, String sName, String qName ) {
 
             if ( qName.equals( OBJECT ) || qName.equals( RELOBJECT ) ) {
 
