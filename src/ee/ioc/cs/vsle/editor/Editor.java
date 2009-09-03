@@ -845,7 +845,10 @@ public class Editor extends JFrame implements ChangeListener {
     }
 
     public Canvas newSchemeTab(VPackage pkg, InputStream inputStream) {
-        Canvas c = new Canvas(pkg, pkg.getPath());
+        assert SwingUtilities.isEventDispatchThread();
+
+        Canvas c = new Canvas(pkg,
+                new File(pkg.getPath()).getParent() + File.separator);
         c.loadScheme(inputStream);
         addCanvas(c);
         return c;

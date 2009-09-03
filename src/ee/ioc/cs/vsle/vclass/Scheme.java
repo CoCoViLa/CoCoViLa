@@ -3,7 +3,9 @@ package ee.ioc.cs.vsle.vclass;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
 
+import javax.swing.SwingUtilities;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
@@ -173,9 +175,28 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
 
     @Override
     public ee.ioc.cs.vsle.api.Scheme load(InputStream inputStream) {
-        Canvas c = Editor.getInstance().newSchemeTab(canvas.getPackage(),
-                inputStream);
-        return c.getScheme();
+        final InputStream input = inputStream;
+        final Canvas[] c = new Canvas[1];
+        try {
+            SwingUtilities.invokeAndWait(new Runnable() {
+
+                @Override
+                public void run() {
+                    c[0] = Editor.getInstance().newSchemeTab(
+                            getContainer().getPackage(), input);
+                }
+                
+            });
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+        return c[0] == null ? null : c[0].getScheme();
+    }
+
+    ISchemeContainer getContainer() {
+        return canvas;
     }
 
     @Override
