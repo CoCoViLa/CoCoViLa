@@ -172,6 +172,7 @@ public final class ProgramContext {
      * Loads a scheme into the Scheme Editor.
      * The scheme description has to be in .syn format and belong to the
      * same package as the current scheme.
+     * This method is thread safe.
      * @param inputStream the source that should output a valid scheme
      * description
      * @see Scheme#load(InputStream)

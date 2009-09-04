@@ -102,7 +102,9 @@ public interface Scheme {
     /**
      * Loads a scheme into the Scheme Editor.
      * The scheme description has to be in .syn format and belong to the
-     * same package as the current scheme. 
+     * same package as the current scheme.
+     * This method can be called from any thread, therefore the implementation
+     * has to be thread safe.
      * @param inputStream the source that should output a valid scheme
      * description
      */
