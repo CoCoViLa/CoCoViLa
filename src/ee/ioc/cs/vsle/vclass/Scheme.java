@@ -20,6 +20,7 @@ import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.StringUtil;
+import ee.ioc.cs.vsle.util.db;
 
 /**
  * The scheme description
@@ -168,29 +169,49 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
 
     @Override
     public void close() {
-        // The following cast should be avoided, but currently ISchemeContainer
-        // has no reference to (but actually is) the canvas that should be closed.
-        Editor.getInstance().closeSchemeTab((Canvas) canvas);
+        if (SwingUtilities.isEventDispatchThread()) {
+            // The following cast should be avoided, but currently
+            // ISchemeContainer has no reference to (but actually is)
+            // the canvas that should be closed.
+            Editor.getInstance().closeSchemeTab((Canvas) canvas);
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    @Override
+                    public void run() {
+                        close();
+                    }
+                });
+            } catch (InterruptedException e) {
+                db.p(e);
+            } catch (InvocationTargetException e) {
+                db.p(e);
+            }
+        }
     }
 
     @Override
     public ee.ioc.cs.vsle.api.Scheme load(InputStream inputStream) {
         final InputStream input = inputStream;
         final Canvas[] c = new Canvas[1];
-        try {
-            SwingUtilities.invokeAndWait(new Runnable() {
 
-                @Override
-                public void run() {
-                    c[0] = Editor.getInstance().newSchemeTab(
-                            getContainer().getPackage(), input);
-                }
-                
-            });
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
+        if (SwingUtilities.isEventDispatchThread()) {
+            c[0] = Editor.getInstance().newSchemeTab(
+                    getContainer().getPackage(), input);
+        } else {
+            try {
+                SwingUtilities.invokeAndWait(new Runnable() {
+                    @Override
+                    public void run() {
+                        c[0] = Editor.getInstance().newSchemeTab(
+                                getContainer().getPackage(), input);
+                    }
+                });
+            } catch (InterruptedException e) {
+                db.p(e);
+            } catch (InvocationTargetException e) {
+                db.p(e);
+            }
         }
         return c[0] == null ? null : c[0].getScheme();
     }
