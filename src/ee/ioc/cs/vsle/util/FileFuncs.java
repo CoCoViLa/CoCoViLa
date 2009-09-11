@@ -207,7 +207,8 @@ public class FileFuncs {
 
 	/**
 	 * Writes the text to the specified file. The file is created if it
-	 * does not exist yet. A newline is appended to the text.
+	 * does not exist yet. A newline is appended to the text unless the text
+	 * already ends with a newline.
 	 * @param file the output file
 	 * @param text the text to be written
 	 * @return true on success, false on error
@@ -218,7 +219,10 @@ public class FileFuncs {
 			PrintWriter out = null;
 			try {
 				out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-				out.println(text);
+				out.print(text);
+				if (text != null && !text.endsWith("\n")) {
+				    out.println();
+				}
 				out.close();
 				out = null;
 				status = true;
