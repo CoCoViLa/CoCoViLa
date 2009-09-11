@@ -76,7 +76,8 @@ public abstract class PaletteBase implements ActionListener {
             String actionCmd) {
 
         JToggleButton button = new JToggleButton(icon);
-
+        // Workaround for 2849980
+        button.setSelectedIcon(icon);
         button.setActionCommand(actionCmd);
         button.setToolTipText(descr);
 
