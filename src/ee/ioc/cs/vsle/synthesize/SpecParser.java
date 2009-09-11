@@ -317,11 +317,9 @@ public class SpecParser {
         throw new SpecParseException( "Specification parsing error" );
     }
 
-    private static ArrayList<String> s_parseErrors = new ArrayList<String>();
-
     public static ClassList parseSpecification( String fullSpec, String mainClassName, Set<String> schemeObjects, String path )
             throws IOException, SpecParseException, EquationException {
-        s_parseErrors.clear();
+
         long start = System.currentTimeMillis();
         
         ClassList classes = parseSpecificationImpl( refineSpec( fullSpec ), TYPE_THIS, schemeObjects, path,
@@ -416,14 +414,11 @@ public class SpecParser {
                         LineType.Constant statement = ( LineType.Constant)lt.getStatement();
 
                         if ( containsVar( annClass.getFields(), statement.getName() ) ) {
-                            s_parseErrors.add( "Variable " + statement.getName() + " declared more than once in class " + className );
-
                             throw new SpecParseException( "Variable " + statement.getName() + " declared more than once in class " + className );
                         }
 
                         File file = new File( path + statement.getType() + ".java" );
                         if ( file.exists() && isSpecClass( path, statement.getType() ) ) {
-                            s_parseErrors.add( "Constant " + statement.getName() + " cannot be of type " + statement.getType() );
                             throw new SpecParseException( "Constant " + statement.getName() + " cannot be of type " + statement.getType() );
                         }
                         if ( RuntimeProperties.isLogDebugEnabled() )
@@ -444,7 +439,6 @@ public class SpecParser {
                         
                         for ( int i = 0; i < vars.length; i++ ) {
                             if ( containsVar( annClass.getFields(), vars[ i ] ) ) {
-                                s_parseErrors.add( "Variable " + vars[ i ] + " declared more than once in class " + className );
                                 throw new SpecParseException( "Variable " + vars[ i ] + " declared more than once in class "
                                         + className );
                             }
@@ -486,7 +480,6 @@ public class SpecParser {
                         ClassField var = getVar( name, annClass.getFields() );
 
                         if ( var != null && !var.isAlias() ) {
-                            s_parseErrors.add( "Variable " + name + " declared more than once in class " + className );
                             throw new SpecParseException( "Variable " + name + " declared more than once in class " + 
                                     className + ", line: " + lt.getOrigSpecLine() );
                         } else if ( var != null && var.isAlias() ) {
@@ -579,8 +572,9 @@ public class SpecParser {
 
                     } else if ( lt.getType() == LineType.TYPE_EQUATION ) {
                         LineType.Equation statement = ( LineType.Equation)lt.getStatement();
-                        EquationSolver.solve( statement.getEq() );
-                        next: for ( Relation rel : EquationSolver.getRelations() ) {
+                        EquationSolver solver = new EquationSolver();
+                        solver.solve( statement.getEq() );
+                        next: for ( Relation rel : solver.getRelations() ) {
                             if ( RuntimeProperties.isLogDebugEnabled() )
                                 db.p( "equation: " + rel );
                             String[] pieces = rel.getRel().split( ":" );
@@ -644,8 +638,6 @@ public class SpecParser {
                         ClassRelation classRelation = new ClassRelation( RelType.TYPE_JAVAMETHOD, lt.getOrigSpecLine() );
 
                         if ( statement.getOutputs().length == 0 ) {
-                            s_parseErrors.add( "Error in line \n" + lt.getOrigSpecLine() + "\nin class " + className
-                                    + ".\nAn axiom can not have an empty output." );
                             throw new SpecParseException( "Error in line \n" + lt.getOrigSpecLine() + "\nin class "
                                     + className + ".\nAn axiom can not have an empty output." );
                         }

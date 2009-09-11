@@ -11,10 +11,12 @@ class UnaryOpNode extends ExpNode {
 		this.meth = meth;
 	}
 
+	@Override
 	void getExpressions() {
 		operand.getExpressions(sub);
 	}
 
+	@Override
 	void getExpressions(String upper) {
 	    
 		if ( Function.contains( meth ) ) {
@@ -24,6 +26,7 @@ class UnaryOpNode extends ExpNode {
 		}
 	}
 
+	@Override
 	void getVars() {
 		operand.getVars();
 	}
@@ -32,11 +35,13 @@ class UnaryOpNode extends ExpNode {
 		sub = operand.inFix();
 	}
 
+	@Override
 	void decorate() {
 		reverse();
 		operand.decorate();
 	}
 
+	@Override
 	String inFix() {
 		String a = operand.inFix();
 
