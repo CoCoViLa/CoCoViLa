@@ -23,7 +23,7 @@ class Rel implements Serializable {
     //see RelType
     private int type;
     private Set<Var> unknownInputs = new LinkedHashSet<Var>();
-    private CodeEmitter emitter;
+    transient private CodeEmitter emitter;
     
     Rel( Var parent, String declaration ) {
         relID = RelType.relCounter++;
