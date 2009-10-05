@@ -165,9 +165,28 @@ public final class ProgramContext {
     public static final Object[] computeModel(
             String context, String[] inputNames,
             String[] outputNames, Object[] inputValues) {
-        return scheme.computeModel( context, inputNames, outputNames, inputValues );
+        return computeModel( context, inputNames, outputNames, inputValues, true );
     }
 
+    /**
+     * Computes a given model at runtime and executes a generated program
+     * Dynamic approach
+     * This method enables to turn off caching of compiled models 
+     * (useful for changing specifications during iterative computations)
+     * 
+     * @param context
+     * @param inputNames
+     * @param outputNames
+     * @param inputValues
+     * @param cacheCompiledModel
+     * @return Object array of computed values
+     */
+    public static final Object[] computeModel(
+            String context, String[] inputNames,
+            String[] outputNames, Object[] inputValues, boolean cacheCompiledModel) {
+        return scheme.computeModel( context, inputNames, outputNames, inputValues, cacheCompiledModel );
+    }
+    
     /**
      * Loads a scheme into the Scheme Editor.
      * The scheme description has to be in .syn format and belong to the

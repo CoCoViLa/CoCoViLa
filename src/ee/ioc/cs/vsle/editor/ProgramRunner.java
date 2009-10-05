@@ -694,7 +694,7 @@ public class ProgramRunner {
     public Object[] computeModel(Class<?> context, String[] inputNames,
             String[] outputNames, Object[] inputValues)
     {
-        return computeModel( context.getName(), inputNames, outputNames, inputValues );
+        return computeModel( context.getName(), inputNames, outputNames, inputValues, true );
     }
     
     /**
@@ -707,12 +707,18 @@ public class ProgramRunner {
      * @return
      */
     public Object[] computeModel(String contextClassName, String[] inputNames,
-            String[] outputNames, Object[] inputValues)
+            String[] outputNames, Object[] inputValues, boolean cacheCompiledModel )
     {
         long start = System.currentTimeMillis();
         try {
-            int hash = calcHashForSubtask( contextClassName, inputNames, outputNames );
-            Object genObj = getFromCache( hash );
+            Object genObj = null;
+            int hash = -1;
+            
+            if(cacheCompiledModel) {
+                hash = calcHashForSubtask( contextClassName, inputNames, outputNames );
+                genObj = getFromCache( hash );
+            }
+            
             if ( genObj == null ) {
                 //synthesize
                 StringBuilder result = new StringBuilder();
@@ -727,7 +733,8 @@ public class ProgramRunner {
                         generatedClassName, schemeContainer.getWorkDir(), fs );
                 //compile
                 genObj = compile( fs, schemeContainer, generatedClassName );
-                cacheObject( hash, genObj );
+                if(cacheCompiledModel)
+                    cacheObject( hash, genObj );
             }
 
             if(genObj == null)
@@ -750,18 +757,14 @@ public class ProgramRunner {
         }
     }
     
-    private static Map<Integer, Object> objectCache = new HashMap<Integer, Object>();
+    private static Map<Integer, Object> objectCache = new Hashtable<Integer, Object>();
     
     private Object getFromCache( int hash ) {
-        synchronized ( s_lock ) {
-            return objectCache.get( hash );
-        }
+        return objectCache.get( hash );
     }
-    
+
     private void cacheObject( int hash, Object obj ) {
-        synchronized ( s_lock ) {
-            objectCache.put( hash, obj );
-        }
+        objectCache.put( hash, obj );
     }
     
     private int calcHashForSubtask( String name, String[] inputNames,

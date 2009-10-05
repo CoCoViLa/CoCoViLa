@@ -162,9 +162,9 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
     @Override
     public Object[] computeModel(
             String context, String[] inputNames,
-            String[] outputNames, Object[] inputValues) {
+            String[] outputNames, Object[] inputValues, boolean cacheCompiledModel ) {
 
-        return new ProgramRunner(canvas).computeModel( context, inputNames, outputNames, inputValues );
+        return new ProgramRunner(canvas).computeModel( context, inputNames, outputNames, inputValues, cacheCompiledModel );
     }
 
     @Override

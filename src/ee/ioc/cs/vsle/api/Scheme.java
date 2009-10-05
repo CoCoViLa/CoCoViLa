@@ -85,7 +85,7 @@ public interface Scheme {
 
     public Object[] computeModel(
             String context, String[] inputNames,
-            String[] outputNames, Object[] inputValues);
+            String[] outputNames, Object[] inputValues, boolean cacheCompiledModel );
 
     /**
      * Closes the scheme in Scheme Editor.
