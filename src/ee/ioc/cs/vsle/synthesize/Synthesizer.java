@@ -21,8 +21,10 @@ public class Synthesizer {
 			"[a-zA-Z_0-9-.]+[ \t\n]*(super ([ a-zA-Z_0-9-,]+ ))?" +
 			"[ \t\n]*\\{[ \t\n]*(.+)[ \t\n]*\\}[ \t\n]*@\\*/ *";
 
-    private Synthesizer() {}
-      
+    private Synthesizer() {
+        // should not be instanciated
+    }
+
     /**
     This method makes a compilable class from problem specification, calling createProblem,
     planner, generates needed classes(_Class_ notation), putting it all together and writing into
@@ -115,7 +117,8 @@ public class Synthesizer {
         matcher = pattern.matcher( fileString );
 
         if ( matcher.find() ) {
-            fileString = matcher.replaceAll( "\n" + prog.toString() );
+            fileString = matcher.replaceAll("\n"
+                    + Matcher.quoteReplacement(prog.toString()));
         }
 
         fileString = "import ee.ioc.cs.vsle.util.*;\nimport ee.ioc.cs.vsle.api.*;\n\n" + fileString 
@@ -192,7 +195,6 @@ public class Synthesizer {
      * @param outputs
      * @param classList
      * @param result
-     * @return
      * @throws IOException
      * @throws SpecParseException
      */
