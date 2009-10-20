@@ -66,6 +66,12 @@ public class ClassField implements Cloneable, Serializable {
 	protected boolean isStatic = false;
 	
 	protected boolean isAliasLength = false;
+	
+	/**
+	 * If a field is hidden it mean that it will not be shown in the Object Properties window
+	 */
+	private boolean hidden = false;
+	
 	/**
 	 * Class constructor.
 	 */
@@ -350,5 +356,19 @@ public class ClassField implements Cloneable, Serializable {
      */
     public void setAliasLength( boolean isAliasLength ) {
         this.isAliasLength = isAliasLength;
+    }
+
+    /**
+     * @return the hidden
+     */
+    public boolean isHidden() {
+        return hidden;
+    }
+
+    /**
+     * @param hidden the hidden to set
+     */
+    public void setHidden( boolean hidden ) {
+        this.hidden = hidden;
     }
 }

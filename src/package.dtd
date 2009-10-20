@@ -30,9 +30,11 @@ shown in the list of attributes in the Schema Editor -->
 	type	CDATA	#IMPLIED
 	value	CDATA	#IMPLIED
 	description	CDATA	#IMPLIED
+<!-- if a field is hidden it mean that it will not be shown in the Object Properties window -->	
+	hidden 	(true|false)	#IMPLIED
 >
 <!-- Graphics to display some info about the field together with the visual 
-appearance of the rich component e.g 'text string="*self"' displays its value -->
+appearance of the rich component e.g 'text string="*self"' (or *selfWithName) displays its value -->
 <!ELEMENT known	(graphics)>
 <!ELEMENT default	(graphics)>
 <!-- A visual appearance of something composed of vector graphics' shapes and/or raster images -->

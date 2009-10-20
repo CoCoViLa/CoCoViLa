@@ -161,7 +161,8 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
         private static final String EL_PACKAGE = "package";
         private static final String ATR_STATIC = "static";
         private static final String ATR_NATURE = "nature";
-
+        private static final String ATR_HIDDEN = "hidden";
+        
         private final int CLASS = 1, PORT_OPEN = 2, PORT_CLOSED = 3, PACKAGE = 4, FIELD = 5, FIELD_KNOWN = 6;
 
         /**
@@ -354,7 +355,8 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 
                 newField.setValue( value );
                 newField.setDescription( desc );
-
+                newField.setHidden( Boolean.parseBoolean( attrs.getValue( ATR_HIDDEN ) ) );
+                
                 String nature = attrs.getValue( ATR_NATURE );
                 if ( "input".equals( nature ) )
                     newField.setInput( true );

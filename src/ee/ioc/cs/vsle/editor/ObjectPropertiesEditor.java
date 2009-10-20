@@ -122,7 +122,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 
 		JLabel label = new JLabel( "Object name", SwingConstants.CENTER );
 
-		nameTextField = new JTextField(object.getName(), 6);
+		nameTextField = new JTextField(controlledObject.getName(), 6);
 		labelPane.add(label);
 		textFieldPane.add(nameTextField);
 		label = new JLabel("(String)");
@@ -137,8 +137,11 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		JTextField textField;
 		JComboBox comboBox;
 		
-		for (ClassField field : object.getFields()) {
+		for (ClassField field : controlledObject.getFields()) {
 
+            if ( field.isHidden() )
+                continue;
+		    
             String name = field.isAlias() ? "alias " : "";
             name += field.getName();
             label = new JLabel(name, SwingConstants.CENTER);
@@ -211,7 +214,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			output.addActionListener(chkBoxlst);
 		}
 		
-		isStatic = new JCheckBox( "Static", object.isStatic() );
+		isStatic = new JCheckBox( "Static", controlledObject.isStatic() );
 		textFieldPane.add(isStatic);
 		labelPane.add( new JLabel() );
 		inputPane.add( new JLabel() );
@@ -254,7 +257,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		buttonPane.add(apply);
 		clear = new JButton("Clear all");
 		clear.addActionListener(this);
-		if (object.getFields().size() == 0) {
+		if (controlledObject.getFields().size() == 0) {
 			clear.setEnabled(false);
 		} else {
 			clear.setEnabled(true);
@@ -350,6 +353,9 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		    int txtIdx = 0;
 
 		    for (ClassField fld : controlledObject.getFields()) {
+		        //TODO this is soo ugly, need to refactor
+		        if ( fld.isHidden() )
+	                continue;
 		        fld.setInput(goalInputs.get(i).isSelected());
 		        fld.setGoal(goalOutputs.get(i).isSelected());
 		            
