@@ -87,7 +87,11 @@ public class SpecGenerator implements ISpecGenerator {
                 	}
 			    }
 			    
-				if ( field.getValue() != null ) {
+				if ( field.getValue() != null 
+				        /* the value of a hidden field should be ignored, 
+				         * consider the case when a value is propagated from the 
+				         * executed program and user has no chance to clear it from the GUI */
+				        && !field.isHidden()) {
 					appendSpecFieldLHS(obj, field, s);
 
 					if (field.getType().equals(TYPE_STRING)) {
