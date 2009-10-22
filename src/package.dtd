@@ -21,7 +21,8 @@
 	static (true|false)	"false"
 >
 <!-- Field is an attribute of the rich component 
-shown in the list of attributes in the Schema Editor -->
+shown in the list of attributes in the Schema Editor.
+If a field is 'hidden' it means that it will not be shown in the Object Properties window -->	
 <!ELEMENT fields	(field*)>
 <!ELEMENT field	(known|default)*>
 <!ATTLIST field 
@@ -30,7 +31,6 @@ shown in the list of attributes in the Schema Editor -->
 	type	CDATA	#IMPLIED
 	value	CDATA	#IMPLIED
 	description	CDATA	#IMPLIED
-<!-- if a field is hidden it mean that it will not be shown in the Object Properties window -->	
 	hidden 	(true|false)	#IMPLIED
 >
 <!-- Graphics to display some info about the field together with the visual 
