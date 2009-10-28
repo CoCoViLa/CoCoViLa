@@ -6,6 +6,8 @@ package ee.ioc.cs.vsle.table;
 import java.io.*;
 import java.util.*;
 
+import javax.swing.*;
+
 import ee.ioc.cs.vsle.api.Package;
 import ee.ioc.cs.vsle.editor.*;
 
@@ -63,7 +65,15 @@ public class TableManager {
             return table;
         }
         
-        throw new TableException( "No such table: " + tableId );
+        final String msg = "No such table: " + tableId;
+        
+        SwingUtilities.invokeLater( new Runnable() {
+            public void run() {
+                JOptionPane.showMessageDialog( null, msg + "\n(NB! Table ids are case sensitive!", "Error", JOptionPane.ERROR_MESSAGE );
+            }
+        } );
+        
+        throw new TableException( msg );
     }
     
     /**
