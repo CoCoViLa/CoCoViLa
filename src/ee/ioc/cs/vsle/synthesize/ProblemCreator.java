@@ -17,6 +17,8 @@ public class ProblemCreator {
     //the list of classes that exist in the problem setting.
     private ClassList classes;
     private static int aliasCounter = 0;
+    private static final Pattern PATTERN_ALIAS_ELEMENT_ACCESS = Pattern
+            .compile( "([^\\* ]+)\\.(\\*|[0-9]+)(\\.(\\(([a-zA-Z0-9_]+)\\))?([^\\.() ]+))?$");
     
     ProblemCreator( ClassList classes ) {
         assert classes != null;
@@ -696,15 +698,14 @@ public class ProblemCreator {
                 return var;
             }
 
-            Pattern aliasElementAccess = Pattern
-                    .compile("([^\\*]+)\\.(\\*|[0-9]+)(\\.([^\\.]+))?$");
-            Matcher matcher = aliasElementAccess.matcher(varName);
+            Matcher matcher = PATTERN_ALIAS_ELEMENT_ACCESS.matcher(varName);
             if (matcher.find()) {
                 String aliasVarName = matcher.group(1);
                 String element = matcher.group(2);
-                String subelement = matcher.group(4);
+                String type = matcher.group(5);
+                String subelement = matcher.group(6);
                 Var var =  getAliasElementVar(problem, varName, aliasVarName,
-                        element, subelement, parentVar);
+                        element, subelement, parentVar, type);
 
                 if ( substitutions != null )
                     substitutions.put( field.getName(), var.getFullName() );
@@ -729,7 +730,7 @@ public class ProblemCreator {
      * @throws UnknownVariableException
      */
     private Var getAliasElementVar(Problem problem, String varName,
-            String aliasVarName, String element, String subelement, Var parent)
+            String aliasVarName, String element, String subelement, Var parent, String type)
             throws AliasException, UnknownVariableException {
         
         Var aliasVar = problem.getVar(aliasVarName);
@@ -745,7 +746,7 @@ public class ProblemCreator {
         if ("*".equals(element)) {
             if (subelement != null) {
                 // construct new alias
-                Alias newAlias = new Alias( "derived_" + aliasCounter++, null );
+                Alias newAlias = new Alias( "derived_" + aliasCounter++, type );
                 newAlias.setInitialized( true );
                 Var newAliasVar = new Var( newAlias, parent );
                 problem.addVar( newAliasVar );

@@ -24,6 +24,8 @@ class ClassRelation
      */
     private static final long serialVersionUID = -6822667728220713188L;
     
+    private static final Pattern PATTERN_EXCEPTION = Pattern.compile( "^\\(([\\._A-Za-z0-9]+)\\)$" );
+    
     protected Collection<ClassField> inputs = new LinkedHashSet<ClassField>();
     private Collection<SubtaskClassRelation> subtasks = new LinkedHashSet<SubtaskClassRelation>();
     protected Collection<ClassField> outputs = new LinkedHashSet<ClassField>();
@@ -155,20 +157,18 @@ class ClassRelation
 	} // setOutput
 
 	/**
-	 * @param outputs String[]
+	 * @param _outputs String[]
 	 * @param varList ArrayList
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
-        void addOutputs( String[] outputs, Collection<ClassField> varList ) throws UnknownVariableException {
-            for ( int i = 0; i < outputs.length; i++ ) {
+        void addOutputs( String[] _outputs, Collection<ClassField> varList ) throws UnknownVariableException {
+            for ( int i = 0; i < _outputs.length; i++ ) {
                 //we must have at least one output, others will be considered as exceptions
-                String output = outputs[ i ];
-                Pattern pattern = Pattern.compile( ".*\\([ .A-Za-z0-9]+\\).*" );
-                Matcher matcher = pattern.matcher( output );
+                String output = _outputs[ i ];
+                
+                Matcher matcher = PATTERN_EXCEPTION.matcher( output.trim() );
                 if ( matcher.find() ) {
-                	
-                	String ex = output.replaceAll( "[ ()]+", "" );
-                    ClassField cf = new ClassField( ex, "exception" );
+                    ClassField cf = new ClassField( matcher.group( 1 ), "exception" );
 
                     exceptions.add( cf );
 
@@ -200,7 +200,9 @@ class ClassRelation
 	
 	/**
 	 * @return String
-	 */ public String toString() {
+	 */ 
+	@Override
+    public String toString() {
 		if (type == RelType.TYPE_METHOD_WITH_SUBTASK) {
 			return "[Subtasks: " + subtasks + "][Inputs: " + inputs + "][Output: " + outputs + "][Method: " + method + "][Type: " + type + "]";
 		}

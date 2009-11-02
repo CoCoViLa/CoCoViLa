@@ -171,6 +171,8 @@ class Rel implements Serializable {
 	
 	private class CodeEmitter
 	{
+        private final Pattern PATTERN_VAR_IN_EQUATION = Pattern
+                .compile( "[^a-zA-Z_]*([a-zA-Z_]{1}[a-zA-Z_0-9\\.]*)" );
 	    
 	    private String getMaxType(Collection<Var> _inputs) {
 
@@ -428,9 +430,7 @@ class Rel implements Serializable {
                 varNames.add( inps.getFullName() );
             }
 
-            Pattern pattern = Pattern
-                    .compile( "[^a-zA-Z_]*([a-zA-Z_]{1}[a-zA-Z_0-9\\.]*)" );
-            Matcher matcher = pattern.matcher( method );
+            Matcher matcher = PATTERN_VAR_IN_EQUATION.matcher( method );
 
             boolean methodCallExist = false;
 
