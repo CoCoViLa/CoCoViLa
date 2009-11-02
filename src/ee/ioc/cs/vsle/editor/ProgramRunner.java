@@ -456,9 +456,14 @@ public class ProgramRunner {
                     return Byte.toString( f.getByte( obj ) );
                 } else {
                     Object o = f.get( obj );
-                    if ( o instanceof Object[] ) {
-
-                        return Arrays.deepToString( (Object[]) o );
+                    if ( o.getClass().isArray() ) {
+                        String result = "[";
+                        for ( int i = 0; i < Array.getLength( o ); i++ ) {
+                            if(i > 0)
+                                result += ", ";
+                            result += Array.get( o, i );
+                        }
+                        return result + "]";
                     }
                     return o.toString();
                 }
@@ -574,11 +579,10 @@ public class ProgramRunner {
                             Object o = fieldOfCf.get( lastObj );
                             
                             if( o != null ) {
-                                if ( o instanceof String[] ) {
-                                    String[] sar = (String[]) o;
+                                if( o.getClass().isArray() ) { 
                                     String result = "";
-                                    for ( int k = 0; k < sar.length; k++ ) {
-                                        result += sar[k] + TypeUtil.ARRAY_TOKEN;
+                                    for ( int i = 0; i < Array.getLength( o ); i++ ) {
+                                        result += Array.get( o, i ) + TypeUtil.ARRAY_TOKEN;
                                     }
                                     cf.setValue( result );
                                 } else {
