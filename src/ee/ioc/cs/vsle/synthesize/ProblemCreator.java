@@ -232,24 +232,25 @@ public class ProblemCreator {
                 }
             }
 
-            // if it is not a "real" relation (type 7), we just set the result as target, and inputs as known variables
-            if ( classRelation.getType() == RelType.TYPE_UNIMPLEMENTED ) {
-                setTargets( problem, classRelation, parent );
-            } 
-            // if class relation doesnt have inputs, its an axiom
-            else if ( rel != null && classRelation.getInputs().isEmpty() &&
+            if ( rel != null ) {
+                // if it is not a "real" relation (type 7), we just set the result as target, and inputs as known variables
+                if ( rel.getType() == RelType.TYPE_UNIMPLEMENTED ) {
+                    setTargets( problem, rel );
+                } 
+                // if class relation doesnt have inputs, its an axiom
+                else if ( classRelation.getInputs().isEmpty() &&
                         rel.getSubtasks().size() == 0 ) { 
-                problem.addAxiom( rel );
-            }
-            else if ( rel != null ) {
-                problem.addRel( rel );
-                
-                if( rel.getSubtasks().size() > 0 ) {
-                    problem.addRelWithSubtask( rel );
+                    problem.addAxiom( rel );
                 }
-                
-            } 
-            else if( relSet != null ) {
+                else {
+                    problem.addRel( rel );
+
+                    if( rel.getSubtasks().size() > 0 ) {
+                        problem.addRelWithSubtask( rel );
+                    }
+
+                } 
+            } else if( relSet != null ) {
                 problem.addAllRels( relSet );
             }
 
@@ -682,7 +683,7 @@ public class ProblemCreator {
             }
 
             Pattern aliasElementAccess = Pattern
-                    .compile("(.*)\\.(\\*|[0-9]+)(\\.([^\\.])+)?$");
+                    .compile("([^\\*]+)\\.(\\*|[0-9]+)(\\.([^\\.])+)?$");
             Matcher matcher = aliasElementAccess.matcher(varName);
             if (matcher.find()) {
                 String aliasVarName = matcher.group(1);
@@ -758,16 +759,8 @@ public class ProblemCreator {
                     varName + " is incorrect, wildcard should be defined with an element!");
         }
         
-        int elemNr = Integer.parseInt(element);
-        List<Var> childVars = aliasVar.getChildVars();
-        int size = childVars.size();
-        if (elemNr >= size) {
-            throw new AliasException(aliasVarName + "." + element
-                    + " is out of bounds, "
-                    + aliasVar.getFullName() + " contains " + size
-                    + (size == 1 ? " element" : " elements"));
-        }
-        Var var = childVars.get(elemNr);
+        Var var = getVarFromAliasByElemNr(aliasVar, aliasVarName, element);
+        
         if (subelement != null) {
             var = getVarFromSpecOrAlias( problem, varName, aliasVarName + "." + element, subelement, var );
         }
@@ -775,6 +768,20 @@ public class ProblemCreator {
         return var;
     }
 
+    private Var getVarFromAliasByElemNr(Var aliasVar, String aliasVarName,
+            String element) throws AliasException {
+        int elemNr = Integer.parseInt(element);
+        List<Var> childVars = aliasVar.getChildVars();
+        int size = childVars.size();
+        if (elemNr >= size) {
+            throw new AliasException(aliasVarName + "." + element
+                    + " is out of bounds, " + aliasVar.getFullName()
+                    + " contains " + size
+                    + (size == 1 ? " element" : " elements"));
+        }
+        return childVars.get(elemNr);
+    }
+    
     /**
      * @param problem
      * @param varName
@@ -798,11 +805,17 @@ public class ProblemCreator {
             }
         } else if(var.getField().isAlias()) { 
             boolean found = false;
-            for (Var childVar : var.getChildVars()) {
-                if(subelement.equals(childVar.getName())) {
-                    var = childVar;
+            if (subelement.matches("^\\d+$")) {
+                //if subelement is a number, extract the corresponding var
+                if( (var = getVarFromAliasByElemNr(var, varName, subelement) ) != null )
                     found = true;
-                    break;
+            } else {
+                for (Var childVar : var.getChildVars()) {
+                    if (subelement.equals(childVar.getName())) {
+                        var = childVar;
+                        found = true;
+                        break;
+                    }
                 }
             }
             if(!found)
@@ -908,45 +921,18 @@ public class ProblemCreator {
    @param classRelation the goal specification is extracted from it.
    @param obj the name of the object where the goal specification was declared.
    */
-  private static void setTargets( Problem problem, ClassRelation classRelation, Var parent ) throws
+  private static void setTargets( Problem problem, Rel goal ) throws
           UnknownVariableException {
       
-      String obj = parent.getFullNameForConcat();
-      Collection<Var> vars = new HashSet<Var>();
-      Collection<Var> flattened = new HashSet<Var>();
-      
       {//Assumptions
-          for ( ClassField cf : classRelation.getInputs() ) {
-              String varName = obj + cf.getName();
-              if ( problem.containsVar( varName ) ) {
-                  vars.add( problem.getVar( varName ) );
-              } else {
-                  throw new UnknownVariableException( cf.getName() );
-              }
-          }
-
-          CodeGenerator.unfoldVarsToSet( vars, flattened );
-
+          Collection<Var> flattened = new HashSet<Var>();
+          CodeGenerator.unfoldVarsToSet( goal.getInputs(), flattened );
           problem.getKnownVars().addAll( flattened );
           problem.getAssumptions().addAll( flattened );
       }
       
       {//Goals
-          vars.clear();
-          flattened.clear();
-          
-          for ( ClassField cf : classRelation.getOutputs() ) {
-              String varName = obj + cf.getName();
-              if ( problem.containsVar( varName ) ) {
-                  vars.add( problem.getVar( varName ) );
-              } else {
-                  throw new UnknownVariableException( cf.getName() );
-              }
-          }
-          
-          CodeGenerator.unfoldVarsToSet( vars, flattened );
-          
-          problem.getGoals().addAll( flattened );
+          CodeGenerator.unfoldVarsToSet( goal.getOutputs(), problem.getGoals() );
       }
 
   }
