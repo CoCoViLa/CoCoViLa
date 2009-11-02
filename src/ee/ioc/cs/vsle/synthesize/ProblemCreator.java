@@ -77,9 +77,9 @@ public class ProblemCreator {
             
             problem.addVar( var );
             
-            String type;
+            //String type;
             
-            if ( classes.getType( type = cf.getType() ) != null ) {
+            if ( classes.getType( /*type =*/ cf.getType() ) != null ) {
                 /*
                 if( RuntimeProperties.isRecursiveSpecsAllowed() ) {
                     int lastDepth;
@@ -176,6 +176,13 @@ public class ProblemCreator {
             
             boolean isAliasRel = false;
 
+            //Substitutions appear in the case of alias element access and are used
+            //during the code generation, see Rel.CodeEmitter.emitEquation()
+            //For instance, a.1 is replaced by x in the equation y=a.1
+            //EquationSolver produces a method string that is directly used by Rel.CodeEmitter. 
+            //Variable name a.1 has to be replaced by x in the method string to make it y=x;
+            Map<String, String> varSubstitutions = new LinkedHashMap<String, String>();
+            
             /* 
              * If we have a relation alias = alias, we rewrite it into new relations, ie we create
              * a relation for each component of the alias structure.
@@ -194,15 +201,15 @@ public class ProblemCreator {
                 //the following is for x = y, not x -> y relation
                 else if ( ( classRelation.getType() == RelType.TYPE_EQUATION ) ) {
                     
-                    Var inpVar = checkVarExistance( problem, parent, classRelation.getInput() );
-                    Var outpVar = checkVarExistance( problem, parent, classRelation.getOutput() );
+                    Var inpVar = checkVarExistance( problem, parent, classRelation.getInput(), varSubstitutions );
+                    Var outpVar = checkVarExistance( problem, parent, classRelation.getOutput(), varSubstitutions );
                     
                     isAliasRel = checkVarEquality( inpVar, outpVar, classes, classRelation, parent, problem );
                 }
             }
 
             if ( !isAliasRel ) {
-                rel = makeRel( new Rel( parent, classRelation.getSpecLine() ), classRelation, problem, parent );
+                rel = makeRel( new Rel( parent, classRelation.getSpecLine() ), classRelation, problem, parent, varSubstitutions );
                 
                 if ( classRelation.getSubtasks().size() > 0 ) {
 
@@ -222,7 +229,7 @@ public class ProblemCreator {
                         } else {
                             subtaskRel = new SubtaskRel( parent, subtask.getSpecLine() );
                             
-                            makeRel( subtaskRel, subtask, problem, parent );
+                            makeRel( subtaskRel, subtask, problem, parent, varSubstitutions );
                         }
                         
                         rel.addSubtask( subtaskRel );
@@ -317,7 +324,7 @@ public class ProblemCreator {
 
         subtaskRel = new SubtaskRel( par, subtask.getSpecLine() );
 
-        makeRel( subtaskRel, subtask, contextProblem, par );
+        makeRel( subtaskRel, subtask, contextProblem, par, null );
 
         subtaskRel.setContext( contextProblem );
         
@@ -501,11 +508,11 @@ public class ProblemCreator {
      * @param classes
      * @param problem
      * @param parent
-     * @throws AliasException
+     * @throws SpecParseException 
      */
     private void createAliasVar(Alias alias, AnnotatedClass ac,
             Problem problem, Var parent)
-            throws AliasException {
+            throws SpecParseException {
 
         Var var;
         //corresponding Var may have already been initialized
@@ -532,7 +539,7 @@ public class ProblemCreator {
             rewriteWildcardAliasVar( var, ac, problem );
         } else {
             for ( ClassField childField : alias.getVars() ) {
-                Var childVar = problem.getVar( parent.getFullNameForConcat() + childField.getName() );
+                Var childVar = checkVarExistance( problem, parent, childField, null ); 
                 
                 if( childVar != null ) {
                     var.addVar( childVar );
@@ -638,7 +645,7 @@ public class ProblemCreator {
     @param obj the name of the object where the goal specification was declared.
     */
 
-   private Rel makeRel( Rel rel, ClassRelation classRelation, Problem problem, Var parentVar ) throws
+   private Rel makeRel( Rel rel, ClassRelation classRelation, Problem problem, Var parentVar, Map<String, String> substitutions ) throws
            SpecParseException {
 
        for ( ClassField input : classRelation.getInputs() ) {
@@ -647,13 +654,13 @@ public class ProblemCreator {
                 return null;
             }
            
-           Var var = checkVarExistance( problem, parentVar, input );
+           Var var = checkVarExistance( problem, parentVar, input, substitutions );
            var.addRel( rel );
            rel.addInput( var );
        }
        
        for ( ClassField output : classRelation.getOutputs() ) {
-           Var var = checkVarExistance( problem, parentVar, output );
+           Var var = checkVarExistance( problem, parentVar, output, substitutions );
            rel.addOutput( var );
        }
        
@@ -666,11 +673,13 @@ public class ProblemCreator {
        
        rel.setType( classRelation.getType() );
        
+       rel.addSubstitutions( substitutions );
+       
        return rel;
    }
 
     private Var checkVarExistance(Problem problem, Var parentVar,
-            ClassField field) throws SpecParseException {
+            ClassField field, Map<String, String> substitutions) throws SpecParseException {
 
         String parentObj = parentVar.getFullNameForConcat();
         String varName = parentObj + field.getName();
@@ -679,18 +688,28 @@ public class ProblemCreator {
 
             // --------alias element access--------
             if (aliasElements.containsKey(varName)) {
-                return aliasElements.get(varName);
+                Var var = aliasElements.get(varName); 
+                
+                if ( substitutions != null )
+                    substitutions.put( field.getName(), var.getFullName() );
+                
+                return var;
             }
 
             Pattern aliasElementAccess = Pattern
-                    .compile("([^\\*]+)\\.(\\*|[0-9]+)(\\.([^\\.])+)?$");
+                    .compile("([^\\*]+)\\.(\\*|[0-9]+)(\\.([^\\.]+))?$");
             Matcher matcher = aliasElementAccess.matcher(varName);
             if (matcher.find()) {
                 String aliasVarName = matcher.group(1);
                 String element = matcher.group(2);
                 String subelement = matcher.group(4);
-                return getAliasElementVar(problem, varName, aliasVarName,
+                Var var =  getAliasElementVar(problem, varName, aliasVarName,
                         element, subelement, parentVar);
+
+                if ( substitutions != null )
+                    substitutions.put( field.getName(), var.getFullName() );
+                
+                return var;
             }
             // ------end of alias element access------
 
@@ -715,6 +734,10 @@ public class ProblemCreator {
         
         Var aliasVar = problem.getVar(aliasVarName);
 
+        if(aliasVar==null) {
+            throw new UnknownVariableException(aliasVarName);
+        }
+        
         if (!((Alias) aliasVar.getField()).isInitialized()) {
             throw new AliasException( aliasVar.getFullName() + " is not initialized!" );
         }
@@ -722,7 +745,7 @@ public class ProblemCreator {
         if ("*".equals(element)) {
             if (subelement != null) {
                 // construct new alias
-                Alias newAlias = new Alias( "alias_" + aliasCounter++, null );
+                Alias newAlias = new Alias( "derived_" + aliasCounter++, null );
                 newAlias.setInitialized( true );
                 Var newAliasVar = new Var( newAlias, parent );
                 problem.addVar( newAliasVar );

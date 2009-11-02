@@ -15,6 +15,13 @@ class Rel implements Serializable {
     private Collection<Var> inputs = new LinkedHashSet<Var>();
     private Collection<SubtaskRel> subtasks = new LinkedHashSet<SubtaskRel>();
     private Collection<Var> exceptions = new LinkedHashSet<Var>();
+    //Substitutions appear in the case of alias element access and are used
+    //during the code generation, see CodeEmitter.emitEquation()
+    //For instance, a.1 is replaced by x in the equation y=a.1
+    //EquationSolver produces a method string that is directly used by CodeEmitter. 
+    //Variable name a.1 has to be replaced by x in the method string to make it y=x;
+    private Map<String, String> substitutions = new LinkedHashMap<String, String>();
+    //
     private int relID = 0;
     protected Var parent;
     private String method;
@@ -147,6 +154,11 @@ class Rel implements Serializable {
     //for debug!!!
     String printUnknownInputs() {
         return unknownInputs.toString();
+    }
+    
+    void addSubstitutions( Map<String, String> substs ) {
+        if ( substs != null )
+            substitutions.putAll( substs );
     }
     
     /**************** The code below is related to the code generation ************************************/
@@ -427,11 +439,16 @@ class Rel implements Serializable {
             //take each variable and replace it with the real instance name
             while ( matcher.find() ) {
 
-                String rep = parentFullName + matcher.group( 1 );
+                String varname = matcher.group( 1 );
+                String rep = parentFullName + varname;
 
                 if ( !varNames.contains( rep ) ) {
-                    rep = "$1";
-                    methodCallExist = true;
+                    if ( ( varname = substitutions.get( varname ) ) != null ) {
+                        rep = varname;
+                    } else {
+                        rep = "$1";
+                        methodCallExist = true;
+                    }
                 }
 
                 matcher.appendReplacement( sb, method.substring( matcher
