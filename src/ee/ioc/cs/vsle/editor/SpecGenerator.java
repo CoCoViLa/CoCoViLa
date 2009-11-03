@@ -154,7 +154,8 @@ public class SpecGenerator implements ISpecGenerator {
 				
 				String multiport = ( multi.getObject().isSuperClass() ? ""
                         : multi.getObject().getName() + "." ) + multi.getName();
-				String port = simple.getObject().getName() + "." + simple.getName();
+				String port = ( simple.getObject().isSuperClass() ? ""
+                        : simple.getObject().getName() + "." ) + simple.getName();
 				
 				List<String> list = multiRels.get( multiport );
 				if( list == null ) {
