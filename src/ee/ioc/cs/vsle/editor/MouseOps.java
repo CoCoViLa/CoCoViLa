@@ -537,7 +537,7 @@ class MouseOps extends MouseInputAdapter {
 
         List<GObj> selected = canvas.getObjects().getSelected();
         if ( selected != null && selected.size() > 0 )
-            canvas.posInfo.setText( "Selection: " + selected.toString() );
+            canvas.setStatusBarText( "Selection: " + selected.toString() );
 
         canvas.setActionInProgress( false );
     }

@@ -30,6 +30,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 	private DiagnosticsCollector collector = new DiagnosticsCollector();
 	private boolean schemeLoaded;
 	private boolean schemeLoadingCancelled;
+	private String schemePath;
 	
 	/**
 	 * Sets the package description
@@ -80,6 +81,8 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 	        return false;
 	    }
 
+	    schemePath = file.getAbsolutePath();
+	    
 	    InputStream input = null;
 	    try {
 	        input = new FileInputStream(file);
@@ -529,4 +532,11 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
             return showErrorMessage;
         }
 	}
+
+    /**
+     * @return the schemePath
+     */
+    public String getSchemePath() {
+        return schemePath;
+    }
 }

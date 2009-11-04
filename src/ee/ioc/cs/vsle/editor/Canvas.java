@@ -39,7 +39,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     boolean showGrid = false;
     Dimension drawAreaSize = new Dimension( 600, 500 );
     JPanel infoPanel;
-    JLabel posInfo;
+    private JLabel posInfo;
     DrawingArea drawingArea;
     BufferedImage backgroundImage;
     ExecutorService executor;
@@ -536,7 +536,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         add( areaScrollPane, BorderLayout.CENTER );
 
         infoPanel.add( posInfo );
-        posInfo.setText( "-" );
+        setStatusBarText( "-" );
 
         add( infoPanel, BorderLayout.SOUTH );
 
@@ -1061,7 +1061,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
                 newScheme = new Scheme(this, loader.getObjectList(),
                         loader.getConnectionList());
             }
-        } else {
+        } else if ( !loader.isSchemeLoadingCancelled() ) {
             List<String> msgs = loader.getDiagnostics().getMessages();
             String msg;
             if (msgs.size() > 0) {
@@ -1091,6 +1091,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
         mListener.setState( State.selection );
         recalcPreferredSize();
         drawingArea.repaint();
+        
+        setStatusBarText( "Loaded scheme: " + loader.getSchemePath() );
         return true;
     }
 
@@ -1137,7 +1139,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
             // remain open probably until the next garbage collection.
             output = new FileOutputStream( file );
             scheme.save(output);
-            posInfo.setText( "Scheme saved to: " + file.getName() );
+            setStatusBarText( "Scheme saved to: " + file.getName() );
         } catch ( Exception e ) {
             e.printStackTrace();
         } finally {
@@ -1360,7 +1362,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
             }
         }
         
-        posInfo.setText( message );
+        setStatusBarText( message );
     }
 
     /**
@@ -1879,5 +1881,12 @@ public class Canvas extends JPanel implements ISchemeContainer {
         this.scheme = scheme;
         setObjectList(scheme.getObjects());
         setConnectionList(scheme.getConnections());
+    }
+
+    /**
+     * Sets Status Bar text
+     */
+    void setStatusBarText( String text ) {
+        posInfo.setText( text );
     }
 }

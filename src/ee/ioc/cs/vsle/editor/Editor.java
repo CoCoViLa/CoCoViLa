@@ -3,7 +3,6 @@ package ee.ioc.cs.vsle.editor;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.net.URI;
 import java.util.*;
 import java.util.List;
 
@@ -582,13 +581,13 @@ public class Editor extends JFrame implements ChangeListener {
         }
     } // loadPackage
 
-    private void addCanvas(Canvas canvas) {
+    private void addCanvas(final Canvas canvas) {
         int count = 0;
 
         String packageName = canvas.getPackage().getName();
 
         for (Component canv : tabbedPane.getComponents()) {
-            if (packageName.equals(((Canvas) canv).getPackage().getName())) {
+            if (canv instanceof Canvas && packageName.equals(((Canvas) canv).getPackage().getName())) {
                 count++;
             }
         }
@@ -598,8 +597,26 @@ public class Editor extends JFrame implements ChangeListener {
             canvas.setTitle(packageName);
         }
 
-        tabbedPane.addTab(packageName, canvas);
-        tabbedPane.setSelectedComponent(canvas);
+        tabbedPane.addTab( packageName, canvas );
+        tabbedPane.setSelectedComponent( canvas );
+
+        /* TODO
+        JLabel tabLabel = new JLabel( packageName );
+        tabbedPane.setTabComponentAt( tabbedPane.getSelectedIndex(), tabLabel );
+
+        tabLabel.addMouseMotionListener( new MouseMotionAdapter() {
+
+            @Override
+            public void mouseMoved( MouseEvent e ) {
+                super.mouseMoved( e );
+
+                canvas.setStatusBarText( "Package: "
+                        + canvas.getPackage().getPath() );
+            }
+        } );
+        */
+        
+        canvas.setStatusBarText( "Loaded package: " + canvas.getPackage().getPath() );
     }
 
     /**
