@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.editor;
 
 import java.io.*;
 
+import javax.swing.*;
 import javax.xml.parsers.*;
 
 import org.xml.sax.*;
@@ -28,7 +29,8 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 	private VPackage vpackage;
 	private DiagnosticsCollector collector = new DiagnosticsCollector();
 	private boolean schemeLoaded;
-
+	private boolean schemeLoadingCancelled;
+	
 	/**
 	 * Sets the package description
 	 * @param vpackage package description
@@ -46,6 +48,14 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
         return schemeLoaded;
     }
 
+    /**
+     * Indicated if loading of a scheme was canceled by a user
+     * @return
+     */
+    public boolean isSchemeLoadingCancelled() {
+        return schemeLoadingCancelled;
+    }
+    
     /**
 	 * Reads in the scheme description from a .syn file.
 	 * The setPackage() method must be called with a non-null argument
@@ -147,6 +157,10 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
                             + (System.currentTimeMillis() - startParsing)
                             + "ms.\n" );
             }
+        } catch (SchemeLoaderException e) {
+            collector.collectDiagnostic(e.getMessage());
+            schemeLoadingCancelled = !e.isShowErrorMessage();
+            return false;
         } catch (Exception e) {
             collector.collectDiagnostic(e.getMessage());
             return false;
@@ -326,10 +340,24 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 
 				superClass = attrs.getValue(SUPERCLASS);
 				
-				if (!type.equals(vPackage.getName())) {
-					throw new SAXException("Scheme was built with package \""
-							+ type + "\", load this package first");
-				}
+                if ( !type.equals( vPackage.getName() ) ) {
+                    
+                    String msg = "Scheme was built with the package \""
+                            + type + "\", not \"" + vPackage.getName() + "\"."
+                            + "\nContinue loading scheme using current package?"
+                            + "\nSaving it with override previous package with the current one.";
+                    
+                    int res = JOptionPane.showConfirmDialog( null, msg,
+                            "Package mismatch", JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE );
+
+                    if( res != JOptionPane.YES_OPTION) {
+                        
+                        throw new SchemeLoaderException(
+                                "Scheme was built with package \"" + type
+                                + "\", not \"" + vPackage.getName(), false );
+                    }
+                }
 			} else if (element.equals(PROPERTIES)
 					|| element.equals(RELPROPERTIES)) {
 
@@ -483,5 +511,22 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 			return objects;
 		}
 
+	}
+	
+	private class SchemeLoaderException extends RuntimeException {
+	    
+	    private boolean showErrorMessage;
+	    
+	    public SchemeLoaderException(String message, boolean showErrorMessage) {
+	        super(message);
+	        this.showErrorMessage = showErrorMessage;
+	    }
+
+        /**
+         * @return the showErrorMessage
+         */
+        public boolean isShowErrorMessage() {
+            return showErrorMessage;
+        }
 	}
 }
