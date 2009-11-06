@@ -191,18 +191,17 @@ public class EditorActionListener implements ActionListener {
                     Editor.getInstance().updateWindowTitle();
                 }
             } else if ( e.getActionCommand().equals( Menu.CLOSE ) ) {
-                closeCurrentScheme();
+                Editor.getInstance().closeCurrentCanvas();
             } else if ( Menu.DELETE_SCHEME.equals( e.getActionCommand() ) ) {
                 deleteCurrentScheme();
             } else if ( Menu.EXPORT_SCHEME.equals( e.getActionCommand() ) ) {
             	exportSchemeSpecification();
             } else if ( e.getActionCommand().equals( Menu.CLOSE_ALL ) ) {
                 while ( Editor.getInstance().getCurrentPackage() != null ) {
-                    RuntimeProperties.removeOpenPackage( Editor.getInstance().getCurrentPackage().getPath() );
-                    Editor.getInstance().clearPane();
+                    Editor.getInstance().closeCurrentCanvas();
                 }
             } else if ( e.getActionCommand().equals( Menu.RELOAD ) ) {
-                reloadCurrentPackage();
+                Editor.getInstance().reloadCurrentPackage();
             } else if ( e.getActionCommand().equals( Menu.INFO ) ) {
                 String message;
                 if ( Editor.getInstance().getCurrentPackage() != null ) {
@@ -402,23 +401,6 @@ public class EditorActionListener implements ActionListener {
         }
     }
 
-    /**
-     * Reloads the current package discarding the current scheme. The request is
-     * ignored if no package is open.
-     */
-    private void reloadCurrentPackage() {
-        Editor editor = Editor.getInstance();
-        VPackage pkg = editor.getCurrentPackage();
-
-        if ( pkg != null ) {
-            File pkgFile = new File( pkg.getPath() );
-            if ( pkgFile.exists() ) {
-                Editor.getInstance().clearPane();
-                Editor.getInstance().loadPackage( pkgFile );
-            }
-        }
-    }
-
     private void exportSchemeSpecification() {
     	Editor editor = Editor.getInstance();
         VPackage pack = editor.getCurrentPackage();
@@ -468,13 +450,13 @@ public class EditorActionListener implements ActionListener {
                 int rv = JOptionPane.showConfirmDialog( canvas, "The scheme is not saved. Are you sure you want to "
                         + "close it?", "Confirm Delete", JOptionPane.YES_NO_OPTION );
                 if ( rv == JOptionPane.YES_OPTION )
-                    reloadCurrentPackage();
+                    Editor.getInstance().reloadCurrentPackage();
             } else {
                 int rv = JOptionPane.showConfirmDialog( editor, "Are you sure you want to delete the current scheme"
                         + " and permanently remove the file\n" + lastScheme + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION );
                 if ( rv == JOptionPane.YES_OPTION ) {
                     if ( new File( lastScheme ).delete() )
-                        reloadCurrentPackage();
+                        Editor.getInstance().reloadCurrentPackage();
                     else
                         JOptionPane.showMessageDialog( canvas, "Cannot remove" + " the file " + lastScheme + ".\nPlease check"
                                 + " the permissions.", "Error", JOptionPane.ERROR_MESSAGE );
@@ -483,15 +465,4 @@ public class EditorActionListener implements ActionListener {
         }
     }
 
-    /**
-     * Closes current scheme.
-     */
-    private void closeCurrentScheme() {
-        Editor editor = Editor.getInstance();
-        if ( editor.getCurrentPackage() != null ) {
-            RuntimeProperties.removeOpenPackage( editor.getCurrentPackage().getPath() );
-
-            editor.clearPane();
-        }
-    }
 }

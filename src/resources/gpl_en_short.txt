@@ -1,8 +1,9 @@
-Visual Specification Language Editor and Icon Editor.
+CoCoViLa - Compiler-Compiler for Visual Languages.
+http://www.cs.ioc.ee/cocovila
 
-Copyright (C) 2004
-Aulo Aasmaa, TTU, aulo@email.ee
-Ando Saabas, IOC, ando@cs.ioc.ee
+Copyright (c) 2004-2009
+Modeling and Simulation Group at IoC
+http://www.cs.ioc.ee/msg
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License

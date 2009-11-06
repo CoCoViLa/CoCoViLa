@@ -472,11 +472,11 @@ public class Editor extends JFrame implements ChangeListener {
     /**
      * 
      */
-    private void makeToolsMenu( JMenuBar menuBar ) {
+    private void makeToolsMenu( JMenuBar _menuBar ) {
         
         JMenu menu = new JMenu( Menu.MENU_TOOLS );
         menu.setMnemonic( KeyEvent.VK_T );
-        menuBar.add( menu );
+        _menuBar.add( menu );
         
         JMenuItem menuItem = new JMenuItem( Menu.EXPERT_TABLE );
         menuItem.addActionListener( aListener );
@@ -531,14 +531,27 @@ public class Editor extends JFrame implements ChangeListener {
     /**
      * Package loader.
      * 
+     * @param _package - package to be loaded.
+     */
+    void loadPackage(VPackage _package) {
+
+        if ( _package != null ) {
+            File pkgFile = new File( _package.getPath() );
+            if ( pkgFile.exists() ) {
+                loadPackage( pkgFile );
+            }
+        }    
+    }
+    
+    /**
+     * Package loader.
+     * 
      * @param f - package file to be loaded.
      */
     void loadPackage( File f ) {
 
         if ( f != null ) {
-            String path;
-            RuntimeProperties.setLastPath( path = f.getAbsolutePath() );
-            RuntimeProperties.addOpenPackage( path );
+            RuntimeProperties.setLastPath( f.getAbsolutePath() );
 
             try {
 
@@ -567,7 +580,9 @@ public class Editor extends JFrame implements ChangeListener {
                 }
                 
                 if( isOK ) {
-                    Canvas canvas = new Canvas( loader.getPackage(), f.getParent() + File.separator );
+                    VPackage pkg = loader.getPackage();
+                    Canvas canvas = new Canvas( pkg, f.getParent() + File.separator );
+                    RuntimeProperties.addOpenPackage( pkg );
                     addCanvas(canvas);
                 }
             } catch ( Exception e ) {
@@ -597,25 +612,8 @@ public class Editor extends JFrame implements ChangeListener {
             canvas.setTitle(packageName);
         }
 
-        tabbedPane.addTab( packageName, canvas );
+        tabbedPane.addTab( packageName, null, canvas, canvas.getPackage().getPath() );
         tabbedPane.setSelectedComponent( canvas );
-
-        /* TODO
-        JLabel tabLabel = new JLabel( packageName );
-        tabbedPane.setTabComponentAt( tabbedPane.getSelectedIndex(), tabLabel );
-
-        tabLabel.addMouseMotionListener( new MouseMotionAdapter() {
-
-            @Override
-            public void mouseMoved( MouseEvent e ) {
-                super.mouseMoved( e );
-
-                canvas.setStatusBarText( "Package: "
-                        + canvas.getPackage().getPath() );
-            }
-        } );
-        */
-        
         canvas.setStatusBarText( "Loaded package: " + canvas.getPackage().getPath() );
     }
 
@@ -709,7 +707,7 @@ public class Editor extends JFrame implements ChangeListener {
 
         } else {
 
-            for ( String packageFile : RuntimeProperties.getOpenPackages() ) {
+            for ( String packageFile : RuntimeProperties.getPrevOpenPackages() ) {
 
                 File f = new File( packageFile );
 
@@ -773,11 +771,6 @@ public class Editor extends JFrame implements ChangeListener {
             if ( res == JOptionPane.YES_OPTION )
                 SystemUtils.unpackPackages();
         }
-    }
-
-    public void clearPane() {
-        Canvas canv = getCurrentCanvas();
-        closeSchemeTab(canv);
     }
 
     public void openOptionsDialog() {
@@ -871,7 +864,9 @@ public class Editor extends JFrame implements ChangeListener {
         return c;
     }
 
-    public void closeSchemeTab(Canvas canv) {
+    public void closeSchemeTab( Canvas canv ) {
+        if ( canv == null )
+            return;
         canv.destroy();
         tabbedPane.remove(canv);
         if (tabbedPane.getTabCount() > 0) {
@@ -879,4 +874,38 @@ public class Editor extends JFrame implements ChangeListener {
             getCurrentCanvas().drawingArea.grabFocus();
         }
     }
+
+    /**
+     * Reloads the current package discarding the current scheme. The request is
+     * ignored if no package is open.
+     */
+    void reloadPackage( Canvas canvas ) {
+        VPackage pkg = canvas.getPackage();
+        closeCanvas( canvas );
+        loadPackage( pkg );
+    }
+
+    /**
+     * Reloads the current package discarding the current scheme. The request is
+     * ignored if no package is open.
+     */
+    void reloadCurrentPackage() {
+        reloadPackage( getCurrentCanvas() );
+    }
+
+    /**
+     * Closes the given tab
+     */
+    void closeCanvas( Canvas canv ) {
+        RuntimeProperties.removeOpenPackage( canv.getPackage().getPath() );
+        closeSchemeTab( canv );
+    }
+
+    /**
+     * Closes current tab
+     */
+    public void closeCurrentCanvas() {
+        closeCanvas( getCurrentCanvas() );
+    }
+    
 }

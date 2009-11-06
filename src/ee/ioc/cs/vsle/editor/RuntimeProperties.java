@@ -4,10 +4,12 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 public class RuntimeProperties {
 
@@ -115,7 +117,8 @@ public class RuntimeProperties {
     private static String lnf;
     private static boolean recursiveSpecsAllowed = false;
     private static int maxRecursiveDeclarationDepth = 2;
-    private static Set<String> openPackages = new LinkedHashSet<String>();
+    private static List<String> openPackages = new ArrayList<String>();
+    private static List<String> prevOpenPackages = new ArrayList<String>();
     private static Map<String, String> recentPackages = new LinkedHashMap<String, String>();
     private static boolean computeGoal;
     private static boolean propagateValues;
@@ -194,7 +197,7 @@ public class RuntimeProperties {
                 if ( pack[ i ].trim().length() == 0 )
                     continue;
 
-                RuntimeProperties.openPackages.add( pack[ i ] );
+                RuntimeProperties.prevOpenPackages.add( pack[ i ] );
             }
         }
 
@@ -483,12 +486,9 @@ public class RuntimeProperties {
     /**
      * @param openPackage the openPackage to set
      */
-    public static void addOpenPackage( String openPackage ) {
-        RuntimeProperties.openPackages.add( openPackage );
-
-        String packageName = openPackage.substring( 0, openPackage.indexOf( "." ) );
-        packageName = packageName.substring( packageName.lastIndexOf( "\\" ) + 1 );
-        RuntimeProperties.recentPackages.put( packageName, openPackage );
+    public static void addOpenPackage( VPackage pkg ) {
+        RuntimeProperties.openPackages.add( pkg.getPath() );
+        RuntimeProperties.recentPackages.put( pkg.getName(), pkg.getPath() );
     }
 
     public static void removeOpenPackage( String package_ ) {
@@ -498,15 +498,15 @@ public class RuntimeProperties {
     /**
      * @return the openPackages
      */
-    public static Set<String> getOpenPackages() {
-        return openPackages;
+    public static Collection<String> getPrevOpenPackages() {
+        return Collections.unmodifiableCollection( prevOpenPackages );
     }
 
     /**
      * @return the recentPackages
      */
     public static Map<String, String> getRecentPackages() {
-        return recentPackages;
+        return Collections.unmodifiableMap( recentPackages );
     }
 
     /**
