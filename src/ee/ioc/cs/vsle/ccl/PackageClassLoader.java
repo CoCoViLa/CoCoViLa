@@ -1,10 +1,9 @@
 package ee.ioc.cs.vsle.ccl;
 
 import java.io.*;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-import java.net.URL;
+import java.net.*;
 import java.util.*;
+import java.util.jar.*;
 
 import org.eclipse.jdt.internal.compiler.batch.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.batch.FileSystem;
@@ -168,15 +167,14 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
         
         InputStream inputStreamJar = null;
         File tempJar;
-        FileOutputStream fosJar = null;
         try {
             //check if the file is already local
             if(url.getPath().startsWith( "file:" )) 
                 return new File( urlStrJar ).toURI().toURL();
             
-            URL urlJar = new URL(urlStrJar);
+            JarFile jar = ( (JarURLConnection) url.openConnection() ).getJarFile();
+            inputStreamJar = new FileInputStream( jar.getName() );
             
-            inputStreamJar = urlJar.openStream();
             String strippedName = urlStrJar;
             int dotIndex = strippedName.lastIndexOf('.');
             if (dotIndex >= 0) {
@@ -190,17 +188,7 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
             }
             tempJar = File.createTempFile(strippedName, ".jar");
             tempJar.deleteOnExit();
-            fosJar = new FileOutputStream(tempJar);
-            byte[] ba = new byte[1024];
-            int bytesWritten = 0;
-            while (true) {
-                int bytesRead = inputStreamJar.read(ba);
-                if (bytesRead < 0) {
-                    break;
-                }
-                fosJar.write(ba, 0, bytesRead);
-                bytesWritten += bytesRead;
-            }
+            SystemUtils.copyToFile( inputStreamJar, tempJar );
             return tempJar.toURI().toURL();
         } catch (Exception ioe) {
             ioe.printStackTrace();
@@ -208,12 +196,6 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
             try {
                 if (inputStreamJar != null) {
                     inputStreamJar.close();
-                }
-            } catch (IOException ioe) {
-            }
-            try {
-                if (fosJar != null) {
-                    fosJar.close();
                 }
             } catch (IOException ioe) {
             }

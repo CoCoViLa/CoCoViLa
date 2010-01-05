@@ -75,23 +75,45 @@ public class SystemUtils {
                 InputStream source = jarF.getInputStream( jarF
                         .getEntry( entryName ) );
 
-                // create output stream associated with the new file
-                FileOutputStream target = new FileOutputStream( newFileName );
-                int chunkSize = 1024;
-                int bytesRead;
-                byte[] ba = new byte[chunkSize];
-
-                while ( ( bytesRead = readBlocking( source, ba, 0, chunkSize ) ) > 0 ) {
-                    target.write( ba, 0, bytesRead );
-                }
+                copyToFile(source, fi);
 
                 // done copying -- close streams
                 source.close();
-                target.close();
             }
         } catch ( IOException e ) {
             e.printStackTrace();
             return;
+        }
+    }
+	
+    /**
+     * Copies data from a stream into a file
+     * 
+     * @param source
+     * @param targetFileName
+     */
+    public static void copyToFile( InputStream source, File targetFile ) {
+        FileOutputStream target = null;
+        try {
+            // create output stream associated with the new file
+            target = new FileOutputStream( targetFile );
+            int chunkSize = 1024;
+            int bytesRead;
+            byte[] ba = new byte[chunkSize];
+
+            while ( ( bytesRead = readBlocking( source, ba, 0, chunkSize ) ) > 0 ) {
+                target.write( ba, 0, bytesRead );
+            }
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        } finally {
+            if ( target != null ) {
+                try {
+                    target.close();
+                } catch ( IOException e ) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 	
