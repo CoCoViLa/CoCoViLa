@@ -51,14 +51,14 @@ class Rel implements Serializable {
     }
 
     void removeUnknownInput( Var var ) {
-        if ( !var.getField().isConstant() ) {
+        if ( !var.getField().isConstant() && !var.getField().isAliasLength() ) {
             unknownInputs.remove( var );
         }
     }
 
     void addInput(Var var) {
         inputs.add( var );
-        if( !var.getField().isConstant() ) {
+        if( !var.getField().isConstant() && !var.getField().isAliasLength() ) {
         	unknownInputs.add( var );
         }
     }

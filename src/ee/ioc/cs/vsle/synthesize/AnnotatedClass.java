@@ -96,8 +96,16 @@ public class AnnotatedClass {
 		return name;
 	}
 
+	/*
+	 * need to keep relations up-to-date (i.e. not cache rels from superclasses because some relations
+	 * may be added into superclasses later
+	 */
 	Collection<ClassRelation> getClassRelations() {
-		return classRelations;
+	    Collection<ClassRelation> relations = new LinkedHashSet<ClassRelation>(classRelations);
+	    for ( AnnotatedClass superclass : superClasses ) {
+	        relations.addAll( superclass.getClassRelations() );
+        }
+		return relations;
 	}
 
 	Collection<ClassField> getFields() {
@@ -115,8 +123,6 @@ public class AnnotatedClass {
 				allFields.add( cf );
 			}
 		}
-		classRelations.addAll( clas.getClassRelations() );
-		
 		superClasses.add( clas );
 		superClasses.addAll( clas.getSuperClasses() );
 	}

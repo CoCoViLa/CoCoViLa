@@ -583,8 +583,8 @@ public class SpecParser {
 
                             // cannot assign new values for constants
                             ClassField tmp = getVar( checkAliasLength( out, annClass, className ), annClass.getFields() );
-                            if ( tmp != null && tmp.isConstant() ) {
-                                db.p( "Ignoring constant and equation output: " + tmp );
+                            if ( tmp != null && ( tmp.isConstant() || tmp.isAliasLength() ) ) {
+                                db.p( "Ignoring constant as equation output: " + tmp );
                                 continue;
                             }
                             // if one variable is used on both sides of "=", we
@@ -871,11 +871,16 @@ public class SpecParser {
                     return aliasLengthName;
                 }
                 int length = alias.getVars().size();
-                //if value cannot be determined here, it will be defined in ProgramCreator
-                String value = (alias.isWildcard() || !alias.isInitialized()) ? null : "" + length;
-                ClassField var = new ClassField( aliasLengthName, TYPE_INT, value, true );
-                var.setAliasLength( true );
+                AliasLength var = new AliasLength( alias, thisClass.getName() );
                 thisClass.addField( var );
+                //if value cannot be determined here, it will be defined in ProgramCreator
+                if(!alias.isWildcard() && alias.isInitialized() ) {
+                    String meth = aliasLengthName + " = " + length;
+                    ClassRelation cr = new ClassRelation( RelType.TYPE_EQUATION, meth );
+                    cr.addOutput( aliasLengthName, thisClass.getFields() );
+                    cr.setMethod( meth );
+                    thisClass.addClassRelation( cr );
+                }
                 return aliasLengthName;
 
             }

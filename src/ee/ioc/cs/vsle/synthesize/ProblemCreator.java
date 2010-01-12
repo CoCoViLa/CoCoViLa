@@ -108,14 +108,13 @@ public class ProblemCreator {
             
             if( cf.isConstant() ) {
                 problem.getKnownVars().add( var );
-                
-                if( cf.isAliasLength() && cf.getValue() == null ) {
-                    //this denotes alias.length constant and the value needs to be assigned
-                    String name = cf.getName();
-                    Alias alias = (Alias)ac.getFieldByName( name.substring( 0, name.length() - 7 ) );
-                    String aliasFullName = parent.getFullNameForConcat() + alias.getName();
-                    aliasLengths.put( aliasFullName, var );
-                }
+            }
+            
+            if( cf.isAliasLength() && cf.getValue() == null ) {
+                //this denotes alias.length constant and the value needs to be assigned
+                Alias alias = ((AliasLength)cf).getAlias();
+                String aliasFullName = parent.getFullNameForConcat() + alias.getName();
+                aliasLengths.put( aliasFullName, var );
             }
         }
 
@@ -127,9 +126,13 @@ public class ProblemCreator {
         if( root ) {
             //initialize <alias>.length property
             for ( String alias : aliasLengths.keySet() ) {
-                Var length = aliasLengths.get( alias );
+                Var lengthVar = aliasLengths.get( alias );
                 Var aliasVar = problem.getVar( alias );
-                length.getField().setValue( "" + aliasVar.getChildVars().size() );
+                String meth = lengthVar.getFullName() + " = " + aliasVar.getChildVars().size();
+                ClassRelation cr = new ClassRelation( RelType.TYPE_EQUATION, meth );
+                cr.addOutput( lengthVar.getFullName(), ac.getFields() );
+                cr.setMethod( meth );
+                ac.addClassRelation( cr );
             }
             
             

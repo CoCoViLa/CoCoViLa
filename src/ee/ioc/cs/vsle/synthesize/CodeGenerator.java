@@ -261,7 +261,9 @@ public class CodeGenerator {
 
         for ( Var var : usedVars ) {
 
-            boolean allow = !var.getField().isAlias() && !var.getField().isConstant() && !var.getField().isVoid() && !var.getField().isStatic();
+            ClassField cf = var.getField();
+            boolean allow = !cf.isAlias() && !cf.isConstant() 
+                                && !cf.isVoid() && !cf.isStatic();
 
             if ( var.getParent().equals( _problem.getRootVar() ) ) {
                 if ( allow ) {
