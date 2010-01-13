@@ -1256,6 +1256,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
     class DrawingArea extends JPanel {
         private static final long serialVersionUID = 1L;
 
+        private final Stroke connectionStroke = new BasicStroke();
+
         protected void drawGrid( Graphics2D g ) {
 
             Rectangle vr = g.getClipBounds();
@@ -1311,6 +1313,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
             }
 
             g2.setColor( Color.blue );
+            g2.setStroke(connectionStroke);
             for ( int i = 0; i < connections.size(); i++ ) {
                 rel = connections.get( i );
                 rel.drawRelation( g2 );
