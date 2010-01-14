@@ -486,16 +486,16 @@ public class ProblemCreator {
             AnnotatedClass ac1 = classes.getType( type1 );
             AnnotatedClass ac2 = classes.getType( type2 );
             
-            if( ac2.getSuperClasses().contains( ac1 ) ) {
+            if( ac2.getAllSuperClasses().contains( ac1 ) ) {
                 types.add( ac1 );
             }
-            else if( ac1.getSuperClasses().contains( ac2 ) ) {
+            else if( ac1.getAllSuperClasses().contains( ac2 ) ) {
                 types.add( ac2 );
             }
             else {
-                
-                for ( AnnotatedClass super1 : ac1.getSuperClasses() ) {
-                    if( ac2.getSuperClasses().contains( super1 ) ) {
+                ClassList allAC2superclasses = ac2.getAllSuperClasses();
+                for ( AnnotatedClass super1 : ac1.getAllSuperClasses() ) {
+                    if( allAC2superclasses.contains( super1 ) ) {
                         types.add( super1 );
                     }
                 }

@@ -101,10 +101,12 @@ public class AnnotatedClass {
 	 * may be added into superclasses later
 	 */
 	Collection<ClassRelation> getClassRelations() {
-	    Collection<ClassRelation> relations = new LinkedHashSet<ClassRelation>(classRelations);
+	    Collection<ClassRelation> relations = new LinkedHashSet<ClassRelation>();
 	    for ( AnnotatedClass superclass : superClasses ) {
 	        relations.addAll( superclass.getClassRelations() );
         }
+	    //the order does matter! rels from superclasses have to go first
+	    relations.addAll( classRelations );
 		return relations;
 	}
 
@@ -124,12 +126,19 @@ public class AnnotatedClass {
 			}
 		}
 		superClasses.add( clas );
-		superClasses.addAll( clas.getSuperClasses() );
 	}
 
 	public ClassList getSuperClasses() {
 		return superClasses;
 	}
 
+	public ClassList getAllSuperClasses() {
+	    ClassList allSuperClasses = new ClassList();
+	    allSuperClasses.addAll( superClasses );
+	    for ( AnnotatedClass superclass : superClasses ) {
+	        allSuperClasses.addAll( superclass.getAllSuperClasses() );
+        }
+        return allSuperClasses;
+    }
 }
 
