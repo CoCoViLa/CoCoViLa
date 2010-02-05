@@ -127,12 +127,12 @@ public class ProgramRunner {
                     + e.getMessage(), "Execution error",
                     JOptionPane.ERROR_MESSAGE );
             e.printStackTrace( System.err );
-        } catch ( CompileException ce ) {
-            ErrorWindow.showErrorMessage( "Compilation failed:\n " + ce.excDesc );
-        } catch ( SpecParseException e ) {
-            ErrorWindow.showErrorMessage( "Compilation failed:\n " + e.excDesc );
-        } catch ( Exception e ) {
-            ErrorWindow.showErrorMessage( "Compilation failed:\n " + e.getMessage() );
+        } catch (CompileException ce) {
+            ErrorWindow.showErrorMessage("Compilation failed:\n " + ce.toString());
+        } catch (SpecParseException e) {
+            ErrorWindow.showErrorMessage("Compilation failed:\n " + e.toString());
+        } catch (Exception e) {
+            ErrorWindow.showErrorMessage("Compilation failed:\n " + e.toString());
         } 
     }
     
@@ -229,32 +229,34 @@ public class ProgramRunner {
         if( e instanceof UnknownVariableException ) {
             UnknownVariableException uve = (UnknownVariableException)e;
             String line = uve.getLine();
-            msg = "Fatal error: variable " + uve.excDesc + " not declared"
+            msg = "Fatal error: variable " + uve.getMessage() + " not declared"
                     + ( line != null ? ", line: " + line : "" );
             db.p( msg );
             ErrorWindow.showErrorMessage( msg );
         }
         else if( e instanceof  LineErrorException ) {
             LineErrorException lee = (LineErrorException)e;
-            msg = "Syntax error on line '" + lee.excDesc + "'";
+            msg = "Syntax error on line '" + lee.getMessage() + "'";
             db.p( msg );
             ErrorWindow.showErrorMessage( msg );
         }
         else if( e instanceof  EquationException ) {
             EquationException ee = (EquationException)e;
-            msg = "EquationException " + ee.excDesc;
+            msg = "EquationException " + ee.getMessage();
             ErrorWindow.showErrorMessage( msg );
         }
         else if( e instanceof  MutualDeclarationException ) {
             MutualDeclarationException lee = (MutualDeclarationException)e;
-            msg = "Mutual recursion in specifications, between classes " + lee.excDesc;
+            msg = "Mutual recursion in specifications, between classes "
+                + lee.getMessage();
             db.p( msg );
             ErrorWindow.showErrorMessage( msg );
         }
         else if( e instanceof  SpecParseException ) {
             SpecParseException spe = (SpecParseException)e;
             String line = spe.getLine();
-            msg = "Specification parsing error: " + spe.excDesc + ( line != null ? ", line: " + line : "" ); 
+            msg = "Specification parsing error: " + spe.getMessage() 
+                + (line != null ? ", line: " + line : ""); 
             db.p( msg );
             ErrorWindow.showErrorMessage( msg );
         }

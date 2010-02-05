@@ -722,7 +722,7 @@ public class SpecParser {
         } catch ( UnknownVariableException uve ) {
 
             String line = uve.getLine() != null ? uve.getLine() : lt != null ? lt.getOrigSpecLine() : null;
-            throw new UnknownVariableException( className + "." + uve.excDesc, line );
+            throw new UnknownVariableException(className + "." + uve.getMessage(), line);
 
         }
         classList.add( annClass );
@@ -786,7 +786,7 @@ public class SpecParser {
                 try {
                     classList.addAll( parseSpecificationImpl( refineSpec( s ), type, null, path, checkedClasses ) );
                 } catch ( SpecParseException e ) {
-                    throw new SpecParseException( "Class \"" + type + "\": " + e.excDesc, e.getLine() );
+                    throw new SpecParseException("Class \"" + type + "\": " + e.toString(), e);
                 }
                 checkedClasses.remove( type );
             }
@@ -945,7 +945,7 @@ public class SpecParser {
                             //}
                         } catch ( UnknownVariableException e ) {
                             if( RuntimeProperties.isLogInfoEnabled() )
-                                db.p( "Line: " + e.getLine() + ", " + e.excDesc );
+                                db.p("Line: " + e.getLine() + ", " + e.toString());
                         } catch ( AliasException e ) {
                         }
                     }

@@ -260,13 +260,13 @@ public class Synthesizer {
             makeProgram( prog, classList, mainClassName, path,
                     new FileSystemStorage(outputDir));
         } catch ( UnknownVariableException uve ) {
-            db.p( "Fatal error: variable " + uve.excDesc + " not declared" );
+            db.p("Fatal error: variable " + uve.getMessage() + " not declared");
         } catch ( LineErrorException lee ) {
-            db.p( "Fatal error on line " + lee.excDesc );
+            db.p("Fatal error on line " + lee.getMessage());
         } catch ( MutualDeclarationException lee ) {
-            db.p( "Mutual recursion in specifications, between classes " + lee.excDesc );
+            db.p("Mutual recursion in specifications, between classes " + lee.getMessage());
         } catch ( EquationException ee ) {
-            db.p( ee.excDesc );
+            db.p(ee.getMessage());
         } catch ( SpecParseException spe ) {
             db.p( spe );
         } catch ( Exception ex ) {

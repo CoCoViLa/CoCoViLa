@@ -1,26 +1,24 @@
 package ee.ioc.cs.vsle.synthesize;
 
 /**
- * <p>Title: Unknown Variable Exception</p>
- * <p>Description: <description></p>
- * <p>Copyright: Copyright (c) 2004</p>
- * <p>Company: </p>
- * @author Ando Saabas
- * @version 1.0
+ * Unknown Variable Exception
  */
-public class UnknownVariableException
-	extends SpecParseException {
+public class UnknownVariableException extends SpecParseException {
+    /**
+     * Class constructor.
+     * @param varName name of the unknown variable
+     */
+    public UnknownVariableException(String varName) {
+        super(varName);
+    }
 
-	/**
-	 * Class constructor.
-	 * @param s String - exception message.
-	 */
-	public UnknownVariableException(String s) {
-		super(s);
-	} // ee.ioc.cs.editor.synthesize.UnknownVariableException
-
-	public UnknownVariableException(String s, String line) {
-        super(s);
-        setLine( line );
-    } // ee.ioc.cs.editor.synthesize.UnknownVariableException
+    /**
+     * Class constructor
+     * @param varName name of the unknown variable
+     * @param line the specification line where the exception occured$
+     */
+    public UnknownVariableException(String varName, String line) {
+        super(varName);
+        setLine(line);
+    }
 }
