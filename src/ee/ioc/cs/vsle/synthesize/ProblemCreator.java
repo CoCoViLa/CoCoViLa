@@ -779,6 +779,10 @@ public class ProblemCreator {
                     var.addRel( aliasOutputRel );
                 }
                 
+                if( newAliasVar.getChildVars().isEmpty() ) {
+                    problem.getKnownVars().add( newAliasVar );
+                }
+                
                 aliasElements.put(varName, newAliasVar);
                 return newAliasVar;
             }
