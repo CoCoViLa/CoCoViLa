@@ -43,5 +43,8 @@ class StringStack {
         return getAnyChar();
     }
 
+    boolean isEmpty() {
+        return e.length() == 0;
+    }
 }
 
