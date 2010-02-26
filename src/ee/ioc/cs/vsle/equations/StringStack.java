@@ -8,12 +8,27 @@ class StringStack {
     }
 
     char peek() {
-        if (e.length() > 0) {
-            return e.charAt(0);
+        return peek(0);
+    }
+
+    char peek(int n) {
+        if (e.length() > n) {
+            return e.charAt(n);
         }
         return '#';
     }
-
+    
+    void skipBlanks() {
+        // Skip past any spaces and tabs on the current line of input.
+        // Stop at a non-blank character or end-of-line.
+        int i = 0;
+        char ch;
+        while ((ch = peek(i)) == ' ' || ch == '\t') {
+            i++;
+        }
+        e = e.substring(i);
+    }
+    
     char getAnyChar() {
         char ch = e.charAt(0);
 
