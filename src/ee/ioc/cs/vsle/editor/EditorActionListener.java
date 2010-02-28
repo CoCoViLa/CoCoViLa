@@ -257,6 +257,8 @@ public class EditorActionListener implements ActionListener {
                 } else {
                     JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
                 }
+            } else if ( e.getActionCommand().equals( Menu.EXTEND_SPEC ) ) {
+                new CodeViewer( Editor.getInstance().getCurrentCanvas().getScheme() );
             } else if ( e.getActionCommand().equals( Menu.RUN ) ) {
                 Canvas canv = Editor.getInstance().getCurrentCanvas();
                 if ( canv != null ) {

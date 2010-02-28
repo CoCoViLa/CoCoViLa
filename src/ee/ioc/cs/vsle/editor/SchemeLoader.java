@@ -234,6 +234,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
         private static final String TYPE = "type";
         private static final String RELOBJECT = "relobject";
         private static final String OBJECT = "object";
+        private static final String EXT_SPEC = "extended_spec";
         
         private ObjectList objects;
 		private ConnectionList connections;
@@ -244,7 +245,9 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 		private GObj obj;
 		private PackageClass pclass;
 		private boolean ignoreCurrent;
-
+		private boolean readingExtSpec;
+		private String schemeExtSpec;
+		
 		@Override
 		public InputSource resolveEntity(String publicId, String systemId) {
 			InputSource is = null;
@@ -448,6 +451,8 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 				String y = new String(attrs.getValue("y"));
 				connection.addBreakPoint(new Point(Integer.parseInt(x),
 						Integer.parseInt(y)));
+			} else if ( EXT_SPEC.equals( qName ) ) {
+			    readingExtSpec = true;
 			}
 
 		}
@@ -465,8 +470,11 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
                 if ( superClass != null && superClass.equals( obj.getName() ) ) {
                     obj.setSuperClass( true );
                 }
+                obj = null;
             } else if ( CONNECTION.equals( qName ) ) {
                 connection = null;
+            } else if ( EXT_SPEC.equals( qName ) ) {
+                readingExtSpec = false;
             } else if ( qName.equals( SCHEME ) ) {
                 // create proper references to start and endports in all
                 // RelObjects
@@ -488,9 +496,16 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
         }
 
 		@Override
-		public void characters(char buf[], int offset, int len) {
-			// ingored
-		}
+        public void characters( char buf[], int offset, int len ) {
+            if ( readingExtSpec ) {
+                String spec = new String( buf, offset, len );
+                if ( obj != null ) {
+                    obj.setSpecText( spec );
+                } else {
+                    schemeExtSpec = spec;
+                }
+            }
+        }
 
 		@Override
 		public void ignorableWhitespace(char buf[], int offset, int len) {
@@ -538,5 +553,12 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
      */
     public String getSchemePath() {
         return schemePath;
+    }
+    
+    public Scheme getScheme(ISchemeContainer canvas) {
+        Scheme scheme = new Scheme(canvas, getObjectList(), getConnectionList());
+        if ( handler != null )
+            scheme.setSpecText( handler.schemeExtSpec );
+        return scheme;
     }
 }

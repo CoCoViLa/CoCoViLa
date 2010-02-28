@@ -1053,13 +1053,10 @@ public class Canvas extends JPanel implements ISchemeContainer {
                 if (DiagnosticsCollector.promptLoad(this,
                         loader.getDiagnostics(),
                         "Warning: Inconsistent scheme", "scheme")) {
-
-                    newScheme = new Scheme(this, loader.getObjectList(),
-                            loader.getConnectionList());
+                    newScheme = loader.getScheme( this );
                 }
             } else {
-                newScheme = new Scheme(this, loader.getObjectList(),
-                        loader.getConnectionList());
+                newScheme = loader.getScheme( this );
             }
         } else if ( !loader.isSchemeLoadingCancelled() ) {
             List<String> msgs = loader.getDiagnostics().getMessages();

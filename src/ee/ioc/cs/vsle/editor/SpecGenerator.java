@@ -197,6 +197,14 @@ public class SpecGenerator implements ISpecGenerator {
 			s.append( OFFSET2 ).append( multiport ).append( " = [ " ).append( portarray ).append( " ];\n");
 		}
 		
+		if(scheme.getSpecText() != null) {
+		    String[] lines = scheme.getSpecText().split( "\n" ); 
+
+		    for ( String string : lines ) {
+		        s.append( OFFSET2 ).append( string ).append( "\n" );                
+            }
+		}
+	
 		if( goalAxiom != null ) {
 			
 			s.append( OFFSET2 );

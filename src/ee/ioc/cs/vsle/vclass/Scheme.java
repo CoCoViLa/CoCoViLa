@@ -25,12 +25,13 @@ import ee.ioc.cs.vsle.util.db;
 /**
  * The scheme description
  */
-public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
+public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExtendable {
 
     private static final long serialVersionUID = 1L;
     private ObjectList objects;
 	private ConnectionList connections;
 	private ISchemeContainer canvas;
+	private String extendedSpec;
 	
 	public Scheme( ISchemeContainer canvas, ObjectList objects,
 			ConnectionList connections) {
@@ -274,10 +275,32 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme {
                 con.toXML(th);
             }
 
+            th.startElement( "", "", "extended_spec", null );
+            th.startCDATA();
+            char[] chs = getSpecText().toCharArray();
+            th.characters( chs, 0, chs.length );
+            th.endCDATA();
+            th.endElement( "", "", "extended_spec" );
+            
             th.endElement("", "", "scheme");
             th.endDocument();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public String getSpecText() {
+        return extendedSpec;
+    }
+
+    @Override
+    public String getTitle() {
+        return canvas.getPackage().getName();
+    }
+
+    @Override
+    public void setSpecText(String spec) {
+        extendedSpec = spec;
     }
 }

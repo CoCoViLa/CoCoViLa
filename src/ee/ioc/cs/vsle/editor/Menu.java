@@ -60,6 +60,7 @@ public class Menu {
 
     // SCHEME
     public static final String SPECIFICATION = "Specification...";
+    public static final String EXTEND_SPEC = "Extend...";
     public static final String RUN = "Run";
     public static final String PROPAGATE_VALUES = "Propagate";
     public static final String COMPUTE_GOAL = "Compute Goal";
@@ -99,6 +100,7 @@ public class Menu {
     public static final String TOFRONT = "To Front";
     public static final String MAKECLASS = "Make Class";
     public static final String VIEWCODE = "View Code";
+    public static final String OBJ_SPEC = "Extend Spec";
     public static final String SHOW_VALUES = "Show Values";
     public static final String CLASSPAINTER = "Enable External Painters";
     public static final String ROTATION = "Rotate";

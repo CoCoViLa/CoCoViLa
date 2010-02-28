@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.editor;
 
 import ee.ioc.cs.vsle.util.FileFuncs;
+import ee.ioc.cs.vsle.vclass.*;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -17,6 +18,10 @@ import java.io.*;
 public class CodeViewer extends JFrame implements ActionListener,
         PropertyChangeListener {
 
+    public enum MODE {
+        FILE, SPEC
+    }
+    
     // OS X specific properties
     private static final String DOC_FILE = "Window.documentFile";
     private static final String MODIFIED = "Window.documentModified";
@@ -34,7 +39,9 @@ public class CodeViewer extends JFrame implements ActionListener,
             }
         }
     };
-
+    
+    private MODE mode = MODE.FILE;
+    private ISpecExtendable extendable;
     /**
      * Returns the main text component for editing the source code.
      * @return the main text component
@@ -52,6 +59,19 @@ public class CodeViewer extends JFrame implements ActionListener,
 	public CodeViewer(String name, String path) {
 		this(name, path, ".java");
 	}
+	
+	public CodeViewer(ISpecExtendable extendable) {
+	    super(extendable.getTitle());
+	    this.extendable = extendable;
+	    mode = MODE.SPEC;
+	    initLayout();
+	    getTextArea().setText( extendable.getSpecText() );
+	    markSaved();
+	    setPreferredSize(new Dimension(550, 450));
+        setMinimumSize(getMinimumSize());
+        pack();
+        setVisible(true);
+    }
 
 	private void initLayout() {
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -87,6 +107,7 @@ public class CodeViewer extends JFrame implements ActionListener,
 		JMenuItem new_ = new JMenuItem( "New" );
 		new_.setActionCommand( "New" );
 		new_.addActionListener(this);
+		new_.setEnabled( mode == MODE.FILE );
 		fileMenu.add(new_);
 		
 		JMenuItem open = new JMenuItem( "Open..." );
@@ -94,6 +115,7 @@ public class CodeViewer extends JFrame implements ActionListener,
 		open.addActionListener(this);
 		open.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_O,
 		        InputEvent.CTRL_DOWN_MASK));
+		open.setEnabled( mode == MODE.FILE );
 		fileMenu.add(open);
 		
 		fileMenu.add( new JSeparator() );
@@ -109,6 +131,7 @@ public class CodeViewer extends JFrame implements ActionListener,
 		JMenuItem saveAs = new JMenuItem( "Save As..." );
 		saveAs.setActionCommand( "SaveAs" );
 		saveAs.addActionListener(this);
+		saveAs.setEnabled( mode == MODE.FILE );
 		fileMenu.add(saveAs);
 		
 		fileMenu.add( new JSeparator() );
@@ -184,6 +207,13 @@ public class CodeViewer extends JFrame implements ActionListener,
 	}
 
 	private boolean saveFile( boolean saveAs ) {
+	    
+	    if(mode == MODE.SPEC) {
+            extendable.setSpecText( textArea.getText() );
+            markSaved();
+            return true;
+        }
+	    
 	    File openFileNew = openFile;
 
 		if( saveAs ) {
@@ -270,15 +300,21 @@ public class CodeViewer extends JFrame implements ActionListener,
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (UndoRedoDocumentPanel.PROPERTY_SAVED.equals(evt.getPropertyName())) {
+            String title;
+            if (mode == MODE.FILE && openFile != null) {
+                title = openFile.getAbsolutePath();
+            } else if(mode == MODE.SPEC) {
+                title = extendable.getTitle();
+            }
+            else return;
             // Put an asterisk in front of the title for unsaved files
-            if (openFile != null) {
-                if (Boolean.TRUE.equals(evt.getNewValue())) {
-                    setTitle(openFile.getAbsolutePath());
-                    getRootPane().putClientProperty(MODIFIED, Boolean.FALSE);
-                } else {
-                    setTitle("*" + openFile.getAbsolutePath());
-                    getRootPane().putClientProperty(MODIFIED, Boolean.TRUE);
-                }
+
+            if (Boolean.TRUE.equals(evt.getNewValue())) {
+                setTitle(title);
+                getRootPane().putClientProperty(MODIFIED, Boolean.FALSE);
+            } else {
+                setTitle("*" + title);
+                getRootPane().putClientProperty(MODIFIED, Boolean.TRUE);
             }
         }
     }

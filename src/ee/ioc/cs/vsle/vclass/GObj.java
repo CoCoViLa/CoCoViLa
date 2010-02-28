@@ -14,7 +14,8 @@ import javax.xml.transform.sax.TransformerHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.AttributesImpl;
 
-public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeObject {
+public class GObj implements Serializable, Cloneable, 
+                                ee.ioc.cs.vsle.api.SchemeObject, ISpecExtendable {
 
     private static final long serialVersionUID = 1L;
 
@@ -69,6 +70,8 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
 
     private boolean drawPorts = true;
     private boolean drawInstanceName = false;
+    
+    private String extendedSpec;
     
     public GObj() {
         // default constructor
@@ -844,5 +847,20 @@ public class GObj implements Serializable, Cloneable, ee.ioc.cs.vsle.api.SchemeO
      */
     public int getPortOffsetY2() {
         return portOffsetY2;
+    }
+
+    @Override
+    public String getSpecText() {
+        return extendedSpec;
+    }
+
+    @Override
+    public String getTitle() {
+        return getName();
+    }
+
+    @Override
+    public void setSpecText(String spec) {
+        extendedSpec = spec;
     }
 }

@@ -98,7 +98,7 @@ public class SpecEditor {
             SchemeLoader schemeLoader = new SchemeLoader( _package );
             
             if ( schemeLoader.load( schemeFile ) ) {
-                scheme = new Scheme( this, schemeLoader.getObjectList(), schemeLoader.getConnectionList() );
+                scheme = schemeLoader.getScheme( this );
             } else {
                 JOptionPane.showMessageDialog( null, "Error loading scheme", "Error", JOptionPane.ERROR_MESSAGE );
             }
