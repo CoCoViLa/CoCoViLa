@@ -275,12 +275,15 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
                 con.toXML(th);
             }
 
-            th.startElement( "", "", "extended_spec", null );
-            th.startCDATA();
-            char[] chs = getSpecText().toCharArray();
-            th.characters( chs, 0, chs.length );
-            th.endCDATA();
-            th.endElement( "", "", "extended_spec" );
+            String spec = getSpecText();
+            if( spec != null ) {
+                th.startElement( "", "", "extended_spec", null );
+                th.startCDATA();
+                char[] chs = spec.toCharArray();
+                th.characters( chs, 0, chs.length );
+                th.endCDATA();
+                th.endElement( "", "", "extended_spec" );
+            }
             
             th.endElement("", "", "scheme");
             th.endDocument();
