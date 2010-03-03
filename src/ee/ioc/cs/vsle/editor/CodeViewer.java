@@ -1,16 +1,14 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.util.FileFuncs;
-import ee.ioc.cs.vsle.vclass.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.beans.*;
+import java.io.*;
 
 import javax.swing.*;
 import javax.swing.text.*;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.*;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * Source code viewer and editor for package component metaclasses.
@@ -50,10 +48,14 @@ public class CodeViewer extends JFrame implements ActionListener,
         return textArea;
     }
 
+    private CodeViewer(File file) {
+        super();
+        initLayout();
+        openFile( file );
+    }
+    
 	private CodeViewer(String name, String path, String extension) {
-		super();
-		initLayout();
-		openFile( new File( path + name + extension ) );
+		this(new File( path + name + extension ));
 	}
 
 	public CodeViewer(String name, String path) {
@@ -67,12 +69,16 @@ public class CodeViewer extends JFrame implements ActionListener,
 	    initLayout();
 	    getTextArea().setText( extendable.getSpecText() );
 	    markSaved();
-	    setPreferredSize(new Dimension(550, 450));
-        setMinimumSize(getMinimumSize());
-        pack();
-        setVisible(true);
+	    open();
     }
 
+	public void open() {
+        setPreferredSize(new Dimension(550, 450));
+        setMinimumSize(getMinimumSize());
+        pack();
+        setVisible(true);        
+    }
+	
 	private void initLayout() {
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		setLocationByPlatform(true);
@@ -88,6 +94,8 @@ public class CodeViewer extends JFrame implements ActionListener,
 		
 		textArea.addKeyListener(new ProgramTextEditor.CommentKeyListener());
 		textArea.setFont(RuntimeProperties.getFont(RuntimeProperties.Fonts.CODE));
+		textArea.addMouseListener( new JavaClassOpener() );
+		
 		FontChangeEvent.addFontChangeListener( fontListener );
 		
 		JScrollPane areaScrollPane = new JScrollPane(textArea);
@@ -356,6 +364,30 @@ public class CodeViewer extends JFrame implements ActionListener,
         // ask confirmation when window is closed with unsaved content
         if (WindowEvent.WINDOW_CLOSING != e.getID() || confirmClose()) {
             super.processWindowEvent(e);
+        }
+    }
+    
+    private class JavaClassOpener extends MouseAdapter {
+
+        @Override
+        public void mouseClicked( MouseEvent e ) {
+            
+            if(SwingUtilities.isRightMouseButton( e )
+                    && e.getClickCount() == 1
+                    && ( e.getModifiers() & KeyEvent.CTRL_MASK ) > 0 ) {
+                
+                String text = textArea.getSelectedText();
+                if( StringUtil.isJavaIdentifier( text ) && openFile != null ) {
+                    
+                    File newFile = new File( openFile.getParent(), text + ".java" );
+                    if(newFile.exists()) {
+                        if(( e.getModifiers() & KeyEvent.SHIFT_MASK ) > 0)
+                            new CodeViewer( newFile ).open();
+                        else
+                            openFile( newFile );
+                    }
+                }
+            }
         }
     }
 }

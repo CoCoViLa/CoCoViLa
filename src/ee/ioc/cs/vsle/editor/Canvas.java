@@ -1169,11 +1169,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
     void openClassCodeViewer( String className ) {
         String editor = RuntimeProperties.getDefaultEditor();
         if (editor == null) {
-            CodeViewer cv = new CodeViewer(className, getWorkDir());
-            cv.setPreferredSize(new Dimension(550, 450));
-            cv.setMinimumSize(cv.getMinimumSize());
-            cv.pack();
-            cv.setVisible(true);
+            new CodeViewer(className, getWorkDir()).open();
+            
         } else {
             File wd = new File(getWorkDir());
             String editCmd = editor.replace("%f",
