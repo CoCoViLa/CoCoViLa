@@ -50,8 +50,8 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
     }
 
     /**
-     * Indicated if loading of a scheme was canceled by a user
-     * @return
+     * Indicates if loading of a scheme was canceled by a user
+     * @return true, if loading was canceled; false otherwise
      */
     public boolean isSchemeLoadingCancelled() {
         return schemeLoadingCancelled;
@@ -364,39 +364,28 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
                                 + "\", not \"" + vPackage.getName(), false );
                     }
                 }
-			} else if (element.equals(PROPERTIES)
-					|| element.equals(RELPROPERTIES)) {
-
-				String x = attrs.getValue("x");
-				String y = attrs.getValue("y");
-				String xsize = attrs.getValue("xsize");
-				String ysize = attrs.getValue("ysize");
-				String width = attrs.getValue("width");
-				String height = attrs.getValue("height");
+            } else if (element.equals(PROPERTIES)) {
+                String x = attrs.getValue("x");
+                String y = attrs.getValue("y");
+                String xsize = attrs.getValue("xsize");
+                String ysize = attrs.getValue("ysize");
                 String angle = attrs.getValue("angle");
+                // width and height are deprecated and should be ignored here
 
-				obj.setX(Integer.parseInt(x));
-				obj.setY(Integer.parseInt(y));
+                obj.setX(Integer.parseInt(x));
+                obj.setY(Integer.parseInt(y));
+                obj.setXsize(Float.parseFloat(xsize));
+                obj.setYsize(Float.parseFloat(ysize));
 
-				if (element.equals(RELPROPERTIES)) {
-					String endX = attrs.getValue("endX");
-					String endY = attrs.getValue("endY");
-
-					RelObj relObj = (RelObj) obj;
-					
-					relObj.setEndX( Integer.parseInt(endX) );
-					relObj.setEndY( Integer.parseInt(endY) );
-                }
-
-				obj.setXsize(Float.parseFloat(xsize));
-				obj.setYsize(Float.parseFloat(ysize));
-				obj.setWidth(Integer.parseInt(width));
-				obj.setHeight(Integer.parseInt(height));
-
-                if (angle != null)
+                if (angle != null) {
                     obj.setAngle(Double.valueOf(angle).doubleValue());
-
-			} else if (element.equals(FIELD)) {
+                }
+            } else if (element.equals(RELPROPERTIES)) {
+                // Values of properties x, y, endX, endY, angle, width, height,
+                // xsize, ysize are calculated from connection ports.
+                // The property "strict" is not used at all for relclasses?
+                // All these attributes should be ignored here.
+            } else if (element.equals(FIELD)) {
 				String name = new String(attrs.getValue(NAME));
 				String type = new String(attrs.getValue(TYPE));
 				String value = attrs.getValue(VALUE);
@@ -492,6 +481,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 
                     }
                 }
+                objects.updateRelObjs();
             }
         }
 
@@ -529,12 +519,16 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 			return objects;
 		}
 
+		public String getSchemeExtSpec() {
+		    return schemeExtSpec;
+		}
 	}
 	
 	private class SchemeLoaderException extends RuntimeException {
-	    
+
+	    private static final long serialVersionUID = 1L;
 	    private boolean showErrorMessage;
-	    
+
 	    public SchemeLoaderException(String message, boolean showErrorMessage) {
 	        super(message);
 	        this.showErrorMessage = showErrorMessage;
@@ -554,11 +548,11 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
     public String getSchemePath() {
         return schemePath;
     }
-    
+
     public Scheme getScheme(ISchemeContainer canvas) {
         Scheme scheme = new Scheme(canvas, getObjectList(), getConnectionList());
         if ( handler != null )
-            scheme.setSpecText( handler.schemeExtSpec );
+            scheme.setSpecText(handler.getSchemeExtSpec());
         return scheme;
     }
 }

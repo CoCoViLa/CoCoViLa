@@ -520,8 +520,7 @@ public class GObj implements Serializable, Cloneable,
     }
 
     /**
-     * @param specFields
-     *                the specFields to set
+     * @param specField The specField to be added
      */
     public void addSpecField( ClassField specField ) {
         this.specFields.put( specField.getName(), specField );
@@ -557,8 +556,6 @@ public class GObj implements Serializable, Cloneable,
         attrs.clear();
         attrs.addAttribute("", "", "x", StringUtil.CDATA, Integer.toString(getX()));
         attrs.addAttribute("", "", "y", StringUtil.CDATA, Integer.toString(getY()));
-        attrs.addAttribute("", "", "width", StringUtil.CDATA, Integer.toString(getWidth()));
-        attrs.addAttribute("", "", "height", StringUtil.CDATA, Integer.toString(getHeight()));
         attrs.addAttribute("", "", "xsize", StringUtil.CDATA, Double.toString(getXsize()));
         attrs.addAttribute("", "", "ysize", StringUtil.CDATA, Double.toString(getYsize()));
         attrs.addAttribute("", "", "strict", StringUtil.CDATA, Boolean.toString(isStrict()));

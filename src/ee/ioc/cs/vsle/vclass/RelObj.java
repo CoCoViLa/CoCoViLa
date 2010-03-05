@@ -144,6 +144,7 @@ public class RelObj extends GObj {
 
 		th.startElement("", "", "relobject", attrs);
 
+		/* Do not save values that can (and have to) be calculated (#2953636).
 		attrs.clear();
 		attrs.addAttribute("", "", "x", StringUtil.CDATA,
 				Integer.toString(getX()));
@@ -168,6 +169,7 @@ public class RelObj extends GObj {
 
 		th.startElement("", "", "relproperties", attrs);
 		th.endElement("", "", "relproperties");
+		*/
 
 		attrs.clear();
 		th.startElement("", "", "fields", attrs);
