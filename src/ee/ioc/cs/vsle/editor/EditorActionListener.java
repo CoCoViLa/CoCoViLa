@@ -126,14 +126,15 @@ public class EditorActionListener implements ActionListener {
         // JmenuItem chosen
         if ( e.getSource().getClass().getName() == "javax.swing.JMenuItem"
                 || e.getSource().getClass().getName() == "javax.swing.JCheckBoxMenuItem" ) {
-
-            if ( e.getActionCommand().equals( Menu.SAVE_SCHEME_AS ) ) {
+            
+            if ( Menu.NEW_SCHEME.equals( e.getActionCommand() ) ) {
+                newScheme();
+            } else if ( e.getActionCommand().equals( Menu.SAVE_SCHEME_AS ) ) {
                 saveSchemeAs();
             } else if ( Menu.SAVE_SCHEME.equals( e.getActionCommand() ) ) {
                 saveScheme();
             } else if ( e.getActionCommand().equals( Menu.LOAD_SCHEME ) ) {
-                if ( Editor.getInstance().getCurrentPackage() == null ) {
-                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                if ( notifyOnNullPackage(Editor.getInstance().getCurrentPackage()) ) {
                     return;
                 }
                 JFileChooser fc = new JFileChooser( Editor.getInstance().getCurrentPackage().getPath() );
@@ -157,8 +158,7 @@ public class EditorActionListener implements ActionListener {
                 }
 
             } else if ( e.getActionCommand().equals( Menu.RELOAD_SCHEME ) ) {
-                if ( Editor.getInstance().getCurrentPackage() == null ) {
-                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                if ( notifyOnNullPackage(Editor.getInstance().getCurrentPackage()) ) {
                     return;
                 } else if ( Editor.getInstance().getCurrentPackage().getLastScheme() == null ) {
                     JOptionPane.showMessageDialog( Editor.getInstance(), "No scheme has been recently saved or loaded", "Error",
@@ -255,7 +255,7 @@ public class EditorActionListener implements ActionListener {
                     programEditor.setSize( 700, 450 );
                     programEditor.setVisible( true );
                 } else {
-                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                    notifyOnNullPackage(null);
                 }
             } else if ( e.getActionCommand().equals( Menu.EXTEND_SPEC ) ) {
                 new CodeViewer( Editor.getInstance().getCurrentCanvas().getScheme() );
@@ -273,7 +273,7 @@ public class EditorActionListener implements ActionListener {
 
                     EventSystem.queueEvent( evt );
                 } else {
-                    JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+                    notifyOnNullPackage(null);
                 }
             } else if ( e.getActionCommand().equals( Menu.PROPAGATE_VALUES ) ) {
                 JCheckBoxMenuItem check = (JCheckBoxMenuItem) e.getSource();
@@ -347,6 +347,20 @@ public class EditorActionListener implements ActionListener {
     }
 
     /**
+     * Clears all elements from the canvas and unlinks any previously loaded scheme
+     */
+    private void newScheme() {
+        Editor ed = Editor.getInstance();
+        VPackage pk = ed.getCurrentPackage();
+        if ( notifyOnNullPackage(pk) ) {
+            return;
+        }
+        pk.setLastScheme( null );
+        ed.getCurrentCanvas().newScheme();
+        ed.updateWindowTitle();        
+    }
+
+    /**
      * Saves the current scheme to the file it was loaded from or where it was
      * last saved to. If this scheme has not been saved before the method
      * invokes saveSchemeAs().
@@ -355,8 +369,7 @@ public class EditorActionListener implements ActionListener {
         Editor editor = Editor.getInstance();
         VPackage pack = editor.getCurrentPackage();
 
-        if ( pack == null ) {
-            JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+        if ( notifyOnNullPackage(pack) ) {
             return;
         }
 
@@ -376,8 +389,7 @@ public class EditorActionListener implements ActionListener {
         Editor editor = Editor.getInstance();
         VPackage pack = editor.getCurrentPackage();
 
-        if ( pack == null ) {
-            JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+        if ( notifyOnNullPackage(pack) ) {
             return;
         }
 
@@ -407,8 +419,7 @@ public class EditorActionListener implements ActionListener {
     	Editor editor = Editor.getInstance();
         VPackage pack = editor.getCurrentPackage();
 
-        if ( pack == null ) {
-            JOptionPane.showMessageDialog( editor, "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+        if ( notifyOnNullPackage(pack) ) {
             return;
         }
 
@@ -452,19 +463,28 @@ public class EditorActionListener implements ActionListener {
                 int rv = JOptionPane.showConfirmDialog( canvas, "The scheme is not saved. Are you sure you want to "
                         + "close it?", "Confirm Delete", JOptionPane.YES_NO_OPTION );
                 if ( rv == JOptionPane.YES_OPTION )
-                    Editor.getInstance().reloadCurrentPackage();
+                    newScheme();
             } else {
                 int rv = JOptionPane.showConfirmDialog( editor, "Are you sure you want to delete the current scheme"
                         + " and permanently remove the file\n" + lastScheme + "?", "Confirm Delete", JOptionPane.YES_NO_OPTION );
                 if ( rv == JOptionPane.YES_OPTION ) {
                     if ( new File( lastScheme ).delete() )
-                        Editor.getInstance().reloadCurrentPackage();
+                        newScheme();
                     else
                         JOptionPane.showMessageDialog( canvas, "Cannot remove" + " the file " + lastScheme + ".\nPlease check"
                                 + " the permissions.", "Error", JOptionPane.ERROR_MESSAGE );
                 }
             }
+        } else {
+            notifyOnNullPackage( null );
         }
     }
 
+    private boolean notifyOnNullPackage( VPackage pk ) {
+        if ( pk == null ) {
+            JOptionPane.showMessageDialog( Editor.getInstance(), "No package loaded", "Error", JOptionPane.ERROR_MESSAGE );
+            return true;
+        }
+        return false;
+    }
 }

@@ -1093,6 +1093,18 @@ public class Canvas extends JPanel implements ISchemeContainer {
         return true;
     }
 
+    public void newScheme() {
+        setScheme(new Scheme(this));
+        if ( classPainters != null )
+            classPainters.clear();
+        undoManager.discardAllEdits();
+        Editor.getInstance().refreshUndoRedo();
+        mListener.setState( State.selection );
+        recalcPreferredSize();
+        drawingArea.repaint();    
+        setStatusBarText( "New scheme" );
+    }
+    
     public boolean loadScheme(InputStream inputStream) {
         SchemeLoader loader = new SchemeLoader(vPackage);
         loader.load(inputStream);

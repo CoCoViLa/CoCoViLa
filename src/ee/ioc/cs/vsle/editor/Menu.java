@@ -19,6 +19,7 @@ public class Menu {
 
     // Menu item names.
     // FILE
+    public static final String NEW_SCHEME = "New Scheme";
     public static final String SAVE_SCHEME = "Save Scheme";
     public static final String SAVE_SCHEME_AS = "Save Scheme As...";
     public static final String EXPORT_MENU = "Export";
