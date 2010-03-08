@@ -1,1 +1,0 @@
-package ee.ioc.cs.vsle.vclass;/**  */public class GroupUnfolder {	public static ObjectList unfold(ObjectList objects) {		ObjectList objects2 = new ObjectList();		GObj obj;		for (int i = 0; i < objects.size(); i++) {			obj = objects.get(i);			objects2.addAll(obj.getComponents());		}		return objects2;	}}

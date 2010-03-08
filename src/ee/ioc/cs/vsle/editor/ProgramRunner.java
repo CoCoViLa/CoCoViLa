@@ -60,7 +60,7 @@ public class ProgramRunner {
     }
 
     private void updateFromCanvas() {
-        objects = GroupUnfolder.unfold( schemeContainer.getObjects() );
+        objects = schemeContainer.getObjects().unfold();
     }
 
     public void destroy() {
@@ -269,7 +269,7 @@ public class ProgramRunner {
     private Collection<String> watchableFields() {
         GObj obj;
 
-        objects = GroupUnfolder.unfold( objects );
+        objects = objects.unfold();
         Collection<String> watchFields = new TreeSet<String>();
 
         for ( int i = 0; i < objects.size(); i++ ) {

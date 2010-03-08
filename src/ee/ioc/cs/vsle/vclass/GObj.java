@@ -284,8 +284,7 @@ public class GObj implements Serializable, Cloneable,
     }
 
     public ArrayList<GObj> getComponents() {
-        ArrayList<GObj> c = new ArrayList<GObj>();
-
+        ArrayList<GObj> c = new ArrayList<GObj>(1);
         c.add( this );
         return c;
     }

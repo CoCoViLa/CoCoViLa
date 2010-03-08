@@ -270,5 +270,19 @@ public class ObjectList extends ArrayList<GObj> {
         
         return true;
     }
-	
+
+    public static ObjectList unfold(ObjectList objects) {
+        ObjectList objects2 = new ObjectList();
+        GObj obj;
+
+        for (int i = 0; i < objects.size(); i++) {
+            obj = objects.get(i);
+            objects2.addAll(obj.getComponents());
+        }
+        return objects2;
+    }
+
+    public ObjectList unfold() {
+        return ObjectList.unfold(this);
+    }
 }
