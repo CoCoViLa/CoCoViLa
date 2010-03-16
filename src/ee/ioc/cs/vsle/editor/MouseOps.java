@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.editor;
 
+import ee.ioc.cs.vsle.util.VMath;
 import ee.ioc.cs.vsle.vclass.*;
 
 import javax.swing.*;
@@ -15,12 +16,17 @@ import java.util.List;
  */
 class MouseOps extends MouseInputAdapter {
 
+    // Remove a dragged breakpoint on mouse button release when it is closer
+    // to the line segment between neighbouring points than this threshold.
+    private static double BP_REMOVE_THRESHOLD = 800d;
+
     String state = State.selection;
     int startX, startY;
     boolean mouseOver;
 
     private Canvas canvas;
     private Point draggedBreakPoint;
+    private Connection draggedBreakPointConn;
     private GObj draggedObject;
     private int cornerClicked;
     private Port currentPort;
@@ -219,12 +225,9 @@ class MouseOps extends MouseInputAdapter {
             Connection con = canvas.getConnectionNearPoint( canvas.mouseX, canvas.mouseY );
 
             if ( con != null ) {
-                draggedBreakPoint = con.breakPointContains( canvas.mouseX, canvas.mouseY );
-
-                if ( draggedBreakPoint != null ) {
-                    setState( State.dragBreakPoint );
-                    con.setSelected( true );
-                    canvas.drawingArea.repaint();
+                Point bp = con.breakPointContains(canvas.mouseX, canvas.mouseY);
+                if (bp != null) {
+                    startBreakPointDrag(con, bp);
                 } else {
                     obj = canvas.getObjects().checkInside( canvas.mouseX, canvas.mouseY );
                 }
@@ -346,6 +349,15 @@ class MouseOps extends MouseInputAdapter {
         } else if ( State.dragBox.equals( state ) ) {
             canvas.mouseX = x;
             canvas.mouseY = y;
+        } else {
+            Connection c = canvas.getConnectionNearPoint(x, y);
+            if (c != null) {
+                canvas.getConnections().clearSelected();
+                c.setSelected(true);
+                draggedBreakPoint = new Point(x, y);
+                c.addBreakPoint(c.indexOf(x, y), draggedBreakPoint);
+                setState(State.dragBreakPoint);
+            }
         }
         canvas.drawingArea.repaint();
     }
@@ -518,7 +530,7 @@ class MouseOps extends MouseInputAdapter {
     @Override
     public void mouseReleased( MouseEvent e ) {
         if ( state.equals( State.dragBreakPoint ) ) {
-            state = State.selection;
+            endBreakPointDrag();
         } else if ( state.equals( State.drag ) ) {
             if ( !SwingUtilities.isLeftMouseButton( e ) )
                 return;
@@ -540,5 +552,72 @@ class MouseOps extends MouseInputAdapter {
             canvas.setStatusBarText( "Selection: " + selected.toString() );
 
         canvas.setActionInProgress( false );
+    }
+
+    private void startBreakPointDrag(Connection con, Point bp) {
+        draggedBreakPoint = bp;
+        draggedBreakPointConn = con;
+        setState(State.dragBreakPoint);
+        con.setSelected(true);
+        canvas.drawingArea.repaint();
+    }
+
+    private void endBreakPointDrag() {
+        setState(State.selection);
+
+        // Remove the dragged breakpoint if it is on a straight line
+        // or close to another breakpoint or endpoint.
+        if (draggedBreakPoint != null && draggedBreakPointConn != null) {
+            ArrayList<Point> ps = draggedBreakPointConn.getBreakPoints();
+            assert ps != null;
+            int n = ps.indexOf(draggedBreakPoint);
+            assert n >= 0 && n < ps.size();
+
+            // Find neighbour anchor points, could be breakpoints or ports
+            Point p1, p2;
+            if (n == 0) {
+                p1 = draggedBreakPointConn.getBeginPort().getAbsoluteCenter();
+            } else {
+                p1 = ps.get(n - 1);
+            }
+            if (n == ps.size() - 1) {
+                p2 = draggedBreakPointConn.getEndPort().getAbsoluteCenter();
+            } else {
+                p2 = ps.get(n + 1);
+            }
+
+            // Remove the dragged breakpoint if it lies on an almost
+            // straight line.
+            double d = (draggedBreakPoint.x - p1.x) * (p2.y - p1.y)
+                     - (draggedBreakPoint.y - p1.y) * (p2.x - p1.x);
+
+            if (Math.abs(d) < BP_REMOVE_THRESHOLD) {
+                ps.remove(draggedBreakPoint);
+                draggedBreakPoint = null;
+            }
+
+            // Remove the breakpoint if it is close to another breakpoint
+            if (draggedBreakPoint != null) {
+                d = VMath.distanceBetweenPoints(p2, draggedBreakPoint);
+                if (d < Connection.NEAR_DISTANCE * 3) {
+                    draggedBreakPointConn.removeBreakPoint(n);
+                    draggedBreakPoint = null;
+                }
+            }
+            if (draggedBreakPoint != null) {
+                d = VMath.distanceBetweenPoints(p1, draggedBreakPoint);
+                if (d < Connection.NEAR_DISTANCE * 3) {
+                    draggedBreakPointConn.removeBreakPoint(n);
+                    draggedBreakPoint = null;
+                }
+            }
+
+            // a breakpoint was removed, redrawing is needed
+            if (draggedBreakPoint == null) {
+                canvas.drawingArea.repaint();
+            }
+        }
+        draggedBreakPoint = null;
+        draggedBreakPointConn = null;
     }
 }

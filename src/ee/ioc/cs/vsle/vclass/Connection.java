@@ -199,6 +199,18 @@ public class Connection implements Serializable {
 	}
 
 	/**
+	 * Removes a beakpoint at the specified index in the breakpoint list.
+	 * @param index the index of the breakpoint to remove
+	 * @return true if a breakpoint was removed, false otherwise
+	 */
+	public boolean removeBreakPoint(int index) {
+	    if (breakPoints != null) {
+	        return breakPoints.remove(index) != null;
+	    }
+	    return false;
+	}
+
+	/**
 	 * Shifts the coordinates of the breakpoints by the specified amount. 
 	 * @param dx change of the X coordinate
 	 * @param dy change of the Y coordinate
