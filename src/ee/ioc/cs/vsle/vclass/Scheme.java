@@ -217,7 +217,7 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
         return c[0] == null ? null : c[0].getScheme();
     }
 
-    ISchemeContainer getContainer() {
+    public ISchemeContainer getContainer() {
         return canvas;
     }
 

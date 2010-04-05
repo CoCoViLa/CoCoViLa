@@ -5,6 +5,42 @@ import java.io.Serializable;
 import ee.ioc.cs.vsle.graphics.Shape;
 
 public class PackageClass implements Serializable {
+    
+    public static enum ComponentType { 
+        CLASS(GObj.class), 
+        REL(RelObj.class), 
+        SCHEME(SchemeObj.class); 
+        
+        private Class<? extends GObj> _class;
+        
+        ComponentType(Class<? extends GObj> _class) {
+            this._class = _class;
+        }
+        
+        public GObj getInstance() {
+            try {
+                return _class.newInstance();
+            } catch ( Exception e ) {
+                e.printStackTrace();
+            }
+            
+            return null;
+        }
+        
+        public static ComponentType getType(String s) {
+            
+            if("relation".equals( s )) {
+                return REL;
+            } else if( "class".equals( s )) {
+                return CLASS;
+            } else if( "scheme".equals( s )) {
+                return SCHEME;
+            }
+            
+            return valueOf( s );
+        }
+    }
+    
     private static final long serialVersionUID = 1L;
 	private String name;
 	private String icon;
@@ -15,7 +51,7 @@ public class PackageClass implements Serializable {
 	private ClassGraphics graphics;
 	private ArrayList<Port> ports = new ArrayList<Port>();
 	private String description;
-	private boolean relation = false;
+	private ComponentType componentType = ComponentType.CLASS;
     private String painterName;
     private ClassPainter painterPrototype;
     private int sequence;
@@ -76,7 +112,7 @@ public class PackageClass implements Serializable {
 	 * @return a new visual instance of this package class
 	 */
 	public GObj getNewInstance() {
-		GObj obj = isRelation() ? new RelObj() : new GObj();
+		GObj obj = componentType.getInstance();
 
 		obj.setWidth(graphics.getBoundWidth());
 		obj.setHeight(graphics.getBoundHeight());
@@ -246,15 +282,18 @@ public class PackageClass implements Serializable {
     /**
      * @param relation the relation to set
      */
-    public void setRelation( boolean relation ) {
-        this.relation = relation;
+    public void setComponentType( ComponentType type ) {
+        if(type == null)
+            throw new IllegalStateException("Component type cannot be null");
+        
+        this.componentType = type;
     }
 
     /**
      * @return the relation
      */
-    public boolean isRelation() {
-        return relation;
+    public ComponentType getComponentType() {
+        return componentType;
     }
 
     /**

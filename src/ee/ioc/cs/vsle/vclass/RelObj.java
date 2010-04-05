@@ -12,6 +12,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.GObj.*;
 
 /**
  * Relation class

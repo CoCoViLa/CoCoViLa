@@ -241,8 +241,8 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 newClass = new PackageClass();
                 status = CLASS;
                 String type = attrs.getValue( ATR_TYPE );
-                if ( type != null && type.equals( VAL_RELATION ) ) {
-                    newClass.setRelation( true );
+                if ( type != null ) {
+                    newClass.setComponentType( PackageClass.ComponentType.getType( type ) );
                 }
 
                 newClass.setStatic( Boolean.parseBoolean( attrs.getValue( ATR_STATIC ) ) );
@@ -271,30 +271,33 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 
                 ClassField cf = newClass.getSpecField( name );
 
-                if ( name.indexOf( "." ) > -1 ) {
-                    //TODO - temporarily do not dig into hierarchy
-                    int idx = name.indexOf( "." );
-                    String root = name.substring( 0, idx );
+                if(newClass.getComponentType() != PackageClass.ComponentType.SCHEME) {
 
-                    if ( newClass.getSpecField( root ) == null ) {
-                        collector.collectDiagnostic( "Field " + root + " in class " + newClass.getName()
-                                + " is not declared in the specification, variable " + type + " " + name + " ignored " );
-                        return;
-                    }
+                    if ( name.indexOf( "." ) > -1 ) {
+                        //TODO - temporarily do not dig into hierarchy
+                        int idx = name.indexOf( "." );
+                        String root = name.substring( 0, idx );
 
-                    newField = new ClassField( name, type );
-                    newClass.addSpecField( newField );
-                } else if ( !TypeUtil.TYPE_THIS.equalsIgnoreCase( name ) ) {
-                    if ( cf == null ) {
+                        if ( newClass.getSpecField( root ) == null ) {
+                            collector.collectDiagnostic( "Field " + root + " in class " + newClass.getName()
+                                    + " is not declared in the specification, variable " + type + " " + name + " ignored " );
+                            return;
+                        }
 
-                        collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.getName()
-                                + " does not have the corresponding field in the specification" );
-                    } else if ( !cf.getType().equals( type )
-                            //type may be declared as "alias", however cf.getType() returns e.g. "double[]", ignore it
-                            && !( cf.isAlias() && TypeUtil.TYPE_ALIAS.equals( type )) ) {
+                        newField = new ClassField( name, type );
+                        newClass.addSpecField( newField );
+                    } else if ( !TypeUtil.TYPE_THIS.equalsIgnoreCase( name ) ) {
+                        if ( cf == null ) {
 
-                        collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.getName()
-                                + " does not match the field declared in the specification: " + cf.getType() + " " + cf.getName() );
+                            collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.getName()
+                                    + " does not have the corresponding field in the specification" );
+                        } else if ( !cf.getType().equals( type )
+                                //type may be declared as "alias", however cf.getType() returns e.g. "double[]", ignore it
+                                && !( cf.isAlias() && TypeUtil.TYPE_ALIAS.equals( type )) ) {
+
+                            collector.collectDiagnostic( "Port " + type + " " + name + " in class " + newClass.getName()
+                                    + " does not match the field declared in the specification: " + cf.getType() + " " + cf.getName() );
+                        }
                     }
                 }
                 newPort = new Port( name, type, Integer.parseInt( x ), Integer.parseInt( y ), portConnection, strict, multi );
@@ -706,17 +709,19 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 else {// else we a reading a class field
                     newClass.setName( charBuf.toString() );
 
-                    Collection<ClassField> specFields;
+                    if(newClass.getComponentType() != PackageClass.ComponentType.SCHEME) {
+                        Collection<ClassField> specFields;
 
-                    try {
-                        specFields = SpecParser.getFields( path, newClass.getName(), ".java" );
-                        newClass.setSpecFields( specFields );
+                        try {
+                            specFields = SpecParser.getFields( path, newClass.getName(), ".java" );
+                            newClass.setSpecFields( specFields );
 
-                    } catch ( IOException e ) {
+                        } catch ( IOException e ) {
 
-                        collector.collectDiagnostic( "Class " + newClass.getName() + " specified in package does not exist." );
-                    } catch ( SpecParseException e ) {
-                        collector.collectDiagnostic( "Unable to parse the specification of class " + newClass.getName() );
+                            collector.collectDiagnostic( "Class " + newClass.getName() + " specified in package does not exist." );
+                        } catch ( SpecParseException e ) {
+                            collector.collectDiagnostic( "Unable to parse the specification of class " + newClass.getName() );
+                        }
                     }
                 }
             }

@@ -67,7 +67,7 @@ public class Palette extends PaletteBase {
             }
 
             String actionCmd;
-            if (pClass.isRelation() == true) {
+            if (pClass.getComponentType() == PackageClass.ComponentType.REL) {
                 // to denote a class which is a relation
                 actionCmd = State.addRelObjPrefix + pClass.getName();
             } else {

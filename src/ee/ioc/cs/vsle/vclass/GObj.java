@@ -1,18 +1,18 @@
 package ee.ioc.cs.vsle.vclass;
 
-import ee.ioc.cs.vsle.util.*;
+import java.awt.*;
+import java.awt.geom.*;
+import java.io.*;
+import java.util.*;
+
+import javax.xml.transform.sax.*;
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
+
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.graphics.Shape;
-
-import java.io.Serializable;
-import java.util.*;
-import java.awt.*;
-import java.awt.geom.AffineTransform;
-
-import javax.xml.transform.sax.TransformerHandler;
-
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.AttributesImpl;
+import ee.ioc.cs.vsle.util.*;
 
 public class GObj implements Serializable, Cloneable, 
                                 ee.ioc.cs.vsle.api.SchemeObject, ISpecExtendable {
