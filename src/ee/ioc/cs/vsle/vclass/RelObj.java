@@ -1,14 +1,12 @@
 package ee.ioc.cs.vsle.vclass;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
+import java.awt.*;
+import java.awt.geom.*;
 
-import javax.xml.transform.sax.TransformerHandler;
+import javax.xml.transform.sax.*;
 
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.AttributesImpl;
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
 
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.util.*;

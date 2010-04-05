@@ -1,14 +1,14 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
-import javax.swing.event.MouseInputAdapter;
-import java.awt.Cursor;
-import java.awt.Rectangle;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.List;
+import javax.swing.event.*;
+
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * Mouse operations on Canvas.
@@ -45,7 +45,7 @@ class MouseOps extends MouseInputAdapter {
 
         this.state = state;
 
-        if ( State.addRelation.equals( state ) ) {
+        if ( State.addRelation.equals( state ) || State.addRelationCurve.equals( state ) ) {
             canvas.setCursor( Cursor.getPredefinedCursor( Cursor.CROSSHAIR_CURSOR ) );
         } else if ( State.selection.equals( state ) ) {
             canvas.setCursor( Cursor.getPredefinedCursor( Cursor.DEFAULT_CURSOR ) );
@@ -89,7 +89,6 @@ class MouseOps extends MouseInputAdapter {
     @Override
     public void mouseClicked( MouseEvent e ) {
         int x, y;
-
         // ignore mouse clicks while dragging
         if ( State.drag.equals( state ) || State.dragBreakPoint.equals( state ) )
             return;
@@ -112,7 +111,8 @@ class MouseOps extends MouseInputAdapter {
                         openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
                     }
                 }
-            } else if ( State.addRelation.equals( state ) && canvas.currentCon != null) {
+            } else if ( (State.addRelation.equals( state ) || State.addRelationCurve.equals( state )) 
+                    && canvas.currentCon != null) {
                 // remove last breakpoint or stop adding the relation
                 // when only the first breakpoints is left
                 if ( canvas.currentCon.getBreakpointCount() > 0 )
@@ -125,13 +125,13 @@ class MouseOps extends MouseInputAdapter {
             // **********End of RIGHT mouse button
             // controls**********************************************
         } else {
-            if ( state.equals( State.addRelation ) ) {
+            if ( state.equals( State.addRelation ) || State.addRelationCurve.equals( state ) ) {
                 // **********Relation adding code**************************
                 Port port = canvas.getObjects().getPort( x, y );
                 if ( port != null ) {
                     if ( canvas.currentCon == null ) {
                         if ( port.canBeConnected() )
-                            canvas.startAddingConnection( port );
+                            canvas.startAddingConnection( port, State.addRelationCurve.equals( state ) );
                     } else {
                         Port firstPort = canvas.currentCon.getBeginPort();
                         if ( port.canBeConnectedTo( firstPort ) ) {
@@ -158,7 +158,7 @@ class MouseOps extends MouseInputAdapter {
             } else if ( state.equals( State.selection ) ) {
                 // **********Selecting objects code*********************
 
-                if ( !e.isShiftDown() ) {
+                if ( !e.isControlDown() ) {
                     canvas.getObjects().clearSelected();
                     canvas.getConnections().clearSelected();
                 }
@@ -212,10 +212,29 @@ class MouseOps extends MouseInputAdapter {
 
     @Override
     public void mousePressed( MouseEvent e ) {
+        canvas.drawingArea.grabFocus();
+        
         if ( state.equals( State.selection ) ) {
             GObj obj = null;
             canvas.mouseX = Math.round( e.getX() / canvas.getScale() );
             canvas.mouseY = Math.round( e.getY() / canvas.getScale() );
+            
+            {//find a point for dragging
+                List<Connection> conns = e.isShiftDown() 
+                                    ? canvas.getConnections() 
+                                    : canvas.getConnections().getSelectedConnections();
+                int idx;
+                for (Connection rel : conns) {
+                    if(rel instanceof CurvedConnection 
+                            && (idx = ((CurvedConnection)rel).checkPoint( canvas.mouseX, canvas.mouseY )) != -1) {
+                        draggedCurvePointConn = (CurvedConnection)rel;
+                        draggedCurvePointIdx = idx;
+                        canvas.setActionInProgress( true );
+                        return;
+                    }
+                }
+            }
+            
             Connection con = canvas.getConnectionNearPoint( canvas.mouseX, canvas.mouseY );
 
             if ( con != null ) {
@@ -233,7 +252,7 @@ class MouseOps extends MouseInputAdapter {
             }
 
             if ( obj != null ) {
-                if ( e.isShiftDown() ) {
+                if ( e.isControlDown() ) {
                     obj.setSelected( true );
                 } else {
                     if ( !obj.isSelected() ) {
@@ -260,6 +279,9 @@ class MouseOps extends MouseInputAdapter {
         canvas.setActionInProgress( true );
     }
 
+    private CurvedConnection draggedCurvePointConn;
+    private int draggedCurvePointIdx;
+    
     @Override
     public void mouseDragged( MouseEvent e ) {
 
@@ -271,7 +293,9 @@ class MouseOps extends MouseInputAdapter {
 
         canvas.setPosInfo( x, y );
 
-        if ( State.dragBreakPoint.equals( state ) ) {
+        if(draggedCurvePointIdx != -1) {
+            draggedCurvePointConn.movePoint( draggedCurvePointIdx, x, y, e.isControlDown() );
+        } else if ( State.dragBreakPoint.equals( state ) ) {
             if ( RuntimeProperties.getSnapToGrid() ) {
                 draggedBreakPoint.x = Math.round( (float) x / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep();
                 draggedBreakPoint.y = Math.round( (float) y / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep();
@@ -360,7 +384,7 @@ class MouseOps extends MouseInputAdapter {
         // Check if port needs to be hilighted because of mouseover.
         // A repaint() is always necessary when adding connections and the
         // mouse has moved because the disconnected end has to follow the mouse.
-        if ( state.equals( State.addRelation ) ) {
+        if ( state.equals( State.addRelation ) || State.addRelationCurve.equals( state ) ) {
             updateConnectionPortHilight( x, y );
             canvas.drawingArea.repaint();
         } else if ( State.isAddRelClass( state ) ) {
@@ -402,8 +426,14 @@ class MouseOps extends MouseInputAdapter {
             }
 
             canvas.drawingArea.repaint();
-        }
-
+        } 
+//        else if((e.getModifiers() & KeyEvent.SHIFT_MASK) > 0) {
+//            if(canvas.getConnections().getPoint( x, y ) != null)
+//                canvas.setCursor( Cursor.getPredefinedCursor( Cursor.CROSSHAIR_CURSOR ) );
+//            else
+//                canvas.setCursor( Cursor.getDefaultCursor() );
+//        }
+        
         canvas.mouseX = x;
         canvas.mouseY = y;
     }
@@ -534,7 +564,8 @@ class MouseOps extends MouseInputAdapter {
             state = State.selection;
             canvas.drawingArea.repaint();
         }
-
+        draggedCurvePointIdx = -1;
+        draggedCurvePointConn = null;
         List<GObj> selected = canvas.getObjects().getSelected();
         if ( selected != null && selected.size() > 0 )
             canvas.setStatusBarText( "Selection: " + selected.toString() );

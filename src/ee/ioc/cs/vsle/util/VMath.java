@@ -1,9 +1,9 @@
 package ee.ioc.cs.vsle.util;
 
-import java.awt.geom.Line2D;
+import java.awt.*;
+import java.awt.geom.*;
 
-import ee.ioc.cs.vsle.vclass.Point;
-import ee.ioc.cs.vsle.vclass.Port;
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * Created by IntelliJ IDEA.

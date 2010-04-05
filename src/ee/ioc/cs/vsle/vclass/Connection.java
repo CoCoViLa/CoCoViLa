@@ -4,11 +4,9 @@ import ee.ioc.cs.vsle.util.VMath;
 import ee.ioc.cs.vsle.util.StringUtil;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.ArrayList;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Stroke;
+import java.awt.*;
 
 import javax.xml.transform.sax.TransformerHandler;
 
@@ -33,17 +31,21 @@ public class Connection implements Serializable {
 	 */
 	public static final float NEAR_DISTANCE = 5.0f;
 	
-	private Port beginPort;
-	private Port endPort;
-	private boolean selected;
-	private ArrayList<Point> breakPoints = new ArrayList<Point>();
+	protected Port beginPort;
+	protected Port endPort;
+	protected boolean selected;
+	protected ArrayList<Point> breakPoints = new ArrayList<Point>();
 	
 	/**
 	 * Is this an implicit connection between two strict ports 
 	 * that were connected by placing them close to each other.
 	 */
-	private boolean strict;
+	protected boolean strict;
 
+	protected Connection() {
+	    
+	}
+	
 	/**
 	 * Class constructor. The second port is left disconnected by
 	 * this constructor.
@@ -239,7 +241,7 @@ public class Connection implements Serializable {
 	 * are no breakpoints. Start and end points are not counted as breakpoints.
 	 * @return the list of breakpoints
 	 */
-	public ArrayList<Point> getBreakPoints() {
+	public List<Point> getBreakPoints() {
 		return breakPoints;
 	}
 
@@ -313,7 +315,7 @@ public class Connection implements Serializable {
 	 * @param endX X coordinate of the end point
 	 * @param endY Y coordinate of the end point
 	 */
-	private void drawRelation(Graphics2D g, int startX, int startY,
+	protected void drawRelation(Graphics2D g, int startX, int startY,
 			int endX, int endY) {
 
 		// do not show strict and other connections that should be invisible
@@ -498,5 +500,14 @@ public class Connection implements Serializable {
      */
     public Port getEndPort() {
         return endPort;
+    }
+    
+    public Connection copyAndAdjust( Port beginPort_, Port endPort_, int shift) {
+        Connection newCon = new Connection( beginPort_, endPort_, isStrict() );
+        
+        for ( Point p : getBreakPoints() )
+            newCon.addBreakPoint( new Point( p.x + shift, p.y + shift ) );
+        
+        return newCon;
     }
 }

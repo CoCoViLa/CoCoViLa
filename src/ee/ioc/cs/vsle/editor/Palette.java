@@ -104,6 +104,11 @@ public class Palette extends PaletteBase {
                 "Relation", State.addRelation);
 
         toolPanel.add(relation);
+        
+        JToggleButton relationCurve = createButton("images/curve.png",
+                "Relation", State.addRelationCurve);
+
+        toolPanel.add(relationCurve);
 
         return toolPanel;
     }

@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.vclass;
 
+import java.awt.*;
 import java.io.Serializable;
 import java.util.ArrayList;
 

@@ -16,7 +16,10 @@ public class KeyOps implements KeyListener {
 	}
 
 	public void keyPressed(KeyEvent e) {
-		// ignore
+	    if ((e.getModifiers() & KeyEvent.SHIFT_MASK) > 0) {
+            canvas.setShowConnectionBreakPoints(true);
+            canvas.repaint();
+        }
 	} // keyPressed
 
 	public void keyTyped(KeyEvent e) {
@@ -46,6 +49,9 @@ public class KeyOps implements KeyListener {
 		} else if (e.getKeyCode() == 27) {	// event: escape key, return to selection
 			// setState() takes care of cancelAdding() if needed
 			canvas.mListener.setState(State.selection);
-		}
+		} else if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
+            canvas.setShowConnectionBreakPoints(false);
+            canvas.repaint();
+        }
 	} // keyReleased
 }

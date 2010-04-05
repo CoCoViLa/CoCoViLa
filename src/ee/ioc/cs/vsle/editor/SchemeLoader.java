@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.editor;
 
+import java.awt.*;
 import java.io.*;
 
 import javax.swing.*;

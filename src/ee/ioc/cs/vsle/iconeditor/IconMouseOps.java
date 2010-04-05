@@ -2,17 +2,16 @@ package ee.ioc.cs.vsle.iconeditor;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.ArrayList;
+import java.util.*;
 
 import javax.swing.*;
-import javax.swing.event.MouseInputAdapter;
+import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.graphics.Shape;
-import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.vclass.Point;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * Created by IntelliJ IDEA.

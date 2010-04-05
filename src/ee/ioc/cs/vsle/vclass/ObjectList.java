@@ -1,9 +1,9 @@
 package ee.ioc.cs.vsle.vclass;
 
-import ee.ioc.cs.vsle.util.*;
+import java.awt.*;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * A <tt>List</tt> for storing and organizing scheme objects.

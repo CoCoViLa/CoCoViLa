@@ -1,7 +1,6 @@
 package ee.ioc.cs.vsle.vclass;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 
 /**
  * A <tt>list</tt> for storing and manipulating connections
@@ -118,6 +117,14 @@ public class ConnectionList extends ArrayList<Connection> {
 		}
 	} // remove
 
+	public List<Connection> getSelectedConnections() {
+	    List<Connection> list = new ArrayList<Connection>();
+        for (Connection con : this)
+            if(con.isSelected())
+                list.add( con );
+        return list;
+    } // clearSelected
+	
 	/**
 	 * Make the currently selected connections not selected.
 	 */

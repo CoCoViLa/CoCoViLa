@@ -1,13 +1,11 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.vclass.Connection;
-import ee.ioc.cs.vsle.vclass.Point;
-import ee.ioc.cs.vsle.editor.Menu;
+import java.awt.*;
+import java.awt.event.*;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import javax.swing.JPopupMenu;
-import javax.swing.JMenuItem;
+import javax.swing.*;
+
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * <p>Popup menu opened if clicked on a connection line with a right mouse button.</p>
@@ -59,6 +57,15 @@ public class ConnectionPopupMenu extends JPopupMenu implements ActionListener {
 			menuItem.setActionCommand(Menu.REMOVEBREAKPOINT);
 			this.add(menuItem);
 		}
+		
+		this.add(new JSeparator());
+		
+		if (relation instanceof CurvedConnection) {
+            menuItem = new JMenuItem("Make straight");
+            menuItem.addActionListener(this);
+            menuItem.setActionCommand("Make straight");
+            this.add(menuItem);
+        }
 	} // ee.ioc.cs.editor.editor.ConnectionPopupMenu
 
 	/**
@@ -73,6 +80,8 @@ public class ConnectionPopupMenu extends JPopupMenu implements ActionListener {
 					new Point(clickX, clickY));
 			// select the connection to make the new breakpoint visible
 			connection.setSelected(true);
+		} else if("Make straight".equals( e.getActionCommand() )) {
+		    ((CurvedConnection)connection).makeStraight();
 		} else {
 			connection.removeBreakPoint(clickX, clickY);
 		}

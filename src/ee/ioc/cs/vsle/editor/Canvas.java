@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.editor;
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.*;
@@ -15,7 +16,6 @@ import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
-import ee.ioc.cs.vsle.vclass.Point;
 
 /**
  */
@@ -490,6 +490,16 @@ public class Canvas extends JPanel implements ISchemeContainer {
         return m_canvasTitle;
     }
 
+    public boolean showConnectionBreakPoints() {
+        return showConnectionBreakpoints;
+    }
+    
+    boolean showConnectionBreakpoints;
+    
+    public void setShowConnectionBreakPoints(boolean show) {
+        this.showConnectionBreakpoints = show;
+    }
+    
     /**
      * Returns the filename part of package's last scheme path.
      * 
@@ -993,13 +1003,10 @@ public class Canvas extends JPanel implements ISchemeContainer {
                     endObj = obj;
 
                 if ( beginObj != null && endObj != null ) {
-                    Connection newCon = new Connection( beginObj.getPorts().get( con.getBeginPort().getNumber() ), endObj.getPorts()
-                            .get( con.getEndPort().getNumber() ), con.isStrict() );
 
-                    for ( Point p : con.getBreakPoints() )
-                        newCon.addBreakPoint( new Point( p.x + 20, p.y + 20 ) );
-
-                    newConnections.add( newCon );
+                    newConnections.add( con.copyAndAdjust( 
+                            beginObj.getPorts().get( con.getBeginPort().getNumber() ), 
+                            endObj.getPorts().get( con.getEndPort().getNumber() ), 20 ) );
                     break;
                 }
             }
@@ -1601,9 +1608,9 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * 
      * @param port the first port of the connection
      */
-    void startAddingConnection( Port port ) {
+    void startAddingConnection( Port port, boolean curved ) {
         setActionInProgress( true );
-        currentCon = new Connection( port );
+        currentCon = curved ? new CurvedConnection( port ) : new Connection( port );
     }
 
     /**
