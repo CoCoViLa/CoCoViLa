@@ -74,14 +74,17 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
             //all non word chars are removed and then if the first char is digit or the string is empty it is replaced by "_"
             String packClassName = getName().replaceAll( "\\W+", "" ).replaceFirst( "^[0-9]|^$", "_" );
 
-            int i = 0;
+            // if first char is in lower case, make it upper case
+            packClassName = packClassName.replaceFirst("^\\p{javaLowerCase}",
+                    packClassName.substring(0, 1).toUpperCase());
 
+            // make the name unique
+            int i = 0;
             while( hasClass( packClassName ) ) {
                 packClassName = packClassName + "_" + i++;
             }
 
-            //if first char is in lower case, make it upper case
-            return packClassName.replaceFirst( "^\\p{javaLowerCase}", packClassName.substring( 0, 1 ).toUpperCase() );
+            return packClassName;
         }
 
         /* (non-Javadoc)
