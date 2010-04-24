@@ -20,6 +20,7 @@
         <xsd:sequence>
             <xsd:element name="input" type="Input" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="output" type="Output" minOccurs="1" maxOccurs="1"/>
+            <xsd:element name="default" minOccurs="0" maxOccurs="1" type="xsd:string"/>
             <xsd:element name="hrules" type="HRules" minOccurs="1" maxOccurs="unbounded"/>
             <xsd:element name="vrules" type="VRules" minOccurs="0" maxOccurs="unbounded"/>
             <xsd:element name="data" type="Data" minOccurs="1" maxOccurs="1"/>

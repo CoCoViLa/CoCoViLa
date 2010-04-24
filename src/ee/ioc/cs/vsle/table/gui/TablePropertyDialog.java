@@ -32,6 +32,7 @@ public class TablePropertyDialog extends JDialog {
     private JButton jbtCancel;
     private ActionListener actionListener;
     private JTextField jtfTableId;
+    private JTextField jtfDefault;
     private Table table;
     private boolean editMode = false;
     
@@ -49,9 +50,10 @@ public class TablePropertyDialog extends JDialog {
     }
     
     TablePropertyDialog( JFrame frame, Table tab ) {
-        
-        super( frame, "New expert table", Dialog.ModalityType.APPLICATION_MODAL );
-        
+        super(frame, (tab.getTableId() != null 
+                ? "Table properties: " + tab.getTableId() : "New expert table"),
+                Dialog.ModalityType.APPLICATION_MODAL);
+
         init();
         initActionListener();
         
@@ -90,7 +92,15 @@ public class TablePropertyDialog extends JDialog {
         addFlowToPanel( root, outputPane, FlowLayout.LEFT );
         
         addFlowToPanel( outputPane, outputField = new FieldPane(), FlowLayout.LEFT );
-        
+
+        // default output value
+        JPanel defaultOutput = new JPanel(new GridLayout(1, 2, 5, 5));
+        JLabel lblDefault = new JLabel("Default value:");
+        jtfDefault = new JTextField(10);
+        defaultOutput.add(lblDefault);
+        defaultOutput.add(jtfDefault);
+        addFlowToPanel(outputPane, defaultOutput, FlowLayout.LEFT);
+
         jbtAddInput = new JButton( "Add Input" );
         addFlowToPanel( root, jbtAddInput, FlowLayout.RIGHT );
         
@@ -197,7 +207,16 @@ public class TablePropertyDialog extends JDialog {
         if( inputs.containsByID( outField ) ) {
             throw new TableException( "Ouput field cannot be in the input list\n" + outField );
         }
-        
+
+        String dv = jtfDefault.getText();
+        if (dv == null || dv.length() < 1) {
+            // Should the empty string be allowed as a default value?
+            // Currently the empty string is treated as missing value.
+            table.setDefaultValue(null);
+        } else {
+            table.setDefaultValue(dv);
+        }
+
         if( editMode ) {
             table.changePropertiesAndVerify( tableId, inputs, outField );
             
@@ -215,7 +234,10 @@ public class TablePropertyDialog extends JDialog {
     private void initFromTable() {
         
         jtfTableId.setText( table.getTableId() );
-        
+        if (table.hasDefaultValue()) {
+            jtfDefault.setText(table.getDefaultValue().toString());
+        }
+
         outputField.jcboxType.setSelectedItem( table.getOutputField().getType() );
         outputField.jtfName.setText( table.getOutputField().getId() );
         

@@ -42,6 +42,7 @@ public class TableXmlProcessor {
     private static final String TBL_ELEM_HRULES = "hrules";
     private static final String TBL_ELEM_OUTPUT = "output";
     private static final String TBL_ELEM_INPUT = "input";
+    private static final String TBL_ELEM_DEFAULT = "default";
     private static final String TBL_ATTR_ID = "id";
     private static final String XML_DOC_ROOT = "tables";
     private static final String XML_NS_URI = "cocovila";
@@ -263,7 +264,15 @@ public class TableXmlProcessor {
         Element outputNode = document.createElementNS( XML_NS_URI,TBL_ELEM_OUTPUT );
         tableNode.appendChild( outputNode );
         outputNode.appendChild( createVarNode( table.getOutputField(), document ) );
-        
+
+        // default value
+        if (table.hasDefaultValue()) {
+            Element defaultValue = document.createElementNS(XML_NS_URI,
+                    TBL_ELEM_DEFAULT);
+            defaultValue.setTextContent(table.getDefaultValue().toString());
+            tableNode.appendChild(defaultValue);
+        }
+
         //save rules
         Element hRulesNode = document.createElementNS( XML_NS_URI,TBL_ELEM_HRULES );
         createRuleNodesAndAppend( table.getHRules(), document, hRulesNode );
@@ -462,6 +471,8 @@ public class TableXmlProcessor {
             } else if ( TBL_ELEM_DATA.equals( node.getNodeName() )  ) {
                 
                 parseData( node.getChildNodes(), table );
+            } else if (TBL_ELEM_DEFAULT.equals(node.getNodeName())) {
+                table.setDefaultValue(node.getTextContent());
             }
          }
         
