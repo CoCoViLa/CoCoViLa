@@ -364,7 +364,8 @@ public class DepthFirstPlanner implements IPlanner {
                                 || ( depth != 0 )
                         ) ) {
                     //If the problem is solved, optimize and return
-                    Optimizer.optimize( problem, algorithm, problem.getGoals() );
+                    if( !isOptDisabled )
+                        Optimizer.optimize( problem, algorithm, problem.getGoals() );
                     return true;
                 }
             } else {
@@ -521,7 +522,7 @@ public class DepthFirstPlanner implements IPlanner {
 
                         //the linear planning has been performed at the end of MLB on the depth+1,
                         //if the problem was solved, there is no need to run linear planning again
-                        if( solved || ( solved = linearForwardSearch( problemNew, newAlg, problemNew.getGoals(), true ) ) 
+                        if( ( solved || ( solved = linearForwardSearch( problemNew, newAlg, problemNew.getGoals(), true ) ) ) 
                                 && !isOptDisabled ) {
                             // if solved, optimize here with full list of goals in order to get rid of
                             // unnecessary subtask instances and other relations
