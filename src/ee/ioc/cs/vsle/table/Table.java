@@ -32,7 +32,8 @@ public final class Table implements IStructuralExpertTable {
     
     private int lastHorizontalId = -1;
     private int lastVerticalId = -1;
-    
+    private Object defaultValue;
+
     /**
      * Constructor
      * 
@@ -506,10 +507,25 @@ public final class Table implements IStructuralExpertTable {
         DataCell cell = row.getCell(colId);
 
         if( cell == null || cell.getValue() == null ) {
+            if (hasDefaultValue()) {
+                return getDefaultValue();
+            }
             throw new TableException( "Cell value not specified" );
         }
         
         return cell.getValue();
+    }
+
+    public boolean hasDefaultValue() {
+        return defaultValue != null;
+    }
+
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = createDataObjectFromString(defaultValue);
     }
 
     /**
