@@ -224,13 +224,22 @@ public class CurvedConnection extends Connection {
         breakPoints.add( p2 );
     }
     
+    @Override
+    public Point breakPointContains(int x, int y) {
+        int idx;
+        if((idx = checkPoint( x, y )) > -1)
+            return breakPoints.get( idx );
+        
+        return null;
+    }
+    
+    //return the index of a found point or -1
+    //this does not include first and last points
     public int checkPoint( int x, int y ) {
-        int i = 0;
-        for ( Point point : breakPoints ) {
-            if(point.distance( x, y ) < 5) {
+        for ( int i = 1; i < breakPoints.size()-1; i++ ) {
+            if(breakPoints.get( i ) .distance( x, y ) < 5) {
                 return i;
             }
-            i++;
         }
         return -1;
     }

@@ -215,7 +215,6 @@ class MouseOps extends MouseInputAdapter {
         canvas.drawingArea.grabFocus();
         
         if ( state.equals( State.selection ) ) {
-            GObj obj = null;
             canvas.mouseX = Math.round( e.getX() / canvas.getScale() );
             canvas.mouseY = Math.round( e.getY() / canvas.getScale() );
             
@@ -244,13 +243,13 @@ class MouseOps extends MouseInputAdapter {
                     setState( State.dragBreakPoint );
                     con.setSelected( true );
                     canvas.drawingArea.repaint();
-                } else {
-                    obj = canvas.getObjects().checkInside( canvas.mouseX, canvas.mouseY );
+                    canvas.setActionInProgress( true );
+                    return;
                 }
-            } else {
-                obj = canvas.getObjects().checkInside( canvas.mouseX, canvas.mouseY );
             }
 
+            GObj obj = canvas.getObjects().checkInside( canvas.mouseX, canvas.mouseY );
+            
             if ( obj != null ) {
                 if ( e.isControlDown() ) {
                     obj.setSelected( true );
