@@ -107,7 +107,7 @@ public class ProblemCreator {
             }
             
             if( cf.isConstant() ) {
-                problem.getKnownVars().add( var );
+                problem.getCurrentContext().getKnownVars().add( var );
             }
             
             if( cf.isAliasLength() && cf.getValue() == null ) {
@@ -263,7 +263,9 @@ public class ProblemCreator {
 
                 } 
             } else if( relSet != null ) {
-                problem.addAllRels( relSet );
+                for ( Rel _rel : relSet ) {
+                    problem.addRel( _rel );
+                }
             }
 
         }
@@ -554,7 +556,7 @@ public class ProblemCreator {
         
         //if an alias has been initialized with an empty list of elements it is always computable
         if( var.getChildVars().isEmpty() && alias.isInitialized() ) {
-            problem.getKnownVars().add( var );
+            problem.getCurrentContext().getKnownVars().add( var );
         }
     }
     
@@ -780,7 +782,7 @@ public class ProblemCreator {
                 }
                 
                 if( newAliasVar.getChildVars().isEmpty() ) {
-                    problem.getKnownVars().add( newAliasVar );
+                    problem.getCurrentContext().getKnownVars().add( newAliasVar );
                 }
                 
                 aliasElements.put(varName, newAliasVar);
@@ -958,12 +960,14 @@ public class ProblemCreator {
       {//Assumptions
           Collection<Var> flattened = new HashSet<Var>();
           CodeGenerator.unfoldVarsToSet( goal.getInputs(), flattened );
-          problem.getKnownVars().addAll( flattened );
+          problem.getCurrentContext().getKnownVars().addAll( flattened );
           problem.getAssumptions().addAll( flattened );
       }
       
       {//Goals
-          CodeGenerator.unfoldVarsToSet( goal.getOutputs(), problem.getGoals() );
+          Set<Var> goals = new LinkedHashSet<Var>();
+          CodeGenerator.unfoldVarsToSet( goal.getOutputs(), goals );
+          problem.getCurrentContext().addGoals( goals );
       }
 
   }

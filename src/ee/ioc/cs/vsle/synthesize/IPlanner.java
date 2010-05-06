@@ -1,10 +1,9 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import java.awt.Component;
-import java.util.*;
+import java.awt.*;
 
 public interface IPlanner {
-	public ArrayList<Rel> invokePlaning( Problem problem, boolean computeAll );
+	public EvaluationAlgorithm invokePlaning( Problem problem, boolean computeAll );
 	
 	public String getDescription();
 	

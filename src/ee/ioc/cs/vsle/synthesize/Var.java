@@ -1,8 +1,7 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
-import java.io.Serializable;
 import java.util.*;
 
 import ee.ioc.cs.vsle.util.*;
@@ -16,8 +15,7 @@ import ee.ioc.cs.vsle.vclass.*;
  * @author  Ando Saabas
  * @version 1.0
  */
-public class Var implements //Cloneable,
-        Serializable {
+public class Var {
 
     private Set<Rel> rels = new LinkedHashSet<Rel>();
     //the following is for alias only!!!
@@ -40,8 +38,7 @@ public class Var implements //Cloneable,
         
         this.parent = parent;
     }
-
-
+    
     Set<Rel> getRels() {
         return rels;
     }

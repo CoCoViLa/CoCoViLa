@@ -3,8 +3,6 @@
  */
 package ee.ioc.cs.vsle.synthesize;
 
-import java.util.*;
-
 import ee.ioc.cs.vsle.vclass.*;
 
 /**
@@ -13,10 +11,7 @@ import ee.ioc.cs.vsle.vclass.*;
  */
 public class SubtaskRel extends Rel {
 
-    private List<Rel> algorithm = new ArrayList<Rel>();
-    
     private Problem context;
-    private ClassField contextCF;
     
     /** 
      * "true" means that subtask is solvable, 
@@ -25,22 +20,9 @@ public class SubtaskRel extends Rel {
      */
     private Boolean isSolvable;
     
-	/**
-	 * 
-	 */
 	public SubtaskRel( Var parent, String decl ) {
 		super( parent, decl );
 	}
-
-    void addRelToAlgorithm(Rel rel) {
-
-        algorithm.add(rel);
-    }
-
-    List<Rel> getAlgorithm() {
-
-        return algorithm;
-    }
 
     public boolean isIndependent() {
     	return context != null;

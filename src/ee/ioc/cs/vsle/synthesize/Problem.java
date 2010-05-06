@@ -1,26 +1,29 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import java.io.*;
 import java.util.*;
 
-import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
-
-class Problem implements Serializable {
+/**
+ * Represents the problem graph
+ */
+class Problem {
 
 	private Set<Rel> axioms = new LinkedHashSet<Rel>();
-	private Set<Var> knownVars = new LinkedHashSet<Var>();
 	private List<Var> assumptions = new ArrayList<Var>();
-	private Set<Var> goals = new LinkedHashSet<Var>();
 	private Map<String, Var> allVars = new LinkedHashMap<String, Var>();
 	private Set<Rel> allRels = new LinkedHashSet<Rel>();
 	private Set<Rel> relWithSubtasks = new LinkedHashSet<Rel>();
 	private Set<SubtaskRel> subtasks = new LinkedHashSet<SubtaskRel>();
-	private Set<Var> foundVars = new LinkedHashSet<Var>();
 	private Var rootVarThis;
+	private PlanningContext currentContext;
 	
 	Problem( Var varThis ) {
 		rootVarThis = varThis;
+		addVar( varThis );
+		currentContext = new PlanningContext();
+	}
+	
+	PlanningContext getCurrentContext() {
+	    return currentContext;
 	}
 	
 	Var getRootVar() {
@@ -54,18 +57,6 @@ class Problem implements Serializable {
 		return axioms;
 	}
 
-	Set<Var> getKnownVars() {
-		return knownVars;
-	}
-
-	Set<Var> getFoundVars() {
-		return foundVars;
-	}
-
-	Set<Var> getGoals() {
-		return goals;
-	}
-
 	Set<Rel> getAllRels() {
 		return allRels;
 	}
@@ -78,16 +69,9 @@ class Problem implements Serializable {
 		axioms.add(rel);
 	}
 
-	void addGoal(Var var) {
-		goals.add(var);
-	}
-
 	void addRel(Rel rel) {
 		allRels.add(rel);
-	}
-
-	void addAllRels(Set<Rel> set) {
-		allRels.addAll(set);
+		currentContext.addUnknownInputs( rel, rel.getInputs() );
 	}
 
 	void addRelWithSubtask(Rel rel) {
@@ -111,31 +95,9 @@ class Problem implements Serializable {
 		return assumptions;
 	}
 
-	Problem getCopy() {
-		
-		try {
-			return DeepCopy.copy( this );
-
-		} catch (Exception e) {
-			
-			db.p( "\nUnable to get the copy of Problem, due to: " );
-			
-			if( RuntimeProperties.isLogDebugEnabled() ) {
-				e.printStackTrace();
-				db.p( "\nProblem:\n" + this.toString() );
-			} else {
-				db.p( e.getClass().getName() + " " + e.getMessage() );
-			}
-			
-			return null;
-		}
-	}
-
 	@Override
     public String toString() {
-		return ("All: " + allVars + "\n Rels: " + allRels + "\n Known: "
-				+ knownVars + "\n Targets:" + goals + "\n Axioms:"
-				+ axioms + "\n Subtasks:" + relWithSubtasks );
+		return ("All: " + allVars + "\n Rels: " + allRels 
+		        + "\n Axioms:" + axioms + "\n Subtasks:" + relWithSubtasks );
 	}
-
 }

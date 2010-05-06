@@ -14,12 +14,17 @@ import java.io.*;
  */
 public class DeepCopy {
 
+    public static long time = 0;
+    public static long count = 0;
+    
     /**
      * Returns a copy of the object, or throws exception if the object cannot
      * be serialized.
      */
     public static <T> T copy( T orig ) throws Exception {
-		
+		count++;
+        long _currTime = System.currentTimeMillis();
+        
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		ObjectOutputStream oos = new ObjectOutputStream( bos );
 		oos.writeObject( orig );
@@ -41,6 +46,8 @@ public class DeepCopy {
 
 		ois.close();
 
+		time += (System.currentTimeMillis() - _currTime);
+		
 		return copy;
 		
 //		// Write the object out to a byte array

@@ -56,15 +56,17 @@ public class Synthesizer {
         problem = new ProblemCreator(classList).makeProblem();
             
         // run the planner on the obtained problem
-        ArrayList<Rel> algorithmList = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
+        EvaluationAlgorithm algorithm = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
+        
         if( RuntimeProperties.isShowAlgorithm() ) {
-        	AlgorithmVisualizer.getInstance().addNewTab( mainClassName, algorithmList );
+        	AlgorithmVisualizer.getInstance().addNewTab( mainClassName, algorithm );
         }
-        CodeGenerator cg = new CodeGenerator( algorithmList, problem, mainClassName );
-        String algorithm = cg.generate();
+        
+        CodeGenerator cg = new CodeGenerator( algorithm, problem, mainClassName );
+        String algorithmCode = cg.generate();
 
         if (runner != null) {
-            runner.addFoundVars( problem.getFoundVars() );
+            runner.addFoundVars( problem.getCurrentContext().getFoundVars() );
             runner.setAssumptions( problem.getAssumptions() );
         }
         
@@ -76,9 +78,6 @@ public class Synthesizer {
         // check all the fields and make declarations accordingly
         for ( ClassField field : ac.getClassFields() ) {
 
-//        	if( AnnotatedClass.SPEC_OBJECT_NAME.equals( field.getName() ) && ac.getSuperClasses().size() > 0 )
-//        		continue;//TODO - remove?
-        	
             String dec = TypeUtil.getDeclaration( field, "public" );
            
         	if( dec != null && dec.length() > 0 ) {
@@ -90,7 +89,7 @@ public class Synthesizer {
         prog.append( "\n" ).append(  CodeGenerator.OT_TAB )
             .append( CodeGenerator.getComputeMethodSignature( CodeGenerator.COMPUTE_ARG_NAME) )
             .append( " {\n" );
-        prog.append( algorithm );
+        prog.append( algorithmCode );
         prog.append( CodeGenerator.OT_TAB ).append( "}\n\n" );
         
         prog.append( CodeGenerator.OT_TAB ).append( "public static void main( String[] args ) {\n" )
@@ -123,9 +122,8 @@ public class Synthesizer {
 
         fileString = "import ee.ioc.cs.vsle.util.*;\nimport ee.ioc.cs.vsle.api.*;\n\n" + fileString 
         			 + "\n" + cg.getIndependentSubtasks();
-        
-        return fileString;
 
+        return fileString;
     }
 
     /**
@@ -221,21 +219,19 @@ public class Synthesizer {
         subtaskCR.addOutputs( outputs, varsForSubtask );
         subtask = new ProblemCreator(classList).makeIndependentSubtask( subtaskCR );
         //get problem graph
-        Problem context = subtask.getContext();
+        Problem problemContext = subtask.getContext();
         //construct an algorithm
-        ArrayList<Rel> alg = PlannerFactory.getInstance().getCurrentPlanner()
-                .invokePlaning( context, false );
-        boolean solved = context.getFoundVars()
-                .containsAll( context.getGoals() );
-        if ( solved ) {
-            subtask.getAlgorithm().addAll( alg );
-        } else {
+        EvaluationAlgorithm alg = PlannerFactory.getInstance().getCurrentPlanner()
+                .invokePlaning( problemContext, false );
+        boolean solved = problemContext.getCurrentContext().getFoundVars()
+                .containsAll( problemContext.getCurrentContext().getAllGoals() );
+        if ( !solved ) {
             throw new ComputeModelException( contextClassName
                     + " problem is not solvable!" );
         }
         //generate code
         StringBuilder classCode = new StringBuilder();
-        String className = CodeGenerator.genIndependentSubtask( subtask,
+        String className = CodeGenerator.genIndependentSubtask( subtask, alg,
                 classCode );
         result.append( "import ee.ioc.cs.vsle.util.*;\n" ).append(
                 "import ee.ioc.cs.vsle.api.*;\n\npublic " ).append( classCode );

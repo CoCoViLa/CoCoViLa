@@ -3,16 +3,16 @@
  */
 package ee.ioc.cs.vsle.synthesize;
 
+import static ee.ioc.cs.vsle.synthesize.CodeGenerator.*;
+
 import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
-import static ee.ioc.cs.vsle.synthesize.CodeGenerator.*;
 
 /**
  * This class is responsible for the whole planning
@@ -26,7 +26,7 @@ public class DepthFirstPlanner implements IPlanner {
     private final boolean isSubtaskRepetitionAllowed = s_isSubtaskRepetitionAllowed;
     private final boolean isIncremental = s_isIncremental;
     private final boolean isOptDisabled = s_disableOptimizationInSubtasks;
-    private List<SubtaskRel> indSubtasks = new ArrayList<SubtaskRel>();
+    private Map<SubtaskRel, EvaluationAlgorithm> indSubtasks = new LinkedHashMap<SubtaskRel, EvaluationAlgorithm>();
     private boolean computeAll;
     
     /**
@@ -56,12 +56,14 @@ public class DepthFirstPlanner implements IPlanner {
      * goal-driven recursive planning with backtracking is invoked. Planning is
      * performed until no new variables are introduced into the algorithm.
      */
-    public ArrayList<Rel> invokePlaning( Problem problem, boolean _computeAll ) {
+    public EvaluationAlgorithm invokePlaning( Problem problem, boolean _computeAll ) {
         long startTime = System.currentTimeMillis();
 
         computeAll = _computeAll;
-        ArrayList<Rel> algorithm = new ArrayList<Rel>();
+        EvaluationAlgorithm algorithm = new EvaluationAlgorithm();
 
+        PlanningContext context = problem.getCurrentContext();
+        
         // add all axioms at the beginning of an algorithm
         Collection<Var> flattened = new HashSet<Var>();
         for ( Iterator<Rel> axiomIter = problem.getAxioms().iterator(); axiomIter.hasNext(); ) {
@@ -76,24 +78,24 @@ public class DepthFirstPlanner implements IPlanner {
                     //is given in a scheme via a properties window
 //                    && !problem.getKnownVars().containsAll( flattened ) 
                ) {
-                algorithm.add( rel );
+                algorithm.addRel( rel );
             }
             axiomIter.remove();
-            problem.getKnownVars().addAll( flattened );
+            context.getKnownVars().addAll( flattened );
             flattened.clear();
         }
 
-        problem.getFoundVars().addAll( problem.getKnownVars() );
+        context.getFoundVars().addAll( context.getKnownVars() );
 
         //remove all known vars with no relations
-        for( Iterator<Var> varIter = problem.getKnownVars().iterator(); varIter.hasNext(); ) {
+        for( Iterator<Var> varIter = context.getKnownVars().iterator(); varIter.hasNext(); ) {
             if( varIter.next().getRels().isEmpty() ) {
                 varIter.remove();
             }
         }
         
         //start planning
-        if ( problem.getRelsWithSubtasks().isEmpty() && linearForwardSearch( problem, algorithm, problem.getGoals(), computeAll ) ) {
+        if ( problem.getRelsWithSubtasks().isEmpty() && linearForwardSearch( context, algorithm, computeAll ) ) {
             if ( RuntimeProperties.isLogInfoEnabled() )
                 db.p( "Problem solved without subtasks" );
         } else if ( !problem.getRelsWithSubtasks().isEmpty() && subtaskPlanning( problem, algorithm ) ) {
@@ -116,11 +118,10 @@ public class DepthFirstPlanner implements IPlanner {
      * @param p
      * @param algorithm
      * @param targetVars
-     * @param computeAll
+     * @param _computeAll
      * @return
      */
-    private boolean linearForwardSearch( Problem p, List<Rel> algorithm, 
-            Set<Var> targetVars, boolean computeAll ) {
+    private boolean linearForwardSearch( PlanningContext context, EvaluationAlgorithm algorithm, boolean _computeAll ) {
 
         /*
          * while iterating through hashset, items cant be removed from/added to
@@ -130,21 +131,19 @@ public class DepthFirstPlanner implements IPlanner {
         Set<Var> newVars = new LinkedHashSet<Var>();
         Set<Var> relOutputs = new LinkedHashSet<Var>();
         Set<Var> removableVars = new LinkedHashSet<Var>();
-        // backup goals for later optimization
-        Set<Var> allTargetVars = new LinkedHashSet<Var>( targetVars );
 
         boolean changed = true;
 
         if ( isLinearLoggingOn() )
-            db.p( "------Starting linear planning with (sub)goals: " + targetVars + "--------" );
+            db.p( "------Starting linear planning with (sub)goals: " + context.getRemainingGoals() + "--------" );
 
         if ( isLinearLoggingOn() )
             db.p( "Algorithm " + algorithm );
 
         int counter = 1;
 
-        while ( ( !computeAll && changed && !targetVars.isEmpty() ) 
-                || ( changed && computeAll ) ) {
+        while ( ( !_computeAll && changed && !context.getRemainingGoals().isEmpty() ) 
+                || ( changed && _computeAll ) ) {
 
             if ( isLinearLoggingOn() )
                 db.p( "----Iteration " + counter + " ----" );
@@ -154,9 +153,9 @@ public class DepthFirstPlanner implements IPlanner {
             
             // iterate through all knownvars
             if ( isLinearLoggingOn() )
-                db.p( "Known:" + p.getKnownVars() );
+                db.p( "Known:" + context.getKnownVars() );
 
-            for ( Var var : p.getKnownVars() ) {
+            for ( Var var : context.getKnownVars() ) {
 
                 if ( isLinearLoggingOn() )
                     db.p( "Current Known: " + var );
@@ -165,16 +164,15 @@ public class DepthFirstPlanner implements IPlanner {
                 for ( Rel rel : var.getRels() ) {
                     if ( isLinearLoggingOn() )
                         db.p( "And its rel: " + rel );
-                    if ( p.getAllRels().contains( rel ) ) {
-                        rel.removeUnknownInput( var );
+                    if ( context.isAvailableRel( rel ) ) {
+                        context.removeUnknownInput( rel, var );
 
                         if ( isLinearLoggingOn() )
-                            db.p( "problem contains it " + rel 
-                                    + " unknownInputs: " + rel.getUnknownInputCount() );
+                            db.p( "problem contains it " + rel );
 
                         removableVars.add( var );
 
-                        if ( rel.getUnknownInputCount() == 0 
+                        if ( context.isRelReadyToUse( rel )
                                 && rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) {
 
                             if ( isLinearLoggingOn() )
@@ -187,7 +185,7 @@ public class DepthFirstPlanner implements IPlanner {
 
                             for ( Var relVar : rel.getOutputs() ) {
 
-                                if ( !p.getFoundVars().contains( relVar ) ) {
+                                if ( !context.getFoundVars().contains( relVar ) ) {
                                     relIsNeeded = true;
                                 }
                             }
@@ -207,14 +205,14 @@ public class DepthFirstPlanner implements IPlanner {
                                     relOutputs.clear();
                                     unfoldVarsToSet( rel.getOutputs(), relOutputs );
                                     newVars.addAll( relOutputs );
-                                    p.getFoundVars().addAll( relOutputs );
+                                    context.getFoundVars().addAll( relOutputs );
                                 }
-                                algorithm.add( rel );
+                                algorithm.addRel( rel );
                                 if ( isLinearLoggingOn() )
                                     db.p( "algorithm " + algorithm );
                             }
 
-                            p.getAllRels().remove( rel );
+                            context.removeRel( rel );
                             changed = true;
                         }
                     }
@@ -222,25 +220,25 @@ public class DepthFirstPlanner implements IPlanner {
             }
 
             // remove targets if they have already been found
-            for ( Iterator<Var> targetIter = targetVars.iterator(); targetIter.hasNext(); ) {
+            for ( Iterator<Var> targetIter = context.getRemainingGoals().iterator(); targetIter.hasNext(); ) {
                 Var targetVar = targetIter.next();
-                if ( p.getFoundVars().contains( targetVar ) ) {
+                if ( context.getFoundVars().contains( targetVar ) ) {
                     targetIter.remove();
                 }
             }
             
             if ( isLinearLoggingOn() )
-                db.p( "foundvars " + p.getFoundVars() );
+                db.p( "foundvars " + context.getFoundVars() );
 
-            p.getKnownVars().addAll( newVars );
-            p.getKnownVars().removeAll( removableVars );
+            context.getKnownVars().addAll( newVars );
+            context.getKnownVars().removeAll( removableVars );
             newVars.clear();
         }
         if ( isLinearLoggingOn() )
             db.p( "algorithm " + algorithm );
 
-        if ( !computeAll ) {
-            Optimizer.optimize( p, algorithm, allTargetVars );
+        if ( !_computeAll ) {
+            Optimizer.optimize( context, algorithm );
 
             if ( isLinearLoggingOn() )
                 db.p( "optimized algorithm " + algorithm );
@@ -249,19 +247,23 @@ public class DepthFirstPlanner implements IPlanner {
         if ( isLinearLoggingOn() )
             db.p( "\n---!!!Finished linear planning!!!---\n" );
 
-        return targetVars.isEmpty() || p.getFoundVars().containsAll( allTargetVars );
+        return context.getRemainingGoals().isEmpty() 
+                || context.getFoundVars().containsAll( context.getAllGoals() );
     }
 
-    private boolean subtaskPlanning( Problem problem, ArrayList<Rel> algorithm ) {
+    private boolean subtaskPlanning( Problem problem, EvaluationAlgorithm algorithm ) {
 
         if ( isSubtaskLoggingOn() )
             db.p( "!!!--------- Starting Planning With Subtasks ---------!!!" );
 
         final int maxDepthBackup = maxDepth;
         db.p( "maxDepthBackup:" + maxDepthBackup + " sbt: " + problem.getRelsWithSubtasks().size() );
+        PlanningContext context = problem.getCurrentContext();
         
         try {
 
+            Set<Rel> relsWithSubtasks = new LinkedHashSet<Rel>( problem.getRelsWithSubtasks() );
+            
             if( isIncremental ) {
                 int incrementalDepth = 0;
 
@@ -274,7 +276,7 @@ public class DepthFirstPlanner implements IPlanner {
                     
                     //if we need to compute some specific goals, after reaching a certain depth, but not the maximal depth, 
                     //the problem may be solved and there is no need to go any deeper.
-                    if( subtaskPlanningImpl( problem, algorithm, new LinkedHashSet<Rel>(), 0 ) ) {
+                    if( subtaskPlanningImpl( context, relsWithSubtasks, algorithm, new LinkedHashSet<Rel>(), 0 ) ) {
                         db.p( "The problem was solved during idfs after some intermediate MLB" );
                         return true;
                     }
@@ -294,7 +296,7 @@ public class DepthFirstPlanner implements IPlanner {
                 if ( isSubtaskLoggingOn() )
                     db.p( "Starting subtask dfs with maxDepth: " + ( maxDepth + 1 ) );
 
-                if( subtaskPlanningImpl( problem, algorithm, new LinkedHashSet<Rel>(), 0 ) ) {
+                if( subtaskPlanningImpl( context, relsWithSubtasks, algorithm, new LinkedHashSet<Rel>(), 0 ) ) {
                     if( isSubtaskLoggingOn() )
                     db.p( "The problem was solved during dfs after some intermediate MLB" );
                     return true;
@@ -310,7 +312,7 @@ public class DepthFirstPlanner implements IPlanner {
         }
 
         db.p( "Invoking final linear planning" );
-        return linearForwardSearch( problem, algorithm, problem.getGoals(), computeAll );
+        return linearForwardSearch( context, algorithm, computeAll );
     }
 
     /**
@@ -321,20 +323,21 @@ public class DepthFirstPlanner implements IPlanner {
      * @param subtaskRelsInPath
      * @param depth
      */
-    private boolean subtaskPlanningImpl( Problem problem, List<Rel> algorithm, Set<Rel> subtaskRelsInPath, int depth ) {
+    private boolean subtaskPlanningImpl( PlanningContext context, Set<Rel> relsWithSubtasks,
+            EvaluationAlgorithm algorithm, Set<Rel> subtaskRelsInPath, int depth ) {
 
-        Set<Rel> relsWithSubtasks = new LinkedHashSet<Rel>( problem.getRelsWithSubtasks() );
+        Set<Rel> relsWithSubtasksCopy = new LinkedHashSet<Rel>( relsWithSubtasks );
 
         Set<Rel> relsWithSubtasksToRemove = new LinkedHashSet<Rel>();
         
         boolean firstMLB = true;
         
         // start building Maximal Linear Branch (MLB)
-        MLB: while ( !relsWithSubtasks.isEmpty() ) {
+        MLB: while ( !relsWithSubtasksCopy.isEmpty() ) {
 
             if ( isSubtaskLoggingOn() ) {
                 String print = p( depth ) + "Starting new MLB with: ";
-                for ( Rel rel : relsWithSubtasks ) {
+                for ( Rel rel : relsWithSubtasksCopy ) {
                     print += "\n" + p( depth ) + "  " + rel.getParentObjectName() + " : " + rel.getDeclaration();
                 }
 //                 print += "\n" + p( depth ) + " All remaining rels in problem:";
@@ -353,7 +356,7 @@ public class DepthFirstPlanner implements IPlanner {
             if( ( depth == 0 ) || ( !firstMLB && depth > 0) ) {
                 
                 boolean solvedIntermediately = 
-                    linearForwardSearch( problem, algorithm, new LinkedHashSet<Var>( problem.getGoals() ), true );
+                    linearForwardSearch( context, algorithm, true );
 
                 //Having constructed some MLBs the (sub)problem may be solved 
                 //and there is no need in wasting precious time planning unnecessary branches
@@ -365,7 +368,7 @@ public class DepthFirstPlanner implements IPlanner {
                         ) ) {
                     //If the problem is solved, optimize and return
                     if( !isOptDisabled )
-                        Optimizer.optimize( problem, algorithm, problem.getGoals() );
+                        Optimizer.optimize( context, algorithm );
                     return true;
                 }
             } else {
@@ -373,21 +376,21 @@ public class DepthFirstPlanner implements IPlanner {
             }
             
             // or children
-            OR: for ( Iterator<Rel> subtaskRelIterator = relsWithSubtasks.iterator(); subtaskRelIterator.hasNext(); ) {
+            OR: for ( Iterator<Rel> subtaskRelIterator = relsWithSubtasksCopy.iterator(); subtaskRelIterator.hasNext(); ) {
 
                 Rel subtaskRel = subtaskRelIterator.next();
 
                 if ( isSubtaskLoggingOn() )
                     db.p( p( depth ) + "OR: depth: " + ( depth + 1 ) + " rel - " + subtaskRel.getParentObjectName() + " : "
                             + subtaskRel.getDeclaration() );
-                if ( ( subtaskRel.getUnknownInputCount() > 0 ) || problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
+                
+                if ( ( !context.isRelReadyToUse(subtaskRel) ) || context.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
 
                     if ( isSubtaskLoggingOn() ) {
                         db.p( p( depth ) + "skipped" );
-                        if ( subtaskRel.getUnknownInputCount() > 0 ) {
-                            db.p( p( depth ) + "because unknown inputs count = " + subtaskRel.getUnknownInputCount() + " "
-                                    + subtaskRel.printUnknownInputs() );
-                        } else if ( problem.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
+                        if ( !context.isRelReadyToUse(subtaskRel) ) {
+                            db.p( p( depth ) + "because it has unknown inputs" );//TODO print unknown
+                        } else if ( context.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
                             db.p( p( depth ) + "because all outputs in FoundVars" );
                         }
                     }
@@ -407,6 +410,8 @@ public class DepthFirstPlanner implements IPlanner {
                     newPath.add( subtaskRel );
                 }
 
+                PlanningResult result = new PlanningResult( subtaskRel, true );
+                
                 // this is true if all subtasks are solvable
                 boolean allSolved = true;
                 // and children
@@ -414,41 +419,27 @@ public class DepthFirstPlanner implements IPlanner {
                     if ( isSubtaskLoggingOn() )
                         db.p( p( depth ) + "AND: subtask - " + subtask );
 
+                    EvaluationAlgorithm sbtAlgorithm = null;
+                    
                     //////////////////////INDEPENDENT SUBTASK////////////////////////////////////////
                     if ( subtask.isIndependent() ) {
                         if ( isSubtaskLoggingOn() )
                             db.p( "Independent!!!" );
 
-                        SubtaskRel initialSubtask;
-
-                        int ind;
-
-                        if ( ( ind = indSubtasks.indexOf( subtask ) ) > -1 ) {
-                            initialSubtask = indSubtasks.get( ind );
-
-                            if ( subtask != initialSubtask ) {
-                                if ( subtask.isSolvable() == null )
-                                    subtask.getAlgorithm().addAll( initialSubtask.getAlgorithm() );
-                                subtask.setSolvable( initialSubtask.isSolvable() );
-                                subtask = initialSubtask;
-                            }
-                        } else {
-                            indSubtasks.add( subtask );
-                        }
-
                         if ( subtask.isSolvable() == null ) {
                             if ( isSubtaskLoggingOn() )
                                 db.p( "Not solved yet" );
                             // independent subtask is solved only once
-                            Problem context = subtask.getContext();
+                            Problem problemContext = subtask.getContext();
                             if ( RuntimeProperties.isLogInfoEnabled() ) {
                                 db.p( "Start solving independent subtask " + subtask.getDeclaration() );
                             }
-                            ArrayList<Rel> alg = getInstance().invokePlaning( context, isOptDisabled );
-                            boolean solved = context.getFoundVars().containsAll( context.getGoals() );
+                            sbtAlgorithm = getInstance().invokePlaning( problemContext, isOptDisabled );
+                            PlanningContext indCntx = problemContext.getCurrentContext();
+                            boolean solved = indCntx.getFoundVars().containsAll( indCntx.getAllGoals() );
                             if ( solved ) {
                                 subtask.setSolvable( Boolean.TRUE );
-                                subtask.getAlgorithm().addAll( alg );
+                                indSubtasks.put( subtask, sbtAlgorithm );
                                 if ( RuntimeProperties.isLogInfoEnabled() ) {
                                     db.p( "Solved " + subtask.getDeclaration() );
                                 }
@@ -463,6 +454,7 @@ public class DepthFirstPlanner implements IPlanner {
                             if ( isSubtaskLoggingOn() )
                                 db.p( "Already solved" );
                             allSolved &= true;
+                            sbtAlgorithm = indSubtasks.get( subtask );
                         } else {
                             if ( isSubtaskLoggingOn() )
                                 db.p( "Not solvable" );
@@ -474,63 +466,64 @@ public class DepthFirstPlanner implements IPlanner {
                         if ( !allSolved ) {
                             continue OR;
                         }
+                        
+                        assert sbtAlgorithm != null;
+                        
+                        result.addSubtaskAlgorithm( subtask, sbtAlgorithm );
                     } 
                     //////////////////////DEPENDENT SUBTASK//////////////////////////////////////
                     else {
                         // lets clone the environment
-                        Problem problemNew = problem.getCopy();
-                        // we need fresh cloned subtask instance
-                        SubtaskRel subtaskNew = problemNew.getSubtask( subtask );
+                        PlanningContext newContext = prepareNewContext( context, subtask );
                         
-                        prepareSubtask( problemNew, subtaskNew );
+                        sbtAlgorithm = new EvaluationAlgorithm();
                         
                         //this set with full list of goals is used later for optimization
-                        Set<Var> allGoals = new LinkedHashSet<Var>( problemNew.getGoals() );
+                        //Set<Var> allGoals = new LinkedHashSet<Var>( problemNew.getGoals() );TODO
                         
                         //during linear planning, if some goals are found, they are removed from the set "goals" 
-                        boolean solved = linearForwardSearch( problemNew, subtaskNew.getAlgorithm(),
+                        boolean solved = linearForwardSearch( newContext, sbtAlgorithm,
                                 // do not optimize here, because the solution may require additional rels with subtasks
-                                problemNew.getGoals(), true );
+                                true );
 
                         if ( solved ) {
                             if ( isSubtaskLoggingOn() )
-                                db.p( p( depth ) + "SOLVED subtask: " + subtaskNew );
+                                db.p( p( depth ) + "SOLVED subtask: " + subtask );
                             
                             if( !isOptDisabled ) {
                                 //if a subtask has been solved, optimize its algorithm
-                                Optimizer.optimize( problemNew, subtaskNew.getAlgorithm(), allGoals );
+                                Optimizer.optimize( newContext, sbtAlgorithm );
                             }
                             
-                            subtask.getAlgorithm().addAll( subtaskNew.getAlgorithm() );
+                            result.addSubtaskAlgorithm( subtask, sbtAlgorithm );
                             allSolved &= solved;
                             continue AND;
                         } else if ( !solved && ( depth == maxDepth ) ) {
                             if ( isSubtaskLoggingOn() )
-                                db.p( p( depth ) + "NOT SOLVED and cannot go any deeper, subtask: " + subtaskNew );
+                                db.p( p( depth ) + "NOT SOLVED and cannot go any deeper, subtask: " + subtask );
                             continue OR;
                         }
 
                         if ( isSubtaskLoggingOn() )
                             db.p( p( depth ) + "Recursing deeper" );
 
-                        List<Rel> newAlg = new ArrayList<Rel>( subtaskNew.getAlgorithm() );
-
-                        solved = subtaskPlanningImpl( problemNew, newAlg, newPath, depth + 1 );
+                        //TODO should the algorithm be copied?
+                        solved = subtaskPlanningImpl( newContext, relsWithSubtasks, sbtAlgorithm, newPath, depth + 1 );
 
                         if ( isSubtaskLoggingOn() )
                             db.p( p( depth ) + "Back to depth " + ( depth + 1 ) );
 
                         //the linear planning has been performed at the end of MLB on the depth+1,
                         //if the problem was solved, there is no need to run linear planning again
-                        if( ( solved || ( solved = linearForwardSearch( problemNew, newAlg, problemNew.getGoals(), true ) ) ) 
+                        if( ( solved || ( solved = linearForwardSearch( newContext, sbtAlgorithm, true ) ) ) 
                                 && !isOptDisabled ) {
                             // if solved, optimize here with full list of goals in order to get rid of
                             // unnecessary subtask instances and other relations
-                            Optimizer.optimize( problemNew, newAlg, allGoals );
+                            Optimizer.optimize( newContext, sbtAlgorithm );
                         }
                         
                         if ( isSubtaskLoggingOn() )
-                            db.p( p( depth ) + ( solved ? "" : "NOT" ) + " SOLVED subtask: " + subtaskNew );
+                            db.p( p( depth ) + ( solved ? "" : "NOT" ) + " SOLVED subtask: " + subtask );
 
                         allSolved &= solved;
 
@@ -539,14 +532,14 @@ public class DepthFirstPlanner implements IPlanner {
                         if ( !allSolved ) {
                             continue OR;
                         }
-                        // copy algorithm from cloned subtask to old
-                        subtask.getAlgorithm().addAll( newAlg );
+                        
+                        result.addSubtaskAlgorithm( subtask, sbtAlgorithm );
                     }
 
-                }
+                }//AND
 
                 if ( allSolved ) {
-                    algorithm.add( subtaskRel );
+                    algorithm.add( result );
 
                     Set<Var> newVars = new LinkedHashSet<Var>();
 
@@ -554,8 +547,8 @@ public class DepthFirstPlanner implements IPlanner {
 //                    System.err.println( "newVars " + newVars.size() + " " + newVars + 
 //                            "\nproblem.getKnownVars() " + problem.getKnownVars().size() + " " + problem.getKnownVars() + 
 //                            "\nproblem.getFoundVars() " + problem.getFoundVars().size() + " " + problem.getFoundVars() );
-                    problem.getKnownVars().addAll( newVars );
-                    problem.getFoundVars().addAll( newVars );
+                    context.getKnownVars().addAll( newVars );
+                    context.getFoundVars().addAll( newVars );
 
                     subtaskRelIterator.remove();
 
@@ -578,7 +571,7 @@ public class DepthFirstPlanner implements IPlanner {
                                 + " : " + subtaskRel.getDeclaration() );
                     newPath.remove( subtaskRel );
                 }
-            }
+            }//end OR
 
             // exit loop because there are no more rels with subtasks to be
             // applied
@@ -591,25 +584,29 @@ public class DepthFirstPlanner implements IPlanner {
         
         //incremental dfs, remove solved subtasks
         if( depth == 0 ) {
-            problem.getRelsWithSubtasks().removeAll( relsWithSubtasksToRemove );
+            relsWithSubtasks.removeAll( relsWithSubtasksToRemove );
         }
         
         return false;
     }
 
-    private void prepareSubtask( Problem problem, Rel subtask ) {
+    private PlanningContext prepareNewContext( PlanningContext context, Rel subtask ) {
+        
+        PlanningContext newContext = context.getCopy();
         // [x->y] assume x is known
-        Set<Var> flatVars = new LinkedHashSet<Var>();
-        unfoldVarsToSet( subtask.getInputs(), flatVars );
-        problem.getKnownVars().addAll( flatVars );
-        problem.getFoundVars().addAll( flatVars );
-        problem.getGoals().clear();
-        unfoldVarsToSet( subtask.getOutputs(), problem.getGoals() );
+        Set<Var> allSubtaskInputs = new LinkedHashSet<Var>();
+        unfoldVarsToSet( subtask.getInputs(), allSubtaskInputs );
+        newContext.getKnownVars().addAll( allSubtaskInputs );
+        newContext.getFoundVars().addAll( allSubtaskInputs );
+        Set<Var> goals = new LinkedHashSet<Var>();
+        unfoldVarsToSet( subtask.getOutputs(), goals );
+        newContext.addGoals( goals );
+        return newContext;
     }
 
     private static volatile int s_maxDepth = 2;// 0..2, i.e. 3
     private static volatile int s_maxRept = 1;
-    private static volatile int s_limit = 0;//0 - depth; 1 - repetition; ...
+    //private static volatile int s_limit = 0;//0 - depth; 1 - repetition; ...
     private static volatile boolean s_isSubtaskRepetitionAllowed = false;
     private static volatile boolean s_isIncremental = false;
     private static volatile boolean s_disableOptimizationInSubtasks = false;

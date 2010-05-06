@@ -56,8 +56,8 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				AlgorithmVisualizer thisClass = getInstance();
-				thisClass.addNewTab( "test", new ArrayList<Rel>() );
-				thisClass.addNewTab( "test2", new ArrayList<Rel>() );
+//				thisClass.addNewTab( "test", new ArrayList<Rel>() );
+//				thisClass.addNewTab( "test2", new ArrayList<Rel>() );
 				thisClass.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 				thisClass.setVisible(true);
 			}
@@ -94,7 +94,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 	 * @param title
 	 * @param algorithm
 	 */
-	public void addNewTab( String title, List<Rel> algorithm ) {
+	public void addNewTab( String title, EvaluationAlgorithm algorithm ) {
 		
 		final TabPanel panel = new TabPanel( algorithm );
 		
@@ -161,7 +161,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 
 		private JScrollPane jScrollPane = null;
 		
-		TabPanel( final List<Rel> algorithm ) {
+		TabPanel( final EvaluationAlgorithm algorithm ) {
 			setLayout(new BorderLayout());
 			add(getJScrollPane(), BorderLayout.CENTER);
 			
@@ -212,12 +212,13 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 			return jScrollPane;
 		}
 		
-		private String generateAlgorithmText( List<Rel> algorithm ) {
+		private String generateAlgorithmText( EvaluationAlgorithm algorithm ) {
 			
 			StringBuilder alg = new StringBuilder();
 
-			for ( Rel rel : algorithm ) {
-
+			for ( PlanningResult res : algorithm ) {
+			    Rel rel = res.getRel();
+			    
 				String obj = rel.getParentObjectName();
 				
 				if( TypeUtil.TYPE_THIS.equals( obj ) ) {
@@ -238,7 +239,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 						alg.append("!Subtask ");
 						alg.append(subtask.getDeclaration());
 						alg.append(" :\n");
-						alg.append(generateAlgorithmText(subtask.getAlgorithm()));
+						alg.append(generateAlgorithmText(res.getSubtaskAlgorithm( subtask )));
 						left();
 					}
 

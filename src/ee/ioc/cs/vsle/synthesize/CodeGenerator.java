@@ -24,13 +24,13 @@ public class CodeGenerator {
         OT_INC, OT_DEC
     }
 
-    private int                      subCount            = 0;
+    private int subCount = 0;
 
-    public static int                ALIASTMP_NR;
+    public static int ALIASTMP_NR;
 
-    private List<Rel>                algRelList;
-    private Problem                  problem;
-    private String                   className;
+    private EvaluationAlgorithm algorithm;
+    private Problem problem;
+    private String className;
 
     private Map<SubtaskRel, IndSubt> independentSubtasks = new HashMap<SubtaskRel, IndSubt>();
 
@@ -40,10 +40,10 @@ public class CodeGenerator {
         offset = "";
     }
     
-    public CodeGenerator( List<Rel> algRelList, Problem problem, String className ) {
+    public CodeGenerator( EvaluationAlgorithm algorithm, Problem problem, String className ) {
         
         this();
-        this.algRelList = algRelList;
+        this.algorithm = algorithm;
         this.problem = problem;
         this.className = className;
     }
@@ -63,8 +63,10 @@ public class CodeGenerator {
 
         genInputs( alg, problem.getAssumptions(), COMPUTE_ARG_NAME );
 
-        for ( Rel rel : algRelList ) {
+        for ( PlanningResult res : algorithm ) {
 
+            Rel rel = res.getRel();
+            
             if ( rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) {
                 appendRelToAlg( rel.toString(), rel.getExceptions(), alg, false );
             }
@@ -76,7 +78,7 @@ public class CodeGenerator {
                 unfoldVarsToSet( rel.getInputs(), usedVars );
                 unfoldVarsToSet( rel.getOutputs(), usedVars );
 
-                genRelWithSubtasks( rel, alg, false, className, usedVars, problem );
+                genRelWithSubtasks( res, alg, false, className, usedVars, problem );
             }
 
         }
@@ -111,8 +113,9 @@ public class CodeGenerator {
      * @param usedVars
      * @param _problem
      */
-    private void genRelWithSubtasks( Rel rel, StringBuilder alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars, Problem _problem ) {
+    private void genRelWithSubtasks( PlanningResult res, StringBuilder alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars, Problem _problem ) {
 
+        Rel rel = res.getRel();
         String relString = rel.toString();
         
         for ( SubtaskRel subtask : rel.getSubtasks() ) {
@@ -124,7 +127,7 @@ public class CodeGenerator {
             String sbClassName;
             if ( !subtask.isIndependent() || ( subtask.isIndependent() && !independentSubtasks.containsKey( subtask ) ) ) {
                 
-                sbClassName = genSubtask( bufSbtClass, parentClassName, usedVars, _problem,
+                sbClassName = genSubtask( res.getSubtaskAlgorithm( subtask ), bufSbtClass, parentClassName, usedVars, _problem,
                         subtask, subNum );
                 
                 if ( subtask.isIndependent() ) {
@@ -161,7 +164,7 @@ public class CodeGenerator {
      * @param subNum
      * @return
      */
-    private String genSubtask( StringBuilder bufSbtClass, String parentClassName,
+    private String genSubtask( EvaluationAlgorithm subAlg, StringBuilder bufSbtClass, String parentClassName,
             Set<Var> usedVars, Problem _problem,
             SubtaskRel subtask, int subNum ) {
         
@@ -193,19 +196,19 @@ public class CodeGenerator {
         unfoldVarsToSet( subInputs, currentUsedVars );
         unfoldVarsToSet( subOutputs, currentUsedVars );
 
-        List<Rel> subAlg = subtask.getAlgorithm();
         right();
         bufSbtBody.append( same() ).append( "//Subtask: " ).append( subtask ).append( "\n" );
         // apend subtask inputs to algorithm
         genInputs( bufSbtBody, subInputs, subtaskInputArrayName );
 
         for ( int i = 0; i < subAlg.size(); i++ ) {
-            Rel trel = subAlg.get( i );
+            PlanningResult res = subAlg.get( i );
+            Rel trel = res.getRel();
             if ( RuntimeProperties.isLogDebugEnabled() )
                 db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs() );
             if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                 // recursion
-                genRelWithSubtasks( trel, bufSbtBody, true, sbClassName, currentUsedVars, currentProblem );
+                genRelWithSubtasks( res, bufSbtBody, true, sbClassName, currentUsedVars, currentProblem );
 
             } else {
                 appendRelToAlg( trel.toString(), trel.getExceptions(), bufSbtBody, true );
@@ -244,9 +247,9 @@ public class CodeGenerator {
      * @param classCode
      * @return name of the generated class
      */
-    static String genIndependentSubtask(SubtaskRel subtask, StringBuilder classCode) {
+    static String genIndependentSubtask(SubtaskRel subtask, EvaluationAlgorithm subAlg, StringBuilder classCode) {
         
-        return new CodeGenerator().genSubtask( classCode, null, null, null, subtask, 0 );
+        return new CodeGenerator().genSubtask( subAlg, classCode, null, null, null, subtask, 0 );
     }
     
     private static String _this_ = "." + TYPE_THIS + ".";

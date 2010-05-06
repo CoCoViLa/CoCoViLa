@@ -16,13 +16,14 @@ public class Optimizer {
 	 @param algorithm an unoptimized algorithm
 	 @param goals the variables which the algorithm has to calculate (other branches are removed)
 	 */   
-    public static void optimize( Problem problem, List<Rel> algorithm, Set<Var> goals ) {
-    	optimize( problem, algorithm, new HashSet<Var>( goals ), "" );
+    public static void optimize( PlanningContext context, EvaluationAlgorithm algorithm ) {
+    	optimize( context, algorithm, new HashSet<Var>( context.getAllGoals() ), "" );
     }
     
-	private static void optimize( Problem problem, List<Rel> algorithm, Set<Var> goals, String p ) {
+	private static void optimize( PlanningContext context, EvaluationAlgorithm algorithm, Set<Var> goals, String p ) {
 		Rel rel;
-		ArrayList<Rel> removeThese = new ArrayList<Rel>();
+		PlanningResult res;
+		EvaluationAlgorithm removeThese = new EvaluationAlgorithm();
 		
 		if (RuntimeProperties.isLogDebugEnabled())
 			db.p( p + "!!!--------- Starting Optimization with targets: " + goals + " ---------!!!");
@@ -30,7 +31,9 @@ public class Optimizer {
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
 			if (RuntimeProperties.isLogDebugEnabled())
 				db.p( p + "Reguired vars: " + goals );
-            rel = algorithm.get(i);
+			
+			res = algorithm.get(i);
+            rel = res.getRel();
             if (RuntimeProperties.isLogDebugEnabled())
     			db.p( p + "Rel from algorithm: " + rel );
 			boolean relIsNeeded = false;
@@ -57,7 +60,7 @@ public class Optimizer {
 						HashSet<Var> subGoals = new HashSet<Var>();
 						CodeGenerator.unfoldVarsToSet( subtask.getOutputs(), subGoals );
 						// the problem object is required only on the top level
-						optimize( null, subtask.getAlgorithm(), subGoals, incPrefix( p ) );
+						optimize( null, res.getSubtaskAlgorithm( subtask ), subGoals, incPrefix( p ) );
 						if (RuntimeProperties.isLogDebugEnabled()) {
 							db.p( p + "Finished optimizing subtask: " + subtask );
 							db.p( p + "Required inputs from upper level: " + subGoals );
@@ -73,7 +76,7 @@ public class Optimizer {
 			} else {
 				if (RuntimeProperties.isLogDebugEnabled())
 					db.p( p + "Removed");
-				removeThese.add(rel);
+				removeThese.add(res);
 			}
 		}
 		if (RuntimeProperties.isLogDebugEnabled()) {
@@ -81,18 +84,18 @@ public class Optimizer {
 		}
 		
 		//remove unneeded relations
-		for (Rel relToRemove : removeThese) {
-			if( algorithm.indexOf( relToRemove ) > -1 ) {
-				algorithm.remove( relToRemove);
+		for (PlanningResult resToRemove : removeThese) {
+			if( algorithm.indexOf( resToRemove ) > -1 ) {
+				algorithm.remove( resToRemove);
 			}
 			
-			if( problem != null ) {
+			if( context != null ) {
 			    /* 
 			     * Do not keep vars in Found set if a relation that introduces 
 			     * those vars has been removed, otherwise the propagation procedure
 			     * may overwrite values of such variables.
 			     */
-			    problem.getFoundVars().removeAll( relToRemove.getOutputs() );
+			    context.getFoundVars().removeAll( resToRemove.getRel().getOutputs() );
 			}
 		}
 		if (RuntimeProperties.isLogDebugEnabled())

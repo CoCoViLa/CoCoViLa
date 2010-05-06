@@ -1,15 +1,15 @@
 package ee.ioc.cs.vsle.synthesize;
 
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
+
+import java.util.*;
+import java.util.regex.*;
+
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
-import java.io.Serializable;
-import java.util.*;
-import java.util.regex.*;
-import static ee.ioc.cs.vsle.util.TypeUtil.*;
-
-class Rel implements Serializable {
+class Rel {
 
     private Collection<Var> outputs = new LinkedHashSet<Var>();
     private Collection<Var> inputs = new LinkedHashSet<Var>();
@@ -29,7 +29,7 @@ class Rel implements Serializable {
     private String declaration;
     //see RelType
     private int type;
-    private Set<Var> unknownInputs = new LinkedHashSet<Var>();
+    
     transient private CodeEmitter emitter;
     
     Rel( Var parent, String declaration ) {
@@ -46,27 +46,11 @@ class Rel implements Serializable {
         type = t;
     }
     
-    int getUnknownInputCount() {
-        return unknownInputs.size();
-    }
-
-    void removeUnknownInput( Var var ) {
-        if ( !var.getField().isConstant() ) {
-            unknownInputs.remove( var );
-        }
-    }
-
     void addInput(Var var) {
         inputs.add( var );
-        if( !var.getField().isConstant() ) {
-        	unknownInputs.add( var );
-        }
     }
-
     void addInputs( Collection<Var> vars ) {
-    	for (Var var : vars) {
-			addInput( var );
-		}
+        inputs.addAll( vars );
     }
     
     /**
@@ -95,10 +79,6 @@ class Rel implements Serializable {
     
     void addSubtask(SubtaskRel rel) {
         subtasks.add(rel);
-    }
-    
-    boolean isUnknownInputsExist( Collection<Var> vars ) {
-    	return vars.containsAll( inputs );
     }
     
     Collection<Var> getExceptions() {
@@ -148,12 +128,6 @@ class Rel implements Serializable {
     public String toString()
     {
         return getCodeEmitter().emitCode();
-    }
-    
-    
-    //for debug!!!
-    String printUnknownInputs() {
-        return unknownInputs.toString();
     }
     
     void addSubstitutions( Map<String, String> substs ) {

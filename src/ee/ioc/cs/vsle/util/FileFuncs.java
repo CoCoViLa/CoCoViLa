@@ -24,8 +24,8 @@ public class FileFuncs {
     /**
      * Buffer size for file read and write operations.
      */
-    private static final int BUFSIZE = 1024;
-
+    private static final int BUFSIZE = 10240;
+    private static final int BUFMAXSIZE = Integer.MAX_VALUE / 2;
     /**
      * Interface for different storage types for generated data.
      * The effect of these functions is implementation dependant, for example
@@ -60,7 +60,8 @@ public class FileFuncs {
             }
             if (file.isFile() && file.canRead()) {
                 try {
-                    return getByteStreamContents(new FileInputStream(file));
+                    return getByteStreamContents(new FileInputStream(file), 
+                            file.length() > BUFMAXSIZE ? BUFMAXSIZE : (int)file.length());
                 } catch (FileNotFoundException e) {
                     db.p(e);
                 }
@@ -88,13 +89,13 @@ public class FileFuncs {
             }
             //TODO find the reason for those exceptions
             try {
-                if (file.canRead() && file.isFile()) {
-                }
-                return getCharStreamContents(new FileInputStream(file));
+                if (file.canRead() && file.isFile())
+                    return getCharStreamContents(new FileInputStream(file), 
+                            file.length() > BUFMAXSIZE ? BUFMAXSIZE : (int)file.length());
             } catch (FileNotFoundException e) {
-//                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
+                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
             } catch (SecurityException e) {
-//                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
+                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
             }
             return null;
         }
@@ -327,19 +328,23 @@ public class FileFuncs {
      * Reads everything from a character input stream into a char array.
      * @param charStream Finite character stream
      */
-    public static char[] getCharStreamContents(InputStream charStream) {
+    public static char[] getCharStreamContents(InputStream charStream) { 
+        return getCharStreamContents( charStream, BUFSIZE );
+    }
+    
+    public static char[] getCharStreamContents(InputStream charStream, int size) {
         InputStreamReader reader = new InputStreamReader(charStream);
         char[] buf = null;
         int readTotal = 0;
         int read = 0;
 
         try {
-            buf = new char[BUFSIZE];
+            buf = new char[size];
 
             while (true) {
                 if (buf.length == readTotal) {
                     // a linked list of chunks could be more efficient
-                    buf = Arrays.copyOf(buf, readTotal + BUFSIZE);
+                    buf = Arrays.copyOf(buf, readTotal + size);
                 }
                 read = reader.read(buf, readTotal, buf.length - readTotal);
                 if (read > -1) {
@@ -396,17 +401,21 @@ public class FileFuncs {
      * @return the contents of the stream as byte array; null in case of errors
      */
     public static byte[] getByteStreamContents(InputStream byteStream) {
+        return getByteStreamContents( byteStream, BUFSIZE );
+    }
+    
+    public static byte[] getByteStreamContents(InputStream byteStream, int size) {
         byte[] buf = null;
         int readTotal = 0;
         int read = 0;
-
+        
         try {
-            buf = new byte[BUFSIZE];
+            buf = new byte[size];
 
             while (true) {
                 if (buf.length == readTotal) {
                     // a linked list of chunks could be more efficient
-                    buf = Arrays.copyOf(buf, readTotal + BUFSIZE);
+                    buf = Arrays.copyOf(buf, readTotal + size);
                 }
                 read = byteStream.read(buf, readTotal, buf.length - readTotal);
                 if (read > -1) {

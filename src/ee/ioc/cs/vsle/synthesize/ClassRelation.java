@@ -16,8 +16,7 @@ import java.util.regex.Matcher;
  * @author  Ando Saabas
  * @version 1.0
  */
-class ClassRelation
-	implements Serializable {
+class ClassRelation  {
 
     /**
      * 
