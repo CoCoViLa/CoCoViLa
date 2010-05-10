@@ -33,7 +33,7 @@ public class Synthesizer {
     */
     public static void makeProgram( String progText, ClassList classes, String mainClassName, String path, GenStorage storage ) throws SpecParseException {
         generateSubclasses( classes, path, storage );
-        storage.writeFile( mainClassName + ".java", progText.getBytes() );
+        storage.writeFile( mainClassName + ".java", progText );
     }
 
     /** Takes care of steps needed for planning and algorithm extracting, calling problem creator
@@ -115,15 +115,16 @@ public class Synthesizer {
         pattern = Pattern.compile(RE_SPEC, Pattern.DOTALL);
         matcher = pattern.matcher( fileString );
 
+        StringBuilder fsb = new StringBuilder(fileString);
+        
         if ( matcher.find() ) {
-            fileString = matcher.replaceAll("\n"
-                    + Matcher.quoteReplacement(prog.toString()));
+            fsb.insert( matcher.start(), "\n" ).replace( matcher.start()+1, matcher.end()+1, Matcher.quoteReplacement( prog.toString() ) );
         }
 
-        fileString = "import ee.ioc.cs.vsle.util.*;\nimport ee.ioc.cs.vsle.api.*;\n\n" + fileString 
-        			 + "\n" + cg.getIndependentSubtasks();
-
-        return fileString;
+        fsb.insert( 0, "import ee.ioc.cs.vsle.util.*;\nimport ee.ioc.cs.vsle.api.*;\n\n" )
+                .append( cg.getIndependentSubtasks() );
+        
+        return fsb.toString();
     }
 
     /**
@@ -154,32 +155,31 @@ public class Synthesizer {
                 		+ "|" + "public class[ \t\n]+" + pClass.getName());
                 matcher = pattern.matcher( fileString );
 
+                StringBuilder fsb = new StringBuilder( fileString );
                 // be sure class is public
                 if ( matcher.find() ) {
-                    fileString = matcher.replaceAll( "public class " + pClass.getName() );
+                    fsb.replace( matcher.start(), matcher.end(), "public class " + pClass.getName() );
                 }
                 
-                String declars = "";
+                fsb.insert( 0, "import ee.ioc.cs.vsle.api.*;\n\n" );
+                
+                StringBuilder declars = new StringBuilder();
 
                 for ( ClassField field : pClass.getClassFields() ) {
-                	//TODO - remove?
-//                	if( AnnotatedClass.SPEC_OBJECT_NAME.equals( field.getName() ) && pClass.getSuperClasses().size() > 0 )
-//                		continue;//do not understand why should we skip adding SPEC_OBJECT_NAME if class has superclasses 
-                	declars += CodeGenerator.OT_TAB + TypeUtil.getDeclaration( field, "public" );
+                    declars.append( CodeGenerator.OT_TAB ).append( TypeUtil.getDeclaration( field, "public" ) );
 				}
 
                 // find spec
                 pattern = Pattern.compile(RE_SPEC, Pattern.DOTALL);
-                matcher = pattern.matcher( fileString );
+                matcher = pattern.matcher( fsb.toString() );
                 if ( matcher.find() ) {
-                    fileString = matcher.replaceAll( "\n" + declars );
+                    int matcherStart = matcher.start();
+                    fsb.insert( matcherStart++, "\n" ).delete( matcherStart, matcher.end()+1 ).insert( matcherStart, declars );
                 } else {
                 	throw new SpecParseException( "Unable to parse " + pClass.getName() + " specification" );
                 }
 
-                fileString = "import ee.ioc.cs.vsle.api.*;\n\n" + fileString;
-
-                storage.writeFile( pClass.getName() + ".java", fileString.getBytes() );
+                storage.writeFile( pClass.getName() + ".java", fsb.toString() );
             }
         }
     }

@@ -34,7 +34,7 @@ public class FileFuncs {
      * can be later successfully read.
      */
     public static interface GenStorage {
-        public boolean writeFile(String fileName, byte[] data);
+        public boolean writeFile(String fileName, String data);
         public byte[] getFileContents(String fileName);
         public char[] getCharFileContents(String fileName);
     }
@@ -69,12 +69,12 @@ public class FileFuncs {
             return null;
         }
 
-        public boolean writeFile(String fileName, byte[] data) {
+        public boolean writeFile(String fileName, String data) {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
                 file = new File(path, fileName);
             }
-            return FileFuncs.writeFile(file, new String(data));
+            return FileFuncs.writeFile(file, data);
         }
 
         @Override
@@ -119,11 +119,11 @@ public class FileFuncs {
             return data;
         }
 
-        public boolean writeFile(String fileName, byte[] data) {
+        public boolean writeFile(String fileName, String data) {
             if (fileMap == null) {
                 fileMap = new HashMap<String, byte[]>();
             }
-            fileMap.put(fileName, data);
+            fileMap.put(fileName, data.getBytes());
             return true;
         }
 

@@ -1,12 +1,15 @@
 package ee.ioc.cs.vsle.synthesize;
 
+import static ee.ioc.cs.vsle.util.TypeUtil.*;
+
 import java.util.*;
+import java.util.regex.*;
 
 import ee.ioc.cs.vsle.api.*;
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
-import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 public class CodeGenerator {
 
@@ -15,29 +18,24 @@ public class CodeGenerator {
     public static final String INDEPENDENT_SUBTASK = "IndependentSubtask";
     public static final String GENERATED_INTERFACE_NAME = "IComputable";
     public static final String SUBTASK_INTERFACE_NAME = "Subtask";
-    
-    private static String      offset = "";
-
     public static final String OT_TAB = "    ";
-
-    private static enum OFFSET {
-        OT_INC, OT_DEC
-    }
+    private static final String _this_ = "." + TYPE_THIS + ".";
+    
+    private StringBuilder offset = new StringBuilder();
 
     private int subCount = 0;
 
-    public static int ALIASTMP_NR;
+    public int aliasTmpNr = 0;
 
     private EvaluationAlgorithm algorithm;
     private Problem problem;
     private String className;
-
+    private RelCodeProducer relProducer = new RelCodeProducer( this );
+    
     private Map<SubtaskRel, IndSubt> independentSubtasks = new HashMap<SubtaskRel, IndSubt>();
 
     private CodeGenerator() {
-        
-        ALIASTMP_NR = 0;
-        offset = "";
+        offset = new StringBuilder();
     }
     
     public CodeGenerator( EvaluationAlgorithm algorithm, Problem problem, String className ) {
@@ -59,7 +57,7 @@ public class CodeGenerator {
         long start = System.currentTimeMillis();
 
         StringBuilder alg = new StringBuilder();
-        cOT( OFFSET.OT_INC, 2 );
+        changeOffset( true, 2 );
 
         genInputs( alg, problem.getAssumptions(), COMPUTE_ARG_NAME );
 
@@ -68,7 +66,7 @@ public class CodeGenerator {
             Rel rel = res.getRel();
             
             if ( rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) {
-                appendRelToAlg( rel.toString(), rel.getExceptions(), alg, false );
+                appendRelToAlg( relProducer.setRel( rel ) .emit(), rel.getExceptions(), alg, false );
             }
 
             else if ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
@@ -116,7 +114,7 @@ public class CodeGenerator {
     private void genRelWithSubtasks( PlanningResult res, StringBuilder alg, boolean isNestedSubtask, String parentClassName, Set<Var> usedVars, Problem _problem ) {
 
         Rel rel = res.getRel();
-        String relString = rel.toString();
+        String relString = relProducer.setRel( rel ).emit();
         
         for ( SubtaskRel subtask : rel.getSubtasks() ) {
 
@@ -170,9 +168,9 @@ public class CodeGenerator {
         
         String sbClassName = ( subtask.isIndependent() ? "Independent" : "" ) + SUBTASK_INTERFACE_NAME + "_" + subNum;
 
-        String offsetBak = offset;
+        StringBuilder offsetBak = offset;
         if ( subtask.isIndependent() )
-            offset = "";
+            offset = new StringBuilder();
 
         Problem currentProblem = subtask.isIndependent() ? subtask.getContext() : _problem;
         Set<Var> currentUsedVars = subtask.isIndependent() ? new HashSet<Var>() : usedVars;
@@ -190,14 +188,14 @@ public class CodeGenerator {
 
         bufSbtBody.append( same() ).append( getRunMethodSignature( subtaskInputArrayName ) ).append( " {\n" );
 
-        List<Var> subInputs = subtask.getInputs();
-        List<Var> subOutputs = subtask.getOutputs();
+        Collection<Var> subInputs = subtask.getInputs();
+        Collection<Var> subOutputs = subtask.getOutputs();
 
         unfoldVarsToSet( subInputs, currentUsedVars );
         unfoldVarsToSet( subOutputs, currentUsedVars );
 
         right();
-        bufSbtBody.append( same() ).append( "//Subtask: " ).append( subtask ).append( "\n" );
+        bufSbtBody.append( same() ).append( "//Subtask: " ).append( relProducer.setRel( subtask ).emit() ).append( "\n" );
         // apend subtask inputs to algorithm
         genInputs( bufSbtBody, subInputs, subtaskInputArrayName );
 
@@ -211,7 +209,7 @@ public class CodeGenerator {
                 genRelWithSubtasks( res, bufSbtBody, true, sbClassName, currentUsedVars, currentProblem );
 
             } else {
-                appendRelToAlg( trel.toString(), trel.getExceptions(), bufSbtBody, true );
+                appendRelToAlg( relProducer.setRel( trel ).emit(), trel.getExceptions(), bufSbtBody, true );
             }
             unfoldVarsToSet( trel.getInputs(), currentUsedVars );
             unfoldVarsToSet( trel.getOutputs(), currentUsedVars );
@@ -231,7 +229,7 @@ public class CodeGenerator {
         // append run() after subtasks' constructor
         bufSbtClass.append( bufSbtBody );
         // end of class
-        bufSbtClass.append( left() ).append( "} //End of subtask: " ).append( subtask ).append( "\n" );
+        bufSbtClass.append( left() ).append( "} //End of subtask: " ).append( relProducer.setRel( subtask ).emit() ).append( "\n" );
 
         if ( subtask.isIndependent() )
             offset = offsetBak;
@@ -252,12 +250,10 @@ public class CodeGenerator {
         return new CodeGenerator().genSubtask( subAlg, classCode, null, null, null, subtask, 0 );
     }
     
-    private static String _this_ = "." + TYPE_THIS + ".";
-
     private String generateFieldDeclaration( String parentClassName, String sbName, Set<Var> usedVars, Problem _problem ) {
 
-        String declOT = same();
-        String consOT = right();
+        String declOT = same().toString();
+        String consOT = right().toString();
         StringBuilder bufDecl = new StringBuilder();
         StringBuilder bufConstr = new StringBuilder();
         Set<String> topVars = new HashSet<String>();
@@ -320,31 +316,28 @@ public class CodeGenerator {
         return result.toString();
     }
 
-    private String cOT( OFFSET ot, int times ) {
+    private StringBuilder changeOffset( boolean increase, int times ) {
 
-        switch ( ot ) {
-        case OT_INC:
+        if(increase)
             for ( int i = 0; i < times; i++ ) {
-                offset += OT_TAB;
+                offset.append( OT_TAB );
             }
-            break;
-        case OT_DEC:
-            offset = offset.substring( OT_TAB.length() * times );
-            break;
-        }
+        else
+            offset.setLength( offset.length() - 4 * times );
 
         return offset;
     }
 
-    private String left() {
-        return cOT( OFFSET.OT_DEC, 1 );
+    private StringBuilder left() {
+        offset.setLength( offset.length()-4 );
+        return offset;
     }
 
-    private String right() {
-        return cOT( OFFSET.OT_INC, 1 );
+    private StringBuilder right() {
+        return offset.append( OT_TAB );
     }
 
-    private String same() {
+    private StringBuilder same() {
         return offset;
     }
 
@@ -380,7 +373,7 @@ public class CodeGenerator {
      * @param vars
      * @param inputArgName
      */
-    private void genInputs( StringBuilder alg, List<Var> vars,
+    private void genInputs( StringBuilder alg, Collection<Var> vars,
             String inputArgName ) {
 
         if ( vars.isEmpty() ) {
@@ -389,12 +382,13 @@ public class CodeGenerator {
 
         StringBuilder result = new StringBuilder();
 
-        for ( int i = 0; i < vars.size(); i++ ) {
-            Var var = vars.get( i );
+        int i = 0;
+        for ( Var var : vars ) {
 
             if ( var.getField().isAlias() ) {
                 String aliasTmp = getAliasTmpName( var.getName() );
                 result.append( getVarsFromAlias( var, aliasTmp, inputArgName, i ) );
+                i++;
                 continue;
             }
 
@@ -415,13 +409,14 @@ public class CodeGenerator {
                         .append( "])." ).append( token.getMethod() ).append(
                                 "();\n" );
             }
+            i++;
         }
 
         alg.append( result ).append( "\n" );
     }
 
     // getAliasSubtaskInput
-    public static String getVarsFromAlias( Var aliasVar, String aliasTmp,
+    public String getVarsFromAlias( Var aliasVar, String aliasTmp,
             String parentVar, int num ) {
 
         if ( aliasVar.getChildVars().isEmpty() ) {
@@ -468,13 +463,13 @@ public class CodeGenerator {
         return out.toString();
     }
 
-    private String getSubtaskOutputs( List<Var> vars ) {
+    private String getSubtaskOutputs( Collection<Var> vars ) {
 
         StringBuilder declarations = new StringBuilder( "\n" );
         StringBuilder varList = new StringBuilder();
 
-        for ( int i = 0; i < vars.size(); i++ ) {
-            Var var = vars.get( i );
+        int i = 0;
+        for ( Var var : vars ) {
 
             String varName;
 
@@ -491,6 +486,7 @@ public class CodeGenerator {
             } else {
                 varList.append( ", " ).append( varName );
             }
+            i++;
         }
 
         return declarations.append( same() ).append( "return new Object[]{ " )
@@ -498,7 +494,7 @@ public class CodeGenerator {
     }
 
     // getAliasSubtaskOutput
-    public static String getVarsToAlias( Var aliasVar, String aliasTmp ) {
+    public String getVarsToAlias( Var aliasVar, String aliasTmp ) {
 
         String aliasType = aliasVar.getType();
         StringBuilder before = new StringBuilder();
@@ -560,34 +556,33 @@ public class CodeGenerator {
         }
     }
 
-    public static String getOffset() {
-        return offset;
+    public String getOffset() {
+        return offset.toString();
     }
 
-    public static String getAliasTmpName( String varName ) {
+    private String getAliasTmpName( String varName ) {
         varName = varName.replaceAll( "\\.", "_" );
-        return TypeUtil.TYPE_ALIAS + "_" + varName + "_" + ALIASTMP_NR++;
+        return new StringBuilder( TypeUtil.TYPE_ALIAS ).append( "_" ).append( varName ).append( "_" ).append( aliasTmpNr++ ).toString();
     }
 
     private class IndSubt {
 
-        private String className;
+        private String _className;
         private String code;
 
         public IndSubt( String className, String code ) {
-            this.className = className;
+            this._className = className;
             this.code = code;
         }
 
         public String getClassName() {
-            return className;
+            return _className;
         }
 
         public String getCode() {
             return code;
         }
     }
-    
     
     public static String getRunMethodSignature( String argName ) {
         return "public Object[] run(Object[] " + argName + ")";
@@ -596,4 +591,449 @@ public class CodeGenerator {
     public static String getComputeMethodSignature( String argName ) {
         return "public void compute( Object... " + argName + " )";
     }
+    
+    
+    /**************** The code below is related to the relation code generation ************************************/
+    static class RelCodeProducer
+    {
+        private static final Pattern PATTERN_VAR_IN_EQUATION = Pattern
+                                        .compile( "[^a-zA-Z_]*([a-zA-Z_]{1}[a-zA-Z_0-9\\.]*)" );
+        
+        private Rel rel;
+        private CodeGenerator cg;
+        
+        RelCodeProducer(Rel rel) {
+            this(new CodeGenerator());
+            setRel( rel );
+        }
+        
+        private RelCodeProducer(CodeGenerator cg) {
+            this.cg = cg;
+        }
+        
+        private RelCodeProducer setRel(Rel rel) {
+            this.rel = rel;
+            return this;
+        }
+        
+        private String getMaxType(Collection<Var> _inputs) {
+
+            for ( Var var : _inputs ) {
+                if (!var.getType().equals(TYPE_INT)) {
+                    return TYPE_DOUBLE;
+                }
+            }
+            return TYPE_INT;
+        }
+
+        private String getOutputString() {
+
+            StringBuilder outputString = new StringBuilder();
+            Var var = rel.getFirstOutput();
+
+            if ( !TypeUtil.TYPE_VOID.equals( var.getType() ) ) {
+                if ( var.getField().isAlias() ) {
+                    String alias_tmp = getRelAliasTmpName( var );
+
+                    if ( !var.getChildVars().isEmpty() ) {
+
+                        outputString.append(
+                                ( (Alias) var.getField() ).getType() ).append(
+                                " " ).append( alias_tmp ).append( " " );
+                    }
+
+                } else {
+                    outputString.append( var.getFullName() );
+                }
+
+            }
+            return outputString.toString();
+        }
+
+        private String getRelAliasTmpName( Var var ) {
+            
+            String varName = var.getFullNameForConcat().replaceAll( "\\.", "_" );
+            return new StringBuilder( TypeUtil.TYPE_ALIAS ).append( "_" )
+                    .append( varName ).append( rel.getId() ).toString();
+        }
+
+        private String getParametersString( boolean useBrackets ) {
+            
+            StringBuilder params = new StringBuilder();
+            if ( useBrackets )
+                params.append( "(" );
+
+            int j = 0;
+            for ( Var var : rel.getInputs() ) {
+
+                if ( !TypeUtil.TYPE_VOID.equals( var.getType() ) ) {
+                    if ( j++ > 0 )
+                        params.append( ", " );
+
+                    if ( var.getField().isAlias() ) {
+                        params.append( getRelAliasTmpName( var ) );
+                    } else {
+                        params.append( var.getFullName() );
+                    }
+                }
+            }
+            if ( useBrackets )
+                params.append( ")" );
+
+            return params.toString();
+        }
+
+        private String getSubtaskParametersString() {
+
+            StringBuilder params = new StringBuilder( "(" );
+
+            boolean subExist = false;
+            for ( int i = 0; i < rel.getSubtaskCount(); i++ ) {
+                if ( i == 0 ) {
+                    subExist = true;
+                } else {
+                    params.append( ", " );
+                }
+                params.append( RelType.TAG_SUBTASK );
+            }
+            if ( subExist && rel.getInputs().size() > 0 ) {
+                params.append( ", " );
+            }
+
+            return params.append( getParametersString( false ) ).append( ")" )
+                    .toString();
+        }
+        
+        /* 
+         * Emits code for a given relation class
+         */
+        String emit() {
+
+            assert rel != null : "Relation is null";
+            
+            if (rel.getType() == RelType.TYPE_ALIAS) {
+                return "";
+            }
+            else if (rel.getType() == RelType.TYPE_EQUATION) {
+                return emitEquation();
+                
+            } else if (rel.getType() == RelType.TYPE_SUBTASK) {
+                // this should not be used in code generation
+                return rel.getInputs() + " -> " + rel.getOutputs();
+
+            } else if ( ( rel.getType() == RelType.TYPE_JAVAMETHOD )
+                    || ( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK )) {
+
+                return emitMethod();
+
+            } else {
+                return emitAssignment();
+            }
+        }
+
+        private String emitAssignment() {
+
+            Var ip = rel.getFirstInput();
+            Var op = rel.getFirstOutput();
+            StringBuilder assigns = new StringBuilder();
+            int i = 0;
+
+            if ( ip.getField().isArray() && op.getField().isAlias() ) {
+                for ( Var childVar : op.getChildVars() ) {
+                    assigns.append( CodeGenerator.OT_TAB ).append( childVar.getFullName() )
+                            .append( " = " ).append( ip.getFullName() ).append(
+                                    "[" ).append( Integer.toString( i++ ) )
+                            .append( "];\n" );
+                }
+            } else if ( op.getField().isArray() && ip.getField().isAlias() ) {
+                for ( Var childVar : ip.getChildVars() ) {
+                    assigns.append( CodeGenerator.OT_TAB ).append(
+                            op.getFullName() ).append( "[" ).append(
+                            Integer.toString( i++ ) ).append( "] = " ).append(
+                            childVar.getFullName() ).append( ";\n" );
+                }
+            } else if ( op.getField().isAlias() && ip.getField().isAlias() ) {
+                for ( Var inpChildVar : ip.getChildVars() ) {
+                    assigns.append( CodeGenerator.OT_TAB ).append(
+                            op.getChildVars().get( i++ ).getFullName() ).append( " = " )
+                            .append( inpChildVar.getFullName() ).append( ";\n" );
+                }
+            } else
+                assigns.append( op.getFullName() ).append( " = " ).append(
+                        ip.getFullName() ).append( ";\n" );
+
+            return assigns.toString();
+        }
+
+        private String emitMethod() {
+
+            String output = getOutputString();
+            String meth;
+
+            if ( Table.TABLE_KEYWORD.equals( rel.getMethod() ) ) {
+
+                StringBuilder cast = new StringBuilder();
+
+                if ( !rel.getOutputs().isEmpty() ) {
+
+                    cast.append( "(" );
+
+                    String _type = rel.getFirstOutput().getType();
+
+                    TypeToken token = TypeToken.getTypeToken( _type );
+
+                    if ( token == TypeToken.TOKEN_OBJECT ) {
+                        cast.append( _type );
+                    } else {
+                        cast.append( token.getObjType() );
+                    }
+
+                    cast.append( ")" );
+                }
+                meth = cast.append( "ProgramContext.queryTable" ).toString();
+            } else {
+                meth = rel.getParent().getFullNameForConcat() + rel.getMethod();
+            }
+            
+            String params = ( rel.getType() == RelType.TYPE_JAVAMETHOD ) ? getParametersString( true )
+                    : getSubtaskParametersString();
+            
+            return new StringBuilder( checkAliasInputs() ).append(
+                    output.length() > 0 ? output + " = " : "" ).append( meth )
+                    .append( params ).append( ";\n" ).append(
+                            checkAliasOutputs() ).toString();
+        }
+
+        private String emitEquation() {
+            
+            StringBuilder result = new StringBuilder();
+            // if its an array assingment
+            if ( rel.getInputs().size() == 0 && rel.getOutputs().size() == 1 ) {
+                Var op = rel.getFirstOutput();
+
+                if ( op.getField().isPrimOrStringArray() ) {
+                    String[] split = rel.getMethod().split( "=" );
+                    result.append( op.getField().getType() ).append( " " )
+                            .append( " TEMP" ).append(
+                                    Integer.toString( RelType.auxVarCounter ) )
+                            .append( "=" ).append( split[1] ).append( ";\n" );
+                    result.append( CodeGenerator.OT_TAB ).append(
+                            CodeGenerator.OT_TAB ).append( op.getFullName() )
+                            .append( " = TEMP" ).append(
+                                    Integer.toString( RelType.auxVarCounter ) )
+                            .append( ";\n" );
+                    RelType.auxVarCounter++;
+                    return result.toString();
+
+                }
+            }
+
+            if ( rel.getInputs().size() == 1 && rel.getOutputs().size() == 1 ) {
+                Var ip = rel.getFirstInput();
+                Var op = rel.getFirstOutput();
+
+                if ( ip.getField().isArray() && op.getField().isAlias() ) {
+
+                    for ( int i = 0; i < rel.getFirstOutput().getChildVars().size(); i++ ) {
+                        result.append( op.getChildVars().get( i ).getFullName() ).append(
+                                " = " ).append( ip.getFullName() ).append( "[" )
+                                .append( i ).append( "];\n" );
+                    }
+                    return result.toString();
+                } else if ( op.getField().isArray() && ip.getField().isAlias() ) {
+
+                    result.append( op.getField().getType() ).append( " TEMP" )
+                            .append( rel.getId() ).append( " = new " ).append(
+                                    op.getField().arrayType() ).append( "[" )
+                            .append( ip.getChildVars().size() ).append( "];\n" );
+                    for ( int i = 0; i < ip.getChildVars().size(); i++ ) {
+                        result.append( CodeGenerator.OT_TAB ).append(
+                                CodeGenerator.OT_TAB ).append( " TEMP" )
+                                .append( rel.getId() ).append( "[" ).append( i )
+                                .append( "] = " ).append(
+                                        ip.getChildVars().get( i ).getFullName() ).append(
+                                        ";\n" );
+                    }
+
+                    return result.append( CodeGenerator.OT_TAB ).append(
+                            CodeGenerator.OT_TAB ).append( op.getFullName() )
+                            .append( " = " ).append( " TEMP" ).append( rel.getId() )
+                            .append( ";\n" ).toString();
+                } else if ( rel.getMethod() == null ) {
+                    return result.append( op.getFullName() ).append( " = " )
+                            .append( ip.getFullName() ).append( ";\n" )
+                            .toString();
+                }
+            }
+
+            Set<String> varNames = new LinkedHashSet<String>();
+            for ( Var out : rel.getOutputs() ) {
+                varNames.add( out.getFullName() );
+            }
+            for ( Var inps : rel.getInputs() ) {
+                varNames.add( inps.getFullName() );
+            }
+
+            String method = rel.getMethod();
+            Matcher matcher = PATTERN_VAR_IN_EQUATION.matcher( method );
+
+            boolean methodCallExist = false;
+
+            String parentFullName = rel.getParent().getFullNameForConcat();
+            StringBuffer sb = new StringBuffer();
+            //take each variable and replace it with the real instance name
+            while ( matcher.find() ) {
+
+                String varname = matcher.group( 1 );
+                String rep = parentFullName + varname;
+
+                if ( !varNames.contains( rep ) ) {
+                    if ( ( varname = rel.getSubstitutions().get( varname ) ) != null ) {
+                        rep = varname;
+                    } else {
+                        rep = "$1";
+                        methodCallExist = true;
+                    }
+                }
+
+                matcher.appendReplacement( sb, method.substring( matcher
+                        .start(), matcher.start( 1 ) ) //
+                        + rep // 
+                        + method.substring( matcher.end( 1 ), matcher.end() ) ); //
+            }
+
+            matcher.appendTail( sb );
+
+            // TODO - add casting to other types as well
+            if ( rel.getFirstOutput().getType().equals( TYPE_INT )
+                    && ( methodCallExist || !getMaxType( rel.getInputs() ).equals(
+                            TYPE_INT ) ) ) {
+
+                String[] eq = sb.toString().split( "=" );
+                return result.append( eq[0] ).append( " = (" )
+                        .append( TYPE_INT ).append( ") (" ).append( eq[1] )
+                        .append( " );\n" ).toString();
+            }
+
+            return sb.append( ";\n" ).toString();
+        }
+        
+        private String checkAliasInputs() {
+            StringBuilder assigns = new StringBuilder();
+            for ( Var input : rel.getInputs() ) {
+                if ( input.getField().isAlias() ) {
+
+                    String alias_tmp = getRelAliasTmpName( input );
+
+                    if ( input.getChildVars().isEmpty()
+                            && !( (Alias) input.getField() ).isInitialized() ) {
+                        //TODO check assigns overwrite (before refactoring, 1.75.2.2)
+                        assigns.append( input.getType() ).append( " " ).append(
+                                alias_tmp ).append( " = null;\n" ).append(
+                                cg.getOffset() );
+                    } else {
+
+                        assigns.append( checkObjectArrayDimension( alias_tmp, input
+                                .getType(), input.getChildVars().size() ) );
+                        
+                        StringBuilder declarations = new StringBuilder();
+                        StringBuilder varList = new StringBuilder();
+
+                        for ( int k = 0; k < input.getChildVars().size(); k++ ) {
+                            Var var = input.getChildVars().get( k );
+
+                            if ( var.getField().isVoid() )
+                                continue;
+
+                            String varName;
+
+                            if ( var.getField().isAlias() ) {
+                                String aliasTmpFromInput = getRelAliasTmpName( var );
+
+                                declarations.append( cg.getVarsToAlias(
+                                        var, aliasTmpFromInput ) );
+
+                                varName = aliasTmpFromInput;
+
+                            } else {
+                                varName = var.getFullName();
+                            }
+
+                            varList.append( cg.getOffset() ).append(
+                                    alias_tmp ).append( "[" ).append(
+                                    Integer.toString( k ) ).append( "] = " )
+                                    .append( varName ).append( ";\n" );
+                        }
+                        assigns.append( declarations ).append( varList ).append(
+                                cg.getOffset() );
+                    }
+                }
+            }
+            return assigns.toString();
+        }
+
+        private String checkObjectArrayDimension( String name, String _type, int size ) {
+
+            StringBuilder result = 
+                new StringBuilder( _type ).append( " " ).append( name ).append( " = new " );
+            
+            /*
+             * if we have alias as a set of arrays, we should change the declaration
+             * as follows: from double[][] tmp = new double[][2]; to double[][] tmp =
+             * new double[2][];
+             */
+            if ( _type.endsWith( "[][]" ) ) {
+                return result.append( _type.substring( 0, _type.length() - 4 ) ).append(
+                                "[" ).append( size ).append( "][];\n" ).toString();
+            }
+            return result.append( _type.substring( 0, _type.length() - 2 ) )
+                    .append( "[" ).append( size ).append( "];\n" ).toString();
+        }
+
+        private String checkAliasOutputs() {
+            StringBuilder assigns = new StringBuilder();
+            Var output = rel.getFirstOutput();
+            if ( output.getField().isAlias() ) {
+
+                String alias_tmp = getRelAliasTmpName( output );
+
+                for ( int k = 0; k < output.getChildVars().size(); k++ ) {
+                    Var varFromAlias = output.getChildVars().get( k );
+
+                    if ( varFromAlias.getField().isVoid() )
+                        continue;
+
+                    String varType = varFromAlias.getType();
+                    TypeToken token = TypeToken.getTypeToken( varType );
+
+                    if ( token == TypeToken.TOKEN_OBJECT
+                            || token == TypeToken.TOKEN_STRING ) {
+                        if ( varFromAlias.getField().isAlias() ) {
+                            assigns.append( cg.getVarsFromAlias(
+                                    varFromAlias, cg.getAliasTmpName( varFromAlias
+                                                        .getName() ), alias_tmp, k ) );
+                        } else {
+                            assigns.append( cg.getOffset() ).append(
+                                    varFromAlias.getFullName() ).append( " = (" )
+                                    .append( varType ).append( ")" ).append(
+                                            alias_tmp ).append( "[" ).append( k )
+                                    .append( "];\n" );
+                        }
+                    } else {
+                        assigns.append( cg.getOffset() ).append(
+                                varFromAlias.getFullName() ).append( " = ((" )
+                                .append( token.getObjType() ).append( ")" ).append(
+                                        alias_tmp ).append( "[" ).append( k )
+                                .append( "])." ).append( token.getMethod() )
+                                .append( "();\n" );
+                    }
+
+                }
+            }
+
+            return assigns.toString();
+        }
+    }
+
+    
 }

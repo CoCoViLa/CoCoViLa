@@ -219,7 +219,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 			for ( PlanningResult res : algorithm ) {
 			    Rel rel = res.getRel();
 			    
-				String obj = rel.getParentObjectName();
+				String obj = rel.getParent().getFullName();
 				
 				if( TypeUtil.TYPE_THIS.equals( obj ) ) {
 					obj = "spec";

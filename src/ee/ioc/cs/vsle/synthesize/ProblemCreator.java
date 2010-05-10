@@ -251,13 +251,13 @@ public class ProblemCreator {
                 } 
                 // if class relation doesnt have inputs, its an axiom
                 else if ( classRelation.getInputs().isEmpty() &&
-                        rel.getSubtasks().size() == 0 ) { 
+                        rel.getSubtaskCount() == 0 ) { 
                     problem.addAxiom( rel );
                 }
                 else {
                     problem.addRel( rel );
 
-                    if( rel.getSubtasks().size() > 0 ) {
+                    if( rel.getSubtaskCount() > 0 ) {
                         problem.addRelWithSubtask( rel );
                     }
 

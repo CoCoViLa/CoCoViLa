@@ -338,7 +338,7 @@ public class DepthFirstPlanner implements IPlanner {
             if ( isSubtaskLoggingOn() ) {
                 String print = p( depth ) + "Starting new MLB with: ";
                 for ( Rel rel : relsWithSubtasksCopy ) {
-                    print += "\n" + p( depth ) + "  " + rel.getParentObjectName() + " : " + rel.getDeclaration();
+                    print += "\n" + p( depth ) + "  " + rel.getParent().getFullName() + " : " + rel.getDeclaration();
                 }
 //                 print += "\n" + p( depth ) + " All remaining rels in problem:";
 //                for ( Rel rel : problem.getAllRels() ) {
@@ -381,7 +381,7 @@ public class DepthFirstPlanner implements IPlanner {
                 Rel subtaskRel = subtaskRelIterator.next();
 
                 if ( isSubtaskLoggingOn() )
-                    db.p( p( depth ) + "OR: depth: " + ( depth + 1 ) + " rel - " + subtaskRel.getParentObjectName() + " : "
+                    db.p( p( depth ) + "OR: depth: " + ( depth + 1 ) + " rel - " + subtaskRel.getParent().getFullName() + " : "
                             + subtaskRel.getDeclaration() );
                 
                 if ( ( !context.isRelReadyToUse(subtaskRel) ) || context.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
@@ -553,7 +553,7 @@ public class DepthFirstPlanner implements IPlanner {
                     subtaskRelIterator.remove();
 
                     if ( isSubtaskLoggingOn() ) {
-                        db.p( p( depth ) + "SOLVED ALL SUBTASKS for " + subtaskRel.getParentObjectName() + " : "
+                        db.p( p( depth ) + "SOLVED ALL SUBTASKS for " + subtaskRel.getParent().getFullName() + " : "
                                 + subtaskRel.getDeclaration() );
                         db.p( p( depth ) + "Updating the problem graph and continuing building new MLB" );
                     }
@@ -567,7 +567,7 @@ public class DepthFirstPlanner implements IPlanner {
 
                 } else if ( !isSubtaskRepetitionAllowed ) {
                     if ( isSubtaskLoggingOn() )
-                        db.p( p( depth ) + "NOT SOLVED ALL subtasks, removing from path " + subtaskRel.getParentObjectName()
+                        db.p( p( depth ) + "NOT SOLVED ALL subtasks, removing from path " + subtaskRel.getParent().getFullName()
                                 + " : " + subtaskRel.getDeclaration() );
                     newPath.remove( subtaskRel );
                 }

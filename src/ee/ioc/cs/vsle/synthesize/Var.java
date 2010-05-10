@@ -19,24 +19,41 @@ public class Var {
 
     private Set<Rel> rels = new LinkedHashSet<Rel>();
     //the following is for alias only!!!
-    private List<Var> vars = new ArrayList<Var>();
+    private List<Var> vars;
     private ClassField field;
     private int varNumber;
     private Var parent;
     private String parentObject;
-    
-    private Var() {
-
-    	varNumber = RelType.varCounter++;
-    }
+    private String fullName;
+    private String fullNameForConcat;
+    private int hashcode;
     
     public Var( ClassField cf, Var parent ) {
     	
-    	this();
-        
-        setField( cf );
-        
+    	this.varNumber = RelType.varCounter++;
+        this.field = cf;
         this.parent = parent;
+
+        if(field.isAlias())
+            vars = new ArrayList<Var>();
+        
+        if( parent != null ) {
+            String obj = parent.getObject();
+            parentObject = ((obj != null) ? obj + "." : "") + parent.getName();
+        }
+
+        fullName =  ( parentObject != null
+                            ? ( parentObject + "." ).substring( 5 ) : "" ) + field.getName();
+
+        if (TYPE_THIS.equals(fullName)) {
+            fullNameForConcat = "";
+        } else if (fullName.startsWith(TYPE_THIS)) {
+            fullNameForConcat = fullName.substring(5) + ".";
+        } else {
+            fullNameForConcat = fullName + ".";
+        }
+        
+        hashcode = RelType.VAR_HASH + varNumber;
     }
     
     Set<Rel> getRels() {
@@ -48,32 +65,24 @@ public class Var {
     }
     
     public List<Var> getChildVars() {
-    	if( !field.isAlias() ) {
-			throw new IllegalStateException( "getChildVars(): Var " + getName() + " is not alias, but " + getType() );
-		}
-    	return vars;
+        if (!field.isAlias()) {
+            throw new IllegalStateException("Var " + getName() + " is not alias, but " + getType());
+        }
+        return vars;
     }
     
-    public void addVar( Var var ) {
-    	if( !field.isAlias() ) {
-			throw new IllegalStateException( "addVar(): Var " + getName() + " is not alias, but " + getType() );
-		}
-    	vars.add( var );
+    public void addVar(Var var) {
+        if (!field.isAlias()) {
+            throw new IllegalStateException("Var " + getName() + " is not alias, but " + getType());
+        }
+        vars.add(var);
     }
-    /**
-     * <UNCOMMENTED>
-     * @param field ClassField
-     */
-    private void setField( ClassField field ) {
-        this.field = field;
-    } // setField
-
+    
     public ClassField getField() {
         return field;
     }
 
     /**
-     * <UNCOMMENTED>
      * @param rel Rel
      */
     void addRel( Rel rel ) {
@@ -81,7 +90,6 @@ public class Var {
     } // addRel
 
     /**
-     * <UNCOMMENTED>
      * @return String
      */
     public String getName() {
@@ -93,58 +101,40 @@ public class Var {
     }
     
     /**
-     * Lazily initialize the chain of parent objects. Once created, it does not change.
-     * 
      * @return String
      */
     public String getObject() {
-
-        if( parentObject != null ) return parentObject;
-
-        if( parent != null ) {
-            String obj = parent.getObject();
-            return parentObject = ((obj != null) ? obj + "." : "") + parent.getName();
-        }
-        return null;
+        return parentObject;
     } // getObj
-
+    
+    public String getFullName() {
+        return fullName;
+    }
+        
+    public String getFullNameForConcat() {
+        return fullNameForConcat;
+    }
+    
     public String getDeclaration() {
     	return TypeUtil.getDeclaration( field, "" );
     }
-    
-    public String getFullName() {
-    	String obj = getObject();
-    	return ( ( ( obj != null ) ? ( obj + "." ).substring( 5 ) : "" ) + field.getName() );
-        }
-        
-    public String getFullNameForConcat() {
-    	String s = getFullName();
-        if ( TYPE_THIS.equals( s ) ) {
-            return "";
-        } else if ( s.startsWith( TYPE_THIS ) ) {
-            return s.substring(5) + ".";
-        } else {
-            return s + ".";
-        }
-    }
-    
+
     /**
      * PLEASE USE THIS ONLY FOR DEBUGGING!!!
      * @return String
      */
     @Override
     public String toString() {
-    	String obj = getObject();
-    	return ( ( ( obj != null ) ? ( obj + "." ) : "" ) + field.getName() );
+    	return getFullName();
     } // toString
 
     @Override
     public boolean equals( Object e ) {
-        return this.varNumber == ( ( Var ) e ).varNumber;
+        return this == e || this.varNumber == ( ( Var ) e ).varNumber;
     }
 
     @Override
     public int hashCode() {
-        return RelType.VAR_HASH + varNumber;
+        return hashcode;
     }
 }
