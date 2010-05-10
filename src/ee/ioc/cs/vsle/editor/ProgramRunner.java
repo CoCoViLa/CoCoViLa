@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.editor;
 import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 import java.awt.*;
+import java.io.*;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
@@ -142,6 +143,8 @@ public class ProgramRunner {
             IllegalArgumentException, SecurityException,
             InvocationTargetException, NoSuchMethodException {
 
+        long start = System.currentTimeMillis();
+        
         ClassLoader classLoader = cont.getPackage().newRunnerClassLoader( fs );
         Class<?> pc = classLoader.loadClass( CCL.PROGRAM_CONTEXT );
         Class<?> clas = classLoader.loadClass( className );
@@ -149,6 +152,7 @@ public class ProgramRunner {
         pc.getMethod( "setScheme", Scheme.class ).invoke( null,
                 cont.getScheme() );
 
+        db.p( "Compilation time: " + (System.currentTimeMillis() - start) + "ms.");
         return object;
     }
 
@@ -261,7 +265,12 @@ public class ProgramRunner {
             ErrorWindow.showErrorMessage( msg );
         }
         else {
-            ErrorWindow.showErrorMessage( e.getMessage() );
+            if( ( msg = e.getMessage() ) == null) {
+                StringWriter sw = new StringWriter();
+                e.printStackTrace( new PrintWriter( sw ) );
+                msg = sw.toString();
+            }
+            ErrorWindow.showErrorMessage( msg );
             e.printStackTrace();
         }
     }

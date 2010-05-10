@@ -53,7 +53,8 @@ public class CodeGenerator {
      */
     public String generate() {
 
-        db.p( "Starting code generation" );
+        if(RuntimeProperties.isLogDebugEnabled())
+            db.p( "Starting code generation" );
         long start = System.currentTimeMillis();
 
         StringBuilder alg = new StringBuilder();
@@ -81,7 +82,7 @@ public class CodeGenerator {
 
         }
 
-        db.p( "Finished code generation in " + ( System.currentTimeMillis() - start ) + "ms" );
+        db.p( "Code generation time: " + ( System.currentTimeMillis() - start ) + "ms" );
 
         return alg.toString();
     }

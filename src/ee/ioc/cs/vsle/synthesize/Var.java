@@ -130,7 +130,8 @@ public class Var {
 
     @Override
     public boolean equals( Object e ) {
-        return this == e || this.varNumber == ( ( Var ) e ).varNumber;
+        return this == e 
+                || ( e != null && this.varNumber == ( ( Var ) e ).varNumber );
     }
 
     @Override

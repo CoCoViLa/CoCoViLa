@@ -110,7 +110,7 @@ class Rel {
 
     @Override
     public boolean equals(Object e) {
-        return this == e || this.relID == ((Rel) e).relID;
+        return this == e || (e != null && this.relID == ((Rel) e).relID);
     }
 
     @Override
