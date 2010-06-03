@@ -391,6 +391,9 @@ public class CodeGenerator {
                 result.append( getVarsFromAlias( var, aliasTmp, inputArgName, i ) );
                 i++;
                 continue;
+            } else if ( var.getField().isVoid() ) {
+                i++;
+                continue;
             }
 
             String varType = var.getType();
@@ -473,8 +476,10 @@ public class CodeGenerator {
         for ( Var var : vars ) {
 
             String varName;
-
-            if ( var.getField().isAlias() ) {
+            if ( var.getField().isVoid() )
+                varName = new StringBuilder( "/*void:" ).append( var.getField().getName() )
+                        .append( "*/null" ).toString();
+            else if ( var.getField().isAlias() ) {
                 String aliasTmp = getAliasTmpName( var.getName() );
                 declarations.append( getVarsToAlias( var, aliasTmp ) );
                 varName = aliasTmp;
