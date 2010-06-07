@@ -756,18 +756,16 @@ public class ProblemCreator {
                 Var newAliasVar = new Var( newAlias, parent );
                 problem.addVar( newAliasVar );
                 
-                Rel aliasInputRel = new Rel(parent, newAlias.getName() + " ->");
+                Rel aliasInputRel = new Rel(parent, "(" + varName + ") " + newAlias.getName() + " ->");
                 aliasInputRel.addInput( newAliasVar );
                 newAliasVar.addRel( aliasInputRel );
                 aliasInputRel.setMethod( TypeUtil.TYPE_ALIAS );
                 aliasInputRel.setType( RelType.TYPE_ALIAS );
-                problem.addRel( aliasInputRel );
                 
-                Rel aliasOutputRel = new Rel(parent, "-> " + newAlias.getName());
+                Rel aliasOutputRel = new Rel(parent, "-> " + "(" + varName + ") " + newAlias.getName());
                 aliasOutputRel.addOutput( newAliasVar );
                 aliasOutputRel.setMethod( TypeUtil.TYPE_ALIAS );
                 aliasOutputRel.setType( RelType.TYPE_ALIAS );
-                problem.addRel( aliasOutputRel );
                 
                 int i = 0;
                 for ( Var elementVar : aliasVar.getChildVars() ) {
@@ -780,6 +778,9 @@ public class ProblemCreator {
                     aliasOutputRel.addInput( var );
                     var.addRel( aliasOutputRel );
                 }
+                
+                problem.addRel( aliasInputRel );
+                problem.addRel( aliasOutputRel );
                 
                 if( newAliasVar.getChildVars().isEmpty() ) {
                     problem.getCurrentContext().getKnownVars().add( newAliasVar );
