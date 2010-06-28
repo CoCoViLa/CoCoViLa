@@ -209,25 +209,24 @@ public class TablePropertyDialog extends JDialog {
         }
 
         String dv = jtfDefault.getText();
-        if (dv == null || dv.length() < 1) {
+        if (dv != null && dv.length() < 1) {
             // Should the empty string be allowed as a default value?
             // Currently the empty string is treated as missing value.
-            table.setDefaultValue(null);
-        } else {
-            table.setDefaultValue(dv);
+            dv = null;
         }
 
         if( editMode ) {
             table.changePropertiesAndVerify( tableId, inputs, outField );
-            
+            table.setDefaultValue(dv);
             return null;
         }
-        
+
         Table tab = Table.createEmptyTable( tableId );
-        
+
         tab.addInputFields( inputs );
         tab.setOutputField( outField );
-        
+        tab.setDefaultValue(dv);
+
         return tab;
     }
     
