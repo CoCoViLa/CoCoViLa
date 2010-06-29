@@ -74,6 +74,21 @@ public class TableFrame extends JFrame {
         setSize( 400, 300 );
     }
     
+    @Override
+    protected void processWindowEvent( WindowEvent e ) {
+        //TODO maybe the confirmation should be shown only if
+        //a table has been modified and not saved?
+        if ( e.getID() == WindowEvent.WINDOW_CLOSING 
+                && getTable() != null ) {
+            if( JOptionPane.YES_OPTION == 
+                JOptionPane.showConfirmDialog( 
+                        e.getComponent(), "Would you like to close the editor?", 
+                        "Confirm close", JOptionPane.YES_NO_OPTION ) )
+                dispose();
+        } else 
+            super.processWindowEvent( e );
+    }
+    
     /**
      * 
      */
@@ -239,9 +254,13 @@ public class TableFrame extends JFrame {
     @Override
     public void dispose() {
         
-        super.dispose();
+        SwingUtilities.invokeLater( new Runnable() {
+            public void run() {
+                setTable( null );                
+            }
+        } );
         
-        setTable( null );
+        super.dispose();
     }
     
     /**
