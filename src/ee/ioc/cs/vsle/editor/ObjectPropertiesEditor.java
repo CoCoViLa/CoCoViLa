@@ -433,7 +433,6 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 //				watchFields.get(i).setSelected(false);
 				goalInputs.get(i).setSelected(false);
 				goalOutputs.get(i).setSelected(false);
-				field.setWatched(false);
 				field.setValue(null);
 				textField.setText("");
 			}

@@ -15,15 +15,16 @@ public class ProgramRunnerEvent extends BaseEvent {
 
     private static Object s_lock = new Object();
 
-    public static final int COMPUTE_GOAL = 128;
-    public static final int COMPUTE_ALL = 1;
-    public static final int COMPILE = 2;
-    public static final int RUN = 4;
-    public static final int PROPAGATE = 8;
+    public static final int COMPUTE_GOAL = 1;
+    public static final int COMPUTE_ALL = 1 << 1;
+    public static final int COMPILE = 1 << 2;
+    public static final int RUN = 1 << 3;
+    public static final int PROPAGATE = 1 << 4;
     public static final int RUN_NEW = COMPILE | RUN;
-    public static final int DESTROY = 32;
-    public static final int REQUEST_SPEC = 64;
-    public static final int SHOW_VALUES = 256;
+    public static final int DESTROY = 1 << 5;
+    public static final int REQUEST_SPEC = 1 << 6;
+    public static final int SHOW_VALUES = 1 << 7;
+    public static final int SHOW_ALL_VALUES = 1 << 8;
 
     private long m_id;
     private int m_operation;

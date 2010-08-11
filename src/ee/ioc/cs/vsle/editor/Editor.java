@@ -475,6 +475,17 @@ public class Editor extends JFrame implements ChangeListener {
         
         menu.add( new JSeparator() );
 
+        // Values
+        menuItem = new JMenuItem( Menu.SCHEME_VALUES, KeyEvent.VK_V );
+        menuItem.addActionListener( aListener );
+        boolean enabled = getCurrentCanvas() != null && getCurrentCanvas().getLastProgramRunnerID() != 0;
+        menuItem.setEnabled( enabled );
+        if(!enabled)
+            menuItem.setToolTipText( "Run the scheme first" );
+        menu.add( menuItem );
+        
+        menu.add( new JSeparator() );
+
         // Options
         menuItem = new JMenuItem( Menu.SCHEMEOPTIONS, KeyEvent.VK_O );
         menuItem.addActionListener( aListener );

@@ -157,7 +157,7 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
             Class<?> context, String[] inputNames,
             String[] outputNames, Object[] inputValues) {
         
-        return new ProgramRunner(canvas).computeModel( context, inputNames, outputNames, inputValues );
+        return new ProgramRunner(canvas).computeModel( context.getName(), inputNames, outputNames, inputValues, true );
     }
     
     @Override

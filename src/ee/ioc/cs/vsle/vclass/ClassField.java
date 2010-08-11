@@ -51,8 +51,6 @@ public class ClassField implements Cloneable, Serializable {
 
 	protected boolean isConstant = false;
 
-	protected boolean watched = false;
-
 	protected ArrayList<ClassField> vars;
 
 	private ClassGraphics knownGraphics;
@@ -168,16 +166,6 @@ public class ClassField implements Cloneable, Serializable {
 	} // clone
 
 	/**
-	 * Returns true if the user is interested in seeing the value of this
-	 * field after each invokation of the generated program.
-	 * 
-	 * @return true if this field is watched, false otherwise
-	 */
-	public boolean isWatched() {
-		return watched;
-	} // isWatched
-
-	/**
 	 * Converts the class into a string and returns the name of it.
 	 * NB! FOR DEBUG ONLY
 	 * @return String - name of the class.
@@ -217,8 +205,6 @@ public class ClassField implements Cloneable, Serializable {
 		} else if (!isInput && isGoal)
 			attrs.addAttribute("", "", "nature", StringUtil.CDATA, "goal");
 
-		if (watched)
-			attrs.addAttribute("", "", "watch", StringUtil.CDATA, "true");
 		if (value != null)
 			attrs.addAttribute("", "", "value", StringUtil.CDATA, value);
 
@@ -265,10 +251,6 @@ public class ClassField implements Cloneable, Serializable {
 		return vars;
 	}
 	
-	public void setWatched(boolean value) {
-		this.watched = value;
-	}
-
 	public void setKnownGraphics(ClassGraphics gr) {
 		knownGraphics = gr;
 	}

@@ -219,7 +219,6 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 	class PackageHandler extends DefaultHandler {
 
 	    private static final String CONNECTION = "connection";
-        private static final String WATCH = "watch";
         private static final String GOAL = "goal";
         private static final String INPUT = "input";
         private static final String NATURE = "nature";
@@ -406,8 +405,6 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 					cf.setInput(true);
 				else if (GOAL.equals(nature))
 					cf.setGoal(true);
-
-				cf.setWatched(Boolean.parseBoolean(attrs.getValue(WATCH)));
 
 			} else if (element.equals(CONNECTION)) {
 				String obj1 = new String(attrs.getValue("obj1"));

@@ -281,6 +281,12 @@ public class EditorActionListener implements ActionListener {
             } else if ( e.getActionCommand().equals( Menu.COMPUTE_GOAL ) ) {
                 JCheckBoxMenuItem check = (JCheckBoxMenuItem) e.getSource();
                 RuntimeProperties.setComputeGoal( check.isSelected() );
+            } else if ( e.getActionCommand().equals( Menu.SCHEME_VALUES ) ) {
+                Canvas canvas = Editor.getInstance().getCurrentCanvas();
+                if ( canvas != null ) {
+                    ProgramRunnerEvent event = new ProgramRunnerEvent( this, canvas.getLastProgramRunnerID(), ProgramRunnerEvent.SHOW_ALL_VALUES );
+                    EventSystem.queueEvent( event );
+                }
             } else if ( e.getActionCommand().equals( Menu.SHOW_ALGORITHM ) ) {
                 JCheckBoxMenuItem check = (JCheckBoxMenuItem) e.getSource();
                 RuntimeProperties.setShowAlgorithm( check.isSelected() );
