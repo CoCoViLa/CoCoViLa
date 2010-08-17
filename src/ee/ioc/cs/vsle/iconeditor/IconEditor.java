@@ -174,9 +174,9 @@ public class IconEditor extends JFrame {
         exportmenu = new JMenu( Menu.EXPORT_MENU );
         exportmenu.setMnemonic( KeyEvent.VK_E );
 
-        menuItem = new JMenuItem( Menu.EXPORT_CLASS, KeyEvent.VK_C );
-        menuItem.addActionListener( mListener );
-        exportmenu.add( menuItem );
+//        menuItem = new JMenuItem( Menu.EXPORT_CLASS, KeyEvent.VK_C );
+//        menuItem.addActionListener( mListener );
+//        exportmenu.add( menuItem );
 
         menuItem = new JMenuItem( Menu.EXPORT_TO_PACKAGE, KeyEvent.VK_P );
         menuItem.addActionListener( mListener );
@@ -388,6 +388,7 @@ public class IconEditor extends JFrame {
     }
     /**
      * Save shape to file in XML format.
+     * @deprecated
      */
     public void exportShapesToXML() {
         classParamsOk = true;

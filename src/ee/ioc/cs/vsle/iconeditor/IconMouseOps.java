@@ -953,8 +953,9 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
                 editor.openOptionsDialog();
             } else if ( e.getActionCommand().equals( Menu.CLEAR_ALL ) ) {
                 editor.clearObjects();
-            } else if ( e.getActionCommand().equals( Menu.EXPORT_CLASS ) ) {
-                editor.exportShapesToXML(); // the class is not a relation
+            /* do we need this?
+               } else if ( e.getActionCommand().equals( Menu.EXPORT_CLASS ) ) {
+                editor.exportShapesToXML(); // the class is not a relation*/
             } else if ( e.getActionCommand().equals( Menu.EXPORT_TO_PACKAGE ) ) {
                 editor.exportShapesToPackage(); // append the graphics to a package
             } else if ( e.getActionCommand().equals( Menu.IMPORT_FROM_PACKAGE ) ) {
