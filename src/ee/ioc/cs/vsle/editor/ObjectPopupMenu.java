@@ -18,8 +18,8 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
 
     // ee.ioc.cs.editor.editor.Menu items displayed in the menu.
     JMenuItem itemProperties;
-    // JMenuItem itemGroup;
-    // JMenuItem itemUngroup;
+     JMenuItem itemGroup;
+     JMenuItem itemUngroup;
     JMenuItem itemClone;
     JMenuItem itemHLPorts;
     JMenuItem itemDrawPorts;
@@ -55,17 +55,17 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         /*
          * See canvas.groupObjects()
          */
-        /*
-         * itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
-         * itemGroup.addActionListener(this);
-         * itemGroup.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_G,
-         * InputEvent.CTRL_DOWN_MASK)); this.add(itemGroup);
-         * 
-         * itemUngroup = new JMenuItem(Menu.UNGROUP, KeyEvent.VK_U);
-         * itemUngroup.addActionListener(this);
-         * itemUngroup.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_U,
-         * InputEvent.CTRL_DOWN_MASK)); this.add(itemUngroup);
-         */
+        
+         itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
+         itemGroup.addActionListener(this);
+         itemGroup.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_G,
+         InputEvent.CTRL_DOWN_MASK)); this.add(itemGroup);
+         
+         itemUngroup = new JMenuItem(Menu.UNGROUP, KeyEvent.VK_U);
+         itemUngroup.addActionListener(this);
+         itemUngroup.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_U,
+         InputEvent.CTRL_DOWN_MASK)); this.add(itemUngroup);
+         
 
         itemProperties = new JMenuItem( Menu.PROPERTIES, KeyEvent.VK_R );
         itemProperties.addActionListener( this );
@@ -93,10 +93,10 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         itemShowValues.setEnabled( canvas.getLastProgramRunnerID() > 0 );
         this.add( itemShowValues );
 
-        // itemMakeClass = new JMenuItem( Menu.MAKECLASS );
-        // itemMakeClass.addActionListener( this );
-        // itemMakeClass.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK ) );
-        // this.add( itemMakeClass );
+         itemMakeClass = new JMenuItem( Menu.MAKECLASS );
+         itemMakeClass.addActionListener( this );
+         itemMakeClass.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK ) );
+         this.add( itemMakeClass );
 
         if (object != null && object.getClassName() != null) {
             this.add(makeSubmenuOrder());
@@ -233,10 +233,10 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             /*
              * Disabled until needed and reimplemented
              */
-            // } else if (Menu.GROUP.equals(cmd)) {
-            // canvas.groupObjects();
-            // } else if (Menu.UNGROUP.equals(cmd)) {
-            // canvas.ungroupObjects();
+        } else if ( Menu.GROUP.equals( cmd ) ) {
+            canvas.groupObjects();
+        } else if ( Menu.UNGROUP.equals( cmd ) ) {
+            canvas.ungroupObjects();
         } else if ( Menu.HLPORTS.equals( cmd ) ) {
             canvas.hilightPorts();
         } else if ( Menu.SHPORTS.equals( cmd ) ) {

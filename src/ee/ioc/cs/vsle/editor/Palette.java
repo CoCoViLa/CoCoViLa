@@ -17,9 +17,13 @@ public class Palette extends PaletteBase {
 
     protected Canvas canvas;
 
-    public Palette(VPackage vPackage, final Canvas canv) {
+    public Palette(Canvas canv) {
         super();
         this.canvas = canv;
+        init();
+    }
+
+    private void init() {
 
         // Cannot use JToolBars here because it does not play nicely with changing
         // L'n'F and scrollable toolbar. Hence buttons will look different 
@@ -42,11 +46,16 @@ public class Palette extends PaletteBase {
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1.0;
         c.insets = new Insets(0, PANEL_SPACE.width, 0, PANEL_SPACE.width);
-        toolBar.add(new ScrollableBar(createClassPanel(vPackage)), c);
+        toolBar.add(new ScrollableBar(createClassPanel(canvas.getPackage())), c);
 
         canvas.add(toolBar, BorderLayout.PAGE_START);
     }
-
+    
+    void reset() {
+        canvas.remove( toolBar );
+        init();
+    }
+    
     private JComponent createClassPanel(VPackage vPackage) {
         JPanel classPanel = new JPanel();
 

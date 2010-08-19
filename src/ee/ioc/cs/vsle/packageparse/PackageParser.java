@@ -4,7 +4,9 @@ import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.List;
 
+import javax.swing.*;
 import javax.xml.parsers.*;
 
 import org.xml.sax.*;
@@ -773,4 +775,48 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
         return path;
     }
 
+    public static VPackage loadPackage_(File f) {
+
+        if ( f != null && f.exists()) {
+
+            try {
+
+                String packageName = f.getName().substring( 0, f.getName().indexOf( "." ) );
+
+                PackageParser loader = new PackageParser();
+                boolean isOK = false;
+
+                if ( loader.load( f ) ) {
+                    if ( loader.getDiagnostics().hasProblems() ) {
+                        if ( DiagnosticsCollector.promptLoad( Editor.getInstance(), loader.getDiagnostics(), "Warning: Package " + packageName + " contains errors", "package" ) ) {
+                            isOK = true;
+                        }
+                    } else {
+                        isOK = true;
+                    }
+                } else {
+                    List<String> msgs = loader.getDiagnostics().getMessages();
+                    String msg;
+                    if ( msgs.size() > 0 )
+                        msg = msgs.get( 0 );
+                    else
+                        msg = "An error occured. See the log for details.";
+
+                    JOptionPane.showMessageDialog( Editor.getInstance(), msg, "Error loading package", JOptionPane.ERROR_MESSAGE );
+                }
+
+                if( isOK ) {
+                    return loader.getPackage();
+                }
+            } catch ( Exception e ) {
+                String message = "Unable to load package \"" + f.getAbsolutePath() + "\"";
+                db.p( message );
+                if ( RuntimeProperties.isLogDebugEnabled() ) {
+                    e.printStackTrace( System.out );
+                }
+                JOptionPane.showMessageDialog( Editor.getInstance(), message, "Error", JOptionPane.ERROR_MESSAGE );
+            }
+        }
+        return null;
+    }
 }

@@ -511,4 +511,13 @@ public class Connection implements Serializable {
     public Port getEndPort() {
         return endPort;
     }
+
+    @Override
+    public String toString() {
+        GObj start = getBeginPort().getObject();
+        GObj end = getEndPort().getObject();
+        return "("+start.getClassName() + ")" + start.getName() + "." + getBeginPort().getName() 
+                + " <--> " 
+                + "("+end.getClassName() + ")" + end.getName() + "." + getEndPort().getName();
+    }
 }

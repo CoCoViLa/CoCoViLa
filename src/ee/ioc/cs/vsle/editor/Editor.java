@@ -11,6 +11,7 @@ import javax.swing.event.*;
 import javax.swing.undo.*;
 
 import ee.ioc.cs.vsle.editor.EditorActionListener.*;
+import ee.ioc.cs.vsle.editor.scheme.*;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
@@ -132,12 +133,11 @@ public class Editor extends JFrame implements ChangeListener {
         menu.add( menuItem );
         
         submenu = new JMenu( Menu.EXPORT_MENU );
-        //submenu.setMnemonic( KeyEvent.VK_E );
-        menuItem = new JMenuItem( Menu.EXPORT_SCHEME );
-        menuItem.addActionListener(aListener);
-        submenu.add(menuItem);
         menu.add(submenu);
-
+        //submenu.setMnemonic( KeyEvent.VK_E );
+        
+        SchemeExporter.makeSchemeExportMenu(submenu, aListener);
+        
         // Export window graphics
         submenu.add(GraphicsExporter.getExportMenu());
 
@@ -436,7 +436,7 @@ public class Editor extends JFrame implements ChangeListener {
 
             menuItem.addActionListener( new ActionListener() {
                 public void actionPerformed( ActionEvent e ) {
-                    loadPackage( new File( RuntimeProperties.getRecentPackages().get( packageName ) ) );
+                    openNewCanvasWithPackage( new File( RuntimeProperties.getRecentPackages().get( packageName ) ) );
                 }
             } );
             menu.add( menuItem );
@@ -550,72 +550,21 @@ public class Editor extends JFrame implements ChangeListener {
         }
         return null;
     }
-
-    /**
-     * Package loader.
-     * 
-     * @param _package - package to be loaded.
-     */
-    void loadPackage(VPackage _package) {
-
-        if ( _package != null ) {
-            File pkgFile = new File( _package.getPath() );
-            if ( pkgFile.exists() ) {
-                loadPackage( pkgFile );
-            }
-        }    
-    }
     
     /**
      * Package loader.
      * 
      * @param f - package file to be loaded.
      */
-    void loadPackage( File f ) {
+    void openNewCanvasWithPackage( File f ) {
 
-        if ( f != null ) {
+        VPackage pkg;
+        
+        if((pkg = PackageParser.loadPackage_( f )) != null ) {
             RuntimeProperties.setLastPath( f.getAbsolutePath() );
-
-            try {
-
-                String packageName = f.getName().substring( 0, f.getName().indexOf( "." ) );
-                
-                PackageParser loader = new PackageParser();
-                boolean isOK = false;
-                
-                if ( loader.load( f ) ) {
-                    if ( loader.getDiagnostics().hasProblems() ) {
-                        if ( DiagnosticsCollector.promptLoad( this, loader.getDiagnostics(), "Warning: Package " + packageName + " contains errors", "package" ) ) {
-                            isOK = true;
-                        }
-                    } else {
-                        isOK = true;
-                    }
-                } else {
-                    List<String> msgs = loader.getDiagnostics().getMessages();
-                    String msg;
-                    if ( msgs.size() > 0 )
-                        msg = msgs.get( 0 );
-                    else
-                        msg = "An error occured. See the log for details.";
-
-                    JOptionPane.showMessageDialog( this, msg, "Error loading package", JOptionPane.ERROR_MESSAGE );
-                }
-                
-                if( isOK ) {
-                    VPackage pkg = loader.getPackage();
-                    Canvas canvas = new Canvas( pkg, f.getParent() + File.separator );
-                    RuntimeProperties.addOpenPackage( pkg );
-                    addCanvas(canvas);
-                }
-            } catch ( Exception e ) {
-                String message = "Unable to load package \"" + f.getAbsolutePath() + "\"";
-                db.p( message );
-                if ( RuntimeProperties.isLogDebugEnabled() ) {
-                    e.printStackTrace( System.out );
-                }
-                JOptionPane.showMessageDialog( Editor.getInstance(), message, "Error", JOptionPane.ERROR_MESSAGE );
-            }
+            Canvas canvas = new Canvas( pkg, f.getParent() + File.separator );
+            RuntimeProperties.addOpenPackage( pkg );
+            addCanvas(canvas);
         }
     } // loadPackage
 
@@ -724,7 +673,7 @@ public class Editor extends JFrame implements ChangeListener {
                 File file = new File( directory + args[ 0 ] );
 
                 if ( file.exists() ) {
-                    window.loadPackage( file );
+                    window.openNewCanvasWithPackage( file );
                 }
             }
 
@@ -737,7 +686,7 @@ public class Editor extends JFrame implements ChangeListener {
                 if ( f.exists() ) {
                     if ( RuntimeProperties.isLogDebugEnabled() )
                         db.p( "Found package file name " + packageFile + " from the configuration file." );
-                    window.loadPackage( f );
+                    window.openNewCanvasWithPackage( f );
                 }
             }
 
@@ -896,24 +845,6 @@ public class Editor extends JFrame implements ChangeListener {
             tabbedPane.setSelectedIndex(0);
             getCurrentCanvas().drawingArea.grabFocus();
         }
-    }
-
-    /**
-     * Reloads the current package discarding the current scheme. The request is
-     * ignored if no package is open.
-     */
-    void reloadPackage( Canvas canvas ) {
-        VPackage pkg = canvas.getPackage();
-        closeCanvas( canvas );
-        loadPackage( pkg );
-    }
-
-    /**
-     * Reloads the current package discarding the current scheme. The request is
-     * ignored if no package is open.
-     */
-    void reloadCurrentPackage() {
-        reloadPackage( getCurrentCanvas() );
     }
 
     /**

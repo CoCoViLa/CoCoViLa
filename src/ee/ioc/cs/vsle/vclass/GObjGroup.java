@@ -18,7 +18,14 @@ public class GObjGroup extends GObj implements Serializable {
 		setBounds();
 	}
 
-	private void setBounds() {
+	/**
+     * @return the objects
+     */
+    public ArrayList<GObj> getObjects() {
+        return objects;
+    }
+
+    private void setBounds() {
 		int x1, x2, y1, y2;
 		GObj obj;
 

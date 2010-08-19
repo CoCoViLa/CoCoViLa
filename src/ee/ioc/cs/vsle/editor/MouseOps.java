@@ -36,7 +36,7 @@ class MouseOps extends MouseInputAdapter {
     }
 
     public void setState( String state ) {
-        if ( canvas.currentCon != null || canvas.currentObj != null ) {
+        if ( canvas.currentCon != null || canvas.getCurrentObj() != null ) {
             canvas.cancelAdding();
             if ( currentPort != null ) {
                 currentPort.setSelected( false );
@@ -46,7 +46,7 @@ class MouseOps extends MouseInputAdapter {
 
         assert currentPort == null;
         assert canvas.currentCon == null;
-        assert canvas.currentObj == null;
+        assert canvas.getCurrentObj() == null;
         assert canvas.currentPainter == null;
 
         this.state = state;
@@ -183,6 +183,8 @@ class MouseOps extends MouseInputAdapter {
                             canvas.openPropertiesDialog(obj);
                         else if (SwingUtilities.isMiddleMouseButton(e))
                             canvas.openClassCodeViewer(obj.getClassName());
+                        else
+                            canvas.setCurrentObj( obj );
                     }
                 }
 
@@ -199,7 +201,7 @@ class MouseOps extends MouseInputAdapter {
                         if ( obj.getPorts().size() != 2 )
                             return;
 
-                        if ( canvas.currentObj == null ) {
+                        if ( canvas.getCurrentObj() == null ) {
                             if ( port.canBeConnectedTo( obj.getPorts().get( 0 ) ) )
                                 canvas.startAddingRelObject( port );
                         } else {
@@ -207,7 +209,7 @@ class MouseOps extends MouseInputAdapter {
                                 canvas.addCurrentObject( port );
                         }
                     }
-                } else if ( canvas.currentObj != null ) {
+                } else if ( canvas.getCurrentObj() != null ) {
                     canvas.addCurrentObject();
                     setState( State.selection );
                 }
@@ -378,36 +380,36 @@ class MouseOps extends MouseInputAdapter {
         } else if ( State.isAddRelClass( state ) ) {
             updateRelClassPortHilight( x, y );
             canvas.drawingArea.repaint();
-        } else if ( canvas.currentObj != null ) {
+        } else if ( State.isAddObject( state ) && canvas.getCurrentObj() != null ) {
             // if we're adding a new object...
 
             if ( RuntimeProperties.getSnapToGrid() ) {
-                canvas.currentObj.setX( Math.round( x / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep() );
-                canvas.currentObj.setY( Math.round( y / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep() );
+                canvas.getCurrentObj().setX( Math.round( x / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep() );
+                canvas.getCurrentObj().setY( Math.round( y / RuntimeProperties.getGridStep() ) * RuntimeProperties.getGridStep() );
             } else {
-                canvas.currentObj.setY( y );
-                canvas.currentObj.setX( x );
+                canvas.getCurrentObj().setY( y );
+                canvas.getCurrentObj().setX( x );
             }
 
-            if ( canvas.currentObj.isStrict() )
+            if ( canvas.getCurrentObj().isStrict() )
                 updateStrictPortHilight();
 
-            Rectangle rect = new Rectangle( e.getX() - 10, e.getY() - 10, Math.round( canvas.currentObj.getRealWidth()
-                    * canvas.getScale() ) + 10, Math.round( ( canvas.currentObj.getRealHeight() * canvas.getScale() ) + 10 ) );
+            Rectangle rect = new Rectangle( e.getX() - 10, e.getY() - 10, Math.round( canvas.getCurrentObj().getRealWidth()
+                    * canvas.getScale() ) + 10, Math.round( ( canvas.getCurrentObj().getRealHeight() * canvas.getScale() ) + 10 ) );
 
             canvas.drawingArea.scrollRectToVisible( rect );
 
-            if ( e.getX() + canvas.currentObj.getRealWidth() > canvas.drawAreaSize.width ) {
+            if ( e.getX() + canvas.getCurrentObj().getRealWidth() > canvas.drawAreaSize.width ) {
 
-                canvas.drawAreaSize.width = e.getX() + canvas.currentObj.getRealWidth();
+                canvas.drawAreaSize.width = e.getX() + canvas.getCurrentObj().getRealWidth();
 
                 canvas.drawingArea.setPreferredSize( canvas.drawAreaSize );
                 canvas.drawingArea.revalidate();
             }
 
-            if ( e.getY() + canvas.currentObj.getRealHeight() > canvas.drawAreaSize.height ) {
+            if ( e.getY() + canvas.getCurrentObj().getRealHeight() > canvas.drawAreaSize.height ) {
 
-                canvas.drawAreaSize.height = e.getY() + canvas.currentObj.getRealHeight();
+                canvas.drawAreaSize.height = e.getY() + canvas.getCurrentObj().getRealHeight();
 
                 canvas.drawingArea.setPreferredSize( canvas.drawAreaSize );
                 canvas.drawingArea.revalidate();
@@ -429,7 +431,7 @@ class MouseOps extends MouseInputAdapter {
      */
     private void updateRelClassPortHilight( int x, int y ) {
         Port port = canvas.getObjects().getPort( x, y );
-        RelObj curObj = (RelObj) canvas.currentObj;
+        RelObj curObj = (RelObj) canvas.getCurrentObj();
 
         if ( currentPort != null && currentPort != port ) {
             if ( curObj == null || curObj.getStartPort() != currentPort )
@@ -496,7 +498,7 @@ class MouseOps extends MouseInputAdapter {
      * location.
      */
     private void updateStrictPortHilight() {
-        for ( Port port : canvas.currentObj.getPorts() ) {
+        for ( Port port : canvas.getCurrentObj().getPorts() ) {
             port.setSelected( false );
 
             Port port2 = canvas.getObjects().getPort( port.getRealCenterX(), port.getRealCenterY() );
@@ -508,7 +510,7 @@ class MouseOps extends MouseInputAdapter {
                 // port will be connected an the others should not be
                 // hilighted.
                 boolean ignore = false;
-                for ( Port p : canvas.currentObj.getPorts() ) {
+                for ( Port p : canvas.getCurrentObj().getPorts() ) {
                     if ( p.isSelected() && canvas.getObjects().getPort( p.getRealCenterX(), p.getRealCenterY() ) == port2 ) {
                         ignore = true;
                         break;
@@ -518,9 +520,9 @@ class MouseOps extends MouseInputAdapter {
 
                 if ( !ignore ) {
                     port.setSelected( true );
-                    canvas.currentObj.setX( canvas.currentObj.getX()
+                    canvas.getCurrentObj().setX( canvas.getCurrentObj().getX()
                             + ( port2.getRealCenterX() - port.getRealCenterX() ) );
-                    canvas.currentObj.setY( canvas.currentObj.getY()
+                    canvas.getCurrentObj().setY( canvas.getCurrentObj().getY()
                             + ( port2.getRealCenterY() - port.getRealCenterY() ) );
                 }
             }

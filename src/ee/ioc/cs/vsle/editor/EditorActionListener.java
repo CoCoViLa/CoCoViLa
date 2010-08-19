@@ -7,6 +7,7 @@ import java.io.*;
 import javax.swing.*;
 import javax.swing.undo.*;
 
+import ee.ioc.cs.vsle.editor.scheme.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.iconeditor.*;
 import ee.ioc.cs.vsle.table.gui.*;
@@ -100,7 +101,7 @@ public class EditorActionListener implements ActionListener {
         public void actionPerformed( ActionEvent e ) {
             Canvas canvas = Editor.getInstance().getCurrentCanvas();
             if ( canvas != null )
-                canvas.deleteObjects();
+                canvas.deleteSelectedObjects();
         }
     }
 
@@ -187,7 +188,7 @@ public class EditorActionListener implements ActionListener {
                     File pack = fc.getSelectedFile();
 
                     db.p( "Loading package: " + pack.getName() );
-                    Editor.getInstance().loadPackage( pack );
+                    Editor.getInstance().openNewCanvasWithPackage( pack );
                     Editor.getInstance().updateWindowTitle();
                 }
             } else if ( e.getActionCommand().equals( Menu.CLOSE ) ) {
@@ -196,12 +197,24 @@ public class EditorActionListener implements ActionListener {
                 deleteCurrentScheme();
             } else if ( Menu.EXPORT_SCHEME.equals( e.getActionCommand() ) ) {
             	exportSchemeSpecification();
+            } else if ( Menu.EXPORT_SCHEME_AS_OBJECT.equals( e.getActionCommand() ) ) {
+                Canvas canv = Editor.getInstance().getCurrentCanvas();
+                if ( canv != null ) {
+                    SchemeExporter.exportAsObject(canv);
+                } else {
+                    notifyOnNullPackage(null);
+                }
             } else if ( e.getActionCommand().equals( Menu.CLOSE_ALL ) ) {
                 while ( Editor.getInstance().getCurrentPackage() != null ) {
                     Editor.getInstance().closeCurrentCanvas();
                 }
             } else if ( e.getActionCommand().equals( Menu.RELOAD ) ) {
-                Editor.getInstance().reloadCurrentPackage();
+                Canvas canv = Editor.getInstance().getCurrentCanvas();
+                if ( canv != null ) {
+                    canv.reloadCurrentPackage();
+                } else {
+                    notifyOnNullPackage(null);
+                }
             } else if ( e.getActionCommand().equals( Menu.INFO ) ) {
                 String message;
                 if ( Editor.getInstance().getCurrentPackage() != null ) {

@@ -12,7 +12,7 @@ public class SchemeContainer implements ISchemeContainer {
     String dir;
     Scheme scheme;
 
-    SchemeContainer( VPackage _package, String dir ) {
+    public SchemeContainer( VPackage _package, String dir ) {
         this._package = _package;
         this.dir = dir;
         scheme = new Scheme( this, new ObjectList(), new ConnectionList() );

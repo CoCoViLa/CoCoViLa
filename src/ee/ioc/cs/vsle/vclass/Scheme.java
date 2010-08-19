@@ -1,8 +1,6 @@
 package ee.ioc.cs.vsle.vclass;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.lang.reflect.InvocationTargetException;
 
 import javax.swing.SwingUtilities;
@@ -239,6 +237,29 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
         return runner.getId();
     }
 
+    public boolean saveToFile( File file ) {
+        OutputStream output = null;
+        try {
+            // The stream has to be closed explicitly or the file will
+            // remain open probably until the next garbage collection.
+            output = new FileOutputStream( file );
+            save(output);
+            return true;
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        } finally {
+            if ( output != null ) {
+                try {
+                    output.close();
+                } catch ( IOException e ) {
+                    db.p( e );
+                }
+                output = null;
+            }
+        }
+        return false;
+    }
+    
     @Override
     public void save(OutputStream outputStream) {
         try {
