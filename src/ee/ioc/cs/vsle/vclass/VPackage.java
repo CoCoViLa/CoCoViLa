@@ -196,4 +196,10 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
     public ArrayList<PackageClass> getClasses() {
         return classes;
     }
+
+    @Override
+    public String toString() {
+        return "VPackage [name=" + name + ", description=" + description
+                + ", path=" + path + "]";
+    }
 }

@@ -483,8 +483,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
     public void reloadCurrentPackage() {
         VPackage oldPackage = vPackage;
-        vPackage = PackageParser.loadPackage_( new File(oldPackage.getPath()) );
-        vPackage.setLastScheme( oldPackage.getLastScheme() );
+        vPackage = new PackageXmlProcessor(new File(oldPackage.getPath())).parse();
+        if(vPackage==null)
+            vPackage = oldPackage;
+        else
+            vPackage.setLastScheme( oldPackage.getLastScheme() );
         palette.reset();
     }
     
@@ -609,12 +612,6 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * Method for grouping objects.
      */
     public void groupObjects() {
-//        throw new UnsupportedOperationException();
-        /*
-         * This function is broken and was hidden in the GUI. If this is
-         * something useful then it should be specified and reimplemented or
-         * something.
-         */
         
         ArrayList<GObj> selected = objects.getSelected();
         if ( selected.size() > 1 ) {
@@ -692,22 +689,20 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * Method for ungrouping objects.
      */
     public void ungroupObjects() {
-//        throw new UnsupportedOperationException();
-        /*
-         * See groupObjects()
-         */
         
-        GObj obj;
-        for ( int i = 0; i < objects.getSelected().size(); i++ ) {
-            obj = objects.getSelected().get( i );
+        for ( GObj obj : objects.getSelected() ) {
             if ( obj.isGroup() ) {
-                objects.addAll( ( (GObjGroup) obj ).getObjects() );
+                List<GObj> groupedObjects = ( (GObjGroup) obj ).getObjects();
+                objects.addAll( groupedObjects );
                 objects.remove( obj );
                 obj = null;
                 setCurrentObj( null );
+                //select all previously grouped objects
+                for( GObj grObj : groupedObjects )
+                    grObj.setSelected( true );
             }
         }
-        drawingArea.repaint();         
+        drawingArea.repaint();
     }
 
     public void addCurrentObject() {

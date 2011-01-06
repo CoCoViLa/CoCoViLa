@@ -559,8 +559,7 @@ public class Editor extends JFrame implements ChangeListener {
     void openNewCanvasWithPackage( File f ) {
 
         VPackage pkg;
-        
-        if((pkg = PackageParser.loadPackage_( f )) != null ) {
+        if((pkg = PackageXmlProcessor.load(f)) != null ) {
             RuntimeProperties.setLastPath( f.getAbsolutePath() );
             Canvas canvas = new Canvas( pkg, f.getParent() + File.separator );
             RuntimeProperties.addOpenPackage( pkg );

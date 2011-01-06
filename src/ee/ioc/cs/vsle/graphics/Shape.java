@@ -24,8 +24,7 @@ public abstract class Shape implements Serializable, Cloneable {
     }
 
     public Shape( int x, int y, int width, int height ) {
-        this.setX( x );
-        this.setY( y );
+        this( x, y );
         this.setWidth( width );
         this.setHeight( height );
     }

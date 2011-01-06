@@ -20,6 +20,7 @@ import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
+@Deprecated
 public class PackageParser implements DiagnosticsCollector.Diagnosable {
 
     private VPackage pack;
@@ -83,7 +84,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             collector.collectDiagnostic( "IO error: " + ioe.getMessage() );
             return false;
         }
-        if ( RuntimeProperties.isLogDebugEnabled() )
+//        if ( RuntimeProperties.isLogDebugEnabled() )
             db.p( "Package parsing completed in " + ( System.currentTimeMillis() - startParsing ) + "ms.\n" );
 
         return true;
@@ -242,25 +243,24 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
             } else if ( element.equals( EL_CLASS ) ) {
                 newClass = new PackageClass();
                 status = CLASS;
-                String type = attrs.getValue( ATR_TYPE );
+                String type = attrs.getValue( ATR_TYPE );//done
                 if ( type != null ) {
                     newClass.setComponentType( PackageClass.ComponentType.getType( type ) );
                 }
 
-                newClass.setStatic( Boolean.parseBoolean( attrs.getValue( ATR_STATIC ) ) );
+                newClass.setStatic( Boolean.parseBoolean( attrs.getValue( ATR_STATIC ) ) );//done
 
             } else if ( element.equals( EL_GRAPHICS ) ) {
                 newGraphics = new ClassGraphics();
-                String showFields = attrs.getValue( ATR_SHOW_FIELDS );
-                String type = attrs.getValue( ATR_TYPE );
-
+                String showFields = attrs.getValue( ATR_SHOW_FIELDS );//done
                 if ( showFields != null && showFields.equals( VAL_TRUE ) ) {
                     newGraphics.setShowFields( true );
                 }
+                String type = attrs.getValue( ATR_TYPE );//TODO wtf is this?
                 if ( type != null && type.equals( VAL_RELATION ) ) {
                     newGraphics.setRelation( true );
                 }
-            } else if ( element.equals( EL_PORT ) ) {
+            } else if ( element.equals( EL_PORT ) ) {//done
                 status = PORT_OPEN;
                 String id = attrs.getValue( ATR_ID );
                 String name = attrs.getValue( ATR_NAME );
@@ -317,12 +317,12 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 // initiate them to gather all X and Y positions there.
                 makeInitialPolygon( attrs );
 
-            } else if ( element.equals( EL_POINT ) ) {
+            } else if ( element.equals( EL_POINT ) ) {//done
                 String x = attrs.getValue( ATR_X );
                 String y = attrs.getValue( ATR_Y );
                 polyXs.add( x );
                 polyYs.add( y );
-            } else if ( element.equals( EL_FIELD ) ) {
+            } else if ( element.equals( EL_FIELD ) ) {//done
                 String name = attrs.getValue( ATR_NAME );
                 String type = attrs.getValue( ATR_TYPE );
                 String value = attrs.getValue( ATR_VALUE );
@@ -370,7 +370,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 
                 newClass.addField( newField );
 
-            } else if ( element.equals( EL_TEXT ) ) {
+            } else if ( element.equals( EL_TEXT ) ) {//done
                 Text newText = makeText( attrs, newGraphics );
 
                 /*
@@ -379,11 +379,11 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                  */
                 newGraphics.addShape( newText );
 
-            } else if ( element.equals( EL_LINE ) ) {
+            } else if ( element.equals( EL_LINE ) ) {//done
                 Line newLine = makeLine( attrs, newGraphics );
 
                 newGraphics.addShape( newLine );
-            } else if ( element.equals( EL_IMAGE ) ) {
+            } else if ( element.equals( EL_IMAGE ) ) {//done
                 String x = attrs.getValue( ATR_X );
                 String y = attrs.getValue( ATR_Y );
 //                String width = attrs.getValue( ATR_WIDTH );
@@ -399,7 +399,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 
                 newGraphics.addShape( newImg );
                 
-            } else if ( element.equals( EL_RECT ) ) {
+            } else if ( element.equals( EL_RECT ) ) {//done
                 String x = attrs.getValue( ATR_X );
                 String y = attrs.getValue( ATR_Y );
                 String width = attrs.getValue( ATR_WIDTH );
@@ -422,7 +422,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                         Integer.parseInt( height ), Integer.parseInt( color ), Boolean.valueOf( filled ).booleanValue(), str, tr, lt );
 
                 newGraphics.addShape( newRect );
-            } else if ( element.equals( "oval" ) ) {
+            } else if ( element.equals( "oval" ) ) {//done
                 String x = attrs.getValue( ATR_X );
                 String y = attrs.getValue( ATR_Y );
                 String width = attrs.getValue( ATR_WIDTH );
@@ -445,7 +445,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                         Integer.parseInt( height ), Integer.parseInt( color ), Boolean.valueOf( filled ).booleanValue(), str, tr, lt );
 
                 newGraphics.addShape( newOval );
-            } else if ( element.equals( "arc" ) ) {
+            } else if ( element.equals( "arc" ) ) {//done
                 String x = attrs.getValue( ATR_X );
                 String y = attrs.getValue( ATR_Y );
                 String width = attrs.getValue( ATR_WIDTH );
@@ -471,7 +471,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                                 .booleanValue(), str, tr, lt );
 
                 newGraphics.addShape( newArc );
-            } else if ( element.equals( EL_BOUNDS ) ) {
+            } else if ( element.equals( EL_BOUNDS ) ) {//done
                 String x = attrs.getValue( ATR_X );
                 String y = attrs.getValue( ATR_Y );
                 String width = attrs.getValue( ATR_WIDTH );
@@ -616,7 +616,7 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
 
             if ( qName.equals( EL_CLASS ) ) {
                 pack.getClasses().add( newClass );
-            } else if ( qName.equals( EL_PORT ) ) {
+            } else if ( qName.equals( EL_PORT ) ) {//done
                 if ( newPort.getOpenGraphics() == null ) {
                     newGraphics = new ClassGraphics();
                     newGraphics.addShape( new Oval( -4, -4, 8, 8, 12632256, true, 1.0f, 255, 0, true ) );
@@ -674,44 +674,44 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                 newGraphics.addShape( polygon );
             } else if ( qName.equals( EL_GRAPHICS ) ) {
 
-                if ( status == FIELD ) {
+                if ( status == FIELD ) {//done
                     if ( newField != null ) {
                         newField.setDefaultGraphics( newGraphics );
                     } else {
                         collector.collectDiagnostic( "Default Graphics ignored" );
                     }
-                } else if ( status == FIELD_KNOWN ) {
+                } else if ( status == FIELD_KNOWN ) {//done
                     if ( newField != null ) {
                         newField.setKnownGraphics( newGraphics );
                     } else {
                         collector.collectDiagnostic( "Known Graphics ignored" );
                     }
-                } else if ( status == PORT_OPEN ) {
+                } else if ( status == PORT_OPEN ) {//done
                     newPort.setOpenGraphics( newGraphics );
-                } else if ( status == PORT_CLOSED ) {
+                } else if ( status == PORT_CLOSED ) {//done
                     newPort.setClosedGraphics( newGraphics );
                 } else {
                     // newGraphics.packageClass = newClass;
-                    newClass.addGraphics( newGraphics );
+                    newClass.addGraphics( newGraphics );//done
                 }
-            } else if ( EL_PAINTER.equals( element ) ) {
+            } else if ( EL_PAINTER.equals( element ) ) {//done
                 newClass.setPainterName( charBuf.toString() );
                 pack.setPainters( true );
-            } else if ( EL_ICON.equals( element ) ) {
+            } else if ( EL_ICON.equals( element ) ) {//done
                 newClass.setIcon( charBuf.toString() );
-            } else if ( EL_DESCRIPTION.equals( element ) ) {
+            } else if ( EL_DESCRIPTION.equals( element ) ) {//done
                 if ( status == PACKAGE )
                     pack.setDescription( charBuf.toString() );
                 else
                     newClass.setDescription( charBuf.toString() );
-            } else if ( EL_NAME.equals( element ) ) {
+            } else if ( EL_NAME.equals( element ) ) {//done
                 // if we are reading a package field
                 if ( status == PACKAGE )
-                    pack.setName( charBuf.toString() );
+                    pack.setName( charBuf.toString() );//done
                 else {// else we a reading a class field
-                    newClass.setName( charBuf.toString() );
+                    newClass.setName( charBuf.toString() );//done
 
-                    if(newClass.getComponentType() != PackageClass.ComponentType.SCHEME) {
+                    if(newClass.getComponentType() != PackageClass.ComponentType.SCHEME) {//done
                         Collection<ClassField> specFields;
 
                         try {

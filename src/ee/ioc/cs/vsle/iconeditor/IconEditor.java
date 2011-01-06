@@ -46,20 +46,20 @@ public class IconEditor extends JFrame {
     IconPalette palette;
     Dimension drawAreaSize = new Dimension( 700, 500 );
     ShapeGroup shapeList = new ShapeGroup();
-    ArrayList<IconClass> icons = new ArrayList<IconClass>();
+    ArrayList<IconClass> packageClassList = new ArrayList<IconClass>();
     ArrayList<ClassField> fields = new ArrayList<ClassField>();
     Shape currentShape;
     ArrayList<IconPort> ports = new ArrayList<IconPort>();
     IconKeyOps keyListener;
-    ArrayList<String> packageClasses = new ArrayList<String>();
+    ArrayList<String> packageClassNamesList = new ArrayList<String>();
     boolean newClass = true;
     /**
      * Table model for storing class fields
      */
     private ClassFieldsTableModel dbrClassFields = new ClassFieldsTableModel();
 
-    ChooseClassDialog ccd = new ChooseClassDialog( packageClasses );
-    DeleteClassDialog dcd = new DeleteClassDialog( packageClasses );
+    ChooseClassDialog ccd = new ChooseClassDialog( packageClassNamesList );
+    DeleteClassDialog dcd = new DeleteClassDialog( packageClassNamesList );
     ClassImport ci;
     int classX, classY;
 
@@ -1118,12 +1118,12 @@ public class IconEditor extends JFrame {
         }
                 
         // See if class already exists in package
-        ci = new ClassImport( getPackageFile(), packageClasses, icons );
-        for ( int i = 0; i < icons.size(); i++ ) {
+        ci = new ClassImport( getPackageFile(), packageClassNamesList, packageClassList );
+        for ( int i = 0; i < packageClassList.size(); i++ ) {
 
             // class exists, move changed class to the end
 
-            if ( IconEditor.className.equalsIgnoreCase( icons.get( i ).getName() ) ) {
+            if ( IconEditor.className.equalsIgnoreCase( packageClassList.get( i ).getName() ) ) {
                 inPackage = true;
                 classX = 0 - classX;
                 classY = 0 - classY;
@@ -1131,18 +1131,18 @@ public class IconEditor extends JFrame {
                 // loaded
                 shapeList.shift( classX, classY );
                 // set values to those on screen
-                icons.get( i ).setBoundingbox( boundingbox );
-                icons.get( i ).setDescription( IconEditor.classDescription );
+                packageClassList.get( i ).setBoundingbox( boundingbox );
+                packageClassList.get( i ).setDescription( IconEditor.classDescription );
                 if ( IconEditor.getClassIcon() == null ) {
-                    icons.get( i ).setIconName( "default.gif" );
+                    packageClassList.get( i ).setIconName( "default.gif" );
                 } else {
-                    icons.get( i ).setIconName( IconEditor.getClassIcon() );
+                    packageClassList.get( i ).setIconName( IconEditor.getClassIcon() );
                 }
-                icons.get( i ).setIsRelation( IconEditor.classIsRelation );
-                icons.get( i ).setName( IconEditor.className );
-                icons.get( i ).setPorts( ports );
-                icons.get( i ).shiftPorts( classX, classY );
-                icons.get( i ).setShapeList( shapeList );
+                packageClassList.get( i ).setIsRelation( IconEditor.classIsRelation );
+                packageClassList.get( i ).setName( IconEditor.className );
+                packageClassList.get( i ).setPorts( ports );
+                packageClassList.get( i ).shiftPorts( classX, classY );
+                packageClassList.get( i ).setShapeList( shapeList );
 
                 if ( dbrClassFields != null && dbrClassFields.getRowCount() > 0 ) {
                     fields.clear();
@@ -1154,9 +1154,9 @@ public class IconEditor extends JFrame {
                         fields.add( field );
                     }
                 }
-                icons.get( i ).setFields( fields );
-                icons.add( icons.get( i ) );
-                icons.remove( i );
+                packageClassList.get( i ).setFields( fields );
+                packageClassList.add( packageClassList.get( i ) );
+                packageClassList.remove( i );
                 // assume that we only have one class with that name
                 break;
             }
@@ -1192,12 +1192,12 @@ public class IconEditor extends JFrame {
                 content.append( getShapesInXML( false ) );
             } else {
                 // write all classes
-                for ( int i = 0; i < icons.size(); i++ ) {
+                for ( int i = 0; i < packageClassList.size(); i++ ) {
 
                     classX = 0;
                     classY = 0;
 
-                    makeClass( icons.get( i ) );
+                    makeClass( packageClassList.get( i ) );
                     content.append( getShapesInXML( false ) );
                 }
             }
@@ -1750,17 +1750,17 @@ public class IconEditor extends JFrame {
      */
     public void importClassFromPackage( File f ) {
     	prevPackagePath = f.getParent();
-    	ci = new ClassImport( f, packageClasses, icons );
+    	ci = new ClassImport( f, packageClassNamesList, packageClassList );
         // opens dialog with list of class names
-        ccd.newJList( packageClasses );
+        ccd.newJList( packageClassNamesList );
         ccd.setLocationRelativeTo( rootPane );
         ccd.setVisible( true );
         ccd.repaint();
         String selection = ccd.getSelectedValue();
         newClass = false;
-        for ( int i = 0; i < icons.size(); i++ ) {
-            if ( ( icons.get( i ) ).getName().equals( selection ) ) {
-                makeClass( icons.get( i ) );
+        for ( int i = 0; i < packageClassList.size(); i++ ) {
+            if ( ( packageClassList.get( i ) ).getName().equals( selection ) ) {
+                makeClass( packageClassList.get( i ) );
             }
         }
 
@@ -1828,8 +1828,8 @@ public class IconEditor extends JFrame {
         try {
             in = new BufferedReader( new FileReader( f ) );
 
-            ci = new ClassImport( f, packageClasses, icons );
-            dcd.newJList( packageClasses );
+            ci = new ClassImport( f, packageClassNamesList, packageClassList );
+            dcd.newJList( packageClassNamesList );
             dcd.setLocationRelativeTo( rootPane );
             dcd.setVisible( true );
             dcd.repaint();
@@ -1844,12 +1844,12 @@ public class IconEditor extends JFrame {
                 }
                 content.append( str + "\n" );
             }
-            for ( int i = 0; i < icons.size(); i++ ) {
+            for ( int i = 0; i < packageClassList.size(); i++ ) {
 
-                if ( ! ( ( icons.get( i ) ).getName().equals( selection ) ) ) {
+                if ( ! ( ( packageClassList.get( i ) ).getName().equals( selection ) ) ) {
                     classX = 0;
                     classY = 0;
-                    makeClass( icons.get( i ) );
+                    makeClass( packageClassList.get( i ) );
                     content.append( getShapesInXML( false ) );
                 }
             }

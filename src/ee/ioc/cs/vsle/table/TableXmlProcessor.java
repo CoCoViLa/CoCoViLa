@@ -4,20 +4,17 @@
 package ee.ioc.cs.vsle.table;
 
 import java.io.*;
-import java.net.*;
 import java.util.*;
 
 import javax.swing.*;
-import javax.xml.*;
-import javax.xml.parsers.*;
 import javax.xml.transform.*;
 import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
-import javax.xml.validation.*;
 
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
+import ee.ioc.cs.vsle.common.xml.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
 
@@ -27,7 +24,7 @@ import ee.ioc.cs.vsle.util.*;
  * 
  * @author pavelg
  */
-public class TableXmlProcessor {
+public class TableXmlProcessor extends AbstractXmlProcessor {
 
     private static final String TBL_ELEM_ENTRY = "entry";
     private static final String TBL_ELEM_RULE = "rule";
@@ -44,110 +41,13 @@ public class TableXmlProcessor {
     private static final String TBL_ELEM_INPUT = "input";
     private static final String TBL_ELEM_DEFAULT = "default";
     private static final String TBL_ATTR_ID = "id";
-    private static final String XML_DOC_ROOT = "tables";
-    private static final String XML_NS_URI = "cocovila";
-    private DiagnosticsCollector collector = new DiagnosticsCollector();
-    private File xmlFile;
     
     /**
      * @param tableFile
      */
     public TableXmlProcessor( File tableFile ) {
 
-        if( tableFile == null ) {
-            throw new TableException( "No file" );
-        } 
-
-        xmlFile = tableFile;
-    }
-    
-    /**
-     * Parses and validates table xml document
-     * 
-     * @return document
-     * @throws ParserConfigurationException
-     * @throws SAXException
-     * @throws IOException
-     */
-    private Document getDocument() throws ParserConfigurationException, SAXException, IOException {
-
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        
-        factory.setNamespaceAware( true );
-
-        Document document = factory.newDocumentBuilder().parse( xmlFile );
-        
-        validateDocument( document );
-        
-        return document;
-    }
-    
-    /**
-     * Validates table structure
-     * 
-     * @param document
-     * @throws SAXException
-     * @throws IOException
-     */
-    private void validateDocument( Document document ) throws SAXException, IOException {
-        
-        URL url = FileFuncs.getResource( RuntimeProperties.TABLE_SCHEMA, true );
-        if ( url == null ) {
-            url = new URL( RuntimeProperties.SCHEMA_LOC + RuntimeProperties.TABLE_SCHEMA );
-        }
-        
-        /*
-         * Use Schema and Validator objects instead (hate string-passing style)
-         * 
-         * factory.setValidating(true);
-         * factory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaLanguage", "http://www.w3.org/2001/XMLSchema");
-         * factory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", new InputSource( url.toString() ) );
-        */
-        
-        // Create a SchemaFactory capable of understanding WXS schemas.
-        SchemaFactory schemaFactory =
-            SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-
-        // Load a WXS schema, represented by a Schema instance.
-        Source schemaFile = new StreamSource( url.toString() );
-        
-        Schema schema = schemaFactory.newSchema(schemaFile);
-
-        // Create a Validator object, which can be used to validate
-        // an instance document.
-        Validator validator = schema.newValidator();
-
-        validator.setErrorHandler( new ErrorHandler() {
-
-            public void error(SAXParseException exception) {
-                collector.collectDiagnostic( "Error: " + exception.getMessage(), true );
-            }
-
-            public void fatalError(SAXParseException exception) {
-                collector.collectDiagnostic( "Fatal Error: " + exception.getMessage(), true );
-            }
-
-            public void warning(SAXParseException exception) {
-                collector.collectDiagnostic( "Warning: " +exception.getMessage(), false );
-            }
-        } );
-        
-        // Validate the DOM tree.
-        validator.validate( new DOMSource( document ) );
-        
-    }
-    
-    /**
-     * Creates new table xml document with corresponding namespace
-     * 
-     * @return document
-     * @throws ParserConfigurationException
-     */
-    private Document createNewDocument() throws ParserConfigurationException {
-        
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.getDOMImplementation().createDocument( XML_NS_URI, XML_DOC_ROOT, null );
+        super(tableFile, "cocovila", "tables", RuntimeProperties.TABLE_SCHEMA);
     }
     
     /**
@@ -369,48 +269,12 @@ public class TableXmlProcessor {
     }
     
     /**
-     * Checks if there are any problems
-     * 
-     * @param errorMess
-     */
-    private void checkProblems( final String errorMess ) {
-        
-        if (collector.hasProblems()) {
-            final boolean[] rv = new boolean[] { false };
-            
-            Runnable runnable = new Runnable() {
-                public void run() {
-                    rv[0] = DiagnosticsCollector.promptLoad(
-                            Editor.getInstance(), collector,
-                            errorMess,
-                            xmlFile.getName() );
-                }
-            };
-            
-            if( SwingUtilities.isEventDispatchThread() ) {
-                
-                runnable.run();
-                
-            } else {
-                try {
-                    SwingUtilities.invokeAndWait( runnable );
-                } catch (Exception e) {
-                    db.p(e);
-                }
-            }
-            
-            if (!rv[0]) {
-                throw new TableException( errorMess );
-            }
-        }
-    }
-    
-    /**
      * Parses the table xml from a given file
      * 
      * @param tableFile absolute path to table.xml
      * @return Map<table id, table>
      */
+    @Override
     public Map<String, Table> parse() {
         
         Map<String, Table> tables = new LinkedHashMap<String, Table>();
@@ -581,6 +445,16 @@ public class TableXmlProcessor {
                 }
             }
         }
+    }
+
+    @Override
+    protected void reportError( String message ) {
+        throw new TableException( message );        
+    }
+
+    @Override
+    protected EntityResolver getEntityResolver() {
+        return null;
     }
     
 }

@@ -15,7 +15,7 @@ public class ClassGraphics implements Serializable {
 	private int boundWidth;
 	private int boundHeight;
 	private boolean showFields = false;
-	private boolean relation = false;
+	private boolean relation = false;//TODO not used?
 
 	/**
 	 * Set bounds of the graphical object.

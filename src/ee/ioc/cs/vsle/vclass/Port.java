@@ -124,11 +124,11 @@ public class Port implements Cloneable, Serializable {
 	}
 
 	@Override
-	public String toString() {
-		if (id!=null)
-			return id;
-		return name;
-	}
+    public String toString() {
+        return "Port [id=" + id + ", field=" + field + ", name=" + name
+                + ", type=" + type + ", x=" + x + ", y=" + y + ", strict="
+                + strict + ", area=" + area + ", isMulti=" + isMulti + "]";
+    }
 
 	public void setSelected(boolean b) {
 		selected = b;

@@ -18,14 +18,14 @@
 	See package state for an example usage 
 -->
 <!ATTLIST class
-	type (relation|class|scheme)	#IMPLIED
+	type (relation|class|scheme)	"class"
 	static (true|false)	"false"
 >
 <!-- Field is an attribute of the rich component 
 shown in the list of attributes in the Schema Editor.
 If a field is 'hidden' it means that it will not be shown in the Object Properties window -->	
-<!ELEMENT fields	(field*)>
-<!ELEMENT field	(known|default)*>
+<!ELEMENT fields	(field+)>
+<!ELEMENT field	(known?,default?)>
 <!ATTLIST field 
 	name	CDATA   #REQUIRED
 	nature	(normal|input|goal)	"normal"
@@ -37,11 +37,11 @@ If a field is 'hidden' it means that it will not be shown in the Object Properti
 <!-- Graphics to display some info about the field together with the visual 
 appearance of the rich component e.g 'text string="*self"' (or *selfWithName) displays its value -->
 <!ELEMENT known	(graphics)>
-<!ELEMENT default	(graphics)>
+<!ELEMENT default (graphics)>
 <!-- A visual appearance of something composed of vector graphics' shapes and/or raster images -->
-<!ELEMENT graphics ( bounds | (line | rect | oval | arc | polygon | image ) | text | painter? )+>
+<!ELEMENT graphics ( bounds, (line | rect | oval | arc | polygon | image | text )+, painter? )>
 <!ATTLIST graphics 
-	showFields (true|false)	#IMPLIED
+	showFields (true|false) "false"
 >
 <!-- painter of this class graphics -->
 <!ELEMENT painter (#PCDATA)>
@@ -138,10 +138,11 @@ appearance of the rich component e.g 'text string="*self"' (or *selfWithName) di
 	fontname	CDATA	#REQUIRED
 	fontstyle	CDATA	#REQUIRED
 	fontsize	CDATA	#REQUIRED
-	fixedsize	CDATA	#IMPLIED
+	fixed	CDATA	#IMPLIED
 	transparency	CDATA	#IMPLIED
 >
-<!-- A raster image for the visual appearance -->
+<!-- A raster image for the visual appearance.
+image path should be relative to the package xml -->
 <!ELEMENT image	EMPTY>
 <!ATTLIST image
 	x	CDATA	#REQUIRED
@@ -154,7 +155,7 @@ appearance of the rich component e.g 'text string="*self"' (or *selfWithName) di
 <!-- Port is a connection point added to the visual appearance of a rich component. 
 Port is bound to a metaclasses component via the attribute "name".
 Ports are used to connect rich components to each-other 
-portConnection=area - 
+portConnection=area - used for rendering relation classes
 -->
 <!ELEMENT ports	(port+)>
 <!ELEMENT port	(open?, closed?)>
@@ -164,7 +165,7 @@ portConnection=area -
 	type	CDATA	#REQUIRED
 	x	CDATA	#REQUIRED
 	y	CDATA	#REQUIRED
-	portConnection	CDATA	#IMPLIED
+	portConnection	(area|none) "none"
 	strict	CDATA	#IMPLIED
 	multi	CDATA	#IMPLIED
 >

@@ -61,7 +61,7 @@ public class SchemeExporter {
             
             //update package with new scheme class and icon
             //1. Write to package TODO
-            //2. Reload package TODO
+            //2. Reload package
             canv.reloadCurrentPackage();
             
             //update canvas

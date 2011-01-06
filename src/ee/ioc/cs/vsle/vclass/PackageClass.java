@@ -65,11 +65,6 @@ public class PackageClass implements Serializable {
 		super();
 	}
 
-	@Override
-	public String toString() {
-		return getName();
-	}
-
 	public void addPort(Port port) {
 		getPorts().add(port);
 	}
@@ -308,5 +303,12 @@ public class PackageClass implements Serializable {
      */
     public String getPainterName() {
         return painterName;
+    }
+
+    @Override
+    public String toString() {
+        return "PackageClass [name=" + name + ", icon=" + icon
+                + ", description=" + description + ", componentType="
+                + componentType + ", isStatic=" + isStatic + "]";
     }
 }
