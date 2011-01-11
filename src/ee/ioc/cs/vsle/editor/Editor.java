@@ -4,13 +4,15 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
-import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
 
-import ee.ioc.cs.vsle.editor.EditorActionListener.*;
+import ee.ioc.cs.vsle.editor.EditorActionListener.CloneAction;
+import ee.ioc.cs.vsle.editor.EditorActionListener.DeleteAction;
+import ee.ioc.cs.vsle.editor.EditorActionListener.RedoAction;
+import ee.ioc.cs.vsle.editor.EditorActionListener.UndoAction;
 import ee.ioc.cs.vsle.editor.scheme.*;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.synthesize.*;
@@ -177,14 +179,17 @@ public class Editor extends JFrame implements ChangeListener {
 
         menu.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
 
+            @Override
             public void popupMenuCanceled( PopupMenuEvent e ) {
                 // ignore
             }
 
+            @Override
             public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {
                 // ignore
             }
 
+            @Override
             public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
                 Canvas canvas = Editor.getInstance().getCurrentCanvas();
                 if ( canvas == null || !canvas.getPackage().hasPainters() ) {
@@ -217,6 +222,7 @@ public class Editor extends JFrame implements ChangeListener {
         //sync View with current canvas
         menu.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
 
+            @Override
             public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
                 Canvas canvas;
                 
@@ -228,10 +234,12 @@ public class Editor extends JFrame implements ChangeListener {
                 showObjectNamesCheckBox.setSelected( canvas.isShowObjectNames() );
             }
 
+            @Override
             public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {
                 // ignore
             }
 
+            @Override
             public void popupMenuCanceled( PopupMenuEvent e ) {
                 // ignore
             }
@@ -264,6 +272,7 @@ public class Editor extends JFrame implements ChangeListener {
 
             final JMenuItem empty = new JMenuItem( "Empty" );
 
+            @Override
             public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
 
                 makeRecentSubMenu( submenuRecent );
@@ -282,10 +291,12 @@ public class Editor extends JFrame implements ChangeListener {
 
             }
 
+            @Override
             public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {
                 // ignore
             }
 
+            @Override
             public void popupMenuCanceled( PopupMenuEvent e ) {
                 // ignore
             }
@@ -297,16 +308,19 @@ public class Editor extends JFrame implements ChangeListener {
 
         menuScheme.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
 
+            @Override
             public void popupMenuWillBecomeVisible( PopupMenuEvent e ) {
 
                 makeSchemeMenu( menuScheme );
 
             }
 
+            @Override
             public void popupMenuWillBecomeInvisible( PopupMenuEvent e ) {
                 // ignore
             }
 
+            @Override
             public void popupMenuCanceled( PopupMenuEvent e ) {
                 // ignore
             }
@@ -397,6 +411,7 @@ public class Editor extends JFrame implements ChangeListener {
         case JOptionPane.OK_OPTION:
 
             SwingUtilities.invokeLater( new Runnable() {
+                @Override
                 public void run() {
 
                     int state = getExtendedState();
@@ -435,6 +450,7 @@ public class Editor extends JFrame implements ChangeListener {
             JMenuItem menuItem = new JMenuItem( packageName );
 
             menuItem.addActionListener( new ActionListener() {
+                @Override
                 public void actionPerformed( ActionEvent e ) {
                     openNewCanvasWithPackage( new File( RuntimeProperties.getRecentPackages().get( packageName ) ) );
                 }
@@ -598,6 +614,7 @@ public class Editor extends JFrame implements ChangeListener {
             // Java 1.5 seems to not support @Override annotations for
             // interface methods. bug_id=5008260
             // @Override
+            @Override
             public void run() {
                 createAndInitGUI( args );
             }
@@ -697,6 +714,7 @@ public class Editor extends JFrame implements ChangeListener {
         final String[] bs = RuntimeProperties.getSchemeEditorWindowProps().split( ";" );
 
         SwingUtilities.invokeLater( new Runnable() {
+            @Override
             public void run() {
                 int x = bs[ 0 ] != null && bs[ 0 ].length() > 0 ? Integer.parseInt( bs[ 0 ] ) : window.getLocationOnScreen().x;
                 int y = bs[ 1 ] != null && bs[ 1 ].length() > 0 ? Integer.parseInt( bs[ 1 ] ) : window.getLocationOnScreen().y;
@@ -762,6 +780,7 @@ public class Editor extends JFrame implements ChangeListener {
 
     }
 
+    @Override
     public void stateChanged( ChangeEvent e ) {
         refreshUndoRedo();
         Canvas canvas = getCurrentCanvas();

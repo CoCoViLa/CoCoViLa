@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.util.*;
 
 public class Port implements Cloneable, Serializable {
@@ -24,6 +25,20 @@ public class Port implements Cloneable, Serializable {
 	private boolean watched = false;
 	private boolean hilighted = false;
 
+	public static final ClassGraphics DEFAULT_OPEN_GRAPHICS;
+	public static final ClassGraphics DEFAULT_CLOSED_GRAPHICS;
+	
+	static {
+	    DEFAULT_OPEN_GRAPHICS = new ClassGraphics();
+	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, 12632256, true, 1.0f, 255, 0, true ) );
+	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, 0, false, 1.0f, 255, 0, true ) );
+	    DEFAULT_OPEN_GRAPHICS.setBounds( -4, -4, 8, 8 );
+	    
+	    DEFAULT_CLOSED_GRAPHICS = new ClassGraphics();
+	    DEFAULT_CLOSED_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, 0, true, 1.0f, 255, 0, true ) );
+	    DEFAULT_CLOSED_GRAPHICS.setBounds( -4, -4, 8, 8 );
+	}
+	
 	public Port(String name, String type, int x, int y, String portConnection, String strict, String multi ) {
 		this.name = name;
 		this.type = type.trim();
@@ -125,9 +140,7 @@ public class Port implements Cloneable, Serializable {
 
 	@Override
     public String toString() {
-        return "Port [id=" + id + ", field=" + field + ", name=" + name
-                + ", type=" + type + ", x=" + x + ", y=" + y + ", strict="
-                + strict + ", area=" + area + ", isMulti=" + isMulti + "]";
+        return "Port " + getObject().getName() + "." + getName();
     }
 
 	public void setSelected(boolean b) {
@@ -219,6 +232,12 @@ public class Port implements Cloneable, Serializable {
 		return obj;
 	}
 
+    public String getConnectionId() {
+        if ( id != null )
+            return id;
+        return name;
+    }
+	
 	public int getNumber() {
 		Port port;
 

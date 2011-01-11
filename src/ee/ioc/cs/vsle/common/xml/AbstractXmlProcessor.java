@@ -15,10 +15,10 @@ import javax.xml.transform.stream.*;
 import javax.xml.validation.*;
 
 import org.w3c.dom.*;
+import org.w3c.dom.ls.*;
 import org.xml.sax.*;
 
 import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**
@@ -204,4 +204,51 @@ public abstract class AbstractXmlProcessor implements DiagnosticsCollector.Diagn
     }
     
     protected abstract void reportError(String message);
+    
+    protected boolean writeDocument( Document document, OutputStream out ) {
+        
+        try {
+            //Q: why bother? A: DOM3 L/S API should be faster
+            if ( ( document.getFeature( "Core", "3.0" ) != null ) 
+                    && ( document.getFeature( "LS", "3.0" ) != null ) ) {
+
+                DOMImplementationLS domLS  = (DOMImplementationLS) ( document.getImplementation() ).getFeature( "LS", "3.0" );
+
+                LSOutput lso = domLS.createLSOutput();
+                lso.setSystemId( XML_SCHEMA );
+                lso.setByteStream( out );
+
+                LSSerializer lss = domLS.createLSSerializer();
+                lss.getDomConfig().setParameter( "format-pretty-print", true );
+                lss.write( document, lso );
+                
+            } else {
+                
+                TransformerFactory transfac = TransformerFactory.newInstance();
+                Transformer trans = transfac.newTransformer();
+                trans.setOutputProperty(OutputKeys.INDENT, "yes");
+                trans.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
+                trans.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM, XML_SCHEMA);
+                trans.transform(new DOMSource(document), new StreamResult(out));
+            }
+            /* this is also fast, but deprecated by xerces
+                OutputFormat format = new OutputFormat(document, "UTF-8", true);
+                format.setIndenting(true);
+                format.setDoctype( null, XML_SCHEMA );
+                XMLSerializer serializer = new XMLSerializer(out, format);
+                serializer.asDOMSerializer();
+                serializer.serialize(document);
+             */
+        } catch ( Exception e ) {
+            return false;
+        }  finally {
+            try {
+                out.close();
+            } catch (IOException e) {
+                // ignore
+            }
+        }
+        
+        return true;
+    }
 }

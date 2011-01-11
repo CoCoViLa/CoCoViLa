@@ -65,7 +65,7 @@ public class ClassGraphics implements Serializable {
 	 * @param Ysize float -
 	 * @param g2 Graphics -
 	 */
-	void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
+	public void draw(int xPos, int yPos, float Xsize, float Ysize, Graphics2D g2) {
 		Shape s;
 
 		for (int i = 0; i < shapes.size(); i++) {

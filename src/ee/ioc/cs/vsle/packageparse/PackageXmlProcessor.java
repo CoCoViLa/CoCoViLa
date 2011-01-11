@@ -8,6 +8,7 @@ import java.io.*;
 import java.util.*;
 
 import javax.xml.parsers.*;
+import javax.xml.transform.*;
 
 import org.w3c.dom.*;
 import org.xml.sax.*;
@@ -304,7 +305,6 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         
         Port newPort = new Port( name, type, Integer.parseInt( x ), Integer.parseInt( y ), portConnection, strict, multi );
         
-        //is id really needed?
         if( portNode.hasAttribute( ATR_ID ) )
             newPort.setId( portNode.getAttribute( ATR_ID ) );
         
@@ -314,11 +314,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                 && ( gr = getElementByName( gr, EL_GRAPHICS )) != null ) {
             newPort.setOpenGraphics( getGraphicsParser().parse( gr ) );
         } else {
-            ClassGraphics newGraphics = new ClassGraphics();
-            newGraphics.addShape( new Oval( -4, -4, 8, 8, 12632256, true, 1.0f, 255, 0, true ) );
-            newGraphics.addShape( new Oval( -4, -4, 8, 8, 0, false, 1.0f, 255, 0, true ) );
-            newGraphics.setBounds( -4, -4, 8, 8 );
-            newPort.setOpenGraphics( newGraphics );
+            newPort.setOpenGraphics( Port.DEFAULT_OPEN_GRAPHICS );
         }
         
         //closed
@@ -326,10 +322,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                 && ( gr = getElementByName( gr, EL_GRAPHICS )) != null ) {
             newPort.setClosedGraphics( getGraphicsParser().parse( gr ) );
         } else {
-            ClassGraphics newGraphics = new ClassGraphics();
-            newGraphics.addShape( new Oval( -4, -4, 8, 8, 0, true, 1.0f, 255, 0, true ) );
-            newGraphics.setBounds( -4, -4, 8, 8 );
-            newPort.setClosedGraphics( newGraphics );
+            newPort.setClosedGraphics( Port.DEFAULT_CLOSED_GRAPHICS );
         }
         
         newClass.addPort( newPort );
@@ -606,10 +599,73 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             IOException {
     }
     
+    public void addClassObject( String name ) {
+        
+        Document doc;
+        try {
+            doc = getDocument();
+        } catch ( Exception e ) {
+            e.printStackTrace();
+            return;
+        }
+        
+        Element classNode = doc.createElement( EL_CLASS );
+        doc.getDocumentElement().appendChild( classNode );
+        classNode.setAttribute( ATR_TYPE, PackageClass.ComponentType.SCHEME.getXmlName() );
+        classNode.setAttribute( ATR_STATIC, "false" );
+        
+        Element className = doc.createElement( EL_NAME );
+        className.setTextContent( name );
+        classNode.appendChild( className );
+        
+        Element desrc = doc.createElement( EL_DESCRIPTION );
+        desrc.setTextContent( "Exported scheme" );
+        classNode.appendChild( desrc );
+        
+        Element icon = doc.createElement( EL_ICON );
+        icon.setTextContent( "default.gif" );
+        classNode.appendChild( icon );
+        
+        Element graphics = doc.createElement( EL_GRAPHICS );
+        classNode.appendChild( graphics );
+        
+        Element bounds = doc.createElement( EL_BOUNDS );
+        graphics.appendChild( bounds );
+        bounds.setAttribute( ATR_X, "0" );
+        bounds.setAttribute( ATR_Y, "0" );
+        bounds.setAttribute( ATR_WIDTH, "100" );
+        bounds.setAttribute( ATR_HEIGHT, "70" );
+        
+        Element rect = doc.createElement( EL_RECT );
+        graphics.appendChild( rect );
+        rect.setAttribute( ATR_X, "0" );
+        rect.setAttribute( ATR_Y, "0" );
+        rect.setAttribute( ATR_WIDTH, "100" );
+        rect.setAttribute( ATR_HEIGHT, "70" );
+        
+        Element text = doc.createElement( EL_TEXT );
+        text.setAttribute( ATR_STRING, "Exported Scheme" );
+        text.setAttribute( ATR_X, "5" );
+        text.setAttribute( ATR_Y, "25" );
+        text.setAttribute( ATR_FONTNAME, "Arial" );
+        text.setAttribute( ATR_FONTSIZE, "10" );
+        text.setAttribute( ATR_FONTSTYLE, "0" );
+        graphics.appendChild( text );
+        
+        try {
+            writeDocument( doc, new FileOutputStream( xmlFile ) );
+        } catch ( FileNotFoundException e ) {
+            e.printStackTrace();
+        }
+    }
     
     public static VPackage load(File f) {
 
         return new PackageXmlProcessor(f).parse();
     }
-
+    
+    public static void main( String[] args ) throws ParserConfigurationException, SAXException, IOException, TransformerException {
+//        new PackageXmlProcessor( FileFuncs.showFileChooser( "/Users/pavelg/workspace/cocovila_packages/gearbox", null, null, null, false ) ).test();
+        System.out.println(PackageClass.ComponentType.SCHEME.name());
+    }
 }

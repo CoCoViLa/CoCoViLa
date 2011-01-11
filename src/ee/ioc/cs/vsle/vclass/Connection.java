@@ -266,11 +266,11 @@ public class Connection implements Serializable {
 		attrs.addAttribute("", "", "obj1", StringUtil.CDATA,
 				getBeginPort().getObject().getName());
 		attrs.addAttribute("", "", "port1", StringUtil.CDATA,
-				getBeginPort().toString());
+				getBeginPort().getConnectionId());
 		attrs.addAttribute("", "", "obj2", StringUtil.CDATA,
 				getEndPort().getObject().getName());
 		attrs.addAttribute("", "", "port2", StringUtil.CDATA,
-				getEndPort().toString());
+				getEndPort().getConnectionId());
 
 		th.startElement("", "", "connection", attrs);
 		attrs.clear();

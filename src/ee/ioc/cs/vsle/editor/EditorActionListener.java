@@ -35,6 +35,7 @@ public class EditorActionListener implements ActionListener {
             setEnabled( false );
         }
 
+        @Override
         public void actionPerformed( ActionEvent evt ) {
             Canvas canvas = Editor.getInstance().getCurrentCanvas();
             if ( canvas != null ) {
@@ -66,6 +67,7 @@ public class EditorActionListener implements ActionListener {
             setEnabled( false );
         }
 
+        @Override
         public void actionPerformed( ActionEvent evt ) {
             Canvas canvas = Editor.getInstance().getCurrentCanvas();
             if ( canvas != null ) {
@@ -98,6 +100,7 @@ public class EditorActionListener implements ActionListener {
             putValue( Action.ACCELERATOR_KEY, KeyStroke.getKeyStroke( KeyEvent.VK_DELETE, 0 ) );
         }
 
+        @Override
         public void actionPerformed( ActionEvent e ) {
             Canvas canvas = Editor.getInstance().getCurrentCanvas();
             if ( canvas != null )
@@ -114,6 +117,7 @@ public class EditorActionListener implements ActionListener {
                     KeyEvent.VK_D, InputEvent.CTRL_DOWN_MASK));
         }
 
+        @Override
         public void actionPerformed(ActionEvent e) {
             Canvas canvas = Editor.getInstance().getCurrentCanvas();
             if (canvas != null) {
@@ -122,6 +126,7 @@ public class EditorActionListener implements ActionListener {
         }
     }
 
+    @Override
     public void actionPerformed( ActionEvent e ) {
 
         // JmenuItem chosen
@@ -196,7 +201,12 @@ public class EditorActionListener implements ActionListener {
             } else if ( Menu.DELETE_SCHEME.equals( e.getActionCommand() ) ) {
                 deleteCurrentScheme();
             } else if ( Menu.EXPORT_SCHEME.equals( e.getActionCommand() ) ) {
-            	exportSchemeSpecification();
+                Canvas canv = Editor.getInstance().getCurrentCanvas();
+                if ( canv != null ) {
+                    SchemeExporter.exportSchemeSpecification( canv.getScheme(), canv.getSchemeTitle() );
+                } else {
+                    notifyOnNullPackage(null);
+                }
             } else if ( Menu.EXPORT_SCHEME_AS_OBJECT.equals( e.getActionCommand() ) ) {
                 Canvas canv = Editor.getInstance().getCurrentCanvas();
                 if ( canv != null ) {
@@ -434,41 +444,6 @@ public class EditorActionListener implements ActionListener {
         }
     }
 
-    private void exportSchemeSpecification() {
-    	Editor editor = Editor.getInstance();
-        VPackage pack = editor.getCurrentPackage();
-
-        if ( notifyOnNullPackage(pack) ) {
-            return;
-        }
-
-        JFileChooser fc = new JFileChooser( pack.getPath() );
-        
-        String schemeTitle = editor.getCurrentCanvas().getSchemeTitle();
-        
-        if( schemeTitle != null ) {
-        	fc.setSelectedFile( new File( pack.getPath() + File.separator + schemeTitle ) );
-        }
-        
-        CustomFileFilter filter = SpecGenFactory.getInstance().getCurrentSpecGen().getFileFilter();
-        fc.setFileFilter( filter );
-        int returnVal = fc.showSaveDialog( editor );
-        if ( returnVal == JFileChooser.APPROVE_OPTION ) {
-
-            File file = fc.getSelectedFile();
-
-            if ( !file.getAbsolutePath().toLowerCase().endsWith( filter.getExtension() ) ) {
-
-                file = new File( file.getAbsolutePath() + "." + filter.getExtension() );
-            }
-
-            RuntimeProperties.setLastPath( file.getAbsolutePath() );
-            if ( RuntimeProperties.isLogInfoEnabled() )
-                db.p( "Exporting scheme specification into: " + file.getName() );
-            editor.getCurrentCanvas().exportSchemeSpecification( file );
-        }
-    }
-    
     /**
      * Closes the current scheme and removes the file the scheme was loaded
      * from. The user is asked for confirmation.

@@ -49,7 +49,8 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
 		return "Objects: " + objects + " Connections: " + connections;
 	}
 
-	public ee.ioc.cs.vsle.api.Package getPackage() {
+	@Override
+    public VPackage getPackage() {
 		return canvas.getPackage();
 	}
 
@@ -92,6 +93,7 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
      * update the visuals when, for example, the values of the fields have
      * changed.
      */
+    @Override
     public void repaint() {
         if (canvas == Editor.getInstance().getCurrentCanvas()) {
             canvas.repaint(); // TODO should repaint only the drawingarea
@@ -103,6 +105,7 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
      * 
      * @see ee.ioc.cs.vsle.api.Scheme#repaint(int, int, int, int)
      */
+    @Override
     public void repaint(int x, int y, int width, int height) {
     }
 
@@ -110,6 +113,7 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
      * @see ee.ioc.cs.vsle.api.Scheme#getFieldValue(java.lang.String,
      *      java.lang.String)
      */
+    @Override
     public Object getFieldValue(String objectName, String fieldName) {
         GObj obj = objects.getByName(objectName);
         if (obj == null)
@@ -125,6 +129,7 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
     /*
      * @see ee.ioc.cs.vsle.api.Scheme#getObject(java.lang.String)
      */
+    @Override
     public SchemeObject getObject(String objectName) {
         SchemeObject obj = objects.getByName(objectName);
         if (obj == null)
@@ -135,6 +140,7 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
     /*
      * @see ee.ioc.cs.vsle.api.Scheme#queryTable(java.lang.String, java.lang.Object[])
      */
+    @Override
     public Object queryTable( String tableName, Object[] args ) {
         return TableManager.getTable( getPackage(), tableName ).queryTable( args );
     }

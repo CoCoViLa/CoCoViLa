@@ -1,5 +1,6 @@
 package ee.ioc.cs.vsle.util;
 
+import java.awt.*;
 import java.io.*;
 import java.net.*;
 import java.util.Arrays;
@@ -12,7 +13,7 @@ import javax.imageio.stream.ImageInputStream;
 import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
+import ee.ioc.cs.vsle.editor.*;
 
 /**
  * User: Ando
@@ -53,6 +54,7 @@ public class FileFuncs {
             path = new File(defaultPath);
         }
 
+        @Override
         public byte[] getFileContents(String fileName) {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
@@ -69,6 +71,7 @@ public class FileFuncs {
             return null;
         }
 
+        @Override
         public boolean writeFile(String fileName, String data) {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
@@ -82,6 +85,7 @@ public class FileFuncs {
             return "FileSystemStorage(" + path + ")";
         }
 
+        @Override
         public char[] getCharFileContents(String fileName) {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
@@ -111,6 +115,7 @@ public class FileFuncs {
 
         private Map<String, byte[]> fileMap;
 
+        @Override
         public byte[] getFileContents(String fileName) {
             byte[] data = null;
             if (fileMap != null) {
@@ -119,6 +124,7 @@ public class FileFuncs {
             return data;
         }
 
+        @Override
         public boolean writeFile(String fileName, String data) {
             if (fileMap == null) {
                 fileMap = new HashMap<String, byte[]>();
@@ -148,6 +154,7 @@ public class FileFuncs {
             return s.toString();
         }
 
+        @Override
         public char[] getCharFileContents(String fileName) {
             byte[] contents = getFileContents(fileName);
             if (contents != null) {
@@ -259,6 +266,14 @@ public class FileFuncs {
         } catch ( Exception e ) {
             db.p( e );
         }
+    }
+    
+    public static String getName(File f) {
+        String s = f.getName();
+        int i = s.lastIndexOf( '.' );
+        if( i > 0 && i < s.length() )
+            return s.substring( 0, i );
+        return s;
     }
     
     public static String getExtension(File f) {
@@ -453,4 +468,29 @@ public class FileFuncs {
         s = s.replaceAll("[^-\\w]+", "_");
         return s;
     }
+    
+    public static File showFileChooser( String path, File selectedFile, CustomFileFilter filter, Component parent, boolean showSaveDialog ) {
+        
+        JFileChooser fc = new JFileChooser( path );
+        fc.setSelectedFile( selectedFile );
+        fc.setFileFilter( filter );
+        int returnVal = showSaveDialog ? fc.showSaveDialog( parent ) : fc.showOpenDialog( parent );
+        
+        if ( returnVal == JFileChooser.APPROVE_OPTION ) {
+
+            File file = fc.getSelectedFile();
+
+            if ( showSaveDialog 
+                    && filter != null 
+                    && !file.getAbsolutePath().toLowerCase().endsWith( filter.getExtension() ) ) {
+
+                file = new File( file.getAbsolutePath() + "." + filter.getExtension() );
+            }
+            
+            return file;
+        }
+        
+        return null;
+    }
+    
 }

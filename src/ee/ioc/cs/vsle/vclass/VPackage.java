@@ -87,9 +87,7 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
             return packClassName;
         }
 
-        /* (non-Javadoc)
-         * @see ee.ioc.cs.vsle.vclass.Package#getPath()
-         */
+        @Override
         public String getPath() {
             return path;
         }
@@ -109,10 +107,8 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
 			this.name = name;
 		}
 
-		/* (non-Javadoc)
-         * @see ee.ioc.cs.vsle.vclass.Package#getName()
-         */
-		public String getName() {
+		@Override
+        public String getName() {
 			return name;
 		}
 

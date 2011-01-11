@@ -45,6 +45,10 @@ public class SchemeContainer implements ISchemeContainer {
         return scheme;
     }
 
+    public void setScheme( Scheme scheme ) {
+        this.scheme = scheme;
+    }
+
     @Override
     public String getWorkDir() {
         return dir;
