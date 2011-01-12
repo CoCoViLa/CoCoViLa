@@ -203,10 +203,12 @@ public class GObj implements Serializable, Cloneable,
         return strict;
     }
 
+    @Override
     public int getX() {
         return x;
     }
 
+    @Override
     public int getY() {
         return y;
     }
@@ -219,10 +221,12 @@ public class GObj implements Serializable, Cloneable,
         return height;
     }
 
+    @Override
     public int getRealWidth() {
         return (int) ( getWidth() * getXsize() );
     }
 
+    @Override
     public int getRealHeight() {
         return (int) ( getHeight() * getYsize() );
     }
@@ -236,6 +240,7 @@ public class GObj implements Serializable, Cloneable,
         this.name = name;
     }
 
+    @Override
     public String getName() {
         return name;
     }
@@ -244,6 +249,7 @@ public class GObj implements Serializable, Cloneable,
         this.className = name;
     }
 
+    @Override
     public String getClassName() {
         return className;
     }
@@ -460,11 +466,13 @@ public class GObj implements Serializable, Cloneable,
         Ysize = ysize;
     }
 
+    @Override
     public void setX( int x ) {
         // Editor GUI does not support negative coordinates properly
         this.x = x < 0 ? DEFAULT_X : x;
     }
 
+    @Override
     public void setY( int y ) {
         // Editor GUI does not support negative coordinates properly
         this.y = y < 0 ? DEFAULT_Y : y;
@@ -706,6 +714,7 @@ public class GObj implements Serializable, Cloneable,
     /*
      * @see ee.ioc.cs.vsle.api.SchemeObject#getFieldValue(java.lang.String)
      */
+    @Override
     public Object getFieldValue( String fieldName ) {
         ClassField f = getField( fieldName );
         if ( f == null )
@@ -718,6 +727,7 @@ public class GObj implements Serializable, Cloneable,
      * @see ee.ioc.cs.vsle.api.SchemeObject#setFieldValue(java.lang.String,
      *      java.lang.String)
      */
+    @Override
     public void setFieldValue( String fieldName, String value ) {
         ClassField f = getField( fieldName );
         if ( f == null )

@@ -1,8 +1,8 @@
 package ee.ioc.cs.vsle.editor.scheme;
 
 import java.awt.*;
+import java.awt.Point;
 import java.awt.event.*;
-import java.beans.*;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -20,28 +20,70 @@ public class SchemeExportDialog extends JDialog {
 
     private ISchemeContainer schemeContainer;
     private VPackage selectedPackage;
-    private List<Port> ports;
+    private Set<String> ports;
+    private String iconRelativePath;
+    private boolean isOk;
     
-    public SchemeExportDialog( ISchemeContainer schemeContainer, List<Port> ports ) {
+    //GUI
+    private JButton jbtOk;
+    private JCheckBox jcbModifyScheme;
+    private JTextField jtfName;
+    private JPanel previewPanel;
+    private JList jlPorts;
+    
+    //shapes
+    private Text previewText = new Text( 5, 20, getPreviewPanel().getFont(), Color.red, 255, "" );
+    private Rect previewRect = new Rect( 0, 0, 35, 35, Color.black.getRGB(), false, 1f, 255, 0 );
+    
+    /**
+     * @param schemeContainer
+     * @param ports
+     */
+    public SchemeExportDialog( ISchemeContainer schemeContainer, Set<String> ports ) {
         super( Editor.getInstance(), "Export scheme", true );
+        
         assert schemeContainer != null;
         assert ports != null;
+        
         this.schemeContainer = schemeContainer;
         this.selectedPackage = schemeContainer.getPackage();
         this.ports = ports;
         init();
+        
+        setVisible( true );
     }
 
     private void init() {
+        
         JPanel contentPane = new JPanel( new BorderLayout( 5, 5 ) );
         contentPane.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
         setContentPane( contentPane );
 
         JPanel buttonPane = new JPanel(
                 new FlowLayout( FlowLayout.CENTER, 5, 5 ) );
-        buttonPane.add( new JButton( "OK" ) );
-        buttonPane.add( new JButton( "Cancel" ) );
+        
+        final JButton jbtCancel;
+        buttonPane.add( jbtOk = new JButton( "OK" ) );
+        buttonPane.add( jbtCancel = new JButton( "Cancel" ) );
 
+        ActionListener alst = new ActionListener() {
+            
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                
+                if( e.getSource() == jbtOk ) {
+                    isOk = true;
+                }
+                
+                SchemeExportDialog.this.dispose();
+                jbtOk.removeActionListener( this );
+                jbtCancel.removeActionListener( this );
+            }
+        };
+        
+        jbtOk.addActionListener( alst );
+        jbtCancel.addActionListener( alst );
+        
         contentPane.add( buttonPane, BorderLayout.SOUTH );
         contentPane.add( createCenterPanel(), BorderLayout.CENTER );
 
@@ -53,6 +95,7 @@ public class SchemeExportDialog extends JDialog {
     }
 
     private JPanel createCenterPanel() {
+        
         JPanel centerPane = new JPanel();
         centerPane.setLayout( new GridBagLayout() );
 
@@ -100,15 +143,14 @@ public class SchemeExportDialog extends JDialog {
                 gbc, 0, y += 2, 1, 1, 0, 0, GridBagConstraints.NONE,
                 GridBagConstraints.WEST ) );
         
-        ImageIcon icon = FileFuncs.getImageIcon("images/default.gif", false);
-        final JLabel jlblIcon = new JLabel(icon);
+        final JLabel jlblIcon = new JLabel();
         jlblIcon.setBorder( BorderFactory.createLineBorder( Color.black ) );
         
         centerPane.add( jlblIcon, GuiUtil.buildGridBagConstraints(
                 gbc, 1, y, 1, 1, 0, 0, GridBagConstraints.NONE,
                 GridBagConstraints.CENTER ) );
         
-        final JLabel jlblIconName = new JLabel( "default.gif" );
+        final JLabel jlblIconName = new JLabel();
         centerPane.add( jlblIconName, GuiUtil
                 .buildGridBagConstraints( gbc, 3, y, 1, 1, 0, 0,
                         GridBagConstraints.NONE, GridBagConstraints.WEST ) );
@@ -118,6 +160,18 @@ public class SchemeExportDialog extends JDialog {
                 .buildGridBagConstraints( gbc, 5, y, 1, 1, 0, 0,
                         GridBagConstraints.NONE, GridBagConstraints.EAST ) );
         
+        final Runnable dropIcon = new Runnable() {
+            @Override
+            public void run() {
+                iconRelativePath = "default.gif";
+                ImageIcon icon = FileFuncs.getImageIcon("images/default.gif", false);
+                jlblIcon.setIcon( icon );
+                jlblIconName.setText( iconRelativePath );
+            }
+        };
+        
+        dropIcon.run();
+        
         jbtChooseIcon.addActionListener( new ActionListener() {
             
             @Override
@@ -126,11 +180,31 @@ public class SchemeExportDialog extends JDialog {
                         null, null, SchemeExportDialog.this, false );
                 
                 if( iconFile != null && iconFile.exists() ) {
+                    
+                    String packageDir = new File( selectedPackage.getPath() ).getParent();
+
+                    if( !iconFile.getAbsolutePath().startsWith( packageDir ) ) {
+                        JOptionPane.showMessageDialog( 
+                                SchemeExportDialog.this, 
+                                "Image should be in the (sub)directory of the package " + selectedPackage.getName(), 
+                                "Error", JOptionPane.ERROR_MESSAGE );
+                        return;
+                    }
+
                     ImageIcon ii = FileFuncs.getImageIcon( iconFile.getAbsolutePath(), true );
                     if( ii.getImageLoadStatus() == MediaTracker.COMPLETE ) {
+                        
+                        iconRelativePath = iconFile.getAbsolutePath().substring( packageDir.length()+1 );
                         jlblIcon.setIcon( ii );
-                        jlblIconName.setText( iconFile.getName() );
-                        jlblIconName.setToolTipText( iconFile.getAbsolutePath() );                        
+                        jlblIconName.setText( iconRelativePath );
+                        jlblIconName.setToolTipText( iconFile.getAbsolutePath() ); 
+                        checkValidity();
+                    } else {
+                        JOptionPane.showMessageDialog( 
+                                SchemeExportDialog.this, 
+                                "Error loading image " + iconFile.getAbsolutePath(), 
+                                "Error", JOptionPane.ERROR_MESSAGE );
+                        return;
                     }
                 }
             }
@@ -157,8 +231,9 @@ public class SchemeExportDialog extends JDialog {
             
             @Override
             public void actionPerformed( ActionEvent e ) {
-                File packFile = FileFuncs.showFileChooser( selectedPackage.getPath(), 
-                        new File( selectedPackage.getPath() ), 
+                File oldPackFile = new File( selectedPackage.getPath() );
+                File packFile = FileFuncs.showFileChooser( null, 
+                        oldPackFile, 
                         new CustomFileFilter( CustomFileFilter.EXT.XML ), 
                         SchemeExportDialog.this, 
                         false );
@@ -177,10 +252,19 @@ public class SchemeExportDialog extends JDialog {
                             jcbModifyScheme.setEnabled( false );
                             jcbModifyScheme.setToolTipText( "Selected package differs from the package of original scheme" );
                         }
+                        
+                        //check image icon
+                        if( iconRelativePath != null 
+                                && ! new File(packFile.getParent(), iconRelativePath).exists() ) {
+                            dropIcon.run();
+                        }
+                        
+                        checkValidity();
                         repaint();
                     }
                 }
             }
+
         });
         
         centerPane
@@ -190,7 +274,7 @@ public class SchemeExportDialog extends JDialog {
                                 GridBagConstraints.EAST ) );
         
         //modify scheme
-        jcbModifyScheme = new JCheckBox( "Modify current scheme" );
+        jcbModifyScheme = new JCheckBox( "Replace selected objects with new object in the current scheme" );
         centerPane
                 .add(jcbModifyScheme, GuiUtil
                         .buildGridBagConstraints( gbc, 0, ++y, 6, 1, 0, 0,
@@ -200,8 +284,14 @@ public class SchemeExportDialog extends JDialog {
         return centerPane;
     }
 
-    private JCheckBox jcbModifyScheme;
-    private JTextField jtfName;
+    private void checkValidity() {
+
+        boolean isValid = 
+            iconRelativePath != null 
+                && StringUtil.isJavaIdentifier( getSchemeName() );
+
+        jbtOk.setEnabled( isValid );
+    }
     
     private JTextField getNameTextField() {
         
@@ -229,24 +319,10 @@ public class SchemeExportDialog extends JDialog {
         return jtfName;
     }
 
-    public static void main( String[] args ) {
-        SchemeContainer container = null;
-        VPackage pack;
-        if ( ( pack = PackageXmlProcessor
-                .load( new File(
-                        "/Users/pavelg/workspace/cocovila_packages/Circuit/Circuit.xml" ) ) ) != null ) {
-
-            container = new SchemeContainer( pack, pack.getPath() );
-
-            new SchemeExportDialog( container, new ArrayList<Port>(Arrays.asList( new Port[] {  } ) ) ).setVisible( true );
-        }
-    }
-
-    JPanel previewPanel;
-    Text previewText = new Text( 5, 20, getPreviewPanel().getFont(), Color.red, 255, "" );
-    
     private JPanel getPreviewPanel() {
+        
         if( previewPanel == null ) {
+            
             previewPanel = new JPanel() {
                 @Override
                 protected void paintComponent( Graphics g ) {
@@ -266,15 +342,22 @@ public class SchemeExportDialog extends JDialog {
                     int rectMaxWidth = previewPanel.getWidth() - 40;
                     int rectWidth = Math.min( rectMinWidth, rectMaxWidth );
                     
-                    new Rect( 0, 0, rectWidth, 35, Color.black.getRGB(), false, 3f, 255, 0 ).draw( 20, 20, 1f, 1f, g2 );
-                    previewText.draw( 20, 20, 1f, 1f, g2 );
+                    previewRect.setWidth( rectWidth );
+                    int offset = 20;
+                    previewRect.draw( offset, offset, 1f, 1f, g2 );
+                    previewText.draw( offset, offset, 1f, 1f, g2 );
                     
                     int maxPorts = Math.max( rectMaxWidth / portStep, 1 );
+                    portPoints.clear();
                     
                     for( int i = 0; i < selectedPortCount; i++ ) {
+                        
+                        Point p = new Point( 12 + (i % maxPorts)*portStep, (i/maxPorts + 1)*portStep + 20 );
+                        portPoints.add( p );
+                        
                         Port.DEFAULT_OPEN_GRAPHICS.draw( 
-                                32 + (i % maxPorts)*portStep, 
-                                (i/maxPorts + 1)*portStep + 40, 
+                                p.x + offset, 
+                                p.y + offset, 
                                 1f, 1f, g2 );
                     }
                 }
@@ -283,59 +366,48 @@ public class SchemeExportDialog extends JDialog {
         return previewPanel;
     }
     
+    private List<Point> portPoints = new ArrayList<Point>();
+    
+    public Point[] getPortPoints() {
+        return portPoints.toArray( new Point[portPoints.size()] );
+    }
+    
+    public ClassGraphics getClassGraphics() {
+        
+        ClassGraphics cg = new ClassGraphics();
+        cg.setBoundWidth( previewRect.getWidth() );
+        cg.setBoundHeight( previewRect.getHeight() );
+        cg.addShape( previewText );
+        cg.addShape( previewRect );
+        return cg;
+    }
+    
     private void updatePreview() {
         
         previewText.setText( getNameTextField().getText() );
+        checkValidity();
         getPreviewPanel().repaint();
     }
     
-    private JList jlPorts;
-    
+   
     private JList getPortsList() {
         
         if( jlPorts == null ) {
-//            List<String> model = new ArrayList<String>();
             Set<String> model = new LinkedHashSet<String>();
-            
-            for( Port port : ports ) {
-                String id = port.getObject().getName() + "." + port.getField().getName();
-                model.add( id );
-            }
-//            model.addAll( ports );
-
+            //first list ports with outer connections
+            model.addAll( ports );
+            //and then put the rest of the ports
             for( GObj obj : schemeContainer.getObjects() ) {
                 for( Port port : obj.getPorts() ) {
-                    String id = port.getObject().getName() + "." + port.getField().getName();
-                    model.add( id );
-//                    if( !ports.contains( port ) ) {
-//                        model.add( port );
-//                    }
+                    model.add( port.getNameWithObject() );
                 }
             }
-            //        System.out.println( "Model: " + model);
             jlPorts = new JList( model.toArray() );
-
-            ListCellRenderer rend = new DefaultListCellRenderer() {
-                @Override
-                public Component getListCellRendererComponent( JList list, Object value,
-                        int index, boolean isSelected, boolean cellHasFocus ) {
-
-                    JLabel lbl = (JLabel) super.getListCellRendererComponent( jlPorts, value, index, isSelected, cellHasFocus );
-//                    Port p = (Port)value;
-//                    lbl.setText( p.getObject().getName() + "." + p.getName() + ( p.getId() != null ? " (" + p.getId() + ")" : "" ) );
-                    return lbl;
-                }
-            };
-
-            jlPorts.setCellRenderer( rend );
             jlPorts.setSelectionInterval( 0, ports.size()-1 );
-            //        System.out.println(jlist.getModel().getClass().getName());
             jlPorts.addListSelectionListener( new ListSelectionListener() {
 
                 @Override
                 public void valueChanged( ListSelectionEvent e ) {
-//                    Object[] values = jlPorts.getSelectedValues();
-//                    System.out.println(Arrays.toString( values ));
                     updatePreview();
                 }
             });
@@ -344,5 +416,35 @@ public class SchemeExportDialog extends JDialog {
         }
         
         return jlPorts;
+    }
+    
+    public String getSchemeName() {
+        return getNameTextField().getText();
+    }
+    
+    public String[] getSelectedPortNames() {
+        
+        List<String> portNames = new ArrayList<String>();
+        for( Object value : getPortsList().getSelectedValues() ) {
+            portNames.add( (String)value );
+        }
+        
+        return portNames.toArray( new String[portNames.size()] );
+    }
+    
+    public String getImageFilename() {
+        return iconRelativePath;
+    }
+    
+    public VPackage getSelectedPackage() {
+        return selectedPackage;
+    }
+    
+    public boolean shouldModifyCurrentScheme() {
+        return jcbModifyScheme.isSelected();
+    }
+
+    public boolean isOk() {
+        return isOk;
     }
 }

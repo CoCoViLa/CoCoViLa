@@ -493,4 +493,12 @@ public class FileFuncs {
         return null;
     }
     
+    public static boolean askToOverwriteFile( File f ) {
+        
+        return JOptionPane.showConfirmDialog( 
+                    null, 
+                    "File \"" + f.getName() + "\" exists, overwrite?", 
+                    "File exists", 
+                    JOptionPane.YES_NO_OPTION ) == JOptionPane.OK_OPTION;
+    }
 }

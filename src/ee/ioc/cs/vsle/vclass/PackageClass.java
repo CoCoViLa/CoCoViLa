@@ -76,6 +76,10 @@ public class PackageClass implements Serializable {
 		graphics = gr;
 	}
 
+	public ClassGraphics getGraphics() {
+	    return graphics;
+	}
+	
 	/**
 	 * Sets the {@code ClassPainter} instance that is used to create
 	 * new instances by cloning the first instacne.

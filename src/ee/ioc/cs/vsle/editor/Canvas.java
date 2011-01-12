@@ -1717,17 +1717,20 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * 
      * @param className the name of the visual class
      */
-    private void createAndInitNewObject( String className ) {
+    public GObj createAndInitNewObject( String className ) {
         PackageClass pClass = vPackage.getClass( className );
-        setCurrentObj( pClass.getNewInstance() );
+        GObj obj = pClass.getNewInstance();
+        setCurrentObj( obj );
 
-        assert getCurrentObj() != null;
+        assert obj != null;
 
-        getCurrentObj().setName( genObjectName( pClass, getCurrentObj() ) );
+        obj.setName( genObjectName( pClass, obj ) );
 
-        setViewAttributes( getCurrentObj() );
+        setViewAttributes( obj );
         
-        currentPainter = pClass.getPainterFor( scheme, getCurrentObj() );
+        currentPainter = pClass.getPainterFor( scheme, obj );
+        
+        return obj;
     }
 
     private void setViewAttributes( GObj obj ) {

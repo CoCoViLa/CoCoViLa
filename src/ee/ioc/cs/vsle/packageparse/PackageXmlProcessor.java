@@ -6,11 +6,13 @@ package ee.ioc.cs.vsle.packageparse;
 import java.awt.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import javax.xml.parsers.*;
 import javax.xml.transform.*;
 
 import org.w3c.dom.*;
+import org.w3c.dom.ls.*;
 import org.xml.sax.*;
 
 import ee.ioc.cs.vsle.common.xml.*;
@@ -83,6 +85,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
     private static final String EL_NAME = "name";
     private static final String ATR_ID = "id";
     private static final String EL_PORT = "port";
+    private static final String EL_PORTS = "ports";
     private static final String ATR_SHOW_FIELDS = "showFields";
     private static final String EL_GRAPHICS = "graphics";
     private static final String VAL_RELATION = "relation";
@@ -303,7 +306,12 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             }
         }
         
-        Port newPort = new Port( name, type, Integer.parseInt( x ), Integer.parseInt( y ), portConnection, strict, multi );
+        Port newPort = new Port( name, type, 
+                Integer.parseInt( x ), 
+                Integer.parseInt( y ), 
+                portConnection, 
+                Boolean.parseBoolean( strict ), 
+                Boolean.parseBoolean( multi ) );
         
         if( portNode.hasAttribute( ATR_ID ) )
             newPort.setId( portNode.getAttribute( ATR_ID ) );
@@ -313,16 +321,12 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         if( ( gr = getElementByName( portNode, EL_OPEN ) ) != null 
                 && ( gr = getElementByName( gr, EL_GRAPHICS )) != null ) {
             newPort.setOpenGraphics( getGraphicsParser().parse( gr ) );
-        } else {
-            newPort.setOpenGraphics( Port.DEFAULT_OPEN_GRAPHICS );
         }
         
         //closed
         if( ( gr = getElementByName( portNode, EL_CLOSED ) ) != null 
                 && ( gr = getElementByName( gr, EL_GRAPHICS )) != null ) {
             newPort.setClosedGraphics( getGraphicsParser().parse( gr ) );
-        } else {
-            newPort.setClosedGraphics( Port.DEFAULT_CLOSED_GRAPHICS );
         }
         
         newClass.addPort( newPort );
@@ -599,7 +603,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             IOException {
     }
     
-    public void addClassObject( String name ) {
+    public void addPackageClass( PackageClass pClass ) {
         
         Document doc;
         try {
@@ -607,6 +611,18 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         } catch ( Exception e ) {
             e.printStackTrace();
             return;
+        }
+        
+        String name = pClass.getName();
+
+        //check if such class exists and remove duplicates
+        Element rootEl = doc.getDocumentElement();
+        NodeList classEls = rootEl.getElementsByTagName( EL_CLASS );
+        for( int i = 0; i < classEls.getLength(); i++ ) {
+            Element nameEl = getElementByName( (Element)classEls.item( i ), EL_NAME );
+            if( name.equals( nameEl.getTextContent() ) ) {
+                rootEl.removeChild( classEls.item( i ) );
+            }
         }
         
         Element classNode = doc.createElement( EL_CLASS );
@@ -619,39 +635,30 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         classNode.appendChild( className );
         
         Element desrc = doc.createElement( EL_DESCRIPTION );
-        desrc.setTextContent( "Exported scheme" );
+        desrc.setTextContent( pClass.getDescription() );
         classNode.appendChild( desrc );
         
         Element icon = doc.createElement( EL_ICON );
-        icon.setTextContent( "default.gif" );
+        icon.setTextContent( pClass.getIcon() );
         classNode.appendChild( icon );
         
-        Element graphics = doc.createElement( EL_GRAPHICS );
-        classNode.appendChild( graphics );
+        //graphics
+        classNode.appendChild( generateGraphicsNode( doc, pClass.getGraphics() ) );
         
-        Element bounds = doc.createElement( EL_BOUNDS );
-        graphics.appendChild( bounds );
-        bounds.setAttribute( ATR_X, "0" );
-        bounds.setAttribute( ATR_Y, "0" );
-        bounds.setAttribute( ATR_WIDTH, "100" );
-        bounds.setAttribute( ATR_HEIGHT, "70" );
+        //ports
+        List<Port> ports = pClass.getPorts();
+        if( !ports.isEmpty() ) {
+            Element portsEl = doc.createElement( EL_PORTS );
+            classNode.appendChild( portsEl );
+            
+            for( Port port : pClass.getPorts() ) {
+                portsEl.appendChild( generatePortNode( doc, port ) );
+            }
+        }
         
-        Element rect = doc.createElement( EL_RECT );
-        graphics.appendChild( rect );
-        rect.setAttribute( ATR_X, "0" );
-        rect.setAttribute( ATR_Y, "0" );
-        rect.setAttribute( ATR_WIDTH, "100" );
-        rect.setAttribute( ATR_HEIGHT, "70" );
+        //fields TODO implement fields serialization
         
-        Element text = doc.createElement( EL_TEXT );
-        text.setAttribute( ATR_STRING, "Exported Scheme" );
-        text.setAttribute( ATR_X, "5" );
-        text.setAttribute( ATR_Y, "25" );
-        text.setAttribute( ATR_FONTNAME, "Arial" );
-        text.setAttribute( ATR_FONTSIZE, "10" );
-        text.setAttribute( ATR_FONTSTYLE, "0" );
-        graphics.appendChild( text );
-        
+        //write
         try {
             writeDocument( doc, new FileOutputStream( xmlFile ) );
         } catch ( FileNotFoundException e ) {
@@ -659,13 +666,68 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         }
     }
     
+    private Element generatePortNode( Document doc, Port port ) {
+        Element portEl = doc.createElement( EL_PORT );
+        
+        portEl.setAttribute( ATR_NAME, port.getName() );
+        portEl.setAttribute( ATR_TYPE, port.getType() );
+        portEl.setAttribute( ATR_X, Integer.toString( port.getX() ) );
+        portEl.setAttribute( ATR_Y, Integer.toString( port.getY() ) );
+        portEl.setAttribute( ATR_PORT_CONNECTION, port.isArea() ? "area" : "" );
+        portEl.setAttribute( ATR_STRICT, Boolean.toString( port.isStrict() ) );
+        portEl.setAttribute( ATR_MULTI, Boolean.toString( port.isMulti() ) );
+        
+        return portEl;
+    }
+    
+    private Element generateGraphicsNode( Document doc, ClassGraphics gr ) {
+        
+        Element graphicsEl = doc.createElement( EL_GRAPHICS );
+        
+        Element bounds = doc.createElement( EL_BOUNDS );
+        graphicsEl.appendChild( bounds );
+        bounds.setAttribute( ATR_X, Integer.toString( gr.getBoundX() ) );
+        bounds.setAttribute( ATR_Y, Integer.toString( gr.getBoundY() ) );
+        bounds.setAttribute( ATR_WIDTH, Integer.toString( gr.getBoundWidth() ) );
+        bounds.setAttribute( ATR_HEIGHT, Integer.toString( gr.getBoundHeight() ) );
+        
+        for( Shape shape : gr.getShapes() ) {
+            
+            if( shape instanceof Rect ) {
+                Rect rect = (Rect)shape;
+                Element rectEl = doc.createElement( EL_RECT );
+                graphicsEl.appendChild( rectEl );
+                rectEl.setAttribute( ATR_X, Integer.toString( rect.getX() ) );
+                rectEl.setAttribute( ATR_Y, Integer.toString( rect.getY() ) );
+                rectEl.setAttribute( ATR_WIDTH, Integer.toString( rect.getWidth() ) );
+                rectEl.setAttribute( ATR_HEIGHT, Integer.toString( rect.getHeight() ) );
+                rectEl.setAttribute( ATR_COLOUR, Integer.toString( rect.getColor().getRGB() ) );
+                rectEl.setAttribute( ATR_FILLED, Boolean.toString( rect.isFilled() ) );
+                rectEl.setAttribute( ATR_FIXED, Boolean.toString( rect.isFixed() ) );
+                rectEl.setAttribute( ATR_STROKE, Float.toString( rect.getStroke().getLineWidth() ) );
+                rectEl.setAttribute( ATR_LINETYPE, Float.toString( rect.getLineType() ) );
+                rectEl.setAttribute( ATR_TRANSPARENCY, Integer.toString( rect.getTransparency() ) );
+            } else if( shape instanceof Text ) {
+                Text text = (Text)shape;
+                Element textEl = doc.createElement( EL_TEXT );
+                textEl.setAttribute( ATR_STRING, text.getText() );
+                textEl.setAttribute( ATR_X, Integer.toString( text.getX() ) );
+                textEl.setAttribute( ATR_Y, Integer.toString( text.getY() ) );
+                textEl.setAttribute( ATR_FONTNAME, text.getFont().getName() );
+                textEl.setAttribute( ATR_FONTSIZE, Integer.toString( text.getFont().getSize() ) );
+                textEl.setAttribute( ATR_FONTSTYLE, Integer.toString( text.getFont().getStyle() ) );
+                textEl.setAttribute( ATR_TRANSPARENCY, Integer.toString( text.getTransparency() ) );
+                textEl.setAttribute( ATR_COLOUR, Integer.toString( text.getColor().getRGB() ) );
+                graphicsEl.appendChild( textEl );
+            } //TODO handle the rest of shapes
+        }
+        
+        return graphicsEl;
+    }
+    
     public static VPackage load(File f) {
 
         return new PackageXmlProcessor(f).parse();
     }
     
-    public static void main( String[] args ) throws ParserConfigurationException, SAXException, IOException, TransformerException {
-//        new PackageXmlProcessor( FileFuncs.showFileChooser( "/Users/pavelg/workspace/cocovila_packages/gearbox", null, null, null, false ) ).test();
-        System.out.println(PackageClass.ComponentType.SCHEME.name());
-    }
 }

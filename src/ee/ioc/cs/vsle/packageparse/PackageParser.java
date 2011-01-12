@@ -302,7 +302,10 @@ public class PackageParser implements DiagnosticsCollector.Diagnosable {
                         }
                     }
                 }
-                newPort = new Port( name, type, Integer.parseInt( x ), Integer.parseInt( y ), portConnection, strict, multi );
+                newPort = new Port( name, type, 
+                        Integer.parseInt( x ), Integer.parseInt( y ), 
+                        portConnection, Boolean.parseBoolean( strict ), 
+                        Boolean.parseBoolean( multi ) );
                 newPort.setId( id );
             } else if ( element.equals( EL_OPEN ) ) {
                 status = PORT_OPEN;

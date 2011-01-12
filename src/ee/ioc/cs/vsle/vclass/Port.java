@@ -39,7 +39,7 @@ public class Port implements Cloneable, Serializable {
 	    DEFAULT_CLOSED_GRAPHICS.setBounds( -4, -4, 8, 8 );
 	}
 	
-	public Port(String name, String type, int x, int y, String portConnection, String strict, String multi ) {
+	public Port(String name, String type, int x, int y, String portConnection, boolean strict, boolean multi ) {
 		this.name = name;
 		this.type = type.trim();
 		this.x = x;
@@ -49,9 +49,11 @@ public class Port implements Cloneable, Serializable {
 		if ( portConnection != null )
             area = portConnection.equals("area");
 
-		this.strict = Boolean.parseBoolean( strict );
-
-		this.isMulti = Boolean.parseBoolean( multi );
+		this.strict = strict;
+		this.isMulti = multi;
+		
+		setOpenGraphics( DEFAULT_OPEN_GRAPHICS );
+		setClosedGraphics( DEFAULT_CLOSED_GRAPHICS );
 	}
 
 	public ArrayList<Port> getStrictConnected() {
@@ -138,9 +140,14 @@ public class Port implements Cloneable, Serializable {
 		return name;
 	}
 
+	public String getNameWithObject() {
+	    
+	    return ( getObject() != null ? getObject().getName() + "." : "" ) + getName();
+	}
+	
 	@Override
     public String toString() {
-        return "Port " + getObject().getName() + "." + getName();
+        return "Port " + getNameWithObject();
     }
 
 	public void setSelected(boolean b) {

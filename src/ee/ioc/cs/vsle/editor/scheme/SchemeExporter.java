@@ -1,14 +1,12 @@
 package ee.ioc.cs.vsle.editor.scheme;
 
-import java.awt.*;
+import java.awt.Point;
 import java.io.*;
 import java.util.*;
 
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.editor.Canvas;
-import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -62,18 +60,26 @@ public class SchemeExporter {
         }
     }
       
+    /**
+     * Exports selected objects to a scheme and if needed, 
+     * instantiates an object of this scheme and 
+     * replaces selected objects with it preserving connections
+     * if corresponding ports have been chosen
+     * 
+     * @param canv
+     */
     public static void exportAsObject(Canvas canv) {
         
         ArrayList<GObj> selectedObjects = canv.getObjects().getSelected();
-        ArrayList<Port> connectedPortsToOuterObjects = new ArrayList<Port>();
         
         if ( selectedObjects.size() > 1 ) {
             
-            Set<SelectedObjConnectionToOuterObj> outerConnections = new LinkedHashSet<SelectedObjConnectionToOuterObj>();
+            Map<String, List<Connection>> innerPortNamesToConnections = new LinkedHashMap<String, List<Connection>>();
+            Map<String, String> innerPortNamesToTypes = new LinkedHashMap<String, String>();
+            
             Set<Connection> innerConnections = new HashSet<Connection>();
             
             for ( GObj obj : selectedObjects ) {
-//                System.out.println( obj );
                 //find all connections with objects that are not selected
                 for( Connection con : obj.getConnections() ) {
                     Port innerPort = con.getBeginPort();
@@ -87,17 +93,23 @@ public class SchemeExporter {
                         innerObj = obj;
                         innerPort = con.getEndPort();
                     } else {
-//                        System.out.println( con );
                         innerConnections.add( con );
                         continue;
                     }
-                    outerConnections.add( new SelectedObjConnectionToOuterObj( innerObj, innerPort, outerObj, outerPort, con ) );
-                    connectedPortsToOuterObjects.add( innerPort );
-                    System.out.println(con);
+                    
+                    String portName = innerPort.getNameWithObject();
+                    List<Connection> conList;
+                    if( ( conList = innerPortNamesToConnections.get( portName ) ) == null ) {
+                        conList = new ArrayList<Connection>();
+                        innerPortNamesToConnections.put( portName, conList );
+                    }
+                    conList.add( con );
+                    
+                    if( innerPortNamesToTypes.containsKey( portName ) ) {
+                        innerPortNamesToTypes.put( portName, innerPort.getField().getType() );
+                    }
                 }
             }
-            
-//            System.out.println("Ports: " + connectedPortsToOuterObjects);
             
             SchemeContainer container = new SchemeContainer( canv.getPackage(), canv.getWorkDir() );
             //save new scheme
@@ -106,60 +118,90 @@ public class SchemeExporter {
                     new ObjectList( selectedObjects ), 
                     new ConnectionList( innerConnections ));
             container.setScheme( newScheme );
-            System.out.println(selectedObjects);
-            new SchemeExportDialog( container, connectedPortsToOuterObjects ).setVisible( true );
             
-            if( true ) return;
+            SchemeExportDialog sed = new SchemeExportDialog( container, innerPortNamesToConnections.keySet() );
             
-            File file = FileFuncs.showFileChooser( canv.getPackage().getPath(), null, 
-                    new CustomFileFilter( CustomFileFilter.EXT.SYN ), Editor.getInstance(), true );
-            
-            if( file == null ) 
+            if( !sed.isOk() ) {
                 return;
+            }
             
-            newScheme.saveToFile( file );
+            String schemeName = sed.getSchemeName();
+            String[] selectedPorts = sed.getSelectedPortNames();
+            Point[] portPoints = sed.getPortPoints();
+            VPackage selectedPackage = sed.getSelectedPackage();
+            boolean modify = sed.shouldModifyCurrentScheme();
+            ClassGraphics cg = sed.getClassGraphics();
             
+            File packageFile = new File( selectedPackage.getPath() );
+            File schemeFile = new File( packageFile.getParent(), schemeName + ".syn" );
+            
+            if( schemeFile.exists() && !FileFuncs.askToOverwriteFile( schemeFile ) ) {
+                return;
+            }
+            
+            newScheme.saveToFile( schemeFile );
+            
+            PackageClass pc = new PackageClass( schemeName );
+            pc.setIcon( sed.getImageFilename() );
+            pc.setDescription( "-" );
+            
+            pc.addGraphics( cg );
+            for ( int i = 0; i < selectedPorts.length; i++ ) {
+                String portName = selectedPorts[i];
+                Point portLoc = portPoints[i];
+                
+                Port port = new Port( portName, 
+                        innerPortNamesToTypes.containsKey( portName ) 
+                            ? innerPortNamesToTypes.get( portName ) : "", 
+                        portLoc.x, portLoc.y, null, false, false );
+                
+                pc.addPort( port );
+            }
             
             //update package with new scheme class and icon
-            //1. Write to package TODO
-            String schemeName = FileFuncs.getName( file );
-            new PackageXmlProcessor( new File(canv.getPackage().getPath()) ).addClassObject( schemeName );
+            //1. Write to package
+            new PackageXmlProcessor( packageFile ).addPackageClass( pc );
+            
             //2. Reload package
             canv.reloadCurrentPackage();
             
-            //update canvas
-            //1. remove objects
-            canv.deleteSelectedObjects();
-            //2. add new instance of newly created component TODO
-            //3. modify connections TODO
-            //4.repaint
-            canv.repaint();
-            
+            if( modify ) {
+                //update canvas
+                //1. remove objects
+                canv.deleteSelectedObjects();
+                //2. add new instance of newly created component
+                GObj obj = canv.createAndInitNewObject( schemeName );
+                GObjGroup objGroup = new GObjGroup( selectedObjects );
+                Point center = new Point(objGroup.getX() + objGroup.getWidth()/2, objGroup.getY() + objGroup.getHeight()/2);
+                //set location, e.g. center of selected objects' group
+                obj.setX( center.x - obj.getWidth()/2 );
+                obj.setY( center.y - obj.getHeight()/2 );
+                
+                canv.addCurrentObject();
+                
+                //3. modify connections
+                for( Port newPort : obj.getPorts() ) {
+                    
+                    String portName = newPort.getName();
+                    if( innerPortNamesToConnections.containsKey( portName ) ) {
+                        
+                        List<Connection> conList = innerPortNamesToConnections.get( portName );
+                        if( conList != null ) {
+                            for ( Connection connection : conList ) {
+                                if( connection.getBeginPort().getNameWithObject().equals( portName ) ) {
+                                    connection.setBeginPort( newPort );
+                                } else {
+                                    connection.setEndPort( newPort );
+                                }
+                                canv.addConnection( connection );
+                            }
+                        }
+                    }
+                }
+                
+                //4.repaint
+                canv.repaint();
+            }
         }
     }
-    
-    static class SelectedObjConnectionToOuterObj {
-        
-        private GObj innerObj;
-        private Port innerPort;
-        private GObj outerObj;
-        private Port outerPort;
-        private Connection conn;
-        
-        public SelectedObjConnectionToOuterObj( GObj innerObj, Port innerPort,
-                GObj outerObj, Port outerPort, Connection conn ) {
-            super();
-            this.innerObj = innerObj;
-            this.innerPort = innerPort;
-            this.outerObj = outerObj;
-            this.outerPort = outerPort;
-            this.conn = conn;
-        }
-
-        @Override
-        public String toString() {
-            return innerObj.getName() + " : " + conn.toString();
-        }
-    }
-
 }
