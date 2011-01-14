@@ -271,7 +271,9 @@ public class Connection implements Serializable {
 				getEndPort().getObject().getName());
 		attrs.addAttribute("", "", "port2", StringUtil.CDATA,
 				getEndPort().getConnectionId());
-
+		attrs.addAttribute("", "", "strict", StringUtil.CDATA,
+                Boolean.toString( isStrict() ));
+		
 		th.startElement("", "", "connection", attrs);
 		attrs.clear();
 		th.startElement("", "", "breakpoints", attrs);

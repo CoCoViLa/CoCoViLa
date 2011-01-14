@@ -144,6 +144,9 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                 db.p( "Package parsing finished in " + ( System.currentTimeMillis() - startParsing ) + "ms.\n");
         } catch ( Exception e ) {
             collector.collectDiagnostic( e.getMessage(), true );
+            if(RuntimeProperties.isLogDebugEnabled()) {
+                e.printStackTrace();
+            }
         } 
         
         try {
@@ -485,7 +488,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                     Lineprops lp = getLineProps( node );
                     Colorprops cp = getColorProps( node );
 
-                    Polygon polygon =  new Polygon( cp.colour, isShapeFilled( node ), lp.strokeWidth, cp.alpha, lp.lineType );
+                    Polygon polygon = new Polygon( cp.colour, isShapeFilled( node ), lp.strokeWidth, cp.alpha, lp.lineType );
                     
                     //points
                     NodeList points = node.getElementsByTagName( EL_POINT );
@@ -500,7 +503,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                     int height = newGraphics.getBoundHeight();
                     
                     for ( int j = 0; j < pointCount; j++ ) {
-                        FixedCoords fc = getFixedCoords( (Element)list.item( j ), width, height, null );
+                        FixedCoords fc = getFixedCoords( (Element)points.item( j ), width, height, null );
                         xs[j] = fc.x;
                         fxs[j] = fc.fx;
                         ys[j] = fc.y;

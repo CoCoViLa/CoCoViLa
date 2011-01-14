@@ -19,7 +19,8 @@
 	obj1		CDATA	#REQUIRED
 	port1		CDATA	#REQUIRED
 	obj2		CDATA	#REQUIRED
-	port2		CDATA	#REQUIRED>
+	port2		CDATA	#REQUIRED
+	strict		(true|false) "false" >
 
 <!ATTLIST relobject
 	name		CDATA	#REQUIRED

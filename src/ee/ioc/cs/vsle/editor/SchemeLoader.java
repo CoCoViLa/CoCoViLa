@@ -413,6 +413,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 				String port2 = new String(attrs.getValue("port2"));
 				Port beginPort = objects.getPort(obj1, port1);
 				Port endPort = objects.getPort(obj2, port2);
+				boolean strict = Boolean.parseBoolean( attrs.getValue( "strict" ) );
 
 				if (beginPort == null || endPort == null) {
 				    collectDiagnostic("Discarding connection "
@@ -426,7 +427,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 					return;
 				}
 
-				connection = new Connection(beginPort, endPort);
+				connection = new Connection(beginPort, endPort, strict);
 				connections.add(connection);
 			} else if (element.equals("point")) {
 				// quietly ignore breakpoints if the connection is not valid
