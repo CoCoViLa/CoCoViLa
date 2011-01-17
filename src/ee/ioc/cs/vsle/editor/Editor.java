@@ -797,17 +797,23 @@ public class Editor extends JFrame implements ChangeListener {
      * Updates the title of the window to reflect current scheme name.
      */
     public void updateWindowTitle() {
-        String windowTitle = null;
-
+        String windowTitle = WINDOW_TITLE;
+        
         Canvas canvas = getCurrentCanvas();
-        if ( canvas != null )
-            windowTitle = canvas.getSchemeTitle();
-
-        if ( windowTitle == null )
-            windowTitle = WINDOW_TITLE;
-        else
-            windowTitle += " - " + WINDOW_TITLE;
-
+        if ( canvas != null ) {
+            String packageName = canvas.getPackage().getName();
+            String schemeTitle = canvas.getSchemeTitle();
+            int idx = tabbedPane.getSelectedIndex();
+            
+            if( schemeTitle != null ) {
+                windowTitle = schemeTitle + " - " + packageName + " - " + WINDOW_TITLE;
+                tabbedPane.setTitleAt( idx, schemeTitle );
+            } else {
+                tabbedPane.setTitleAt( idx, packageName ); 
+                windowTitle = packageName + " - " + WINDOW_TITLE;
+            }
+        }
+        
         setTitle( windowTitle );
     }
 
