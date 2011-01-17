@@ -193,6 +193,7 @@ public class SchemeExporter {
                                 } else {
                                     connection.setEndPort( newPort );
                                 }
+                                connection.setStrict( false );
                                 canv.addConnection( connection );
                             }
                         }

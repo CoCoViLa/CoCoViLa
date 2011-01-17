@@ -466,6 +466,13 @@ public class Connection implements Serializable {
 	}
 
 	/**
+     * @param strict the strict to set
+     */
+	public void setStrict( boolean strict ) {
+        this.strict = strict;
+    }
+
+    /**
 	 * Finds the line segment being closest to the point and returns the index
 	 * of this line segment. If the point is not close enough to this connection
 	 * then -1 is returned.

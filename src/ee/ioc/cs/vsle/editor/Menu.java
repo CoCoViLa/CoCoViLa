@@ -25,7 +25,7 @@ public class Menu {
     public static final String EXPORT_MENU = "Export";
     public static final String IMPORT_MENU = "Import";
     public static final String EXPORT_CLASS = "As Class";
-    public static final String EXPORT_SCHEME_AS_OBJECT = "As Scheme Object...";
+    public static final String EXPORT_SCHEME_AS_OBJECT = "Selection as Object...";
     public static final String EXPORT_SCHEME = "As Metaclass...";
     public static final String EXPORT_TO_PACKAGE = "To Package";
     public static final String EXPORT_WINDOW_GRAPHICS = "Window Graphics";
