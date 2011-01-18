@@ -27,10 +27,10 @@ public class KeyOps implements KeyListener {
 
 		if (e.getKeyCode() == 68) {   // event: clone object(s), key: ctrl+d
 			canvas.cloneObject();
-		} else if (e.getKeyCode() == 71) { // event: group objects, key: ctrl+g
-			canvas.groupObjects();
-		} else if (e.getKeyCode() == 85) { // event: ungroup objects, key: ctrl+u
-			canvas.ungroupObjects();
+//		} else if (e.getKeyCode() == 71) { // event: group objects, key: ctrl+g
+//			canvas.groupObjects();
+//		} else if (e.getKeyCode() == 85) { // event: ungroup objects, key: ctrl+u
+//			canvas.ungroupObjects();
 		} else if (e.getKeyCode() == 39) { // event: move shape to right, key: right arrow key
 			canvas.moveObjects(MOVE_STEP, 0);
 		} else if (e.getKeyCode() == 37) { // event: move shape to left, key: left arrow key

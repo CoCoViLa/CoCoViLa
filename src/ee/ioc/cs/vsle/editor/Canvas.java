@@ -610,7 +610,13 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * Method for grouping objects.
      */
     public void groupObjects() {
-        
+        throw new UnsupportedOperationException();
+        /*
+         * This function is broken and was hidden in the GUI. If this is
+         * something useful then it should be specified and reimplemented or
+         * something.
+         */
+        /*
         ArrayList<GObj> selected = scheme.getObjects().getSelected();
         if ( selected.size() > 1 ) {
             GObj obj;
@@ -624,9 +630,36 @@ public class Canvas extends JPanel implements ISchemeContainer {
             scheme.getObjects().add( og );
             drawingArea.repaint();
         }
-         
+         */
     } // groupObjects
 
+    /**
+     * Method for ungrouping objects.
+     */
+    public void ungroupObjects() {
+        throw new UnsupportedOperationException();
+        /*
+         * This function is broken and was hidden in the GUI. If this is
+         * something useful then it should be specified and reimplemented or
+         * something.
+         */
+        /*
+        for ( GObj obj : scheme.getObjects().getSelected() ) {
+            if ( obj.isGroup() ) {
+                List<GObj> groupedObjects = ( (GObjGroup) obj ).getObjects();
+                scheme.getObjects().addAll( groupedObjects );
+                scheme.getObjects().remove( obj );
+                obj = null;
+                setCurrentObj( null );
+                //select all previously grouped objects
+                for( GObj grObj : groupedObjects )
+                    grObj.setSelected( true );
+            }
+        }
+        drawingArea.repaint();
+        */
+    }
+    
     /**
      * Moves selected objects on the scheme.
      * 
@@ -682,26 +715,6 @@ public class Canvas extends JPanel implements ISchemeContainer {
         scheme.getObjects().updateRelObjs();
         drawingArea.repaint();
     } // moveObject
-
-    /**
-     * Method for ungrouping objects.
-     */
-    public void ungroupObjects() {
-        
-        for ( GObj obj : scheme.getObjects().getSelected() ) {
-            if ( obj.isGroup() ) {
-                List<GObj> groupedObjects = ( (GObjGroup) obj ).getObjects();
-                scheme.getObjects().addAll( groupedObjects );
-                scheme.getObjects().remove( obj );
-                obj = null;
-                setCurrentObj( null );
-                //select all previously grouped objects
-                for( GObj grObj : groupedObjects )
-                    grObj.setSelected( true );
-            }
-        }
-        drawingArea.repaint();
-    }
 
     public void addCurrentObject() {
         addCurrentObject( null );

@@ -52,19 +52,15 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         this.add(Editor.getInstance().cloneAction);
         this.add(Editor.getInstance().deleteAction);
 
-        /*
-         * See canvas.groupObjects()
-         */
-        
-         itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
-         itemGroup.addActionListener(this);
-         itemGroup.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_G,
-         InputEvent.CTRL_DOWN_MASK)); this.add(itemGroup);
-         
-         itemUngroup = new JMenuItem(Menu.UNGROUP, KeyEvent.VK_U);
-         itemUngroup.addActionListener(this);
-         itemUngroup.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_U,
-         InputEvent.CTRL_DOWN_MASK)); this.add(itemUngroup);
+//         itemGroup = new JMenuItem(Menu.GROUP, KeyEvent.VK_G);
+//         itemGroup.addActionListener(this);
+//         itemGroup.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_G,
+//         InputEvent.CTRL_DOWN_MASK)); this.add(itemGroup);
+//         
+//         itemUngroup = new JMenuItem(Menu.UNGROUP, KeyEvent.VK_U);
+//         itemUngroup.addActionListener(this);
+//         itemUngroup.setAccelerator(KeyStroke.getKeyStroke( KeyEvent.VK_U,
+//         InputEvent.CTRL_DOWN_MASK)); this.add(itemUngroup);
          
 
         itemProperties = new JMenuItem( Menu.PROPERTIES, KeyEvent.VK_R );
@@ -93,10 +89,10 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         itemShowValues.setEnabled( canvas.getLastProgramRunnerID() > 0 );
         this.add( itemShowValues );
 
-         itemMakeClass = new JMenuItem( Menu.MAKECLASS );
-         itemMakeClass.addActionListener( this );
-         itemMakeClass.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK ) );
-         this.add( itemMakeClass );
+//         itemMakeClass = new JMenuItem( Menu.MAKECLASS );
+//         itemMakeClass.addActionListener( this );
+//         itemMakeClass.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_M, InputEvent.CTRL_DOWN_MASK ) );
+//         this.add( itemMakeClass );
 
         if (object != null && object.getClassName() != null) {
             this.add(makeSubmenuOrder());
@@ -172,6 +168,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         JMenuItem itemRotCw = new JMenuItem( Menu.ROTATE_CW );
         itemRotCw.addActionListener( new ActionListener() {
 
+            @Override
             public void actionPerformed( ActionEvent e ) {
                 obj.setAngle( obj.getAngle() + Math.PI / 2.0 );
                 canvas.drawingArea.repaint();
@@ -183,6 +180,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         JMenuItem itemRotCcw = new JMenuItem( Menu.ROTATE_CCW );
         itemRotCcw.addActionListener( new ActionListener() {
 
+            @Override
             public void actionPerformed( ActionEvent e ) {
                 obj.setAngle( obj.getAngle() - Math.PI / 2.0 );
                 canvas.drawingArea.repaint();
@@ -194,6 +192,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         JMenuItem itemRotAngle = new JMenuItem( Menu.ROTATE_ANGLE );
         itemRotAngle.addActionListener( new ActionListener() {
 
+            @Override
             public void actionPerformed( ActionEvent e ) {
                 String value = JOptionPane.showInputDialog( "Input the angle in degrees:" );
                 try {
@@ -225,6 +224,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
      * 
      * @param e Action Event
      */
+    @Override
     public void actionPerformed( ActionEvent e ) {
         String cmd = e.getActionCommand();
 
@@ -233,10 +233,10 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             /*
              * Disabled until needed and reimplemented
              */
-        } else if ( Menu.GROUP.equals( cmd ) ) {
-            canvas.groupObjects();
-        } else if ( Menu.UNGROUP.equals( cmd ) ) {
-            canvas.ungroupObjects();
+//        } else if ( Menu.GROUP.equals( cmd ) ) {
+//            canvas.groupObjects();
+//        } else if ( Menu.UNGROUP.equals( cmd ) ) {
+//            canvas.ungroupObjects();
         } else if ( Menu.HLPORTS.equals( cmd ) ) {
             canvas.hilightPorts();
         } else if ( Menu.SHPORTS.equals( cmd ) ) {
@@ -261,11 +261,11 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
             canvas.getObjects().sendToBack( object );
             canvas.drawingArea.repaint();
-        } else if ( Menu.MAKECLASS.equals( cmd ) ) {
-            ClassSaveDialog csd = new ClassSaveDialog( ( (GObjGroup) object ).getSpec( canvas.getConnections() ), canvas );
-            csd.pack();
-            csd.setLocationRelativeTo( canvas );
-            csd.setVisible( true );
+//        } else if ( Menu.MAKECLASS.equals( cmd ) ) {
+//            ClassSaveDialog csd = new ClassSaveDialog( ( (GObjGroup) object ).getSpec( canvas.getConnections() ), canvas );
+//            csd.pack();
+//            csd.setLocationRelativeTo( canvas );
+//            csd.setVisible( true );
         } else if ( Menu.VIEWCODE.equals( cmd ) ) {
             canvas.openClassCodeViewer( object.getClassName() );
         } else if ( Menu.OBJ_SPEC.equals( cmd ) ) {
