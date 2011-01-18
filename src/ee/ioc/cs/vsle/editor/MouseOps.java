@@ -110,6 +110,7 @@ class MouseOps extends MouseInputAdapter {
             if ( State.selection.equals( state ) ) {
                 Connection relation = canvas.getConnectionNearPoint( x, y );
                 if ( relation != null ) {
+                    relation.setSelected( true );
                     ConnectionPopupMenu popupMenu = new ConnectionPopupMenu( relation, canvas, x, y );
                     popupMenu.show( canvas, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
                 } else {
@@ -544,7 +545,7 @@ class MouseOps extends MouseInputAdapter {
             int x2 = Math.max( startX, canvas.mouseX );
             int y1 = Math.min( startY, canvas.mouseY );
             int y2 = Math.max( startY, canvas.mouseY );
-            canvas.getObjects().selectObjectsInsideBox( x1, y1, x2, y2 );
+            canvas.getObjects().selectObjectsInsideBox( x1, y1, x2, y2, e.isShiftDown() );
             state = State.selection;
             canvas.drawingArea.repaint();
         }

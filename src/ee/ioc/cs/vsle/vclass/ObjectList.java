@@ -73,11 +73,11 @@ public class ObjectList extends ArrayList<GObj> {
 		return null;
 	}
 
-	public void selectObjectsInsideBox(int x1, int y1, int x2, int y2) {
+	public void selectObjectsInsideBox(int x1, int y1, int x2, int y2, boolean appendSelection) {
 		for (GObj obj : this) {
-			if (obj.isInside(x1, y1, x2, y2)) {
-				obj.setSelected(true);
-			}
+		    //select that are inside and deselect if outside the box
+		    obj.setSelected( obj.isInside(x1, y1, x2, y2) 
+		            || ( appendSelection && obj.isSelected() ) );
 		}
 	}
 
