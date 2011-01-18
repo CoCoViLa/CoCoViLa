@@ -76,7 +76,7 @@ public class SchemeExporter {
             
             Map<String, List<Connection>> innerPortNamesToConnections = new LinkedHashMap<String, List<Connection>>();
             Map<String, String> innerPortNamesToTypes = new LinkedHashMap<String, String>();
-            
+            List<ClassField> newFields = new ArrayList<ClassField>();
             Set<Connection> innerConnections = new HashSet<Connection>();
             
             for ( GObj obj : selectedObjects ) {
@@ -109,6 +109,12 @@ public class SchemeExporter {
                         innerPortNamesToTypes.put( portName, innerPort.getField().getType() );
                     }
                 }
+                for( ClassField cf : obj.getFields() ) {
+                    ClassField newCf = new ClassField( obj.getName() + "." + cf.getName(), cf.getType(), cf.getValue() );
+                    newCf.setGoal( cf.isGoal() );
+                    newCf.setInput( cf.isInput() );
+                    newFields.add( newCf );
+                }
             }
             
             SchemeContainer container = new SchemeContainer( canv.getPackage(), canv.getWorkDir() );
@@ -126,6 +132,7 @@ public class SchemeExporter {
             }
             
             String schemeName = sed.getSchemeName();
+            String schemeDescription = sed.getDescription();
             String[] selectedPorts = sed.getSelectedPortNames();
             Point[] portPoints = sed.getPortPoints();
             VPackage selectedPackage = sed.getSelectedPackage();
@@ -135,7 +142,7 @@ public class SchemeExporter {
             File packageFile = new File( selectedPackage.getPath() );
             File schemeFile = new File( packageFile.getParent(), schemeName + ".syn" );
             
-            if( schemeFile.exists() && !FileFuncs.askToOverwriteFile( schemeFile ) ) {
+            if( schemeFile.exists() && !FileFuncs.askToOverwriteFile( schemeFile, canv ) ) {
                 return;
             }
             
@@ -143,7 +150,7 @@ public class SchemeExporter {
             
             PackageClass pc = new PackageClass( schemeName );
             pc.setIcon( sed.getImageFilename() );
-            pc.setDescription( "-" );
+            pc.setDescription( schemeDescription );
             
             pc.addGraphics( cg );
             for ( int i = 0; i < selectedPorts.length; i++ ) {
@@ -158,6 +165,11 @@ public class SchemeExporter {
                 pc.addPort( port );
             }
             
+            if( sed.shouldExportFields() ) {
+                for ( ClassField cf : newFields ) {
+                    pc.addField( cf );
+                }
+            }
             //update package with new scheme class and icon
             //1. Write to package
             new PackageXmlProcessor( packageFile ).addPackageClass( pc );
@@ -203,6 +215,8 @@ public class SchemeExporter {
                 //4.repaint
                 canv.repaint();
             }
+        } else {
+            JOptionPane.showMessageDialog( canv, "Two or more objects have to be selected!" );
         }
     }
 }

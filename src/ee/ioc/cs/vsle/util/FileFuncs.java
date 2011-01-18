@@ -493,10 +493,10 @@ public class FileFuncs {
         return null;
     }
     
-    public static boolean askToOverwriteFile( File f ) {
+    public static boolean askToOverwriteFile( File f, Component parent ) {
         
         return JOptionPane.showConfirmDialog( 
-                    null, 
+                    parent, 
                     "File \"" + f.getName() + "\" exists, overwrite?", 
                     "File exists", 
                     JOptionPane.YES_NO_OPTION ) == JOptionPane.OK_OPTION;

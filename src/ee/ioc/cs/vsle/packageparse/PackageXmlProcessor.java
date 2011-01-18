@@ -214,34 +214,39 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         
         ClassField newField;
         
-        if ( name.indexOf( "." ) > -1 ) {
-            //TODO - temporarily do not dig into hierarchy
-            int idx = name.indexOf( "." );
-            String root = name.substring( 0, idx );
+        if(newClass.getComponentType() != PackageClass.ComponentType.SCHEME) {
+            if ( name.indexOf( "." ) > -1 ) {
+                //TODO - temporarily do not dig into hierarchy
+                int idx = name.indexOf( "." );
+                String root = name.substring( 0, idx );
 
-            if ( newClass.getSpecField( root ) == null ) {
-                collector.collectDiagnostic( "Field " + root + " in class " + newClass.getName()
-                        + " is not declared in the specification, variable " + type + " " + name + " ignored " );
-                return;
+                if ( newClass.getSpecField( root ) == null ) {
+                    collector.collectDiagnostic( "Field " + root + " in class " + newClass.getName()
+                            + " is not declared in the specification, variable " + type + " " + name + " ignored " );
+                    return;
+                }
+
+                newField = new ClassField( name, type );
+                newClass.addSpecField( newField );
+            } else {
+                newField = newClass.getSpecField( name );
+
+                if ( newField == null ) {
+
+                    collector.collectDiagnostic( "Field " + type + " " + name + " in class " + newClass.getName()
+                            + " is not declared in the specification" );
+                    return;
+                } else if ( !newField.getType().equals( type ) ) {
+
+                    collector.collectDiagnostic( "Field " + type + " " + name + " in class " + newClass.getName()
+                            + " does not match the field declared in the specification: " + newField.getType() + " "
+                            + newField.getName() );
+                    return;
+                }
             }
-
+        } else {
             newField = new ClassField( name, type );
             newClass.addSpecField( newField );
-        } else {
-            newField = newClass.getSpecField( name );
-
-            if ( newField == null ) {
-
-                collector.collectDiagnostic( "Field " + type + " " + name + " in class " + newClass.getName()
-                        + " is not declared in the specification" );
-                return;
-            } else if ( !newField.getType().equals( type ) ) {
-
-                collector.collectDiagnostic( "Field " + type + " " + name + " in class " + newClass.getName()
-                        + " does not match the field declared in the specification: " + newField.getType() + " "
-                        + newField.getName() );
-                return;
-            }
         }
 
         newField.setValue( fieldNode.hasAttribute( ATR_VALUE ) ? fieldNode.getAttribute( ATR_VALUE ) : null );
@@ -654,12 +659,21 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             Element portsEl = doc.createElement( EL_PORTS );
             classNode.appendChild( portsEl );
             
-            for( Port port : pClass.getPorts() ) {
+            for( Port port : ports ) {
                 portsEl.appendChild( generatePortNode( doc, port ) );
             }
         }
         
-        //fields TODO implement fields serialization
+        //fields
+        Collection<ClassField> fields = pClass.getFields();
+        if( !fields.isEmpty() ) {
+            Element fieldsEl = doc.createElement( EL_FIELDS );
+            classNode.appendChild( fieldsEl );
+            
+            for( ClassField cf : fields ) {
+                fieldsEl.appendChild( generateFieldNode( doc, cf ) );
+            }
+        }
         
         //write
         try {
@@ -669,6 +683,23 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         }
     }
     
+    private Node generateFieldNode( Document doc, ClassField field ) {
+        Element fieldEl = doc.createElement( EL_FIELD );
+        
+        fieldEl.setAttribute( ATR_NAME, field.getName() );
+        fieldEl.setAttribute( ATR_TYPE, field.getType() );
+        
+        if( field.isInput() )
+            fieldEl.setAttribute( ATR_NATURE, "input" );
+        else if( field.isGoal() )
+            fieldEl.setAttribute( ATR_NATURE, "goal" );
+        
+        if( field.getValue() != null )
+            fieldEl.setAttribute( ATR_VALUE, field.getValue() );
+        
+        return fieldEl;
+    }
+
     private Element generatePortNode( Document doc, Port port ) {
         Element portEl = doc.createElement( EL_PORT );
         

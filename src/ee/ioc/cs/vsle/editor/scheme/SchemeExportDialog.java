@@ -27,7 +27,9 @@ public class SchemeExportDialog extends JDialog {
     //GUI
     private JButton jbtOk;
     private JCheckBox jcbModifyScheme;
+    private JCheckBox jcbExportFields;
     private JTextField jtfName;
+    private JTextField jtfDescr;
     private JPanel previewPanel;
     private JList jlPorts;
     
@@ -92,6 +94,9 @@ public class SchemeExportDialog extends JDialog {
         setResizable( false );
         
         updatePreview();
+        
+        getNameTextField().requestFocus();
+        getNameTextField().selectAll();
     }
 
     private JPanel createCenterPanel() {
@@ -119,7 +124,7 @@ public class SchemeExportDialog extends JDialog {
         //Name
         centerPane.add( new JLabel( "Name:" ), GuiUtil.buildGridBagConstraints(
                 gbc, 2, y, 1, 1, 0, 0, GridBagConstraints.NONE,
-                GridBagConstraints.CENTER ) );
+                GridBagConstraints.EAST ) );
         
         centerPane.add( getNameTextField(), GuiUtil
                 .buildGridBagConstraints( gbc, 3, y, 3, 1, 0, 0,
@@ -129,7 +134,7 @@ public class SchemeExportDialog extends JDialog {
         //Ports
         centerPane.add( new JLabel( "Ports:" ), GuiUtil
                 .buildGridBagConstraints( gbc, 2, ++y, 1, 1, 0, 0,
-                        GridBagConstraints.NONE, GridBagConstraints.NORTH ) );
+                        GridBagConstraints.NONE, GridBagConstraints.NORTHEAST ) );
 
         JScrollPane jsListPane = new JScrollPane( getPortsList() );
         jsListPane.setPreferredSize(new Dimension(170, 105));
@@ -138,9 +143,27 @@ public class SchemeExportDialog extends JDialog {
                 .buildGridBagConstraints( gbc, 3, y, 3, 1, 0, 0,
                         GridBagConstraints.NONE, GridBagConstraints.NORTH ) );
 
+        //Fields
+        jcbExportFields = new JCheckBox( "Export list of fields" );
+        centerPane
+                .add( jcbExportFields, GuiUtil
+                        .buildGridBagConstraints( gbc, 0, y += 2, 2, 1, 0, 0,
+                                GridBagConstraints.HORIZONTAL,
+                                GridBagConstraints.WEST ) );
+        
+        //Description
+        centerPane.add( new JLabel( "Description:" ), GuiUtil.buildGridBagConstraints(
+                gbc, 2, y, 1, 1, 0, 0, GridBagConstraints.NONE,
+                GridBagConstraints.EAST ) );
+        
+        centerPane.add( getDescrTextField(), GuiUtil
+                .buildGridBagConstraints( gbc, 3, y, 3, 1, 0, 0,
+                        GridBagConstraints.HORIZONTAL,
+                        GridBagConstraints.CENTER ) );
+        
         //icon
         centerPane.add( new JLabel( "Toolbar Icon:" ), GuiUtil.buildGridBagConstraints(
-                gbc, 0, y += 2, 1, 1, 0, 0, GridBagConstraints.NONE,
+                gbc, 0, ++y, 1, 1, 0, 0, GridBagConstraints.NONE,
                 GridBagConstraints.WEST ) );
         
         final JLabel jlblIcon = new JLabel();
@@ -319,6 +342,14 @@ public class SchemeExportDialog extends JDialog {
         return jtfName;
     }
 
+    private JTextField getDescrTextField() {
+        
+        if( jtfDescr == null ) {
+            jtfDescr = new JTextField( "" );
+        }
+        return jtfDescr;
+    }
+
     private JPanel getPreviewPanel() {
         
         if( previewPanel == null ) {
@@ -446,5 +477,13 @@ public class SchemeExportDialog extends JDialog {
 
     public boolean isOk() {
         return isOk;
+    }
+    
+    public String getDescription() {
+        return getDescrTextField().getText();
+    }
+    
+    public boolean shouldExportFields() {
+        return jcbExportFields.isSelected();
     }
 }
