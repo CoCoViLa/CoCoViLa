@@ -33,7 +33,7 @@ public class Editor extends JFrame implements ChangeListener {
 
     private static Editor s_instance;
 
-    JTabbedPane tabbedPane;
+    DnDTabbedPane tabbedPane;
 
     EditorActionListener aListener;
     DeleteAction deleteAction;
@@ -64,7 +64,8 @@ public class Editor extends JFrame implements ChangeListener {
         setLocationByPlatform( true );
         setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
         addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
-        tabbedPane = new JTabbedPane();
+        tabbedPane = new DnDTabbedPane();
+        tabbedPane.setTabLayoutPolicy( JTabbedPane.SCROLL_TAB_LAYOUT );
         tabbedPane.addChangeListener( this );
         undoAction = new UndoAction();
         redoAction = new RedoAction();
@@ -866,7 +867,6 @@ public class Editor extends JFrame implements ChangeListener {
         canv.destroy();
         tabbedPane.remove(canv);
         if (tabbedPane.getTabCount() > 0) {
-            tabbedPane.setSelectedIndex(0);
             getCurrentCanvas().drawingArea.grabFocus();
         }
     }
