@@ -375,7 +375,7 @@ public class ProgramRunner {
 
                         } else if ( typeOfCf.equals( TYPE_FLOAT ) ) {
 
-                            cf.setValue( Float.toString( fieldOfCf.getFloat( lastObj ) ) );
+                            cf.setValue( Float.toString( fieldOfCf.getFloat( lastObj ) ) + "f" );
 
                         } else if ( typeOfCf.equals( TYPE_LONG ) ) {
 
