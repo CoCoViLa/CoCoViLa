@@ -18,7 +18,6 @@ import javax.swing.*;
  */
 public class DnDTabbedPane extends JTabbedPane {
 
-
     private GlassPane glass;
     private int dragTabIdx = -1;
     
@@ -47,6 +46,11 @@ public class DnDTabbedPane extends JTabbedPane {
                     frame.validate();
                     frame.setLocation( location.x - frame.getSize().width/2, location.y-5 );
                     frame.setVisible( true );
+                    
+                    //keep dragging the frame while mouse button is pressed
+                    robot.mouseRelease( InputEvent.BUTTON1_MASK );
+                    robot.mouseMove( location.x, location.y );
+                    robot.mousePress( InputEvent.BUTTON1_MASK );
                 }
             } catch ( AWTException e1 ) {
                 e1.printStackTrace();
@@ -69,19 +73,16 @@ public class DnDTabbedPane extends JTabbedPane {
         @Override
         public Object getTransferData( DataFlavor flavor )
                 throws UnsupportedFlavorException, IOException {
-            //            System.err.println("getTransferData");
             return null;
         }
 
         @Override
         public DataFlavor[] getTransferDataFlavors() {
-            //            System.err.println("getTransferDataFlavors");
             return null;
         }
 
         @Override
         public boolean isDataFlavorSupported( DataFlavor flavor ) {
-            //            System.err.println("isDataFlavorSupported");
             return false;
         }
 
@@ -91,7 +92,8 @@ public class DnDTabbedPane extends JTabbedPane {
 
         @Override
         public void dragGestureRecognized( DragGestureEvent dge ) {
-            if ( getTabCount() < 2 )
+            if ( getTabCount() < 2 
+                    || !SwingUtilities.isLeftMouseButton( (MouseEvent)dge.getTriggerEvent() ) )
                 return;
 
             Point p = dge.getDragOrigin();
@@ -108,8 +110,10 @@ public class DnDTabbedPane extends JTabbedPane {
             getGlass().createImage( dge.getComponent() );
 
             try {
+                //unfortunately "drag image" is OS-specific and is not shown in Windows
                 dge.startDrag( DragSource.DefaultMoveDrop, emptyImage, emptyPoint, transferable,
                         dragSourceListener );
+                    
             } catch ( InvalidDnDOperationException e ) {
                 e.printStackTrace();
             }
@@ -246,13 +250,14 @@ public class DnDTabbedPane extends JTabbedPane {
          */
         public void createImage( Component c ) {
             Rectangle rect = getBoundsAt( dragTabIdx );
-            this.image = new BufferedImage( c.getWidth(), c.getHeight(),
+            this.image = new BufferedImage( 
+                    c.getWidth(), c.getHeight(),
                     BufferedImage.TYPE_INT_ARGB );
-            Graphics g = image.getGraphics();
-            c.paint( g );
-            rect.x = rect.x < 0 ? 0 : rect.x;
-            rect.y = rect.y < 0 ? 0 : rect.y;
-            image = image.getSubimage( rect.x, rect.y, rect.width, rect.height );
+            c.paint( image.getGraphics() );
+            image = image.getSubimage( 
+                        rect.x < 0 ? 0 : rect.x, 
+                        rect.y < 0 ? 0 : rect.y, 
+                        rect.width, rect.height );
         }
     }
 
@@ -264,34 +269,9 @@ public class DnDTabbedPane extends JTabbedPane {
         private Icon icon;
         private String tip;
         
-        private final DropTargetListener frameDropTargetListener = new DropTargetAdapter() {
-            
-            @Override
-            public void drop( DropTargetDropEvent e ) {
-                
-                if ( dragTabIdx > -1 ) {
-                    tab = DnDTabbedPane.this.getTabComponentAt( dragTabIdx );
-                    comp = DnDTabbedPane.this.getComponentAt( dragTabIdx );
-                    tabTitle = DnDTabbedPane.this.getTitleAt( dragTabIdx );
-                    icon = DnDTabbedPane.this.getIconAt( dragTabIdx );
-                    tip = DnDTabbedPane.this.getToolTipTextAt( dragTabIdx );
-                    DnDTabbedPane.this.removeTabAt( dragTabIdx );
-
-                    getContentPane().add( comp );
-                    validate();
-                    
-                    e.dropComplete( true );
-                } else {
-                    e.dropComplete( false );
-                }
-                dragTabIdx = -1;
-            }
-        };
-        
         private OuterFrame() {
             super();
             setSize( 200, 300 );
-            new DropTarget( this, DnDConstants.ACTION_COPY_OR_MOVE, frameDropTargetListener, true );
             
             addWindowListener( new WindowAdapter() {
 
