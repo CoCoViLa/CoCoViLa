@@ -116,6 +116,8 @@ public class DataTable extends JTable {
 
                 if( token != TypeToken.TOKEN_OBJECT ) {
                     columnClass = token.getWrapperClass();
+                } else {
+                    columnClass = Object.class;
                 }
             }
         }

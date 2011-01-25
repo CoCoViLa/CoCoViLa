@@ -30,6 +30,8 @@ public class TableMainPanel extends JPanel {
     private List<ListSelectionModel> selectionModels;
     private Table table;
     private TestQueryPanel queryPane;
+    private JComboBox dc;
+    private ActionListener dtActionLst;
     
     /**
      * Constructor
@@ -41,7 +43,7 @@ public class TableMainPanel extends JPanel {
         table = expTable;
         
         initLayout();
-        initSelectionManagement();
+        initListeners();
     }
     
     /**
@@ -119,12 +121,38 @@ public class TableMainPanel extends JPanel {
         dt.setBorder( BorderFactory.createLineBorder( Color.black ) );
         dp.add( dt, BorderLayout.NORTH );
         aggregateTablePanel.add( dp, c );
+        
+        //data table chooser
+        if( table.isAliasOutput() ) {
+            GuiUtil.buildGridBagConstraints( c, 1, 3, 1, 1, 0, 50, GridBagConstraints.BOTH, GridBagConstraints.PAGE_END ); 
+            JPanel chooserPane = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
+            chooserPane.add( new JLabel( "Output: " ) );
+            dc = new JComboBox( table.getOutputFields().toArray() );
+            dc.setRenderer( new DefaultListCellRenderer() {
+
+                @Override
+                public Component getListCellRendererComponent( JList list,
+                        Object value, int index, boolean isSelected,
+                        boolean cellHasFocus ) {
+                    
+                    JLabel lbl = (JLabel)super.getListCellRendererComponent( list, value, index, isSelected,
+                            cellHasFocus );
+                    
+                    TableField tf = (TableField)value;
+                    lbl.setText( tf.getType() + " " + tf.getId() );
+                    return lbl;
+                }
+                
+            });
+            chooserPane.add( dc );
+            aggregateTablePanel.add( chooserPane, c );
+        }
     }
     
     /**
      * Initialize selection listener
      */
-    private void initSelectionManagement() {
+    private void initListeners() {
         
         final ListSelectionModel hctRowModel = hct.getSelectionModel();
         final ListSelectionModel vctColumnModel = vct.getColumnModel().getSelectionModel();
@@ -191,6 +219,16 @@ public class TableMainPanel extends JPanel {
         
         hct.getFixedTableHeader().getColumnModel().getSelectionModel().setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
         vct.getFixedTableHeader().getSelectionModel().setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
+        
+        dtActionLst = new ActionListener() {
+            
+            @Override
+            public void actionPerformed( ActionEvent arg0 ) {
+                TableField tf = (TableField) dc.getSelectedItem();
+                table.setOutputField( tf, true );
+            }
+        };
+        dc.addActionListener( dtActionLst);
     }
     
     /**
@@ -233,6 +271,10 @@ public class TableMainPanel extends JPanel {
         if( queryPane != null ) {
             queryPane.destroy();
             queryPane = null;
+        }
+        if( dc != null ) {
+            dc.removeActionListener( dtActionLst );
+            dc = null;
         }
     }
     

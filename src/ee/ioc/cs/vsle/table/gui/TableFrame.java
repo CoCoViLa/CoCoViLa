@@ -221,6 +221,7 @@ public class TableFrame extends JFrame {
         
         if( table != null ) {
             SwingUtilities.invokeLater( new Runnable() {
+                @Override
                 public void run() {
                     getContentPane().add( lastPanel = new TableMainPanel( table ), BorderLayout.CENTER );
                     validate();
@@ -255,6 +256,7 @@ public class TableFrame extends JFrame {
     public void dispose() {
         
         SwingUtilities.invokeLater( new Runnable() {
+            @Override
             public void run() {
                 setTable( null );                
             }
@@ -453,6 +455,7 @@ public class TableFrame extends JFrame {
             }
             
             SwingUtilities.invokeLater( new Runnable() {
+                @Override
                 public void run() {
                     updateFrameTitle();
                 }

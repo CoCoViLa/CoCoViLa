@@ -7,6 +7,7 @@ public class TableField {
 
     private String id;
     private String type;
+    private Object defaultValue;
     
     public TableField( String id, String type ) {
         this.id = id;
@@ -53,5 +54,13 @@ public class TableField {
     @Override
     public String toString() {
         return "TableField: id= " + id + ", type=" + type;
+    }
+
+    public Object getDefaultValue() {
+        return defaultValue;
+    }
+    
+    public void setDefaultValueFromString( String value ) {
+        defaultValue = Table.createDataObjectFromString( type, value );
     }
 }

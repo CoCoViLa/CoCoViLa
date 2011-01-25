@@ -7,9 +7,6 @@ import java.io.*;
 import java.util.*;
 
 import javax.swing.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.*;
-import javax.xml.transform.stream.*;
 
 import org.w3c.dom.*;
 import org.xml.sax.*;
@@ -121,13 +118,7 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
             
             if( !collector.hasProblems() ) {
                 //transform and save into file
-                TransformerFactory xformFactory = TransformerFactory.newInstance();  
-                Transformer transformer = xformFactory.newTransformer();
-                transformer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
-                transformer.setOutputProperty(OutputKeys.INDENT,"yes");
-                Source input = new DOMSource(document);
-                Result output = new StreamResult( new FileOutputStream( xmlFile ) );
-                transformer.transform(input, output);
+                writeDocument( document, new FileOutputStream( xmlFile ) );
             }
         } catch ( Exception e ) {
             e.printStackTrace();
@@ -165,13 +156,13 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
         tableNode.appendChild( outputNode );
         outputNode.appendChild( createVarNode( table.getOutputField(), document ) );
 
-        // default value
-        if (table.hasDefaultValue()) {
-            Element defaultValue = document.createElementNS(XML_NS_URI,
-                    TBL_ELEM_DEFAULT);
-            defaultValue.setTextContent(table.getDefaultValue().toString());
-            tableNode.appendChild(defaultValue);
-        }
+        // default value TODO refactor
+//        if (table.hasDefaultValue()) {
+//            Element defaultValue = document.createElementNS(XML_NS_URI,
+//                    TBL_ELEM_DEFAULT);
+//            defaultValue.setTextContent(table.getDefaultValue().toString());
+//            tableNode.appendChild(defaultValue);
+//        }
 
         //save rules
         Element hRulesNode = document.createElementNS( XML_NS_URI,TBL_ELEM_HRULES );
@@ -322,7 +313,7 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
                 
             } else if ( TBL_ELEM_OUTPUT.equals( node.getNodeName() )  ) {
                 
-                table.setOutputField( parseVariables( node.getChildNodes() ).iterator().next() );
+                table.setOutputField( parseVariables( node.getChildNodes() ).iterator().next(), false );
 
             } else if ( TBL_ELEM_HRULES.equals( node.getNodeName() )  ) {
                 
@@ -336,7 +327,7 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
                 
                 parseData( node.getChildNodes(), table );
             } else if (TBL_ELEM_DEFAULT.equals(node.getNodeName())) {
-                table.setDefaultValue(node.getTextContent());
+                table.getOutputField().setDefaultValueFromString( node.getTextContent() );
             }
          }
         

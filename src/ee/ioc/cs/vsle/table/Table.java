@@ -25,6 +25,11 @@ public final class Table implements IStructuralExpertTable {
     
     private String tableId;
     private TableFieldList inputList = new TableFieldList();
+    private TableFieldList outputList = new TableFieldList();
+    private TableField aliasOutput;
+    //this member indicates either a single output 
+    //OR the current active element of an alias 
+    //(values of which are shown in GUI)
     private TableField output;
     private List<Rule> hrules = new ArrayList<Rule>();
     private List<Rule> vrules = new ArrayList<Rule>();
@@ -32,7 +37,6 @@ public final class Table implements IStructuralExpertTable {
     
     private int lastHorizontalId = -1;
     private int lastVerticalId = -1;
-    private Object defaultValue;
 
     /**
      * Constructor
@@ -63,6 +67,7 @@ public final class Table implements IStructuralExpertTable {
     /**
      * @return the id
      */
+    @Override
     public String getTableId() {
         return tableId;
     }
@@ -78,38 +83,38 @@ public final class Table implements IStructuralExpertTable {
      * @param inputFields
      * @param outputField
      */
-    public void changePropertiesAndVerify( String newTableId, Collection<TableField> inputFields, TableField outputField ) {
+    public void changePropertiesAndVerify( String newTableId, Collection<TableField> inputFields, Collection<TableField>  outputFields, TableField alias ) {
         
         tableId = newTableId;
         
         int eventTypeMask = 0;
         
         //handle output
-        if( !outputField.getType().equals( output.getType() ) ) {
-            
-            eventTypeMask |= TableEvent.DATA;
-            
-            String newType = outputField.getType();
-            
-            for ( DataRow row : data ) {
-                for ( DataCell cell : row.cells ) {
-                    Object value = cell.getValue();
-                    
-                    if( value != null ) {
-                        Object newValue;
-                        
-                        try {
-                            newValue = TypeUtil.createObjectFromString( newType, value.toString() );
-                        } catch ( Exception e ) {
-                            newValue = null;
-                        }
-                        cell.setValue( newValue );
-                    }
-                }
-            }
-        }
-        
-        output = outputField;
+//        if( !outputField.getType().equals( output.getType() ) ) {TODO
+//            
+//            eventTypeMask |= TableEvent.DATA;
+//            
+//            String newType = outputField.getType();
+//            
+//            for ( DataRow row : data ) {
+//                for ( DataCell cell : row.cells ) {
+//                    Object value = cell.getValue();
+//                    
+//                    if( value != null ) {
+//                        Object newValue;
+//                        
+//                        try {
+//                            newValue = TypeUtil.createObjectFromString( newType, value.toString() );
+//                        } catch ( Exception e ) {
+//                            newValue = null;
+//                        }
+//                        cell.setValue( newValue );
+//                    }
+//                }
+//            }
+//        }
+//        
+//        output = outputField;
         
         //handle inputs
         TableFieldList oldInputs = new TableFieldList();
@@ -181,13 +186,22 @@ public final class Table implements IStructuralExpertTable {
         return new ArrayList<TableField>( inputList );
     }
     
-    /**
-     * @param field
-     */
-    public void setOutputField( TableField field ) {
-        output = field;
+    public void setOutputField( TableField field, boolean notify ) {
+        if( outputList.contains( field ) ) {
+            output = field;
+            if( notify ) {
+                TableEvent.dispatchEvent( new TableEvent( this, TableEvent.DATA ) );
+            }
+        } else {
+            throw new TableException( "No such output field: " + field );
+        }
     }
     
+    public void addOutputFields( Collection<TableField> fields ) {
+        
+        outputList.addAll( fields );
+    }
+
     /**
      * @return
      */
@@ -395,12 +409,16 @@ public final class Table implements IStructuralExpertTable {
      * @param value
      * @return
      */
-    public Object createDataObjectFromString( String value ) {
+    private Object createDataObjectFromString( String value ) {
+        return createDataObjectFromString( output.getType(), value );
+    }
+    
+    public static Object createDataObjectFromString( String type, String value ) {
         try {
-            return TypeUtil.createObjectFromString( output.getType(), value );
+            return TypeUtil.createObjectFromString( type, value );
         } catch ( Exception e ) {
             throw new TableException( "Unable to create object from string, type=" + 
-                    output.getType() + ", value=" + value, e );
+                    type + ", value=" + value, e );
         }
     }
     
@@ -476,12 +494,16 @@ public final class Table implements IStructuralExpertTable {
         return null;
     }
     
-    /* (non-Javadoc)
-     * @see ee.ioc.cs.vsle.table.IStructuralExpertTable#queryTable(java.lang.Object[])
-     */
+    public boolean isAliasOutput() {
+        return aliasOutput != null;
+    }
+    
+    public void setAliasOutput( TableField alias ) {
+        aliasOutput = alias;
+    }
+    
+    @Override
     public synchronized Object queryTable( Object[] args ) {
-        
-        //db.p( "queryTable(): " + Arrays.toString( args ) );
         
         int rowId = checkRules( getOrderedRowIds(), hrules, args );
         int colId = checkRules( getOrderedColumnIds(), vrules, args );
@@ -506,26 +528,27 @@ public final class Table implements IStructuralExpertTable {
 
         DataCell cell = row.getCell(colId);
 
-        if( cell == null || cell.getValue() == null ) {
-            if (hasDefaultValue()) {
-                return getDefaultValue();
-            }
-            throw new TableException( "Cell value not specified" );
+        if( cell == null ) {
+            throw new TableException( "Cell is null (rowId=" + rowId + ", colId=" + colId );
         }
         
-        return cell.getValue();
-    }
-
-    public boolean hasDefaultValue() {
-        return defaultValue != null;
-    }
-
-    public Object getDefaultValue() {
-        return defaultValue;
-    }
-
-    public void setDefaultValue(String defaultValue) {
-        this.defaultValue = createDataObjectFromString(defaultValue);
+        if( isAliasOutput() ) {
+            List<Object> res = new ArrayList<Object>();
+            for ( TableField out : outputList ) {
+                Object val = cell.getValueById( out.getId() );
+                if( val == null )
+                    throw new TableException( "Cell value for output " + out.getId() + " not specified" );
+                res.add( val );
+            }
+            
+            return res.toArray();
+        }
+        
+        Object res = cell.getValue();
+        if( res == null ) {
+            throw new TableException( "Cell value not specified" );
+        }
+        return res;
     }
 
     /**
@@ -653,11 +676,11 @@ public final class Table implements IStructuralExpertTable {
      */
     private class DataCell {
         private int verticalId;
-        private Object value;
+        private Map<String, Object> values = new LinkedHashMap<String, Object>();
         
         public DataCell( int verticalId, Object value ) {
             this.verticalId = verticalId;
-            this.value = value;
+            values.put( output.getId(), value );
         }
 
         /**
@@ -671,20 +694,32 @@ public final class Table implements IStructuralExpertTable {
          * @return the value
          */
         public Object getValue() {
-            return value;
+            return getValueById( output.getId() );
         }
 
+        public Object getValueById( String id ) {
+            return values.get( id );
+        }
+        
         /**
          * @param value
          */
         public void setValue( Object value ) {
-            this.value = value;
+            setValueById( output.getId(), value );
+        }
+        
+        public void setValueById( String id, Object value ) {
+            values.put( id, value );
         }
 
         @Override
         public String toString() {
-            return "Data cell: " /*+ "row=" + horizontalId + ", "+*/+"col=" + verticalId + ", value=" + value;
+            return "Data cell: " +"col=" + verticalId + ", value=" + getValue();
         }
+    }
+
+    public List<TableField> getOutputFields() {
+        return Collections.unmodifiableList( outputList );
     }
     
 }
