@@ -38,6 +38,8 @@ public class TableField {
     
     @Override
     public boolean equals( Object obj ) {
+        if( obj == null ) return false;
+        
         return id.equals( ((TableField)obj).id ) && type.equals( ((TableField)obj).type );
     }
 

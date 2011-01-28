@@ -12,6 +12,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.table.*;
+import ee.ioc.cs.vsle.table.event.*;
 import ee.ioc.cs.vsle.util.*;
 
 import static ee.ioc.cs.vsle.table.gui.TableConstants.*;
@@ -32,6 +33,9 @@ public class TableMainPanel extends JPanel {
     private TestQueryPanel queryPane;
     private JComboBox dc;
     private ActionListener dtActionLst;
+    private TableEvent.Listener tableListener;
+    private JPanel jpAliasOutputElem;
+    boolean aliasOutputChangeInProgress;
     
     /**
      * Constructor
@@ -123,29 +127,37 @@ public class TableMainPanel extends JPanel {
         aggregateTablePanel.add( dp, c );
         
         //data table chooser
-        if( table.isAliasOutput() ) {
-            GuiUtil.buildGridBagConstraints( c, 1, 3, 1, 1, 0, 50, GridBagConstraints.BOTH, GridBagConstraints.PAGE_END ); 
-            JPanel chooserPane = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
-            chooserPane.add( new JLabel( "Output: " ) );
-            dc = new JComboBox( table.getOutputFields().toArray() );
-            dc.setRenderer( new DefaultListCellRenderer() {
+        GuiUtil.buildGridBagConstraints( c, 1, 3, 1, 1, 0, 50, GridBagConstraints.BOTH, GridBagConstraints.PAGE_END ); 
+        jpAliasOutputElem = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
+        jpAliasOutputElem.add( new JLabel( "Output: " ) );
+        dc = new JComboBox();
+        dc.setRenderer( new DefaultListCellRenderer() {
 
-                @Override
-                public Component getListCellRendererComponent( JList list,
-                        Object value, int index, boolean isSelected,
-                        boolean cellHasFocus ) {
-                    
-                    JLabel lbl = (JLabel)super.getListCellRendererComponent( list, value, index, isSelected,
-                            cellHasFocus );
-                    
-                    TableField tf = (TableField)value;
+            @Override
+            public Component getListCellRendererComponent( JList list,
+                    Object value, int index, boolean isSelected,
+                    boolean cellHasFocus ) {
+
+                JLabel lbl = (JLabel)super.getListCellRendererComponent( list, value, index, isSelected,
+                        cellHasFocus );
+
+                TableField tf = (TableField)value;
+                if( tf != null )
                     lbl.setText( tf.getType() + " " + tf.getId() );
-                    return lbl;
-                }
-                
-            });
-            chooserPane.add( dc );
-            aggregateTablePanel.add( chooserPane, c );
+                return lbl;
+            }
+
+        });
+        jpAliasOutputElem.add( dc );
+        aggregateTablePanel.add( jpAliasOutputElem, c );
+        updateAliasElemCombo();
+    }
+    
+    private void updateAliasElemCombo() {
+        jpAliasOutputElem.setVisible( table.isAliasOutput() );
+        if( table.isAliasOutput() ) {
+            dc.setModel( new DefaultComboBoxModel( table.getOutputFields().toArray() ) );
+            dc.setSelectedItem( table.getOutputField() );
         }
     }
     
@@ -224,11 +236,29 @@ public class TableMainPanel extends JPanel {
             
             @Override
             public void actionPerformed( ActionEvent arg0 ) {
+                
                 TableField tf = (TableField) dc.getSelectedItem();
+                aliasOutputChangeInProgress = true;
                 table.setOutputField( tf, true );
+                aliasOutputChangeInProgress = false;
             }
         };
         dc.addActionListener( dtActionLst);
+        
+        tableListener = new TableEvent.Listener() {
+
+            @Override
+            public void tableChanged( TableEvent e ) {
+                
+                if( !aliasOutputChangeInProgress 
+                        && ( e.getType() & TableEvent.DATA ) > 0 ) {
+                    
+                    updateAliasElemCombo();
+                }
+            }
+        };
+        
+        TableEvent.addTableListener( tableListener );
     }
     
     /**
@@ -276,6 +306,8 @@ public class TableMainPanel extends JPanel {
             dc.removeActionListener( dtActionLst );
             dc = null;
         }
+        
+        TableEvent.removeTableListener( tableListener );
     }
     
     @Override

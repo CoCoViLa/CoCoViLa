@@ -56,6 +56,8 @@ public class TablePropertyDialog extends JDialog {
     private JTextField jtfAliasName;
 
     private JComboBox jcbAliasType;
+
+    private JPanel aliasPane;
     
     /**
      * @param frame
@@ -128,7 +130,7 @@ public class TablePropertyDialog extends JDialog {
         outputTypePane.add( jrbAliasOutput );
         addFlowToPanel( outputPane, outputTypePane, FlowLayout.LEFT );
         
-        final JPanel aliasPane = new JPanel( new GridLayout( 1, 3, 5, 5 ));
+        aliasPane = new JPanel( new GridLayout( 1, 3, 5, 5 ));
         aliasPane.setBorder( BorderFactory.createTitledBorder( "Alias" ) );
         jcbAliasType = new JComboBox( allowedAliasTypes );
         jtfAliasName = new JTextField( 5 );
@@ -174,7 +176,7 @@ public class TablePropertyDialog extends JDialog {
                         pack();
                     }
                 } else if( e.getSource() == jcbAliasType ) {
-                    checkAliasType( jcbAliasType.getSelectedItem().toString() );
+                    checkAliasType();
                 }
             }
         };
@@ -197,7 +199,9 @@ public class TablePropertyDialog extends JDialog {
         pack();
     }
 
-    protected void checkAliasType( String type ) {
+    protected void checkAliasType() {
+        
+        String type = jcbAliasType.getSelectedItem().toString();
         
         if( isAliasOutput && !TYPE_OBJECT.equals( type ) ) {
             for ( FieldPane fp : outputFields ) {
@@ -229,9 +233,10 @@ public class TablePropertyDialog extends JDialog {
                     
                 } if( source == jbtAddOutput ) {
                     
-                    if( isAliasOutput )
+                    if( isAliasOutput ) {
                         addOutputFieldPane( true );
-                    
+                        checkAliasType();
+                    }
                 } else if( source == jbtOk ) {
                     
                     try {
@@ -302,7 +307,7 @@ public class TablePropertyDialog extends JDialog {
         
         TableField alias = null;
         if( isAliasOutput ) {
-            String outName = jtfAliasName.getName();
+            String outName = jtfAliasName.getText();
             
             if( outName == null || outName.trim().length() == 0 
                     || !StringUtil.isJavaIdentifier( outName ) ) {
@@ -373,6 +378,11 @@ public class TablePropertyDialog extends JDialog {
         }
         
         jrbAliasOutput.setSelected( isAliasOutput = table.isAliasOutput() );
+        aliasPane.setVisible( isAliasOutput );
+        if( isAliasOutput ) {
+            jtfAliasName.setText( table.getAliasOutput().getId() );
+            jcbAliasType.setSelectedItem( table.getAliasOutput().getType() );
+        }
         jrbSingleOutput.setSelected( !isAliasOutput );
         
         inputFields.clear();

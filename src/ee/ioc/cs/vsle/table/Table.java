@@ -83,38 +83,60 @@ public final class Table implements IStructuralExpertTable {
      * @param inputFields
      * @param outputField
      */
-    public void changePropertiesAndVerify( String newTableId, Collection<TableField> inputFields, Collection<TableField>  outputFields, TableField alias ) {
+    public void changePropertiesAndVerify( String newTableId, TableFieldList inputFields, TableFieldList outputFields, TableField alias ) {
         
         tableId = newTableId;
         
         int eventTypeMask = 0;
         
-        //handle output
-//        if( !outputField.getType().equals( output.getType() ) ) {TODO
-//            
-//            eventTypeMask |= TableEvent.DATA;
-//            
-//            String newType = outputField.getType();
-//            
-//            for ( DataRow row : data ) {
-//                for ( DataCell cell : row.cells ) {
-//                    Object value = cell.getValue();
-//                    
-//                    if( value != null ) {
-//                        Object newValue;
-//                        
-//                        try {
-//                            newValue = TypeUtil.createObjectFromString( newType, value.toString() );
-//                        } catch ( Exception e ) {
-//                            newValue = null;
-//                        }
-//                        cell.setValue( newValue );
-//                    }
-//                }
-//            }
-//        }
-//        
-//        output = outputField;
+        boolean outputsChanged = false;
+        if( aliasOutput == null ) {
+
+            if( alias == null ) {//single output remains
+                //handle output
+                TableField outputField = outputFields.iterator().next();
+
+                if( !outputField.getType().equals( getOutputField().getType() ) ) {
+
+                    outputsChanged = true;
+                }
+            } else {//change output to alias
+                if( outputFields.size() == 1 && outputFields.iterator().next().equals( getOutputField() ) ) {
+                    //if alias was created by the element remains the same, do nothing   
+                } else {
+                    outputsChanged = true;
+                }
+            }
+        } else {//has alias output
+            if( alias == null ) {//alias removed
+                outputsChanged = true;
+            } else {
+                if( outputFields.size() == outputList.size() ) {
+                    for ( int i = 0; i < outputFields.size(); i++ ) {
+                        if( !outputFields.get( i ).equals( outputList.get( i ) ) ) {
+                            outputsChanged = true;
+                            break;
+                        }
+                    }
+                } else {
+                    outputsChanged = true;
+                }
+            }
+        }
+        
+        if( outputsChanged ) {
+            eventTypeMask |= TableEvent.DATA;
+            for ( DataRow row : data ) {
+                for ( DataCell cell : row.cells ) {
+                    cell.update( outputList, outputFields );
+                }
+            }
+        }
+        
+        aliasOutput = alias;
+        outputList.clear();
+        outputList.addAll( outputFields );
+        output = null;
         
         //handle inputs
         TableFieldList oldInputs = new TableFieldList();
@@ -124,9 +146,7 @@ public final class Table implements IStructuralExpertTable {
         
         for ( TableField newInput : inputFields ) {
             
-//            TableField oldInput;
-            
-            if( ( /*oldInput = */oldInputs.getFieldByID( newInput.getId() ) ) != null ) {
+            if( ( oldInputs.getFieldByID( newInput.getId() ) ) != null ) {
                 //remove field that is totally equal (by type and by id)
                 oldInputs.remove( newInput );
             }
@@ -188,9 +208,11 @@ public final class Table implements IStructuralExpertTable {
     
     public void setOutputField( TableField field, boolean notify ) {
         if( outputList.contains( field ) ) {
-            output = field;
-            if( notify ) {
-                TableEvent.dispatchEvent( new TableEvent( this, TableEvent.DATA ) );
+            if( output != field ) {
+                output = field;
+                if( notify ) {
+                    TableEvent.dispatchEvent( new TableEvent( this, TableEvent.DATA ) );
+                }
             }
         } else {
             throw new TableException( "No such output field: " + field );
@@ -206,6 +228,9 @@ public final class Table implements IStructuralExpertTable {
      * @return
      */
     public TableField getOutputField() {
+        if( output == null && outputList.size() > 0 )
+            output = outputList.get( 0 );
+        
         return output;
     }
     
@@ -410,7 +435,7 @@ public final class Table implements IStructuralExpertTable {
      * @return
      */
     private Object createDataObjectFromString( String value ) {
-        return createDataObjectFromString( output.getType(), value );
+        return createDataObjectFromString( getOutputField().getType(), value );
     }
     
     public static Object createDataObjectFromString( String type, String value ) {
@@ -500,6 +525,10 @@ public final class Table implements IStructuralExpertTable {
     
     public void setAliasOutput( TableField alias ) {
         aliasOutput = alias;
+    }
+    
+    public TableField getAliasOutput() {
+        return aliasOutput;
     }
     
     @Override
@@ -680,7 +709,8 @@ public final class Table implements IStructuralExpertTable {
         
         public DataCell( int verticalId, Object value ) {
             this.verticalId = verticalId;
-            values.put( output.getId(), value );
+            if( getOutputField() != null )
+                values.put( getOutputField().getId(), value );
         }
 
         /**
@@ -694,7 +724,7 @@ public final class Table implements IStructuralExpertTable {
          * @return the value
          */
         public Object getValue() {
-            return getValueById( output.getId() );
+            return getValueById( getOutputField().getId() );
         }
 
         public Object getValueById( String id ) {
@@ -705,13 +735,37 @@ public final class Table implements IStructuralExpertTable {
          * @param value
          */
         public void setValue( Object value ) {
-            setValueById( output.getId(), value );
+            setValueById( getOutputField().getId(), value );
         }
         
         public void setValueById( String id, Object value ) {
             values.put( id, value );
         }
 
+        public void update( TableFieldList oldOutputFields, TableFieldList newOutputFields ) {
+            Map<String, Object> oldValues = values;
+            values = new LinkedHashMap<String, Object>();
+            
+            for ( TableField newTf : newOutputFields ) {
+                Object oldValue = oldValues.get( newTf.getId() );
+                
+                if( oldValue != null ) {
+                    Object newValue;
+
+                    if( newTf.equals( oldOutputFields.getFieldByID( newTf.getId() ) ) )
+                        //if types are equal
+                        newValue = oldValue;
+                    else//otherwise try to cast old type to new
+                        try {
+                            newValue = TypeUtil.createObjectFromString( newTf.getType(), oldValue.toString() );
+                        } catch ( Exception e ) {
+                            newValue = null;
+                        }
+                    setValueById( newTf.getId(), newValue );
+                }
+            }
+        }
+        
         @Override
         public String toString() {
             return "Data cell: " +"col=" + verticalId + ", value=" + getValue();
