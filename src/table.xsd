@@ -20,7 +20,7 @@
         <xsd:sequence>
             <xsd:element name="input" type="Input" minOccurs="1" maxOccurs="1"/>
             <xsd:element name="output" type="Output" minOccurs="1" maxOccurs="1"/>
-            <xsd:element name="default" minOccurs="0" maxOccurs="1" type="xsd:string"/>
+            <xsd:element name="default" type="xsd:string" minOccurs="0" maxOccurs="1"/>
             <xsd:element name="hrules" type="HRules" minOccurs="1" maxOccurs="unbounded"/>
             <xsd:element name="vrules" type="VRules" minOccurs="0" maxOccurs="unbounded"/>
             <xsd:element name="data" type="Data" minOccurs="1" maxOccurs="1"/>
@@ -38,18 +38,28 @@
 
     <xsd:complexType name="Output">
         <xsd:sequence>
-            <xsd:element name="var" type="Var" minOccurs="1" maxOccurs="1" />
+            <xsd:element name="var" type="Var" minOccurs="1" maxOccurs="unbounded" />
         </xsd:sequence>
+        <xsd:attribute name="kind" use="optional" default="single">
+			<xsd:simpleType>
+				<xsd:restriction base="xsd:string">
+					<xsd:pattern value="single|alias" />
+				</xsd:restriction>
+			</xsd:simpleType>
+		</xsd:attribute>
+        <xsd:attribute name="alias_id" type="xsd:string" use="optional" />
+        <xsd:attribute name="alias_type" type="xsd:string" use="optional" />
     </xsd:complexType>
 
     <xsd:complexType name="Var">
         <xsd:attribute name="id" type="xsd:string" use="required" />
         <xsd:attribute name="type" type="xsd:string" use="required" />
+        <xsd:attribute name="default" type="xsd:string" use="optional" />
     </xsd:complexType>
 
     <xsd:complexType name="HRules">
         <xsd:sequence>
-            <xsd:element name="rule" type="Rule" minOccurs="1" maxOccurs="unbounded" />
+            <xsd:element name="rule" type="Rule" minOccurs="0" maxOccurs="unbounded" />
         </xsd:sequence>
     </xsd:complexType>
 
@@ -61,7 +71,7 @@
 
     <xsd:complexType name="Rule">
         <xsd:sequence>
-            <xsd:element name="entry" minOccurs="1" maxOccurs="unbounded" >
+            <xsd:element name="entry" minOccurs="0" maxOccurs="unbounded" >
     		<xsd:complexType>
         		<xsd:attribute name="id" type="xsd:int" use="required" />
     		</xsd:complexType>
@@ -75,23 +85,30 @@
     <xsd:complexType name="Data">
         <xsd:sequence>
             <xsd:element name="row" minOccurs="1" maxOccurs="unbounded" >
-    		<xsd:complexType>
-        		<xsd:sequence>
-                    <xsd:element name="cell" minOccurs="1" maxOccurs="unbounded" >
-        		        <xsd:complexType>
-                            <xsd:simpleContent>
-                                <xsd:extension base="xsd:string">
-                                    <xsd:attribute name="id" type="xsd:int" use="required" />
-                                </xsd:extension>
-                            </xsd:simpleContent>
-        		        </xsd:complexType>
-                    </xsd:element>
-                </xsd:sequence>
-        		<xsd:attribute name="id" type="xsd:int" use="required" />
-    		</xsd:complexType>
+	    		<xsd:complexType>
+	        		<xsd:sequence>
+	                    <xsd:element name="cell" type="Cell" minOccurs="1" maxOccurs="unbounded" />
+	                </xsd:sequence>
+	        		<xsd:attribute name="id" type="xsd:int" use="required" />
+	    		</xsd:complexType>
             </xsd:element>
         </xsd:sequence>
     </xsd:complexType>
-
+    
+    <xsd:complexType name="Cell" mixed="true">
+        <xsd:sequence>
+        	<xsd:element name="value" type="Value" minOccurs="0" maxOccurs="unbounded" />
+        </xsd:sequence>
+		<xsd:attribute name="id" type="xsd:int" use="required" />
+    </xsd:complexType>
+   
+	<xsd:complexType name="Value">
+		<xsd:simpleContent>
+   			<xsd:extension base="xsd:string">
+       			<xsd:attribute name="var" type="xsd:string" use="required" />
+   			</xsd:extension>
+   		</xsd:simpleContent>
+  	</xsd:complexType>
+			        
 </xsd:schema>
 

@@ -389,7 +389,7 @@ public final class Table implements IStructuralExpertTable {
      * @param verticalId
      * @param value
      */
-    void addDataCell( int horizontalId, int verticalId, String value ) {
+    void addDataCell( int horizontalId, int verticalId, Map<String, String> values ) {
         
         DataRow row;
         
@@ -401,7 +401,18 @@ public final class Table implements IStructuralExpertTable {
             throw new TableException( "Dublicate cell! row=" + horizontalId + ", col=" + verticalId );
         }
         
-        row.addCell( new DataCell( verticalId, createDataObjectFromString( value ) ) );
+        DataCell cell;
+        row.addCell( cell = new DataCell( verticalId ) );
+        
+        if( values != null ) {
+            for ( String outputId : values.keySet() ) {
+                TableField out = outputList.getFieldByID( outputId );
+                if( out == null )
+                    throw new TableException( "Output " + outputId + " is not declared" );
+
+                cell.setValue( out, createDataObjectFromString( out.getType(), values.get( outputId ) ) );
+            }
+        }
         
         if( horizontalId > lastHorizontalId ) {
             lastHorizontalId = horizontalId;
@@ -422,6 +433,15 @@ public final class Table implements IStructuralExpertTable {
     }
     
     /**
+     * @param rowIndex
+     * @param columnIndex
+     * @return
+     */
+    Map<TableField, Object> getCellValuesAt( int rowIndex, int columnIndex ) {
+        return data.get( rowIndex ).getCells().get( columnIndex ).getValues();
+    }
+    
+    /**
      * @param value
      * @param rowIndex
      * @param columnIndex
@@ -431,13 +451,10 @@ public final class Table implements IStructuralExpertTable {
     }
     
     /**
+     * @param type
      * @param value
      * @return
      */
-    private Object createDataObjectFromString( String value ) {
-        return createDataObjectFromString( getOutputField().getType(), value );
-    }
-    
     public static Object createDataObjectFromString( String type, String value ) {
         try {
             return TypeUtil.createObjectFromString( type, value );
@@ -564,7 +581,7 @@ public final class Table implements IStructuralExpertTable {
         if( isAliasOutput() ) {
             List<Object> res = new ArrayList<Object>();
             for ( TableField out : outputList ) {
-                Object val = cell.getValueById( out.getId() );
+                Object val = cell.getValue( out, true );
                 if( val == null )
                     throw new TableException( "Cell value for output " + out.getId() + " not specified" );
                 res.add( val );
@@ -669,14 +686,6 @@ public final class Table implements IStructuralExpertTable {
         }
         
         /**
-         * @param position
-         * @param cell
-         */
-        void addCell( int position, DataCell cell ) {
-            cells.add( position, cell );
-        }
-        
-        /**
          * @param verticalId
          * @return
          */
@@ -701,16 +710,27 @@ public final class Table implements IStructuralExpertTable {
     
     /**
      * Represents table cell. 
-     * Contains value, row and column index.
+     * Contains map of values, row and column index.
      */
     private class DataCell {
         private int verticalId;
-        private Map<String, Object> values = new LinkedHashMap<String, Object>();
+        private Map<TableField, Object> values = new LinkedHashMap<TableField, Object>();
         
-        public DataCell( int verticalId, Object value ) {
+        /**
+         * @param verticalId
+         */
+        public DataCell( int verticalId ) {
             this.verticalId = verticalId;
+        }
+        
+        /**
+         * @param verticalId
+         * @param value
+         */
+        public DataCell( int verticalId, Object value ) {
+            this( verticalId );
             if( getOutputField() != null )
-                values.put( getOutputField().getId(), value );
+                values.put( getOutputField(), value );
         }
 
         /**
@@ -724,35 +744,58 @@ public final class Table implements IStructuralExpertTable {
          * @return the value
          */
         public Object getValue() {
-            return getValueById( getOutputField().getId() );
+            return getValue( getOutputField(), true );
         }
 
-        public Object getValueById( String id ) {
-            return values.get( id );
+        /**
+         * Returns the value and if it is null, 
+         * returns the default value
+         * 
+         * @param field
+         * @param checkDefault
+         * @return
+         */
+        public Object getValue( TableField field, boolean checkDefault ) {
+            Object value;
+            return ( ( value = values.get( field ) ) != null
+                     || !checkDefault )
+                        ? value 
+                        : field.getDefaultValue();
         }
         
         /**
          * @param value
          */
         public void setValue( Object value ) {
-            setValueById( getOutputField().getId(), value );
+            setValue( getOutputField(), value );
         }
         
-        public void setValueById( String id, Object value ) {
-            values.put( id, value );
+        /**
+         * @param field
+         * @param value
+         */
+        public void setValue( TableField field, Object value ) {
+            values.put( field, value );
         }
 
+        /**
+         * Updates the values and tries to perform type conversion
+         * 
+         * @param oldOutputFields
+         * @param newOutputFields
+         */
         public void update( TableFieldList oldOutputFields, TableFieldList newOutputFields ) {
-            Map<String, Object> oldValues = values;
-            values = new LinkedHashMap<String, Object>();
+            Map<TableField, Object> oldValues = values;
+            values = new LinkedHashMap<TableField, Object>();
             
             for ( TableField newTf : newOutputFields ) {
-                Object oldValue = oldValues.get( newTf.getId() );
+                TableField oldTf = oldOutputFields.getFieldByID( newTf.getId() );
+                Object oldValue = oldValues.get( oldTf );
                 
-                if( oldValue != null ) {
+                if( oldTf != null && oldValue != null ) {
                     Object newValue;
 
-                    if( newTf.equals( oldOutputFields.getFieldByID( newTf.getId() ) ) )
+                    if( oldTf.getType().equals( newTf.getType() ) )
                         //if types are equal
                         newValue = oldValue;
                     else//otherwise try to cast old type to new
@@ -761,9 +804,16 @@ public final class Table implements IStructuralExpertTable {
                         } catch ( Exception e ) {
                             newValue = null;
                         }
-                    setValueById( newTf.getId(), newValue );
+                    setValue( newTf, newValue );
                 }
             }
+        }
+        
+        /**
+         * Returns read-only mapping of outputs to values
+         */
+        public Map<TableField, Object> getValues() {
+            return Collections.unmodifiableMap( values );
         }
         
         @Override
@@ -772,6 +822,9 @@ public final class Table implements IStructuralExpertTable {
         }
     }
 
+    /**
+     * Returns read-only list of outputs
+     */
     public List<TableField> getOutputFields() {
         return Collections.unmodifiableList( outputList );
     }
