@@ -26,7 +26,7 @@ public class SpecParser {
                     ".*/\\*@.*specification [a-zA-Z_0-9-.]+ ?(super ([ a-zA-Z_0-9-,]+ ))? ?\\{ ?(.+) ?\\} ?@\\*/ ?" );
     private static final Pattern PATTERN_WHITESPACE = Pattern.compile( "[ \r\t\n]+" );
     private static final Pattern PATTERN_DECLARATION = Pattern
-                        .compile( "^ *(static )?([a-zA-Z_$][0-9a-zA-Z_$]*(\\[\\])*) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)" );
+                        .compile( "^ *(static)? *([a-zA-Z_](([\\.][a-zA-Z_])*)[0-9a-zA-Z_$]*(\\[\\])*) (([a-zA-Z_$][0-9a-zA-Z_$]* ?, ?)* ?[a-zA-Z_$][0-9a-zA-Z_$]* ?$)"   );
     private static final Pattern PATTERN_AXIOM_SPEC = Pattern.compile( "(.*) *-> *([ -_a-zA-Z0-9.,]+) *$" );
     private static final Pattern PATTERN_AXIOM_SUBTASK = Pattern.compile( "\\[ *(([a-zA-Z_$][0-9a-zA-Z_$]*) *\\|-)? *(.*) *-> ?(.*)\\]" );
     private static final Pattern PATTERN_AXIOM_SUBTASKS = Pattern.compile( "\\[([^\\]\\[]*) *-> *([^\\]\\[]*)\\]" );
@@ -262,7 +262,7 @@ public class SpecParser {
                 LineType.Declaration st = new LineType.Declaration();
                 st.setStatic( ( matcher.group( 1 ) != null ) );
                 st.setType( matcher.group( 2 ).trim() );
-                st.setNames( matcher.group( 4 ).trim().split( " *, *", -1 ) );
+                st.setNames( matcher.group( 6 ).trim().split( " *, *", -1 ) );
                 return new LineType( LineType.TYPE_DECLARATION, st, line );
             }
             return new LineType( LineType.TYPE_ERROR, null, line );
