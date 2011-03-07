@@ -95,7 +95,9 @@ public class Optimizer {
 			     * those vars has been removed, otherwise the propagation procedure
 			     * may overwrite values of such variables.
 			     */
-			    context.getFoundVars().removeAll( resToRemove.getRel().getOutputs() );
+			    Set<Var> outputs = new LinkedHashSet<Var>();
+	            CodeGenerator.unfoldVarsToSet(resToRemove.getRel().getOutputs(), outputs);
+			    context.getFoundVars().removeAll( outputs );
 			}
 		}
 		if (RuntimeProperties.isLogDebugEnabled())
