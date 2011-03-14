@@ -124,7 +124,7 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
             ( (Text) shape ).setFont( font );
             ( (Text) shape ).setText( text );
         } else {
-            Text t = new Text( x, y, font, color, getTransparency(), text );
+            Text t = new Text( x, y, font, Shape.createColorWithAlpha( color, getTransparency() ), text );
             editor.shapeList.add( t );
         }
         editor.repaint();
@@ -140,7 +140,7 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
             for ( int i = 0; i < editor.shapeList.size(); i++ ) {
                 Shape s = editor.shapeList.get( i );
                 if ( s.isSelected() ) {
-                    s.setTransparency( transparency );
+                    s.setColor( Shape.createColorWithAlpha( s.getColor(), transparency ) );
                 }
             }
             editor.repaint();
@@ -276,7 +276,8 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
      * @param col Color - line color. Black by default if not chosen otherwise from the color chooser.
      */
     public void drawLine( Color col ) {
-        Line line = new Line( startX, startY, editor.mouseX, editor.mouseY, col.getRGB(), strokeWidth, getTransparency(), lineType );
+        Line line = new Line( startX, startY, editor.mouseX, editor.mouseY, 
+                Shape.createColorWithAlpha( col, getTransparency() ), strokeWidth, lineType );
 
         editor.mouseX = startX;
         editor.mouseY = startY;
@@ -290,7 +291,8 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
      * @param col Color - dot color. Black by default if not chosen otherwise from the color chooser.
      */
     public void drawDot( Color col ) {
-        Dot dot = new Dot( startX, startY, col.getRGB(), strokeWidth, getTransparency() );
+        Dot dot = new Dot( startX, startY, 
+                Shape.createColorWithAlpha( col, getTransparency() ), strokeWidth );
         editor.shapeList.add( dot );
         editor.repaint();
     } // drawDot
@@ -355,8 +357,8 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
             return;
         }
         if ( state.equals( State.drawArc2 ) ) {
-            Arc arc = new Arc( startX, startY, arcWidth, arcHeight, arcStartAngle, arcAngle, color.getRGB(), fill, strokeWidth,
-                    getTransparency(), lineType );
+            Arc arc = new Arc( startX, startY, arcWidth, arcHeight, arcStartAngle, arcAngle, 
+                    Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );
             editor.shapeList.add( arc );
             setState( State.selection );
         }
@@ -798,24 +800,25 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
 
                 } else {
                     db.p( this.getTransparency() );
-                    Rect rect = new Rect( Math.min( startX, editor.mouseX ), Math.min( startY, editor.mouseY ), width, height, color
-                            .getRGB(), fill, strokeWidth, getTransparency(), lineType );
+                    Rect rect = new Rect( Math.min( startX, editor.mouseX ), Math.min( startY, editor.mouseY ), width, height, 
+                            Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );
                     editor.shapeList.add( rect );
                 }
                 editor.repaint();
             } else if ( state.equals( State.drawOval ) || state.equals( State.drawFilledOval ) ) {
                 int width = Math.abs( editor.mouseX - startX );
                 int height = Math.abs( editor.mouseY - startY );
-                Oval oval = new Oval( Math.min( startX, editor.mouseX ), Math.min( startY, editor.mouseY ), width, height, color.getRGB(),
-                        fill, strokeWidth, getTransparency(), lineType );
+                Oval oval = new Oval( Math.min( startX, editor.mouseX ), Math.min( startY, editor.mouseY ), width, height, 
+                        Shape.createColorWithAlpha( color, getTransparency() ),
+                        fill, strokeWidth, lineType );
                 editor.shapeList.add( oval );
             } else if ( state.equals( State.drawArc ) || state.equals( State.drawFilledArc ) ) {
                 arcWidth = Math.abs( editor.mouseX - startX );
                 arcHeight = Math.abs( editor.mouseY - startY );
                 setState( State.drawArc1 );
             } else if ( state.equals( State.drawLine ) ) {
-                Line line = new Line( startX, startY, editor.mouseX, editor.mouseY, color.getRGB(), strokeWidth, getTransparency(),
-                        lineType );
+                Line line = new Line( startX, startY, editor.mouseX, editor.mouseY, 
+                        Shape.createColorWithAlpha( color, getTransparency() ), strokeWidth, lineType );
                 editor.shapeList.add( line );
             } else if ( state.equals( State.resize ) ) {
                 state = State.selection;

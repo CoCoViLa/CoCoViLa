@@ -61,14 +61,6 @@ public class ShapeGroup extends Shape implements Serializable {
         }
     } // setColor
 
-    @Override
-    public void setTransparency( int d ) {
-        for ( int i = 0; i < shapes.size(); i++ ) {
-            Shape shape = shapes.get( i );
-            shape.setTransparency( d );
-        }
-    } // setTransparency
-
     /**
      * Specify the line type used at drawing the shape.
      * @param lineType float

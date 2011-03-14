@@ -39,10 +39,9 @@ public class Dot extends Shape implements Serializable {
      * @param transp
      *            double - transparency (Alpha) value (0..100%).
      */
-    public Dot( int x, int y, int colorInt, float strokeWidth, int transp ) {
+    public Dot( int x, int y, Color color, float strokeWidth ) {
         super( x, y, (int) strokeWidth / 2, (int) strokeWidth / 2 );
-        this.setColor( new Color( colorInt ) );
-        setTransparency( transp );
+        this.setColor( color );
         
         setStroke( strokeWidth, 0.0f );
     } // Dot
@@ -119,7 +118,7 @@ public class Dot extends Shape implements Serializable {
 
     @Override
     public Shape getCopy() {
-        return new Dot( getX(), getY(), getColor().getRGB(), getStrokeWidth(), getTransparency() );
+        return new Dot( getX(), getY(), getColor(), getStrokeWidth() );
     }
 }
 

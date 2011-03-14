@@ -16,7 +16,7 @@ public class Line extends Shape implements Serializable {
     private int fixedY1;
     private int fixedY2;
 
-    public Line( int x1, int y1, int x2, int y2, int colorInt, float strokeWidth, int transp, float lineType ) {
+    public Line( int x1, int y1, int x2, int y2, Color color, float strokeWidth, float lineType ) {
         super( Math.min( x1, x2 ), Math.min( y1, y2 ) );
         this.setWidth( Math.max( x1, x2 ) - this.getX() ); // endX - startX;
         this.setHeight( Math.max( y1, y2 ) - this.getY() ); // endY - startY;
@@ -25,8 +25,7 @@ public class Line extends Shape implements Serializable {
         setStartY( y1 );
         setEndX( x2 );
         setEndY( y2 );
-        setColor( new Color( colorInt ) );
-        setColor( new Color( getColor().getRed(), getColor().getGreen(), getColor().getBlue(), transp ) );
+        setColor( color );
 
         setStroke( strokeWidth, lineType );
     } // Line
@@ -326,8 +325,7 @@ public class Line extends Shape implements Serializable {
 
     @Override
     public Shape getCopy() {
-        return new Line( getStartX(), getStartY(), getEndX(), getEndY(), getColor().getRGB(), getStrokeWidth(), getTransparency(),
-                getLineType() );
+        return new Line( getStartX(), getStartY(), getEndX(), getEndY(), getColor(), getStrokeWidth(), getLineType() );
     }
 
     /**

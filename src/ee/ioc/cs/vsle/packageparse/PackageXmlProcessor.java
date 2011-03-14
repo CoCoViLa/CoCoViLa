@@ -1,18 +1,14 @@
-/**
- * 
- */
 package ee.ioc.cs.vsle.packageparse;
 
 import java.awt.*;
 import java.io.*;
+import java.net.*;
 import java.util.*;
 import java.util.List;
 
 import javax.xml.parsers.*;
-import javax.xml.transform.*;
 
 import org.w3c.dom.*;
-import org.w3c.dom.ls.*;
 import org.xml.sax.*;
 
 import ee.ioc.cs.vsle.common.xml.*;
@@ -99,11 +95,26 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
     /**
      * The default values
      */
-    private static final int IMPLIED_ALPHA = 255;
-    private static final int IMPLIED_COLOR = 0;
+    private static final Color IMPLIED_COLOR = new Color(0);
     private static final float IMPLIED_STROKE = 1.0f;
     private static final float IMPLIED_LINE = 0.0f;
     
+    public static final EntityResolver ENTITY_RESOLVER = new EntityResolver() {
+
+        @Override
+        public InputSource resolveEntity( String publicId, String systemId ) {
+            if ( systemId != null && systemId.endsWith( "dtd" ) ) {
+                URL url = FileFuncs.getResource( RuntimeProperties.PACKAGE_DTD, true );
+                if ( url != null ) {
+                    return new InputSource( url.toString() );
+                }
+                //if unable to find dtd in local fs, try getting it from web
+                return new InputSource( RuntimeProperties.SCHEMA_LOC + RuntimeProperties.PACKAGE_DTD );
+            }
+            return null;
+        }
+
+    };
     /**
      * @param packageFile
      */
@@ -369,16 +380,6 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             
         }
         
-        class Colorprops {
-            int colour;
-            int alpha;
-            public Colorprops( int colour, int transparency ) {
-                this.colour = colour;
-                this.alpha = transparency;
-            }
-            
-        }
-        
         class FixedCoords {
             int x, fx, y, fy;
             public FixedCoords( int x, int fx, int y, int fy ) {
@@ -403,10 +404,29 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                     shape.hasAttribute( ATR_LINETYPE ) ? Float.parseFloat( shape.getAttribute( ATR_LINETYPE ) ) : IMPLIED_LINE );
         }
         
-        private Colorprops getColorProps( Element shape ) {
-            return new Colorprops( 
-                    shape.hasAttribute( ATR_COLOUR ) ? Integer.parseInt( shape.getAttribute( ATR_COLOUR ) ) : IMPLIED_COLOR,
-                    shape.hasAttribute( ATR_TRANSPARENCY ) ? Integer.parseInt( shape.getAttribute( ATR_TRANSPARENCY ) ) : IMPLIED_ALPHA );
+        private Color getColor( Element shape ) {
+            Color color;
+            if( shape.hasAttribute( ATR_COLOUR ) ) {
+                String s = shape.getAttribute( ATR_COLOUR );
+                if( s.indexOf( ',' ) > -1 ) {
+                    String[] rgb = s.split( "," );
+                    color = new Color(
+                            Integer.parseInt( rgb[0] ),
+                            Integer.parseInt( rgb[1] ),
+                            Integer.parseInt( rgb[2] ) );
+                } else {
+                    color = new Color( Integer.parseInt( s ) );
+                }
+            } else
+                color = IMPLIED_COLOR;
+            
+            if( shape.hasAttribute( ATR_TRANSPARENCY ) ) {
+                int alpha = Integer.parseInt( shape.getAttribute( ATR_TRANSPARENCY ) );
+                if( alpha < 255 )
+                    return new Color( color.getRed(), color.getGreen(), color.getBlue(), alpha );
+            }
+            
+            return color;
         }
         
         private boolean isShapeFilled( Element shape ) {
@@ -469,31 +489,27 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
 
                     Dim dim =  getDim( node );
                     Lineprops lp = getLineProps( node );
-                    Colorprops cp = getColorProps( node );
-                    shape =  new Rect( dim.x, dim.y, dim.width, dim.height, cp.colour, isShapeFilled( node ), lp.strokeWidth, cp.alpha, lp.lineType );
+                    shape =  new Rect( dim.x, dim.y, dim.width, dim.height, getColor( node ), isShapeFilled( node ), lp.strokeWidth, lp.lineType );
                     
                 } else if ( EL_OVAL.equals( nodeName ) ) {
 
                     Dim dim =  getDim( node );
                     Lineprops lp = getLineProps( node );
-                    Colorprops cp = getColorProps( node );
-                    shape = new Oval( dim.x, dim.y, dim.width, dim.height, cp.colour, isShapeFilled( node ), lp.strokeWidth, cp.alpha, lp.lineType );
+                    shape = new Oval( dim.x, dim.y, dim.width, dim.height, getColor( node ), isShapeFilled( node ), lp.strokeWidth, lp.lineType );
                     
                 } else if ( EL_ARC.equals( nodeName ) ) {
 
                     Dim dim =  getDim( node );
                     Lineprops lp = getLineProps( node );
-                    Colorprops cp = getColorProps( node );
                     int startAngle = Integer.parseInt( node.getAttribute( ATR_START_ANGLE ) );
                     int arcAngle = Integer.parseInt( node.getAttribute( ATR_ARC_ANGLE ) );
                     shape = new Arc( dim.x, dim.y, dim.width, dim.height,
-                            startAngle, arcAngle, cp.colour, isShapeFilled( node ), lp.strokeWidth, cp.alpha, lp.lineType );
+                            startAngle, arcAngle, getColor( node ), isShapeFilled( node ), lp.strokeWidth, lp.lineType );
                     
                 } else if ( EL_POLYGON.equals( nodeName ) ) {
                     Lineprops lp = getLineProps( node );
-                    Colorprops cp = getColorProps( node );
 
-                    Polygon polygon = new Polygon( cp.colour, isShapeFilled( node ), lp.strokeWidth, cp.alpha, lp.lineType );
+                    Polygon polygon = new Polygon( getColor( node ), isShapeFilled( node ), lp.strokeWidth, lp.lineType );
                     
                     //points
                     NodeList points = node.getElementsByTagName( EL_POINT );
@@ -543,7 +559,6 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         }
 
         private Text makeText( Element textNode, ClassGraphics graphics ) {
-            Colorprops cp = getColorProps( textNode );
             String str = textNode.getAttribute( ATR_STRING );
 
             String fontName = textNode.getAttribute( ATR_FONTNAME );
@@ -554,7 +569,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
 
             FixedCoords fc = getFixedCoords( textNode, graphics.getBoundWidth(), graphics.getBoundHeight(), null );
             
-            Text newText = new Text( fc.x, fc.y, font, new Color( cp.colour ), cp.alpha, str, isShapeFixed( textNode ) );
+            Text newText = new Text( fc.x, fc.y, font, getColor( textNode ), str, isShapeFixed( textNode ) );
             newText.setFixedX( fc.fx );
             newText.setFixedY( fc.fy );
             
@@ -564,14 +579,13 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         private Line makeLine( Element lineNode, ClassGraphics graphics ) {
             
             Lineprops lp = getLineProps( lineNode );
-            Colorprops cp = getColorProps( lineNode );
             
             int w = graphics.getBoundWidth();
             int h = graphics.getBoundHeight();
             FixedCoords fc1 = getFixedCoords( lineNode, w, h, "1" );
             FixedCoords fc2 = getFixedCoords( lineNode, w, h, "2" );
             
-            Line newLine = new Line( fc1.x, fc1.y, fc2.x, fc2.y, cp.colour, lp.strokeWidth, cp.alpha, lp.lineType );
+            Line newLine = new Line( fc1.x, fc1.y, fc2.x, fc2.y, getColor( lineNode ), lp.strokeWidth, lp.lineType );
             newLine.setFixedX1( fc1.fx );
             newLine.setFixedX2( fc2.fx );
             newLine.setFixedY1( fc1.fy );
@@ -589,7 +603,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
 
     @Override
     protected EntityResolver getEntityResolver() {
-        return PackageParser.ENTITY_RESOLVER;
+        return ENTITY_RESOLVER;
     }
 
     @Override

@@ -19,11 +19,10 @@ public class Rect extends Shape implements Serializable {
      * @param transp double - shape transparency percentage.
      * @param lineType int - shape line type.
      */
-    public Rect( int x, int y, int width, int height, int colorInt, boolean filled, float strokeWidth, int transp, float lineType ) {
+    public Rect( int x, int y, int width, int height, Color color, boolean filled, float strokeWidth, float lineType ) {
         super( x, y, width, height );
         setFilled( filled );
-        setColor( new Color( colorInt ) );
-        setTransparency( transp );
+        setColor( color );
         setStroke( strokeWidth, lineType );
     } // Rect
 
@@ -100,8 +99,8 @@ public class Rect extends Shape implements Serializable {
 
     @Override
     public Shape getCopy() {
-        return new Rect( getX(), getY(), getWidth(), getHeight(), getColor().getRed(), 
-                isFilled(), getStrokeWidth(), getTransparency(), getLineType() );
+        return new Rect( getX(), getY(), getWidth(), getHeight(), getColor(), 
+                isFilled(), getStrokeWidth(), getLineType() );
     }
 
 }

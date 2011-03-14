@@ -40,18 +40,13 @@ public class Arc extends Shape implements Serializable, Cloneable {
      * @param lineType -
      *            shape line type.
      */
-    public Arc( int x, int y, int width, int height, int startAngle, int arcAngle, int colorInt, boolean fill, float strokeWidth,
-            int transp, float lineType ) {
+    public Arc( int x, int y, int width, int height, int startAngle, int arcAngle, Color color, boolean fill, float strokeWidth, float lineType ) {
         super( x, y, width, height );
         this.setStartAngle( startAngle );
         this.setArcAngle( arcAngle );
-        setColor( new Color( colorInt ) );
-        setTransparency( transp );
-
+        setColor( color );
         this.setFilled( fill );
-
         setStroke( strokeWidth, lineType );
-        
     } // Arc
 
     public int getStartAngle() {
@@ -203,8 +198,8 @@ public class Arc extends Shape implements Serializable, Cloneable {
     @Override
     public Shape getCopy() {
         
-        return new Arc( getX(), getY(), getWidth(), getHeight(), getStartAngle(), getArcAngle(), getColor().getRGB(), isFilled(), 
-                getStrokeWidth(), getTransparency(), getLineType() );
+        return new Arc( getX(), getY(), getWidth(), getHeight(), getStartAngle(), getArcAngle(), getColor(), isFilled(), 
+                getStrokeWidth(), getLineType() );
     }
 
     /**

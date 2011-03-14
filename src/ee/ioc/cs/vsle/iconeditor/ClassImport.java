@@ -21,6 +21,8 @@ import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 
+import static ee.ioc.cs.vsle.graphics.Shape.*;
+
 public class ClassImport {
 	ArrayList <String> pc;
 	ArrayList <IconClass>icons;
@@ -135,7 +137,7 @@ public class ClassImport {
 				if (strVal != null)
 					tr = Integer.parseInt(strVal);
 				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
-				Rect rect = new Rect(x, y, w, h, col, filled, st, tr, lt);
+				Rect rect = new Rect(x, y, w, h, createColor( col, tr ), filled, st, lt);
 				rect.setFixed(fixed);
 				shapeList.add(rect);
 			}else if(element.equals("oval")){
@@ -158,7 +160,7 @@ public class ClassImport {
 					tr = Integer.parseInt(strVal);
 				
 				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
-				Oval oval = new Oval(x, y, w, h, col, filled, st, tr, lt);
+				Oval oval = new Oval(x, y, w, h, createColor( col, tr ), filled, st, lt);
 				oval.setFixed(fixed);
 				shapeList.add(oval);
 			}else if(element.equals("line")){
@@ -181,7 +183,7 @@ public class ClassImport {
 					tr = Integer.parseInt(strVal);
 				
 				
-				Line line = new Line(x, y, x2, y2, col, st, tr, lt);
+				Line line = new Line(x, y, x2, y2, createColor( col, tr ), st, lt);
 				line.setFixed(fixed);
 				shapeList.add(line);
 			}else if(element.equals("arc")){
@@ -208,7 +210,7 @@ public class ClassImport {
 				arcAngle = Integer.parseInt(attrs.getValue("arcAngle"));
 				
 				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
-				Arc arc = new Arc(x, y, w, h, startAngle, arcAngle, col, filled, st, tr, lt);
+				Arc arc = new Arc(x, y, w, h, startAngle, arcAngle, createColor( col, tr ), filled, st, lt);
 				arc.setFixed(fixed);
 				shapeList.add(arc);
 			}else if (element.equals("bounds")){
@@ -227,7 +229,7 @@ public class ClassImport {
 				st = Integer.parseInt(attrs.getValue("stroke"));
 				tr = Integer.parseInt(attrs.getValue("transparency"));
 				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
-				Dot dot = new Dot(x, y, col, st, tr);
+				Dot dot = new Dot(x, y, createColor( col, tr ), st);
 				dot.setFixed(fixed);
 				shapeList.add(dot);
 			}else if(element.equals("text")){
@@ -253,9 +255,9 @@ public class ClassImport {
 				if (font != null) {
 				    Text text;
 				    if (inField) {
-				        text = new Text(x, y, font, new Color(col), tr, "*".concat(field.getName()));
+				        text = new Text(x, y, font, createColor( col, tr ), "*".concat(field.getName()));
 				    } else {
-				        text = new Text(x, y, font, new Color(col), tr, textStr);
+				        text = new Text(x, y, font, createColor( col, tr ), textStr);
 				    }
 				    shapeList.add(text);
 				}

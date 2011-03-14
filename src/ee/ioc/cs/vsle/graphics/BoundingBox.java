@@ -8,11 +8,11 @@ public class BoundingBox extends Shape implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public static final String name = "BoundingBox";
-
+    private static final Color BB_COLOR = new Color( Color.lightGray.getRed(), Color.lightGray.getGreen(), Color.lightGray.getBlue(), 200 );
+    
     public BoundingBox( int x, int y, int width, int height ) {
         super( x, y, width, height );
-        this.setColor( Color.lightGray );
-        setTransparency( 200 );
+        this.setColor( BB_COLOR );
         this.setFilled( true );
     } // BoundingBox
 

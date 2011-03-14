@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.util.*;
+import static ee.ioc.cs.vsle.graphics.Shape.*;
 
 public class Port implements Cloneable, Serializable {
 
@@ -30,12 +31,12 @@ public class Port implements Cloneable, Serializable {
 	
 	static {
 	    DEFAULT_OPEN_GRAPHICS = new ClassGraphics();
-	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, 12632256, true, 1.0f, 255, 0, true ) );
-	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, 0, false, 1.0f, 255, 0, true ) );
+	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, createColor( 12632256, 255 ), true, 1.0f, 0, true ) );
+	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, createColor( 0, 255 ), false, 1.0f, 0, true ) );
 	    DEFAULT_OPEN_GRAPHICS.setBounds( -4, -4, 8, 8 );
 	    
 	    DEFAULT_CLOSED_GRAPHICS = new ClassGraphics();
-	    DEFAULT_CLOSED_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, 0, true, 1.0f, 255, 0, true ) );
+	    DEFAULT_CLOSED_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, createColor( 0, 255 ), true, 1.0f, 0, true ) );
 	    DEFAULT_CLOSED_GRAPHICS.setBounds( -4, -4, 8, 8 );
 	}
 	

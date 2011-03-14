@@ -18,11 +18,10 @@ public class Polygon extends Shape {
     private int[] xFixed;
     private int[] yFixed;
 
-    public Polygon( int colorInt, boolean b, float strokeWidth, int transp, float lineType ) {
+    public Polygon( Color color, boolean b, float strokeWidth, float lineType ) {
         super( 0, 0 );
         setFilled( b );
-        setColor( new Color( colorInt ) );
-        setTransparency( transp );
+        setColor( color );
         setStroke( strokeWidth, lineType );
     }
 

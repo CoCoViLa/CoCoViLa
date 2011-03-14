@@ -14,6 +14,7 @@ import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.*;
+import static ee.ioc.cs.vsle.graphics.Shape.*;
 
 public class IconEditor extends JFrame {
 
@@ -1439,7 +1440,7 @@ public class IconEditor extends JFrame {
                 str = str.substring( str.indexOf( ":" ) + 1 );
                 boolean fixed = Boolean.valueOf( str ).booleanValue();
 
-                Line line = new Line( x1, y1, x2, y2, colorInt, strokeW, transp, lt );
+                Line line = new Line( x1, y1, x2, y2, createColor( colorInt, transp ), strokeW, lt );
                 line.setFixed( fixed );
                 shapeList.add( line );
             } else if ( str.startsWith( "ARC:" ) ) {
@@ -1468,7 +1469,7 @@ public class IconEditor extends JFrame {
                 str = str.substring( str.indexOf( ":" ) + 1 );
                 boolean fixed = Boolean.valueOf( str ).booleanValue();
 
-                Arc arc = new Arc( x, y, width, height, startAngle, arcAngle, colorInt, fill, strokeW, transp, lt );
+                Arc arc = new Arc( x, y, width, height, startAngle, arcAngle, createColor( colorInt, transp ), fill, strokeW, lt );
                 arc.setFixed( fixed );
                 shapeList.add( arc );
             } else if ( str.startsWith( "BOUNDS:" ) ) {
@@ -1504,7 +1505,7 @@ public class IconEditor extends JFrame {
                 str = str.substring( str.indexOf( ":" ) + 1 );
                 boolean fixed = Boolean.valueOf( str ).booleanValue();
 
-                Dot dot = new Dot( x, y, colorInt, strokeW, transp );
+                Dot dot = new Dot( x, y, createColor( colorInt, transp ), strokeW );
                 dot.setFixed( fixed );
                 shapeList.add( dot );
             } else if ( str.startsWith( "OVAL:" ) ) {
@@ -1529,7 +1530,7 @@ public class IconEditor extends JFrame {
                 str = str.substring( str.indexOf( ":" ) + 1 );
                 boolean fixed = Boolean.valueOf( str ).booleanValue();
 
-                Oval oval = new Oval( x, y, width, height, colorInt, fill, strokeW, transp, lt );
+                Oval oval = new Oval( x, y, width, height, createColor( colorInt, transp ), fill, strokeW, lt );
                 oval.setFixed( fixed );
                 shapeList.add( oval );
             } else if ( str.startsWith( "RECT:" ) ) {
@@ -1554,7 +1555,7 @@ public class IconEditor extends JFrame {
                 str = str.substring( str.indexOf( ":" ) + 1 );
                 boolean fixed = Boolean.valueOf( str ).booleanValue();
 
-                Rect rect = new Rect( x, y, width, height, colorInt, fill, strokeW, transp, lt );
+                Rect rect = new Rect( x, y, width, height, createColor( colorInt, transp ), fill, strokeW, lt );
                 rect.setFixed( fixed );
                 shapeList.add( rect );
             } else if ( str.startsWith( "TEXT:" ) ) {
@@ -1583,7 +1584,7 @@ public class IconEditor extends JFrame {
                 else if ( fontStyle.equalsIgnoreCase( "2" ) )
                     font = new Font( fontName, Font.ITALIC, fontSize );
                 if ( font != null ) {
-                    Text text = new Text( x, y, font, new Color( colorInt ), transp, str );
+                    Text text = new Text( x, y, font, createColor( colorInt, transp ), str );
                     shapeList.add( text );
                 }
 

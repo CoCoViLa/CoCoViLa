@@ -10,14 +10,13 @@ public class Oval extends Shape implements Serializable {
 
     private double rotation = 0.0;
 
-    public Oval( int x, int y, int width, int height, int colorInt, boolean fill, float strokeWidth, int transp, float lineType ) {
-        this( x, y, width, height, colorInt, fill, strokeWidth, transp, lineType, false );
+    public Oval( int x, int y, int width, int height, Color color, boolean fill, float strokeWidth, float lineType ) {
+        this( x, y, width, height, color, fill, strokeWidth, lineType, false );
     } // Oval
 
-    public Oval( int x, int y, int width, int height, int colorInt, boolean fill, float strokeWidth, int transp, float lineType, boolean fixed ) {
+    public Oval( int x, int y, int width, int height, Color color, boolean fill, float strokeWidth, float lineType, boolean fixed ) {
         super( x, y, width, height );
-        setColor( new Color( colorInt ) );
-        setTransparency( transp );
+        setColor( color );
         setFilled( fill );
         setStroke( strokeWidth, lineType );
         setFixed( fixed );
@@ -117,8 +116,8 @@ public class Oval extends Shape implements Serializable {
 
     @Override
     public Shape getCopy() {
-        return new Oval( getX(), getY(), getWidth(), getHeight(), getColor().getRGB(), 
-                isFilled(), getStrokeWidth(), getTransparency(), getLineType() );
+        return new Oval( getX(), getY(), getWidth(), getHeight(), getColor(), 
+                isFilled(), getStrokeWidth(), getLineType() );
     }
 
     /**

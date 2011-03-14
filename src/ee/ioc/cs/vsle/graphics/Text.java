@@ -18,18 +18,14 @@ public class Text extends Shape implements Serializable {
     private int h; //* Height of the text.
     private int w;//	 * Width of the text.
 
-    public Text( int x, int y, Font font, Color color, int transp, String s ) {
-        super( x, y );
-        this.setFont( font );
-        this.setColor( new Color( color.getRed(), color.getGreen(), color.getBlue(), transp ) );
-        this.setText( s );
-
+    public Text( int x, int y, Font font, Color color, String s ) {
+        this( x, y, font, color, s, false );
     } // Text
 
-    public Text( int x, int y, Font font, Color color, int transp, String s, boolean fixed ) {
+    public Text( int x, int y, Font font, Color color, String s, boolean fixed ) {
         super( x, y );
         this.setFont( font );
-        this.setColor( new Color( color.getRed(), color.getGreen(), color.getBlue(), transp ) );
+        this.setColor( color );
         this.setText( s );
         setFixed( fixed );
     } // Text
@@ -289,7 +285,7 @@ public class Text extends Shape implements Serializable {
 
     @Override
     public Shape getCopy() {
-        return new Text( getX(), getY(), getFont(), getColor(), getTransparency(), getText() );
+        return new Text( getX(), getY(), getFont(), getColor(), getText(), isFixed() );
     }
 
     /**

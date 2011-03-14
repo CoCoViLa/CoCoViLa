@@ -34,8 +34,8 @@ public class SchemeExportDialog extends JDialog {
     private JList jlPorts;
     
     //shapes
-    private Text previewText = new Text( 5, 20, getPreviewPanel().getFont(), Color.red, 255, "" );
-    private Rect previewRect = new Rect( 0, 0, 35, 35, Color.black.getRGB(), false, 1f, 255, 0 );
+    private Text previewText = new Text( 5, 20, getPreviewPanel().getFont(), Color.red, "" );
+    private Rect previewRect = new Rect( 0, 0, 35, 35, Color.black, false, 1f, 0 );
     
     /**
      * @param schemeContainer

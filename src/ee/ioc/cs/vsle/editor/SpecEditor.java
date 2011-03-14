@@ -9,6 +9,7 @@ import javax.swing.*;
 
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * @author pavelg
@@ -38,22 +39,20 @@ public class SpecEditor {
 
         int returnVal = fc.showOpenDialog( null );
 
-        final PackageParser packageLoader = new PackageParser();
-        
         SchemeContainer container = null;
         
         if ( returnVal == JFileChooser.APPROVE_OPTION ) {
-            File pack = fc.getSelectedFile();
+            File packFile = fc.getSelectedFile();
 
-            db.p( "Loading package: " + pack.getName() );
-            
-            if( packageLoader.load( pack ) ) {
+            db.p( "Loading package: " + packFile.getName() );
+            VPackage pkg;
+            if((pkg = PackageXmlProcessor.load(packFile)) != null ) {
 
-                container = new SchemeContainer( packageLoader.getPackage(), packageLoader.getPath() );
+                container = new SchemeContainer( pkg, packFile.getParent() + File.separator );
 
                 if( JOptionPane.showConfirmDialog( null, "Open a scheme?", "Open", JOptionPane.YES_NO_OPTION ) 
                         == JOptionPane.OK_OPTION ) {
-                    fc = new JFileChooser( packageLoader.getPath() );
+                    fc = new JFileChooser( packFile.getParent() + File.separator );
                     fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.SYN ) );
                     returnVal = fc.showOpenDialog( null );
                     File schemeFile = fc.getSelectedFile();

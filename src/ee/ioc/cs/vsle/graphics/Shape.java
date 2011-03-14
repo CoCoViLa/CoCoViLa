@@ -221,12 +221,6 @@ public abstract class Shape implements Serializable, Cloneable {
         }
     }
 
-    public void setTransparency( int d ) {
-        if( getColor() != null ) {
-            setColor( new Color( getColor().getRed(), getColor().getGreen(), getColor().getBlue(), d ) );
-        }
-    }
-
     public void setLineType( float lineType ) {
         if( getStroke() != null ) {
             setStroke( getStrokeWidth(), lineType );
@@ -374,6 +368,18 @@ public abstract class Shape implements Serializable, Cloneable {
         } else {
             this.stroke = new BasicStroke( strokeWidth );
         }
+    }
+    
+    public static Color createColor( int rgb, int alpha ) {
+        
+        return createColorWithAlpha( new Color( rgb ), alpha );
+    }
+    
+    public static Color createColorWithAlpha( Color color, int alpha ) {
+        
+        return ( alpha == 255 ) 
+                ? color 
+                : new Color( color.getRed(), color.getGreen(), color.getBlue(), alpha );
     }
 
 }
