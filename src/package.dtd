@@ -39,7 +39,7 @@ appearance of the rich component e.g 'text string="*self"' (or *selfWithName) di
 <!ELEMENT known	(graphics)>
 <!ELEMENT default (graphics)>
 <!-- A visual appearance of something composed of vector graphics' shapes and/or raster images -->
-<!ELEMENT graphics ( (bounds | line | rect | oval | arc | polygon | image | text )+, painter? )>
+<!ELEMENT graphics ( bounds?, ( line | rect | oval | arc | polygon | image | text )*, painter? )>
 <!ATTLIST graphics 
 	showFields (true|false) "false"
 >
