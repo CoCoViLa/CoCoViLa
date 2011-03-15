@@ -63,7 +63,7 @@ public class Image extends Shape {
             // Determine the type of transparency of the new buffered image
             int transparency = Transparency.OPAQUE;
             if (hasAlpha) {
-                transparency = Transparency.BITMASK;
+                transparency = Transparency.TRANSLUCENT;
             }
     
             // Create the buffered image
@@ -104,15 +104,19 @@ public class Image extends Shape {
     
         // Use a pixel grabber to retrieve the image's color model;
         // grabbing a single pixel is usually sufficient
-         PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
+        PixelGrabber pg = new PixelGrabber(image, 0, 0, 1, 1, false);
         try {
-            pg.grabPixels();
+            if (pg.grabPixels()) {
+                // Get the image's color model
+                ColorModel cm = pg.getColorModel();
+                if (cm != null) {
+                    return cm.hasAlpha();
+                }
+            }
         } catch (InterruptedException e) {
+            // ignore
         }
-    
-        // Get the image's color model
-        ColorModel cm = pg.getColorModel();
-        return cm.hasAlpha();
+        return false;
     }
 
     @Override
