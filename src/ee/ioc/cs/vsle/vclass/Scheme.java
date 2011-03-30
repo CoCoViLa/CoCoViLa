@@ -2,6 +2,8 @@ package ee.ioc.cs.vsle.vclass;
 
 import java.io.*;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.SwingUtilities;
 import javax.xml.transform.OutputKeys;
@@ -54,18 +56,34 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
 		return canvas.getPackage();
 	}
 
-	public ObjectList getObjects() {
+	public ObjectList getObjectList() {
 		if (objects == null)
 			objects = new ObjectList();
 
 		return objects;
 	}
 
+    public GObj getObject(int index) {
+        return objects != null ? objects.get(index) : null;
+    }
+
+    public ArrayList<GObj> getSelectedObjects() {
+        return objects != null ? objects.getSelected() : new ArrayList<GObj>(0);
+    }
+
+    public List<SchemeObject> getObjects() {
+        return new ArrayList<SchemeObject>(objects);
+    }
+
 	public void setObjects(ObjectList objects) {
 		this.objects = objects;
 	}
 
-	public ConnectionList getConnections() {
+	public List<ee.ioc.cs.vsle.api.Connection> getConnections() {
+	    return new ArrayList<ee.ioc.cs.vsle.api.Connection>(connections);
+	}
+
+	public ConnectionList getConnectionList() {
 		if (connections == null)
 			connections = new ConnectionList();
 

@@ -70,7 +70,7 @@ public class SchemeExporter {
      */
     public static void exportAsObject(Canvas canv) {
         
-        ArrayList<GObj> selectedObjects = canv.getObjects().getSelected();
+        ArrayList<GObj> selectedObjects = canv.getObjectList().getSelected();
         
         if ( selectedObjects.size() > 1 ) {
             
@@ -192,7 +192,7 @@ public class SchemeExporter {
                 canv.addCurrentObject();
                 
                 //3. modify connections
-                for( Port newPort : obj.getPorts() ) {
+                for( Port newPort : obj.getPortList() ) {
                     
                     String portName = newPort.getName();
                     if( innerPortNamesToConnections.containsKey( portName ) ) {

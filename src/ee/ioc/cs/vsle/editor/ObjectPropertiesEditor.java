@@ -313,7 +313,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 					"Input error",
 					JOptionPane.ERROR_MESSAGE);
 		} else {
-			if (!canvas.getObjects().isUniqueName(objectName,
+			if (!canvas.getObjectList().isUniqueName(objectName,
 					controlledObject)) {
 				inputError = true;
 				JOptionPane.showMessageDialog(this, "The name of the"

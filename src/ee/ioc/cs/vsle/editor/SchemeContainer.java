@@ -31,8 +31,8 @@ public class SchemeContainer implements ISchemeContainer {
     }
 
     @Override
-    public ObjectList getObjects() {
-        return scheme.getObjects();
+    public ObjectList getObjectList() {
+        return scheme.getObjectList();
     }
 
     @Override

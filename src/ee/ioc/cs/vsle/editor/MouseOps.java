@@ -114,8 +114,8 @@ class MouseOps extends MouseInputAdapter {
                     ConnectionPopupMenu popupMenu = new ConnectionPopupMenu( relation, canvas, x, y );
                     popupMenu.show( canvas, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
                 } else {
-                    GObj obj = canvas.getObjects().checkInside( x, y );
-                    if ( obj != null || canvas.getObjects().getSelectedCount() > 1 ) {
+                    GObj obj = canvas.getObjectList().checkInside( x, y );
+                    if ( obj != null || canvas.getObjectList().getSelectedCount() > 1 ) {
                         openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
                     }
                 }
@@ -134,7 +134,7 @@ class MouseOps extends MouseInputAdapter {
         } else {
             if ( state.equals( State.addRelation ) ) {
                 // **********Relation adding code**************************
-                Port port = canvas.getObjects().getPort( x, y );
+                Port port = canvas.getObjectList().getPort( x, y );
                 if ( port != null ) {
                     if ( canvas.currentCon == null ) {
                         if ( port.canBeConnected() )
@@ -166,7 +166,7 @@ class MouseOps extends MouseInputAdapter {
                 // **********Selecting objects code*********************
 
                 if ( !e.isShiftDown() ) {
-                    canvas.getObjects().clearSelected();
+                    canvas.getObjectList().clearSelected();
                     canvas.getConnections().clearSelected();
                 }
 
@@ -175,7 +175,7 @@ class MouseOps extends MouseInputAdapter {
                 if ( con != null ) {
                     con.setSelected( true );
                 } else {
-                    GObj obj = canvas.getObjects().checkInside( x, y );
+                    GObj obj = canvas.getObjectList().checkInside(x, y);
 
                     if ( obj != null ) {
                         obj.setSelected( true );
@@ -191,7 +191,7 @@ class MouseOps extends MouseInputAdapter {
 
             } else {
                 if ( State.isAddRelClass( state ) ) {
-                    Port port = canvas.getObjects().getPort( x, y );
+                    Port port = canvas.getObjectList().getPort(x, y);
 
                     if ( port != null ) {
                         PackageClass obj = canvas.getPackage().getClass( State.getClassName( state ) );
@@ -232,10 +232,10 @@ class MouseOps extends MouseInputAdapter {
                 if (bp != null) {
                     startBreakPointDrag(con, bp);
                 } else {
-                    obj = canvas.getObjects().checkInside( canvas.mouseX, canvas.mouseY );
+                    obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY);
                 }
             } else {
-                obj = canvas.getObjects().checkInside( canvas.mouseX, canvas.mouseY );
+                obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY);
             }
 
             if ( obj != null ) {
@@ -243,7 +243,7 @@ class MouseOps extends MouseInputAdapter {
                     obj.setSelected( true );
                 } else {
                     if ( !obj.isSelected() ) {
-                        canvas.getObjects().clearSelected();
+                        canvas.getObjectList().clearSelected();
                         obj.setSelected( true );
                     }
                 }
@@ -253,7 +253,8 @@ class MouseOps extends MouseInputAdapter {
                 }
                 canvas.drawingArea.repaint();
             } else if ( con == null ) {
-                cornerClicked = canvas.getObjects().controlRectContains( canvas.mouseX, canvas.mouseY );
+                cornerClicked = canvas.getObjectList().controlRectContains(
+                        canvas.mouseX, canvas.mouseY);
                 if ( cornerClicked != 0 ) {
                     setState( State.resize );
                 } else {
@@ -308,13 +309,14 @@ class MouseOps extends MouseInputAdapter {
 
             // If there are strict ports being moved find the first one that
             // would create a new connection and snap it to the other port.
-            ArrayList<GObj> selected = canvas.getObjects().getSelected();
+            ArrayList<GObj> selected = canvas.getObjectList().getSelected();
             SNAP: for ( GObj obj : selected ) {
                 if ( obj.isStrict() ) {
-                    for ( Port port1 : obj.getPorts() ) {
+                    for ( Port port1 : obj.getPortList() ) {
                         if ( port1.isStrict() ) {
                             Point p1 = obj.toCanvasSpace( port1.getRealCenterX(), port1.getRealCenterY() );
-                            Port port2 = canvas.getObjects().getPort( p1.x + moveX, p1.y + moveY, obj );
+                            Port port2 = canvas.getObjectList().getPort(
+                                    p1.x + moveX, p1.y + moveY, obj);
 
                             if ( port2 != null && !selected.contains( port2.getObject() ) && port1.canBeConnectedTo( port2 )
                                     && ( !port1.isConnectedTo( port2 ) || port1.isStrictConnected() ) ) {
@@ -431,7 +433,7 @@ class MouseOps extends MouseInputAdapter {
      * @param y the Y coordinate of the mouse cursor
      */
     private void updateRelClassPortHilight( int x, int y ) {
-        Port port = canvas.getObjects().getPort( x, y );
+        Port port = canvas.getObjectList().getPort(x, y);
         RelObj curObj = (RelObj) canvas.getCurrentObj();
 
         if ( currentPort != null && currentPort != port ) {
@@ -468,7 +470,7 @@ class MouseOps extends MouseInputAdapter {
      * is is possible to generalise and merge these methods?
      */
     private void updateConnectionPortHilight( int x, int y ) {
-        Port port = canvas.getObjects().getPort( x, y );
+        Port port = canvas.getObjectList().getPort(x, y);
 
         if ( currentPort != null && currentPort != port ) {
             if ( canvas.currentCon == null || canvas.currentCon.getBeginPort() != currentPort ) {
@@ -499,10 +501,11 @@ class MouseOps extends MouseInputAdapter {
      * location.
      */
     private void updateStrictPortHilight() {
-        for ( Port port : canvas.getCurrentObj().getPorts() ) {
+        for ( Port port : canvas.getCurrentObj().getPortList() ) {
             port.setSelected( false );
 
-            Port port2 = canvas.getObjects().getPort( port.getRealCenterX(), port.getRealCenterY() );
+            Port port2 = canvas.getObjectList().getPort(
+                    port.getRealCenterX(), port.getRealCenterY());
 
             if ( port2 != null && port2.isStrict() && !port2.isStrictConnected() && port.canBeConnectedTo( port2 ) ) {
 
@@ -511,8 +514,9 @@ class MouseOps extends MouseInputAdapter {
                 // port will be connected an the others should not be
                 // hilighted.
                 boolean ignore = false;
-                for ( Port p : canvas.getCurrentObj().getPorts() ) {
-                    if ( p.isSelected() && canvas.getObjects().getPort( p.getRealCenterX(), p.getRealCenterY() ) == port2 ) {
+                for ( Port p : canvas.getCurrentObj().getPortList() ) {
+                    if (p.isSelected() && canvas.getObjectList().getPort(
+                            p.getRealCenterX(), p.getRealCenterY()) == port2) {
                         ignore = true;
                         break;
                     }
@@ -545,12 +549,13 @@ class MouseOps extends MouseInputAdapter {
             int x2 = Math.max( startX, canvas.mouseX );
             int y1 = Math.min( startY, canvas.mouseY );
             int y2 = Math.max( startY, canvas.mouseY );
-            canvas.getObjects().selectObjectsInsideBox( x1, y1, x2, y2, e.isShiftDown() );
+            canvas.getObjectList().selectObjectsInsideBox(
+                    x1, y1, x2, y2, e.isShiftDown());
             state = State.selection;
             canvas.drawingArea.repaint();
         }
 
-        List<GObj> selected = canvas.getObjects().getSelected();
+        List<GObj> selected = canvas.getObjectList().getSelected();
         if ( selected != null && selected.size() > 0 )
             canvas.setStatusBarText( "Selection: " + selected.toString() );
 

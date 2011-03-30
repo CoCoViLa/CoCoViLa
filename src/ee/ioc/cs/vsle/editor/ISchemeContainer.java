@@ -38,11 +38,11 @@ public interface ISchemeContainer {
     String getWorkDir();
     
     /**
-     * Returns a list of objects
+     * Returns the reference of the internal object list
      * 
-     * @return
+     * @return object list
      */
-    ObjectList getObjects();
+    ObjectList getObjectList();
 
     /**
      * Returns a scheme

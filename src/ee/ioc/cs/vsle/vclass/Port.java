@@ -2,13 +2,14 @@ package ee.ioc.cs.vsle.vclass;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.util.*;
 import static ee.ioc.cs.vsle.graphics.Shape.*;
 
-public class Port implements Cloneable, Serializable {
+public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	private String id;
@@ -137,6 +138,7 @@ public class Port implements Cloneable, Serializable {
 			> pointY);
 	}
 
+	@Override
 	public String getName() {
 		return name;
 	}
@@ -211,6 +213,7 @@ public class Port implements Cloneable, Serializable {
 		return false;
 	}
 
+	@Override
 	public String getType() {
 		return type;
 	}
@@ -236,6 +239,7 @@ public class Port implements Cloneable, Serializable {
 		}
 	}
 
+	@Override
 	public GObj getObject() {
 		return obj;
 	}
@@ -249,8 +253,8 @@ public class Port implements Cloneable, Serializable {
 	public int getNumber() {
 		Port port;
 
-		for (int j = 0; j < obj.getPorts().size(); j++) {
-			port = obj.getPorts().get(j);
+		for (int j = 0; j < obj.getPortList().size(); j++) {
+			port = obj.getPortList().get(j);
 			if (port == this) {
 				return j;
 			}
@@ -274,8 +278,13 @@ public class Port implements Cloneable, Serializable {
 		return hilighted;
 	}
 
-	public ArrayList<Connection> getConnections() {
-		return connections;
+	@Override
+	public List<ee.ioc.cs.vsle.api.Connection> getConnections() {
+	    return new ArrayList<ee.ioc.cs.vsle.api.Connection>(connections);
+	}
+
+	public ArrayList<Connection> getConnectionList() {
+	    return connections;
 	}
 
 	@Override

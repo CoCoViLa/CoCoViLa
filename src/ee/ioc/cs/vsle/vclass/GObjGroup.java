@@ -154,13 +154,13 @@ public class GObjGroup extends GObj implements Serializable {
 	}
 
 	@Override
-	public ArrayList<Port> getPorts() {
+	public ArrayList<Port> getPortList() {
 		ArrayList<Port> c = new ArrayList<Port>();
 		GObj obj;
 
 		for (int j = 0; j < objects.size(); j++) {
 			obj = objects.get(j);
-			c.addAll(obj.getPorts());
+			c.addAll(obj.getPortList());
 		}
 		return c;
 

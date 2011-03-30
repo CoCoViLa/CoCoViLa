@@ -469,14 +469,13 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
                 for ( int i = 0; i < objects.size(); i++ ) {
                     obj = objects.get( i );
                     if ( obj instanceof RelObj ) {
-                        Port port = obj.getPorts().get( 0 );
-                        Connection con = port.getConnections().get( 0 );
+                        Port port = obj.getPortList().get( 0 );
+                        Connection con = port.getConnectionList().get(0);
                         ( (RelObj) obj ).setStartPort( con.getBeginPort() );
                         // ((RelObj)obj).startPort.obj = con.beginPort.obj;
-                        port = obj.getPorts().get( 1 );
-                        con = port.getConnections().get( 0 );
+                        port = obj.getPortList().get( 1 );
+                        con = port.getConnectionList().get(0);
                         ( (RelObj) obj ).setEndPort( con.getEndPort() );
-
                     }
                 }
                 objects.updateRelObjs();

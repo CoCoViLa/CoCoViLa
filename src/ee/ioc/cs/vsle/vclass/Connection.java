@@ -18,7 +18,7 @@ import org.xml.sax.helpers.AttributesImpl;
 /**
  * Connection between two ports.
  */
-public class Connection implements Serializable {
+public class Connection implements ee.ioc.cs.vsle.api.Connection, Serializable {
 
 	private static final long serialVersionUID = 1L;
 

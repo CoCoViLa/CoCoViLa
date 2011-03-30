@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.api;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.List;
 
 /**
  * The Scheme interface that is exposed to the generated programs through the
@@ -24,6 +25,20 @@ public interface Scheme {
      * {@code} null otherwise.
      */
     public SchemeObject getObject(String objectName);
+
+    /**
+     * Returns a copy of the list containing all scheme objects. Adding or
+     * removing list elements does not get reflected on the scheme: use
+     * {@code addObject} etc. to modify the scheme.
+     * @return list of scheme objects
+     */
+    public List<SchemeObject> getObjects();
+
+    /**
+     * Returns a copy of the list containing all connections on the scheme.
+     * @return list of all connections
+     */
+    //public List<Connection> getConnections();
 
     /**
      * Gets the value from the specified scheme object field.

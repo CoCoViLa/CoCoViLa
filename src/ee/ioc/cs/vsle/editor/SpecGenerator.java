@@ -29,8 +29,8 @@ public class SpecGenerator implements ISpecGenerator {
 	    StringBuilder goalAxiom = null;
 	    StringBuilder inputs = null;
 	    
-    	ObjectList objects = scheme.getObjects();
-    	ConnectionList relations = scheme.getConnections();
+    	ObjectList objects = scheme.getObjectList();
+    	ConnectionList relations = scheme.getConnectionList();
 
     	GObj superClass = scheme.getSuperClass();
     	
@@ -125,7 +125,7 @@ public class SpecGenerator implements ISpecGenerator {
 			}
 			
 			//not connected multiport is an empty array and can be used in computations
-			for(Port port : obj.getPorts()) {
+			for(Port port : obj.getPortList()) {
 			    if(port.isMulti()) {
 			        String multiport = ( port.getObject().isSuperClass() ? ""
 	                        : port.getObject().getName() + "." ) + port.getName();

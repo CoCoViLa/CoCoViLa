@@ -11,6 +11,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
 
+import ee.ioc.cs.vsle.api.SchemeObject;
 import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.packageparse.*;
@@ -180,11 +181,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
             moveSelected( moveX, moveY );
 
             if ( delConns != null )
-                canvas.getScheme().getConnections().removeAll( delConns );
+                canvas.getScheme().getConnectionList().removeAll( delConns );
             if ( newConns != null )
-                canvas.getScheme().getConnections().addAll( newConns );
+                canvas.getScheme().getConnectionList().addAll( newConns );
 
-            canvas.getScheme().getObjects().updateRelObjs();
+            canvas.getObjectList().updateRelObjs();
         }
 
         @Override
@@ -194,11 +195,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
             moveSelected( -moveX, -moveY );
 
             if ( newConns != null )
-                canvas.getScheme().getConnections().removeAll( newConns );
+                canvas.getScheme().getConnectionList().removeAll( newConns );
             if ( delConns != null )
-                canvas.getScheme().getConnections().addAll( delConns );
+                canvas.getScheme().getConnectionList().addAll( delConns );
 
-            canvas.getScheme().getObjects().updateRelObjs();
+            canvas.getScheme().getObjectList().updateRelObjs();
         }
 
         private void moveSelected( int dx, int dy ) {
@@ -309,10 +310,10 @@ public class Canvas extends JPanel implements ISchemeContainer {
         @Override
         public void redo() throws CannotRedoException {
             super.redo();
-            canvas.getScheme().getObjects().add( object );
-            canvas.getScheme().getObjects().updateRelObjs();
+            canvas.getObjectList().add(object);
+            canvas.getObjectList().updateRelObjs();
             if ( newConns != null )
-                canvas.getScheme().getConnections().addAll( newConns );
+                canvas.getScheme().getConnectionList().addAll( newConns );
             if ( painter != null && canvas.classPainters != null )
                 canvas.classPainters.put( object, painter );
         }
@@ -320,9 +321,9 @@ public class Canvas extends JPanel implements ISchemeContainer {
         @Override
         public void undo() throws CannotUndoException {
             super.undo();
-            canvas.getScheme().getObjects().remove( object );
+            canvas.getObjectList().remove(object);
             if ( newConns != null )
-                canvas.getScheme().getConnections().removeAll( newConns );
+                canvas.getScheme().getConnectionList().removeAll( newConns );
             if ( painter != null && canvas.classPainters != null )
                 canvas.classPainters.remove( object );
         }
@@ -357,8 +358,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
         @Override
         public void redo() throws CannotRedoException {
             super.redo();
-            canvas.getScheme().getObjects().removeAll( removedObjs );
-            canvas.getScheme().getConnections().removeAll( removedConns );
+            canvas.getObjectList().removeAll(removedObjs);
+            canvas.getScheme().getConnectionList().removeAll( removedConns );
             if ( canvas.classPainters != null && removedPainters != null ) {
                 canvas.classPainters.entrySet().removeAll( removedPainters.entrySet() );
             }
@@ -367,9 +368,9 @@ public class Canvas extends JPanel implements ISchemeContainer {
         @Override
         public void undo() throws CannotUndoException {
             super.undo();
-            canvas.getScheme().getObjects().addAll( removedObjs );
-            canvas.getScheme().getObjects().updateRelObjs();
-            canvas.getScheme().getConnections().addAll( removedConns );
+            canvas.getObjectList().addAll(removedObjs);
+            canvas.getObjectList().updateRelObjs();
+            canvas.getScheme().getConnectionList().addAll( removedConns );
             if ( canvas.classPainters != null && removedPainters != null )
                 canvas.classPainters.putAll( removedPainters );
         }
@@ -404,8 +405,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
         @Override
         public void redo() throws CannotRedoException {
             super.redo();
-            canvas.getScheme().getObjects().addAll( newObjects );
-            canvas.getScheme().getConnections().addAll( newConnections );
+            canvas.getObjectList().addAll(newObjects);
+            canvas.getScheme().getConnectionList().addAll( newConnections );
             if ( canvas.classPainters != null && newPainters != null )
                 canvas.classPainters.putAll( newPainters );
         }
@@ -413,8 +414,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
         @Override
         public void undo() throws CannotUndoException {
             super.undo();
-            canvas.getScheme().getObjects().removeAll( newObjects );
-            canvas.getScheme().getConnections().removeAll( newConnections );
+            canvas.getObjectList().removeAll(newObjects);
+            canvas.getScheme().getConnectionList().removeAll( newConnections );
             if ( canvas.classPainters != null && newPainters != null ) {
                 canvas.classPainters.entrySet().removeAll( newPainters.entrySet() );
             }
@@ -437,8 +438,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
         public ClearAllEdit( Canvas canvas ) {
             this.canvas = canvas;
 
-            objCopy = new ArrayList<GObj>( canvas.getScheme().getObjects() );
-            connCopy = new ArrayList<Connection>( canvas.getScheme().getConnections() );
+            objCopy = new ArrayList<GObj>(canvas.getObjectList());
+            connCopy = new ArrayList<Connection>( canvas.getScheme().getConnectionList() );
             if ( canvas.classPainters != null )
                 painterCopy = new HashMap<GObj, ClassPainter>( canvas.classPainters );
         }
@@ -451,8 +452,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
         @Override
         public void redo() throws CannotRedoException {
             super.redo();
-            canvas.getScheme().getObjects().clear();
-            canvas.getScheme().getConnections().clear();
+            canvas.getObjectList().clear();
+            canvas.getScheme().getConnectionList().clear();
             if ( canvas.classPainters != null )
                 canvas.classPainters.clear();
         }
@@ -460,8 +461,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
         @Override
         public void undo() throws CannotUndoException {
             super.undo();
-            canvas.getScheme().getObjects().addAll( objCopy );
-            canvas.getScheme().getConnections().addAll( connCopy );
+            canvas.getObjectList().addAll(objCopy);
+            canvas.getScheme().getConnectionList().addAll( connCopy );
             if ( canvas.classPainters != null )
                 canvas.classPainters.putAll( painterCopy );
         }
@@ -667,7 +668,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * @param moveY Y coordinate change
      */
     public void moveObjects( int moveX, int moveY ) {
-        ArrayList<GObj> selectedObjs = scheme.getObjects().getSelected();
+        ArrayList<GObj> selectedObjs = scheme.getSelectedObjects();
         ArrayList<Connection> created = null;
         ArrayList<Connection> deleted = null;
 
@@ -685,7 +686,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
                         deleted = new ArrayList<Connection>();
 
                     deleted.addAll( rc );
-                    scheme.getConnections().removeAll( rc );
+                    scheme.getConnectionList().removeAll( rc );
                 }
 
                 // create new strict connections
@@ -696,14 +697,14 @@ public class Canvas extends JPanel implements ISchemeContainer {
                         created = new ArrayList<Connection>();
 
                     created.addAll( nc );
-                    scheme.getConnections().addAll( nc );
+                    scheme.getConnectionList().addAll( nc );
                 }
             }
         }
 
         // if both endpoints of a connection are moved
         // then move the breakpoints also
-        for ( Connection con : scheme.getConnections() ) {
+        for ( Connection con : scheme.getConnectionList() ) {
             if ( selectedObjs.contains( con.getBeginPort().getObject() ) && selectedObjs.contains( con.getEndPort().getObject() ) ) {
                 con.move( moveX, moveY );
             }
@@ -712,7 +713,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         MoveEdit edit = new MoveEdit( this, moveX, moveY, selectedObjs, created, deleted );
         undoSupport.postEdit( edit );
 
-        scheme.getObjects().updateRelObjs();
+        scheme.getObjectList().updateRelObjs();
         drawingArea.repaint();
     } // moveObject
 
@@ -727,7 +728,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         if ( currentObj == null )
             throw new IllegalStateException( "Current object is null" );
 
-        scheme.getObjects().add( currentObj );
+        getObjectList().add(currentObj);
         if ( classPainters != null && currentPainter != null )
             classPainters.put( currentObj, currentPainter );
 
@@ -741,18 +742,18 @@ public class Canvas extends JPanel implements ISchemeContainer {
             obj.getStartPort().setSelected( false );
             obj.getEndPort().setSelected( false );
 
-            ArrayList<Port> ports = currentObj.getPorts();
+            ArrayList<Port> ports = currentObj.getPortList();
 
             newConns = new ArrayList<Connection>( 2 );
             newConns.add( new Connection( obj.getStartPort(), ports.get( 0 ) ) );
             newConns.add( new Connection( ports.get( 1 ), endPort ) );
-            scheme.getConnections().addAll( newConns );
+            scheme.getConnectionList().addAll( newConns );
 
-            scheme.getObjects().updateRelObjs();
+            scheme.getObjectList().updateRelObjs();
         } else if ( currentObj.isStrict() ) {
             newConns = getNewStrictConnections( currentObj );
             if ( newConns != null )
-                scheme.getConnections().addAll( newConns );
+                scheme.getConnectionList().addAll( newConns );
         }
 
         undoSupport.postEdit( new AddObjectEdit( this, currentObj, currentPainter, newConns ) );
@@ -774,13 +775,12 @@ public class Canvas extends JPanel implements ISchemeContainer {
      */
     private ArrayList<Connection> getNewStrictConnections( GObj object ) {
         ArrayList<Connection> conns = null;
-        for ( Port port : object.getPorts() ) {
+        for ( Port port : object.getPortList() ) {
             if ( port.isStrict() ) {
                 port.setSelected( false );
 
                 Point p1 = object.toCanvasSpace( port.getRealCenterX(), port.getRealCenterY() );
-                
-                Port port2 = scheme.getObjects().getPort( p1.x, p1.y, object );
+                Port port2 = scheme.getObjectList().getPort(p1.x, p1.y, object);
 
                 if ( port2 != null && port2.isStrict() && port.canBeConnectedTo( port2 ) && !port.isConnectedTo( port2 ) ) {
 
@@ -827,8 +827,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
     private ArrayList<Connection> getBrokenStrictConnections( GObj object ) {
         ArrayList<Connection> removed = null;
 
-        for ( Port port : object.getPorts() ) {
-            for ( Connection con : port.getConnections() ) {
+        for ( Port port : object.getPortList() ) {
+            for (Connection con : port.getConnectionList()) {
                 if ( con.isStrict() && ! ( con.getBeginPort().contains( con.getEndPort() ) || con.getEndPort().contains( con.getBeginPort() ) ) ) {
 
                     if ( removed == null )
@@ -854,40 +854,40 @@ public class Canvas extends JPanel implements ISchemeContainer {
         // remove selected objects and related connections and
         // accumulate for undo
         GObj obj;
-        for ( int i = 0; i < scheme.getObjects().size(); i++ ) {
-            obj = scheme.getObjects().get( i );
+        for ( int i = 0; i < getObjectList().size(); i++ ) {
+            obj = scheme.getObject(i);
             if ( obj.isSelected() ) {
                 Collection<Connection> cs = obj.getConnections();
                 removableConns.addAll( cs );
-                scheme.getConnections().removeAll( cs );
+                scheme.getConnectionList().removeAll( cs );
                 removableObjs.add( obj );
                 deleteClassPainters( obj, rmPainters );
             }
         }
-        scheme.getObjects().removeAll( removableObjs );
+        getObjectList().removeAll(removableObjs);
 
         // remove selected connections and accumulate them for undo
-        for ( int i = 0; i < scheme.getConnections().size(); ) {
-            con = scheme.getConnections().get( i );
+        for ( int i = 0; i < scheme.getConnectionList().size(); ) {
+            con = scheme.getConnectionList().get( i );
             if ( con.isSelected() ) {
                 removableConns.add( con );
-                scheme.getConnections().remove( con );
+                scheme.getConnectionList().remove( con );
             } else
                 i++;
         }
 
         // remove dangling relation objects
-        for ( RelObj ro : scheme.getObjects().getExcessRels() ) {
+        for ( RelObj ro : scheme.getObjectList().getExcessRels() ) {
             Collection<Connection> cs = ro.getConnections();
             // do not undelete a connection more than once
             for ( Connection c : cs ) {
-                if ( scheme.getConnections().contains( c ) )
+                if ( scheme.getConnectionList().contains( c ) )
                     removableConns.add( c );
             }
-            scheme.getConnections().removeAll( cs );
+            scheme.getConnectionList().removeAll( cs );
             removableObjs.add( ro );
             deleteClassPainters( ro, rmPainters );
-            scheme.getObjects().remove( ro );
+            getObjectList().remove(ro);
         }
 
         if ( removableObjs.size() > 0 || removableConns.size() > 0 ) {
@@ -935,7 +935,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         if ( classPainters == null )
             classPainters = new HashMap<GObj, ClassPainter>();
 
-        for ( GObj obj : scheme.getObjects() ) {
+        for ( GObj obj : scheme.getObjectList() ) {
             PackageClass pc = vPackage.getClass( obj.getClassName() );
             if ( pc != null ) {
                 ClassPainter painter = pc.getPainterFor( scheme, obj );
@@ -946,10 +946,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
     }
 
     public void selectAllObjects() {
-        GObj obj;
-        for ( int i = 0; i < scheme.getObjects().size(); i++ ) {
-            obj = scheme.getObjects().get( i );
-            obj.setSelected( true );
+        for (GObj obj : getObjectList()) {
+            obj.setSelected(true);
         }
         drawingArea.repaint();
     } // selectAllObjects
@@ -961,8 +959,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
         ClearAllEdit edit = new ClearAllEdit( this );
 
         mListener.setState( State.selection );
-        scheme.getObjects().clear();
-        scheme.getConnections().clear();
+        getObjectList().clear();
+        scheme.getConnectionList().clear();
         if ( classPainters != null )
             classPainters.clear();
 
@@ -978,7 +976,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         Map<GObj, ClassPainter> newPainters = null;
 
         // clone every selected object
-        for ( GObj obj : scheme.getObjects().getSelected() ) {
+        for (GObj obj : scheme.getSelectedObjects()) {
             GObj newObj = obj.clone();
             newObj.setPosition( newObj.getX() + 20, newObj.getY() + 20 );
             newObjects.addAll( newObj.getComponents() );
@@ -1013,7 +1011,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
         // now the hard part - we have to clone all the connections
         ArrayList<Connection> newConnections = new ArrayList<Connection>();
-        for ( Connection con : scheme.getConnections() ) {
+        for ( Connection con : scheme.getConnectionList() ) {
             GObj beginObj = null;
             GObj endObj = null;
 
@@ -1024,7 +1022,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
                     endObj = obj;
 
                 if ( beginObj != null && endObj != null ) {
-                    Connection newCon = new Connection( beginObj.getPorts().get( con.getBeginPort().getNumber() ), endObj.getPorts()
+                    Connection newCon = new Connection( beginObj.getPortList().get( con.getBeginPort().getNumber() ), endObj.getPortList()
                             .get( con.getEndPort().getNumber() ), con.isStrict() );
 
                     for ( Point p : con.getBreakPoints() )
@@ -1039,11 +1037,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
         for ( GObj obj : newObjects )
             obj.setName( genObjectName( vPackage.getClass( obj.getClassName() ), obj ) );
 
-        scheme.getObjects().addAll( newObjects );
+        getObjectList().addAll( newObjects );
 
         // New connections have to be added after the new objects have been
         // committed or new ports will not get connected properly.
-        scheme.getConnections().addAll( newConnections );
+        scheme.getConnectionList().addAll( newConnections );
 
         if ( classPainters != null && newPainters != null )
             classPainters.putAll( newPainters );
@@ -1057,8 +1055,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * Hilight ports of the object.
      */
     public void hilightPorts() {
-        for (GObj obj : scheme.getObjects().getSelected()) {
-            for (Port p : obj.getPorts()) {
+        for (GObj obj : scheme.getSelectedObjects()) {
+            for (Port p : obj.getPortList()) {
                 p.setHilighted( !p.isHilighted() );
             }
         }
@@ -1066,7 +1064,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     } // hilightPorts
 
     public void drawSelectedPorts() {
-        for ( GObj obj : scheme.getObjects().getSelected() ) {
+        for (GObj obj : scheme.getSelectedObjects()) {
             obj.setDrawPorts( !obj.isDrawPorts() );
         }
         drawingArea.repaint();
@@ -1112,7 +1110,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         undoManager.discardAllEdits();
         Editor.getInstance().refreshUndoRedo();
         setScheme(newScheme);
-        for (GObj obj : newScheme.getObjects()) {
+        for (GObj obj : newScheme.getObjectList()) {
             setViewAttributes( obj );
         }
         initClassPainters();
@@ -1202,7 +1200,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * is one.
      */
     public void openPropertiesDialog() {
-        ArrayList<GObj> selected = scheme.getObjects().getSelected();
+        ArrayList<GObj> selected = scheme.getSelectedObjects();
         if ( selected != null && selected.size() > 0 )
             openPropertiesDialog( selected.get( 0 ) );
     }
@@ -1217,24 +1215,18 @@ public class Canvas extends JPanel implements ISchemeContainer {
     }
     
     public void setDrawPorts( boolean b ) {
-        
         drawPorts = b;
-        
-        for ( GObj obj : scheme.getObjects() ) {
+        for (GObj obj : scheme.getObjectList()) {
             obj.setDrawPorts( b );
         }
-        
         drawingArea.repaint();
     }
 
     public void showObjectNames( boolean b ) {
-        
         showObjectNames = b;
-        
-        for ( GObj obj : getObjects() ) {
+        for (GObj obj : getObjectList()) {
             obj.setDrawInstanceName( b );
         }
-        
         drawingArea.repaint();
     }
 
@@ -1301,7 +1293,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
                 g2.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON );
             }
 
-            for ( GObj obj : scheme.getObjects() ) {
+            for (GObj obj : getObjectList()) {
                 obj.drawClassGraphics( g2, scale );
 
                 if ( enableClassPainter && classPainters != null ) {
@@ -1313,8 +1305,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
             g2.setColor( Color.blue );
             g2.setStroke(connectionStroke);
-            for ( int i = 0; i < scheme.getConnections().size(); i++ ) {
-                rel = scheme.getConnections().get( i );
+            for ( int i = 0; i < scheme.getConnectionList().size(); i++ ) {
+                rel = scheme.getConnectionList().get( i );
                 rel.drawRelation( g2 );
             }
 
@@ -1350,9 +1342,9 @@ public class Canvas extends JPanel implements ISchemeContainer {
      */
     public void setPosInfo( int x, int y ) {
         String message = x + ", " + y;
-        
-        GObj obj = scheme.getObjects().checkInside( x, y );
-        
+
+        GObj obj = getObjectList().checkInside(x, y);
+
         if( obj != null ) {
             
             message += " : " + obj.getClassName() + " " + obj.getName();
@@ -1446,7 +1438,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
             maxy = backgroundImage.getHeight();
         }
 
-        for ( GObj obj : scheme.getObjects() ) {
+        for (GObj obj : scheme.getObjectList()) {
             int tmp = obj.getX() + obj.getRealWidth();
             if ( tmp > maxx )
                 maxx = tmp;
@@ -1529,20 +1521,20 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * @return list of connections
      */
     public ConnectionList getConnections() {
-        return scheme.getConnections();
+        return scheme.getConnectionList();
     }
 
     public Connection getConnectionNearPoint( int x, int y ) {
-        return scheme.getConnections().nearPoint( x, y );
+        return scheme.getConnectionList().nearPoint( x, y );
     }
 
     public void removeConnection( Connection con ) {
-        scheme.getConnections().remove( con );
+        scheme.getConnectionList().remove( con );
         undoSupport.postEdit( new DeleteConnectionEdit( this, con ) );
     }
 
     public void addConnection( Connection con ) {
-        scheme.getConnections().add( con );
+        scheme.getConnectionList().add( con );
         undoSupport.postEdit( new AddConnectionEdit( this, con ) );
     }
 
@@ -1567,15 +1559,15 @@ public class Canvas extends JPanel implements ISchemeContainer {
     }
 
     public void clearSelectedConnections() {
-        scheme.getConnections().clearSelected();
+        scheme.getConnectionList().clearSelected();
     }
 
     public void resizeObjects( int dx, int dy, int corner ) {
-        for ( GObj obj : scheme.getObjects() ) {
+        for (GObj obj : scheme.getObjectList()) {
             if ( obj.isSelected() )
                 obj.resize( dx, dy, corner );
         }
-        scheme.getObjects().updateRelObjs();
+        scheme.getObjectList().updateRelObjs();
         drawingArea.repaint();
     }
 
@@ -1769,7 +1761,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
          * 
          * if (obj.getConnections().size() > 0) return false;
          */
-        for ( GObj o : scheme.getObjects() )
+        for (GObj o : scheme.getObjectList())
             if ( o.isSuperClass() )
                 return false;
 
@@ -1808,7 +1800,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         String name;
         do {
             name = pClass.getName() + "_" + pClass.getNextSerial();
-        } while ( !scheme.getObjects().isUniqueName( name, obj ) );
+        } while (!getObjectList().isUniqueName(name, obj));
         return name;
     }
 
@@ -1819,7 +1811,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * are cleared
      */
     public void focusObject(GObj obj) {
-        scheme.getObjects().clearSelected();
+        getObjectList().clearSelected();
         if (obj != null) {
             obj.setSelected(true);
 
@@ -1840,11 +1832,10 @@ public class Canvas extends JPanel implements ISchemeContainer {
     }
 
     /**
-     * @return the objects
+     * @return the object list
      */
-    @Override
-    public ObjectList getObjects() {
-        return scheme.getObjects();
+    public ObjectList getObjectList() {
+        return scheme.getObjectList();
     }
     
     /**

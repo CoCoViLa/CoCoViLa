@@ -13,8 +13,8 @@ public class XMLSpecGenerator implements ISpecGenerator {
         GObj obj;
         String spec = "";
 
-    	ObjectList objects = scheme.getObjects();
-    	ConnectionList relations = scheme.getConnections();
+    	ObjectList objects = scheme.getObjectList();
+    	ConnectionList relations = scheme.getConnectionList();
 
         StringBuffer s = new StringBuffer();
         s.append("<package name=\"" + className + "\">\n");

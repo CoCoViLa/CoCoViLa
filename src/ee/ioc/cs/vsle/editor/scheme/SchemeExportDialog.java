@@ -428,8 +428,8 @@ public class SchemeExportDialog extends JDialog {
             //first list ports with outer connections
             model.addAll( ports );
             //and then put the rest of the ports
-            for( GObj obj : schemeContainer.getObjects() ) {
-                for( Port port : obj.getPorts() ) {
+            for (GObj obj : schemeContainer.getObjectList()) {
+                for( Port port : obj.getPortList() ) {
                     model.add( port.getNameWithObject() );
                 }
             }

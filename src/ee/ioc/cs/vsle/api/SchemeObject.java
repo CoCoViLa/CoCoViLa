@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.api;
 
+import java.util.List;
+
 /**
  * The interface of scheme objects that is exposed to the generated programs through
  * the {@code ProgramContext} class.
@@ -74,4 +76,10 @@ public interface SchemeObject {
      * @throws RuntimeException when the field does not exist
      */
     public void setFieldValue(String fieldName, String value);
+
+    /**
+     * Returns the list of ports.
+     * @return the list of ports
+     */
+    public List<Port> getPorts();
 }

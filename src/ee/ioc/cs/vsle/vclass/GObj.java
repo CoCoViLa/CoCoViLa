@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
 import javax.xml.transform.sax.*;
 
@@ -153,8 +154,8 @@ public class GObj implements Serializable, Cloneable,
         Point p = toObjectSpace( pointX, pointY );
         Port port;
 
-        for ( int i = 0; i < getPorts().size(); i++ ) {
-            port = getPorts().get( i );
+        for ( int i = 0; i < getPortList().size(); i++ ) {
+            port = getPortList().get( i );
             if ( port.inBoundsX( p.x ) && port.inBoundsY( p.y ) ) {
                 return port;
             }
@@ -278,9 +279,9 @@ public class GObj implements Serializable, Cloneable,
         ArrayList<Connection> c = new ArrayList<Connection>();
         Port port;
 
-        for ( int i = 0; i < getPorts().size(); i++ ) {
-            port = getPorts().get( i );
-            c.addAll( port.getConnections() );
+        for ( int i = 0; i < getPortList().size(); i++ ) {
+            port = getPortList().get( i );
+            c.addAll(port.getConnectionList());
         }
         return c;
     }
@@ -295,8 +296,12 @@ public class GObj implements Serializable, Cloneable,
         return c;
     }
 
-    public ArrayList<Port> getPorts() {
+    public ArrayList<Port> getPortList() {
         return ports;
+    }
+
+    public List<ee.ioc.cs.vsle.api.Port> getPorts() {
+        return new ArrayList<ee.ioc.cs.vsle.api.Port>(ports);
     }
 
     protected void draw( int xPos, int yPos, float _Xsize, float _Ysize, Graphics2D g2 ) {
@@ -349,9 +354,9 @@ public class GObj implements Serializable, Cloneable,
         }
         
         if( isDrawPorts() ) {
-            for ( int i = 0; i < getPorts().size(); i++ ) {
+            for ( int i = 0; i < getPortList().size(); i++ ) {
                 ClassGraphics graphics;
-                Port port = getPorts().get( i );
+                Port port = getPortList().get( i );
 
                 if ( port.isSelected() || port.isConnected() || port.isHilighted() ) {
 
@@ -433,9 +438,9 @@ public class GObj implements Serializable, Cloneable,
             }
 
             obj.setPorts( new ArrayList<Port>() );
-            for ( Port port : getPorts() ) {
+            for ( Port port : getPortList() ) {
                 port = port.clone();
-                obj.getPorts().add( port );
+                obj.getPortList().add( port );
                 port.setObject( obj );
                 port.setConnections( new ArrayList<Connection>() );
             }
@@ -590,7 +595,7 @@ public class GObj implements Serializable, Cloneable,
      */
     public boolean isStrictConnected() {
         for ( Port port : ports ) {
-            for ( Connection con : port.getConnections() ) {
+            for (Connection con : port.getConnectionList()) {
                 if ( con.isStrict() )
                     return true;
             }

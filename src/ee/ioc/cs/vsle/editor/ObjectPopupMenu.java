@@ -139,17 +139,17 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         submenuOrder.add( itemToBack );
         submenuOrder.setMnemonic( 'O' );
 
-        if (object == null || canvas.getObjects().getSelectedCount() != 1) {
+        if (object == null || canvas.getObjectList().getSelectedCount() != 1) {
             enableDisableMenuItem(itemProperties, false);
             enableDisableMenuItem(itemForward, false);
             enableDisableMenuItem(itemToFront, false);
             enableDisableMenuItem(itemBackward, false);
             enableDisableMenuItem(itemToBack, false);
         } else {
-            int objectIndex = canvas.getObjects().indexOf(object);
+            int objectIndex = canvas.getObjectList().indexOf(object);
 
             // Enable or disable order changing menu items.
-            if (objectIndex == canvas.getObjects().size() - 1) {
+            if (objectIndex == canvas.getObjectList().size() - 1) {
                 enableDisableMenuItem(itemForward, false);
                 enableDisableMenuItem(itemToFront, false);
             }
@@ -244,22 +244,22 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         } else if ( Menu.BACKWARD.equals( cmd ) ) {
             // MOVE OBJECT BACKWARD IN THE LIST
             // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-            canvas.getObjects().sendBackward( object, 1 );
+            canvas.getObjectList().sendBackward( object, 1 );
             canvas.drawingArea.repaint();
         } else if ( Menu.FORWARD.equals( cmd ) ) {
             // MOVE OBJECT FORWARD IN THE LIST
             // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-            canvas.getObjects().bringForward( object, 1 );
+            canvas.getObjectList().bringForward( object, 1 );
             canvas.drawingArea.repaint();
         } else if ( Menu.TOFRONT.equals( cmd ) ) {
             // MOVE OBJECT TO THE FRONT IN THE LIST,
             // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-            canvas.getObjects().bringToFront( object );
+            canvas.getObjectList().bringToFront( object );
             canvas.drawingArea.repaint();
         } else if ( Menu.TOBACK.equals( cmd ) ) {
             // MOVE OBJECT TO THE BACK IN THE LIST
             // NOTE THAT THE LIST IS ITERATED IN REVERSE ORDER WHEN REPAINTED
-            canvas.getObjects().sendToBack( object );
+            canvas.getObjectList().sendToBack( object );
             canvas.drawingArea.repaint();
 //        } else if ( Menu.MAKECLASS.equals( cmd ) ) {
 //            ClassSaveDialog csd = new ClassSaveDialog( ( (GObjGroup) object ).getSpec( canvas.getConnections() ), canvas );

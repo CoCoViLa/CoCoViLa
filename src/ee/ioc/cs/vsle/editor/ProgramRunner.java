@@ -66,7 +66,7 @@ public class ProgramRunner {
     }
 
     private void updateFromCanvas() {
-        objects = schemeContainer.getObjects().unfold();
+        objects = schemeContainer.getObjectList().unfold();
     }
 
     public void destroy() {
@@ -218,7 +218,7 @@ public class ProgramRunner {
 
             Set<String> schemeObjects = new HashSet<String>();
 
-            for ( GObj gObj : schemeContainer.getObjects() ) {
+            for (GObj gObj : schemeContainer.getObjectList()) {
                 schemeObjects.add( gObj.getName() );
             }
 
