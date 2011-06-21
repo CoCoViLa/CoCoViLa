@@ -13,7 +13,7 @@ class Rel {
     //declaration in specification
     private String declaration;
     //see RelType
-    private int type;
+    private RelType type;
     private int hashcode;
     
     /* -------------------- LAZILY INITIALIZED VALUES -------------------- */
@@ -41,11 +41,11 @@ class Rel {
         return relID;
     }
     
-    int getType() {
+    RelType getType() {
         return type;
     }
 
-    void setType(int t) {
+    void setType(RelType t) {
         type = t;
     }
     

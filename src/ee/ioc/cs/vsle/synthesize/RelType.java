@@ -1,15 +1,14 @@
 package ee.ioc.cs.vsle.synthesize;
 
-public class RelType {
+public enum RelType {
 
-    public static final int
-            TYPE_DECLARATION = 1,
-            TYPE_JAVAMETHOD = 2,
-            TYPE_EQUATION = 3,
-            TYPE_ALIAS = 4,
-            TYPE_SUBTASK = 5,
-            TYPE_METHOD_WITH_SUBTASK = 6,
-            TYPE_UNIMPLEMENTED = 7;
+            TYPE_DECLARATION,
+            TYPE_JAVAMETHOD,
+            TYPE_EQUATION,
+            TYPE_ALIAS,
+            TYPE_SUBTASK,
+            TYPE_METHOD_WITH_SUBTASK,
+            TYPE_UNIMPLEMENTED;
 
     static int auxVarCounter = 0;
     static int relCounter = 0;
@@ -20,6 +19,4 @@ public class RelType {
     public final static int REL_HASH = "rel".hashCode();
     public final static int VAR_HASH = "var".hashCode();
 
-    private RelType() {
-    }
 }

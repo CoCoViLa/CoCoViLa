@@ -47,6 +47,9 @@ public class ProblemCreator {
         if ( RuntimeProperties.isLogInfoEnabled() )
             db.p( "Problem created in: " + ( System.currentTimeMillis() - start ) + "ms." );
         
+        if ( RuntimeProperties.isLogDebugEnabled() )
+            db.p( problem );
+        
         return problem;
     }
     
@@ -348,6 +351,7 @@ public class ProblemCreator {
      * @param obj
      * @return
      */
+    @SuppressWarnings( "unused" )
     private static boolean checkRecursiveSpecRelationImpl( Collection<ClassField> fields, Map<String, Integer> visitedClasses, Problem problem, String obj ) {
         for( ClassField outp : fields ) {
             if( outp.isSpecField() && visitedClasses.get(outp.getType()) == 0 ) {
@@ -537,7 +541,7 @@ public class ProblemCreator {
             newAlias.getVars().addAll(alias.getVars());
             //replace existing var with a new one 
             //(because we have to make changes in the underlying class field)
-            var = new Var( newAlias, parent );
+            var.setField( newAlias );
         }
 
         problem.addVar( var );
@@ -590,6 +594,7 @@ public class ProblemCreator {
                         
                         if( var != null ) {
                             aliasVar.addVar( var );
+                            //TODO a field may be overwritten in case of multiports
                             alias.addVar( var.getField() );
                         }
                     }
@@ -626,7 +631,6 @@ public class ProblemCreator {
         relAliasOutp.setType( classRelation.getType() );
         relAliasOutp.addInputs( alias.getChildVars() );
         relAliasOutp.addOutput( alias );
-        alias.addRel(relAliasOutp);
         for ( Var childVar : alias.getChildVars() ) {
             childVar.addRel(relAliasOutp);
         }
@@ -873,6 +877,7 @@ public class ProblemCreator {
     * @param classRelation
     * @return
     */
+   @SuppressWarnings( "unused" )
    private static String checkIfRightWildcard( ClassRelation classRelation ) {
        String s = classRelation.getOutput().getName();
        if ( s.startsWith( "*." ) )
@@ -884,6 +889,7 @@ public class ProblemCreator {
     * creates set of Rels for x -> *.y { impl }; - does not work currently
     * @deprecated
     */
+   @SuppressWarnings( "unused" )
    private static Set<Rel> makeRightWildcardRel( AnnotatedClass ac, ClassList classes, ClassRelation classRelation,
            Problem problem, Var parentVar, String wildcardVar ) throws
            UnknownVariableException {

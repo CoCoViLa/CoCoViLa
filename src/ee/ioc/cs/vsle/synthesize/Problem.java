@@ -2,6 +2,8 @@ package ee.ioc.cs.vsle.synthesize;
 
 import java.util.*;
 
+import ee.ioc.cs.vsle.editor.*;
+
 /**
  * Represents the problem graph
  */
@@ -97,7 +99,35 @@ class Problem {
 
 	@Override
     public String toString() {
-		return ("All: " + allVars + "\n Rels: " + allRels 
-		        + "\n Axioms:" + axioms + "\n Subtasks:" + relWithSubtasks );
+		return ("Vars: " + ( RuntimeProperties.isLogDebugEnabled() ? printVarsDetails( allVars.values() ) : allVars.keySet() ) 
+		        + "\n Rels: " + printRels( allRels ) 
+		        + ( !axioms.isEmpty() ? "\n Axioms: " + printRels( axioms ) : "")
+		        + ( !relWithSubtasks.isEmpty() ? "\n Subtasks: " + printRels( relWithSubtasks ) : "" )
+		        + ( !getCurrentContext().getKnownVars().isEmpty() ? "\n Known: " + getCurrentContext().getKnownVars() : "" ) );
 	}
+	
+	private String printRels( Collection<Rel> rels ) {
+	    StringBuilder sb = new StringBuilder();
+	    for ( Rel rel : rels ) {
+	        if( sb.length() > 0 ) sb.append( "\n" );
+            sb.append( rel.getDeclaration() );
+        }
+	    return sb.toString();
+	}
+	
+	private String printVarsDetails( Collection<Var> vars) {
+	    StringBuilder sb = new StringBuilder();
+        for ( Var var : vars ) {
+            if( sb.length() > 0 ) sb.append( "\n" );
+            sb.append( "Name = ").append( var.getFullName() );
+            if( !var.getRels().isEmpty() ) {
+                sb.append( ", Rels: \n" ).append( printRels( var.getRels() ) );
+            }
+            if( var.getField().isAlias() && !var.getChildVars().isEmpty() ) {
+                sb.append( "\nChild vars: " ).append( var.getChildVars() );
+            }
+        }
+        return sb.toString();
+	}
+	
 }

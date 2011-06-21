@@ -1,12 +1,11 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import ee.ioc.cs.vsle.vclass.ClassField;
 import static ee.ioc.cs.vsle.synthesize.SpecParser.*;
 
-import java.io.Serializable;
 import java.util.*;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.util.regex.*;
+
+import ee.ioc.cs.vsle.vclass.*;
 
 /**
  * <p>Title: ee.ioc.cs.editor.synthesize.ClassRelation</p>
@@ -39,24 +38,24 @@ class ClassRelation  {
 	 * 6 - method with subtask
 	 * 7 - unimplemented
 	 */
-        private int type;
+    private RelType type;
 	private String method;
 	protected String specLine;
 
 	/**
 	 * Class constructor.
-	 * @param type int - relation type.
+	 * @param type RelType - relation type.
 	 */
-        ClassRelation(int type, String specLine ) {
+        ClassRelation(RelType type, String specLine ) {
 		this.type = type;
 		this.specLine = specLine;
 	} // ee.ioc.cs.editor.synthesize.ClassRelation
 
-        int getType() {
+        RelType getType() {
             return type;
         }
 
-        void setType( int value ) {
+        void setType( RelType value ) {
             type = value;
         }
 

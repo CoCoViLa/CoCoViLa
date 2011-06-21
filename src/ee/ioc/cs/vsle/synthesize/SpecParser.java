@@ -150,16 +150,10 @@ public class SpecParser {
 
             return new LineType( LineType.TYPE_ERROR, null, line );
 
-        } else if ( line.indexOf( "super" ) >= 0 ) {
-            matcher = PATTERN_SUPERCLASSES.matcher( line );
-            if ( matcher.find() ) {
-                
-                LineType.Superclasses st = new LineType.Superclasses();
-                st.setClassNames( matcher.group( 1 ).split( "#", -1 ) );
-                
-                return new LineType( LineType.TYPE_SUPERCLASSES, st, line );
-            }
-            return new LineType( LineType.TYPE_ERROR, null, line );
+        } else if ( line.indexOf( "super" ) >= 0 && (matcher = PATTERN_SUPERCLASSES.matcher( line )).find() ) {
+            LineType.Superclasses st = new LineType.Superclasses();
+            st.setClassNames( matcher.group( 1 ).split( "#", -1 ) );
+            return new LineType( LineType.TYPE_SUPERCLASSES, st, line );
 
         } else if ( line.trim().startsWith( "const" ) ) {
             matcher = PATTERN_CONSTANT.matcher( line );

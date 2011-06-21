@@ -40,4 +40,11 @@ public class PlanningResult {
     EvaluationAlgorithm getSubtaskAlgorithm(SubtaskRel subtask) {
         return solutions.get( subtask );
     }
+
+    @Override
+    public String toString() {
+        return rel.toString();// + ", solutions=" + solutions + "]";
+    }
+    
+    
 }

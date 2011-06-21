@@ -56,6 +56,13 @@ public class Var {
         hashcode = RelType.VAR_HASH + varNumber;
     }
     
+    void setField( ClassField cf ) {
+        //only uninitialized alias can be replaced in var
+        assert field.isAlias() && !((Alias)field).isInitialized() 
+                && cf.isAlias() && ((Alias)cf).isInitialized();
+        this.field = cf;
+    }
+    
     Set<Rel> getRels() {
         return rels;
     }

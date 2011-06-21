@@ -5,8 +5,6 @@ package ee.ioc.cs.vsle.synthesize;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
-import java.util.List;
 
 import javax.swing.*;
 import javax.swing.text.*;
@@ -54,7 +52,8 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 	 */
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
+			@Override
+            public void run() {
 				AlgorithmVisualizer thisClass = getInstance();
 //				thisClass.addNewTab( "test", new ArrayList<Rel>() );
 //				thisClass.addNewTab( "test2", new ArrayList<Rel>() );
@@ -110,7 +109,8 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 		
 		btn.addActionListener( new ActionListener() {
 
-			public void actionPerformed(ActionEvent e) {
+			@Override
+            public void actionPerformed(ActionEvent e) {
 				getJTabbedPane().remove( panel );
 				btn.removeActionListener( this );
 			}
@@ -173,7 +173,8 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 					final String text = generateAlgorithmText( algorithm );
 					
 					SwingUtilities.invokeLater( new Runnable() {
-						public void run() {
+						@Override
+                        public void run() {
 							getJtaAlgorithm().setText( text );
 						}
 					} );
@@ -294,10 +295,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
 	    }
 	}
 
-
-    /* (non-Javadoc)
-     * @see ee.ioc.cs.vsle.editor.TextEditView#getTextComponent()
-     */
+    @Override
     public JTextComponent getTextComponent() {
         
         TabPanel panel = (TabPanel)getJTabbedPane().getSelectedComponent();
@@ -309,9 +307,7 @@ public class AlgorithmVisualizer extends JFrame implements TextEditView {
         return null;
     }
 
-    /* (non-Javadoc)
-     * @see ee.ioc.cs.vsle.editor.TextEditView#getWindow()
-     */
+    @Override
     public Window getWindow() {
         return this;
     }
