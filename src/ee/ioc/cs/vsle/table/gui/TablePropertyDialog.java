@@ -7,11 +7,13 @@ import static ee.ioc.cs.vsle.util.TypeUtil.*;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.text.*;
 import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
@@ -24,15 +26,25 @@ public class TablePropertyDialog extends JDialog {
 
     private boolean isOk = false;
     
-    private static final Object[] allowedTypes = new Object[] { 
+    private static final Object[] singleTypes = new Object[] { 
         TYPE_STRING, TYPE_INT, TYPE_DOUBLE, TYPE_LONG, TYPE_BOOLEAN, TYPE_FLOAT, TYPE_SHORT, TYPE_BYTE };
     
+    private static final Object[] allowedInputTypes;
+    private static final Object[] allowedOuputTypes;
     private static final Object[] allowedAliasTypes;
     
     static {
-        List<Object> types = new ArrayList<Object>(Arrays.asList( allowedTypes ));
-        types.add( TYPE_OBJECT );
-        allowedAliasTypes = types.toArray();
+        List<Object> inputTypes = new ArrayList<Object>(Arrays.asList( singleTypes ));
+        for ( Object object : singleTypes ) {
+            inputTypes.add( object.toString() + "[]" );
+        }
+        allowedInputTypes = inputTypes.toArray();
+        
+        allowedOuputTypes = singleTypes;
+        
+        List<Object> aliasTypes = new ArrayList<Object>(Arrays.asList( singleTypes ));
+        aliasTypes.add( TYPE_OBJECT );
+        allowedAliasTypes = aliasTypes.toArray();
     }
     
     private List<FieldPane> inputFields = new ArrayList<FieldPane>();
@@ -105,7 +117,10 @@ public class TablePropertyDialog extends JDialog {
         inputFieldsPane = new JPanel();
         inputFieldsPane.setLayout( new BoxLayout( inputFieldsPane, BoxLayout.Y_AXIS ) );
         inputFieldsPane.setBorder( BorderFactory.createTitledBorder( "Input fields:" ) );
-        addFlowToPanel( root, inputFieldsPane, FlowLayout.LEFT );
+        
+        JPanel ip = new JPanel(new BorderLayout());
+        ip.add( inputFieldsPane, BorderLayout.CENTER );
+        root.add( ip );
         
         addInputFieldPane( false );
         
@@ -116,7 +131,10 @@ public class TablePropertyDialog extends JDialog {
         JPanel outputPane = new JPanel();
         outputPane.setLayout( new BoxLayout( outputPane, BoxLayout.Y_AXIS ) );
         outputPane.setBorder( BorderFactory.createTitledBorder( "Output field" ) );
-        addFlowToPanel( root, outputPane, FlowLayout.LEFT );
+        
+        JPanel op = new JPanel(new BorderLayout());
+        op.add( outputPane, BorderLayout.CENTER );
+        root.add( op );
         
         //--radiobuttons for choosing output type
         JPanel outputTypePane = new JPanel();
@@ -298,7 +316,7 @@ public class TablePropertyDialog extends JDialog {
                 throw new TableException( "Input's identifier " + name + " is invalid" );
             }
             
-            inputs.add( new TableField( name, input.getType() ) );
+            inputs.add( new InputTableField( name, input.getType() ) );
         }
         
         if( inputs.isEmpty() ) {
@@ -388,7 +406,7 @@ public class TablePropertyDialog extends JDialog {
         inputFields.clear();
         inputFieldsPane.removeAll();
         
-        for ( TableField input : table.getInputFields() ) {
+        for ( InputTableField input : table.getInputFields() ) {
             FieldPane fp = addInputFieldPane( false );
             fp.jcboxType.setSelectedItem( input.getType() );
             fp.jtfName.setText( input.getId() );
@@ -415,7 +433,7 @@ public class TablePropertyDialog extends JDialog {
      * 
      */
     private FieldPane addOutputFieldPane( boolean doPack ) {
-        FieldPane fp = new FieldPane( isAliasOutput ? allowedAliasTypes : allowedTypes, true );
+        FieldPane fp = new FieldPane( isAliasOutput ? allowedAliasTypes : allowedOuputTypes, true );
         outputFields.add( fp );
         addFlowToPanel( outputFieldsPane, fp, FlowLayout.LEFT );
         
@@ -460,46 +478,150 @@ public class TablePropertyDialog extends JDialog {
     private class FieldPane extends JPanel {
         
         private JComboBox jcboxType;
+        private JButton jbDetails;
         private JTextField jtfName;
         private JTextField jtfValue;
+        private JPanel jpComponents;
+        private JTextArea jtaDetails;
+        private String question;
+        private List<TableFieldConstraint> constraints;
+        private boolean isOutput;
         
         /**
          * 
          */
         FieldPane() {
             
-            this( allowedTypes, false );
+            this( allowedInputTypes, false );
         }
         
-        FieldPane( Object[] types, boolean defaultValue ) {
+        FieldPane( Object[] types, boolean isOutput ) {
             
-            setLayout( new GridLayout( 
-                            1, 
-                            defaultValue ? 3 : 2, 
-                            5, 5 ) );
+            this.isOutput = isOutput;
             
-            int colWidth = defaultValue ? 5 : 10;
+            jpComponents = new JPanel();
+            
+            jpComponents.setLayout( new GridBagLayout() );
+            
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.insets = new Insets( 5, 5, 5, 5 );
+
             jcboxType = new JComboBox( types );
+            
+            jpComponents.add( jcboxType, GuiUtil.buildGridBagConstraints( gbc, 0,
+                    0, 1, 1, 0, 0, GridBagConstraints.BOTH,
+                    GridBagConstraints.WEST ) );
+            
+            int colWidth = isOutput ? 5 : 10;
             jtfName = new JTextField( colWidth );
             
-            add( jcboxType );
-            add( jtfName );
+            jtfName.getDocument().addDocumentListener( new DocumentListener() {
+                
+                @Override
+                public void removeUpdate( DocumentEvent e ) {
+                    update();
+                }
+                
+                @Override
+                public void insertUpdate( DocumentEvent e ) {
+                    update();
+                }
+                
+                @Override
+                public void changedUpdate( DocumentEvent e ) {
+                    update();
+                }
+                
+            });
             
-            if( defaultValue ) {
+            jpComponents.add( jtfName, GuiUtil.buildGridBagConstraints( gbc, 1,
+                    0, 1, 1, 0, 0, GridBagConstraints.BOTH,
+                    GridBagConstraints.WEST ) );
+            
+            if( isOutput ) {
                 jtfValue = new JTextField( colWidth );
-                add( jtfValue );
+                jpComponents.add( jtfValue, GuiUtil.buildGridBagConstraints( gbc, 2,
+                        0, 1, 1, 0, 0, GridBagConstraints.BOTH,
+                        GridBagConstraints.WEST ) );
+            } else {
+                jbDetails = new JButton( "(...)" );
+                jpComponents.add( jbDetails, GuiUtil.buildGridBagConstraints( gbc, 2,
+                        0, 1, 1, 0, 0, GridBagConstraints.BOTH,
+                        GridBagConstraints.WEST ) );
+                
+                jbDetails.addActionListener( new ActionListener() {
+                    
+                    @Override
+                    public void actionPerformed( ActionEvent e ) {
+                        final TableInputPropDialog inpDialog = 
+                            new TableInputPropDialog( 
+                                    TablePropertyDialog.this, 
+                                    getType(), getFieldName(), 
+                                    question, constraints );
+
+                        inpDialog.setCallback( new Runnable() {
+                            @Override
+                            public void run() {
+                                question = inpDialog.getQuestion();
+                                constraints = inpDialog.getConstraints();
+                                update();
+                            }
+                        } );
+                        inpDialog.setVisible( true );
+                    }
+                });
             }
-        }
-        
-        /**
-         * @param type
-         * @param name
-         */
-        FieldPane( String type, String name ) {
-            jcboxType.setSelectedItem( type );
-            jtfName.setText( name );
+            
+            setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ) );
+            add( jpComponents );
+            
+            update();
         }
 
+        private void update() {
+            
+            if( isOutput ) return;
+            
+            if( getFieldName().trim().length() > 0 ) {
+                jbDetails.setEnabled( true );
+            } else {
+                jbDetails.setEnabled( false );
+            }
+            
+            StringBuilder text = new StringBuilder();
+            
+            if( question != null && question.trim().length() > 0 ) {
+                text.append( "Custom question: \"" )
+                    .append( MessageFormat.format( question, getFieldName(), getType() ) )
+                    .append( "\"" );
+            }  
+            
+            if( constraints != null ) {
+                for ( TableFieldConstraint constr : constraints ) {
+                    if( text.length() > 0 )
+                        text.append( "\n" );
+                    text.append( MessageFormat.format( constr.printConstraint(), getFieldName() ) );
+                }
+            }
+            
+            if( text.length() > 0 ) {
+                if( jtaDetails == null ) {
+                    jtaDetails = new JTextArea(0, 20);
+                    jtaDetails.setEditable( false );
+                    add( jtaDetails );
+                    jtaDetails.setBackground( jtaDetails.getParent().getBackground() );
+                }
+                jtaDetails.setText( text.toString() );
+                jtaDetails.setVisible( true );
+            } else {
+                if( jtaDetails != null ) {
+                    jtaDetails.setVisible( false );
+                }
+            }
+            
+            TablePropertyDialog.this.pack();
+        }
+        
         /**
          * @return the type
          */

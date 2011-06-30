@@ -24,8 +24,8 @@ public final class Table implements IStructuralExpertTable {
     public static final String TABLE_KEYWORD = "@table";
     
     private String tableId;
-    private TableFieldList inputList = new TableFieldList();
-    private TableFieldList outputList = new TableFieldList();
+    private TableFieldList<InputTableField> inputList = new TableFieldList<InputTableField>();
+    private TableFieldList<TableField> outputList = new TableFieldList<TableField>();
     private TableField aliasOutput;
     //this member indicates either a single output 
     //OR the current active element of an alias 
@@ -83,7 +83,7 @@ public final class Table implements IStructuralExpertTable {
      * @param inputFields
      * @param outputField
      */
-    public void changePropertiesAndVerify( String newTableId, TableFieldList inputFields, TableFieldList outputFields, TableField alias ) {
+    public void changePropertiesAndVerify( String newTableId, TableFieldList<InputTableField> inputFields, TableFieldList<TableField> outputFields, TableField alias ) {
         
         tableId = newTableId;
         
@@ -139,12 +139,12 @@ public final class Table implements IStructuralExpertTable {
         output = null;
         
         //handle inputs
-        TableFieldList oldInputs = new TableFieldList();
+        TableFieldList<InputTableField> oldInputs = new TableFieldList<InputTableField>();
         oldInputs.addAll( inputList );
         
         inputList.clear();
         
-        for ( TableField newInput : inputFields ) {
+        for ( InputTableField newInput : inputFields ) {
             
             if( ( oldInputs.getFieldByID( newInput.getId() ) ) != null ) {
                 //remove field that is totally equal (by type and by id)
@@ -194,7 +194,7 @@ public final class Table implements IStructuralExpertTable {
     /**
      * @param field
      */
-    public void addInputFields( Collection<TableField> fields ) {
+    public void addInputFields( Collection<InputTableField> fields ) {
         
         inputList.addAll( fields );
     }
@@ -202,8 +202,8 @@ public final class Table implements IStructuralExpertTable {
     /**
      * @return
      */
-    public List<TableField> getInputFields() {
-        return new ArrayList<TableField>( inputList );
+    public List<InputTableField> getInputFields() {
+        return new ArrayList<InputTableField>( inputList );
     }
     
     public void setOutputField( TableField field, boolean notify ) {
@@ -784,7 +784,7 @@ public final class Table implements IStructuralExpertTable {
          * @param oldOutputFields
          * @param newOutputFields
          */
-        public void update( TableFieldList oldOutputFields, TableFieldList newOutputFields ) {
+        public void update( TableFieldList<TableField> oldOutputFields, TableFieldList<TableField> newOutputFields ) {
             Map<TableField, Object> oldValues = values;
             values = new LinkedHashMap<TableField, Object>();
             

@@ -5,6 +5,9 @@ package ee.ioc.cs.vsle.table;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.regex.*;
+
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * Condition predicates 
@@ -32,6 +35,8 @@ public interface Condition {
     
     public abstract String getOppositeSymbol();
     
+    public abstract boolean acceptsType( String type );
+    
     /**
      * COND_EQUALS
      */
@@ -57,6 +62,11 @@ public interface Condition {
             return "=";
         }
 
+        @Override
+        public boolean acceptsType( String type ) {
+            return true;
+        }
+
     };
 
     /**
@@ -64,9 +74,10 @@ public interface Condition {
      */
     public final static Condition COND_LESS = new Condition() {
 
+        @SuppressWarnings( "unchecked" )
         @Override
         public <T> boolean verify( T obj1, T obj2 ) {
-            return ((Comparable<T>)obj2).compareTo( (T)obj1 ) == -1;
+            return ((Comparable<T>)obj2).compareTo( obj1 ) == -1;
         }
 
         @Override
@@ -83,6 +94,11 @@ public interface Condition {
         public String getSymbol() {
             return "<";
         }
+
+        @Override
+        public boolean acceptsType( String type ) {
+            return !TypeUtil.isArray( type );
+        }
     };
 
     /**
@@ -90,9 +106,10 @@ public interface Condition {
      */
     public final static Condition COND_LESS_OR_EQUAL = new Condition() {
 
+        @SuppressWarnings( "unchecked" )
         @Override
         public <T> boolean verify( T obj1, T obj2 ) {
-            int result = ((Comparable<T>)obj2).compareTo( (T)obj1 ); 
+            int result = ((Comparable<T>)obj2).compareTo( obj1 ); 
             return result == -1 || result == 0;
         }
 
@@ -109,6 +126,11 @@ public interface Condition {
         @Override
         public String getSymbol() {
             return "\u2264";
+        }
+
+        @Override
+        public boolean acceptsType( String type ) {
+            return !TypeUtil.isArray( type );
         }
     };
     
@@ -144,6 +166,141 @@ public interface Condition {
         public String getSymbol() {
             return "\u2208";
         }
+
+        @Override
+        public boolean acceptsType( String type ) {
+            return !TypeUtil.isArray( type );
+        }
+    };
+    
+    /**
+     * REG_EXP_MATCH
+     */
+    public final static Condition REG_EXP_MATCH = new Condition() {
+
+        @Override
+        public <T> boolean verify( T obj1, T obj2 ) {
+            Pattern p = Pattern.compile( (String)obj1 );
+            return p.matcher( (String)obj2 ).matches();
+        }
+
+        @Override
+        public String getKeyword() {
+            return "regexp";
+        }
+        
+        @Override
+        public String getOppositeSymbol() {
+            return "\u00AC^$";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "^$";
+        }
+
+        @Override
+        public boolean acceptsType( String type ) {
+            return TypeUtil.isString( type );
+        }
+    };
+    
+    /**
+     * SUBSTRING
+     */
+    public final static Condition SUBSTRING = new Condition() {
+
+        @Override
+        public <T> boolean verify( T obj1, T obj2 ) {
+            return obj1.toString().indexOf( obj2.toString() ) >= 0;
+        }
+
+        @Override
+        public String getKeyword() {
+            return "substr";
+        }
+        
+        @Override
+        public String getOppositeSymbol() {
+            return "\u22E2";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "\u2291";
+        }
+
+        @Override
+        public boolean acceptsType( String type ) {
+            return TypeUtil.isString( type );
+        }
+    };
+    
+    /**
+     * SUBSET
+     */
+    public final static Condition SUBSET = new Condition() {
+
+        @SuppressWarnings( "unchecked" )
+        @Override
+        public <T> boolean verify( T obj1, T obj2 ) {
+            return Arrays.asList( obj1 ).containsAll( Arrays.asList( obj2 ) );
+        }
+
+        @Override
+        public String getKeyword() {
+            return "subset";
+        }
+        
+        @Override
+        public String getOppositeSymbol() {
+            return "\u2288";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "\u2286";
+        }
+
+        @Override
+        public boolean acceptsType( String type ) {
+            return TypeUtil.isArray( type );
+        }
+    };
+    
+    /**
+     * STRICT_SUBSET
+     */
+    public final static Condition STRICT_SUBSET = new Condition() {
+
+        @SuppressWarnings( "unchecked" )
+        @Override
+        public <T> boolean verify( T obj1, T obj2 ) {
+            List<?> l1 = Arrays.asList( obj1 );
+            List<?> l2 = Arrays.asList( obj2 );
+            return l1.containsAll( l2 )
+                && l1.size() > l2.size();
+        }
+
+        @Override
+        public String getKeyword() {
+            return "strictsubset";
+        }
+        
+        @Override
+        public String getOppositeSymbol() {
+            return "\u2284";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "\u2282";
+        }
+
+        @Override
+        public boolean acceptsType( String type ) {
+            return TypeUtil.isArray( type );
+        }
     };
     
     /**
@@ -158,6 +315,10 @@ public interface Condition {
             map.put( COND_LESS.getKeyword(), COND_LESS );
             map.put( COND_LESS_OR_EQUAL.getKeyword(), COND_LESS_OR_EQUAL );
             map.put( COND_IN_ARRAY.getKeyword(), COND_IN_ARRAY );
+            map.put( REG_EXP_MATCH.getKeyword(), REG_EXP_MATCH );
+            map.put( SUBSTRING.getKeyword(), SUBSTRING );
+            map.put( SUBSET.getKeyword(), SUBSET );
+            map.put( STRICT_SUBSET.getKeyword(), STRICT_SUBSET );
         }
         
         /**

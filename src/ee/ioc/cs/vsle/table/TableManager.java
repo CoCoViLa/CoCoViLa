@@ -69,7 +69,7 @@ public class TableManager {
         
         SwingUtilities.invokeLater( new Runnable() {
             public void run() {
-                JOptionPane.showMessageDialog( null, msg + "\n(NB! Table ids are case sensitive!", "Error", JOptionPane.ERROR_MESSAGE );
+                JOptionPane.showMessageDialog( null, msg + "\n(NB! Table ids are case sensitive!)", "Error", JOptionPane.ERROR_MESSAGE );
             }
         } );
         

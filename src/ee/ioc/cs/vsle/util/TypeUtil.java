@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.util;
 
 import java.lang.reflect.*;
+import java.util.*;
 
 import ee.ioc.cs.vsle.vclass.*;
 
@@ -15,6 +16,7 @@ public class TypeUtil {
 	public static final String TYPE_ANY = "any";
 	public static final String TYPE_THIS = "this";
 	public static final String TYPE_STRING = "String";
+	public static final String TYPE_STRING_FULL = "java.lang.String";
 	
 	public static final String TYPE_INT = "int";
 	public static final String TYPE_DOUBLE = "double";
@@ -60,8 +62,12 @@ public class TypeUtil {
      * @return true if type is primitive or String
      */
     public static boolean isPrimitiveOrString( String type ) {
-		return type.equals(TYPE_STRING) || isPrimitive( type );
+		return isString( type ) || isPrimitive( type );
 	}
+    
+    public static boolean isString( String type ) {
+        return type.equals(TYPE_STRING) || type.equals(TYPE_STRING_FULL);
+    }
     
     /**
      * Used in code generation
@@ -143,39 +149,63 @@ public class TypeUtil {
 
         Class<?> clazz = token.getWrapperClass();
 
-        if ( type.equals( TYPE_STRING ) ) {
+        if ( isString( type ) ) {
             return value;
         } else if ( clazz != null ) {
             Method meth = clazz.getMethod( "valueOf",
                     new Class[] { String.class } );
             Object o = meth.invoke( null, new Object[] { value } );
             return o;
-        } else if ( isArray( type )
-                && isPrimitiveOrString( getArrayComponentType( type ) ) ) {
+        } else if ( isArray( type ) ) {
+            String componentType = getArrayComponentType( type );
+            String[] split = value.split( ARRAY_TOKEN );
+            
+            if( isPrimitiveOrString( componentType ) ) {
 
-            token = TypeToken.getTypeToken( getArrayComponentType( type ) );
-            clazz = token.getWrapperClass();
+                token = TypeToken.getTypeToken( getArrayComponentType( type ) );
+                clazz = token.getWrapperClass();
+                System.out.println("clazz " + clazz);
+                if ( clazz != null && token != TypeToken.TOKEN_STRING ) {
 
-            if ( clazz != null ) {
-
-                String[] split = value.split( ARRAY_TOKEN );
-                Object primeArray = Array.newInstance( token.getPrimeClass(),
-                        split.length );
-
-                for ( int j = 0; j < split.length; j++ ) {
-                    Method meth = clazz.getMethod( "valueOf",
-                            new Class[] { String.class } );
-                    Object val = meth.invoke( null, new Object[] { split[j] } );
-                    Array.set( primeArray, j, val );
+//                    Object primeArray = Array.newInstance( token.getPrimeClass(),
+//                            split.length );
+//
+//                    for ( int j = 0; j < split.length; j++ ) {
+//                        Method meth = clazz.getMethod( "valueOf",
+//                                new Class[] { String.class } );
+//                        System.out.println("array: " + Arrays.deepToString( split ));
+//                        Object val = meth.invoke( null, new Object[] { split[j] } );
+//                        Array.set( primeArray, j, val );
+//                    }
+                    return createObjectArray(
+                            split,
+                            token.getPrimeClass(),
+                            clazz );
                 }
-                return primeArray;
-            }
-            /* equals String[] */
-            return value.split( ARRAY_TOKEN );
-
+                /* equals String[] */
+                return split;
+            } //object type
+            TypeToken tt = TypeToken.getTypeTokenByObjectType( componentType );
+            return createObjectArray(
+                    split,
+                    tt.getWrapperClass(),
+                    tt.getWrapperClass() );
         }
 
         return null;
+    }
+    
+    private static Object createObjectArray( String[] values, Class<?> componentType, Class<?> wrapperClass ) 
+        throws Exception {
+        
+        Object arr = Array.newInstance( componentType, values.length );
+        for ( int j = 0; j < values.length; j++ ) {
+            Method meth = wrapperClass.getMethod( "valueOf",
+                    new Class[] { String.class } );
+            Object val = meth.invoke( null, new Object[] { values[j] } );
+            Array.set( arr, j, val );
+        }
+        return arr;
     }
     
     /**

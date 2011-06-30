@@ -51,7 +51,8 @@ public class TypeToken implements Comparable<TypeToken> {
     	return m_pclass;
     }
 
-	public int compareTo(TypeToken o) {
+	@Override
+    public int compareTo(TypeToken o) {
 		
 		return new Integer( priority ).compareTo( new Integer( o.priority ) );
 	}
@@ -83,5 +84,38 @@ public class TypeToken implements Comparable<TypeToken> {
 		}
     	
     	return token;
+    }
+	
+	public static TypeToken getTypeTokenByObjectType( String varType ) {
+        
+        Class<?> clazz;
+        try {
+            clazz = Class.forName( varType );
+        } catch ( ClassNotFoundException e ) {
+            e.printStackTrace();
+            return null;
+        }
+        
+        if ( clazz.equals( TypeToken.TOKEN_INT.getWrapperClass() ) ) {
+            return TypeToken.TOKEN_INT;
+        } else if ( clazz.equals( TypeToken.TOKEN_DOUBLE.getWrapperClass() ) ) {
+            return TypeToken.TOKEN_DOUBLE;
+        } else if ( clazz.equals( TypeToken.TOKEN_FLOAT.getWrapperClass() ) ) {
+            return TypeToken.TOKEN_FLOAT;
+        } /*else if ( clazz.equals( TOKEN_CHAR.getWrapperClass() ) ) {
+            return TOKEN_CHAR;
+        } */else if ( clazz.equals( TypeToken.TOKEN_BYTE.getWrapperClass() ) ) {
+            return TypeToken.TOKEN_BYTE;
+        } else if ( clazz.equals( TypeToken.TOKEN_SHORT.getWrapperClass() ) ) {
+            return TypeToken.TOKEN_SHORT;
+        } else if ( clazz.equals( TypeToken.TOKEN_LONG.getWrapperClass() ) ) {
+            return TypeToken.TOKEN_LONG;
+        } else if ( clazz.equals( TypeToken.TOKEN_BOOLEAN.getWrapperClass() ) ) {
+            return TypeToken.TOKEN_BOOLEAN;
+        } else if ( clazz.equals( TypeToken.TOKEN_STRING.getWrapperClass() ) ) {
+            return TypeToken.TOKEN_STRING;
+        } else {
+            return TypeToken.TOKEN_OBJECT;
+        }
     }
 }

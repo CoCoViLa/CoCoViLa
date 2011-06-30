@@ -10,33 +10,33 @@ import java.util.*;
  *
  * This list does not allow duplicate additions (by the id)
  */
-public class TableFieldList extends ArrayList<TableField> {
+public class TableFieldList <T extends TableField> extends ArrayList<T> {
 
     @Override
-    public void add( int index, TableField element ) {
+    public void add( int index, T element ) {
         checkField( element );
         super.add( index, element );
     }
 
     @Override
-    public boolean add( TableField element ) {
+    public boolean add( T element ) {
         checkField( element );
         return super.add( element );
     }
 
     @Override
-    public boolean addAll( Collection<? extends TableField> c ) {
+    public boolean addAll( Collection<? extends T> c ) {
         checkAllFields( c );
         return super.addAll( c );
     }
 
     @Override
-    public boolean addAll( int index, Collection<? extends TableField> c ) {
+    public boolean addAll( int index, Collection<? extends T> c ) {
         checkAllFields( c );
         return super.addAll( index, c );
     }
 
-    private void checkAllFields( Collection<? extends TableField> c ) {
+    private void checkAllFields( Collection<? extends T> c ) {
         
         for ( TableField tableField : c ) {
             checkField( tableField );
@@ -54,9 +54,9 @@ public class TableFieldList extends ArrayList<TableField> {
         return getFieldByID( f.getId() ) != null;
     }
     
-    public TableField getFieldByID( String id ) {
+    public T getFieldByID( String id ) {
         
-        for ( TableField field : this ) {
+        for ( T field : this ) {
             if( field.getId().equals( id ) ) {
                 return field;
             }

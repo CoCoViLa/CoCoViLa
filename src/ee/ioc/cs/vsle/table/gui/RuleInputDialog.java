@@ -5,6 +5,7 @@ package ee.ioc.cs.vsle.table.gui;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
@@ -26,7 +27,7 @@ public class RuleInputDialog extends JDialog {
     private JButton btnCancel;
     private boolean valid = false;
     private Rule rule;
-    private List<TableField> fields;
+    private List<InputTableField> fields;
     
     /**
      * Constructor for new rule
@@ -34,7 +35,7 @@ public class RuleInputDialog extends JDialog {
      * @param table
      * @param fields input fields
      */
-    public RuleInputDialog( JTable table, List<TableField> fields ) {
+    public RuleInputDialog( JTable table, List<InputTableField> fields ) {
         
         super( SwingUtilities.getWindowAncestor( table ), "New rule", Dialog.ModalityType.APPLICATION_MODAL );
         this.fields = fields;
@@ -48,7 +49,7 @@ public class RuleInputDialog extends JDialog {
      * @param fields
      * @param rule
      */
-    public RuleInputDialog( JTable table, List<TableField> fields, Rule rule ) {
+    public RuleInputDialog( JTable table, List<InputTableField> fields, Rule rule ) {
         
         this( table, fields );
         
@@ -109,7 +110,8 @@ public class RuleInputDialog extends JDialog {
         cboxVar.setRenderer( listRenderer );
         main.add( cboxVar );
         main.add( Box.createHorizontalStrut( 10 ) );
-        cboxCond = new JComboBox( ConditionItem.values() );
+        cboxCond = new JComboBox();
+        initConditions();
         cboxCond.setRenderer( listRenderer );
         main.add( cboxCond );
         main.add( Box.createHorizontalStrut( 10 ) );
@@ -158,6 +160,9 @@ public class RuleInputDialog extends JDialog {
                 } else if( e.getSource() == btnCancel ) {
                     dispose();
                     btnCancel.removeActionListener( this );
+                } else if( e.getSource() == cboxVar ) {
+                    System.out.println("combo");
+                    initConditions();
                 }
             }
             
@@ -172,6 +177,19 @@ public class RuleInputDialog extends JDialog {
         setResizable( false );
         pack();
         
+    }
+    
+    private void initConditions() {
+        TableField tf = (TableField) cboxVar.getSelectedItem();
+        List<ConditionItem> items = new ArrayList<RuleInputDialog.ConditionItem>();
+        
+        for ( ConditionItem item : ConditionItem.values() ) {
+            if( item.getCond().acceptsType( tf.getType() ) ) {
+                items.add( item );
+            }
+        }
+        ComboBoxModel model = new DefaultComboBoxModel(items.toArray());
+        cboxCond.setModel( model );
     }
     
     /**
@@ -228,7 +246,15 @@ public class RuleInputDialog extends JDialog {
         LESSEQ( Condition.COND_LESS_OR_EQUAL, false ), 
         GREATER( Condition.COND_LESS_OR_EQUAL, true ), 
         IN( Condition.COND_IN_ARRAY, false ), 
-        NOTIN( Condition.COND_IN_ARRAY, true );
+        NOTIN( Condition.COND_IN_ARRAY, true ), 
+        MATCH( Condition.REG_EXP_MATCH, false ), 
+        NOTMATCH( Condition.REG_EXP_MATCH, true ), 
+        SUBSTR( Condition.SUBSTRING, false ), 
+        NOTSUBSTR( Condition.SUBSTRING, true ), 
+        SUBSET( Condition.SUBSET, false ), 
+        NOTSUBSET( Condition.SUBSET, true ), 
+        STRICTSUBSET( Condition.STRICT_SUBSET, false ), 
+        NOTSTRICTSUBSET( Condition.STRICT_SUBSET, true );
         
         private Condition cond;
         private boolean isNegative;
