@@ -183,7 +183,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         newClass.setIcon( getElementByName( classNode, EL_ICON ).getTextContent() );
         
         //parse all variables declared in the corresponding specification
-        if(newClass.getComponentType() != PackageClass.ComponentType.SCHEME) {
+        if( newClass.getComponentType().hasSpec() ) {
             try {
                 Collection<ClassField> specFields = SpecParser.getFields( getPath(), newClass.getName(), ".java" );
                 newClass.setSpecFields( specFields );
@@ -225,7 +225,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         
         ClassField newField;
         
-        if(newClass.getComponentType() != PackageClass.ComponentType.SCHEME) {
+        if( newClass.getComponentType().hasSpec() ) {
             if ( name.indexOf( "." ) > -1 ) {
                 //TODO - temporarily do not dig into hierarchy
                 int idx = name.indexOf( "." );
@@ -296,7 +296,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         
         ClassField cf = newClass.getSpecField( name );
         
-        if(newClass.getComponentType() != PackageClass.ComponentType.SCHEME) {
+        if( newClass.getComponentType().hasSpec() ) {
 
             if ( name.indexOf( "." ) > -1 ) {
                 //TODO - temporarily do not dig into hierarchy

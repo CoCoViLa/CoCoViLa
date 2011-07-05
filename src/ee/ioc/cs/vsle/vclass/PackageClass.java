@@ -7,16 +7,19 @@ import ee.ioc.cs.vsle.graphics.Shape;
 public class PackageClass implements Serializable {
     
     public static enum ComponentType { 
-        CLASS(GObj.class, "class"), 
-        REL(RelObj.class, "relation"), 
-        SCHEME(SchemeObj.class, "scheme"); 
+        CLASS(GObj.class, "class", true), 
+        REL(RelObj.class, "relation", true), 
+        SCHEME(SchemeObj.class, "scheme", false),
+        TABLE(TableObj.class, "table", false); 
         
         private Class<? extends GObj> _class;
         private final String xmlName;
+        private boolean hasSpec;
         
-        private ComponentType(Class<? extends GObj> _class, String name) {
+        private ComponentType(Class<? extends GObj> _class, String name, boolean hasSpec) {
             this._class = _class;
             this.xmlName = name;
+            this.hasSpec = hasSpec;
         }
         
         public GObj getInstance() {
@@ -31,6 +34,10 @@ public class PackageClass implements Serializable {
         
         public String getXmlName() {
             return this.xmlName;
+        }
+        
+        public boolean hasSpec() {
+            return hasSpec;
         }
         
         public static ComponentType getType(String s) {
