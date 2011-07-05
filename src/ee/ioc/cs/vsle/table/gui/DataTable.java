@@ -50,6 +50,7 @@ public class DataTable extends JTable {
             @Override
             public void tableChanged( final TableModelEvent e ) {
                 SwingUtilities.invokeLater( new Runnable() {
+                    @Override
                     public void run() {
                         DataTable.this.tableChanged( new TableModelEvent(dataModel, TableModelEvent.HEADER_ROW) );
                     }
@@ -122,13 +123,16 @@ public class DataTable extends JTable {
             }
         }
         
+        @Override
         public int getColumnCount() { 
             return vct.getColumnCount(); 
         }
+        @Override
         public int getRowCount() { 
             return hct.getRowCount();
         }
 
+        @Override
         public Object getValueAt(int rowIndex, int columnIndex) { 
             return expTable.getCellValueAt( rowIndex, columnIndex );
         }

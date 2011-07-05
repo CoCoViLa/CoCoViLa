@@ -333,6 +333,7 @@ public class RuleTable extends JTable {
          */
         private void restoreEntrySelection( final int position ) {
             SwingUtilities.invokeLater( new Runnable() {
+                @Override
                 public void run() {
                     if( orientation == HORIZONTAL ) {
                         setRowSelectionInterval( position, position );
@@ -358,6 +359,7 @@ public class RuleTable extends JTable {
         private void restoreRuleSelection( final int position ) {
 
             SwingUtilities.invokeLater( new Runnable() {
+                @Override
                 public void run() {
                     
                     if( orientation == HORIZONTAL ) {

@@ -39,6 +39,7 @@ public class RuleTableCellEditor extends AbstractCellEditor implements TableCell
             boolean isSelected, int row, int column ) {
         
         SwingUtilities.invokeLater( new Runnable() {
+            @Override
             public void run() {
                 RuleInputDialog dialog = new RuleInputDialog( table, 
                         ((RuleTableHeader)table).getRuleTable().getStorage().getInputFields(), 

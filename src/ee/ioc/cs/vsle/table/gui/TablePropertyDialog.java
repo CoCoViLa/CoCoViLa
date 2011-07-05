@@ -303,7 +303,7 @@ public class TablePropertyDialog extends JDialog {
             throw new TableException( "Table ID cannot be empty" );
         }
         
-        TableFieldList inputs = new TableFieldList();
+        TableFieldList<InputTableField> inputs = new TableFieldList<InputTableField>();
         
         for ( FieldPane input : inputFields ) {
             String name = input.getFieldName();
@@ -334,7 +334,7 @@ public class TablePropertyDialog extends JDialog {
             alias = new TableField( outName, jcbAliasType.getSelectedItem().toString() );
         }
         
-        TableFieldList outputs = new TableFieldList();
+        TableFieldList<TableField> outputs = new TableFieldList<TableField>();
         
         for ( FieldPane output : outputFields ) {
             String name = output.getFieldName();

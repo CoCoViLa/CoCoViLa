@@ -333,7 +333,8 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
 
             if( TBL_ELEM_INPUT.equals( node.getNodeName() ) ) {
                 
-                table.addInputFields( parseVariables( node.getElementsByTagName( TBL_ELEM_VAR) ) );
+                Collection<InputTableField> coll = parseInputVariables( node.getElementsByTagName( TBL_ELEM_VAR) );
+                table.addInputFields( coll );
                 
             } else if ( TBL_ELEM_OUTPUT.equals( node.getNodeName() )  ) {
 
@@ -352,7 +353,7 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
                     table.setAliasOutput( alias );
                 }
                 
-                TableFieldList outputs = parseVariables( node.getElementsByTagName( TBL_ELEM_VAR) );
+                TableFieldList<TableField> outputs = parseOuputVariables( node.getElementsByTagName( TBL_ELEM_VAR) );
                 
                 if( !table.isAliasOutput() && outputs.size() != 1 )
                     throw new TableException( "The table must have single output" );
@@ -387,9 +388,26 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
      * @param list
      * @return
      */
-    private TableFieldList parseVariables( NodeList list ) {
+    private TableFieldList<InputTableField> parseInputVariables( NodeList list ) {
 
-        TableFieldList vars = new TableFieldList();
+        TableFieldList<InputTableField> vars = new TableFieldList<InputTableField>();
+        
+        for ( int i = 0; i < list.getLength(); i++ ) {
+            Element var = (Element)list.item( i );
+
+            InputTableField tf = new InputTableField( 
+                    var.getAttribute( TBL_ATTR_ID ), 
+                    var.getAttribute( TBL_ATTR_TYPE ) );
+
+            vars.add( tf );
+        }
+        
+        return vars;
+    }
+    
+    private TableFieldList<TableField> parseOuputVariables( NodeList list ) {
+
+        TableFieldList<TableField> vars = new TableFieldList<TableField>();
         
         for ( int i = 0; i < list.getLength(); i++ ) {
             Element var = (Element)list.item( i );

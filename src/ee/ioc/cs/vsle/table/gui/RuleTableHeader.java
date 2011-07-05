@@ -38,14 +38,17 @@ public class RuleTableHeader extends JTable {
         
         final TableModel dataModelF = new AbstractTableModel() {
 
+            @Override
             public int getColumnCount() {
                 return ( orientation == HORIZONTAL ) ? delegateModel.getColumnCount() : 1;
             }
 
+            @Override
             public int getRowCount() {
                 return ( orientation == HORIZONTAL ) ? 1 : delegateModel.getRowCount();
             }
 
+            @Override
             public Object getValueAt( int row, int col ) {
                 return delegateModel.getRule( orientation == HORIZONTAL ? col : row );
             }
