@@ -126,8 +126,9 @@ public class Rule {
     }
     
     public String toStringValue() {
-        return ( condition == Condition.COND_IN_ARRAY ? TypeUtil
-                .toString( value ) : value.toString() );
+        return value.getClass().isArray() 
+                ? TypeUtil.toString( value ) 
+                : value.toString();
     }
     
     /**
