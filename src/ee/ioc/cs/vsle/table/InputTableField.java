@@ -3,6 +3,7 @@
  */
 package ee.ioc.cs.vsle.table;
 
+import java.text.*;
 import java.util.*;
 
 /**
@@ -38,6 +39,9 @@ public class InputTableField extends TableField {
      * @return the constraints
      */
     public List<TableFieldConstraint> getConstraints() {
+        if( constraints == null ) {
+            constraints = new ArrayList<TableFieldConstraint>();
+        }
         return constraints;
     }
 
@@ -46,6 +50,14 @@ public class InputTableField extends TableField {
      */
     public void setConstraints( List<TableFieldConstraint> constraints ) {
         this.constraints = constraints;
+    }
+    
+    public void verifyConstraints( Object obj ) {
+        for ( TableFieldConstraint constr : getConstraints() ) {
+            if( !constr.verify( obj ) ) {
+                throw new TableInputConstraintViolationException( MessageFormat.format( constr.printConstraint(), getId() ) + " violated with " + obj );
+            }
+        }
     }
 
 }

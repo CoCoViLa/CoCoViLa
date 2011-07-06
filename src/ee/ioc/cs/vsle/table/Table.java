@@ -551,21 +551,13 @@ public final class Table implements IStructuralExpertTable {
     @Override
     public synchronized Object queryTable( Object[] args ) {
         
-        int rowId = checkRules( getOrderedRowIds(), hrules, args );
-        int colId = checkRules( getOrderedColumnIds(), vrules, args );
+        TableInferenceEngine.verifyInputs( inputList, args );
         
-        if( rowId == -1 || colId == -1 ) {
-            throw new TableException( "No valid rules for current input: " + Arrays.toString( args ) );
-        }
-
+        int rowId = TableInferenceEngine.checkRules( inputList, getOrderedRowIds(), hrules, args );
+        int colId = TableInferenceEngine.checkRules( inputList, getOrderedColumnIds(), vrules, args );
+        
         // Get row by rowId which is not always the same as array index
-        DataRow row = null;
-        for (DataRow r : data) {
-            if (r.getId() == rowId) {
-                row = r;
-                break;
-            }
-        }
+        DataRow row = getDataRowById( rowId );
 
         if (row == null) {
             // should never happen, or checkRules returned invalid rowId
@@ -597,35 +589,6 @@ public final class Table implements IStructuralExpertTable {
         return res;
     }
 
-    /**
-     * Verifies conditions and returns corresponding index
-     * 
-     * @param ids
-     * @param rules
-     * @param args
-     * @return
-     */
-    private int checkRules( List<Integer> ids, List<Rule> rules, Object[] args ) {
-        outer: for ( Integer id : ids ) {
-            
-            //if a row does not contain any rule entries it is valid by default
-            boolean isOK = true;
-            
-            for ( Rule rule : rules ) {
-                if ( rule.getEntries().contains( id ) ) {
-                    isOK &= rule.verifyCondition( args[ inputList.indexOf( rule.getField() )] );
-                }
-                
-                if( !isOK ) 
-                    continue outer;
-            }
-            
-            return id;
-        }
-        
-        return -1;
-    }
-    
     /**
      * @return
      */
