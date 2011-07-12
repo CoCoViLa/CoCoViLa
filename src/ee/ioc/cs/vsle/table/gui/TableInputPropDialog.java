@@ -34,6 +34,7 @@ public class TableInputPropDialog extends JDialog {
     private JLabel jlGlue = null;
     private JLabel jlQuestionNote = null;
     private JButton jbAddConstraint = null;
+    private JButton jbCheckConstraints = null;
     private JPanel jpAddConstraintFlow = null;
     private JPanel jpConstraintList = null;
     private JLabel jlConstraintsNote = null;
@@ -85,6 +86,10 @@ public class TableInputPropDialog extends JDialog {
             jbOK.addActionListener( new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed( java.awt.event.ActionEvent e ) {
+                    
+                    if( !checkConstraints() ) 
+                        return;
+                    
                     setVisible( false );
                     if( okCallback != null )
                         okCallback.run();
@@ -237,6 +242,21 @@ public class TableInputPropDialog extends JDialog {
         }
         return jbAddConstraint;
     }
+    
+    private JButton getJbCheckConstraints() {
+        if ( jbCheckConstraints == null ) {
+            jbCheckConstraints = new JButton();
+            jbCheckConstraints.setHorizontalAlignment(SwingConstants.CENTER);
+            jbCheckConstraints.setText("Check");
+            jbCheckConstraints.addActionListener( new java.awt.event.ActionListener() {
+                @Override
+                public void actionPerformed( java.awt.event.ActionEvent e ) {
+                    checkConstraints();
+                }
+            } );
+        }
+        return jbCheckConstraints;
+    }
 
     /**
      * This method initializes jpAddConstraintFlow	
@@ -250,6 +270,7 @@ public class TableInputPropDialog extends JDialog {
             jpAddConstraintFlow = new JPanel();
             jpAddConstraintFlow.setLayout(flowLayout);
             jpAddConstraintFlow.add(getJbAddConstraint(), null);
+            jpAddConstraintFlow.add(getJbCheckConstraints(), null);
         }
         return jpAddConstraintFlow;
     }
@@ -407,8 +428,15 @@ public class TableInputPropDialog extends JDialog {
         return list;
     }
     
-    private void checkConstraints() {
-        //TODO
+    private boolean checkConstraints() {
+        boolean isOk = true;
+        for ( ConstraintItemPanel pane : constraintPanels ) {
+            if( pane.getJchbEnableConstraint().isSelected() 
+                    && pane.constrValuePane != null ) {
+                isOk = pane.constrValuePane.checkConstraint();
+            }
+        }
+        return isOk;
     }
     
     private class ConstraintItemPanel extends JPanel {
@@ -517,10 +545,29 @@ public class TableInputPropDialog extends JDialog {
         private void updateFromCheckbox() {
             if( getJchbEnableConstraint().isSelected() ) {
                 if( getJcbConstraint().getItemCount() == 0 ) {//enabled for the first time, need to init
-                    ComboBoxModel model = new DefaultComboBoxModel( availableConstraints );
+                    List<Constraint> constraints = new ArrayList<Constraint>();
+                    for ( Constraint constraint : availableConstraints ) {
+                        
+                        if( !constraint.constraintInstance.isCompatibleWith( getConstraints() ) )
+                            continue;
+                        constraints.add( constraint );
+                    }
+                    ComboBoxModel model = new DefaultComboBoxModel( constraints.toArray() );
                     getJcbConstraint().setModel( model );
                     if( model.getSize() > 0 )
                         getJcbConstraint().setSelectedIndex( 0 );
+                } else {
+                    if( constrValuePane != null 
+                            && !constrValuePane.getConstraint().isCompatibleWith( getConstraints() ) ) {
+                        
+                        SwingUtilities.invokeLater( new Runnable() {
+                            @Override
+                            public void run() {
+                                getJchbEnableConstraint().setSelected( false );
+                            }
+                        } );
+                        return;
+                    }
                 }
                 setConstraintComponentsEnabled( getJcbConstraint().getItemCount() > 0 );
             } else {
@@ -590,6 +637,33 @@ public class TableInputPropDialog extends JDialog {
         
         @Override
         public abstract void setEnabled( boolean b );
+        
+        private Border errorBorder;
+        
+        private Border getErrorBorder() {
+            if( errorBorder == null ) {
+                errorBorder = BorderFactory.createLineBorder( Color.red );
+            }
+            return errorBorder;
+        }
+        
+        public boolean checkConstraint() {
+            
+            TableFieldConstraint c = null;
+            try {
+                c = getConstraint();
+            } catch( Exception e ) {
+                System.err.println( "Exception in InputConstraintPanel.checkConstraint()" );
+            }
+            
+            if( c == null || !c.isCorrect() ) {
+                setBorder( getErrorBorder() );
+                return false;
+            }
+
+            setBorder( null );
+            return true;
+        }
     }
     
     //list panel
@@ -597,7 +671,8 @@ public class TableInputPropDialog extends JDialog {
         
         private JLabel jlValues;
         private JTextField jtfValues;
-
+        private TableFieldConstraint.List lc;
+        
         public ListConstraintPanel() {
             setLayout( new BoxLayout( this, BoxLayout.X_AXIS ) );
             jlValues = new JLabel( "Values:" );
@@ -608,20 +683,11 @@ public class TableInputPropDialog extends JDialog {
 
         @Override
         public TableFieldConstraint getConstraint() {
-            TableFieldConstraint.List lc = new TableFieldConstraint.List();
-            try {
-                String compType = type;
-                TypeToken tt = TypeToken.getTypeToken( type );
-                if( tt != null && tt != TypeToken.TOKEN_OBJECT ) {
-                    compType = tt.getObjType();
-                }
-                //TODO should avoid number format exception here
-                Object o = TypeUtil.createObjectFromString( compType + "[]", jtfValues.getText() );
-                lc.setValueList( (Object[]) o );
-            } catch ( Exception e ) {
-                e.printStackTrace();
-                return null;
-            }
+            if( lc == null )
+                lc = new TableFieldConstraint.List();
+            String text = jtfValues.getText().trim();
+            if( text.length() > 0 )
+                lc.setValuesFromString( type, text );
             return lc;
         }
         
@@ -633,9 +699,8 @@ public class TableInputPropDialog extends JDialog {
 
         @Override
         public void setConstraint( TableFieldConstraint c ) {
-            TableFieldConstraint.List lc = (TableFieldConstraint.List)c;
             StringBuilder sb = new StringBuilder();
-            for( Object o : lc.getValueList() ) {
+            for( Object o : ((TableFieldConstraint.List)c).getValueList() ) {
                 if( sb.length() > 0 )
                     sb.append( TypeUtil.ARRAY_TOKEN );
                 sb.append( o );
@@ -650,6 +715,7 @@ public class TableInputPropDialog extends JDialog {
         private JLabel jlMax = new JLabel( "Max:" );
         private JTextField jtfMin = new JTextField( 5 );
         private JTextField jtfMax = new JTextField( 5 );
+        private TableFieldConstraint.Range rc;
         
         public RangeConstraintPanel() {
             setLayout( new BoxLayout( this, BoxLayout.X_AXIS ) );
@@ -661,26 +727,10 @@ public class TableInputPropDialog extends JDialog {
 
         @Override
         public TableFieldConstraint getConstraint() {
-            TableFieldConstraint.Range rc = new TableFieldConstraint.Range();
-            String minS = jtfMin.getText();
-            if( minS != null && minS.trim().length() > 0 ) {
-                try {
-                    rc.setMin( TypeUtil.createObjectFromString( type, minS ) );
-                } catch ( Exception e ) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-            
-            String maxS = jtfMax.getText();
-            if( maxS != null && maxS.trim().length() > 0 ) {
-                try {
-                    rc.setMax( TypeUtil.createObjectFromString( type, maxS ) );
-                } catch ( Exception e ) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
+
+            if( rc == null )
+                rc = new TableFieldConstraint.Range();
+            rc.setValuesFromString( type, jtfMin.getText(), jtfMax.getText() );
             return rc;
         }
         
@@ -694,13 +744,13 @@ public class TableInputPropDialog extends JDialog {
 
         @Override
         public void setConstraint( TableFieldConstraint c ) {
-            TableFieldConstraint.Range rc = (TableFieldConstraint.Range)c;
+            TableFieldConstraint.Range _rc = (TableFieldConstraint.Range)c;
             
-            if( rc.getMin() != null )
-                jtfMin.setText( rc.getMin().toString() );
+            if( _rc.getMin() != null )
+                jtfMin.setText( _rc.getMin().toString() );
             
-            if( rc.getMax() != null )
-                jtfMax.setText( rc.getMax().toString() );
+            if( _rc.getMax() != null )
+                jtfMax.setText( _rc.getMax().toString() );
         }
     }
 

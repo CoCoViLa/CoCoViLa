@@ -19,14 +19,6 @@ import ee.ioc.cs.vsle.util.*;
  */
 public abstract class TableFieldConstraint {
 
-//    private static Map<String, TableConstraintFactory> registeredConstraintFactories
-//                    = new LinkedHashMap<String, TableConstraintFactory>();
-//    
-//    static {
-//        registeredConstraintFactories.put( "List", new List.Factory() );
-//        registeredConstraintFactories.put( "Range", new Range.Factory() );
-//    }
-    
     //if this is null, then constraint accepts any type
     private java.util.List<String> acceptedTypes;
     private java.util.List<Class<? extends TableFieldConstraint>> compatibleConstraints;
@@ -35,34 +27,17 @@ public abstract class TableFieldConstraint {
         return acceptedTypes == null ? true : acceptedTypes.contains( type );
     }
     
-//    public static String[] getRegisteredConstraintNames() {
-//        Collection<String> names = registeredConstraintFactories.keySet();
-//        return names.toArray( new String[names.size()] );
-//    }
-//    
-//    public static TableConstraintFactory getConstraintFactory( String name ) {
-//        return registeredConstraintFactories.get( name );
-//    }
-    
     public abstract String getName();
     
     public abstract <T> boolean verify( T obj );
     
     public abstract String printConstraint();
     
-    public static abstract class TableConstraintFactory implements IFactory {
-        public abstract <T> TableFieldConstraint getGenericInstance();
-        
-        @Override
-        public String getInterfaceInstance() {
-            return null;
-        }
-        
-        @Override
-        public String getDescription() {
-            return null;
-        }
-    }
+    public abstract void setValuesFromString( String type, String... args ); 
+    
+    public abstract boolean isCompatibleWith( java.util.List<TableFieldConstraint> constraints );
+    
+    public abstract boolean isCorrect();
     
     public static class List extends TableFieldConstraint {
         
@@ -106,6 +81,41 @@ public abstract class TableFieldConstraint {
         @Override
         public boolean acceptType( String type ) {
             return TypeUtil.isPrimitiveOrString( type );
+        }
+
+        @Override
+        public void setValuesFromString( String type, String... args ) {
+            try {
+                String compType = type;
+                TypeToken tt = TypeToken.getTypeToken( type );
+                if( tt != null && tt != TypeToken.TOKEN_OBJECT ) {
+                    compType = tt.getObjType();
+                }
+                //TODO should avoid number format exception here
+                Object o = TypeUtil.createObjectFromString( compType + "[]", args[0] );
+                setValueList( (Object[]) o );
+            } catch ( Exception e ) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        public boolean isCompatibleWith(
+                java.util.List<TableFieldConstraint> constraints ) {
+            
+            for ( TableFieldConstraint tableFieldConstraint : constraints ) {
+                if( tableFieldConstraint instanceof List 
+                        && this != tableFieldConstraint ) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @Override
+        public boolean isCorrect() {
+            return valueList.size() > 0;
         }
     }
     
@@ -160,6 +170,33 @@ public abstract class TableFieldConstraint {
         }
 
         @Override
+        public void setValuesFromString( String type, String... args ) {
+            String minS = args[0];
+            if( minS != null && minS.trim().length() > 0 ) {
+                try {
+                    setMin( TypeUtil.createObjectFromString( type, minS ) );
+                } catch ( Exception e ) {
+                    e.printStackTrace();
+                   throw new RuntimeException(e);
+                }
+            } else {
+                setMin( null );
+            }
+            
+            String maxS = args[1];
+            if( maxS != null && maxS.trim().length() > 0 ) {
+                try {
+                    setMax( TypeUtil.createObjectFromString( type, maxS ) );
+                } catch ( Exception e ) {
+                    e.printStackTrace();
+                    throw new RuntimeException(e);
+                }
+            } else {
+                setMax( null );
+            }
+        }
+        
+        @Override
         public String printConstraint() {
             return "Range constraint: " 
                     + ( min != null ? min + " <= " : "" ) 
@@ -175,6 +212,30 @@ public abstract class TableFieldConstraint {
         @Override
         public boolean acceptType( String type ) {
             return TypeUtil.isPrimitiveOrString( type );
+        }
+
+        @Override
+        public boolean isCompatibleWith(
+                java.util.List<TableFieldConstraint> constraints ) {
+            
+            for ( TableFieldConstraint tableFieldConstraint : constraints ) {
+                if( tableFieldConstraint instanceof Range 
+                        && this != tableFieldConstraint ) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        @SuppressWarnings( { "unchecked", "rawtypes" } )
+        @Override
+        public boolean isCorrect() {
+            if ( min == null && max == null )
+                return false;
+            else if ( min != null && max != null ) 
+                return ((Comparable)min).compareTo( max ) == -1;
+            
+            return true;
         }
     }
     

@@ -316,7 +316,10 @@ public class TablePropertyDialog extends JDialog {
                 throw new TableException( "Input's identifier " + name + " is invalid" );
             }
             
-            inputs.add( new InputTableField( name, input.getType() ) );
+            InputTableField inputField;
+            inputs.add( inputField = new InputTableField( name, input.getType() ) );
+            inputField.setQuestion( input.question );
+            inputField.setConstraints( input.constraints );
         }
         
         if( inputs.isEmpty() ) {
@@ -410,6 +413,9 @@ public class TablePropertyDialog extends JDialog {
             FieldPane fp = addInputFieldPane( false );
             fp.jcboxType.setSelectedItem( input.getType() );
             fp.jtfName.setText( input.getId() );
+            fp.question = input.getQuestion();
+            fp.constraints = input.getConstraints();
+            fp.update();
         }
         
         pack();

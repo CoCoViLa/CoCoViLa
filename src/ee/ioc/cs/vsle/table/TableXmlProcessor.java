@@ -157,9 +157,52 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
         Element inputNode = document.createElementNS( XML_NS_URI,TBL_ELEM_INPUT );
         tableNode.appendChild( inputNode );
         
-        for( TableField input : table.getInputFields() ) {
+        for( InputTableField input : table.getInputFields() ) {
             
-            inputNode.appendChild( createVarNode( input, document ) );
+            Element inputEl = createVarElement( input, document );
+            inputNode.appendChild( inputEl );
+            
+            if( input.getQuestion() != null ) {
+                Element questionEl = document.createElementNS( XML_NS_URI, "question" );
+                questionEl.setTextContent( input.getQuestion() );
+                inputEl.appendChild( questionEl );
+            }
+            
+            if( !input.getConstraints().isEmpty() ) {
+                
+                Element constraintsEl = document.createElementNS( XML_NS_URI, "constraints" );
+                
+                for ( TableFieldConstraint constr : input.getConstraints() ) {
+                    if ( constr instanceof TableFieldConstraint.List ) {
+                        TableFieldConstraint.List list = (TableFieldConstraint.List) constr;
+                        
+                        Element listEl = document.createElementNS( XML_NS_URI, "list" );
+                        
+                        for ( Object obj : list.getValueList() ) {
+                            Element elementEl = document.createElementNS( XML_NS_URI, "element" ); 
+                            elementEl.setAttribute( TBL_ATTR_VALUE, obj.toString() );
+                            listEl.appendChild( elementEl );
+                        }
+                        
+                        constraintsEl.appendChild( listEl );
+                        
+                    } else if ( constr instanceof TableFieldConstraint.Range ) {
+                        TableFieldConstraint.Range range = (TableFieldConstraint.Range) constr;
+                        
+                        Element rangeEl = document.createElementNS( XML_NS_URI, "range" );
+                        
+                        if( range.getMin() != null )
+                            rangeEl.setAttribute( "min", range.getMin().toString() );
+                        
+                        if( range.getMax() != null )
+                            rangeEl.setAttribute( "max", range.getMax().toString() );
+                        
+                        constraintsEl.appendChild( rangeEl );
+                    }
+                }
+                
+                inputEl.appendChild( constraintsEl );
+            }
         }
         
         //save output var(s)
@@ -173,7 +216,7 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
             outputNode.setAttribute( TBL_ATTR_ALIAS_TYPE, alias.getType() );
         }
         for ( TableField output : table.getOutputFields() ) {
-            outputNode.appendChild( createVarNode( output, document ) );
+            outputNode.appendChild( createVarElement( output, document ) );
         }
 
         //save rules
@@ -198,7 +241,7 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
      * @param doc
      * @return
      */
-    private Node createVarNode( TableField field, Document doc ) {
+    private Element createVarElement( TableField field, Document doc ) {
         Element var = doc.createElementNS( XML_NS_URI,TBL_ELEM_VAR );
         var.setAttribute( TBL_ATTR_ID, field.getId() );
         var.setAttribute( TBL_ATTR_TYPE, field.getType() );
@@ -385,20 +428,64 @@ public class TableXmlProcessor extends AbstractXmlProcessor {
     /**
      * Parses variables (inputs and outputs)
      * 
-     * @param list
+     * @param inputsList
      * @return
      */
-    private TableFieldList<InputTableField> parseInputVariables( NodeList list ) {
+    private TableFieldList<InputTableField> parseInputVariables( NodeList inputsList ) {
 
         TableFieldList<InputTableField> vars = new TableFieldList<InputTableField>();
         
-        for ( int i = 0; i < list.getLength(); i++ ) {
-            Element var = (Element)list.item( i );
+        for ( int i = 0; i < inputsList.getLength(); i++ ) {
+            Element var = (Element)inputsList.item( i );
 
             InputTableField tf = new InputTableField( 
                     var.getAttribute( TBL_ATTR_ID ), 
                     var.getAttribute( TBL_ATTR_TYPE ) );
 
+            NodeList entries = var.getElementsByTagName( "question" );
+            
+            if( entries.getLength() == 1 ) {
+                Element question = (Element)entries.item( 0 );
+                tf.setQuestion( question.getTextContent() );
+            }
+            
+            entries = var.getElementsByTagName( "constraints" );
+            
+            if( entries.getLength() == 1 ) {
+                Element constraints = (Element)entries.item( 0 );
+                NodeList nodes = constraints.getChildNodes();
+                
+                List<TableFieldConstraint> constrList = new ArrayList<TableFieldConstraint>();
+                
+                for ( int j = 0; j < nodes.getLength(); j++ ) {
+                    System.out.println(nodes.item( j ).getNodeName() + " -- " + nodes.item( j ).getNodeType() );
+                    if( nodes.item( j ).getNodeType() != Node.ELEMENT_NODE ) continue;
+                    Element constrEl = (Element)nodes.item( j );
+                    
+                    if( "list".equals( constrEl.getNodeName() ) ) {
+                        TableFieldConstraint.List list = new TableFieldConstraint.List();
+                        
+                        NodeList elNodes = constrEl.getElementsByTagName( "element" );
+                        StringBuilder sb = new StringBuilder();
+                        for( int k = 0; k < elNodes.getLength(); k++ ) {
+                            
+                            if( k > 0 ) sb.append( "%%" );
+                            
+                            String value = ((Element)elNodes.item( k )).getAttribute( "value" );
+                            sb.append( value );
+                        }
+                        list.setValuesFromString( tf.getType(), sb.toString() );
+                        constrList.add( list );
+                    } else if ( "range".equals( constrEl.getNodeName() ) ) {
+                        TableFieldConstraint.Range range = new TableFieldConstraint.Range();
+                        range.setValuesFromString( tf.getType(), constrEl.getAttribute( "min" ), constrEl.getAttribute( "max" ) );
+                        constrList.add( range );
+                    }
+                }
+                
+                tf.setConstraints( constrList );
+            }
+            
             vars.add( tf );
         }
         
