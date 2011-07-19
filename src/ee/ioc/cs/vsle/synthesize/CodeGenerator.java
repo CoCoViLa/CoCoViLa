@@ -702,11 +702,14 @@ public class CodeGenerator {
                 }
                 params.append( RelType.TAG_SUBTASK );
             }
-            if ( subExist && rel.getInputs().size() > 0 ) {
+            
+            String simpleParams = getParametersString( false );
+            
+            if ( subExist && simpleParams.length() > 0 ) {
                 params.append( ", " );
             }
 
-            return params.append( getParametersString( false ) ).append( ")" )
+            return params.append( simpleParams ).append( ")" )
                     .toString();
         }
         
