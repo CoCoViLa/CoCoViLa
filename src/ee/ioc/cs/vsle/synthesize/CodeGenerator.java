@@ -868,6 +868,8 @@ public class CodeGenerator {
                             CodeGenerator.OT_TAB ).append( op.getFullName() )
                             .append( " = " ).append( " TEMP" ).append( rel.getId() )
                             .append( ";\n" ).toString();
+                } else if ( op.getField().isVoid() && ip.getField().isVoid() ) {
+                    return "";
                 } else if ( rel.getMethod() == null ) {
                     return result.append( op.getFullName() ).append( " = " )
                             .append( ip.getFullName() ).append( ";\n" )
