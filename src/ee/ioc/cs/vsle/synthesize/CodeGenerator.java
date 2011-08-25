@@ -632,15 +632,15 @@ public class CodeGenerator {
             return TYPE_INT;
         }
 
-        private String getOutputString() {
+        private String getOutputString(Map<String, String> outputSubstitutions) {
 
             StringBuilder outputString = new StringBuilder();
             Var var = rel.getFirstOutput();
 
             if ( !TypeUtil.TYPE_VOID.equals( var.getType() ) ) {
                 if ( var.getField().isAlias() ) {
-                    String alias_tmp = getRelAliasTmpName( var );
-
+                    String alias_tmp = getRelAliasTmpName( var, outputSubstitutions, true );
+                    
                     if ( !var.getChildVars().isEmpty() ) {
 
                         outputString.append(
@@ -656,14 +656,20 @@ public class CodeGenerator {
             return outputString.toString();
         }
 
-        private String getRelAliasTmpName( Var var ) {
+        private String getRelAliasTmpName( Var var, Map<String, String> varNameSubstitutions, boolean cache ) {
+            String name;
+            if( ( name = varNameSubstitutions.get( var.getFullName() ) ) == null ) {
+                String varName = var.getFullNameForConcat().replaceAll( "\\.", "_" );
+                name = new StringBuilder( TypeUtil.TYPE_ALIAS ).append( "_" )
+                        .append( varName ).append( RelType.auxVarCounter++ ).toString();
+                if( cache )
+                    varNameSubstitutions.put( var.getFullName(), name );
+            }
+            return name;
             
-            String varName = var.getFullNameForConcat().replaceAll( "\\.", "_" );
-            return new StringBuilder( TypeUtil.TYPE_ALIAS ).append( "_" )
-                    .append( varName ).append( rel.getId() ).toString();
         }
 
-        private String getParametersString( boolean useBrackets ) {
+        private String getParametersString( boolean useBrackets, Map<String, String> varNameSubstitutions ) {
             
             StringBuilder params = new StringBuilder();
             if ( useBrackets )
@@ -677,7 +683,7 @@ public class CodeGenerator {
                         params.append( ", " );
 
                     if ( var.getField().isAlias() ) {
-                        params.append( getRelAliasTmpName( var ) );
+                        params.append( getRelAliasTmpName( var, varNameSubstitutions, false ) );
                     } else {
                         params.append( var.getFullName() );
                     }
@@ -689,7 +695,7 @@ public class CodeGenerator {
             return params.toString();
         }
 
-        private String getSubtaskParametersString() {
+        private String getSubtaskParametersString( Map<String, String> varNameSubstitutions ) {
 
             StringBuilder params = new StringBuilder( "(" );
 
@@ -703,7 +709,7 @@ public class CodeGenerator {
                 params.append( RelType.TAG_SUBTASK );
             }
             
-            String simpleParams = getParametersString( false );
+            String simpleParams = getParametersString( false, varNameSubstitutions );
             
             if ( subExist && simpleParams.length() > 0 ) {
                 params.append( ", " );
@@ -776,7 +782,6 @@ public class CodeGenerator {
 
         private String emitMethod() {
 
-            String output = getOutputString();
             String meth;
 
             if ( Table.TABLE_KEYWORD.equals( rel.getMethod() ) ) {
@@ -804,13 +809,20 @@ public class CodeGenerator {
                 meth = rel.getParent().getFullNameForConcat() + rel.getMethod();
             }
             
-            String params = ( rel.getType() == RelType.TYPE_JAVAMETHOD ) ? getParametersString( true )
-                    : getSubtaskParametersString();
+            Map<String, String> inputSubstitutions = new HashMap<String, String>();
+            String aliasInputs = checkAliasInputs( inputSubstitutions );
             
-            return new StringBuilder( checkAliasInputs() ).append(
+            String params = ( rel.getType() == RelType.TYPE_JAVAMETHOD ) 
+                    ? getParametersString( true, inputSubstitutions )
+                    : getSubtaskParametersString( inputSubstitutions );
+            
+            Map<String, String> outputSubstitutions = new HashMap<String, String>();            
+            String output = getOutputString( outputSubstitutions );
+                    
+            return new StringBuilder( aliasInputs ).append(
                     output.length() > 0 ? output + " = " : "" ).append( meth )
                     .append( params ).append( ";\n" ).append(
-                            checkAliasOutputs() ).toString();
+                            checkAliasOutputs( outputSubstitutions ) ).toString();
         }
 
         private String emitEquation() {
@@ -929,13 +941,13 @@ public class CodeGenerator {
             return sb.append( ";\n" ).toString();
         }
         
-        private String checkAliasInputs() {
+        private String checkAliasInputs( Map<String, String> varNameSubstitutions ) {
             StringBuilder assigns = new StringBuilder();
             for ( Var input : rel.getInputs() ) {
                 if ( input.getField().isAlias() ) {
 
-                    String alias_tmp = getRelAliasTmpName( input );
-
+                    String alias_tmp = getRelAliasTmpName( input, varNameSubstitutions, true );
+                    
                     if ( input.getChildVars().isEmpty()
                             && !( (Alias) input.getField() ).isInitialized() ) {
                         //TODO check assigns overwrite (before refactoring, 1.75.2.2)
@@ -959,7 +971,7 @@ public class CodeGenerator {
                             String varName;
 
                             if ( var.getField().isAlias() ) {
-                                String aliasTmpFromInput = getRelAliasTmpName( var );
+                                String aliasTmpFromInput = getRelAliasTmpName( var, varNameSubstitutions, false );
 
                                 declarations.append( cg.getVarsToAlias(
                                         var, aliasTmpFromInput ) );
@@ -1001,12 +1013,12 @@ public class CodeGenerator {
                     .append( "[" ).append( size ).append( "];\n" ).toString();
         }
 
-        private String checkAliasOutputs() {
+        private String checkAliasOutputs( Map<String, String> outputSubstitutions ) {
             StringBuilder assigns = new StringBuilder();
             Var output = rel.getFirstOutput();
             if ( output.getField().isAlias() ) {
 
-                String alias_tmp = getRelAliasTmpName( output );
+                String alias_tmp = getRelAliasTmpName( output, outputSubstitutions, false );
 
                 for ( int k = 0; k < output.getChildVars().size(); k++ ) {
                     Var varFromAlias = output.getChildVars().get( k );
