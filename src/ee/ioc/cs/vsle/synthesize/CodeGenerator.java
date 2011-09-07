@@ -25,8 +25,6 @@ public class CodeGenerator {
 
     private int subCount = 0;
 
-    public int aliasTmpNr = 0;
-
     private EvaluationAlgorithm algorithm;
     private Problem problem;
     private String className;
@@ -568,7 +566,7 @@ public class CodeGenerator {
 
     private String getAliasTmpName( String varName ) {
         varName = varName.replaceAll( "\\.", "_" );
-        return new StringBuilder( TypeUtil.TYPE_ALIAS ).append( "_" ).append( varName ).append( "_" ).append( aliasTmpNr++ ).toString();
+        return new StringBuilder( TypeUtil.TYPE_ALIAS ).append( "_" ).append( varName ).append( "_" ).append( RelType.nextTmpVarNr() ).toString();
     }
 
     private class IndSubt {
@@ -661,7 +659,7 @@ public class CodeGenerator {
             if( ( name = varNameSubstitutions.get( var.getFullName() ) ) == null ) {
                 String varName = var.getFullNameForConcat().replaceAll( "\\.", "_" );
                 name = new StringBuilder( TypeUtil.TYPE_ALIAS ).append( "_" )
-                        .append( varName ).append( RelType.auxVarCounter++ ).toString();
+                        .append( varName ).append( RelType.nextTmpVarNr() ).toString();
                 if( cache )
                     varNameSubstitutions.put( var.getFullName(), name );
             }
@@ -836,14 +834,14 @@ public class CodeGenerator {
                     String[] split = rel.getMethod().split( "=" );
                     result.append( op.getField().getType() ).append( " " )
                             .append( " TEMP" ).append(
-                                    Integer.toString( RelType.auxVarCounter ) )
+                                    Integer.toString( RelType.tmpVarNr() ) )
                             .append( "=" ).append( split[1] ).append( ";\n" );
                     result.append( CodeGenerator.OT_TAB ).append(
                             CodeGenerator.OT_TAB ).append( op.getFullName() )
                             .append( " = TEMP" ).append(
-                                    Integer.toString( RelType.auxVarCounter ) )
+                                    Integer.toString( RelType.tmpVarNr() ) )
                             .append( ";\n" );
-                    RelType.auxVarCounter++;
+                    RelType.nextTmpVarNr();
                     return result.toString();
 
                 }

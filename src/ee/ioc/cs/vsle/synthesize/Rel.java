@@ -31,7 +31,7 @@ class Rel {
     /* ------------------------------------------------------------------- */
     
     Rel( Var parent, String declaration ) {
-        relID = RelType.relCounter++;
+        relID = RelType.nextRelNr();
         this.parent = parent;
         this.declaration = declaration;
         hashcode = RelType.REL_HASH + relID;

@@ -10,13 +10,28 @@ public enum RelType {
             TYPE_METHOD_WITH_SUBTASK,
             TYPE_UNIMPLEMENTED;
 
-    static int auxVarCounter = 0;
-    static int relCounter = 0;
-    static int varCounter = 0;
+    private static int auxVarCounter = 0;
+    private static int relCounter = 0;
+    private static int varCounter = 0;
 
     final static String TAG_SUBTASK = "<<subtask>>";
 
     public final static int REL_HASH = "rel".hashCode();
     public final static int VAR_HASH = "var".hashCode();
 
+    public static int tmpVarNr() {
+        return auxVarCounter;
+    }
+    
+    public static int nextTmpVarNr() {
+        return auxVarCounter++;
+    }
+    
+    public static int nextRelNr() {
+        return relCounter++;
+    }
+    
+    public static int nextVarNr() {
+        return varCounter++;
+    }
 }

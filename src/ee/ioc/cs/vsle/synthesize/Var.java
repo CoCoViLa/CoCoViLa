@@ -30,7 +30,7 @@ public class Var {
     
     public Var( ClassField cf, Var parent ) {
     	
-    	this.varNumber = RelType.varCounter++;
+    	this.varNumber = RelType.nextVarNr();
         this.field = cf;
         this.parent = parent;
 
