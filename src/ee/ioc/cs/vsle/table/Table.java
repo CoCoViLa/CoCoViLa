@@ -527,8 +527,8 @@ public final class Table implements IStructuralExpertTable {
      * @param id
      * @return
      */
-    TableField getInput( String id ) {
-        for ( TableField tableField : inputList ) {
+    InputTableField getInput( String id ) {
+        for ( InputTableField tableField : inputList ) {
             if( id.equals( tableField.getId() ) ) {
                 return tableField;
             }
@@ -550,8 +550,14 @@ public final class Table implements IStructuralExpertTable {
     
     @Override
     public synchronized Object queryTable( Object[] args ) {
+        return queryTable( args, true );
+    }
+    
+    public synchronized Object queryTable( Object[] args, boolean verifyInputs ) {
         
-        TableInferenceEngine.verifyInputs( inputList, args );
+        //TODO check the following case -- when no inputs are actually required in order to get a default value
+        if( verifyInputs)
+            TableInferenceEngine.verifyInputs( inputList, args );
         
         int rowId = TableInferenceEngine.checkRules( inputList, getOrderedRowIds(), hrules, args );
         int colId = TableInferenceEngine.checkRules( inputList, getOrderedColumnIds(), vrules, args );

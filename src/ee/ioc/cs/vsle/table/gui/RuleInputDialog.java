@@ -161,7 +161,6 @@ public class RuleInputDialog extends JDialog {
                     dispose();
                     btnCancel.removeActionListener( this );
                 } else if( e.getSource() == cboxVar ) {
-                    System.out.println("combo");
                     initConditions();
                 }
             }
@@ -214,7 +213,7 @@ public class RuleInputDialog extends JDialog {
     private Rule createRuleFromGUI() {
         ConditionItem item = (ConditionItem) cboxCond.getSelectedItem();
         return Rule.createRule( 
-                (TableField) cboxVar.getSelectedItem(), 
+                (InputTableField) cboxVar.getSelectedItem(), 
                 ( item.isNegative() ? "!" : "" ) + item.getCond().getKeyword(), 
                 tfValue.getText() );
     }

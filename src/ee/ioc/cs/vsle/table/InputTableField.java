@@ -26,6 +26,10 @@ public class InputTableField extends TableField {
         return question;
     }
 
+    public String getQuestionText() {
+        return MessageFormat.format( question, getId(), getType() );
+    }
+    
     /**
      * @param question the question to set
      */

@@ -10,7 +10,7 @@ import ee.ioc.cs.vsle.util.*;
  */
 public class Rule {
     
-    private TableField field;
+    private InputTableField field;
     protected Object value;
     private Set<Integer> entries = new LinkedHashSet<Integer>();
     private Condition condition;
@@ -24,7 +24,7 @@ public class Rule {
      * @param condition
      * @param isNegative
      */
-    private Rule( TableField field, String value, Condition condition, boolean isNegative ) {
+    private Rule( InputTableField field, String value, Condition condition, boolean isNegative ) {
         this.field = field;
         this.condition = condition;
         this.negative = isNegative;
@@ -65,7 +65,7 @@ public class Rule {
     /**
      * @return the field
      */
-    public TableField getField() {
+    public InputTableField getField() {
         return field;
     }
     
@@ -140,7 +140,7 @@ public class Rule {
      * @return
      * @throws Exception
      */
-    public static Rule createRule( TableField var, String cond, String svalue ) {
+    public static Rule createRule( InputTableField var, String cond, String svalue ) {
         
         boolean negative = false;
         

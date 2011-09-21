@@ -69,6 +69,16 @@ public class TypeUtil {
         return type.equals(TYPE_STRING) || type.equals(TYPE_STRING_FULL);
     }
     
+    public static boolean isIntegral( String type ) {
+        return type.equals( TYPE_BYTE ) || type.equals( TYPE_CHAR )
+                || type.equals( TYPE_SHORT ) || type.equals( TYPE_INT )
+                || type.equals( TYPE_LONG );
+    }
+    
+    public static boolean isFractional( String type ) {
+        return type.equals( TYPE_FLOAT ) || type.equals( TYPE_DOUBLE );
+    }
+
     /**
      * Used in code generation
      * 
