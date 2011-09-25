@@ -3,6 +3,7 @@
  */
 package ee.ioc.cs.vsle.table;
 
+import java.awt.*;
 import java.io.*;
 import java.util.*;
 
@@ -10,6 +11,7 @@ import javax.swing.*;
 
 import ee.ioc.cs.vsle.api.Package;
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * Class for caching tables and providing access to the tables from outer packages
@@ -68,6 +70,7 @@ public class TableManager {
         final String msg = "No such table: " + tableId;
         
         SwingUtilities.invokeLater( new Runnable() {
+            @Override
             public void run() {
                 JOptionPane.showMessageDialog( null, msg + "\n(NB! Table ids are case sensitive!)", "Error", JOptionPane.ERROR_MESSAGE );
             }
@@ -93,4 +96,74 @@ public class TableManager {
         }
     }
 
+    /**
+     * Given a file, returns possibly empty list of tables 
+     * (mapping of table ids to their instances)
+     * @param file
+     * @return
+     */
+    public static Map<String, Table> getTablesFromFile( File file ) {
+        
+        try {
+            return new TableXmlProcessor( file ).parse();
+        } catch( TableException e ) {
+            if( RuntimeProperties.isLogDebugEnabled() ) {
+                e.printStackTrace();
+            }
+        }
+        return new HashMap<String, Table>();
+    }
+    
+    /**
+     * Shows file chooser and if there is more that one table in a file,
+     * displays a dialog to choose a table.
+     * Returns a chosen table and its corresponding file, otherwise null
+     * 
+     * @param parent
+     * @param path
+     * @return
+     */
+    public static Pair<Table, File> openTable( Window parent, String path ) {
+
+        JFileChooser fc = new JFileChooser( path );
+        fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.TBL ) );
+        fc.setDialogType( JFileChooser.OPEN_DIALOG );
+
+        Pair<Table, File> pair = new Pair<Table, File>( null, null );
+        
+        if ( fc.showOpenDialog( parent ) 
+                == JFileChooser.APPROVE_OPTION ) {
+
+            Map<String, Table> tables = 
+                    getTablesFromFile( fc.getSelectedFile() );
+
+            pair = pair.setAtSecond( fc.getSelectedFile() );
+            
+            final Table table;
+
+            if( tables.size() == 1 ) {
+                table = tables.values().iterator().next();
+
+            } else if( tables.size() > 1 ) {
+
+                Object[] opts = tables.keySet().toArray();
+
+                int res = JOptionPane.showOptionDialog( parent,
+                        "Choose table", "Tables",
+                        JOptionPane.OK_CANCEL_OPTION,
+                        JOptionPane.QUESTION_MESSAGE, null, opts, opts[0] ); 
+
+                if( res != JOptionPane.CLOSED_OPTION ) {
+                    table = tables.get( opts[res] );
+                } else {
+                    return pair;
+                }
+            } else {
+                return pair;
+            }
+
+            return pair.setAtFirst( table );
+        }
+        return pair;   
+    }
 }

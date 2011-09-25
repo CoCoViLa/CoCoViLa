@@ -3,10 +3,11 @@
  */
 package ee.ioc.cs.vsle.table.gui;
 
+import static ee.ioc.cs.vsle.table.gui.TableConstants.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.util.*;
 
 import javax.swing.*;
 import javax.swing.event.*;
@@ -15,8 +16,6 @@ import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.table.event.*;
 import ee.ioc.cs.vsle.util.*;
-
-import static ee.ioc.cs.vsle.table.gui.TableConstants.*;
 
 /**
  * @author pavelg
@@ -198,7 +197,7 @@ public class TableFrame extends JFrame {
     /**
      * 
      */
-    private void newTable() {
+    void newTable() {
         
         TablePropertyDialog dialog = new TablePropertyDialog( this );
         dialog.setVisible( true );
@@ -268,54 +267,10 @@ public class TableFrame extends JFrame {
     /**
      * 
      */
-    private void openTable() {
-
-        JFileChooser fc = new JFileChooser( getPath() );
-        fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.TBL ) );
-        fc.setDialogType( JFileChooser.OPEN_DIALOG );
-        
-        int returnVal = fc.showOpenDialog( TableFrame.this );
-        
-        if ( returnVal == JFileChooser.APPROVE_OPTION ) {
-            
-            Map<String, Table> tables;
-            
-            try {
-                tables = new TableXmlProcessor( fc.getSelectedFile() ).parse();
-            } catch( TableException e ) {
-                if( RuntimeProperties.isLogDebugEnabled() ) {
-                    e.printStackTrace();
-                }
-                return;
-            }
-            
-            openTableFile = fc.getSelectedFile();
-            
-            final Table table;
-            
-            if( tables.size() == 1 ) {
-                table = tables.values().iterator().next();
-                
-            } else if( tables.size() > 1 ) {
-                
-                Object[] opts = tables.keySet().toArray();
-                
-                int res = JOptionPane.showOptionDialog( TableFrame.this,
-                        "Choose table", "Tables",
-                        JOptionPane.OK_CANCEL_OPTION,
-                        JOptionPane.QUESTION_MESSAGE, null, opts, opts[0] ); 
-                
-                if( res != JOptionPane.CLOSED_OPTION ) {
-                    table = tables.get( opts[res] );
-                } else {
-                    return;
-                }
-            } else {
-                return;
-            }
-            
-            setTable( table );
-        }
+    void openTable() {
+        Pair<Table, File> pair = TableManager.openTable( TableFrame.this, getPath() );
+        openTableFile = pair.getSecond();
+        setTable( pair.getFirst() );
     }
     
     /**

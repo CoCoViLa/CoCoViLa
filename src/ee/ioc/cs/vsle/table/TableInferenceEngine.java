@@ -97,12 +97,44 @@ public class TableInferenceEngine {
         
     }
     
+    public static class InputFieldAndSelectedId {
+        
+        private InputTableField input;
+        private Integer selectedId;
+        
+        private InputFieldAndSelectedId() {}
+        
+        /**
+         * @param input
+         * @param selectedId
+         */
+        InputFieldAndSelectedId( InputTableField input,
+                Integer selectedId ) {
+            this();
+            
+            this.input = input;
+            this.selectedId = selectedId;
+        }
+        /**
+         * @return the input
+         */
+        public InputTableField getInput() {
+            return input;
+        }
+        /**
+         * @return the selectedId
+         */
+        public Integer getSelectedId() {
+            return selectedId;
+        }
+    }
+    
     /**
      * @param input
      * @return
      */
-    public static InputTableField getNextInputAndRelevantIds( List<Rule> rules, InputTableField input, 
-            Map<InputTableField, Object> inputsToValues, List<Integer> all_ids, List<Integer> out_ids ) {
+    public static InputFieldAndSelectedId getNextInputAndRelevantIds( List<Rule> rules, InputTableField input, 
+            Map<InputTableField, Object> inputsToValues, List<Integer> allIds, List<Integer> outIds ) {
         
         assert inputsToValues.containsKey( input );
         
@@ -118,8 +150,8 @@ public class TableInferenceEngine {
             Boolean holds = matchesInput ? rule.verifyCondition( inputsToValues.get( input ) ) : null;
             
             for( Integer id : rule.getEntries() ) {
-                System.out.println("id: " + id + " contains in all available ids: " + all_ids.contains( id ) );
-                if( !all_ids.contains( id ) ) continue;
+                System.out.println("id: " + id + " contains in all available ids: " + allIds.contains( id ) );
+                if( !allIds.contains( id ) ) continue;
                 //
                 ProductionRule pr;
                 if( ( pr = productionRules.get( id ) ) == null ) {
@@ -133,31 +165,56 @@ public class TableInferenceEngine {
                     //store only unknown rule's inputs here
                     pr.inputFields.add( ruleInput );
                 //
-                if( holds != null ) {
+                if( holds != null ) {//this id is a candidate for removal
                     boolean contains;
-                    if( ( contains = out_ids.contains( id ) ) && !holds ) {
-                        out_ids.remove( id );
+                    if( ( contains = outIds.contains( id ) ) && !holds ) {
+                        outIds.remove( id );
                     } else if( !contains && holds ) {
-                        out_ids.add( id );
+                        outIds.add( id );
                     }
+                } else {//does not contain current input, so could be useful later
+                    outIds.add( id );
                 }
             }
         }
         
         System.out.println(productionRules.size() + " - All production rules: " + productionRules );
-        productionRules.keySet().retainAll( out_ids );
-        System.out.println(productionRules.size() + " - Filtered production rules: " + productionRules );
-        for ( Integer id : all_ids ) {//we need to iterate all ids because some of rows/cols may contain no rules!
+        System.out.println("All available ids: " + allIds );
+        InputFieldAndSelectedId result = null;//the result will be created only once but the iteration will continue until all ids are examined
+        for ( Integer id : allIds ) {//we need to iterate all ids because some of rows/cols may contain no rules!
             ProductionRule prodr = productionRules.get( id );
-            if( prodr == null || prodr.inputFields.isEmpty() ) {
-                break;//if no other inputs are needed, do not proceed and return null
+            //null means empty row that should be considered
+            //non null and not empty should be among out_ids
+            if( prodr == null || ( prodr.inputFields.isEmpty() && outIds.contains( prodr.id ) ) ) {
+                if( !outIds.contains( id ) )//TODO
+                    outIds.add( id );//this is required in order to keep empty rows/cols for the future use
+                //if no other inputs are needed, do not proceed and return null
+                System.out.println("no other inputs are needed, do not proceed and return null");
+                if( result == null )
+                    result = new InputFieldAndSelectedId( null, id );
+                continue;
+            } else if( !outIds.contains( prodr.id ) ) {
+                continue;
             }
-            return prodr.inputFields.get( 0 );
+            System.out.println( "returning input " + prodr.inputFields.get( 0 ) );
+            if( result == null )
+                result = new InputFieldAndSelectedId( prodr.inputFields.get( 0 ), null );
         }
-        return null;
+        System.out.println("Out ids: " + outIds );
+        
+        if( result == null && outIds.size() != 0 ) {//there is still some hope left!
+            System.out.println("there is still some hope left! " + result );
+            int id = outIds.get( 0 );
+            ProductionRule prodr = productionRules.get( id );
+            if( prodr != null ) {
+                if( !prodr.inputFields.isEmpty() )
+                    result = new InputFieldAndSelectedId( prodr.inputFields.get( 0 ), null );
+            } else {
+                result = new InputFieldAndSelectedId( null, id );
+            }
+        }
+        System.out.println( "returning " + result );
+        return result == null ? new InputFieldAndSelectedId() : result;
     }
     
-    public static void getNextTableInput( TableFieldList<InputTableField> inputFields, List<Integer> ids, List<Rule> rules ) {
-        
-    }
 }

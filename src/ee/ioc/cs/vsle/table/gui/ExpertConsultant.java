@@ -3,26 +3,19 @@
  */
 package ee.ioc.cs.vsle.table.gui;
 
-import javax.swing.SwingUtilities;
-import java.awt.BorderLayout;
-import javax.swing.*;
-import java.awt.Dimension;
-import java.awt.GridBagLayout;
-import java.awt.FlowLayout;
-import javax.swing.*;
-import javax.swing.border.EtchedBorder;
-import javax.swing.JLabel;
-import java.awt.GridBagConstraints;
+import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.util.*;
+import java.util.List;
 
-import javax.swing.JSlider;
+import javax.swing.*;
+import javax.swing.border.*;
 
-import com.sun.org.apache.bcel.internal.generic.*;
-
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.table.*;
+import ee.ioc.cs.vsle.table.TableInferenceEngine.InputFieldAndSelectedId;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
@@ -144,24 +137,60 @@ public class ExpertConsultant extends JFrame {
             getQuestionMainPanel().add( qp, BorderLayout.CENTER );
             inputPanels.push( qp );
         }
-        getJContentPane().revalidate();
+        updateMainPanel();
     }
     
     private void setQuestionPanel( QuestionPanel qp ) {
         getQuestionMainPanel().removeAll();
-        if( qp != null ) {
-            getQuestionMainPanel().add( qp, BorderLayout.CENTER );
+        getQuestionMainPanel().add( qp, BorderLayout.CENTER );
+        updateMainPanel();
+    }
+    
+    /**
+     * Shows table output
+     * 
+     * @param value
+     * @param inputValues
+     */
+    private void setAnswerPanel( Object value, Map<InputTableField, Object> inputValues ) {
+        getQuestionMainPanel().removeAll();
+        String result = value != null ? value.toString() : "Output is undefined!";
+        
+        JPanel jpBox = new JPanel();
+        jpBox.setLayout( new BoxLayout( jpBox, BoxLayout.Y_AXIS ) );
+
+        JPanel jpOutput = GuiUtil.addComponentAsFlow( new JLabel( result ), FlowLayout.CENTER );
+        jpOutput.setBorder( BorderFactory.createTitledBorder( "Expert Table Output" ) );
+        jpBox.add( jpOutput );
+        
+        if( inputValues != null && !inputValues.isEmpty() ) {
+            JPanel jpInputs = new JPanel();
+            jpInputs.setLayout( new BoxLayout( jpInputs, BoxLayout.Y_AXIS ) );
+            jpInputs.setBorder( BorderFactory.createTitledBorder( "Given input values" ) );
+            jpBox.add( jpInputs );
+            
+            for ( Map.Entry<InputTableField,Object> entry : inputValues.entrySet() ) {
+                InputTableField field = entry.getKey();
+                String input = "(" + field.getType() + ") " + field.getId() + " = " + entry.getValue();
+                jpInputs.add( GuiUtil.addComponentAsFlow( new JLabel( input ), FlowLayout.CENTER ) );
+            }
         }
-        getJContentPane().revalidate();
+        
+        getQuestionMainPanel().add( jpBox, BorderLayout.CENTER );
+        updateMainPanel();
+    }
+    
+    private void updateMainPanel() {
+        getQuestionMainPanel().revalidate();
+        getQuestionMainPanel().repaint();
     }
     
     /**
          * @param args
          */
     public static void main( String[] args ) {
-        // TODO Auto-generated method stub
-
         SwingUtilities.invokeLater( new Runnable() {
+            @Override
             public void run() {
                 VPackage pack = PackageXmlProcessor.load( new File("/Users/pavelg/Dropbox/CoCoViLa_packages/MyTest/MyTest2.xml") );
                 if( pack == null ) {
@@ -170,7 +199,7 @@ public class ExpertConsultant extends JFrame {
                 }
                 Table table = (Table)TableManager.getTable( pack, 
                         "ExampleCons1" );//Example123, TestEmpty
-                ExpertConsultant thisClass = new ExpertConsultant(table);
+                ExpertConsultant thisClass = new ExpertConsultant(null, table);
                 thisClass.setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
                 thisClass.setVisible( true );
             }
@@ -181,11 +210,17 @@ public class ExpertConsultant extends JFrame {
      * This is the default constructor
      */
     public ExpertConsultant() {
-        this( null );
+        this( null, (String)null );
     }
 
-    public ExpertConsultant( Table table ) {
+    public ExpertConsultant( Window parent, String path ) {
+        this( parent, TableManager.openTable( parent, path ).getFirst() );
+    }
+    
+    public ExpertConsultant( Window parent, Table table ) {
         super();
+        setLocationRelativeTo( parent );
+        
         this.table = table;
         if( table != null )
             System.out.println("Expert System Constant: " + table.getTableId() + " inputs: " + table.getInputFields().size()
@@ -196,85 +231,135 @@ public class ExpertConsultant extends JFrame {
         initTable();
     }
     
-    class State {
+    private class State {
         Map<InputTableField, Object> inputsToValues = new LinkedHashMap<InputTableField, Object>();
         List<Integer> availableRowIds = new ArrayList<Integer>();
         List<Integer> availableColumnIds = new ArrayList<Integer>();
+        boolean isFirst = false;
+        boolean isFinished = false;
+        int selectedRowId = -1;
+        int selectedColId = -1;
     }
     
-    Stack<State> states = new Stack<ExpertConsultant.State>();
+    private Stack<State> states = new Stack<ExpertConsultant.State>();
     
     private void initTable() {
         if( table == null ) return;
         
+        State initState = new State();
+        initState.isFirst = true;
+        states.push( initState );
+        
         InputTableField firstInput = TableInferenceEngine.getFirstTableInput( table );
         
         if( firstInput == null ) {
+            initState.isFinished = true;
             System.out.println( "Consultant: no inputs are required! Output: " + table.queryTable( null, false ) );
+            setAnswerPanel( table.queryTable( null, false ), initState.inputsToValues );
+            checkButtonStates();
             return;
         }
         
         System.out.println( "Consultant: first input is " + firstInput.getId() );
         
+        initState.availableRowIds.addAll( table.getOrderedRowIds() );
+        initState.availableColumnIds.addAll( table.getOrderedColumnIds() );
+        
         setTableInputField( firstInput );
 
-        ActionListener lst = new ActionListener() {
+        checkButtonStates();
+    }
+    
+    /**
+     * 
+     */
+    private void checkNextInput() {
+        QuestionPanel qp = inputPanels.peek();
+        
+        Object val = null;
+        String type = qp.field.getType();
+        String sval = (String)qp.getValue();
+        try {
+            val = TypeUtil.createObjectFromString( type, sval );
+            //TODO implement constraints check!!!
+        } catch ( Exception ex ) {
+            if( RuntimeProperties.isLogDebugEnabled() )
+                ex.printStackTrace();
+        }
+        
+        if( val == null ) {
+            JOptionPane.showMessageDialog( ExpertConsultant.this, 
+                    "Entered value \'" + sval + "\' is not of type \'" + type + "\'", 
+                    "Error", JOptionPane.ERROR_MESSAGE );
+            return;
+        }
+        
+        System.out.println( "Consultant: " + qp.field.getId() + " value is " + val );
+        
+        State prevState = states.peek();
+        System.out.println( "Next! rows: " + prevState.availableRowIds + " cols: " + prevState.availableColumnIds );
+        
+        State state = new State();
+        state.inputsToValues.putAll( prevState.inputsToValues );
+        state.inputsToValues.put( qp.field, val );
+        state.selectedRowId = prevState.selectedRowId;
+        state.selectedColId = prevState.selectedColId;
+        states.push( state );
+        
+        InputTableField nextInput = null;
+        
+        //first, try horisontal rules
+        System.out.println( "Consultant: horizontal" );
+        if( state.selectedRowId < 0 ) {
+            InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
+                table.getHRules(), qp.field, state.inputsToValues, 
+                prevState.availableRowIds, state.availableRowIds );
+            
+            if( res.getSelectedId() != null )//check if a suitable row has been found
+                state.selectedRowId = res.getSelectedId();
+            else
+                nextInput = res.getInput();//if not, this could be next input (or null)
+        }
 
-            @Override
-            public void actionPerformed( ActionEvent e ) {
-                if( e.getSource() == getJbNext() ) {
-                    QuestionPanel qp = inputPanels.peek();
-                    
-                    Object val = null;
-                    try {
-                        val = TypeUtil.createObjectFromString( qp.field.getType(), (String)qp.getValue() );
-                    } catch ( Exception ex ) {
-                        ex.printStackTrace();
-                    }
-                    
-                    if( val == null ) return;
-                    System.out.println( "Consultant: " + qp.field.getId() + " value is " + val );
+        //next, vertical
+        System.out.println( "Consultant: vertical" );
+        if( state.selectedColId < 0 ) {
+            InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
+                    table.getVRules(), qp.field, state.inputsToValues, 
+                    prevState.availableColumnIds, state.availableColumnIds );
 
-                    State state = new State();
-                    state.inputsToValues.put( qp.field, val );
-                    states.push( state );
-                    
-                    //first, try horisontal rules
-                    System.out.println( "Consultant: horizontal" );
-                    InputTableField nextInput = TableInferenceEngine.getNextInputAndRelevantIds( 
-                            table.getHRules(), qp.field, state.inputsToValues, 
-                            table.getOrderedRowIds(), state.availableRowIds );
+            if( res.getSelectedId() != null )//check if a suitable column has been found
+                state.selectedColId = res.getSelectedId();
+            else if( nextInput == null )
+                nextInput = res.getInput();//if not, this could be next input (or null)
+        }
 
-                    //next, vertical
-                    if( nextInput == null ) {
-                        System.out.println( "Consultant: vertical" );
-                        nextInput = TableInferenceEngine.getNextInputAndRelevantIds( 
-                                table.getVRules(), qp.field, state.inputsToValues, 
-                                table.getOrderedColumnIds(), state.availableColumnIds );
-                    }
-
-                    System.out.println("Consultant: Next input is: " + nextInput );
-
-                    System.out.println( "Consultant: Rows: " + state.availableRowIds );
-                    System.out.println( "Consultant: Cols: " + state.availableColumnIds );
-
-                    if( nextInput == null ) {
-                        System.out.println( "Consultant: no additional inputs are required! Output: "/* + table.queryTable( null, false ) */);
-                        return;
-                    }
-
-                    System.out.println( "Consultant: next input is " + nextInput.getId() );
-
-                    setTableInputField( nextInput );
-                        
-                } else if( e.getSource() == getJbBack() ) {
-                    setQuestionPanel( inputPanels.pop() );
-                }
-                getJbBack().setEnabled( !inputPanels.isEmpty() );
-            }
-        };
-        getJbNext().addActionListener( lst );
-        getJbBack().addActionListener( lst );
+        System.out.println( "Consultant: Rows: " + state.availableRowIds + " selected: " + state.selectedRowId );
+        System.out.println( "Consultant: Cols: " + state.availableColumnIds + " selected: " + state.selectedColId );
+        System.out.println( "Consultan: derived next input: " + nextInput );
+        
+        if( nextInput == null 
+                && state.selectedRowId > -1 && state.selectedColId > -1 ) {
+            state.isFinished = true;
+            System.out.println( "Consultant: no additional inputs are required! Output: " + table.getOutputValue( state.selectedRowId, state.selectedColId )
+                    + " row: " + state.selectedRowId + " col: " + state.selectedColId );
+            setAnswerPanel( table.getOutputValue( state.selectedRowId, state.selectedColId ), state.inputsToValues );
+        } else if( nextInput != null ) {
+            System.out.println( "Consultant: next input is " + nextInput.getId() );
+            setTableInputField( nextInput );
+        } else {
+            System.out.println( "Dunno what to do next...");
+            state.isFinished = true;
+            setAnswerPanel( null, state.inputsToValues );
+        }
+    }
+    
+    private void checkButtonStates() {
+        State currentState = states.peek();
+        
+        getJbBack().setEnabled( !currentState.isFirst );
+        getJbNext().setEnabled( !currentState.isFinished );
+        getJbFinish().setEnabled( currentState.isFinished );
     }
     
     private Stack<QuestionPanel> inputPanels = new Stack<ExpertConsultant.QuestionPanel>();
@@ -288,9 +373,48 @@ public class ExpertConsultant extends JFrame {
         this.setSize(385, 215);
         this.setResizable(false);
         this.setContentPane( getJContentPane() );
-        this.setTitle("Expert System Consultant");
+        this.setTitle("Expert System Consultant" + ( table != null ? ": " + table.getTableId() : "" ) );
+        this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
+        
+        //init listeners
+
+        ActionListener lst = new ActionListener() {
+
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                if( e.getSource() == getJbNext() ) {
+                    //
+                    checkNextInput();
+                } else if( e.getSource() == getJbBack() ) {
+                    //
+                    if( !states.pop().isFinished ) { 
+                            inputPanels.pop();
+                    }
+                    setQuestionPanel( inputPanels.peek() );
+                    System.out.println("Back! " + inputPanels.peek().field.getId() );
+                    System.out.println("State: " + states.peek().inputsToValues );
+                } else if( e.getSource() == getJbCancel() 
+                        || e.getSource() == getJbFinish() ) {
+                    getJbNext().removeActionListener( this );
+                    getJbBack().removeActionListener( this );
+                    getJbCancel().removeActionListener( this );
+                    getJbFinish().removeActionListener( this );
+                    dispose();
+                    return;
+                }
+                checkButtonStates();
+            }
+        };
+        getJbNext().addActionListener( lst );
+        getJbBack().addActionListener( lst );
+        getJbCancel().addActionListener( lst );
+        getJbFinish().addActionListener( lst );
     }
 
+    
+    /**
+     * Contains label with a question and component for value entry 
+     */
     private static class QuestionPanel extends JPanel {
         
         private InputTableField field;
@@ -316,7 +440,7 @@ public class ExpertConsultant extends JFrame {
         
         private JComponent createInputComponent() {
             String type = field.getType();
-            System.out.println( "Analyzing type: " + type );
+            System.out.println( "Analyzing type: " + type + " of input " + field.getId() );
             
             if( TypeUtil.isArray( type ) ) {
                 System.out.println("Array");

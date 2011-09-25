@@ -562,7 +562,11 @@ public final class Table implements IStructuralExpertTable {
         int rowId = TableInferenceEngine.checkRules( inputList, getOrderedRowIds(), hrules, args );
         int colId = TableInferenceEngine.checkRules( inputList, getOrderedColumnIds(), vrules, args );
         
-        // Get row by rowId which is not always the same as array index
+        return getOutputValue( rowId, colId );
+    }
+
+    public Object getOutputValue( int rowId, int colId ) {
+     // Get row by rowId which is not always the same as array index
         DataRow row = getDataRowById( rowId );
 
         if (row == null) {
@@ -594,7 +598,7 @@ public final class Table implements IStructuralExpertTable {
         }
         return res;
     }
-
+    
     /**
      * @return
      */

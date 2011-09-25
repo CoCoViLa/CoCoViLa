@@ -70,7 +70,7 @@ public class Menu {
     public static final String SCHEMEOPTIONS = "Options...";
 
     //TOOLS
-    public static final String EXPERT_TABLE = "Expert Table Editor...";
+    public static final String EXPERT_TABLE = "Expert System Shell...";
     public static final String SHOW_ALGORITHM = "Show Algorithm";
     public static final String VIEW_THREADS = "View Threads...";
     

@@ -357,9 +357,9 @@ public class EditorActionListener implements ActionListener {
             } else if ( e.getActionCommand().equals( Menu.VIEW_THREADS ) ) {
                 RunningThreadManager.showDialog();
             } else if ( e.getActionCommand().equals( Menu.EXPERT_TABLE ) ) {
-                TableFrame frame = new TableFrame();
-                frame.setLocationRelativeTo( Editor.getInstance() );
-                frame.setVisible( true );
+                JDialog ess = new ExpertSystemShellWelcomeDialog();
+                ess.setLocationRelativeTo( Editor.getInstance() );
+                ess.setVisible( true );
             } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
                 new AboutDialog( Editor.getInstance() );
             } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
