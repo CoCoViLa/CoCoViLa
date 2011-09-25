@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.table;
 
 import java.util.*;
 
+import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**

@@ -13,6 +13,7 @@ import org.xml.sax.*;
 
 import ee.ioc.cs.vsle.common.xml.*;
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
 
 /** 

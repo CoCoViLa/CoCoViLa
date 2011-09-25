@@ -76,8 +76,8 @@
 		            			</xsd:element>
 		            			<xsd:element name="range" minOccurs="0" >
 		            				<xsd:complexType>
-			            				<xsd:attribute name="min" type="xsd:string" use="required" />
-			            				<xsd:attribute name="max" type="xsd:string" use="required" />
+			            				<xsd:attribute name="min" type="xsd:string" />
+			            				<xsd:attribute name="max" type="xsd:string" />
 			            			</xsd:complexType>
 		            			</xsd:element>
 	            			</xsd:all>

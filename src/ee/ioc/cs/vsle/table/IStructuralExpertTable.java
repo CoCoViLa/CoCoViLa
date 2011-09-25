@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.table;
 
+import ee.ioc.cs.vsle.table.exception.*;
+
 public interface IStructuralExpertTable {
 
     /**

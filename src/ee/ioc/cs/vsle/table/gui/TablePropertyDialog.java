@@ -16,6 +16,7 @@ import javax.swing.border.*;
 import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.table.*;
+import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**
@@ -579,7 +580,7 @@ public class TablePropertyDialog extends JDialog {
             }
             
             setLayout( new BoxLayout( this, BoxLayout.Y_AXIS ) );
-            add( jpComponents );
+            add( GuiUtil.addComponentAsFlow( jpComponents, FlowLayout.LEFT ) );
             
             update();
         }
@@ -614,7 +615,7 @@ public class TablePropertyDialog extends JDialog {
                 if( jtaDetails == null ) {
                     jtaDetails = new JTextArea(0, 20);
                     jtaDetails.setEditable( false );
-                    add( jtaDetails );
+                    add( GuiUtil.addComponentAsFlow( jtaDetails, FlowLayout.LEFT ) );
                     jtaDetails.setBackground( jtaDetails.getParent().getBackground() );
                 }
                 jtaDetails.setText( text.toString() );

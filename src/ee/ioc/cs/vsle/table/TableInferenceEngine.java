@@ -5,6 +5,8 @@ package ee.ioc.cs.vsle.table;
 
 import java.util.*;
 
+import ee.ioc.cs.vsle.table.exception.*;
+
 /**
  * @author pavelg
  *
@@ -86,12 +88,13 @@ public class TableInferenceEngine {
     static class ProductionRule {
         int id;
         List<Rule> rules = new ArrayList<Rule>();
-        TableFieldList<InputTableField> inputFields = new TableFieldList<InputTableField>();
+        TableFieldList<InputTableField> allInputFields = new TableFieldList<InputTableField>();
+        TableFieldList<InputTableField> unknownInputFields = new TableFieldList<InputTableField>();
 
         @Override
         public String toString() {
             return "ProductionRule [id=" + id + ", rules=" + rules
-                    + ", inputFields=" + inputFields + "]";
+                    + ", inputFields=" + unknownInputFields + "]";
         }
         
         
@@ -142,13 +145,13 @@ public class TableInferenceEngine {
         Map<Integer, ProductionRule> productionRules = new LinkedHashMap<Integer, ProductionRule>();
         
         for ( Rule rule : rules ) {
-            System.out.println("Rule: " + rule );
             InputTableField ruleInput = rule.getField();
             
             //if null, the rule does not match the input
             boolean matchesInput = ruleInput.equals( input );
             Boolean holds = matchesInput ? rule.verifyCondition( inputsToValues.get( input ) ) : null;
             
+            System.out.println("Rule: " + rule + " holds: " + holds + " for input " + input.getId() );
             for( Integer id : rule.getEntries() ) {
                 System.out.println("id: " + id + " contains in all available ids: " + allIds.contains( id ) );
                 if( !allIds.contains( id ) ) continue;
@@ -160,55 +163,65 @@ public class TableInferenceEngine {
                     productionRules.put( id, pr );
                 }
                 pr.rules.add( rule );
-                if( !matchesInput && !pr.inputFields.contains( ruleInput ) 
-                        && !inputsToValues.containsKey( ruleInput ) )
+                if( !matchesInput && !pr.unknownInputFields.contains( ruleInput ) 
+                        && !inputsToValues.containsKey( ruleInput ) ) {
                     //store only unknown rule's inputs here
-                    pr.inputFields.add( ruleInput );
+                    pr.unknownInputFields.add( ruleInput );
+                }
+                if( !pr.allInputFields.contains( ruleInput ) ) {
+                    pr.allInputFields.add( ruleInput );
+                }
                 //
-                if( holds != null ) {//this id is a candidate for removal
+                if( holds != null ) {
                     boolean contains;
                     if( ( contains = outIds.contains( id ) ) && !holds ) {
-                        outIds.remove( id );
+                        outIds.remove( id );//this id is a candidate for removal
                     } else if( !contains && holds ) {
                         outIds.add( id );
                     }
-                } else {//does not contain current input, so could be useful later
-                    outIds.add( id );
                 }
+//                else if( !pr.allInputFields.contains( input ) ){//does not contain current input, so could be useful later
+//                    outIds.add( id );//this does not work correctly
+//                }
             }
         }
         
         System.out.println(productionRules.size() + " - All production rules: " + productionRules );
         System.out.println("All available ids: " + allIds );
+        System.out.println("Current out ids: " + outIds );
         InputFieldAndSelectedId result = null;//the result will be created only once but the iteration will continue until all ids are examined
         for ( Integer id : allIds ) {//we need to iterate all ids because some of rows/cols may contain no rules!
             ProductionRule prodr = productionRules.get( id );
-            //null means empty row that should be considered
-            //non null and not empty should be among out_ids
-            if( prodr == null || ( prodr.inputFields.isEmpty() && outIds.contains( prodr.id ) ) ) {
+            
+            if( prodr == null//null means empty row that should be considered
+                    //non null and not empty should be among out_ids
+                    || ( prodr.unknownInputFields.isEmpty() && outIds.contains( prodr.id ) ) ) {
                 if( !outIds.contains( id ) )//TODO
                     outIds.add( id );//this is required in order to keep empty rows/cols for the future use
-                //if no other inputs are needed, do not proceed and return null
-                System.out.println("no other inputs are needed, do not proceed and return null");
-                if( result == null )
+                //seems that this id could be used
+                if( result == null ) {
+                    System.out.println( "seems that this id could be used " + id );
                     result = new InputFieldAndSelectedId( null, id );
+                }
                 continue;
+            } else if ( !prodr.allInputFields.contains( input ) ) { 
+                outIds.add( id );//if a row/col does not contain input, it could be useful later
             } else if( !outIds.contains( prodr.id ) ) {
                 continue;
             }
-            System.out.println( "returning input " + prodr.inputFields.get( 0 ) );
+            System.out.println( "returning input " + prodr.unknownInputFields.get( 0 ) );
             if( result == null )
-                result = new InputFieldAndSelectedId( prodr.inputFields.get( 0 ), null );
+                result = new InputFieldAndSelectedId( prodr.unknownInputFields.get( 0 ), null );
         }
-        System.out.println("Out ids: " + outIds );
+        System.out.println("Final out ids: " + outIds );
         
         if( result == null && outIds.size() != 0 ) {//there is still some hope left!
             System.out.println("there is still some hope left! " + result );
             int id = outIds.get( 0 );
             ProductionRule prodr = productionRules.get( id );
             if( prodr != null ) {
-                if( !prodr.inputFields.isEmpty() )
-                    result = new InputFieldAndSelectedId( prodr.inputFields.get( 0 ), null );
+                if( !prodr.unknownInputFields.isEmpty() )
+                    result = new InputFieldAndSelectedId( prodr.unknownInputFields.get( 0 ), null );
             } else {
                 result = new InputFieldAndSelectedId( null, id );
             }

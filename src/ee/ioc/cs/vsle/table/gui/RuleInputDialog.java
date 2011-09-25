@@ -11,6 +11,7 @@ import java.util.List;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.table.*;
+import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**

@@ -11,6 +11,7 @@ import javax.swing.*;
 
 import ee.ioc.cs.vsle.api.Package;
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**

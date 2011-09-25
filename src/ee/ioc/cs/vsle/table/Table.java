@@ -6,6 +6,7 @@ package ee.ioc.cs.vsle.table;
 import java.util.*;
 
 import ee.ioc.cs.vsle.table.event.*;
+import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**
@@ -594,7 +595,7 @@ public final class Table implements IStructuralExpertTable {
         
         Object res = cell.getValue();
         if( res == null ) {
-            throw new TableException( "Cell value not specified" );
+            throw new TableCellValueUndefinedException( "Cell value not specified. Row: " + rowId + ", col: " + colId );
         }
         return res;
     }

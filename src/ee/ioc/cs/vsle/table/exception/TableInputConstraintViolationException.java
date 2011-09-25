@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ee.ioc.cs.vsle.table;
+package ee.ioc.cs.vsle.table.exception;
 
 /**
  * @author pavelg

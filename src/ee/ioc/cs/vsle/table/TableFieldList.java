@@ -5,6 +5,8 @@ package ee.ioc.cs.vsle.table;
 
 import java.util.*;
 
+import ee.ioc.cs.vsle.table.exception.*;
+
 /**
  * @author pavelg
  *

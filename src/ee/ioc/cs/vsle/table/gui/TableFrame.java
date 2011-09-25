@@ -15,6 +15,7 @@ import javax.swing.event.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.table.event.*;
+import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**
@@ -229,6 +230,8 @@ public class TableFrame extends JFrame {
                 }
             } );
         }
+        
+        updateFrameTitle();
     }
     
     /**
@@ -277,11 +280,17 @@ public class TableFrame extends JFrame {
      * 
      */
     private void updateFrameTitle() {
-        Table table = getTable();
         
-        String fileName = openTableFile != null ? " (" + openTableFile.getName() + ")": "";
-        
-        setTitle( ( table != null ? table.getTableId() + fileName + " - ": "" ) + "Expert Table");
+        SwingUtilities.invokeLater( new Runnable() {
+            @Override
+            public void run() {
+                Table table = getTable();
+                
+                String fileName = openTableFile != null ? " (" + openTableFile.getName() + ")": "";
+                
+                setTitle( ( table != null ? table.getTableId() + fileName + " - ": "" ) + "Expert Table Visual Editor");
+            }
+        } );
     }
     
     /**
@@ -290,6 +299,7 @@ public class TableFrame extends JFrame {
     private void editTableProperties() {
         TablePropertyDialog dialog = new TablePropertyDialog( this, getTable() );
         dialog.setVisible( true );
+        updateFrameTitle();
     }
     
     /**
@@ -408,14 +418,6 @@ public class TableFrame extends JFrame {
                 SystemUtils.openInBrowser( URL_TUTORIAL, TableFrame.this );
                 return;
             }
-            
-            SwingUtilities.invokeLater( new Runnable() {
-                @Override
-                public void run() {
-                    updateFrameTitle();
-                }
-            } );
-            
         }
     }
 }

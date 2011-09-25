@@ -6,6 +6,8 @@ package ee.ioc.cs.vsle.table;
 import java.text.*;
 import java.util.*;
 
+import ee.ioc.cs.vsle.table.exception.*;
+
 /**
  * @author pavelg
  * Inputs can have constraints and a custom question

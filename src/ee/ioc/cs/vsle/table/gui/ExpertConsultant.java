@@ -16,6 +16,7 @@ import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.table.TableInferenceEngine.InputFieldAndSelectedId;
+import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
@@ -340,10 +341,24 @@ public class ExpertConsultant extends JFrame {
         
         if( nextInput == null 
                 && state.selectedRowId > -1 && state.selectedColId > -1 ) {
+            Object output = null;
+            try {
+                output = table.getOutputValue( state.selectedRowId, state.selectedColId );
+            } catch ( TableCellValueUndefinedException e ) {
+                //
+            } catch ( Exception e ) {
+                JOptionPane.showMessageDialog( ExpertConsultant.this, 
+                        "Error occured, unable to get an output value from the table", 
+                        "Error", JOptionPane.ERROR_MESSAGE );
+                states.pop();
+                return;
+            }
+
             state.isFinished = true;
-            System.out.println( "Consultant: no additional inputs are required! Output: " + table.getOutputValue( state.selectedRowId, state.selectedColId )
+            
+            System.out.println( "Consultant: no additional inputs are required! Output: " + output
                     + " row: " + state.selectedRowId + " col: " + state.selectedColId );
-            setAnswerPanel( table.getOutputValue( state.selectedRowId, state.selectedColId ), state.inputsToValues );
+            setAnswerPanel( output, state.inputsToValues );
         } else if( nextInput != null ) {
             System.out.println( "Consultant: next input is " + nextInput.getId() );
             setTableInputField( nextInput );
@@ -456,7 +471,13 @@ public class ExpertConsultant extends JFrame {
                 
                 if( constr instanceof TableFieldConstraint.List ) {
                     TableFieldConstraint.List list = (TableFieldConstraint.List)constr;
-                    JComboBox jcbox = new JComboBox( list.getValueList() );
+                    final JComboBox jcbox = new JComboBox( list.getValueList() );
+                    callback = new Callback() {
+                        @Override
+                        public Object getValue() {
+                            return jcbox.getSelectedItem();
+                        }
+                    };
                     return jcbox;
                 } else if( constr instanceof TableFieldConstraint.Range ) {
                     TableFieldConstraint.Range range = (TableFieldConstraint.Range)constr;
