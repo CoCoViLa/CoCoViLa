@@ -6,6 +6,7 @@ package ee.ioc.cs.vsle.table.gui;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
+import java.text.*;
 import java.util.*;
 import java.util.List;
 
@@ -280,9 +281,17 @@ public class ExpertConsultant extends JFrame {
         Object val = null;
         String type = qp.field.getType();
         String sval = (String)qp.getValue();
+        InputTableField currentInput = qp.field;
+        
         try {
             val = TypeUtil.createObjectFromString( type, sval );
-            //TODO implement constraints check!!!
+            
+            currentInput.verifyConstraints( val );
+        } catch ( TableInputConstraintViolationException ex ) {
+            JOptionPane.showMessageDialog( ExpertConsultant.this, 
+                    ex.getMessage(), 
+                    "Constraint Violation", JOptionPane.ERROR_MESSAGE );
+            return;
         } catch ( Exception ex ) {
             if( RuntimeProperties.isLogDebugEnabled() )
                 ex.printStackTrace();
@@ -295,14 +304,14 @@ public class ExpertConsultant extends JFrame {
             return;
         }
         
-        System.out.println( "Consultant: " + qp.field.getId() + " value is " + val );
+        System.out.println( "Consultant: " + currentInput.getId() + " value is " + val );
         
         State prevState = states.peek();
         System.out.println( "Next! rows: " + prevState.availableRowIds + " cols: " + prevState.availableColumnIds );
         
         State state = new State();
         state.inputsToValues.putAll( prevState.inputsToValues );
-        state.inputsToValues.put( qp.field, val );
+        state.inputsToValues.put( currentInput, val );
         state.selectedRowId = prevState.selectedRowId;
         state.selectedColId = prevState.selectedColId;
         states.push( state );
@@ -313,7 +322,7 @@ public class ExpertConsultant extends JFrame {
         System.out.println( "Consultant: horizontal" );
         if( state.selectedRowId < 0 ) {
             InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
-                table.getHRules(), qp.field, state.inputsToValues, 
+                table.getHRules(), currentInput, state.inputsToValues, 
                 prevState.availableRowIds, state.availableRowIds );
             
             if( res.getSelectedId() != null )//check if a suitable row has been found
@@ -326,7 +335,7 @@ public class ExpertConsultant extends JFrame {
         System.out.println( "Consultant: vertical" );
         if( state.selectedColId < 0 ) {
             InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
-                    table.getVRules(), qp.field, state.inputsToValues, 
+                    table.getVRules(), currentInput, state.inputsToValues, 
                     prevState.availableColumnIds, state.availableColumnIds );
 
             if( res.getSelectedId() != null )//check if a suitable column has been found
@@ -434,10 +443,7 @@ public class ExpertConsultant extends JFrame {
         
         private InputTableField field;
         private JPanel jpNorthQuestion = null;
-        private JPanel jpCenter = null;
         private JLabel jlblQuestion = null;
-        private JLabel jlblInputType = null;
-        private JSlider jsIntRangeSlider = null;
         private Callback callback;
         
         interface Callback {
@@ -464,7 +470,6 @@ public class ExpertConsultant extends JFrame {
             }
             
             List<TableFieldConstraint> constrList = field.getConstraints();
-            
             if( constrList != null && !constrList.isEmpty() ) {
                 //currently only take first constraint
                 TableFieldConstraint constr = constrList.get( 0 );
@@ -482,8 +487,8 @@ public class ExpertConsultant extends JFrame {
                 } else if( constr instanceof TableFieldConstraint.Range ) {
                     TableFieldConstraint.Range range = (TableFieldConstraint.Range)constr;
                     
-                    @SuppressWarnings( "rawtypes" )
-                    SpinnerNumberModel model = new SpinnerNumberModel( null, (Comparable)range.getMin(), (Comparable)range.getMax(), 1 );
+//                    @SuppressWarnings( "rawtypes" )
+//                    SpinnerNumberModel model = new SpinnerNumberModel( null, (Comparable)range.getMin(), (Comparable)range.getMax(), 1 );
                     
                     if( TypeUtil.isIntegral( type ) ) {
                         JSlider jsl = new JSlider();
@@ -519,9 +524,37 @@ public class ExpertConsultant extends JFrame {
         
         private void initLayout() {
             setLayout( new BorderLayout() );
-            add(getJpNorthQuestion(), BorderLayout.NORTH);
-            add(GuiUtil.addComponentAsFlow( createInputComponent(), FlowLayout.CENTER ), 
-                    BorderLayout.CENTER);
+            add( getJpNorthQuestion(), BorderLayout.NORTH );
+            add( GuiUtil.addComponentAsFlow( createInputComponent(), FlowLayout.CENTER ), 
+                    BorderLayout.CENTER );
+            add( GuiUtil.addComponentAsFlow( getJtaConstraints(), FlowLayout.CENTER ), 
+                    BorderLayout.SOUTH );
+            getJtaConstraints().setBackground( getJtaConstraints().getParent().getBackground() );
+        }
+        
+        private JTextArea jtaConstraints;
+        
+        private JTextArea getJtaConstraints() {
+            //shows all options
+            if( jtaConstraints == null ) {
+                List<TableFieldConstraint> constraints = field.getConstraints();
+                StringBuilder text = new StringBuilder();
+
+                if( constraints != null ) {
+                    for ( TableFieldConstraint constr : constraints ) {
+                        if( constr instanceof TableFieldConstraint.List ) 
+                            continue;//do not display list constraint because combo-box already 
+                        if( text.length() > 0 )
+                            text.append( "\n" );
+                        text.append( MessageFormat.format( constr.printConstraint(), field.getId() ) );
+                    }
+                }
+
+                jtaConstraints = new JTextArea(0, 20);
+                jtaConstraints.setEditable( false );
+                jtaConstraints.setText( text.toString() );
+            }
+            return jtaConstraints;
         }
         
         private JLabel getJlblQuestion() {
@@ -550,48 +583,48 @@ public class ExpertConsultant extends JFrame {
             return jpNorthQuestion;
         }
 
-        /**
-         * This method initializes jpCenter 
-         *  
-         * @return javax.swing.JPanel   
-         */
-        private JPanel getJpCenter() {
-            if ( jpCenter == null ) {
-                GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
-                gridBagConstraints1.fill = GridBagConstraints.VERTICAL;
-                gridBagConstraints1.gridy = 3;
-                gridBagConstraints1.weightx = 1.0;
-                gridBagConstraints1.gridx = 0;
-                GridBagConstraints gridBagConstraints = new GridBagConstraints();
-                gridBagConstraints.gridx = 0;
-                gridBagConstraints.gridy = 2;
-                jlblInputType = new JLabel();
-                jlblInputType.setText("Current value: 35");
-                jlblInputType.setVisible(true);
-                jpCenter = new JPanel();
-                jpCenter.setLayout(new GridBagLayout());
-                jpCenter.add(jlblInputType, gridBagConstraints);
-                jpCenter.add(getJsIntRangeSlider(), gridBagConstraints1);
-            }
-            return jpCenter;
-        }
+//        /**
+//         * This method initializes jpCenter 
+//         *  
+//         * @return javax.swing.JPanel   
+//         */
+//        private JPanel getJpCenter() {
+//            if ( jpCenter == null ) {
+//                GridBagConstraints gridBagConstraints1 = new GridBagConstraints();
+//                gridBagConstraints1.fill = GridBagConstraints.VERTICAL;
+//                gridBagConstraints1.gridy = 3;
+//                gridBagConstraints1.weightx = 1.0;
+//                gridBagConstraints1.gridx = 0;
+//                GridBagConstraints gridBagConstraints = new GridBagConstraints();
+//                gridBagConstraints.gridx = 0;
+//                gridBagConstraints.gridy = 2;
+//                jlblInputType = new JLabel();
+//                jlblInputType.setText("Current value: 35");
+//                jlblInputType.setVisible(true);
+//                jpCenter = new JPanel();
+//                jpCenter.setLayout(new GridBagLayout());
+//                jpCenter.add(jlblInputType, gridBagConstraints);
+//                jpCenter.add(getJsIntRangeSlider(), gridBagConstraints1);
+//            }
+//            return jpCenter;
+//        }
         
-        /**
-         * This method initializes jsIntRangeSlider 
-         *  
-         * @return javax.swing.JSlider  
-         */
-        private JSlider getJsIntRangeSlider() {
-            if ( jsIntRangeSlider == null ) {
-                jsIntRangeSlider = new JSlider();
-                jsIntRangeSlider.setName("");
-                jsIntRangeSlider.setPaintTicks(true);
-                jsIntRangeSlider.setSnapToTicks(true);
-                jsIntRangeSlider.setMinorTickSpacing(5);
-                jsIntRangeSlider.setMajorTickSpacing(50);
-                jsIntRangeSlider.setPaintLabels(true);
-            }
-            return jsIntRangeSlider;
-        }
+//        /**
+//         * This method initializes jsIntRangeSlider 
+//         *  
+//         * @return javax.swing.JSlider  
+//         */
+//        private JSlider getJsIntRangeSlider() {
+//            if ( jsIntRangeSlider == null ) {
+//                jsIntRangeSlider = new JSlider();
+//                jsIntRangeSlider.setName("");
+//                jsIntRangeSlider.setPaintTicks(true);
+//                jsIntRangeSlider.setSnapToTicks(true);
+//                jsIntRangeSlider.setMinorTickSpacing(5);
+//                jsIntRangeSlider.setMajorTickSpacing(50);
+//                jsIntRangeSlider.setPaintLabels(true);
+//            }
+//            return jsIntRangeSlider;
+//        }
     }
 }  //  @jve:decl-index=0:visual-constraint="10,10"
