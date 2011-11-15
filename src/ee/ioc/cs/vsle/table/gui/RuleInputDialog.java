@@ -88,7 +88,7 @@ public class RuleInputDialog extends JDialog {
                 if( value instanceof TableField ) {
                     TableField field = ((TableField)value);
                     lbl.setText( " " + field.getType() + " " + field.getId() );
-                } else {
+                } else if( value != null ){
                     lbl.setText( value.toString() );
                 }
                 
@@ -170,6 +170,7 @@ public class RuleInputDialog extends JDialog {
         
         btnSave.addActionListener( lst );
         btnCancel.addActionListener( lst );
+        cboxVar.addActionListener( lst );
         
         root.add( main );
         root.add( Box.createVerticalStrut( 10 ) );
@@ -181,15 +182,20 @@ public class RuleInputDialog extends JDialog {
     
     private void initConditions() {
         TableField tf = (TableField) cboxVar.getSelectedItem();
-        List<ConditionItem> items = new ArrayList<RuleInputDialog.ConditionItem>();
+
+        Object currentCond = cboxCond.getSelectedItem();
         
+        List<ConditionItem> items = new ArrayList<RuleInputDialog.ConditionItem>();
         for ( ConditionItem item : ConditionItem.values() ) {
+            System.out.println(item.toString() + " accepts " + tf.getType() + ": " + item.getCond().acceptsType( tf.getType() ) );
             if( item.getCond().acceptsType( tf.getType() ) ) {
                 items.add( item );
             }
         }
         ComboBoxModel model = new DefaultComboBoxModel(items.toArray());
+        
         cboxCond.setModel( model );
+        cboxCond.setSelectedItem( currentCond );
     }
     
     /**
@@ -247,10 +253,14 @@ public class RuleInputDialog extends JDialog {
         GREATER( Condition.COND_LESS_OR_EQUAL, true ), 
         IN( Condition.COND_IN_ARRAY, false ), 
         NOTIN( Condition.COND_IN_ARRAY, true ), 
+        IN_INPUT_ARRAY( Condition.COND_IN_INPUT_ARRAY, true ), 
+        NOT_IN_INPUT_ARRAY( Condition.COND_IN_INPUT_ARRAY, false ), 
         MATCH( Condition.REG_EXP_MATCH, false ), 
         NOTMATCH( Condition.REG_EXP_MATCH, true ), 
         SUBSTR( Condition.SUBSTRING, false ), 
         NOTSUBSTR( Condition.SUBSTRING, true ), 
+        SUBSTR_OF_INPUT( Condition.SUBSTRING_Of_INPUT, true ), 
+        NOT_SUBSTR_OF_INPUT( Condition.SUBSTRING_Of_INPUT, false ), 
         SUBSET( Condition.SUBSET, false ), 
         NOTSUBSET( Condition.SUBSET, true ), 
         STRICTSUBSET( Condition.STRICT_SUBSET, false ), 

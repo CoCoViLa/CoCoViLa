@@ -174,6 +174,45 @@ public interface Condition {
     };
     
     /**
+     * COND_IN_INPUT_ARRAY
+     */
+    public final static Condition COND_IN_INPUT_ARRAY = new Condition() {
+
+        @Override
+        public boolean verify( Object elem, Object inputArray ) {
+            
+            int len = Array.getLength( inputArray );
+            
+            for ( int i = 0; i < len; i++ ) {
+                if( Array.get( inputArray, i ).equals( elem ) ) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        @Override
+        public String getKeyword() {
+            return "in_input_array";
+        }
+        
+        @Override
+        public String getOppositeSymbol() {
+            return "\u220C";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "\u220B";
+        }
+
+        @Override
+        public boolean acceptsType( String type ) {
+            return TypeUtil.isArray( type );
+        }
+    };
+    
+    /**
      * REG_EXP_MATCH
      */
     public final static Condition REG_EXP_MATCH = new Condition() {
@@ -228,6 +267,37 @@ public interface Condition {
         @Override
         public String getSymbol() {
             return "\u2291";
+        }
+
+        @Override
+        public boolean acceptsType( String type ) {
+            return TypeUtil.isString( type );
+        }
+    };
+    
+    /**
+     * SUBSTRING of Input
+     */
+    public final static Condition SUBSTRING_Of_INPUT = new Condition() {
+
+        @Override
+        public <T> boolean verify( T obj1, T obj2 ) {
+            return obj2.toString().indexOf( obj1.toString() ) >= 0;
+        }
+
+        @Override
+        public String getKeyword() {
+            return "substr_of_input";
+        }
+        
+        @Override
+        public String getOppositeSymbol() {
+            return "\u22E3";
+        }
+
+        @Override
+        public String getSymbol() {
+            return "\u2292";
         }
 
         @Override
