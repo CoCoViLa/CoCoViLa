@@ -89,15 +89,19 @@ public final class ProgramContext {
     /**
      * Method for querying tables
      * 
-     * @param tableName
+     * @param tableId
      * @param args
      * @return value from the table if conditions hold for some row and column
      * @see ee.ioc.cs.vsle.table.IStructuralExpertTable#queryTable(Object[])
      */
-    public static Object queryTable( String tableName, Object... args ) {
-        return scheme.queryTable( tableName, args );
+    public static Object queryTable( String tableId, Object... args ) {
+        return scheme.queryTable( tableId, args );
     }
 
+    public static Object queryTable( String[] inputIds, String tableId, Object... args ) {
+        return scheme.queryTable( inputIds, tableId, args );
+    }
+    
     /**
      * Sets the value of a scheme object field.
      * @param objectName the name of the scheme object

@@ -144,9 +144,6 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
         return field.getValue();
     }
 
-    /*
-     * @see ee.ioc.cs.vsle.api.Scheme#getObject(java.lang.String)
-     */
     @Override
     public SchemeObject getObject(String objectName) {
         SchemeObject obj = objects.getByName(objectName);
@@ -155,14 +152,16 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
         return obj;
     }
     
-    /*
-     * @see ee.ioc.cs.vsle.api.Scheme#queryTable(java.lang.String, java.lang.Object[])
-     */
     @Override
-    public Object queryTable( String tableName, Object[] args ) {
-        return TableManager.getTable( getPackage(), tableName ).queryTable( args );
+    public Object queryTable( String tableId, Object[] args ) {
+        return TableManager.getTable( getPackage(), tableId ).queryTable( args );
     }
 
+    @Override
+    public Object queryTable( String[] inputIds, String tableId, Object[] args ) {
+        return TableManager.getTable( getPackage(), tableId ).queryTable( inputIds, args );
+    }
+    
     @Override
     public void rerun() {
         ProgramRunner.rerun( canvas );

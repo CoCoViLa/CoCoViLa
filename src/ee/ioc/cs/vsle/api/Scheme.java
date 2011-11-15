@@ -72,13 +72,15 @@ public interface Scheme {
     public ee.ioc.cs.vsle.api.Package getPackage();
 
     /**
-     * @param tableName
+     * @param tableId
      * @param args
      * @return value from the table if conditions hold for some row and column
      * @see ee.ioc.cs.vsle.table.IStructuralExpertTable#queryTable(Object[])
      */
-    public Object queryTable( String tableName, Object[] args );
+    public Object queryTable( String tableId, Object[] args );
 
+    public Object queryTable( String[] inputIds, String tableId, Object[] args );
+    
     /**
      * Terminates the execution of a program from any thread
      * 

@@ -780,7 +780,13 @@ public class CodeGenerator {
 
         private String emitMethod() {
 
-            String meth;
+            Map<String, String> inputSubstitutions = new HashMap<String, String>();
+            String aliasInputs = checkAliasInputs( inputSubstitutions );
+            
+            Map<String, String> outputSubstitutions = new HashMap<String, String>();            
+            String output = getOutputString( outputSubstitutions );
+            
+            String meth, params;
 
             if ( Table.TABLE_KEYWORD.equals( rel.getMethod() ) ) {
 
@@ -802,21 +808,30 @@ public class CodeGenerator {
 
                     cast.append( ")" );
                 }
+                
                 meth = cast.append( "ProgramContext.queryTable" ).toString();
+                
+                if( rel.getInputs().size() > 1 ) {
+                    List<Var> list = new ArrayList<Var>(rel.getInputs());
+                    StringBuilder inputIds = new StringBuilder( "(new String[] { ");
+                    for( int i = 1; i < list.size(); i++ ) {
+                        if( i > 1 ) inputIds.append( ", " );
+                        inputIds.append( "\"" ).append( list.get( i ).getName() ).append( "\"" );
+                    }
+                    inputIds.append( " }, " ).append( getParametersString( false, inputSubstitutions ) ).append( ")" );
+                    
+                    params = inputIds.toString();
+                } else {
+                    params = getParametersString( false, inputSubstitutions );
+                }
             } else {
                 meth = rel.getParent().getFullNameForConcat() + rel.getMethod();
+                
+                params = ( rel.getType() == RelType.TYPE_JAVAMETHOD ) 
+                        ? getParametersString( true, inputSubstitutions )
+                        : getSubtaskParametersString( inputSubstitutions );
             }
             
-            Map<String, String> inputSubstitutions = new HashMap<String, String>();
-            String aliasInputs = checkAliasInputs( inputSubstitutions );
-            
-            String params = ( rel.getType() == RelType.TYPE_JAVAMETHOD ) 
-                    ? getParametersString( true, inputSubstitutions )
-                    : getSubtaskParametersString( inputSubstitutions );
-            
-            Map<String, String> outputSubstitutions = new HashMap<String, String>();            
-            String output = getOutputString( outputSubstitutions );
-                    
             return new StringBuilder( aliasInputs ).append(
                     output.length() > 0 ? output + " = " : "" ).append( meth )
                     .append( params ).append( ";\n" ).append(

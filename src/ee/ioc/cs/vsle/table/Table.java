@@ -566,6 +566,32 @@ public final class Table implements IStructuralExpertTable {
         return getOutputValue( rowId, colId );
     }
 
+    @Override
+    public synchronized Object queryTable( String[] inputIds, Object[] args ) {
+        //inputIds may contain names in different order
+        List<String> outerInputs = Arrays.asList( inputIds );
+        List<InputTableField> missingInputs = new ArrayList<InputTableField>();
+        Object[] newArgs = new Object[inputList.size()];
+        
+        for ( int i = 0; i < inputList.size(); i++ ) {
+            InputTableField input = inputList.get( i );
+            int index = outerInputs.indexOf( input.getId() );
+            if( index > -1 ) {
+                newArgs[ i ] = args[ index ];
+            } else {
+                missingInputs.add( input );
+            }
+        }
+        System.out.println("incomming args: " + Arrays.deepToString( args ));
+        System.out.println("new args: " + Arrays.deepToString( newArgs ));
+        System.out.println("missing inputs: " + missingInputs);
+        if( missingInputs.isEmpty() )
+            return queryTable( newArgs, true );
+
+        //return a value from Consultant
+        return null;
+    }
+    
     public Object getOutputValue( int rowId, int colId ) {
      // Get row by rowId which is not always the same as array index
         DataRow row = getDataRowById( rowId );
@@ -801,6 +827,21 @@ public final class Table implements IStructuralExpertTable {
      */
     public List<TableField> getOutputFields() {
         return Collections.unmodifiableList( outputList );
+    }
+
+    @Override
+    public String[] getTableInputIds() {
+        
+        List<String> inputNames = new ArrayList<String>(getTableInputCount());
+        for ( InputTableField input : inputList ) {
+            inputNames.add( input.getId() );
+        }
+        return inputNames.toArray( new String[inputNames.size()] );
+    }
+
+    @Override
+    public int getTableInputCount() {
+        return inputList.size();
     }
     
 }

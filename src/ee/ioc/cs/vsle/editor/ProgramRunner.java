@@ -60,11 +60,15 @@ public class ProgramRunner {
         schemeContainer.registerRunner( m_id );
 
         //TODO tmp:parse tables each time new runner is created
-        TableManager.updateTables( schemeContainer.getPackage() );
+        TableManager.updateTables( getPackage() );
         
         updateFromCanvas();
     }
 
+    private VPackage getPackage() {
+        return schemeContainer.getPackage();
+    }
+    
     private void updateFromCanvas() {
         objects = schemeContainer.getObjectList().unfold();
     }
@@ -100,7 +104,7 @@ public class ProgramRunner {
         updateFromCanvas();
 
         return SpecGenFactory.getInstance().getCurrentSpecGen().generateSpec( schemeContainer.getScheme(),
-                schemeContainer.getPackage().getPackageClassName() );
+                getPackage().getPackageClassName() );
     }
 
     private Object[] getArguments() throws Exception {
