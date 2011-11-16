@@ -25,7 +25,7 @@ import ee.ioc.cs.vsle.vclass.*;
  * @author pavelg
  *
  */
-public class ExpertConsultant extends JFrame {
+public class ExpertConsultant extends JDialog {
 
     private static final long serialVersionUID = 1L;
     private JPanel jContentPane = null;
@@ -196,7 +196,7 @@ public class ExpertConsultant extends JFrame {
             public void run() {
                 VPackage pack = PackageXmlProcessor.load( new File("/Users/pavelg/Dropbox/CoCoViLa_packages/MyTest/MyTest2.xml") );
                 if( pack == null ) {
-                    System.out.println( "Package null, aborting" );
+                    if (RuntimeProperties.isLogDebugEnabled()) db.p( "Package null, aborting" );
                     return;
                 }
                 Table table = (Table)TableManager.getTable( pack, 
@@ -220,18 +220,28 @@ public class ExpertConsultant extends JFrame {
     }
     
     public ExpertConsultant( Window parent, Table table ) {
+        this( parent, table, null, true );
+    }
+    
+    public ExpertConsultant( Window parent, Table table, Map<InputTableField, Object> knownInputs, boolean showResultPanel ) {
         super();
         setLocationRelativeTo( parent );
         
         this.table = table;
-        if( table != null )
-            System.out.println("Expert System Constant: " + table.getTableId() + " inputs: " + table.getInputFields().size()
-                    + " rows: " + table.getRowCount() + " cols: " + table.getColumnCount() 
-                    + " hr: " + table.getHRules().size() + " vr: " + table.getVRules().size());
+        this.knownInputs = knownInputs;
+        this.showResultPanel = showResultPanel;
+        
+//        if( table != null )
+//            if (RuntimeProperties.isLogDebugEnabled()) db.p("Expert System Constant: " + table.getTableId() + " inputs: " + table.getInputFields().size()
+//                    + " rows: " + table.getRowCount() + " cols: " + table.getColumnCount() 
+//                    + " hr: " + table.getHRules().size() + " vr: " + table.getVRules().size());
         initialize();
         
         initTable();
     }
+    
+    private boolean showResultPanel;
+    private Map<InputTableField, Object> knownInputs;// = new LinkedHashMap<InputTableField, Object>();
     
     private class State {
         Map<InputTableField, Object> inputsToValues = new LinkedHashMap<InputTableField, Object>();
@@ -241,9 +251,12 @@ public class ExpertConsultant extends JFrame {
         boolean isFinished = false;
         int selectedRowId = -1;
         int selectedColId = -1;
+        boolean isFromKnown = false;
     }
     
-    private Stack<State> states = new Stack<ExpertConsultant.State>();
+    //this list should act as a stack, but with possibility to iterate elements
+    //without popping them out (needed for enabling/disabling the Back button)
+    private LinkedList<State> states = new LinkedList<ExpertConsultant.State>();
     
     private void initTable() {
         if( table == null ) return;
@@ -256,58 +269,31 @@ public class ExpertConsultant extends JFrame {
         
         if( firstInput == null ) {
             initState.isFinished = true;
-            System.out.println( "Consultant: no inputs are required! Output: " + table.queryTable( null, false ) );
-            setAnswerPanel( table.queryTable( null, false ), initState.inputsToValues );
+//            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: no inputs are required! Output: " + table.queryTable( null, false ) );
+            setResult( table.queryTable( null, false ), initState.inputsToValues );
             checkButtonStates();
             return;
         }
         
-        System.out.println( "Consultant: first input is " + firstInput.getId() );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: first input is " + firstInput.getId() );
         
         initState.availableRowIds.addAll( table.getOrderedRowIds() );
         initState.availableColumnIds.addAll( table.getOrderedColumnIds() );
         
-        setTableInputField( firstInput );
-
         checkButtonStates();
+        
+        setNextInput( firstInput );
     }
     
     /**
      * 
      */
-    private void checkNextInput() {
-        QuestionPanel qp = inputPanels.peek();
+    private void checkNextInput( InputTableField currentInput, Object val ) {
         
-        Object val = null;
-        String type = qp.field.getType();
-        String sval = (String)qp.getValue();
-        InputTableField currentInput = qp.field;
-        
-        try {
-            val = TypeUtil.createObjectFromString( type, sval );
-            
-            currentInput.verifyConstraints( val );
-        } catch ( TableInputConstraintViolationException ex ) {
-            JOptionPane.showMessageDialog( ExpertConsultant.this, 
-                    ex.getMessage(), 
-                    "Constraint Violation", JOptionPane.ERROR_MESSAGE );
-            return;
-        } catch ( Exception ex ) {
-            if( RuntimeProperties.isLogDebugEnabled() )
-                ex.printStackTrace();
-        }
-        
-        if( val == null ) {
-            JOptionPane.showMessageDialog( ExpertConsultant.this, 
-                    "Entered value \'" + sval + "\' is not of type \'" + type + "\'", 
-                    "Error", JOptionPane.ERROR_MESSAGE );
-            return;
-        }
-        
-        System.out.println( "Consultant: " + currentInput.getId() + " value is " + val );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: " + currentInput.getId() + " value is " + val );
         
         State prevState = states.peek();
-        System.out.println( "Next! rows: " + prevState.availableRowIds + " cols: " + prevState.availableColumnIds );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Next! rows: " + prevState.availableRowIds + " cols: " + prevState.availableColumnIds );
         
         State state = new State();
         state.inputsToValues.putAll( prevState.inputsToValues );
@@ -319,7 +305,7 @@ public class ExpertConsultant extends JFrame {
         InputTableField nextInput = null;
         
         //first, try horisontal rules
-        System.out.println( "Consultant: horizontal" );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: horizontal" );
         if( state.selectedRowId < 0 ) {
             InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
                 table.getHRules(), currentInput, state.inputsToValues, 
@@ -332,7 +318,7 @@ public class ExpertConsultant extends JFrame {
         }
 
         //next, vertical
-        System.out.println( "Consultant: vertical" );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: vertical" );
         if( state.selectedColId < 0 ) {
             InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
                     table.getVRules(), currentInput, state.inputsToValues, 
@@ -344,9 +330,9 @@ public class ExpertConsultant extends JFrame {
                 nextInput = res.getInput();//if not, this could be next input (or null)
         }
 
-        System.out.println( "Consultant: Rows: " + state.availableRowIds + " selected: " + state.selectedRowId );
-        System.out.println( "Consultant: Cols: " + state.availableColumnIds + " selected: " + state.selectedColId );
-        System.out.println( "Consultan: derived next input: " + nextInput );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: Rows: " + state.availableRowIds + " selected: " + state.selectedRowId );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: Cols: " + state.availableColumnIds + " selected: " + state.selectedColId );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultan: derived next input: " + nextInput );
         
         if( nextInput == null 
                 && state.selectedRowId > -1 && state.selectedColId > -1 ) {
@@ -354,7 +340,7 @@ public class ExpertConsultant extends JFrame {
             try {
                 output = table.getOutputValue( state.selectedRowId, state.selectedColId );
             } catch ( TableCellValueUndefinedException e ) {
-                //
+                //TODO handle this exception
             } catch ( Exception e ) {
                 JOptionPane.showMessageDialog( ExpertConsultant.this, 
                         "Error occured, unable to get an output value from the table", 
@@ -365,25 +351,116 @@ public class ExpertConsultant extends JFrame {
 
             state.isFinished = true;
             
-            System.out.println( "Consultant: no additional inputs are required! Output: " + output
+            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: no additional inputs are required! Output: " + output
                     + " row: " + state.selectedRowId + " col: " + state.selectedColId );
-            setAnswerPanel( output, state.inputsToValues );
+            setResult( output, state.inputsToValues );
         } else if( nextInput != null ) {
-            System.out.println( "Consultant: next input is " + nextInput.getId() );
-            setTableInputField( nextInput );
+            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: next input is " + nextInput.getId() );
+            setNextInput( nextInput );
         } else {
-            System.out.println( "Dunno what to do next...");
+            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Dunno what to do next...");
             state.isFinished = true;
-            setAnswerPanel( null, state.inputsToValues );
+            setResult( null, state.inputsToValues );
         }
     }
     
-    private void checkButtonStates() {
-        State currentState = states.peek();
+    private void setNextInput( InputTableField inputField ) {
+    
+        Object value = null;
+        if( knownInputs != null && ( value = knownInputs.get( inputField ) ) != null ) {
+            //the value of next input is known and can be used immediately
+            State currentState = states.peek();
+            currentState.isFromKnown = true;
+            checkNextInput( inputField, value );
+        } else {
+            //otherwise build question panel and wait for user input
+            setTableInputField( inputField );
+        }
+
+        checkButtonStates();
+    }
+    
+    /**
+     * This method is called after pressing Next button
+     */
+    private void checkNextInputFromQuestionPanel() {
         
-        getJbBack().setEnabled( !currentState.isFirst );
+        QuestionPanel qp = inputPanels.peek();
+        InputTableField currentInput = qp.field;
+        
+        String type = currentInput.getType();
+        String sval = (String)qp.getValue();
+        
+        Object value = null;
+        
+        try {
+            value = TypeUtil.createObjectFromString( type, sval );
+            
+            currentInput.verifyConstraints( value );
+        } catch ( TableInputConstraintViolationException ex ) {
+            JOptionPane.showMessageDialog( ExpertConsultant.this, 
+                    ex.getMessage(), 
+                    "Constraint Violation", JOptionPane.ERROR_MESSAGE );
+            return;
+        } catch ( Exception ex ) {
+            if( RuntimeProperties.isLogDebugEnabled() )
+                ex.printStackTrace();
+        }
+        
+        if( value == null ) {
+            JOptionPane.showMessageDialog( ExpertConsultant.this, 
+                    "Entered value \'" + sval + "\' is not of type \'" + type + "\'", 
+                    "Error", JOptionPane.ERROR_MESSAGE );
+            return;
+        }
+        
+        checkNextInput( currentInput, value );
+    }
+    
+    private void setResult( Object value, Map<InputTableField, Object> inputValues ) {
+        
+        returnValue = value;
+        
+        if( showResultPanel ) {
+            setAnswerPanel( value, inputValues );
+        } else {
+            returnOk = true;
+            dispose();
+        }
+    }
+    
+    private Object returnValue;
+    private boolean returnOk = false;
+    
+    public boolean isOk() {
+        return returnOk;
+    }
+    
+    public Object getValue() {
+        return returnValue;
+    }
+    
+    private void checkButtonStates() {
+        
+        State currentState = states.peek();
         getJbNext().setEnabled( !currentState.isFinished );
         getJbFinish().setEnabled( currentState.isFinished );
+        
+        //for the Back button, make sure that there is a state
+        //where it should be possible to back up, i.e.
+        //which is not first and not with isFromKnown flag
+        boolean enabled = false;
+        for( Iterator<State> it = states.iterator(); it.hasNext(); ) {
+            currentState = it.next();
+            
+            if( currentState.isFinished ) 
+                continue;
+            else if( !currentState.isFirst && !currentState.isFromKnown ) {
+                enabled = true;
+                break;
+            }
+        }
+        getJbBack().setEnabled( enabled );
     }
     
     private Stack<QuestionPanel> inputPanels = new Stack<ExpertConsultant.QuestionPanel>();
@@ -408,17 +485,27 @@ public class ExpertConsultant extends JFrame {
             public void actionPerformed( ActionEvent e ) {
                 if( e.getSource() == getJbNext() ) {
                     //
-                    checkNextInput();
+                    checkNextInputFromQuestionPanel();
                 } else if( e.getSource() == getJbBack() ) {
-                    //
+                    
                     if( !states.pop().isFinished ) { 
-                            inputPanels.pop();
+                        inputPanels.pop();
                     }
+                    //check other states, because there are also no corresponding 
+                    //input panels for "from known" states
+                    for( Iterator<State> stateIt = states.iterator(); stateIt.hasNext(); ) {
+                        if( stateIt.next().isFromKnown ) {
+                            stateIt.remove();//pop
+                            continue;
+                        }
+                        break;
+                    }
+                    returnValue = null;
                     setQuestionPanel( inputPanels.peek() );
-                    System.out.println("Back! " + inputPanels.peek().field.getId() );
-                    System.out.println("State: " + states.peek().inputsToValues );
+                    if (RuntimeProperties.isLogDebugEnabled()) db.p("Back! " + inputPanels.peek().field.getId() );
+                    if (RuntimeProperties.isLogDebugEnabled()) db.p("State: " + states.peek().inputsToValues );
                 } else if( e.getSource() == getJbCancel() 
-                        || e.getSource() == getJbFinish() ) {
+                        || ( returnOk = ( e.getSource() == getJbFinish() ) ) ) {
                     getJbNext().removeActionListener( this );
                     getJbBack().removeActionListener( this );
                     getJbCancel().removeActionListener( this );
@@ -461,10 +548,10 @@ public class ExpertConsultant extends JFrame {
         
         private JComponent createInputComponent() {
             String type = field.getType();
-            System.out.println( "Analyzing type: " + type + " of input " + field.getId() );
+            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Analyzing type: " + type + " of input " + field.getId() );
             
             if( TypeUtil.isArray( type ) ) {
-                System.out.println("Array");
+                if (RuntimeProperties.isLogDebugEnabled()) db.p("Array");
                 //TODO implement more sophisticated array entry GUI
                 return createInputTextField();
             }

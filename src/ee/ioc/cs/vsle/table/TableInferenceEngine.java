@@ -5,7 +5,9 @@ package ee.ioc.cs.vsle.table;
 
 import java.util.*;
 
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.table.exception.*;
+import ee.ioc.cs.vsle.util.*;
 
 /**
  * @author pavelg
@@ -151,9 +153,9 @@ public class TableInferenceEngine {
             boolean matchesInput = ruleInput.equals( input );
             Boolean holds = matchesInput ? rule.verifyCondition( inputsToValues.get( input ) ) : null;
             
-            System.out.println("Rule: " + rule + " holds: " + holds + " for input " + input.getId() );
+            if (RuntimeProperties.isLogDebugEnabled()) db.p("Rule: " + rule + " holds: " + holds + " for input " + input.getId() );
             for( Integer id : rule.getEntries() ) {
-                System.out.println("id: " + id + " contains in all available ids: " + allIds.contains( id ) );
+                if (RuntimeProperties.isLogDebugEnabled()) db.p("id: " + id + " contains in all available ids: " + allIds.contains( id ) );
                 if( !allIds.contains( id ) ) continue;
                 //
                 ProductionRule pr;
@@ -186,9 +188,9 @@ public class TableInferenceEngine {
             }
         }
         
-        System.out.println(productionRules.size() + " - All production rules: " + productionRules );
-        System.out.println("All available ids: " + allIds );
-        System.out.println("Current out ids: " + outIds );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p(productionRules.size() + " - All production rules: " + productionRules );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p("All available ids: " + allIds );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p("Current out ids: " + outIds );
         InputFieldAndSelectedId result = null;//the result will be created only once but the iteration will continue until all ids are examined
         for ( Integer id : allIds ) {//we need to iterate all ids because some of rows/cols may contain no rules!
             ProductionRule prodr = productionRules.get( id );
@@ -200,7 +202,7 @@ public class TableInferenceEngine {
                     outIds.add( id );//this is required in order to keep empty rows/cols for the future use
                 //seems that this id could be used
                 if( result == null ) {
-                    System.out.println( "seems that this id could be used " + id );
+                    if (RuntimeProperties.isLogDebugEnabled()) db.p( "seems that this id could be used " + id );
                     result = new InputFieldAndSelectedId( null, id );
                 }
                 continue;
@@ -209,14 +211,14 @@ public class TableInferenceEngine {
             } else if( !outIds.contains( prodr.id ) ) {
                 continue;
             }
-            System.out.println( "returning input " + prodr.unknownInputFields.get( 0 ) );
+            if (RuntimeProperties.isLogDebugEnabled()) db.p( "returning input " + prodr.unknownInputFields.get( 0 ) );
             if( result == null )
                 result = new InputFieldAndSelectedId( prodr.unknownInputFields.get( 0 ), null );
         }
-        System.out.println("Final out ids: " + outIds );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p("Final out ids: " + outIds );
         
         if( result == null && outIds.size() != 0 ) {//there is still some hope left!
-            System.out.println("there is still some hope left! " + result );
+            if (RuntimeProperties.isLogDebugEnabled()) db.p("there is still some hope left! " + result );
             int id = outIds.get( 0 );
             ProductionRule prodr = productionRules.get( id );
             if( prodr != null ) {
@@ -226,7 +228,7 @@ public class TableInferenceEngine {
                 result = new InputFieldAndSelectedId( null, id );
             }
         }
-        System.out.println( "returning " + result );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "returning " + result );
         return result == null ? new InputFieldAndSelectedId() : result;
     }
     

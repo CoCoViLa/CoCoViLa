@@ -5,8 +5,12 @@ package ee.ioc.cs.vsle.table;
 
 import java.util.*;
 
+import javax.swing.*;
+
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.table.event.*;
 import ee.ioc.cs.vsle.table.exception.*;
+import ee.ioc.cs.vsle.table.gui.*;
 import ee.ioc.cs.vsle.util.*;
 
 /**
@@ -23,6 +27,7 @@ import ee.ioc.cs.vsle.util.*;
 public final class Table implements IStructuralExpertTable {
     
     public static final String TABLE_KEYWORD = "@table";
+    public static final String TABLE_WITH_INPUT_MAPPING_KEYWORD = "@tablewithinputmapping";
     
     private String tableId;
     private TableFieldList<InputTableField> inputList = new TableFieldList<InputTableField>();
@@ -557,8 +562,11 @@ public final class Table implements IStructuralExpertTable {
     public synchronized Object queryTable( Object[] args, boolean verifyInputs ) {
         
         //TODO check the following case -- when no inputs are actually required in order to get a default value
-        if( verifyInputs)
+        if( verifyInputs ) {
+            if( inputList.size() != args.length )
+                throw new TableException( "Number of table inputs is incorrect!" );
             TableInferenceEngine.verifyInputs( inputList, args );
+        }
         
         int rowId = TableInferenceEngine.checkRules( inputList, getOrderedRowIds(), hrules, args );
         int colId = TableInferenceEngine.checkRules( inputList, getOrderedColumnIds(), vrules, args );
@@ -572,24 +580,59 @@ public final class Table implements IStructuralExpertTable {
         List<String> outerInputs = Arrays.asList( inputIds );
         List<InputTableField> missingInputs = new ArrayList<InputTableField>();
         Object[] newArgs = new Object[inputList.size()];
+        final Map<InputTableField, Object> knownInputs = new LinkedHashMap<InputTableField, Object>();
         
         for ( int i = 0; i < inputList.size(); i++ ) {
             InputTableField input = inputList.get( i );
             int index = outerInputs.indexOf( input.getId() );
             if( index > -1 ) {
                 newArgs[ i ] = args[ index ];
+                knownInputs.put( input, newArgs[ i ] );
             } else {
                 missingInputs.add( input );
             }
         }
-        System.out.println("incomming args: " + Arrays.deepToString( args ));
-        System.out.println("new args: " + Arrays.deepToString( newArgs ));
-        System.out.println("missing inputs: " + missingInputs);
+        
         if( missingInputs.isEmpty() )
             return queryTable( newArgs, true );
 
         //return a value from Consultant
-        return null;
+        final Object[] o = new Object[1];
+        
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                ExpertConsultant ec = new ExpertConsultant(
+                        Editor.getInstance(), Table.this, knownInputs, false );
+                
+                //check if consultant is already in a finished state
+                //and if true, there is no need to show it, just take the value
+                if ( ec.isOk() ) {
+                    o[0] = ec.getValue();
+                    ec.dispose();
+                } else {
+                    ec.setModal( true );
+                    ec.setVisible( true );
+                    if ( ec.isOk() )
+                        o[0] = ec.getValue();
+                }
+            }
+        };
+        
+        if ( SwingUtilities.isEventDispatchThread() ) {
+            runnable.run();
+        } else {
+            try {
+                SwingUtilities.invokeAndWait( runnable );
+            } catch ( Exception e ) {
+                db.p( e );
+            }
+        }
+        
+        if( o[0] == null ) {
+            throw new TableCellValueUndefinedException( "Cell value not specified." );
+        }
+        return o[0];
     }
     
     public Object getOutputValue( int rowId, int colId ) {

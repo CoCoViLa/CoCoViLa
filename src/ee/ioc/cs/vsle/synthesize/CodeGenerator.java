@@ -788,7 +788,9 @@ public class CodeGenerator {
             
             String meth, params;
 
-            if ( Table.TABLE_KEYWORD.equals( rel.getMethod() ) ) {
+            boolean tableInputsMapping = false;
+            if ( Table.TABLE_KEYWORD.equals( rel.getMethod() )
+                    || ( tableInputsMapping = Table.TABLE_WITH_INPUT_MAPPING_KEYWORD.equals( rel.getMethod() ) ) ) {
 
                 StringBuilder cast = new StringBuilder();
 
@@ -811,7 +813,7 @@ public class CodeGenerator {
                 
                 meth = cast.append( "ProgramContext.queryTable" ).toString();
                 
-                if( rel.getInputs().size() > 1 ) {
+                if( tableInputsMapping && rel.getInputs().size() > 1 ) {
                     List<Var> list = new ArrayList<Var>(rel.getInputs());
                     StringBuilder inputIds = new StringBuilder( "(new String[] { ");
                     for( int i = 1; i < list.size(); i++ ) {
@@ -822,7 +824,7 @@ public class CodeGenerator {
                     
                     params = inputIds.toString();
                 } else {
-                    params = getParametersString( false, inputSubstitutions );
+                    params = getParametersString( true, inputSubstitutions );
                 }
             } else {
                 meth = rel.getParent().getFullNameForConcat() + rel.getMethod();
