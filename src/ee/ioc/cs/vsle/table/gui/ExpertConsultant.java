@@ -169,11 +169,15 @@ public class ExpertConsultant extends JDialog {
             JPanel jpInputs = new JPanel();
             jpInputs.setLayout( new BoxLayout( jpInputs, BoxLayout.Y_AXIS ) );
             jpInputs.setBorder( BorderFactory.createTitledBorder( "Given input values" ) );
-            jpBox.add( jpInputs );
+
+            JScrollPane scroll = new JScrollPane( jpInputs, 
+                    JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
+                    JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
+            jpBox.add( scroll );
             
             for ( Map.Entry<InputTableField,Object> entry : inputValues.entrySet() ) {
                 InputTableField field = entry.getKey();
-                String input = "(" + field.getType() + ") " + field.getId() + " = " + entry.getValue();
+                String input = /*"(" + field.getType() + ") " +*/ field.getId() + " = " + entry.getValue();
                 jpInputs.add( GuiUtil.addComponentAsFlow( new JLabel( input ), FlowLayout.CENTER ) );
             }
         }
