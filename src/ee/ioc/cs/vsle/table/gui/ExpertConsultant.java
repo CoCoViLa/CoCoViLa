@@ -256,6 +256,16 @@ public class ExpertConsultant extends JDialog {
         int selectedRowId = -1;
         int selectedColId = -1;
         boolean isFromKnown = false;
+
+        @Override
+        public String toString() {
+            return "State [inputsToValues=" + inputsToValues + ", isFirst="
+                    + isFirst + ", isFinished=" + isFinished + ", isFromKnown="
+                    + isFromKnown + ", availableRowIds=" + availableRowIds
+                    + ", availableColumnIds=" + availableColumnIds
+                    + ", selectedRowId=" + selectedRowId + ", selectedColId="
+                    + selectedColId + "]";
+        }
     }
     
     //this list should act as a stack, but with possibility to iterate elements
@@ -309,7 +319,7 @@ public class ExpertConsultant extends JDialog {
         InputTableField nextInput = null;
         
         //first, try horisontal rules
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: horizontal" );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "\nConsultant: horizontal" );
         if( state.selectedRowId < 0 ) {
             InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
                 table.getHRules(), currentInput, state.inputsToValues, 
@@ -322,7 +332,7 @@ public class ExpertConsultant extends JDialog {
         }
 
         //next, vertical
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: vertical" );
+        if (RuntimeProperties.isLogDebugEnabled()) db.p( "\nConsultant: vertical" );
         if( state.selectedColId < 0 ) {
             InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
                     table.getVRules(), currentInput, state.inputsToValues, 
@@ -445,7 +455,7 @@ public class ExpertConsultant extends JDialog {
     }
     
     private void checkButtonStates() {
-        
+        System.out.println("checkButtonStates");
         State currentState = states.peek();
         getJbNext().setEnabled( !currentState.isFinished );
         getJbFinish().setEnabled( currentState.isFinished );
@@ -456,12 +466,15 @@ public class ExpertConsultant extends JDialog {
         boolean enabled = false;
         for( Iterator<State> it = states.iterator(); it.hasNext(); ) {
             currentState = it.next();
-            
-            if( currentState.isFinished ) 
-                continue;
-            else if( !currentState.isFirst && !currentState.isFromKnown ) {
-                enabled = true;
-                break;
+            System.out.println("Back: " + currentState + " " + enabled);
+            if( !currentState.isFirst ) {
+                if( currentState.isFinished ) {
+                    enabled = true;
+                }
+                else if( !currentState.isFromKnown ) {
+                    enabled = true;
+                    break;
+                }
             }
         }
         getJbBack().setEnabled( enabled );

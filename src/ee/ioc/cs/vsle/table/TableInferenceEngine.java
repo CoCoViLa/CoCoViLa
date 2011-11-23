@@ -4,6 +4,7 @@
 package ee.ioc.cs.vsle.table;
 
 import java.util.*;
+import java.util.Map.Entry;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.table.exception.*;
@@ -96,7 +97,7 @@ public class TableInferenceEngine {
         @Override
         public String toString() {
             return "ProductionRule [id=" + id + ", rules=" + rules
-                    + ", inputFields=" + unknownInputFields + "]";
+                    + ", unknownInputFields=" + unknownInputFields + ", allInputFields=" + allInputFields + "]";
         }
         
         
@@ -132,6 +133,13 @@ public class TableInferenceEngine {
         public Integer getSelectedId() {
             return selectedId;
         }
+
+        @Override
+        public String toString() {
+            return "InputFieldAndSelectedId [input=" + input + ", selectedId="
+                    + selectedId + "]";
+        }
+        
     }
     
     /**
@@ -153,9 +161,14 @@ public class TableInferenceEngine {
             boolean matchesInput = ruleInput.equals( input );
             Boolean holds = matchesInput ? rule.verifyCondition( inputsToValues.get( input ) ) : null;
             
-            if (RuntimeProperties.isLogDebugEnabled()) db.p("Rule: " + rule + " holds: " + holds + " for input " + input.getId() );
+            if (RuntimeProperties.isLogDebugEnabled()) {
+                if( matchesInput )
+                    db.p("Rule: " + rule + " holds: " + holds + " for input " + input.getId() + " = " + inputsToValues.get( input ) );
+                else
+                    db.p("Rule: " + rule + " does not match the input " + input.getId() + " = " + inputsToValues.get( input ) );
+            }
             for( Integer id : rule.getEntries() ) {
-                if (RuntimeProperties.isLogDebugEnabled()) db.p("id: " + id + " contains in all available ids: " + allIds.contains( id ) );
+                if (RuntimeProperties.isLogDebugEnabled()) db.p("Entry id: " + id + " contains in all available ids: " + allIds.contains( id ) );
                 if( !allIds.contains( id ) ) continue;
                 //
                 ProductionRule pr;
@@ -185,10 +198,16 @@ public class TableInferenceEngine {
 //                else if( !pr.allInputFields.contains( input ) ){//does not contain current input, so could be useful later
 //                    outIds.add( id );//this does not work correctly
 //                }
+                if (RuntimeProperties.isLogDebugEnabled()) db.p( pr );
             }
         }
         
-        if (RuntimeProperties.isLogDebugEnabled()) db.p(productionRules.size() + " - All production rules: " + productionRules );
+        if (RuntimeProperties.isLogDebugEnabled())  {
+            db.p( "All production rules: " + productionRules.size() );
+            for ( Entry<Integer, ProductionRule> entry : productionRules.entrySet() ) {
+                System.out.println("Id: " + entry.getKey() + ", prod: " + entry.getValue() );
+            }
+        }
         if (RuntimeProperties.isLogDebugEnabled()) db.p("All available ids: " + allIds );
         if (RuntimeProperties.isLogDebugEnabled()) db.p("Current out ids: " + outIds );
         InputFieldAndSelectedId result = null;//the result will be created only once but the iteration will continue until all ids are examined
@@ -211,9 +230,13 @@ public class TableInferenceEngine {
             } else if( !outIds.contains( prodr.id ) ) {
                 continue;
             }
-            if (RuntimeProperties.isLogDebugEnabled()) db.p( "returning input " + prodr.unknownInputFields.get( 0 ) );
+            //if (RuntimeProperties.isLogDebugEnabled()) db.p( "returning input " + prodr.unknownInputFields.get( 0 ) );
             if( result == null )
-                result = new InputFieldAndSelectedId( prodr.unknownInputFields.get( 0 ), null );
+                result = new InputFieldAndSelectedId( 
+                        prodr.unknownInputFields.isEmpty() 
+                            ? null
+                            : prodr.unknownInputFields.get( 0 ), 
+                        null );
         }
         if (RuntimeProperties.isLogDebugEnabled()) db.p("Final out ids: " + outIds );
         
