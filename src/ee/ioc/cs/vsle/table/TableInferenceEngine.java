@@ -151,6 +151,8 @@ public class TableInferenceEngine {
         
         assert inputsToValues.containsKey( input );
         
+        outIds.addAll( allIds );
+        
         //the ids that hold for current input
         Map<Integer, ProductionRule> productionRules = new LinkedHashMap<Integer, ProductionRule>();
         
@@ -191,9 +193,10 @@ public class TableInferenceEngine {
                     boolean contains;
                     if( ( contains = outIds.contains( id ) ) && !holds ) {
                         outIds.remove( id );//this id is a candidate for removal
-                    } else if( !contains && holds ) {
-                        outIds.add( id );
-                    }
+                    } 
+//                    else if( !contains && holds ) {
+//                        outIds.add( id );
+//                    }
                 }
 //                else if( !pr.allInputFields.contains( input ) ){//does not contain current input, so could be useful later
 //                    outIds.add( id );//this does not work correctly
@@ -211,14 +214,12 @@ public class TableInferenceEngine {
         if (RuntimeProperties.isLogDebugEnabled()) db.p("All available ids: " + allIds );
         if (RuntimeProperties.isLogDebugEnabled()) db.p("Current out ids: " + outIds );
         InputFieldAndSelectedId result = null;//the result will be created only once but the iteration will continue until all ids are examined
-        for ( Integer id : allIds ) {//we need to iterate all ids because some of rows/cols may contain no rules!
+        for ( Integer id : outIds ) {//we need to iterate all ids because some of rows/cols may contain no rules!
             ProductionRule prodr = productionRules.get( id );
             
             if( prodr == null//null means empty row that should be considered
                     //non null and not empty should be among out_ids
                     || ( prodr.unknownInputFields.isEmpty() && outIds.contains( prodr.id ) ) ) {
-                if( !outIds.contains( id ) )//TODO
-                    outIds.add( id );//this is required in order to keep empty rows/cols for the future use
                 //seems that this id could be used
                 if( result == null ) {
                     if (RuntimeProperties.isLogDebugEnabled()) db.p( "seems that this id could be used " + id );
@@ -226,16 +227,13 @@ public class TableInferenceEngine {
                 }
                 continue;
             } else if ( !prodr.allInputFields.contains( input ) ) { 
-                outIds.add( id );//if a row/col does not contain input, it could be useful later
+                //if a row/col does not contain input, it could be useful later
             } else if( !outIds.contains( prodr.id ) ) {
                 continue;
             }
-            //if (RuntimeProperties.isLogDebugEnabled()) db.p( "returning input " + prodr.unknownInputFields.get( 0 ) );
-            if( result == null )
+            if( result == null && !prodr.unknownInputFields.isEmpty() )
                 result = new InputFieldAndSelectedId( 
-                        prodr.unknownInputFields.isEmpty() 
-                            ? null
-                            : prodr.unknownInputFields.get( 0 ), 
+                        prodr.unknownInputFields.get( 0 ), 
                         null );
         }
         if (RuntimeProperties.isLogDebugEnabled()) db.p("Final out ids: " + outIds );
