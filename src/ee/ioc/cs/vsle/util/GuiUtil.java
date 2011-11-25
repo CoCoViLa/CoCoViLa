@@ -101,4 +101,16 @@ public final class GuiUtil {
         panel.add( comp );
         return panel;
     }
+    
+    public static JPanel addComponentAsBorderPaneCenter( Component comp ) {
+        JPanel panel = new JPanel( new BorderLayout() );
+        panel.add( comp, BorderLayout.CENTER );
+        return panel;
+    }
+    
+    public static JPanel addComponentAsBorderPane( Component comp, String constr, int hgap, int vgap ) {
+        JPanel panel = new JPanel( new BorderLayout( hgap, vgap ) );
+        panel.add( comp, constr );
+        return panel;
+    }
 }

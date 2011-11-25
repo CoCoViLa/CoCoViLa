@@ -15,6 +15,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 import javax.swing.event.*;
 
+import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
@@ -117,10 +118,13 @@ public class TablePropertyDialog extends JDialog {
         //input fields
         inputFieldsPane = new JPanel();
         inputFieldsPane.setLayout( new BoxLayout( inputFieldsPane, BoxLayout.Y_AXIS ) );
-        inputFieldsPane.setBorder( BorderFactory.createTitledBorder( "Input fields:" ) );
         
         JPanel ip = new JPanel(new BorderLayout());
-        ip.add( inputFieldsPane, BorderLayout.CENTER );
+        ip.setBorder( BorderFactory.createTitledBorder( "Input fields:" ) );
+        JScrollPane sp = new JScrollPane( inputFieldsPane, 
+                JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER );
+        ip.add( sp, BorderLayout.CENTER );
+        ip.setPreferredSize( new Dimension( 350, 250 ) );
         root.add( ip );
         
         addInputFieldPane( false );
@@ -214,8 +218,8 @@ public class TablePropertyDialog extends JDialog {
         //other
         setDefaultCloseOperation( DISPOSE_ON_CLOSE );
         setLocationByPlatform( true );
-        setResizable( false );
-        pack();
+        setSize( getPreferredSize() );
+        addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
     }
 
     protected void checkAliasType() {
@@ -249,7 +253,6 @@ public class TablePropertyDialog extends JDialog {
                 if( source == jbtAddInput ) {
                     
                     addInputFieldPane( true );
-                    
                 } if( source == jbtAddOutput ) {
                     
                     if( isAliasOutput ) {
@@ -419,7 +422,6 @@ public class TablePropertyDialog extends JDialog {
             fp.update();
         }
         
-        pack();
     }
     
     /**
@@ -429,10 +431,7 @@ public class TablePropertyDialog extends JDialog {
         FieldPane fp = new FieldPane();
         inputFields.add( fp );
         addFlowToPanel( inputFieldsPane, fp, FlowLayout.LEFT );
-        
-        if( doPack )
-            pack();
-        
+        inputFieldsPane.revalidate();
         return fp;
     }
     
@@ -443,10 +442,7 @@ public class TablePropertyDialog extends JDialog {
         FieldPane fp = new FieldPane( isAliasOutput ? allowedAliasTypes : allowedOuputTypes, true );
         outputFields.add( fp );
         addFlowToPanel( outputFieldsPane, fp, FlowLayout.LEFT );
-        
-        if( doPack )
-            pack();
-        
+        outputFieldsPane.revalidate();
         return fp;
     }
     
@@ -614,6 +610,8 @@ public class TablePropertyDialog extends JDialog {
             if( text.length() > 0 ) {
                 if( jtaDetails == null ) {
                     jtaDetails = new JTextArea(0, 20);
+                    jtaDetails.setLineWrap( true );
+                    jtaDetails.setWrapStyleWord( true );
                     jtaDetails.setEditable( false );
                     add( GuiUtil.addComponentAsFlow( jtaDetails, FlowLayout.LEFT ) );
                     jtaDetails.setBackground( jtaDetails.getParent().getBackground() );
@@ -626,7 +624,6 @@ public class TablePropertyDialog extends JDialog {
                 }
             }
             
-            TablePropertyDialog.this.pack();
         }
         
         /**

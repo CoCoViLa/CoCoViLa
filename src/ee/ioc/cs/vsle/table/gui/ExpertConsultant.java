@@ -12,6 +12,7 @@ import java.util.List;
 
 import javax.swing.*;
 import javax.swing.border.*;
+import javax.swing.text.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.packageparse.*;
@@ -156,29 +157,51 @@ public class ExpertConsultant extends JDialog {
      */
     private void setAnswerPanel( Object value, Map<InputTableField, Object> inputValues ) {
         getQuestionMainPanel().removeAll();
-        String result = value != null ? value.toString() : "Output is undefined!";
+        String result = value != null ? value.toString() : "undefined!";
         
         JPanel jpBox = new JPanel();
         jpBox.setLayout( new BoxLayout( jpBox, BoxLayout.Y_AXIS ) );
 
-        JPanel jpOutput = GuiUtil.addComponentAsFlow( new JLabel( result ), FlowLayout.CENTER );
-        jpOutput.setBorder( BorderFactory.createTitledBorder( "Expert Table Output" ) );
+        JEditorPane resPane = new JEditorPane("text/html", "<html><body>"
+                + "<font face=\"Arial\" color=\"black\" size=\"4\"><p style=\"text-align:center\">" 
+                + result + "</font></body><html>" );
+        resPane.setEditable( false );
+        resPane.setToolTipText( "" );
+        JPanel jpOutput = GuiUtil.addComponentAsFlow( resPane, FlowLayout.CENTER );
+        resPane.setBackground( jpOutput.getBackground() );
+        jpOutput.setBorder( BorderFactory.createTitledBorder( "The result is:" ) );
         jpBox.add( jpOutput );
         
         if( inputValues != null && !inputValues.isEmpty() ) {
             JPanel jpInputs = new JPanel();
             jpInputs.setLayout( new BoxLayout( jpInputs, BoxLayout.Y_AXIS ) );
-            jpInputs.setBorder( BorderFactory.createTitledBorder( "Given input values" ) );
+            jpInputs.setBorder( BorderFactory.createEmptyBorder( 5, 5, 5, 5 ) );
 
             JScrollPane scroll = new JScrollPane( jpInputs, 
                     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, 
                     JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
+            scroll.setBorder( BorderFactory.createTitledBorder( "for the given input values:" ) );
             jpBox.add( scroll );
             
             for ( Map.Entry<InputTableField,Object> entry : inputValues.entrySet() ) {
                 InputTableField field = entry.getKey();
-                String input = /*"(" + field.getType() + ") " +*/ field.getId() + " = " + entry.getValue();
-                jpInputs.add( GuiUtil.addComponentAsFlow( new JLabel( input ), FlowLayout.CENTER ) );
+                StringBuilder sb = new StringBuilder();
+                
+                if( field.getQuestion() != null )
+                    sb.append( field.getQuestionText() );
+                else
+                    sb.append( "What is the value of an input (" )
+                        .append( field.getType() ).append( ") " )
+                        .append( field.getId() ).append( "?" );
+                sb.append( "\nAnswer: " ).append(  entry.getValue() );
+                JTextArea jta = new JTextArea();
+                jta.setText( sb.toString() );
+                jta.setEditable( false );
+                jta.setLineWrap( true );
+                jta.setWrapStyleWord( true );
+                jta.setBackground( jpInputs.getBackground() );
+                jpInputs.add( GuiUtil.addComponentAsBorderPaneCenter( jta ) );
+                jpInputs.add( Box.createVerticalStrut( 5 ) );
             }
         }
         
@@ -348,13 +371,30 @@ public class ExpertConsultant extends JDialog {
         if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: Cols: " + state.availableColumnIds + " selected: " + state.selectedColId );
         if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultan: derived next input: " + nextInput );
         
-        if( nextInput == null 
-                && state.selectedRowId > -1 && state.selectedColId > -1 ) {
+        if( nextInput != null ) {
+            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: next input is " + nextInput.getId() );
+            setNextInput( nextInput );
+            return;
+        } 
+        
+        //first, check ids and try to recover if they are -1
+        if( state.selectedRowId == -1 && !state.availableRowIds.isEmpty() ) {
+            //pick first suitable id
+            state.selectedRowId = state.availableRowIds.get( 0 );
+        }
+        //same for columns
+        if( state.selectedColId == -1 && !state.availableColumnIds.isEmpty() ) {
+            //pick first suitable id
+            state.selectedColId = state.availableColumnIds.get( 0 );
+        }
+        
+        if( state.selectedRowId > -1 && state.selectedColId > -1 ) {
             Object output = null;
             try {
                 output = table.getOutputValue( state.selectedRowId, state.selectedColId );
             } catch ( TableCellValueUndefinedException e ) {
                 //TODO handle this exception
+                System.out.println( "checkNextInput: " + e.getMessage() );
             } catch ( Exception e ) {
                 JOptionPane.showMessageDialog( ExpertConsultant.this, 
                         "Error occured, unable to get an output value from the table", 
@@ -368,9 +408,6 @@ public class ExpertConsultant extends JDialog {
             if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: no additional inputs are required! Output: " + output
                     + " row: " + state.selectedRowId + " col: " + state.selectedColId );
             setResult( output, state.inputsToValues );
-        } else if( nextInput != null ) {
-            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: next input is " + nextInput.getId() );
-            setNextInput( nextInput );
         } else {
             if (RuntimeProperties.isLogDebugEnabled()) db.p( "Dunno what to do next...");
             state.isFinished = true;
@@ -488,8 +525,8 @@ public class ExpertConsultant extends JDialog {
      * @return void
      */
     private void initialize() {
-        this.setSize(385, 215);
-        this.setResizable(false);
+        this.setSize(385, 240);
+        addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
         this.setContentPane( getJContentPane() );
         this.setTitle("Expert System Consultant" + ( table != null ? ": " + table.getTableId() : "" ) );
         this.setDefaultCloseOperation( JFrame.DISPOSE_ON_CLOSE );
@@ -547,7 +584,7 @@ public class ExpertConsultant extends JDialog {
         
         private InputTableField field;
         private JPanel jpNorthQuestion = null;
-        private JLabel jlblQuestion = null;
+        private JTextComponent jtcQuestion = null;
         private Callback callback;
         
         interface Callback {
@@ -661,15 +698,17 @@ public class ExpertConsultant extends JDialog {
             return jtaConstraints;
         }
         
-        private JLabel getJlblQuestion() {
-            if( jlblQuestion == null ) {
-                jlblQuestion = new JLabel();
+        private JTextComponent getJtaQuestion() {
+            if( jtcQuestion == null ) {
                 String q = field.getQuestion() != null ? field.getQuestionText() 
                         : "What is the value of an input (" + field.getType() + ") " + field.getId() + "?";
-                jlblQuestion.setText( q );
-                jlblQuestion.setToolTipText(""); 
+                jtcQuestion = new JEditorPane("text/html", "<html><body>"
+                                        + "<font face=\"Arial\" color=\"black\" size=\"4\"><p style=\"text-align:center\">" 
+                                        + q + "</font></body><html>" );
+                jtcQuestion.setEditable( false );
+                jtcQuestion.setToolTipText( "" );
             }
-            return jlblQuestion;
+            return jtcQuestion;
         }
         
         /**
@@ -680,9 +719,10 @@ public class ExpertConsultant extends JDialog {
         private JPanel getJpNorthQuestion() {
             if ( jpNorthQuestion == null ) {
                 jpNorthQuestion = new JPanel();
-                jpNorthQuestion.setLayout(new FlowLayout());
-                jpNorthQuestion.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
-                jpNorthQuestion.add(getJlblQuestion(), null);
+                jpNorthQuestion.setLayout( new BorderLayout() );
+                jpNorthQuestion.setBorder( BorderFactory.createEmptyBorder( 15, 15, 0, 15 ) );
+                jpNorthQuestion.add( getJtaQuestion(), BorderLayout.CENTER );
+                getJtaQuestion().setBackground( jpNorthQuestion.getBackground() );
             }
             return jpNorthQuestion;
         }
