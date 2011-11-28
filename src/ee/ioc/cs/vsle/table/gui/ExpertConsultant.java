@@ -146,6 +146,7 @@ public class ExpertConsultant extends JDialog {
     private void setQuestionPanel( QuestionPanel qp ) {
         getQuestionMainPanel().removeAll();
         getQuestionMainPanel().add( qp, BorderLayout.CENTER );
+        qp.updateFocus();
         updateMainPanel();
     }
     
@@ -576,20 +577,20 @@ public class ExpertConsultant extends JDialog {
         getJbFinish().addActionListener( lst );
     }
 
+    interface Callback {
+        Object getValue();
+    }
     
     /**
      * Contains label with a question and component for value entry 
      */
-    private static class QuestionPanel extends JPanel {
+    private class QuestionPanel extends JPanel implements KeyListener {
         
         private InputTableField field;
         private JPanel jpNorthQuestion = null;
         private JTextComponent jtcQuestion = null;
+        private JComponent inputComp;
         private Callback callback;
-        
-        interface Callback {
-            Object getValue();
-        }
         
         QuestionPanel( InputTableField field ) {
             this.field = field;
@@ -600,56 +601,69 @@ public class ExpertConsultant extends JDialog {
             return callback != null ? callback.getValue() : null;
         }
         
-        private JComponent createInputComponent() {
-            String type = field.getType();
-            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Analyzing type: " + type + " of input " + field.getId() );
+        private ActionListener lstNext = new ActionListener() {
             
-            if( TypeUtil.isArray( type ) ) {
-                if (RuntimeProperties.isLogDebugEnabled()) db.p("Array");
-                //TODO implement more sophisticated array entry GUI
-                return createInputTextField();
+            @Override
+            public void actionPerformed( ActionEvent e ) {
+                ExpertConsultant.this.getJbNext().doClick();
             }
-            
-            List<TableFieldConstraint> constrList = field.getConstraints();
-            if( constrList != null && !constrList.isEmpty() ) {
-                //currently only take first constraint
-                TableFieldConstraint constr = constrList.get( 0 );
-                
-                if( constr instanceof TableFieldConstraint.List ) {
-                    TableFieldConstraint.List list = (TableFieldConstraint.List)constr;
-                    final JComboBox jcbox = new JComboBox( list.getValueList() );
-                    callback = new Callback() {
-                        @Override
-                        public Object getValue() {
-                            return jcbox.getSelectedItem();
-                        }
-                    };
-                    return jcbox;
-                } else if( constr instanceof TableFieldConstraint.Range ) {
-                    TableFieldConstraint.Range range = (TableFieldConstraint.Range)constr;
-                    
-//                    @SuppressWarnings( "rawtypes" )
-//                    SpinnerNumberModel model = new SpinnerNumberModel( null, (Comparable)range.getMin(), (Comparable)range.getMax(), 1 );
-                    
-                    if( TypeUtil.isIntegral( type ) ) {
-                        JSlider jsl = new JSlider();
-                        jsl.setName("");
-                        jsl.setPaintTicks(true);
-                        jsl.setSnapToTicks(true);
-                        jsl.setMinorTickSpacing(5);
-                        jsl.setMajorTickSpacing(50);
-                        jsl.setPaintLabels(true);
-                    } else if( TypeUtil.isFractional( type ) ) {
-                        JSpinner jsp = new JSpinner();
-                        jsp.setModel( null );
-                    } else if( TypeUtil.isString( type ) ) {
-                        
-                    }
+        };
+        
+        private JComponent getInputComponent() {
+            if( inputComp == null ) {
+                String type = field.getType();
+                if (RuntimeProperties.isLogDebugEnabled()) db.p( "Analyzing type: " + type + " of input " + field.getId() );
+
+                if( TypeUtil.isArray( type ) ) {
+                    if (RuntimeProperties.isLogDebugEnabled()) db.p("Array");
+                    //TODO implement more sophisticated array entry GUI
+                    return inputComp = createInputTextField();
                 }
-                return createInputTextField();
+
+                List<TableFieldConstraint> constrList = field.getConstraints();
+                if( constrList != null && !constrList.isEmpty() ) {
+                    //currently only take first constraint
+                    TableFieldConstraint constr = constrList.get( 0 );
+
+                    if( constr instanceof TableFieldConstraint.List ) {
+                        TableFieldConstraint.List list = (TableFieldConstraint.List)constr;
+                        final JComboBox jcbox = new JComboBox( list.getValueList() );
+                        callback = new Callback() {
+                            @Override
+                            public Object getValue() {
+                                return jcbox.getSelectedItem();
+                            }
+                        };
+                        jcbox.addKeyListener( this );
+                        return inputComp = jcbox;
+                    } else if( constr instanceof TableFieldConstraint.Range ) {
+                        TableFieldConstraint.Range range = (TableFieldConstraint.Range)constr;
+
+                        //                    @SuppressWarnings( "rawtypes" )
+                        //                    SpinnerNumberModel model = new SpinnerNumberModel( null, (Comparable)range.getMin(), (Comparable)range.getMax(), 1 );
+
+                        if( TypeUtil.isIntegral( type ) ) {
+                            JSlider jsl = new JSlider();
+                            jsl.setName("");
+                            jsl.setPaintTicks(true);
+                            jsl.setSnapToTicks(true);
+                            jsl.setMinorTickSpacing(5);
+                            jsl.setMajorTickSpacing(50);
+                            jsl.setPaintLabels(true);
+                        } else if( TypeUtil.isFractional( type ) ) {
+                            JSpinner jsp = new JSpinner();
+                            jsp.setModel( null );
+                        } else if( TypeUtil.isString( type ) ) {
+
+                        }
+                    }
+                    return inputComp = createInputTextField();
+                }
+
+                return inputComp = createInputTextField();
             }
-            
-            return createInputTextField();
+
+            return inputComp;
         }
         
         private JComponent createInputTextField() {
@@ -660,17 +674,28 @@ public class ExpertConsultant extends JDialog {
                     return jtf.getText();
                 }
             };
+            jtf.addKeyListener( this );
             return jtf;
         }
         
         private void initLayout() {
             setLayout( new BorderLayout() );
             add( getJpNorthQuestion(), BorderLayout.NORTH );
-            add( GuiUtil.addComponentAsFlow( createInputComponent(), FlowLayout.CENTER ), 
+            add( GuiUtil.addComponentAsFlow( getInputComponent(), FlowLayout.CENTER ), 
                     BorderLayout.CENTER );
+            updateFocus();
             add( GuiUtil.addComponentAsFlow( getJtaConstraints(), FlowLayout.CENTER ), 
                     BorderLayout.SOUTH );
             getJtaConstraints().setBackground( getJtaConstraints().getParent().getBackground() );
+        }
+        
+        private void updateFocus() {
+            SwingUtilities.invokeLater( new Runnable() {
+                @Override
+                public void run() {
+                    getInputComponent().requestFocus();
+                }
+            } );
         }
         
         private JTextArea jtaConstraints;
@@ -726,6 +751,18 @@ public class ExpertConsultant extends JDialog {
             }
             return jpNorthQuestion;
         }
+
+        @Override
+        public void keyReleased( KeyEvent e ) {
+            if( e.getKeyCode() == KeyEvent.VK_ENTER )
+                ExpertConsultant.this.getJbNext().doClick();
+        }
+
+        @Override
+        public void keyPressed( KeyEvent e ) {}
+        
+        @Override
+        public void keyTyped( KeyEvent e ) {}
 
 //        /**
 //         * This method initializes jpCenter 
