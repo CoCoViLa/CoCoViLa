@@ -263,7 +263,8 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 	}
 
 	public void addConnection(Connection con) {
-		connections.add(con);
+	    if( !connections.contains( con ) )
+	        connections.add(con);
 	}
 
 	public boolean removeConnection(Connection con) {

@@ -94,8 +94,8 @@ public class ConnectionList extends ArrayList<Connection> {
 			Connection relation = (Connection) obj;
 			modified = super.remove(relation);
 			if (modified) {
-				relation.getBeginPort().getConnections().remove(relation);
-				relation.getEndPort().getConnections().remove(relation);
+				relation.getBeginPort().getConnectionList().remove(relation);
+				relation.getEndPort().getConnectionList().remove(relation);
 			}
 		}
 		return modified;

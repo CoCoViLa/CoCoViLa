@@ -275,8 +275,8 @@ public class GObj implements Serializable, Cloneable,
         return group;
     }
 
-    public ArrayList<Connection> getConnections() {
-        ArrayList<Connection> c = new ArrayList<Connection>();
+    public Collection<Connection> getConnections() {
+        Set<Connection> c = new LinkedHashSet<Connection>();
         Port port;
 
         for ( int i = 0; i < getPortList().size(); i++ ) {
