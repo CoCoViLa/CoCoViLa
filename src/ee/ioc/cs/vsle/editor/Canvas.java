@@ -11,12 +11,12 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
 
-import ee.ioc.cs.vsle.api.SchemeObject;
 import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
+import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
 import ee.ioc.cs.vsle.vclass.Point;
 
 /**
@@ -51,7 +51,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     private JScrollPane areaScrollPane;
     private boolean drawPorts = true;
     private boolean showObjectNames = false;
-    
+    private String lastScheme;
     private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
 
         @Override
@@ -485,9 +485,15 @@ public class Canvas extends JPanel implements ISchemeContainer {
         vPackage = new PackageXmlProcessor(new File(oldPackage.getPath())).parse();
         if(vPackage==null)
             vPackage = oldPackage;
-        else
-            vPackage.setLastScheme( oldPackage.getLastScheme() );
         palette.reset();
+    }
+    
+    public String getLastScheme() {
+        return lastScheme;
+    }
+
+    public void setLastScheme(String lastScheme) {
+        this.lastScheme = lastScheme;
     }
     
     private String m_canvasTitle;
@@ -507,7 +513,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      *         null if the scheme is not saved to or loaded from a file.
      */
     public String getSchemeTitle() {
-        String lastFile = vPackage.getLastScheme();
+        String lastFile = getLastScheme();
         String title = null;
         if ( lastFile != null && lastFile.length() > 0 ) {
             int is = lastFile.lastIndexOf( File.separatorChar );
@@ -1119,10 +1125,12 @@ public class Canvas extends JPanel implements ISchemeContainer {
         drawingArea.repaint();
         
         setStatusBarText( "Loaded scheme: " + loader.getSchemePath() );
+        setLastScheme( loader.getSchemePath() );
         return true;
     }
 
     public void newScheme() {
+        setLastScheme( null );
         setScheme(new Scheme(this));
         if ( classPainters != null )
             classPainters.clear();
@@ -1161,6 +1169,16 @@ public class Canvas extends JPanel implements ISchemeContainer {
         ObjectPropertiesEditor.show( obj, this );
     }
 
+    void viewPackageComponent( String className ) {
+        System.out.println( "className: " + className);
+        PackageClass cl = getPackage().getClass( className );
+        if( cl.getComponentType() == ComponentType.SCHEME ) {
+                Editor.getInstance().newSchemeTab( vPackage, getWorkDir() + className + ".syn" );
+        } else {
+            openClassCodeViewer( className );
+        }
+    }
+    
     /**
      * Opens the source file of the specified metaclass.
      * The user set default editor is used, if set. Otherwise the

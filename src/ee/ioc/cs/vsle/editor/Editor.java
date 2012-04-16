@@ -17,6 +17,7 @@ import ee.ioc.cs.vsle.editor.scheme.*;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.util.Console;
 import ee.ioc.cs.vsle.vclass.*;
 
 /**
@@ -446,14 +447,15 @@ public class Editor extends JFrame implements ChangeListener {
 
         menu.removeAll();
 
-        for ( final String packageName : RuntimeProperties.getRecentPackages().keySet() ) {
+        for ( final Map.Entry<String, String> entry : RuntimeProperties.getRecentPackages().entrySet() ) {
 
-            JMenuItem menuItem = new JMenuItem( packageName );
-
+            JMenuItem menuItem = new JMenuItem( entry.getKey() );
+            menuItem.setToolTipText( entry.getValue() );
+            
             menuItem.addActionListener( new ActionListener() {
                 @Override
                 public void actionPerformed( ActionEvent e ) {
-                    openNewCanvasWithPackage( new File( RuntimeProperties.getRecentPackages().get( packageName ) ) );
+                    openNewCanvasWithPackage( new File( entry.getValue() ) );
                 }
             } );
             menu.add( menuItem );
@@ -530,6 +532,10 @@ public class Editor extends JFrame implements ChangeListener {
         menuItem = new JMenuItem( Menu.VIEW_THREADS );
         menuItem.addActionListener( aListener );
         menu.add( menuItem );
+        
+        menuItem = new JMenuItem( Menu.JAVA_CONSOLE );
+        menuItem.addActionListener( aListener );
+        menu.add( menuItem );
     }
 
     /**
@@ -581,6 +587,7 @@ public class Editor extends JFrame implements ChangeListener {
             Canvas canvas = new Canvas( pkg, f.getParent() + File.separator );
             RuntimeProperties.addOpenPackage( pkg );
             addCanvas(canvas);
+            updateWindowTitle();
         }
     } // loadPackage
 
@@ -861,6 +868,18 @@ public class Editor extends JFrame implements ChangeListener {
         return c;
     }
 
+    public Canvas newSchemeTab(VPackage pkg, String pathToScheme) {
+        Canvas c;
+        try {
+            c = newSchemeTab( pkg, new FileInputStream( pathToScheme ) );
+            c.setLastScheme( pathToScheme );
+            updateWindowTitle();
+        } catch ( FileNotFoundException e ) {
+            return null;
+        }
+        return c;
+    }
+    
     public void closeSchemeTab( Canvas canv ) {
         if ( canv == null )
             return;

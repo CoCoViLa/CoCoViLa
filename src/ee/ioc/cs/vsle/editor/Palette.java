@@ -137,7 +137,7 @@ public class Palette extends PaletteBase {
                         if (State.isAddObject(action) 
                                 || State.isAddRelClass(action)) {
 
-                            canvas.openClassCodeViewer(
+                            canvas.viewPackageComponent(
                                     State.getClassName(action ));
                         }
                     }

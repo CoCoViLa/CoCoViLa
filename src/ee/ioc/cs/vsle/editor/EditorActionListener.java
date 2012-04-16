@@ -12,6 +12,7 @@ import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.iconeditor.*;
 import ee.ioc.cs.vsle.table.gui.*;
 import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.util.Console;
 import ee.ioc.cs.vsle.vclass.*;
 
 public class EditorActionListener implements ActionListener {
@@ -155,7 +156,6 @@ public class EditorActionListener implements ActionListener {
                         db.p( "Loading scheme: " + file.getName() );
                     try {
                         if ( Editor.getInstance().getCurrentCanvas().loadScheme( file ) ) {
-                            Editor.getInstance().getCurrentPackage().setLastScheme( file.getAbsolutePath() );
                             Editor.getInstance().updateWindowTitle();
                         }
                     } catch ( Exception exc ) {
@@ -166,12 +166,12 @@ public class EditorActionListener implements ActionListener {
             } else if ( e.getActionCommand().equals( Menu.RELOAD_SCHEME ) ) {
                 if ( notifyOnNullPackage(Editor.getInstance().getCurrentPackage()) ) {
                     return;
-                } else if ( Editor.getInstance().getCurrentPackage().getLastScheme() == null ) {
+                } else if ( Editor.getInstance().getCurrentCanvas().getLastScheme() == null ) {
                     JOptionPane.showMessageDialog( Editor.getInstance(), "No scheme has been recently saved or loaded", "Error",
                             JOptionPane.ERROR_MESSAGE );
                     return;
                 }
-                File file = new File( Editor.getInstance().getCurrentPackage().getLastScheme() );
+                File file = new File( Editor.getInstance().getCurrentCanvas().getLastScheme() );
                 if ( file.exists() ) {
                     db.p( "Reloading scheme: " + file.getName() );
                     try {
@@ -356,6 +356,8 @@ public class EditorActionListener implements ActionListener {
                 RuntimeProperties.save();
             } else if ( e.getActionCommand().equals( Menu.VIEW_THREADS ) ) {
                 RunningThreadManager.showDialog();
+            } else if ( e.getActionCommand().equals( Menu.JAVA_CONSOLE ) ) {
+                Console.show();
             } else if ( e.getActionCommand().equals( Menu.EXPERT_TABLE ) ) {
                 JDialog ess = new ExpertSystemShellWelcomeDialog();
                 ess.setLocationRelativeTo( Editor.getInstance() );
@@ -384,7 +386,6 @@ public class EditorActionListener implements ActionListener {
         if ( notifyOnNullPackage(pk) ) {
             return;
         }
-        pk.setLastScheme( null );
         ed.getCurrentCanvas().newScheme();
         ed.updateWindowTitle();        
     }
@@ -402,7 +403,7 @@ public class EditorActionListener implements ActionListener {
             return;
         }
 
-        String fileName = pack.getLastScheme();
+        String fileName = editor.getCurrentCanvas().getLastScheme();
 
         if ( fileName != null ) {
             editor.getCurrentCanvas().saveScheme( new File( fileName ) );
@@ -439,7 +440,6 @@ public class EditorActionListener implements ActionListener {
             if ( RuntimeProperties.isLogInfoEnabled() )
                 db.p( "Saving scheme: " + file.getName() );
             editor.getCurrentCanvas().saveScheme( file );
-            pack.setLastScheme( file.getAbsolutePath() );
             editor.updateWindowTitle();
         }
     }
@@ -452,7 +452,7 @@ public class EditorActionListener implements ActionListener {
         Editor editor = Editor.getInstance();
         Canvas canvas = editor.getCurrentCanvas();
         if ( canvas != null ) {
-            String lastScheme = canvas.getPackage().getLastScheme();
+            String lastScheme = canvas.getLastScheme();
             if ( lastScheme == null ) {
                 int rv = JOptionPane.showConfirmDialog( canvas, "The scheme is not saved. Are you sure you want to "
                         + "close it?", "Confirm Delete", JOptionPane.YES_NO_OPTION );

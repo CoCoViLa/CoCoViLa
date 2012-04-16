@@ -19,7 +19,6 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
     private String name;
     private String description;
     private String path;
-    private String lastScheme;
     private ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
     private PackageClassLoader classLoader;
 
@@ -91,14 +90,6 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
         public String getPath() {
             return path;
         }
-
-		public String getLastScheme() {
-			return lastScheme;
-		}
-
-		public void setLastScheme(String lastScheme) {
-			this.lastScheme = lastScheme;
-		}
 
 		/**
 		 * @param name the name to set

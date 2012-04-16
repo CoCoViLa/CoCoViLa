@@ -73,6 +73,7 @@ public class Menu {
     public static final String EXPERT_TABLE = "Expert System Shell...";
     public static final String SHOW_ALGORITHM = "Show Algorithm";
     public static final String VIEW_THREADS = "View Threads...";
+    public static final String JAVA_CONSOLE = "Open Java Console";
     
     // OPTIONS
     public static final String SETTINGS = "Settings";
