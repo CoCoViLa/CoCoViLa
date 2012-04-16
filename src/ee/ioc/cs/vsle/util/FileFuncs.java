@@ -51,14 +51,14 @@ public class FileFuncs {
             if (defaultPath == null) {
                 defaultPath = RuntimeProperties.getWorkingDirectory();
             }
-            path = new File(defaultPath);
+            setPath( new File(defaultPath) );
         }
 
         @Override
         public byte[] getFileContents(String fileName) {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
-                file = new File(path, fileName);
+                file = new File(getPath(), fileName);
             }
             if (file.isFile() && file.canRead()) {
                 try {
@@ -75,21 +75,21 @@ public class FileFuncs {
         public boolean writeFile(String fileName, String data) {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
-                file = new File(path, fileName);
+                file = new File(getPath(), fileName);
             }
             return FileFuncs.writeFile(file, data);
         }
 
         @Override
         public String toString() {
-            return "FileSystemStorage(" + path + ")";
+            return "FileSystemStorage(" + getPath() + ")";
         }
 
         @Override
         public char[] getCharFileContents(String fileName) {
             File file = new File(fileName);
             if (!file.isAbsolute()) {
-                file = new File(path, fileName);
+                file = new File(getPath(), fileName);
             }
             //TODO find the reason for those exceptions
             try {
@@ -102,6 +102,21 @@ public class FileFuncs {
                 db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
             }
             return null;
+        }
+
+        /**
+         * @return the path
+         */
+        private File getPath() {
+            checkFolderAndCreate( path );
+            return path;
+        }
+
+        /**
+         * @param path the path to set
+         */
+        private void setPath( File path ) {
+            this.path = path;
         }
     }
 
@@ -500,5 +515,24 @@ public class FileFuncs {
                     "File \"" + f.getName() + "\" exists, overwrite?", 
                     "File exists", 
                     JOptionPane.YES_NO_OPTION ) == JOptionPane.OK_OPTION;
+    }
+    
+    /**
+     * Checks if folders exists, if yes, does nothing and returns false;
+     * if not, creates new folder and returns true
+     * 
+     * @param dir
+     * @return
+     */
+    public static boolean checkFolderAndCreate( File dir ) {
+        if (!dir.exists()) {
+            dir.mkdirs();
+            return true;
+        }
+        return false;
+    }
+    
+    public static boolean checkFolderAndCreate( String path ) {
+        return checkFolderAndCreate( new File(path) );
     }
 }

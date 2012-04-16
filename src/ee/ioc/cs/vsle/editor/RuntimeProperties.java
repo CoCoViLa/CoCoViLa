@@ -685,15 +685,8 @@ public class RuntimeProperties {
     public static void setDumpGenerated(boolean dumpGenerated) {
         // create the directory for generated files
         if (dumpGenerated) {
-            File file = new File(getGenFileDir());
-            if (!file.exists()) {
-                if (isLogDebugEnabled()) {
-                    db.p("Creating genFileDir " + file + "...");
-                }
-                file.mkdirs();
-                if (isLogDebugEnabled()) {
-                    db.p("done.");
-                }
+            if( FileFuncs.checkFolderAndCreate( getGenFileDir() ) && isLogDebugEnabled() ) {
+                db.p("Created genFileDir " + getGenFileDir() );
             }
         }
 
@@ -720,6 +713,7 @@ public class RuntimeProperties {
         
         fontChooser.setActionListener( new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 Map<Fonts, Font> newFonts = fontChooser.getElements();
                 
@@ -731,6 +725,7 @@ public class RuntimeProperties {
                         fonts.put( element, newFont );
                         
                         SwingUtilities.invokeLater( new Runnable() {
+                            @Override
                             public void run() {
                                 FontChangeEvent.dispatchEvent( new FontChangeEvent( this, element, newFont ) );
                             }
