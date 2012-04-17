@@ -9,6 +9,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.*;
 
 /**
@@ -51,15 +52,15 @@ public class ClassPropertiesDialog extends JDialog {
 	private final JLabel lblClassName = new JLabel("Class Name:");
 	private final JLabel lblClassDesc = new JLabel("Class Description:");
 	private final JLabel lblClassIcon = new JLabel("Class Icon:");
-	private final JLabel lblRelation = new JLabel("Class Is Relation:");
+	private final JLabel lblComponentType = new JLabel("Component Type:");
 
 	// Text fields
 	private final JTextField fldClassName = new JTextField();
 	private final JTextField fldClassDesc = new JTextField();
 	private final JTextField fldClassIcon = new JTextField("default.gif");
 
-	// Checkboxes
-	private final JCheckBox chkRelation = new JCheckBox();
+	// Comboboxes
+	private final JComboBox cboxCompType = new JComboBox(PackageClass.ComponentType.values());
 
 	private TitledBorder pnlTableTitle = BorderFactory.createTitledBorder("Class Fields");
 
@@ -125,7 +126,7 @@ public class ClassPropertiesDialog extends JDialog {
 		pnlLabels.add(lblClassName);
 		pnlLabels.add(lblClassDesc);
 		pnlLabels.add(lblClassIcon);
-		pnlLabels.add(lblRelation);
+		pnlLabels.add(lblComponentType);
 
 		// The icon path field and browsing button on a separate panel.
 		pnlClassIcon.setLayout(new BorderLayout());
@@ -134,7 +135,7 @@ public class ClassPropertiesDialog extends JDialog {
 
 		// The class can be defined also as a relation. The checkbox is on a separate panel.
 		pnlRelation.setLayout(new BorderLayout());
-		pnlRelation.add(chkRelation, BorderLayout.WEST);
+		pnlRelation.add(cboxCompType, BorderLayout.WEST);
 		pnlRelation.add(new JLabel(" "), BorderLayout.CENTER);
 
 		// Fields are stored on a separate panel.
@@ -184,7 +185,8 @@ public class ClassPropertiesDialog extends JDialog {
 
 		// Ok button pressed, close the window and update class properties.
 		bttnOk.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent evt) {
+			@Override
+            public void actionPerformed(final ActionEvent evt) {
                 stopCellEditing();
                 // Store the defined properties in runtime variables.
 				storeVariables();
@@ -197,7 +199,8 @@ public class ClassPropertiesDialog extends JDialog {
 
 		// Cancel button pressed, just close the dialog without updating any class parameters.
 		bttnCancel.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent evt) {
+			@Override
+            public void actionPerformed(ActionEvent evt) {
 				dispose();
 			}
 		});
@@ -205,7 +208,8 @@ public class ClassPropertiesDialog extends JDialog {
 		// Icon browsing button pressed. Browse for the icon in GIF format
 		// and set the browsed path to the Class Icon text field.
 		bttnBrowseIcon.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent evt) {
+			@Override
+            public void actionPerformed(final ActionEvent evt) {
 				// Open the file open dialog for browsing the class icon in GIF format.
 				browseIcon();
 			}
@@ -214,7 +218,8 @@ public class ClassPropertiesDialog extends JDialog {
 		// New class field adding button pressed. Add an empty row to the end of the DBResult
 		// and refresh the table.
 		bttnNewField.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent evt) {
+			@Override
+            public void actionPerformed(final ActionEvent evt) {
                 stopCellEditing();
 				addEmptyClassField();
 			}
@@ -223,7 +228,8 @@ public class ClassPropertiesDialog extends JDialog {
 		// Class field deleting button pressed. Delete the selected row from the DBResult
 		// and refresh the table.
 		bttnDelField.addActionListener(new ActionListener() {
-			public void actionPerformed(final ActionEvent evt) {
+			@Override
+            public void actionPerformed(final ActionEvent evt) {
 				stopCellEditing();
 				delClassField();
 			}
@@ -248,7 +254,8 @@ public class ClassPropertiesDialog extends JDialog {
 		 * tabeli ridade peal liikumist kuulav funktsioon
 		 */
 		selectionModel.addListSelectionListener(listListener = new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
+			@Override
+            public void valueChanged(ListSelectionEvent e) {
 				// handle table events here.
 				if (tblClassFields.getSelectedRowCount() > 0) {
 					bttnDelField.setEnabled(true);
@@ -335,7 +342,7 @@ public class ClassPropertiesDialog extends JDialog {
 		if (IconEditor.className != null) fldClassName.setText(IconEditor.className);
 		if (IconEditor.classDescription != null) fldClassDesc.setText(IconEditor.classDescription);
 		if (IconEditor.getClassIcon() != null) fldClassIcon.setText(IconEditor.getClassIcon());
-		chkRelation.setSelected(IconEditor.classIsRelation);
+		cboxCompType.setSelectedItem( IconEditor.componentType );
 	} // initialize
 
 	/**
@@ -357,8 +364,7 @@ public class ClassPropertiesDialog extends JDialog {
 		}
 		IconEditor.setClassIcon( classIcon );
 
-		boolean relation = chkRelation.isSelected();
-		IconEditor.classIsRelation = relation;
+		IconEditor.componentType = (PackageClass.ComponentType)cboxCompType.getSelectedItem();
 	} // storeVariables.
 
 	/**

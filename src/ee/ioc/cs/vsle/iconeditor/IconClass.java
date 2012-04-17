@@ -1,11 +1,9 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import java.util.ArrayList;
+import java.util.*;
 
-import ee.ioc.cs.vsle.graphics.BoundingBox;
-import ee.ioc.cs.vsle.graphics.Shape;
-import ee.ioc.cs.vsle.graphics.ShapeGroup;
-import ee.ioc.cs.vsle.vclass.ClassField;
+import ee.ioc.cs.vsle.graphics.*;
+import ee.ioc.cs.vsle.vclass.*;
 
 /*
  * Info about class (shapes, ports, descriptions, properties)
@@ -17,10 +15,9 @@ public class IconClass {
 	String name;
 	String description;
 	private String iconName;
-	boolean isRelation;
 	BoundingBox boundingbox;
 	int maxWidth = 0, maxHeight = 0;
-	
+	private PackageClass.ComponentType componentType = PackageClass.ComponentType.CLASS;
 	
 	IconClass(){
 		this.shapeList = new ShapeGroup();
@@ -29,8 +26,6 @@ public class IconClass {
 		this.name = null;
 		this.description = null;
 		this.iconName = null;
-		this.isRelation = false;
-			
 	}
 
 	/**
@@ -59,20 +54,6 @@ public class IconClass {
 	 */
 	public void setIconName(String iconName) {
 		this.iconName = iconName;
-	}
-
-	/**
-	 * @return Returns the isRelation.
-	 */
-	public boolean getIsRelation() {
-		return isRelation;
-	}
-
-	/**
-	 * @param isRelation The isRelation to set.
-	 */
-	public void setIsRelation(boolean isRelation) {
-		this.isRelation = isRelation;
 	}
 
 	/**
@@ -189,4 +170,18 @@ public class IconClass {
 	public void setFields(ArrayList<ClassField> fields) {
 		this.fields = fields;
 	}
+
+    /**
+     * @return the componentType
+     */
+    PackageClass.ComponentType getComponentType() {
+        return componentType;
+    }
+
+    /**
+     * @param componentType the componentType to set
+     */
+    void setComponentType( PackageClass.ComponentType componentType ) {
+        this.componentType = componentType;
+    }
 }

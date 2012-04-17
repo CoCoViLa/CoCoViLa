@@ -1,27 +1,22 @@
 package ee.ioc.cs.vsle.iconeditor;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-import org.xml.sax.helpers.DefaultHandler;
-
-import ee.ioc.cs.vsle.graphics.*;
-import ee.ioc.cs.vsle.packageparse.*;
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.vclass.ClassField;
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
-
 import static ee.ioc.cs.vsle.graphics.Shape.*;
+
+import java.awt.*;
+import java.io.*;
+import java.util.*;
+
+import javax.xml.parsers.*;
+
+import org.xml.sax.*;
+import org.xml.sax.helpers.*;
+
+import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.graphics.*;
+import ee.ioc.cs.vsle.graphics.Image;
+import ee.ioc.cs.vsle.util.*;
+import ee.ioc.cs.vsle.vclass.*;
+import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
 
 public class ClassImport {
 	ArrayList <String> pc;
@@ -90,8 +85,8 @@ public class ClassImport {
 			
 			int x, y, w, h, col; // x, y, width, height, colour 
 			int x2, y2;
-			int st = 1; // stroke
-			int lt = 0; // linetype
+			float st = 1; // stroke
+			float lt = 0; // linetype
 			int tr = 255; //transparency
 			String strVal;
 			int startAngle, arcAngle;
@@ -109,8 +104,8 @@ public class ClassImport {
 				ports = new ArrayList<IconPort>();
 				fields = new ArrayList<ClassField>();
 				shapeList = new ShapeGroup();
-				if ("relation".equals(attrs.getValue("type")))
-					classIcon.isRelation = true;
+                type = attrs.getValue("type");
+                classIcon.setComponentType( ComponentType.getType( type ) );
 			} else if(element.equals("name") && inClass){
 				inName = true;
 			} else if(element.equals("description") && inClass){
@@ -129,10 +124,10 @@ public class ClassImport {
 				filled = Boolean.parseBoolean(attrs.getValue("filled"));
 				strVal = attrs.getValue("stroke");
 				if (strVal != null)
-					st = Integer.parseInt(strVal);
+					st = Float.parseFloat(strVal);
 				strVal = attrs.getValue("lineType");
 				if (strVal != null)
-					lt = Integer.parseInt(strVal);
+					lt = Float.parseFloat(strVal);
 				strVal = attrs.getValue("transparency");
 				if (strVal != null)
 					tr = Integer.parseInt(strVal);
@@ -151,10 +146,10 @@ public class ClassImport {
 				
 				strVal = attrs.getValue("stroke");
 				if (strVal != null)
-					st = Integer.parseInt(strVal);
+					st = Float.parseFloat(strVal);
 				strVal = attrs.getValue("lineType");
 				if (strVal != null)
-					lt = Integer.parseInt(strVal);
+					lt = Float.parseFloat(strVal);
 				strVal = attrs.getValue("transparency");
 				if (strVal != null)
 					tr = Integer.parseInt(strVal);
@@ -174,10 +169,10 @@ public class ClassImport {
 				col = Integer.parseInt(attrs.getValue("colour"));
 				strVal = attrs.getValue("stroke");
 				if (strVal != null)
-					st = Integer.parseInt(strVal);
+					st = Float.parseFloat(strVal);
 				strVal = attrs.getValue("lineType");
 				if (strVal != null)
-					lt = Integer.parseInt(strVal);
+					lt = Float.parseFloat(strVal);
 				strVal = attrs.getValue("transparency");
 				if (strVal != null)
 					tr = Integer.parseInt(strVal);
@@ -197,10 +192,10 @@ public class ClassImport {
 				
 				strVal = attrs.getValue("stroke");
 				if (strVal != null)
-					st = Integer.parseInt(strVal);
+					st = Float.parseFloat(strVal);
 				strVal = attrs.getValue("lineType");
 				if (strVal != null)
-					lt = Integer.parseInt(strVal);
+					lt = Float.parseFloat(strVal);
 				strVal = attrs.getValue("transparency");
 				if (strVal != null)
 					tr = Integer.parseInt(strVal);
@@ -226,7 +221,7 @@ public class ClassImport {
 				x = getCoordinate(attrs.getValue("x"));
 				y = getCoordinate(attrs.getValue("y"));
 				col = Integer.parseInt(attrs.getValue("colour"));
-				st = Integer.parseInt(attrs.getValue("stroke"));
+				st = Float.parseFloat(attrs.getValue("stroke"));
 				tr = Integer.parseInt(attrs.getValue("transparency"));
 				fixed = Boolean.parseBoolean(attrs.getValue("fixed"));
 				Dot dot = new Dot(x, y, createColor( col, tr ), st);

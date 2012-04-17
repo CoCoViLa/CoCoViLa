@@ -1,5 +1,8 @@
 package ee.ioc.cs.vsle.iconeditor;
 
+import static ee.ioc.cs.vsle.graphics.Shape.*;
+import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
@@ -13,8 +16,7 @@ import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
-import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.*;
-import static ee.ioc.cs.vsle.graphics.Shape.*;
+import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
 
 public class IconEditor extends JFrame {
 
@@ -24,7 +26,7 @@ public class IconEditor extends JFrame {
     public static String className;
     public static String classDescription;
     private static String classIcon;
-    public static boolean classIsRelation;
+    public static ComponentType componentType;
     
     // Package properties
     public static String packageName;
@@ -307,21 +309,15 @@ public class IconEditor extends JFrame {
             xmlBuffer.append( "<?xml version='1.0' encoding='utf-8'?>\n" );
             xmlBuffer.append( "\n" );
         }
-        xmlBuffer.append( "<class" );
-        if ( IconEditor.classIsRelation ) {
-            xmlBuffer.append( " type=\"relation\"" );
-        } else {
-            xmlBuffer.append( " type=\"class\"" );
-        }
-        xmlBuffer.append( ">\n" );
-        xmlBuffer.append( "	<name>" + IconEditor.className + "</name>\n" );
-        xmlBuffer.append( "	<description>" + IconEditor.classDescription + "</description>\n" );
-        String classIcon = IconEditor.getClassIcon();
+        xmlBuffer.append( "<class type=\"" ).append( componentType.getXmlName() ).append(  "\">\n" );
+        xmlBuffer.append( "	<name>" ).append(  IconEditor.className ).append(  "</name>\n" );
+        xmlBuffer.append( "	<description>" ).append(  IconEditor.classDescription ).append(  "</description>\n" );
+        String _classIcon = IconEditor.getClassIcon();
 //        if ( classIcon != null && classIcon.lastIndexOf( "/" ) >= 0 )
 //            classIcon = classIcon.substring( classIcon.lastIndexOf( "/" ) + 1 );
 //        if ( classIcon != null && classIcon.lastIndexOf( "\\" ) >= 0 )
 //            classIcon = classIcon.substring( classIcon.lastIndexOf( "\\" ) + 1 );
-        xmlBuffer.append( "	<icon>" + classIcon + "</icon>\n" );
+        xmlBuffer.append( "	<icon>" ).append(  _classIcon ).append(  "</icon>\n" );
         xmlBuffer = appendShapes( xmlBuffer );
         xmlBuffer = appendPorts( xmlBuffer );
         xmlBuffer = appendClassFields( xmlBuffer );
@@ -666,10 +662,10 @@ public class IconEditor extends JFrame {
                 g2.setColor( new Color( red, green, blue, alpha ) );
 
                 if ( mListener.lineType > 0 ) {
-                    g2.setStroke( new BasicStroke( (float) mListener.strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND,
+                    g2.setStroke( new BasicStroke( mListener.strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND,
                             50, new float[] { mListener.lineType, mListener.lineType }, 0 ) );
                 } else {
-                    g2.setStroke( new BasicStroke( (float) mListener.strokeWidth ) );
+                    g2.setStroke( new BasicStroke( mListener.strokeWidth ) );
                 }
 
                 final int width = Math.abs( mouseX - mListener.startX );
@@ -744,10 +740,10 @@ public class IconEditor extends JFrame {
 
         int confirmed = JOptionPane.showConfirmDialog( null, "Exit Application?", Menu.EXIT, JOptionPane.OK_CANCEL_OPTION );
         switch ( confirmed ) {
-        case JOptionPane.OK_OPTION:
-            System.exit( 0 );
         case JOptionPane.CANCEL_OPTION:
             break;
+        case JOptionPane.OK_OPTION:
+            System.exit( 0 );
         }
     }
 
@@ -1097,7 +1093,7 @@ public class IconEditor extends JFrame {
      */
     public void saveToPackage() {
         boolean inPackage = false;
-        String className = IconEditor.className;
+        String _className = IconEditor.className;
         
         if( !checkPackage() ) {
             JOptionPane.showMessageDialog(this,
@@ -1139,7 +1135,7 @@ public class IconEditor extends JFrame {
                 } else {
                     packageClassList.get( i ).setIconName( IconEditor.getClassIcon() );
                 }
-                packageClassList.get( i ).setIsRelation( IconEditor.classIsRelation );
+                packageClassList.get( i ).setComponentType( IconEditor.componentType );
                 packageClassList.get( i ).setName( IconEditor.className );
                 packageClassList.get( i ).setPorts( ports );
                 packageClassList.get( i ).shiftPorts( classX, classY );
@@ -1207,9 +1203,9 @@ public class IconEditor extends JFrame {
             in.close();
 
             /* See if .java file exists */
-            File javaFile = new File( getPackageFile().getParent() + File.separator + className + ".java" );
+            File javaFile = new File( getPackageFile().getParent() + File.separator + _className + ".java" );
             /* See if previews .java file exists */
-            File prevJavaFile = new File( prevPackagePath + File.separator + className + ".java" );
+            File prevJavaFile = new File( prevPackagePath + File.separator + _className + ".java" );
             
 
             /* If file exists show confirmation dialog */
@@ -1232,8 +1228,8 @@ public class IconEditor extends JFrame {
                 	if (prevJavaFile.exists()) {
                 		fileText = FileFuncs.getFileContents(prevJavaFile);
                 	} else {
-                		fileText = "class " + className + " {";
-                		fileText += "\n    /*@ specification " + className + " {\n";
+                		fileText = "class " + _className + " {";
+                		fileText += "\n    /*@ specification " + _className + " {\n";
 
                 		for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
                 			String fieldName = dbrClassFields.getValueAt( i, iNAME );
@@ -1373,7 +1369,7 @@ public class IconEditor extends JFrame {
         }
 
         // Add boolean value representing if the class is a relation.
-        sb.append( "CLASSISRELATION:" + IconEditor.classIsRelation + "\n" );
+        sb.append( "COMPONENTTYPE:" + IconEditor.componentType.getXmlName() + "\n" );
         dbrClassFields.removeEmptyRows();
         // Add class fields.
         if ( dbrClassFields != null && dbrClassFields.getRowCount() > 0 ) {
@@ -1607,9 +1603,9 @@ public class IconEditor extends JFrame {
                 IconEditor.classDescription = str.substring( 17 );
             } else if ( str.startsWith( "CLASSICON:" ) ) {
                 IconEditor.setClassIcon( str.substring( 10 ) );
-            } else if ( str.startsWith( "CLASSISRELATION:" ) ) {
-                str = str.substring( 16 );
-                IconEditor.classIsRelation = Boolean.valueOf( str ).booleanValue();
+            } else if ( str.startsWith( "COMPONENTTYPE:" ) ) {
+                str = str.substring( "COMPONENTTYPE:".length() );
+                IconEditor.componentType = ComponentType.getType( str );
             } else if ( str.startsWith( "CLASSFIELD:" ) ) {
                 str = str.substring( 11 );
                 String fieldName = str.substring( 0, str.indexOf( ":" ) );
@@ -1631,6 +1627,7 @@ public class IconEditor extends JFrame {
      */
     public static void main( final String[] args ) {
         SwingUtilities.invokeLater( new Runnable() {
+            @Override
             public void run() {
                 createAndInitGUI( args );
             }
@@ -1655,6 +1652,7 @@ public class IconEditor extends JFrame {
 
     }
 
+    @Override
     public void setTitle( String title ) {
         
         if( title == null || title.length() == 0 ) {
@@ -1789,7 +1787,7 @@ public class IconEditor extends JFrame {
         IconEditor.className = icon.getName();
         IconEditor.classDescription = icon.getDescription();
         IconEditor.setClassIcon( icon.getIconName() );
-        IconEditor.classIsRelation = icon.getIsRelation();
+        IconEditor.componentType = icon.getComponentType();
         palette.boundingbox.setEnabled( false );
         boundingbox = icon.getBoundingbox();
     }
@@ -1891,7 +1889,7 @@ public class IconEditor extends JFrame {
      * @param packageFile the packageFile to set
      */
     void setPackageFile( File packageFile ) {
-        this.packageFile = packageFile;
+        IconEditor.packageFile = packageFile;
     }
 
     /**
