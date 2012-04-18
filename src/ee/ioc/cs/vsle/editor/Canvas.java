@@ -36,7 +36,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
     Connection currentCon;
     public MouseOps mListener;
     public KeyOps keyListener;
-    boolean showGrid = false;
+    boolean showGrid = RuntimeProperties.isShowGrid();
+    boolean showCtrlPane = RuntimeProperties.isShowControls();
     Dimension drawAreaSize = new Dimension( 600, 500 );
     JPanel infoPanel;
     private JLabel posInfo;
@@ -1230,6 +1231,15 @@ public class Canvas extends JPanel implements ISchemeContainer {
     public void setGridVisible( boolean b ) {
         this.showGrid = b;
         drawingArea.repaint();
+    }
+    
+    public boolean isCtrlPanelVisible() {
+        return this.showCtrlPane;
+    }
+
+    public void setCtrlPanelVisible( boolean b ) {
+        this.showCtrlPane = b;
+        palette.reset();
     }
     
     public void setDrawPorts( boolean b ) {

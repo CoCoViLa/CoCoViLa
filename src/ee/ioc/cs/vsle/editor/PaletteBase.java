@@ -41,6 +41,7 @@ public abstract class PaletteBase implements ActionListener {
 
     protected abstract void setState(String state);
 
+    @Override
     public void actionPerformed(ActionEvent e) {
         int i = buttons.lastIndexOf(e.getSource());
         if (i < 0)

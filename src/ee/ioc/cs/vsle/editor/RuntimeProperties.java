@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.editor;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.*;
 import java.io.*;
 import java.util.*;
 import java.util.List;
@@ -13,6 +14,8 @@ import ee.ioc.cs.vsle.vclass.*;
 
 public class RuntimeProperties {
 
+    private final static RuntimeProperties instance = new RuntimeProperties();
+    
     public final static String SCHEME_DTD = "scheme.dtd";
     public final static String PACKAGE_DTD = "package.dtd";
     public final static String TABLE_SCHEMA = "table.xsd";
@@ -41,6 +44,7 @@ public class RuntimeProperties {
     private static final String LAST_EXECUTED = "lastExecuted";
     private static final String ANTI_ALIASING = "antiAliasing";
     private static final String SHOW_GRID = "showGrid";
+    private static final String SHOW_CONTROLS = "showControls";
     private static final String GRID_STEP = "gridStep";
     private static final String NUDGE_STEP = "nudgeStep";
     private static final String SNAP_TO_GRID = "snapToGrid";
@@ -57,8 +61,8 @@ public class RuntimeProperties {
     private static final String VERSION_UNKNOWN = "@project.version@";
     //x;y;width;height;state
     private static final String SCHEME_EDITOR_WINDOW_PROPS = "schemeEditorWindowProps";
-    private static final String COMPUTE_GOAL = "computeGoal";
-    private static final String PROPAGATE_VALUES = "propagateValues";
+    static final String COMPUTE_GOAL = "computeGoal";
+    static final String PROPAGATE_VALUES = "propagateValues";
     private static final String DUMP_GENERATED = "dumpGeneratedFiles";
     private static final String DEFAULT_EDITOR = "defaultEditor";
 
@@ -68,13 +72,11 @@ public class RuntimeProperties {
             + File.separator;
 
     private static final Properties s_defaultProperties;
-    private static final Properties s_runtimeProperties;
+    private final Properties runtimeProperties;
 
     static {
 
         s_defaultProperties = new Properties();
-        s_runtimeProperties = new Properties( s_defaultProperties );
-
         s_defaultProperties.put( DOCUMENTATION_URL, "http://www.cs.ioc.ee/~cocovila/" );
         s_defaultProperties.put( GENERATED_FILES_DIR, "generated" );
         s_defaultProperties.put( COMPILATION_CLASSPATH, "lib/jcommon.jar;lib/jfreechart.jar" );
@@ -83,6 +85,7 @@ public class RuntimeProperties {
         s_defaultProperties.put( DEFAULT_LNF, "javax.swing.plaf.metal.MetalLookAndFeel" );
         s_defaultProperties.put( ANTI_ALIASING, Boolean.TRUE.toString() );
         s_defaultProperties.put( SHOW_GRID, Boolean.TRUE.toString() );
+        s_defaultProperties.put( SHOW_CONTROLS, Boolean.FALSE.toString() );
         s_defaultProperties.put( GRID_STEP, Integer.toString( 15 ) );
         s_defaultProperties.put( NUDGE_STEP, Integer.toString( 1 ) );
         s_defaultProperties.put( SNAP_TO_GRID, Boolean.FALSE.toString() );
@@ -103,28 +106,43 @@ public class RuntimeProperties {
         }
     }
 
-    private static String genFileDir;
-    private static String compilationClasspath;
-    private static int debugInfo;
-    private static int gridStep;
-    private static int nudgeStep;
-    private static boolean snapToGrid;
-    private static boolean showGrid;
-    private static boolean isAntialiasingOn;
-    private static float zoomFactor;
-    private static boolean isSyntaxHighlightingOn;
-    private static boolean showAlgorithm;
-    private static String lnf;
-    private static boolean recursiveSpecsAllowed = false;
-    private static int maxRecursiveDeclarationDepth = 2;
-    private static List<String> openPackages = new ArrayList<String>();
-    private static List<String> prevOpenPackages = new ArrayList<String>();
-    private static Map<String, String> recentPackages = new LinkedHashMap<String, String>();
-    private static boolean computeGoal;
-    private static boolean propagateValues;
-    private static boolean dumpGenerated;
-    private static Map<Fonts, Font> fonts = new Hashtable<Fonts, Font>();
-    private static String defaultEditor;
+    {
+        runtimeProperties = new Properties( s_defaultProperties );
+    }
+    
+    private String genFileDir;
+    private String compilationClasspath;
+    private int debugInfo;
+    private int gridStep;
+    private int nudgeStep;
+    private boolean snapToGrid;
+    private boolean showGrid;
+    private boolean showControls;
+    private boolean isAntialiasingOn;
+    private float zoomFactor;
+    private boolean isSyntaxHighlightingOn;
+    private boolean showAlgorithm;
+    private String lnf;
+    private boolean recursiveSpecsAllowed = false;
+    private int maxRecursiveDeclarationDepth = 2;
+    private List<String> openPackages = new ArrayList<String>();
+    private List<String> prevOpenPackages = new ArrayList<String>();
+    private Map<String, String> recentPackages = new LinkedHashMap<String, String>();
+    private boolean computeGoal;
+    private boolean propagateValues;
+    private boolean dumpGenerated;
+    private Map<Fonts, Font> fonts = new Hashtable<Fonts, Font>();
+    private String defaultEditor;
+    
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
+
+    public static void addPropertyChangeListener(PropertyChangeListener listener) {
+        instance.pcs.addPropertyChangeListener(listener);
+    }
+
+    public void removePropertyChangeListener(PropertyChangeListener listener) {
+        instance.pcs.removePropertyChangeListener(listener);
+    }
     
     public static boolean isLogDebugEnabled() {
         return getDebugInfo() >= 1;
@@ -161,33 +179,34 @@ public class RuntimeProperties {
 
     public static void init() {
 
-        readProperties( APP_PROPS_FILE_NAME, s_runtimeProperties );
+        readProperties( APP_PROPS_FILE_NAME, instance.runtimeProperties );
 
         // Initialize debug flag first because other initializations could want to use this flag
-        setDebugInfo( Integer.parseInt( s_runtimeProperties.getProperty( DEBUG_INFO ) ) );
+        setDebugInfo( Integer.parseInt( instance.runtimeProperties.getProperty( DEBUG_INFO ) ) );
 
-        setGenFileDir( s_runtimeProperties.getProperty( GENERATED_FILES_DIR ) );
+        setGenFileDir( instance.runtimeProperties.getProperty( GENERATED_FILES_DIR ) );
         setDumpGenerated(Boolean.parseBoolean(
-                s_runtimeProperties.getProperty(DUMP_GENERATED)));
-        setCompilationClasspath( s_runtimeProperties.getProperty( COMPILATION_CLASSPATH ) );
-        setLnf( s_runtimeProperties.getProperty( DEFAULT_LNF ) );
-        setGridStep( Integer.parseInt( s_runtimeProperties.getProperty( GRID_STEP ) ) );
-        setAntialiasingOn( Boolean.parseBoolean( s_runtimeProperties.getProperty( ANTI_ALIASING ) ) );
-        setSnapToGrid( Boolean.parseBoolean( s_runtimeProperties.getProperty( SNAP_TO_GRID ) ) );
-        setShowGrid( Boolean.parseBoolean( s_runtimeProperties.getProperty( SHOW_GRID ) ) );
-        setZoomFactor( Float.parseFloat( s_runtimeProperties.getProperty( ZOOM_LEVEL ) ) );
-        setNudgeStep( Integer.parseInt( s_runtimeProperties.getProperty( NUDGE_STEP ) ) );
-        setShowAlgorithm( Boolean.parseBoolean( s_runtimeProperties.getProperty( SHOW_ALGORITHM ) ) );
-        setSyntaxHighlightingOn( Boolean.parseBoolean( s_runtimeProperties.getProperty( SYNTAX_HIGHLIGHT ) ) );
-        setPropagateValues( Boolean.parseBoolean( s_runtimeProperties.getProperty( PROPAGATE_VALUES ) ) );
-        setComputeGoal( Boolean.parseBoolean( s_runtimeProperties.getProperty( COMPUTE_GOAL ) ) );
-        setDefaultEditor(s_runtimeProperties.getProperty(DEFAULT_EDITOR));
+                instance.runtimeProperties.getProperty(DUMP_GENERATED)));
+        setCompilationClasspath( instance.runtimeProperties.getProperty( COMPILATION_CLASSPATH ) );
+        setLnf( instance.runtimeProperties.getProperty( DEFAULT_LNF ) );
+        setGridStep( Integer.parseInt( instance.runtimeProperties.getProperty( GRID_STEP ) ) );
+        setAntialiasingOn( Boolean.parseBoolean( instance.runtimeProperties.getProperty( ANTI_ALIASING ) ) );
+        setSnapToGrid( Boolean.parseBoolean( instance.runtimeProperties.getProperty( SNAP_TO_GRID ) ) );
+        setShowGrid( Boolean.parseBoolean( instance.runtimeProperties.getProperty( SHOW_GRID ) ) );
+        setShowControls( Boolean.parseBoolean( instance.runtimeProperties.getProperty( SHOW_CONTROLS ) ) );
+        setZoomFactor( Float.parseFloat( instance.runtimeProperties.getProperty( ZOOM_LEVEL ) ) );
+        setNudgeStep( Integer.parseInt( instance.runtimeProperties.getProperty( NUDGE_STEP ) ) );
+        setShowAlgorithm( Boolean.parseBoolean( instance.runtimeProperties.getProperty( SHOW_ALGORITHM ) ) );
+        setSyntaxHighlightingOn( Boolean.parseBoolean( instance.runtimeProperties.getProperty( SYNTAX_HIGHLIGHT ) ) );
+        setPropagateValues( Boolean.parseBoolean( instance.runtimeProperties.getProperty( PROPAGATE_VALUES ) ) );
+        setComputeGoal( Boolean.parseBoolean( instance.runtimeProperties.getProperty( COMPUTE_GOAL ) ) );
+        setDefaultEditor(instance.runtimeProperties.getProperty(DEFAULT_EDITOR));
 
         for( Fonts font : Fonts.values() ) {
-            fonts.put( font, Font.decode( s_runtimeProperties.getProperty( font.getPropertyName() ) ) );
+            instance.fonts.put( font, Font.decode( instance.runtimeProperties.getProperty( font.getPropertyName() ) ) );
         }
         
-        String openPacks = s_runtimeProperties.getProperty( OPEN_PACKAGES );
+        String openPacks = instance.runtimeProperties.getProperty( OPEN_PACKAGES );
 
         if ( openPacks != null && openPacks.trim().length() > 0 ) {
             String[] pack = openPacks.split( ";" );
@@ -197,11 +216,11 @@ public class RuntimeProperties {
                 if ( pack[ i ].trim().length() == 0 )
                     continue;
 
-                RuntimeProperties.prevOpenPackages.add( pack[ i ] );
+                instance.prevOpenPackages.add( pack[ i ] );
             }
         }
 
-        String recent = s_runtimeProperties.getProperty( RECENT_PACKAGES );
+        String recent = instance.runtimeProperties.getProperty( RECENT_PACKAGES );
 
         if ( recent != null ) {
 
@@ -215,65 +234,66 @@ public class RuntimeProperties {
 
                     String packageName = f.getName().substring( 0, f.getName().indexOf( "." ) );
 
-                    RuntimeProperties.recentPackages.put( packageName, f.getAbsolutePath() );
+                    instance.recentPackages.put( packageName, f.getAbsolutePath() );
                 }
             }
         }
 
-        String[] specRec = s_runtimeProperties.getProperty( SPEC_RECURSION_PARAMS ).split( ";" );
+        String[] specRec = instance.runtimeProperties.getProperty( SPEC_RECURSION_PARAMS ).split( ";" );
         setRecursiveSpecsAllowed( Boolean.parseBoolean( specRec[0] ) );
         setMaxRecursiveDeclarationDepth( Integer.parseInt( specRec[1] ) );
 
-        s_runtimeProperties.setProperty( LAST_EXECUTED, new java.util.Date().toString() );
+        instance.runtimeProperties.setProperty( LAST_EXECUTED, new java.util.Date().toString() );
 
     }
 
     public static void save() {
 
-        s_runtimeProperties.setProperty( GENERATED_FILES_DIR, genFileDir );
-        s_runtimeProperties.setProperty( COMPILATION_CLASSPATH, compilationClasspath );
-        s_runtimeProperties.setProperty( DEBUG_INFO, Integer.toString( debugInfo ) );
-        s_runtimeProperties.setProperty( GRID_STEP, Integer.toString( gridStep ) );
-        s_runtimeProperties.setProperty( NUDGE_STEP, Integer.toString( nudgeStep ) );
-        s_runtimeProperties.setProperty( SNAP_TO_GRID, Boolean.toString( snapToGrid ) );
-        s_runtimeProperties.setProperty( SHOW_GRID, Boolean.toString( showGrid ) );
-        s_runtimeProperties.setProperty( ANTI_ALIASING, Boolean.toString( isAntialiasingOn ) );
-        s_runtimeProperties.setProperty( ZOOM_LEVEL, Double.toString( zoomFactor ) );
-        s_runtimeProperties.setProperty( SYNTAX_HIGHLIGHT, Boolean.toString( isSyntaxHighlightingOn ) );
-        s_runtimeProperties.setProperty( SHOW_ALGORITHM, Boolean.toString( showAlgorithm ) );
-        s_runtimeProperties.setProperty( DEFAULT_LNF, lnf );
-        s_runtimeProperties.setProperty( SPEC_RECURSION_PARAMS, Boolean.toString( recursiveSpecsAllowed ) + ";" + maxRecursiveDeclarationDepth );
-        s_runtimeProperties.setProperty( COMPUTE_GOAL, Boolean.toString( computeGoal ) );
-        s_runtimeProperties.setProperty( PROPAGATE_VALUES, Boolean.toString( propagateValues ) );
-        s_runtimeProperties.setProperty( DUMP_GENERATED, Boolean.toString(dumpGenerated ));
+        instance.runtimeProperties.setProperty( GENERATED_FILES_DIR, instance.genFileDir );
+        instance.runtimeProperties.setProperty( COMPILATION_CLASSPATH, instance.compilationClasspath );
+        instance.runtimeProperties.setProperty( DEBUG_INFO, Integer.toString( instance.debugInfo ) );
+        instance.runtimeProperties.setProperty( GRID_STEP, Integer.toString( instance.gridStep ) );
+        instance.runtimeProperties.setProperty( NUDGE_STEP, Integer.toString( instance.nudgeStep ) );
+        instance.runtimeProperties.setProperty( SNAP_TO_GRID, Boolean.toString( instance.snapToGrid ) );
+        instance.runtimeProperties.setProperty( SHOW_GRID, Boolean.toString( instance.showGrid ) );
+        instance.runtimeProperties.setProperty( SHOW_CONTROLS, Boolean.toString( instance.showControls ) );
+        instance.runtimeProperties.setProperty( ANTI_ALIASING, Boolean.toString( instance.isAntialiasingOn ) );
+        instance.runtimeProperties.setProperty( ZOOM_LEVEL, Double.toString( instance.zoomFactor ) );
+        instance.runtimeProperties.setProperty( SYNTAX_HIGHLIGHT, Boolean.toString( instance.isSyntaxHighlightingOn ) );
+        instance.runtimeProperties.setProperty( SHOW_ALGORITHM, Boolean.toString( instance.showAlgorithm ) );
+        instance.runtimeProperties.setProperty( DEFAULT_LNF, instance.lnf );
+        instance.runtimeProperties.setProperty( SPEC_RECURSION_PARAMS, Boolean.toString( instance.recursiveSpecsAllowed ) + ";" + instance.maxRecursiveDeclarationDepth );
+        instance.runtimeProperties.setProperty( COMPUTE_GOAL, Boolean.toString( instance.computeGoal ) );
+        instance.runtimeProperties.setProperty( PROPAGATE_VALUES, Boolean.toString( instance.propagateValues ) );
+        instance.runtimeProperties.setProperty( DUMP_GENERATED, Boolean.toString(instance.dumpGenerated ));
 
-        if (defaultEditor == null) {
-            s_runtimeProperties.remove(DEFAULT_EDITOR);
+        if (instance.defaultEditor == null) {
+            instance.runtimeProperties.remove(DEFAULT_EDITOR);
         } else {
-            s_runtimeProperties.setProperty(DEFAULT_EDITOR, defaultEditor);
+            instance.runtimeProperties.setProperty(DEFAULT_EDITOR, instance.defaultEditor);
         }
 
         for( Fonts font : Fonts.values() ) {
-            s_runtimeProperties.setProperty( font.getPropertyName(), encodeFont( fonts.get( font ) ) );
+            instance.runtimeProperties.setProperty( font.getPropertyName(), encodeFont( instance.fonts.get( font ) ) );
         }
         
         String openPackagesString = "";
 
-        for ( String open : openPackages ) {
+        for ( String open : instance.openPackages ) {
             openPackagesString += open + ";";
         }
 
-        s_runtimeProperties.setProperty( OPEN_PACKAGES, openPackagesString );
+        instance.runtimeProperties.setProperty( OPEN_PACKAGES, openPackagesString );
 
         String recentPackagesString = "";
 
-        for ( String recent : recentPackages.values() ) {
+        for ( String recent : instance.recentPackages.values() ) {
             recentPackagesString += recent + ";";
         }
 
-        s_runtimeProperties.setProperty( RECENT_PACKAGES, recentPackagesString );
+        instance.runtimeProperties.setProperty( RECENT_PACKAGES, recentPackagesString );
 
-        writeProperties( APP_PROPS_FILE_NAME, s_runtimeProperties );
+        writeProperties( APP_PROPS_FILE_NAME, instance.runtimeProperties );
         
         db.p( "Configuration saved" );
     }
@@ -284,7 +304,7 @@ public class RuntimeProperties {
      * @return String - system documentation URL.
      */
     public static String getSystemDocUrl() {
-        return s_runtimeProperties.getProperty( DOCUMENTATION_URL );
+        return instance.runtimeProperties.getProperty( DOCUMENTATION_URL );
     }
 
     /**
@@ -302,7 +322,7 @@ public class RuntimeProperties {
             }
         }
 
-        s_runtimeProperties.setProperty( LAST_PATH, path );
+        instance.runtimeProperties.setProperty( LAST_PATH, path );
     }
 
     /**
@@ -312,28 +332,28 @@ public class RuntimeProperties {
      * @return String - last used path from system properties.
      */
     public static String getLastPath() {
-        return s_runtimeProperties.getProperty( LAST_PATH );
+        return instance.runtimeProperties.getProperty( LAST_PATH );
     }
 
     /**
      * @param genFileDir the genFileDir to set
      */
     public static void setGenFileDir( String genFileDir ) {
-        RuntimeProperties.genFileDir = genFileDir;
+        instance.genFileDir = genFileDir;
     }
 
     /**
      * @return the genFileDir
      */
     public static String getGenFileDir() {
-        return genFileDir;
+        return instance.genFileDir;
     }
 
     /**
      * @param compilationClasspath the compilationClasspath to set
      */
     public static void setCompilationClasspath( String compilationClasspath ) {
-        RuntimeProperties.compilationClasspath = (compilationClasspath == null)
+        instance.compilationClasspath = (compilationClasspath == null)
             ? ""
             : compilationClasspath;
     }
@@ -342,7 +362,7 @@ public class RuntimeProperties {
      * @return the compilationClasspath
      */
     public static String getCompilationClasspath() {
-        return compilationClasspath;
+        return instance.compilationClasspath;
     }
 
     /**
@@ -350,8 +370,8 @@ public class RuntimeProperties {
      * @return the compilationClasspath, can be empty or null
      */
     public static String[] getCompilationClasspaths() {
-        if (compilationClasspath != null) {
-            return compilationClasspath.split(";");
+        if (instance.compilationClasspath != null) {
+            return instance.compilationClasspath.split(";");
         }
         return null;
     }
@@ -360,14 +380,14 @@ public class RuntimeProperties {
      * @param debugInfo the debugInfo to set
      */
     public static void setDebugInfo( int debugInfo ) {
-        RuntimeProperties.debugInfo = debugInfo;
+        instance.debugInfo = debugInfo;
     }
 
     /**
      * @return the debugInfo
      */
     public static int getDebugInfo() {
-        return debugInfo;
+        return instance.debugInfo;
     }
 
     /**
@@ -375,166 +395,174 @@ public class RuntimeProperties {
      */
     public static void setGridStep( int gridStep ) {
 
-        RuntimeProperties.gridStep = gridStep;
+        instance.gridStep = gridStep;
     }
 
     /**
      * @return the gridStep
      */
     public static int getGridStep() {
-        return gridStep;
+        return instance.gridStep;
     }
 
     /**
      * @param nudgeStep the nudgeStep to set
      */
     public static void setNudgeStep( int nudgeStep ) {
-        RuntimeProperties.nudgeStep = nudgeStep;
+        instance.nudgeStep = nudgeStep;
     }
 
     /**
      * @return the nudgeStep
      */
     public static int getNudgeStep() {
-        return nudgeStep;
+        return instance.nudgeStep;
     }
 
     /**
      * @param snapToGrid the snapToGrid to set
      */
     public static void setSnapToGrid( boolean snapToGrid ) {
-        RuntimeProperties.snapToGrid = snapToGrid;
+        instance.snapToGrid = snapToGrid;
     }
 
     /**
      * @return the snapToGrid
      */
     public static boolean getSnapToGrid() {
-        return snapToGrid;
+        return instance.snapToGrid;
     }
 
     /**
      * @param showGrid the showGrid to set
      */
     public static void setShowGrid( boolean showGrid ) {
-        RuntimeProperties.showGrid = showGrid;
+        instance.showGrid = showGrid;
     }
 
     /**
      * @return the showGrid
      */
     public static boolean isShowGrid() {
-        return showGrid;
+        return instance.showGrid;
     }
 
+    public static void setShowControls( boolean showControls ) {
+        instance.showControls = showControls;
+    }
+
+    public static boolean isShowControls() {
+        return instance.showControls;
+    }
+    
     /**
      * @param isAntialiasingOn the isAntialiasingOn to set
      */
     public static void setAntialiasingOn( boolean isAntialiasingOn ) {
-        RuntimeProperties.isAntialiasingOn = isAntialiasingOn;
+        instance.isAntialiasingOn = isAntialiasingOn;
     }
 
     /**
      * @return the isAntialiasingOn
      */
     public static boolean isAntialiasingOn() {
-        return isAntialiasingOn;
+        return instance.isAntialiasingOn;
     }
 
     /**
      * @param zoomFactor the zoomFactor to set
      */
     public static void setZoomFactor( float zoomFactor ) {
-        RuntimeProperties.zoomFactor = zoomFactor;
+        instance.zoomFactor = zoomFactor;
     }
 
     /**
      * @return the zoomFactor
      */
     public static float getZoomFactor() {
-        return zoomFactor;
+        return instance.zoomFactor;
     }
 
     /**
      * @param isSyntaxHighlightingOn the isSyntaxHighlightingOn to set
      */
     public static void setSyntaxHighlightingOn( boolean isSyntaxHighlightingOn ) {
-        RuntimeProperties.isSyntaxHighlightingOn = isSyntaxHighlightingOn;
+        instance.isSyntaxHighlightingOn = isSyntaxHighlightingOn;
     }
 
     /**
      * @return the isSyntaxHighlightingOn
      */
     public static boolean isSyntaxHighlightingOn() {
-        return isSyntaxHighlightingOn;
+        return instance.isSyntaxHighlightingOn;
     }
 
     /**
      * @param showAlgorithm the showAlgorithm to set
      */
     public static void setShowAlgorithm( boolean showAlgorithm ) {
-        RuntimeProperties.showAlgorithm = showAlgorithm;
+        instance.showAlgorithm = showAlgorithm;
     }
 
     /**
      * @return the showAlgorithm
      */
     public static boolean isShowAlgorithm() {
-        return showAlgorithm;
+        return instance.showAlgorithm;
     }
 
     /**
      * @param openPackage the openPackage to set
      */
     public static void addOpenPackage( VPackage pkg ) {
-        RuntimeProperties.openPackages.add( pkg.getPath() );
-        RuntimeProperties.recentPackages.put( pkg.getName(), pkg.getPath() );
+        instance.openPackages.add( pkg.getPath() );
+        instance.recentPackages.put( pkg.getName(), pkg.getPath() );
     }
 
     public static void removeOpenPackage( String package_ ) {
-        RuntimeProperties.openPackages.remove( package_ );
+        instance.openPackages.remove( package_ );
     }
 
     /**
      * @return the openPackages
      */
     public static Collection<String> getPrevOpenPackages() {
-        return Collections.unmodifiableCollection( prevOpenPackages );
+        return Collections.unmodifiableCollection( instance.prevOpenPackages );
     }
 
     /**
      * @return the recentPackages
      */
     public static Map<String, String> getRecentPackages() {
-        return Collections.unmodifiableMap( recentPackages );
+        return Collections.unmodifiableMap( instance.recentPackages );
     }
 
     /**
      * @param lnf the lnf to set
      */
     public static void setLnf( String lnf ) {
-        RuntimeProperties.lnf = lnf;
+        instance.lnf = lnf;
     }
 
     /**
      * @return the lnf
      */
     public static String getLnf() {
-        return lnf;
+        return instance.lnf;
     }
 
     /**
      * @param font the font to set
      */
     public static void setFont( Fonts element, Font font ) {
-        fonts.put( element, font );
+        instance.fonts.put( element, font );
     }
 
     /**
      * @return the font
      */
     public static Font getFont( Fonts element ) {
-        return fonts.get( element );
+        return instance.fonts.get( element );
     }
 
     /**
@@ -553,7 +581,7 @@ public class RuntimeProperties {
         // have the form x.y.z-dev in case it is a CVS snapshot release.
         // Real releases should have version numbers without the -dev suffix.
 
-        return s_runtimeProperties.getProperty( VERSION );
+        return instance.runtimeProperties.getProperty( VERSION );
     }
 
     public static void readProperties( String propFile, Properties props ) {
@@ -604,11 +632,11 @@ public class RuntimeProperties {
     }
 
     public static String getSchemeEditorWindowProps() {
-        return s_runtimeProperties.getProperty( SCHEME_EDITOR_WINDOW_PROPS );
+        return instance.runtimeProperties.getProperty( SCHEME_EDITOR_WINDOW_PROPS );
     }
 
     public static void setSchemeEditorWindowProps( Rectangle bounds, int winState ) {
-        s_runtimeProperties.setProperty( SCHEME_EDITOR_WINDOW_PROPS, 
+        instance.runtimeProperties.setProperty( SCHEME_EDITOR_WINDOW_PROPS, 
                 bounds.x + ";" + bounds.y + ";" + bounds.width + ";" + bounds.height + ";" + winState );
     }
     
@@ -622,47 +650,51 @@ public class RuntimeProperties {
      * @return true when recursive functions are allowed, false otherwise
      */
     public static boolean isRecursiveSpecsAllowed() {
-    	return recursiveSpecsAllowed;
+    	return instance.recursiveSpecsAllowed;
     }
     
     public static int getMaxRecursiveDeclarationDepth() {
-    	return maxRecursiveDeclarationDepth;
+    	return instance.maxRecursiveDeclarationDepth;
     }
 
 	public static void setRecursiveSpecsAllowed( boolean recursiveSpecsAllowed ) {
-		RuntimeProperties.recursiveSpecsAllowed = recursiveSpecsAllowed;
+		instance.recursiveSpecsAllowed = recursiveSpecsAllowed;
 	}
 
 	public static void setMaxRecursiveDeclarationDepth( int maxRecursiveDeclarationDepth ) {
-		RuntimeProperties.maxRecursiveDeclarationDepth = maxRecursiveDeclarationDepth;
+		instance.maxRecursiveDeclarationDepth = maxRecursiveDeclarationDepth;
 	}
 
     /**
      * @return the computeGoal
      */
     public static boolean isComputeGoal() {
-        return computeGoal;
+        return instance.computeGoal;
     }
 
     /**
      * @param computeGoal the computeGoal to set
      */
     public static void setComputeGoal( boolean computeGoal ) {
-        RuntimeProperties.computeGoal = computeGoal;
+        boolean old = instance.computeGoal;
+        instance.computeGoal = computeGoal;
+        instance.pcs.firePropertyChange( COMPUTE_GOAL, old, computeGoal );
     }
 
     /**
      * @return the propagateValues
      */
     public static boolean isPropagateValues() {
-        return propagateValues;
+        return instance.propagateValues;
     }
 
     /**
      * @param propagateValues the propagateValues to set
      */
     public static void setPropagateValues( boolean propagateValues ) {
-        RuntimeProperties.propagateValues = propagateValues;
+        boolean old = instance.propagateValues;
+        instance.propagateValues = propagateValues;
+        instance.pcs.firePropertyChange( PROPAGATE_VALUES, old, propagateValues );
     }
 
     /**
@@ -673,7 +705,7 @@ public class RuntimeProperties {
      * false otherwise.
      */
     public static boolean isDumpGenerated() {
-        return dumpGenerated;
+        return instance.dumpGenerated;
     }
 
     /**
@@ -690,7 +722,7 @@ public class RuntimeProperties {
             }
         }
 
-        RuntimeProperties.dumpGenerated = dumpGenerated;
+        instance.dumpGenerated = dumpGenerated;
     }
     
     private static FontChooser fontChooser;
@@ -702,7 +734,7 @@ public class RuntimeProperties {
             return;
         }
         
-        fontChooser = new FontChooser( parent, new Hashtable<Fonts, Font>( fonts ) ) {
+        fontChooser = new FontChooser( parent, new Hashtable<Fonts, Font>( instance.fonts ) ) {
             
             @Override
             public void dispose() {
@@ -720,9 +752,9 @@ public class RuntimeProperties {
                 for ( final Fonts element : newFonts.keySet() ) {
                     final Font newFont = newFonts.get( element );
                     
-                    if( !newFont.equals( fonts.get( element ) ) ) {
+                    if( !newFont.equals( instance.fonts.get( element ) ) ) {
                         
-                        fonts.put( element, newFont );
+                        instance.fonts.put( element, newFont );
                         
                         SwingUtilities.invokeLater( new Runnable() {
                             @Override
@@ -802,7 +834,7 @@ public class RuntimeProperties {
      * @return the editor command, or null
      */
     public static String getDefaultEditor() {
-        return defaultEditor;
+        return instance.defaultEditor;
     }
 
     /**
@@ -818,7 +850,7 @@ public class RuntimeProperties {
                 editorCmd = null;
             }
         }
-        defaultEditor = editorCmd;
+        instance.defaultEditor = editorCmd;
     }
 
     /**

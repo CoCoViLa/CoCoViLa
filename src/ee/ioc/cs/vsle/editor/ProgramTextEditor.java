@@ -68,6 +68,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
 
         SwingUtilities.invokeLater( new Runnable() {
 
+            @Override
             public void run() {
                 ProgramRunnerEvent evt = new ProgramRunnerEvent( this, m_progRunnerID, ProgramRunnerEvent.REQUEST_SPEC );
 
@@ -234,6 +235,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
         return s_frames.get( packageName );
     }
 
+    @Override
     public void actionPerformed( ActionEvent e ) {
 
         int op = -1;
@@ -291,6 +293,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
 
     class ProgramRunnerFeedbackEventListener implements ProgramRunnerFeedbackEvent.Listener {
 
+        @Override
         public void onProgramRunnerFeedbackEvent( final ProgramRunnerFeedbackEvent event ) {
 
             if ( event.getId() == m_progRunnerID ) {
@@ -299,6 +302,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
 
                 SwingUtilities.invokeLater( new Runnable() {
 
+                    @Override
                     public void run() {
                         if ( type == ProgramRunnerFeedbackEvent.TEXT_SPECIFICATION ) {
 
@@ -397,12 +401,15 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
 
     static class CommentKeyListener implements KeyListener {
 
+        @Override
         public void keyTyped( KeyEvent e ) {
         }
 
+        @Override
         public void keyPressed( KeyEvent e ) {
         }
 
+        @Override
         public void keyReleased( KeyEvent e ) {
             if ( e.getKeyChar() == '/' && ( ( e.getModifiers() & KeyEvent.CTRL_MASK ) > 0 ) && ( e.getSource() instanceof JTextArea ) ) {
 
@@ -482,6 +489,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
     /**
      * Returns the text component in the selected tab.
      */
+    @Override
     public JTextComponent getTextComponent() {
         switch (tabbedPane.getSelectedIndex()) {
         case 0:
@@ -498,6 +506,7 @@ public class ProgramTextEditor extends JFrame implements ActionListener, TextEdi
     /**
      * Returns the root window.
      */
+    @Override
     public Window getWindow() {
         return this;
     }

@@ -51,6 +51,7 @@ public class Menu {
     public static final String GRID = "Grid";
     public static final String SHOW_PORTS = "Ports";
     public static final String SHOW_NAMES = "Object Names";
+    public static final String CONTROL_PANEL = "Controls";
     
     // PACKAGE
     public static final String LOAD = "Load";

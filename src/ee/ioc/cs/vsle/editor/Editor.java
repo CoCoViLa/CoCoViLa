@@ -17,7 +17,6 @@ import ee.ioc.cs.vsle.editor.scheme.*;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.util.Console;
 import ee.ioc.cs.vsle.vclass.*;
 
 /**
@@ -36,7 +35,7 @@ public class Editor extends JFrame implements ChangeListener {
 
     DnDTabbedPane tabbedPane;
 
-    EditorActionListener aListener;
+    private EditorActionListener aListener;
     DeleteAction deleteAction;
     UndoAction undoAction;
     RedoAction redoAction;
@@ -47,6 +46,7 @@ public class Editor extends JFrame implements ChangeListener {
     public static final String WINDOW_TITLE = "CoCoViLa - Scheme Editor";
 
     private JCheckBoxMenuItem gridCheckBox;
+    private JCheckBoxMenuItem ctrlCheckBox;
     private JCheckBoxMenuItem showPortCheckBox;
     private JCheckBoxMenuItem showObjectNamesCheckBox;
     
@@ -72,7 +72,6 @@ public class Editor extends JFrame implements ChangeListener {
         redoAction = new RedoAction();
         deleteAction = new DeleteAction();
         cloneAction = new CloneAction();
-        aListener = new EditorActionListener();
         makeMenu();
         getContentPane().add( tabbedPane );
         initActions();
@@ -110,49 +109,49 @@ public class Editor extends JFrame implements ChangeListener {
         menu = new JMenu( Menu.MENU_FILE );
         menu.setMnemonic( KeyEvent.VK_F );
         menuItem = new JMenuItem( Menu.NEW_SCHEME, KeyEvent.VK_N );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_N, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
         menu.addSeparator();
         menuItem = new JMenuItem( Menu.LOAD_SCHEME, KeyEvent.VK_O );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_O, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
         menuItem = new JMenuItem( Menu.RELOAD_SCHEME, KeyEvent.VK_R );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
         menu.addSeparator();
         menuItem = new JMenuItem( Menu.SAVE_SCHEME, KeyEvent.VK_S );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
         menuItem = new JMenuItem( Menu.SAVE_SCHEME_AS );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_S, ActionEvent.CTRL_MASK | ActionEvent.SHIFT_MASK ) );
         menu.add( menuItem );
         menu.addSeparator();
         menuItem = new JMenuItem( Menu.DELETE_SCHEME, KeyEvent.VK_D );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         
         submenu = new JMenu( Menu.EXPORT_MENU );
         menu.add(submenu);
         //submenu.setMnemonic( KeyEvent.VK_E );
         
-        SchemeExporter.makeSchemeExportMenu(submenu, aListener);
+        SchemeExporter.makeSchemeExportMenu(submenu, getActionListener());
         
         // Export window graphics
         submenu.add(GraphicsExporter.getExportMenu());
 
         menu.addSeparator();
         menuItem = new JMenuItem( Menu.PRINT, KeyEvent.VK_P );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_P, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
         menu.addSeparator();
         menuItem = new JMenuItem( Menu.EXIT, KeyEvent.VK_X );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         menuBar.add( menu );
         menu = new JMenu( Menu.MENU_EDIT );
@@ -163,20 +162,20 @@ public class Editor extends JFrame implements ChangeListener {
         menu.add(cloneAction);
 
         menuItem = new JMenuItem(Menu.SCHEME_FIND, KeyEvent.VK_F);
-        menuItem.addActionListener(aListener);
+        menuItem.addActionListener(getActionListener());
         menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F, ActionEvent.CTRL_MASK));
         menu.add(menuItem);
 
         menuItem = new JMenuItem( Menu.SELECT_ALL, KeyEvent.VK_A );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_A, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
         menuItem = new JMenuItem( Menu.CLEAR_ALL, KeyEvent.VK_C );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
 
         final JCheckBoxMenuItem painterEnabled = new JCheckBoxMenuItem( Menu.CLASSPAINTER, true );
-        painterEnabled.addActionListener( aListener );
+        painterEnabled.addActionListener( getActionListener() );
         menu.add( painterEnabled );
 
         menu.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
@@ -210,15 +209,20 @@ public class Editor extends JFrame implements ChangeListener {
         menu.setMnemonic( KeyEvent.VK_V );
         gridCheckBox = new JCheckBoxMenuItem( Menu.GRID, RuntimeProperties.isShowGrid() );
         gridCheckBox.setMnemonic( 'G' );
-        gridCheckBox.addActionListener( aListener );
+        gridCheckBox.addActionListener( getActionListener() );
         menu.add( gridCheckBox );
         
+        ctrlCheckBox = new JCheckBoxMenuItem( Menu.CONTROL_PANEL, RuntimeProperties.isShowControls() );
+        ctrlCheckBox.setMnemonic( 'C' );
+        ctrlCheckBox.addActionListener( getActionListener() );
+        menu.add( ctrlCheckBox );
+        
         showPortCheckBox = new JCheckBoxMenuItem( Menu.SHOW_PORTS, true );
-        showPortCheckBox.addActionListener( aListener );
+        showPortCheckBox.addActionListener( getActionListener() );
         menu.add( showPortCheckBox );
         
         showObjectNamesCheckBox = new JCheckBoxMenuItem( Menu.SHOW_NAMES, false );
-        showObjectNamesCheckBox.addActionListener( aListener );
+        showObjectNamesCheckBox.addActionListener( getActionListener() );
         menu.add( showObjectNamesCheckBox );
         
         //sync View with current canvas
@@ -232,6 +236,7 @@ public class Editor extends JFrame implements ChangeListener {
                     return;
                 
                 gridCheckBox.setSelected( canvas.isGridVisible() );
+                ctrlCheckBox.setSelected( canvas.isCtrlPanelVisible() );
                 showPortCheckBox.setSelected( canvas.isDrawPorts() );
                 showObjectNamesCheckBox.setSelected( canvas.isShowObjectNames() );
             }
@@ -253,19 +258,19 @@ public class Editor extends JFrame implements ChangeListener {
         menu = new JMenu( Menu.MENU_PACKAGE );
         menu.setMnemonic( KeyEvent.VK_P );
         menuItem = new JMenuItem( Menu.LOAD, KeyEvent.VK_L );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         menuItem = new JMenuItem( Menu.RELOAD, KeyEvent.VK_R );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         menuItem = new JMenuItem( Menu.INFO, KeyEvent.VK_I );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         menuItem = new JMenuItem( Menu.CLOSE, KeyEvent.VK_C );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         menuItem = new JMenuItem( Menu.CLOSE_ALL );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         menuBar.add( menu );
         menu.add( new JSeparator() );
@@ -342,16 +347,16 @@ public class Editor extends JFrame implements ChangeListener {
         menu.setMnemonic( KeyEvent.VK_O );
 
         menuItem = new JMenuItem( Menu.SETTINGS, KeyEvent.VK_S );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menuItem.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_J, ActionEvent.CTRL_MASK ) );
         menu.add( menuItem );
 
         menuItem = new JMenuItem( Menu.FONTS );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         
         menuItem = new JMenuItem( Menu.SAVE_SETTINGS );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
 
         submenu = new JMenu( Menu.MENU_LAF );
@@ -366,14 +371,14 @@ public class Editor extends JFrame implements ChangeListener {
         menu.setMnemonic( KeyEvent.VK_H );
         menuBar.add( menu );
         menuItem = new JMenuItem( Menu.DOCS, KeyEvent.VK_D );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         menu.addSeparator();
         menuItem = new JMenuItem( Menu.LICENSE, KeyEvent.VK_L );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         menuItem = new JMenuItem( Menu.ABOUT, KeyEvent.VK_A );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         
     }
@@ -470,33 +475,33 @@ public class Editor extends JFrame implements ChangeListener {
 
         // Specification...
         JMenuItem menuItem = new JMenuItem( Menu.SPECIFICATION, KeyEvent.VK_S );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         //Extend
         menuItem = new JMenuItem( Menu.EXTEND_SPEC, KeyEvent.VK_E );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         menu.add( new JSeparator() );
         // Run
         menuItem = new JMenuItem( Menu.RUN, KeyEvent.VK_R );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
 
         //Propagate
         menuItem = new JCheckBoxMenuItem( Menu.PROPAGATE_VALUES, RuntimeProperties.isPropagateValues() );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
 
         //Compute goal
         menuItem = new JCheckBoxMenuItem( Menu.COMPUTE_GOAL, RuntimeProperties.isComputeGoal() );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         
         menu.add( new JSeparator() );
 
         // Values
         menuItem = new JMenuItem( Menu.SCHEME_VALUES, KeyEvent.VK_V );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         boolean enabled = getCurrentCanvas() != null && getCurrentCanvas().getLastProgramRunnerID() != 0;
         menuItem.setEnabled( enabled );
         if(!enabled)
@@ -507,7 +512,7 @@ public class Editor extends JFrame implements ChangeListener {
 
         // Options
         menuItem = new JMenuItem( Menu.SCHEMEOPTIONS, KeyEvent.VK_O );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
     }
 
@@ -521,20 +526,20 @@ public class Editor extends JFrame implements ChangeListener {
         _menuBar.add( menu );
         
         JMenuItem menuItem = new JMenuItem( Menu.EXPERT_TABLE );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         
         menuItem = new JCheckBoxMenuItem( Menu.SHOW_ALGORITHM, RuntimeProperties.isShowAlgorithm() );
         menuItem.setToolTipText( "If checked, after planning a window with the synthesized algorithm will be shown" );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         
         menuItem = new JMenuItem( Menu.VIEW_THREADS );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
         
         menuItem = new JMenuItem( Menu.JAVA_CONSOLE );
-        menuItem.addActionListener( aListener );
+        menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
     }
 
@@ -681,7 +686,8 @@ public class Editor extends JFrame implements ChangeListener {
         extractPackages();
         
         final Editor window = new Editor();
-
+        s_instance = window;
+        
         if ( !RuntimeProperties.isFromWebstart() && args.length > 0 ) {
 
             if ( args[ 0 ].equals( "-p" ) ) {
@@ -738,8 +744,6 @@ public class Editor extends JFrame implements ChangeListener {
 
         window.setVisible( true );
 
-        s_instance = window;
-
         /* ******************** Init Factories ******************** */
         SpecGenerator.init();
         XMLSpecGenerator.init();
@@ -794,6 +798,7 @@ public class Editor extends JFrame implements ChangeListener {
         Canvas canvas = getCurrentCanvas();
         if ( canvas != null ) {
             gridCheckBox.setSelected( canvas.isGridVisible() );
+            ctrlCheckBox.setSelected( canvas.isCtrlPanelVisible() );
             canvas.drawingArea.repaint();
             canvas.drawingArea.requestFocusInWindow();
         }
@@ -904,5 +909,15 @@ public class Editor extends JFrame implements ChangeListener {
     public void closeCurrentCanvas() {
         closeCanvas( getCurrentCanvas() );
     }
-    
+
+    /**
+     * @return the aListener
+     */
+    EditorActionListener getActionListener() {
+        if( aListener == null )
+            aListener = new EditorActionListener();
+        
+        return aListener;
+    }
+
 }
