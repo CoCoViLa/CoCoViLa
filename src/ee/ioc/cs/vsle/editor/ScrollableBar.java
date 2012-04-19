@@ -37,4 +37,9 @@ public class ScrollableBar extends JComponent {
 	public JComponent getComponent() {
 		return comp;
 	}
+	
+	void destroy() {
+	    setUI( null );
+	    comp = null;
+	}
 }

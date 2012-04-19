@@ -18,6 +18,10 @@ import ee.ioc.cs.vsle.vclass.*;
 public class Palette extends PaletteBase {
 
     protected Canvas canvas;
+    private ScrollableBar bar;
+    private JPanel controlPanel;
+    private PropertyChangeListener propLst;
+    private Map<String, AbstractButton> propsToButtons;
 
     public Palette(Canvas canv) {
         super();
@@ -42,7 +46,7 @@ public class Palette extends PaletteBase {
 
         c.gridx = 2;
         if( canvas.isCtrlPanelVisible() ) {
-            toolBar.add(createControlPanel(), c);
+            toolBar.add( controlPanel = createControlPanel(), c);
             c.gridx++;
         }
         
@@ -53,14 +57,10 @@ public class Palette extends PaletteBase {
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1.0;
         c.insets = new Insets(0, PANEL_SPACE.width, 0, PANEL_SPACE.width);
-        toolBar.add(new ScrollableBar(createClassPanel(canvas.getPackage())), c);
+        toolBar.add(bar = new ScrollableBar(createClassPanel(canvas.getPackage())), c);
 
         canvas.add(toolBar, BorderLayout.PAGE_START);
-    }
-    
-    void reset() {
-        canvas.remove( toolBar );
-        init();
+        canvas.revalidate();
     }
     
     private JComponent createClassPanel(VPackage vPackage) {
@@ -175,8 +175,8 @@ public class Palette extends PaletteBase {
     
     public static enum CtrlButton {
         RUN( "images/control/run_scheme.png", Menu.RUN ), 
-        RUNSAME( "images/control/run_same_app.png", "RUNSAME" ),//TODO
-        STOP( "images/control/stop_app.png", "STOP" ),//TODO 
+        RUNSAME( "images/control/run_same_app.png", "RUNSAME" ),
+        STOP( "images/control/stop_app.png", "STOP" ),
         PROPAGATE( "images/control/propagate.png", Menu.PROPAGATE_VALUES, RuntimeProperties.PROPAGATE_VALUES, true ), 
         GOAL( "images/control/compute_goal.png", Menu.COMPUTE_GOAL, RuntimeProperties.COMPUTE_GOAL, true ), 
         SPEC( "images/control/scheme_spec.png", Menu.SPECIFICATION ), 
@@ -230,35 +230,53 @@ public class Palette extends PaletteBase {
         
     }
     
-    //run
-    //run same
-    //stop running program
-    //propagate - toggle
-    //goal - toggle
-    //specification
-    //extend
-    //reload scheme
-    //reload package
     protected JPanel createControlPanel() {
         
-        JPanel controlPanel = new JPanel();
-        controlPanel.setLayout(new BoxLayout(controlPanel, BoxLayout.LINE_AXIS));
-        controlPanel.setOpaque(false);
+        JPanel _controlPanel = new JPanel();
+        _controlPanel.setLayout(new BoxLayout(_controlPanel, BoxLayout.LINE_AXIS));
+        _controlPanel.setOpaque(false);
+
+        propsToButtons = new LinkedHashMap<String, AbstractButton>();
         
         for ( CtrlButton ctrlBtn : CtrlButton.values() ) {
-            controlPanel.add( prepareButton( ctrlBtn ) );
+            _controlPanel.add( prepareButton( ctrlBtn ) );
         }
 
-        controlPanel.add( Box.createHorizontalStrut( 5 ) );
+        _controlPanel.add( Box.createHorizontalStrut( 5 ) );
+        
+        propLst = new PropertyChangeListener() {
+            
+            @Override
+            public void propertyChange( PropertyChangeEvent evt ) {
+                String propName = evt.getPropertyName();
+                if( propsToButtons.containsKey( propName ) ) {
+                    updateSelection( (JToggleButton)propsToButtons.get( propName ), propName );
+                }
+            }
+        };
         
         RuntimeProperties.addPropertyChangeListener( propLst );
-        return controlPanel;
+        return _controlPanel;
+    }
+    
+    private void updateSelection( JToggleButton btn, String propName ) {
+        if( propName == RuntimeProperties.COMPUTE_GOAL ) {
+            btn.setSelected( RuntimeProperties.isComputeGoal() );
+        } else if ( propName == RuntimeProperties.PROPAGATE_VALUES ) {
+            btn.setSelected( RuntimeProperties.isPropagateValues() );
+        }
     }
     
     private AbstractButton prepareButton( CtrlButton ctrlBtn ) {
         Icon icon = ctrlBtn.getIcon();
-        AbstractButton btn = ctrlBtn.isToggle() ? new JToggleButton(icon) : new JButton( icon );
-        btn.setSelectedIcon(icon);
+        AbstractButton btn;
+        if( ctrlBtn.isToggle() ) {
+            btn = new JToggleButton(icon);
+            btn.setSelectedIcon(icon);
+            updateSelection( (JToggleButton)btn, ctrlBtn.getPropertyName() );
+        } else {
+            btn = new JButton( icon );
+        }
         btn.setActionCommand(ctrlBtn.getActionCmd());
         btn.setToolTipText(ctrlBtn.name());//TODO
         
@@ -271,22 +289,22 @@ public class Palette extends PaletteBase {
         return btn;
     }
 
-    Map<String, AbstractButton> propsToButtons = new LinkedHashMap<String, AbstractButton>();
-    
-    PropertyChangeListener propLst = new PropertyChangeListener() {
-        
-        @Override
-        public void propertyChange( PropertyChangeEvent evt ) {
-            String propName = evt.getPropertyName();
-            if( propsToButtons.containsKey( propName ) ) {
-                JToggleButton btn = (JToggleButton)propsToButtons.get( propName );
-                
-                if( propName == RuntimeProperties.COMPUTE_GOAL ) {
-                    btn.setSelected( RuntimeProperties.isComputeGoal() );
-                } else if ( propName == RuntimeProperties.PROPAGATE_VALUES ) {
-                    btn.setSelected( RuntimeProperties.isPropagateValues() );
-                }
-            }
+    @Override
+    public void destroy() {
+        canvas.remove( toolBar );
+        super.destroy();
+        bar.destroy();
+        bar.removeAll();
+        bar = null;
+        toolBar.removeAll();
+        toolBar = null;
+        if( controlPanel != null ) {
+            controlPanel.removeAll();
+            RuntimeProperties.removePropertyChangeListener( propLst );
+            propLst = null;
+            propsToButtons.clear();
+            propsToButtons = null;
         }
-    };
+        canvas = null;
+    }
 }

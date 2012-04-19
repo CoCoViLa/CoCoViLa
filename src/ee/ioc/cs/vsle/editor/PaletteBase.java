@@ -168,4 +168,16 @@ public abstract class PaletteBase implements ActionListener {
 
         return zoomPanel;
     }
+    
+    protected void destroy() {
+        for ( JToggleButton button : buttons ) {
+            button.removeActionListener(getButtonActionListener());
+            button.removeMouseListener(getButtonMouseListener());
+            // Flush icons, otherwise updated icons will not get displayed.
+            ((ImageIcon) button.getIcon()).getImage().flush();
+        }
+        buttons.clear();
+        buttons = null;
+        mouseListener = null;
+    }
 }

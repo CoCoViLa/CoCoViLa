@@ -48,4 +48,8 @@ public class KeyOps implements KeyListener {
 			canvas.mListener.setState(State.selection);
 		}
 	} // keyReleased
+	
+	void destroy() {
+	    canvas = null;
+	}
 }

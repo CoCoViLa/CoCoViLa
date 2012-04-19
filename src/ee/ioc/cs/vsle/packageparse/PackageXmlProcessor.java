@@ -774,8 +774,13 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
     }
     
     public static VPackage load(File f) {
-
-        return new PackageXmlProcessor(f).parse();
+        PackageXmlProcessor pxp = new PackageXmlProcessor(f);
+        VPackage pack = pxp.parse();
+        pxp.collector = null;
+        pxp.xmlFile = null;
+        pxp.ERROR_HANDLER = null;
+        
+        return pack;
     }
     
 }

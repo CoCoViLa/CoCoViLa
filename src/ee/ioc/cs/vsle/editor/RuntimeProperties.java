@@ -140,7 +140,7 @@ public class RuntimeProperties {
         instance.pcs.addPropertyChangeListener(listener);
     }
 
-    public void removePropertyChangeListener(PropertyChangeListener listener) {
+    public static void removePropertyChangeListener(PropertyChangeListener listener) {
         instance.pcs.removePropertyChangeListener(listener);
     }
     

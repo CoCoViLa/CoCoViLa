@@ -32,7 +32,7 @@ public abstract class AbstractXmlProcessor implements DiagnosticsCollector.Diagn
     protected final String XML_DOC_ROOT;
     protected final String XML_NS_URI;
     protected final String XML_SCHEMA;
-    protected final ErrorHandler ERROR_HANDLER = new ErrorHandler() {
+    protected ErrorHandler ERROR_HANDLER = new ErrorHandler() {
 
         @Override
         public void error(SAXParseException exception) {

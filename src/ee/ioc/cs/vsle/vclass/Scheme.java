@@ -350,4 +350,19 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
     public void setSpecText(String spec) {
         extendedSpec = spec;
     }
+    
+    public void destroy() {
+        
+        if( objects != null ) {
+            objects.clear();
+            objects = null;
+        }
+        
+        if( connections != null ) {
+            connections.clear();
+            connections = null;
+        }
+        
+        canvas = null;
+    }
 }

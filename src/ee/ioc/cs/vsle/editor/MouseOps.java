@@ -628,4 +628,13 @@ class MouseOps extends MouseInputAdapter {
         draggedBreakPoint = null;
         draggedBreakPointConn = null;
     }
+    
+    void destroy() {
+        
+        canvas = null;
+        draggedBreakPoint = null;
+        draggedBreakPointConn = null;
+        draggedObject = null;
+        currentPort = null;
+    }
 }
