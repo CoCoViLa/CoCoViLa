@@ -1165,6 +1165,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     public void saveScheme( File file ) {
         if(scheme.saveToFile( file )) {
             setStatusBarText( "Scheme saved to: " + file.getName() );
+            setLastScheme( file.getAbsolutePath() );
         }
     }
 
