@@ -1901,6 +1901,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     /**
      * @return the object list
      */
+    @Override
     public ObjectList getObjectList() {
         return scheme.getObjectList();
     }

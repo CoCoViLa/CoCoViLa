@@ -285,22 +285,24 @@ public class ProgramRunner {
         }
     }
 
-    private Set<Var> foundVars = new TreeSet<Var>( new Comparator<Var>() {
+    private Map<String, Var> foundVars = new TreeMap<String, Var>( new Comparator<String>() {
 
         @Override
-        public int compare( Var v1, Var v2 ) {
+        public int compare( String v1, String v2 ) {
 
-            if(v1.getFullName().indexOf( '.' ) == -1 && v2.getFullName().indexOf( '.' ) != -1) {
+            if(v1.indexOf( '.' ) == -1 && v2.indexOf( '.' ) != -1) {
                 return -1;
-            } else if(v2.getFullName().indexOf( '.' ) == -1 && v1.getFullName().indexOf( '.' ) != -1) {
+            } else if(v2.indexOf( '.' ) == -1 && v1.indexOf( '.' ) != -1) {
                 return 1;
             }
-            return v1.getFullName().compareTo( v2.getFullName() );
+            return v1.compareTo( v2 );
         }
     } );
 
     public void addFoundVars( Collection<Var> col ) {
-        foundVars.addAll( col );
+        for ( Var var : col ) {
+            foundVars.put( var.getFullName(), var );
+        }
     }
 
     /**
@@ -313,101 +315,20 @@ public class ProgramRunner {
 
             if ( genObject == null || isWorking() )
                 return;
-
-            final Class<?> clas = genObject.getClass();
-
-            Field fieldOfGobj, fieldOfCf;
-            Object lastObj;
-            Class<?> classOfGobj;
-            String namePrefix;
             
             for ( GObj gObj : objects ) {
-
-                // superclass object is a special case that has no field
-                // declaration in the generated code so we have to skip it here
-                if ( gObj.isSuperClass() ) {
-                    classOfGobj = clas;
-                    lastObj = genObject;
-                    namePrefix = gObj.getName() + ".";
-                } else {
-                    fieldOfGobj = clas.getDeclaredField( gObj.getName() );
-                    classOfGobj = fieldOfGobj.getType();
-                    lastObj = fieldOfGobj.get( genObject );
-                    namePrefix = "";
-                }
-
+                
                 for ( ClassField cf : gObj.getFields() ) {
 
                     if ( cf.isAlias() || cf.isInput() ) {
                         continue;
                     }
 
-                    fieldOfCf = classOfGobj.getField( cf.getName() );
-
-                    boolean varIsComputed = false;
-
-                    for ( Var var : foundVars ) {
-
-                        String fullName = namePrefix + var.getFullName();
-                        String fieldName = gObj.getName() + "." + cf.getName();
-                        
-                        if ( fullName.equals( fieldName ) ) {
-                            varIsComputed = true;
-                            break;
-                        }
-                    }
-
-                    if ( varIsComputed ) {
-
-                        String typeOfCf = fieldOfCf.getType().toString();
-
-                        if ( typeOfCf.equals( TYPE_INT ) ) {
-
-                            cf.setValue( Integer.toString( fieldOfCf.getInt( lastObj ) ) );
-
-                        } else if ( typeOfCf.equals( TYPE_DOUBLE ) ) {
-
-                            cf.setValue( Double.toString( fieldOfCf.getDouble( lastObj ) ) );
-
-                        } else if ( typeOfCf.equals( TYPE_BOOLEAN ) ) {
-
-                            cf.setValue( Boolean.toString( fieldOfCf.getBoolean( lastObj ) ) );
-
-                        } else if ( typeOfCf.equals( TYPE_CHAR ) ) {
-
-                            cf.setValue( Character.toString( fieldOfCf.getChar( lastObj ) ) );
-
-                        } else if ( typeOfCf.equals( TYPE_FLOAT ) ) {
-
-                            cf.setValue( Float.toString( fieldOfCf.getFloat( lastObj ) ) + "f" );
-
-                        } else if ( typeOfCf.equals( TYPE_LONG ) ) {
-
-                            cf.setValue( Long.toString( fieldOfCf.getLong( lastObj ) ) );
-
-                        } else if ( typeOfCf.equals( TYPE_SHORT ) ) {
-
-                            cf.setValue( Short.toString( fieldOfCf.getShort( lastObj ) ) );
-
-                        } else if ( typeOfCf.equals( TYPE_BYTE ) ) {
-
-                            cf.setValue( Byte.toString( fieldOfCf.getByte( lastObj ) ) );
-
-                        } else {// it is type object
-                            Object o = fieldOfCf.get( lastObj );
-                            
-                            if( o != null ) {
-                                if( o.getClass().isArray() ) { 
-                                    String result = "";
-                                    for ( int i = 0; i < Array.getLength( o ); i++ ) {
-                                        result += Array.get( o, i ) + TypeUtil.ARRAY_TOKEN;
-                                    }
-                                    cf.setValue( result );
-                                } else {
-                                    cf.setValue( o.toString() );
-                                }
-                            }
-                        }
+                    String fieldName = ( gObj.isSuperClass() ? "" : gObj.getName() + "." ) + cf.getName();
+                    
+                    if ( foundVars.containsKey( fieldName ) ) {
+                        String val = getValueHandler().getVarValueAsString( fieldName );
+                        cf.setValue( val );
                     }
                 }
             }
@@ -809,7 +730,7 @@ public class ProgramRunner {
             DefaultMutableTreeNode varRoot = new DefaultMutableTreeNode();
             Map<String, DefaultMutableTreeNode> objectNodes = new LinkedHashMap<String, DefaultMutableTreeNode>();
 
-            for ( Var var : foundVars ) {
+            for ( Var var : foundVars.values() ) {
                 
                 String varname = var.getFullName();
                 int idx;
@@ -855,7 +776,7 @@ public class ProgramRunner {
             final DefaultMutableTreeNode varRoot = new DefaultMutableTreeNode();
             final DefaultMutableTreeNode aliasRoot = new DefaultMutableTreeNode( "Aliases" );
 
-            for ( Var var : foundVars ) {
+            for ( Var var : foundVars.values() ) {
 
                 String varname;
                 if ( ( varname = var.getFullName() ).startsWith( rootObjectName )
@@ -983,7 +904,7 @@ public class ProgramRunner {
                     } else if ( c.toString().equals( TYPE_CHAR ) ) {
                         return Character.toString( f.getChar( obj ) );
                     } else if ( c.toString().equals( TYPE_FLOAT ) ) {
-                        return Float.toString( f.getFloat( obj ) );
+                        return Float.toString( f.getFloat( obj ) ) + "f";
                     } else if ( c.toString().equals( TYPE_SHORT ) ) {
                         return Short.toString( f.getShort( obj ) );
                     } else if ( c.toString().equals( TYPE_BYTE ) ) {
@@ -991,13 +912,18 @@ public class ProgramRunner {
                     } else {
                         Object o = f.get( obj );
                         if ( o.getClass().isArray() ) {
-                            String result = "[";
+                            String result = "";
                             for ( int i = 0; i < Array.getLength( o ); i++ ) {
-                                if(i > 0)
-                                    result += ", ";
-                                result += Array.get( o, i );
+                                result += Array.get( o, i ) + TypeUtil.ARRAY_TOKEN;
                             }
-                            return result + "]";
+                            return result;
+//                            String result = "[";
+//                            for ( int i = 0; i < Array.getLength( o ); i++ ) {
+//                                if(i > 0)
+//                                    result += ", ";
+//                                result += Array.get( o, i );
+//                            }
+//                            return result + "]";
                         }
                         return o.toString();
                     }
@@ -1049,7 +975,7 @@ public class ProgramRunner {
 
             StringBuilder result = new StringBuilder( "----------- Found Vars -----------\n" );
 
-            for ( Var var : foundVars ) {
+            for ( Var var : foundVars.values() ) {
 
                 if ( var.getField().isAlias() || var.getField().isVoid() ) {
                     continue;
