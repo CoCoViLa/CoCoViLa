@@ -141,7 +141,7 @@ public class SchemeExportDialog extends JDialog {
         
         centerPane.add( jsListPane, GuiUtil
                 .buildGridBagConstraints( gbc, 3, y, 3, 1, 0, 0,
-                        GridBagConstraints.NONE, GridBagConstraints.NORTH ) );
+                        GridBagConstraints.BOTH, GridBagConstraints.NORTH ) );
 
         //Fields
         jcbExportFields = new JCheckBox( "Export list of fields" );
@@ -229,6 +229,7 @@ public class SchemeExportDialog extends JDialog {
                                 "Error", JOptionPane.ERROR_MESSAGE );
                         return;
                     }
+                    SchemeExportDialog.this.pack();
                 }
             }
         });
