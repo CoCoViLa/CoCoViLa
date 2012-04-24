@@ -18,7 +18,7 @@ class MouseOps extends MouseInputAdapter {
 
     // Remove a dragged breakpoint on mouse button release when it is closer
     // to the line segment between neighbouring points than this threshold.
-    private static double BP_REMOVE_THRESHOLD = 800d;
+    private static double BP_REMOVE_THRESHOLD = 200d;
 
     String state = State.selection;
     int startX, startY;
