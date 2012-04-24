@@ -373,7 +373,7 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private void browseIcon() {
 		JFileChooser fc = new JFileChooser(RuntimeProperties.getLastPath());
-		fc.setFileFilter(IconEditor.getFileFilter("gif"));
+		fc.setFileFilter(IconEditor.getFileFilter("gif", "png"));
 		int returnVal = fc.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();

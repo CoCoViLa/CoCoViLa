@@ -301,10 +301,10 @@ public class IconEditor extends JFrame {
      * Returns XML representing shapes on the screen.
      * 
      * @param appendXMLtag - append xml formatting or not.
-     * @return StringBuffer - XML representing shapes on the screen.
+     * @return StringBuilder - XML representing shapes on the screen.
      */
-    public StringBuffer getShapesInXML( boolean appendXMLtag ) {
-        StringBuffer xmlBuffer = new StringBuffer();
+    public StringBuilder getShapesInXML( boolean appendXMLtag ) {
+        StringBuilder xmlBuffer = new StringBuilder();
         if ( appendXMLtag ) {
             xmlBuffer.append( "<?xml version='1.0' encoding='utf-8'?>\n" );
             xmlBuffer.append( "\n" );
@@ -362,7 +362,7 @@ public class IconEditor extends JFrame {
     }
     
     private void savePackage() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append( "<?xml version=\'1.0\' encoding=\'utf-8\'?>\n" );
         sb.append( "\n" );
         sb.append( "<!DOCTYPE package SYSTEM \"" + RuntimeProperties.PACKAGE_DTD + "\">\n" );
@@ -391,7 +391,7 @@ public class IconEditor extends JFrame {
         classParamsOk = true;
         validateClassParams();
         if ( classParamsOk ) {
-            StringBuffer xmlBuffer = new StringBuffer();
+            StringBuilder xmlBuffer = new StringBuilder();
 
             if ( boundingbox != null ) {
                 xmlBuffer = getShapesInXML( true );
@@ -426,7 +426,7 @@ public class IconEditor extends JFrame {
         }
     } // validateClassParams
 
-    private StringBuffer appendShapes( StringBuffer buf ) {
+    private StringBuilder appendShapes( StringBuilder buf ) {
         buf.append( "<graphics>\n" );
         if ( boundingbox != null )
             buf.append( boundingbox.toFile( 0, 0 ) );
@@ -444,7 +444,7 @@ public class IconEditor extends JFrame {
         return buf;
     } // appendShapes
 
-    private StringBuffer appendPorts( StringBuffer buf ) {
+    private StringBuilder appendPorts( StringBuilder buf ) {
         if ( ports != null && ports.size() > 0 ) {
             buf.append( "	<ports>\n" );
             for ( int i = 0; i < ports.size(); i++ ) {
@@ -505,7 +505,7 @@ public class IconEditor extends JFrame {
         return false;
     }
 
-    public StringBuffer appendClassFields( StringBuffer buf ) {
+    public StringBuilder appendClassFields( StringBuilder buf ) {
         dbrClassFields.removeEmptyRows();
         Boolean hasGraphics = false;
         if ( dbrClassFields != null && dbrClassFields.getRowCount() > 0 ) {
@@ -864,7 +864,7 @@ public class IconEditor extends JFrame {
             if ( valid ) {
                 // Save scheme.
                 try {
-                    StringBuffer xml = new StringBuffer();
+                    StringBuilder xml = new StringBuilder();
 
                     xml.append( getGraphicsToString().toString() );
                     xml.append( getClassPropsToString().toString() );
@@ -985,17 +985,29 @@ public class IconEditor extends JFrame {
         repaint();
     }
 
-    public static javax.swing.filechooser.FileFilter getFileFilter( final String format ) {
-        if ( format != null && format.trim().length() > 0 ) {
+    public static javax.swing.filechooser.FileFilter getFileFilter( final String... formats ) {
+        if ( formats != null && formats.length > 0 ) {
             javax.swing.filechooser.FileFilter filter = new javax.swing.filechooser.FileFilter() {
                 @Override
                 public String getDescription() {
-                    return format.toUpperCase() + " files (*." + format.toLowerCase() + ")";
+                    StringBuilder fst = new StringBuilder();
+                    StringBuilder snd = new StringBuilder();
+                    for ( String format : formats ) {
+                        fst.append( format.toUpperCase() ).append( " " );
+                        snd.append( "*." ).append( format.toLowerCase() ).append( " " );
+                    }
+                    return fst + "files (" + snd + ")";
                 }
 
                 @Override
                 public boolean accept( java.io.File f ) {
-                    return f.isDirectory() || f.getName().toLowerCase().endsWith( "." + format.toLowerCase() );
+                    if( f.isDirectory() ) return true;
+                    for ( String format : formats ) {
+                        if( f.getName().toLowerCase().endsWith( "." + format.toLowerCase() ) ) {
+                            return true;
+                        }
+                    }
+                    return false;
                 }
             };
             return filter;
@@ -1102,13 +1114,12 @@ public class IconEditor extends JFrame {
             return;
         }
        
-        File iconFile = new File( getPackageFile().getParent() + File.separator + classIcon);
+        File iconFile = new File( getPackageFile().getParent() + File.separator + getClassIcon());
         
         /* See if icon file exists */
-        File prevIconFile = new File( prevPackagePath + File.separator + classIcon);
+        File prevIconFile = new File( prevPackagePath + File.separator + getClassIcon());
         
-        
-        if ( (IconEditor.getClassIcon() == null) || !prevIconFile.exists() ) {
+        if ( (IconEditor.getClassIcon() == null) && !prevIconFile.exists() ) {
             IconEditor.setClassIcon( "default.gif" );
         } else if (prevIconFile.exists() && (prevIconFile.compareTo(iconFile) != 0)) {
         	FileFuncs.copyImageFile(prevIconFile, iconFile);        	
@@ -1164,7 +1175,7 @@ public class IconEditor extends JFrame {
             // will be appended later.
             BufferedReader in = new BufferedReader( new FileReader( getPackageFile() ) );
             String str;
-            StringBuffer content = new StringBuffer();
+            StringBuilder content = new StringBuilder();
 
             // Read file contents to be appended to.
             while ( ( str = in.readLine() ) != null ) {
@@ -1344,14 +1355,14 @@ public class IconEditor extends JFrame {
     } // emptyClassFields
 
     /**
-     * Returns a StringBuffer with all class properties for saving on a disk in
+     * Returns a StringBuilder with all class properties for saving on a disk in
      * text format.
      * 
-     * @return StringBuffer - class properties for saving on a disk in text
+     * @return StringBuilder - class properties for saving on a disk in text
      *         format.
      */
-    public StringBuffer getClassPropsToString() {
-        StringBuffer sb = new StringBuffer();
+    public StringBuilder getClassPropsToString() {
+        StringBuilder sb = new StringBuilder();
 
         // Add class name.
         if ( IconEditor.className != null && IconEditor.className.trim().length() > 0 ) {
@@ -1389,14 +1400,14 @@ public class IconEditor extends JFrame {
     } // getClassPropsToString
 
     /**
-     * Returns a StringBuffer with all drawn class graphics for saving on a disk
+     * Returns a StringBuilder with all drawn class graphics for saving on a disk
      * in text format.
      * 
-     * @return StringBuffer - class graphics for saving on a disk in text
+     * @return StringBuilder - class graphics for saving on a disk in text
      *         format.
      */
-    public StringBuffer getGraphicsToString() {
-        StringBuffer sb = new StringBuffer();
+    public StringBuilder getGraphicsToString() {
+        StringBuilder sb = new StringBuilder();
 
         for ( int i = 0; i < shapeList.size(); i++ ) {
             Shape shape = shapeList.get( i );
@@ -1822,7 +1833,7 @@ public class IconEditor extends JFrame {
     public void deleteClassFromPackage( File f ) {
         BufferedReader in;
         String str;
-        StringBuffer content = new StringBuffer();
+        StringBuilder content = new StringBuilder();
         String currentClass = IconEditor.className;
         try {
             in = new BufferedReader( new FileReader( f ) );
