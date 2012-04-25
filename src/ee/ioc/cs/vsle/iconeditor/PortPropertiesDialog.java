@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.iconeditor;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.*;
 
 import javax.swing.*;
 
@@ -119,7 +120,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			JOptionPane.showMessageDialog(this, "Please define port name.");
 			tfPortName.requestFocusInWindow();
 			valid = false;
-		} else if (!StringUtil.isJavaIdentifier(name)) {
+		} else if (!checkIdentifier( name )) {
 			JOptionPane.showMessageDialog(this, 
 					"The port name is not a valid identifier.");
 			tfPortName.requestFocusInWindow();
@@ -178,6 +179,21 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		}
 	} // setPortProperties
 
+	private boolean checkIdentifier( String name ) {
+	    int idx = name.indexOf( '.' );
+	    if( idx < 0 )
+	        return StringUtil.isJavaIdentifier(name);
+	    
+	    do {
+	        if( !StringUtil.isJavaIdentifier(name.substring( 0, idx ) ) )
+	            return false;
+	        name = name.substring( idx+1 );
+	        idx = name.indexOf( '.' );
+	    } while( idx > -1 );
+	    
+	    return StringUtil.isJavaIdentifier(name);
+	}
+	
 	public String getPortType() {
 	  return this.portType;
 	}
