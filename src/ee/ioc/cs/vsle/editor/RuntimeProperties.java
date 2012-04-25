@@ -71,45 +71,43 @@ public class RuntimeProperties {
     private static String workingDirectory = System.getProperty( "user.dir" ) 
             + File.separator;
 
-    private static final Properties s_defaultProperties;
+    private final Properties defaultProperties;
     private final Properties runtimeProperties;
 
-    static {
+    {
 
-        s_defaultProperties = new Properties();
-        s_defaultProperties.put( DOCUMENTATION_URL, "http://www.cs.ioc.ee/~cocovila/" );
-        s_defaultProperties.put( GENERATED_FILES_DIR, "generated" );
-        s_defaultProperties.put( COMPILATION_CLASSPATH, "lib/jcommon.jar;lib/jfreechart.jar" );
-        s_defaultProperties.put( OPEN_PACKAGES, "" );
-        s_defaultProperties.put( DEBUG_INFO, Integer.toString( 0 ) );
-        s_defaultProperties.put( DEFAULT_LNF, "javax.swing.plaf.metal.MetalLookAndFeel" );
-        s_defaultProperties.put( ANTI_ALIASING, Boolean.TRUE.toString() );
-        s_defaultProperties.put( SHOW_GRID, Boolean.TRUE.toString() );
-        s_defaultProperties.put( SHOW_CONTROLS, Boolean.FALSE.toString() );
-        s_defaultProperties.put( GRID_STEP, Integer.toString( 15 ) );
-        s_defaultProperties.put( NUDGE_STEP, Integer.toString( 1 ) );
-        s_defaultProperties.put( SNAP_TO_GRID, Boolean.FALSE.toString() );
-        s_defaultProperties.put( RECENT_PACKAGES, "" );
-        s_defaultProperties.put( ZOOM_LEVEL, Float.toString( 1.0f ) );
-        s_defaultProperties.put( SYNTAX_HIGHLIGHT, Boolean.TRUE.toString() );
-        s_defaultProperties.put( SHOW_ALGORITHM, Boolean.FALSE.toString() );
-        s_defaultProperties.put( VERSION, VERSION_UNKNOWN );
-        s_defaultProperties.put( SCHEME_EDITOR_WINDOW_PROPS, ";;650;600;0" );
-        s_defaultProperties.put( SPEC_RECURSION_PARAMS, "false;2" );
-        s_defaultProperties.put( COMPUTE_GOAL, Boolean.FALSE.toString() );
-        s_defaultProperties.put( PROPAGATE_VALUES, Boolean.FALSE.toString() );
-        s_defaultProperties.put( DUMP_GENERATED, Boolean.TRUE.toString() );
+        defaultProperties = new Properties();
+        defaultProperties.put( DOCUMENTATION_URL, "http://www.cs.ioc.ee/~cocovila/" );
+        defaultProperties.put( GENERATED_FILES_DIR, "generated" );
+        defaultProperties.put( COMPILATION_CLASSPATH, "lib/jcommon.jar;lib/jfreechart.jar" );
+        defaultProperties.put( OPEN_PACKAGES, "" );
+        defaultProperties.put( DEBUG_INFO, Integer.toString( 0 ) );
+        defaultProperties.put( DEFAULT_LNF, "javax.swing.plaf.metal.MetalLookAndFeel" );
+        defaultProperties.put( ANTI_ALIASING, Boolean.TRUE.toString() );
+        defaultProperties.put( SHOW_GRID, Boolean.TRUE.toString() );
+        defaultProperties.put( SHOW_CONTROLS, Boolean.FALSE.toString() );
+        defaultProperties.put( GRID_STEP, Integer.toString( 15 ) );
+        defaultProperties.put( NUDGE_STEP, Integer.toString( 1 ) );
+        defaultProperties.put( SNAP_TO_GRID, Boolean.FALSE.toString() );
+        defaultProperties.put( RECENT_PACKAGES, "" );
+        defaultProperties.put( ZOOM_LEVEL, Float.toString( 1.0f ) );
+        defaultProperties.put( SYNTAX_HIGHLIGHT, Boolean.TRUE.toString() );
+        defaultProperties.put( SHOW_ALGORITHM, Boolean.FALSE.toString() );
+        defaultProperties.put( VERSION, VERSION_UNKNOWN );
+        defaultProperties.put( SCHEME_EDITOR_WINDOW_PROPS, ";;650;600;0" );
+        defaultProperties.put( SPEC_RECURSION_PARAMS, "false;2" );
+        defaultProperties.put( COMPUTE_GOAL, Boolean.FALSE.toString() );
+        defaultProperties.put( PROPAGATE_VALUES, Boolean.FALSE.toString() );
+        defaultProperties.put( DUMP_GENERATED, Boolean.TRUE.toString() );
         
         //init default fonts
         for( Fonts font : Fonts.values() ) {
-            s_defaultProperties.put( font.getPropertyName(), font.getDefaultFont() );
+            defaultProperties.put( font.getPropertyName(), font.getDefaultFont() );
         }
+        
+        runtimeProperties = new Properties( defaultProperties );
     }
 
-    {
-        runtimeProperties = new Properties( s_defaultProperties );
-    }
-    
     private String genFileDir;
     private String compilationClasspath;
     private int debugInfo;
@@ -169,8 +167,8 @@ public class RuntimeProperties {
 
         System.setProperty( "user.dir", workingDirectory );
         
-        s_defaultProperties.put( GENERATED_FILES_DIR, workingDirectory + "generated" );
-        s_defaultProperties.put( COMPILATION_CLASSPATH, "" );
+        instance.defaultProperties.put( GENERATED_FILES_DIR, workingDirectory + "generated" );
+        instance.defaultProperties.put( COMPILATION_CLASSPATH, "" );
     }
 
     public static String getWorkingDirectory() {
