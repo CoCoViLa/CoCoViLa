@@ -51,6 +51,8 @@ public interface ISchemeContainer {
      */
     Scheme getScheme();
     
+    String getSchemeName();
+    
     /**
      * Calls repaint
      */

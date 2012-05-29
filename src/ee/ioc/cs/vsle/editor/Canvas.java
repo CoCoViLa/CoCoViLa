@@ -536,6 +536,17 @@ public class Canvas extends JPanel implements ISchemeContainer {
         return title;
     }
 
+    /**
+     * Returns scheme name or if it is missing, a package name
+     * 
+     * This method should always return a name 
+     * and never return null 
+     */
+    @Override
+    public String getSchemeName() {
+        return getPackage().getSchemeClassName( getSchemeTitle() );
+    }
+    
     void initialize() {
         setScheme(new Scheme(this));
         mListener = new MouseOps( this );

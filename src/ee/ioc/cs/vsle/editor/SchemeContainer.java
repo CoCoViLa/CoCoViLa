@@ -66,4 +66,9 @@ public class SchemeContainer implements ISchemeContainer {
     public void unregisterRunner( long id ) {
     }
 
+    @Override
+    public String getSchemeName() {
+        return _package.getSchemeClassName( null );
+    }
+
 }

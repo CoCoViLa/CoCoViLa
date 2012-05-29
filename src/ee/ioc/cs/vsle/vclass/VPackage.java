@@ -69,21 +69,22 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
          * 
          * @return package class name
          */
-        public String getPackageClassName() {
+        public String getSchemeClassName( String schemeNameRef ) {
             //all non word chars are removed and then if the first char is digit or the string is empty it is replaced by "_"
-            String packClassName = getName().replaceAll( "\\W+", "" ).replaceFirst( "^[0-9]|^$", "_" );
+            String className = ( getName() + ( schemeNameRef != null ? "_" + schemeNameRef : "") )
+                    .replaceAll( "\\W+", "" ).replaceFirst( "^[0-9]|^$", "_" );
 
             // if first char is in lower case, make it upper case
-            packClassName = packClassName.replaceFirst("^\\p{javaLowerCase}",
-                    packClassName.substring(0, 1).toUpperCase());
+            className = className.replaceFirst("^\\p{javaLowerCase}",
+                    className.substring(0, 1).toUpperCase());
 
             // make the name unique
             int i = 0;
-            while( hasClass( packClassName ) ) {
-                packClassName = packClassName + "_" + i++;
+            while( hasClass( className ) ) {
+                className = className + "_" + i++;
             }
 
-            return packClassName;
+            return className;
         }
 
         @Override

@@ -104,7 +104,7 @@ public class ProgramRunner {
         updateFromCanvas();
 
         return SpecGenFactory.getInstance().getCurrentSpecGen().generateSpec( schemeContainer.getScheme(),
-                getPackage().getPackageClassName() );
+                schemeContainer.getSchemeName() );
     }
 
     private Object[] getArguments() throws Exception {

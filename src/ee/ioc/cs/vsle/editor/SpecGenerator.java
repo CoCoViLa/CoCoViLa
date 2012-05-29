@@ -43,7 +43,7 @@ public class SpecGenerator implements ISpecGenerator {
 			s.append(" extends ");
 			s.append(superClass.getClassName());
 		}
-		s.append(" {\n").append( OFFSET1 ).append("/*@ specification  ").append(className);
+		s.append(" {\n").append( OFFSET1 ).append("/*@ specification ").append(className);
 		
 		if (superClass != null) {
 			s.append(" super ");
