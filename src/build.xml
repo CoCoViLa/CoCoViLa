@@ -212,6 +212,7 @@
       <fileset dir="${src}">
         <include name="images/*.gif"/>
         <include name="images/*.png"/>
+      	<include name="images/control/*.png"/>
       </fileset>
     </copy>
     <copy todir="${build}/resources">
