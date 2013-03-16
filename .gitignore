@@ -1,0 +1,12 @@
+/dist
+/classes
+/webstart
+/generated
+/config.xml
+/classes
+/rebel.xml
+/packages
+/uml
+/.settings
+/bin
+.DS_Store
