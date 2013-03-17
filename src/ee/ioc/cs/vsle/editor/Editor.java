@@ -9,6 +9,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
 
+import org.slf4j.*;
+
 import ee.ioc.cs.vsle.editor.EditorActionListener.CloneAction;
 import ee.ioc.cs.vsle.editor.EditorActionListener.DeleteAction;
 import ee.ioc.cs.vsle.editor.EditorActionListener.RedoAction;
@@ -31,6 +33,8 @@ public class Editor extends JFrame implements ChangeListener {
 
     private static final long serialVersionUID = 1L;
 
+    private static final Logger logger = LoggerFactory.getLogger( Editor.class );
+    
     private static Editor s_instance;
 
     DnDTabbedPane tabbedPane;
@@ -660,12 +664,12 @@ public class Editor extends JFrame implements ChangeListener {
         
         String version = System.getProperty( "java.version" );
 
-        System.err.println( "Java Version: " + version );
+        logger.info( "Java Version: {}", version );
 
         if ( version.compareTo( "1.6.0" ) < 0 ) {
 
             String message = "CoCoViLa requires at least Java 1.6.0 to run!";
-            System.err.println( message );
+            logger.error( message );
             //for those who start the program w/o the console --
             //try to show this error message in a dialog, not just die silently
             try {
@@ -677,7 +681,7 @@ public class Editor extends JFrame implements ChangeListener {
 
         String directory = RuntimeProperties.getWorkingDirectory();
 
-        System.err.println( "Working directory: " + directory );
+        logger.info( "Working directory: {}", directory );
 
         RuntimeProperties.init();
 
@@ -698,7 +702,7 @@ public class Editor extends JFrame implements ChangeListener {
 
             } else {
 
-                db.p( args[ 0 ] + " read from command line." );
+                logger.info( args[ 0 ] + " read from command line." );
 
                 File file = new File( directory + args[ 0 ] );
 
@@ -714,8 +718,7 @@ public class Editor extends JFrame implements ChangeListener {
                 File f = new File( packageFile );
 
                 if ( f.exists() ) {
-                    if ( RuntimeProperties.isLogDebugEnabled() )
-                        db.p( "Found package file name " + packageFile + " from the configuration file." );
+                    logger.debug( "Found package file name {} from the configuration file.", packageFile );
                     window.openNewCanvasWithPackage( f );
                 }
             }
