@@ -4,10 +4,13 @@ import java.awt.*;
 import java.awt.event.*;
 import java.beans.*;
 import java.io.*;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.List;
 
 import javax.swing.*;
+
+import org.slf4j.*;
 
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -379,6 +382,19 @@ public class RuntimeProperties {
      */
     public static void setDebugInfo( int debugInfo ) {
         instance.debugInfo = debugInfo;
+        try {
+            Class<?> _logger = Class.forName( "ch.qos.logback.classic.Logger" );
+            Class<?> _level = Class.forName( "ch.qos.logback.classic.Level" );
+            Field fLevel = _level.getField( debugInfo == 0 ? "INFO" : "DEBUG" );
+            Method mSetLevel = _logger.getMethod( "setLevel", _level );
+            mSetLevel.setAccessible( true );
+            Logger logger = LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+            mSetLevel.invoke( 
+                    _logger.cast(logger), 
+                    fLevel.get( null ) );
+        } catch ( Exception e ) {
+            e.printStackTrace();
+        }
     }
 
     /**
