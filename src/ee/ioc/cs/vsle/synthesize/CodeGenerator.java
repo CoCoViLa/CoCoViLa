@@ -612,6 +612,7 @@ public class CodeGenerator {
         }
         
         private RelCodeProducer(CodeGenerator cg) {
+        	System.out.println("fdsgsd");
             this.cg = cg;
         }
         
@@ -623,7 +624,8 @@ public class CodeGenerator {
         private String getMaxType(Collection<Var> _inputs) {
 
             for ( Var var : _inputs ) {
-                if (!var.getType().equals(TYPE_INT)) {
+            			String type = var.getField().isAny() ? var.getField().getAnySpecificType() : var.getType();
+                if (!TYPE_INT.equals(type)) {
                     return TYPE_DOUBLE;
                 }
             }
@@ -771,10 +773,13 @@ public class CodeGenerator {
                             op.getChildVars().get( i++ ).getFullName() ).append( " = " )
                             .append( inpChildVar.getFullName() ).append( ";\n" );
                 }
-            } else
-                assigns.append( op.getFullName() ).append( " = " ).append(
-                        ip.getFullName() ).append( ";\n" );
-
+            } else {
+	            	assigns.append( op.getFullName() ).append( " = " );
+	            	if(ip.getField().isAny())
+	            		assigns.append("(").append(op.getType()).append(")");
+	            	assigns.append(
+	            			ip.getFullName() ).append( ";\n" );
+	            }
             return assigns.toString();
         }
 
@@ -898,9 +903,11 @@ public class CodeGenerator {
                 } else if ( op.getField().isVoid() && ip.getField().isVoid() ) {
                     return "";
                 } else if ( rel.getMethod() == null ) {
-                    return result.append( op.getFullName() ).append( " = " )
-                            .append( ip.getFullName() ).append( ";\n" )
-                            .toString();
+                    result.append( op.getFullName() ).append( " = " );
+                    if(ip.getField().isAny())
+                    		result.append("(").append(op.getType()).append(")");
+                    result.append( ip.getFullName() ).append( ";\n" );
+                    return result.toString();
                 }
             }
 
@@ -932,6 +939,8 @@ public class CodeGenerator {
                         rep = "$1";
                         methodCallExist = true;
                     }
+                } else if ( ( varname = rel.getSubstitutions().get( varname ) ) != null ) {
+                  rep = varname;
                 }
 
                 matcher.appendReplacement( sb, method.substring( matcher

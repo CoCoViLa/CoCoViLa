@@ -118,9 +118,10 @@ public class TypeUtil {
     		prx += "static ";
     	}
     	
-    	if ( TypeUtil.TYPE_VOID.equals( type ) || TypeUtil.TYPE_ANY.equals( type ) 
-    			|| isAlias ) {
+    	if ( TypeUtil.TYPE_VOID.equals( type ) || isAlias ) {
     		return "";
+    	} else if( TypeUtil.TYPE_ANY.equals( type ) ) { 
+    		return prx + "/*any*/" + TypeUtil.TYPE_OBJECT + " " + varName + ";\n";
     	} else if ( value != null && value.length() > 0 ) {
     		return prx + "final " + type + " " + varName + " = " + value + ";\n";
     	} else if ( TypeUtil.isPrimitive( type ) ) {

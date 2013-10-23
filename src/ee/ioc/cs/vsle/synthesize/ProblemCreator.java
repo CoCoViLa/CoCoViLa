@@ -209,8 +209,8 @@ public class ProblemCreator {
                 //the following is for x = y, not x -> y relation
                 else if ( ( classRelation.getType() == RelType.TYPE_EQUATION ) ) {
                     
-                    Var inpVar = checkVarExistance( problem, parent, classRelation.getInput(), varSubstitutions );
-                    Var outpVar = checkVarExistance( problem, parent, classRelation.getOutput(), varSubstitutions );
+                    Var inpVar = checkVarExistance( problem, parent, classRelation.getInput(), varSubstitutions, true );
+                    Var outpVar = checkVarExistance( problem, parent, classRelation.getOutput(), varSubstitutions, false );
                     
                     isAliasRel = checkVarEquality( inpVar, outpVar, classes, classRelation, parent, problem );
                 }
@@ -550,7 +550,7 @@ public class ProblemCreator {
             rewriteWildcardAliasVar( var, ac, problem );
         } else {
             for ( ClassField childField : alias.getVars() ) {
-                Var childVar = checkVarExistance( problem, parent, childField, null ); 
+                Var childVar = checkVarExistance( problem, parent, childField, null, false ); 
                 
                 if( childVar != null ) {
                     var.addVar( childVar );
@@ -665,13 +665,13 @@ public class ProblemCreator {
                 return null;
             }
            
-           Var var = checkVarExistance( problem, parentVar, input, substitutions );
+           Var var = checkVarExistance( problem, parentVar, input, substitutions, true );
            var.addRel( rel );
            rel.addInput( var );
        }
        
        for ( ClassField output : classRelation.getOutputs() ) {
-           Var var = checkVarExistance( problem, parentVar, output, substitutions );
+           Var var = checkVarExistance( problem, parentVar, output, substitutions, false );
            rel.addOutput( var );
        }
        
@@ -690,21 +690,19 @@ public class ProblemCreator {
    }
 
     private Var checkVarExistance(Problem problem, Var parentVar,
-            ClassField field, Map<String, String> substitutions) throws SpecParseException {
+            ClassField field, Map<String, String> substitutions, boolean checkAnyType) throws SpecParseException {
 
-        String parentObj = parentVar.getFullNameForConcat();
-        String varName = parentObj + field.getName();
-
-        if (!problem.containsVar(varName)) {
+        String varName = parentVar.getFullNameForConcat() + field.getName();
+        Var var = problem.getVar(varName);
+        
+        if (var == null) {
 
             // --------alias element access--------
             if (aliasElements.containsKey(varName)) {
-                Var var = aliasElements.get(varName); 
-                
-                if ( substitutions != null )
-                    substitutions.put( field.getName(), var.getFullName() );
-                
-                return var;
+                Var aliasEl = aliasElements.get(varName); 
+                if(substitutions != null)
+                		substitutions.put( field.getName(), aliasEl.getFullName() );
+                return aliasEl;
             }
 
             Matcher matcher = PATTERN_ALIAS_ELEMENT_ACCESS.matcher(varName);
@@ -713,17 +711,24 @@ public class ProblemCreator {
                 String element = matcher.group(2);
                 String type = matcher.group(5);
                 String subelement = matcher.group(6);
-                Var var =  getAliasElementVar(problem, varName, aliasVarName,
+                Var aliasEl =  getAliasElementVar(problem, varName, aliasVarName,
                         element, subelement, parentVar, type);
-
-                if ( substitutions != null )
-                    substitutions.put( field.getName(), var.getFullName() );
-                
-                return var;
+                if(substitutions != null)
+                		substitutions.put( field.getName(), aliasEl.getFullName() );
+                return aliasEl;
             }
             // ------end of alias element access------
 
             throw new UnknownVariableException(varName);
+            
+        } else if(checkAnyType && var.getField().isAny()) {
+        		ClassField any = var.getField();
+        		String type = any.getAnySpecificType();
+        		TypeToken token = TypeToken.getTypeToken(type);
+        		if(token.isPrimitive())
+        			type = token.getObjType();
+        		
+        		substitutions.put( field.getName(), "((" + type + ")" + var.getFullName() + ")");
         }
 
         return problem.getVar(varName);

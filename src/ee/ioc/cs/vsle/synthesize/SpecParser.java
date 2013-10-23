@@ -841,7 +841,7 @@ public class SpecParser {
             }
         }
 
-        out.setType( newType );
+        out.setAnySpecificType( newType );
     }
 
     private static void checkAliasLength( String inputs[], AnnotatedClass thisClass, String className )

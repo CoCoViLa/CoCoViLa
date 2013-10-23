@@ -43,6 +43,9 @@ public class ClassField implements Cloneable, Serializable {
 
 	protected String type = "";
 
+	//this is a real type assigned to a field with type "ANY"
+	protected String anyTypeSubstitution = null;
+	
 	protected String value;
 
 	protected String description;
@@ -294,6 +297,29 @@ public class ClassField implements Cloneable, Serializable {
 
 	public boolean isAny() {
 		return TYPE_ANY.equals( getType() );
+	}
+	
+	public String getAnySpecificType() {
+		if(!isAny())
+			throw new IllegalStateException("Not an ANY type! " + this);
+		
+		if(anyTypeSubstitution == null)
+			throw new IllegalStateException("ANY is not bound yet! " + this);
+		
+		return anyTypeSubstitution;
+	}
+	
+	public void setAnySpecificType(String type) {
+		if(!isAny())
+			throw new IllegalStateException("Not an ANY type! " + this);
+		
+		if(type == null)
+			throw new NullPointerException("Provided type cannot be null! " + this);
+		
+		if(anyTypeSubstitution != null && !anyTypeSubstitution.equals(type) )
+			throw new IllegalArgumentException("Cannot assign type " + type + ", ANY is already bound with another type! " + this);
+		
+		anyTypeSubstitution = type;
 	}
 	
 	public boolean isVoid() {

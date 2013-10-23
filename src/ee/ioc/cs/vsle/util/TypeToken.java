@@ -12,8 +12,8 @@ public class TypeToken implements Comparable<TypeToken> {
     public static final TypeToken TOKEN_SHORT = new TypeToken( 2, TYPE_SHORT, Short.class, short.class, "shortValue" );
     public static final TypeToken TOKEN_LONG = new TypeToken( 4, TYPE_LONG, Long.class, long.class, "longValue" );
     public static final TypeToken TOKEN_BOOLEAN = new TypeToken( 0, TYPE_BOOLEAN, Boolean.class, boolean.class, "booleanValue" );
-    public static final TypeToken TOKEN_STRING = new TypeToken( 0, TYPE_STRING, String.class, null, "" );
-    public static final TypeToken TOKEN_OBJECT = new TypeToken( 0, null, null, null, "" );
+    public static final TypeToken TOKEN_STRING = new TypeToken( 0, TYPE_STRING, String.class, null, "", false );
+    public static final TypeToken TOKEN_OBJECT = new TypeToken( 0, null, null, null, "", false );
     
     private String m_type;
     private String m_objType;
@@ -21,14 +21,20 @@ public class TypeToken implements Comparable<TypeToken> {
     private Class<?>  m_wclass;
     private Class<?>  m_pclass;
     private int priority;
+    private boolean primitive;
     
-    private TypeToken( int priority, String type, Class<?> wrapperClass, Class<?> primeClass, String method ) {
-    	this.priority = priority;
+		private TypeToken( int priority, String type, Class<?> wrapperClass, Class<?> primeClass, String method ) {
+    		this(priority, type, wrapperClass, primeClass, method, true);
+    }
+    
+    private TypeToken( int priority, String type, Class<?> wrapperClass, Class<?> primeClass, String method, boolean primitive ) {
+    			this.priority = priority;
         m_type = type;
         m_objType = wrapperClass != null ? wrapperClass.getName() : "";
         m_method = method;
         m_wclass = wrapperClass;
         m_pclass = primeClass;
+        this.primitive = primitive;
     }
 
     public String getType() {
@@ -50,6 +56,10 @@ public class TypeToken implements Comparable<TypeToken> {
     public Class<?> getPrimeClass() {
     	return m_pclass;
     }
+    
+    public boolean isPrimitive() {
+			return primitive;
+		}
 
 	@Override
     public int compareTo(TypeToken o) {
