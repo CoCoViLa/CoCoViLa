@@ -36,7 +36,10 @@ public class Alias extends ClassField {
 	 * @throws AliasException 
 	 */
 	public void addVar(ClassField f) throws AliasException {
-		if( !acceptsType( f.getType() ) ) {
+		if(f.isAny() && !TYPE_OBJECT.equals( this.getVarType() )) {
+			f.setAnySpecificType(getVarType());
+		}
+		else if( !acceptsType( f.getType() ) ) {
 			throw new AliasException( "Unable to add " + f.getType() + " " + f.getName() + " to alias " 
 					+ this + " because types do not match, required: " + getVarType() + ", given: " + f.getType() );
 		}
@@ -141,6 +144,9 @@ public class Alias extends ClassField {
 		for (int i = 0; i < vars.size(); i++) {
 		    ClassField thisVar = vars.get(i);
 		    ClassField otherVar = alias.vars.get(i);
+		    
+		    if(thisVar.isAny() || otherVar.isAny())
+		    	continue;
 		    
 			if( !thisVar.getType().equals( otherVar.getType() )
 			        || ( thisVar.isAlias() ^ otherVar.isAlias() )

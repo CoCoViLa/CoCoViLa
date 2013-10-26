@@ -303,10 +303,14 @@ public class ClassField implements Cloneable, Serializable {
 		if(!isAny())
 			throw new IllegalStateException("Not an ANY type! " + this);
 		
-		if(anyTypeSubstitution == null)
+		if(!isAnyTypeBound())
 			throw new IllegalStateException("ANY is not bound yet! " + this);
 		
 		return anyTypeSubstitution;
+	}
+	
+	public boolean isAnyTypeBound() {
+		return anyTypeSubstitution != null;
 	}
 	
 	public void setAnySpecificType(String type) {

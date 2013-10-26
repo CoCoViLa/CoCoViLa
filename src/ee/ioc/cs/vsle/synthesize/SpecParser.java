@@ -828,7 +828,11 @@ public class SpecParser {
 
                 throw new UnknownVariableException( inputs[ i ] );
             }
-            if ( i == 0 ) {
+            if(in.isAny()) {
+            	newType = in.getAnySpecificType();
+            	continue;
+            }
+            else if ( i == 0 ) {
                 newType = in.getType();
                 continue;
             }
@@ -841,7 +845,8 @@ public class SpecParser {
             }
         }
 
-        out.setAnySpecificType( newType );
+        if(!TYPE_ANY.equals(newType))
+        	out.setAnySpecificType( newType );
     }
 
     private static void checkAliasLength( String inputs[], AnnotatedClass thisClass, String className )

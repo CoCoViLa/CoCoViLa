@@ -722,13 +722,8 @@ public class ProblemCreator {
             throw new UnknownVariableException(varName);
             
         } else if(checkAnyType && var.getField().isAny()) {
-        		ClassField any = var.getField();
-        		String type = any.getAnySpecificType();
-        		TypeToken token = TypeToken.getTypeToken(type);
-        		if(token.isPrimitive())
-        			type = token.getObjType();
-        		
-        		substitutions.put( field.getName(), "((" + type + ")" + var.getFullName() + ")");
+        		substitutions.put( var.getFullName(), 
+        				CodeGeneratorUtil.getAnyTypeSubstitution(var.getFullName(), var.getField().getAnySpecificType()));
         }
 
         return problem.getVar(varName);

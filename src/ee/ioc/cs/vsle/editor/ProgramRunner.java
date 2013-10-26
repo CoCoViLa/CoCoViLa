@@ -911,6 +911,9 @@ public class ProgramRunner {
                         return Byte.toString( f.getByte( obj ) );
                     } else {
                         Object o = f.get( obj );
+                        if(o == null)
+                        	return null;
+                        	//throw new RuntimeException("Unable to get field's value from object: " + "(" + obj.getClass().getName() + ")" + obj + "." + f.getName() );
                         if ( o.getClass().isArray() ) {
                             String result = "";
                             for ( int i = 0; i < Array.getLength( o ); i++ ) {

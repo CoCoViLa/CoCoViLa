@@ -401,8 +401,10 @@ public class CodeGenerator {
 
             if ( token == TypeToken.TOKEN_OBJECT
                     || token == TypeToken.TOKEN_STRING ) {
-                result.append( var.getFullName() ).append( " = (" ).append(
-                        varType ).append( ")" ).append( inputArgName ).append(
+                result.append( var.getFullName() ).append( " = " );
+                if(!TYPE_ANY.equals(varType))
+                	result.append( "(" ).append( varType ).append( ")" );
+                result.append( inputArgName ).append(
                         "[" ).append( i ).append( "];\n" );
             } else {
                 result.append( var.getFullName() ).append( " = ((" ).append(
@@ -612,7 +614,6 @@ public class CodeGenerator {
         }
         
         private RelCodeProducer(CodeGenerator cg) {
-        	System.out.println("fdsgsd");
             this.cg = cg;
         }
         
@@ -685,7 +686,7 @@ public class CodeGenerator {
                     if ( var.getField().isAlias() ) {
                         params.append( getRelAliasTmpName( var, varNameSubstitutions, false ) );
                     } else {
-                        params.append( var.getFullName() );
+                        params.append( getVarName(var) );
                     }
                 }
             }
@@ -774,15 +775,26 @@ public class CodeGenerator {
                             .append( inpChildVar.getFullName() ).append( ";\n" );
                 }
             } else {
-	            	assigns.append( op.getFullName() ).append( " = " );
-	            	if(ip.getField().isAny())
-	            		assigns.append("(").append(op.getType()).append(")");
-	            	assigns.append(
-	            			ip.getFullName() ).append( ";\n" );
+	            	assigns.append( op.getFullName() ).append( " = " )
+	            		.append(getVarName(ip)).append( ";\n" );
 	            }
             return assigns.toString();
         }
 
+        private String getVarName(Var var) {
+        	String subst = rel.getSubstitutions().get(var.getFullName());
+        	if(subst != null) {
+        		return subst;
+        	}
+        	StringBuilder sb = new StringBuilder();
+        	if(var.getField().isAny())
+        		sb.append(CodeGeneratorUtil.getAnyTypeSubstitution(var.getFullName(), var.getField().getAnySpecificType()));
+        	else
+        		sb.append(var.getFullName());
+        	
+        	return sb.toString();
+        }
+        
         private String emitMethod() {
 
             Map<String, String> inputSubstitutions = new HashMap<String, String>();
@@ -903,10 +915,8 @@ public class CodeGenerator {
                 } else if ( op.getField().isVoid() && ip.getField().isVoid() ) {
                     return "";
                 } else if ( rel.getMethod() == null ) {
-                    result.append( op.getFullName() ).append( " = " );
-                    if(ip.getField().isAny())
-                    		result.append("(").append(op.getType()).append(")");
-                    result.append( ip.getFullName() ).append( ";\n" );
+                    result.append( op.getFullName() ).append( " = " )
+                    	.append( getVarName(ip) ).append( ";\n" );
                     return result.toString();
                 }
             }
@@ -939,7 +949,7 @@ public class CodeGenerator {
                         rep = "$1";
                         methodCallExist = true;
                     }
-                } else if ( ( varname = rel.getSubstitutions().get( varname ) ) != null ) {
+                } else if ( ( varname = rel.getSubstitutions().get( rep ) ) != null ) {//"any" type
                   rep = varname;
                 }
 
@@ -1003,7 +1013,7 @@ public class CodeGenerator {
                                 varName = aliasTmpFromInput;
 
                             } else {
-                                varName = var.getFullName();
+                                varName = getVarName(var);
                             }
 
                             varList.append( cg.getOffset() ).append(
