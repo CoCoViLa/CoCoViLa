@@ -95,9 +95,25 @@ public class ExpertSystemShellWelcomeDialog extends JDialog {
      * @param args
      */
     public static void main( String[] args ) {
-        ExpertSystemShellWelcomeDialog d = new ExpertSystemShellWelcomeDialog();
-        d.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
-        d.setVisible( true );
+
+        try {
+            System.setProperty("apple.laf.useScreenMenuBar", "true");
+            
+            UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
+
+        } catch ( Exception e ) {
+            db.p( "Unable to init default Look And Feel: " + UIManager.getSystemLookAndFeelClassName() );
+        }
+        
+        SwingUtilities.invokeLater( new Runnable() {
+            
+            @Override
+            public void run() {
+                ExpertSystemShellWelcomeDialog d = new ExpertSystemShellWelcomeDialog();
+                d.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
+                d.setVisible( true );
+            }
+        } );
     }
 
 }

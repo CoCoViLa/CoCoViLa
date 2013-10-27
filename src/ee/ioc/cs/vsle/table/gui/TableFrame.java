@@ -297,6 +297,12 @@ public class TableFrame extends JFrame {
      * 
      */
     private void editTableProperties() {
+        
+        if( getTable() == null ) {
+            newTable();
+            return;
+        }
+        
         TablePropertyDialog dialog = new TablePropertyDialog( this, getTable() );
         dialog.setVisible( true );
         updateFrameTitle();
@@ -324,7 +330,7 @@ public class TableFrame extends JFrame {
 
             fc.setFileFilter( new CustomFileFilter( CustomFileFilter.EXT.TBL ) );
 
-            if ( fc.showOpenDialog( TableFrame.this ) == JFileChooser.APPROVE_OPTION ) {
+            if ( fc.showSaveDialog( TableFrame.this ) == JFileChooser.APPROVE_OPTION ) {
                 
                 File file = fc.getSelectedFile();
                 

@@ -556,27 +556,25 @@ public class Editor extends JFrame implements ChangeListener {
         return false;
     }
 
+    private enum OS { WIN, MAC, UNIX };
+    
     /**
      * Return operating system type. Uses isWin, isMac, isUnix methods for
      * deciding on Os type and returns always the internally defined Os Type
      * (WIN,MAC or UNIX).
-     * 
-     * @return String - internally defined OS TYPE.
      */
-    public static String getOsType() {
-        Properties sysProps = System.getProperties();
-        try {
-            if ( sysProps != null ) {
-                String osType = sysProps.getProperty( "os.name" );
-                if ( isWin( osType ) ) {
-                    return "Windows";
-                }
-                return "NotWindows";
-            }
-        } catch ( Exception e ) {
-            e.printStackTrace();
-        }
-        return null;
+    public static OS getOsType() {
+      String os = System.getProperty("os.name");
+      if(os != null) {
+        os = os.toLowerCase();
+        if(os.startsWith("win"))
+          return OS.WIN;
+        else if(os.startsWith("mac"))
+          return OS.MAC;
+        else
+          return OS.UNIX;
+      }
+      return null;
     }
     
     /**
@@ -623,10 +621,11 @@ public class Editor extends JFrame implements ChangeListener {
      * @param args command line arguments
      */
     public static void main( final String[] args ) {
+      
+        if(getOsType() == OS.MAC)
+          System.setProperty("apple.laf.useScreenMenuBar", "true");
+      
         SwingUtilities.invokeLater( new Runnable() {
-            // Java 1.5 seems to not support @Override annotations for
-            // interface methods. bug_id=5008260
-            // @Override
             @Override
             public void run() {
                 createAndInitGUI( args );

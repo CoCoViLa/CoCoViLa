@@ -78,16 +78,11 @@ public class TablePropertyDialog extends JDialog {
      */
     TablePropertyDialog( JFrame frame ) {
         
-        super( frame, "New expert table", Dialog.ModalityType.APPLICATION_MODAL );
-        
-        init();
-        initActionListener();
-        
-        setLocationRelativeTo( frame );
+        this( frame, null );
     }
     
     TablePropertyDialog( JFrame frame, Table tab ) {
-        super(frame, (tab.getTableId() != null 
+        super(frame, (tab != null && tab.getTableId() != null 
                 ? "Table properties: " + tab.getTableId() : "New expert table"),
                 Dialog.ModalityType.APPLICATION_MODAL);
 
@@ -96,10 +91,12 @@ public class TablePropertyDialog extends JDialog {
         
         setLocationRelativeTo( frame );
         
-        editMode = true;
-        table = tab;
-        
-        initFromTable();
+        if( tab != null ) {
+            editMode = true;
+            table = tab;
+
+            initFromTable();
+        }
         
     }
 
