@@ -41,6 +41,7 @@ public class RuntimeProperties {
     private static final String DEBUG_INFO = "debugInfo";
     private static final String DEFAULT_LNF = "defaultLayout";
     private static final String LAST_PATH = "last.path";
+    private static final String LAST_ESS_PATH = "ess.last.path";
     private static final String LAST_EXECUTED = "lastExecuted";
     private static final String ANTI_ALIASING = "antiAliasing";
     private static final String SHOW_GRID = "showGrid";
@@ -331,6 +332,17 @@ public class RuntimeProperties {
      */
     public static String getLastPath() {
         return instance.runtimeProperties.getProperty( LAST_PATH );
+    }
+
+    public static void setEssLastPath( String path ) {
+      instance.runtimeProperties.setProperty(LAST_ESS_PATH, path);
+    }
+    
+    public static String getEssLastPath() {
+      String path = instance.runtimeProperties.getProperty(LAST_ESS_PATH);
+      if(path == null)
+        path = getLastPath();
+      return path;
     }
 
     /**

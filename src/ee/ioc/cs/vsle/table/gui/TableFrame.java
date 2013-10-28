@@ -190,7 +190,7 @@ public class TableFrame extends JFrame {
             return Editor.getInstance().getCurrentPackage().getPath();
         }
         
-        String path = RuntimeProperties.getLastPath();
+        String path = RuntimeProperties.getEssLastPath();
         
         return path != null ? path : RuntimeProperties.getWorkingDirectory();
     }

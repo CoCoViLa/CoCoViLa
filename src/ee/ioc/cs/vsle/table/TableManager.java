@@ -135,10 +135,14 @@ public class TableManager {
         if ( fc.showOpenDialog( parent ) 
                 == JFileChooser.APPROVE_OPTION ) {
 
+            File tblFile = fc.getSelectedFile();
+            
             Map<String, Table> tables = 
-                    getTablesFromFile( fc.getSelectedFile() );
+                    getTablesFromFile( tblFile );
 
-            pair = pair.setAtSecond( fc.getSelectedFile() );
+            pair = pair.setAtSecond( tblFile );
+            
+            RuntimeProperties.setEssLastPath(tblFile.getAbsolutePath());
             
             final Table table;
 

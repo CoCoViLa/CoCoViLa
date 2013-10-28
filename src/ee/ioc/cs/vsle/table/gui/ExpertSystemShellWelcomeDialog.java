@@ -67,7 +67,7 @@ public class ExpertSystemShellWelcomeDialog extends JDialog {
                                     Editor.getInstance() != null 
                                         ? Editor.getInstance().getCurrentPackage() != null 
                                             ? Editor.getInstance().getCurrentPackage().getPath() 
-                                            : null//yuck
+                                            : RuntimeProperties.getEssLastPath()
                                         : null ).setVisible( true );
                         }
                     };
