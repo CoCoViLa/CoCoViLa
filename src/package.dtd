@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='us-ascii'?>
 <!-- The root node of a package -->
-<!ELEMENT package	(name, description, daemon?, class+)>
+<!ELEMENT package	(name, description, daemon?, class*)>
 <!-- A single alphanumeric word - no separators allowed -->
 <!ELEMENT name	(#PCDATA)>
 <!-- Free text - may contain many sentences-->
@@ -24,7 +24,7 @@
 <!-- Field is an attribute of the rich component 
 shown in the list of attributes in the Schema Editor.
 If a field is 'hidden' it means that it will not be shown in the Object Properties window -->	
-<!ELEMENT fields	(field+)>
+<!ELEMENT fields	(field*)>
 <!ELEMENT field	(known?,default?)>
 <!ATTLIST field 
 	name	CDATA   #REQUIRED
@@ -157,7 +157,7 @@ Port is bound to a metaclasses component via the attribute "name".
 Ports are used to connect rich components to each-other 
 portConnection=area - used for rendering relation classes
 -->
-<!ELEMENT ports	(port+)>
+<!ELEMENT ports	(port*)>
 <!ELEMENT port	(open?, closed?)>
 <!ATTLIST port
 	id	CDATA	#IMPLIED
