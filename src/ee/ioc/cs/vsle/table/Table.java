@@ -564,7 +564,7 @@ public final class Table implements IStructuralExpertTable {
         //TODO check the following case -- when no inputs are actually required in order to get a default value
         if( verifyInputs ) {
             if( inputList.size() != args.length )
-                throw new TableException( "Number of table inputs is incorrect!" );
+                throw new TableException( "Number of table inputs for " + tableId + " is incorrect!" );
             TableInferenceEngine.verifyInputs( inputList, args );
         }
         

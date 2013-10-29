@@ -393,7 +393,24 @@ public class ProgramRunner {
                             rerun( schemeContainer );
                             rerun = true;
                         } else if ( ex.getCause() instanceof RunningProgramException ) {
-                            ex.getCause().printStackTrace();
+                            if(Editor.getInstance() != null) {
+                              String message = ex.getCause() != null ? ex.getCause().getMessage() : ex.getMessage();
+                              if(RuntimeProperties.isLogDebugEnabled()) {
+                                StringWriter sw;
+                                PrintWriter pw = new PrintWriter(sw = new StringWriter(), true);
+                                if(ex.getCause() != null)
+                                  ex.getCause().printStackTrace(pw);
+                                else
+                                  ex.printStackTrace(pw);
+                                ErrorWindow.showErrorMessage( sw.toString() );
+                                pw.close();
+                              } else {
+                                ex.printStackTrace();
+                                ErrorWindow.showErrorMessage( message );
+                              }
+                            } else {
+                              ex.printStackTrace();
+                            }
                         } else if ( !( ex.getCause() instanceof ThreadDeath )
                                 && !(ex.getCause() instanceof TerminateProgramException)) {
                             ex.printStackTrace();
