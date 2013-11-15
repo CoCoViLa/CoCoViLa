@@ -89,13 +89,13 @@
   </target>
   
   <target name="build-dep" depends="check-dep">
-    <fail message="Cannot find ${lib}/ejc.jar" unless="dep.tools.present"/>
+    <fail message="Cannot find ${lib}/ecj.jar" unless="dep.tools.present"/>
 
     <echo message="Build dependencies are present"/>
   </target>
 
   <target name="runtime-dep" depends="check-dep">
-    <fail message="Cannot find ${lib}/ejc.jar" unless="dep.tools.present"/>
+    <fail message="Cannot find ${lib}/ecj.jar" unless="dep.tools.present"/>
     <fail message="Cannot find ${lib}/jcommon.jar" unless="dep.jcommon.present"/>
     <fail message="Cannot find ${lib}/jfreechart.jar" unless="dep.jfreechart.present"/>
 
@@ -107,7 +107,7 @@
       Compilation
   -->
 
-  <target name="compile" depends="compile-debug,compile-normal"
+  <target name="compile" depends="clean,compile-debug,compile-normal"
           description="Compile the program sources"/>
 
   <target name="compile-debug" depends="init,build-dep"
@@ -294,7 +294,7 @@
         <!--exclude name="**/*Test*.class"/-->
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
-          <attribute name="Class-Path" value="lib/ejc.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Class-Path" value="lib/ecj.jar lib/jfreechart.jar lib/jcommon.jar"/>
           <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
           <attribute name="Implementation-Vendor" value="${project.vendor}"/>
           <attribute name="Implementation-Version" value="${project.version}"/>
@@ -326,7 +326,7 @@
       Web Start
   -->
 	
-  <target name="webstart" depends="check-ws-dirs,runtime-dep,copy-resources,genkey"
+  <target name="webstart" depends="clean,check-ws-dirs,runtime-dep,copy-resources,genkey"
           description="Generate distribution files" >
 
     <jar destfile="${webstart}/cocovila-se.jar"
@@ -335,7 +335,7 @@
     	<exclude name="ee/ioc/cs/vsle/iconeditor/**" />
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
-          <attribute name="Class-Path" value="lib/ejc.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Class-Path" value="lib/ecj.jar lib/jfreechart.jar lib/jcommon.jar"/>
           <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
           <attribute name="Implementation-Vendor" value="${project.vendor}"/>
           <attribute name="Implementation-Version" value="${project.version}"/>
@@ -368,7 +368,7 @@
 
   	<copy todir="${webstart}/lib">
       <fileset dir="${lib}">
-        <include name="ejc.jar"/>
+        <include name="ecj.jar"/>
       	<include name="jcommon.jar"/>
         <include name="jfreechart.jar"/>
       </fileset>
