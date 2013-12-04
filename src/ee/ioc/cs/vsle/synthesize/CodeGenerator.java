@@ -277,9 +277,11 @@ public class CodeGenerator {
                             bufConstr.append( var.getName() ).append( " = " ).append( "(" ).append( var.getType() ).append( ") " ).append( parent )
                                     .append( ".clone();\n" );
                         } else {
-                            bufConstr.append( "try {\n" ).append( consOT ).append( OT_TAB ).append( var.getName() ).append( " = " ).append(
-                                    "DeepCopy.copy( " ).append( parent ).append( " );\n" ).append( consOT ).append(
-                                    "} catch( Exception e ) { throw new SubtaskExecutionException(e); }\n" );
+                            bufConstr.append( "try {\n" )
+                                     .append( consOT ).append( OT_TAB ).append( "//NB! Classes of objects in the array being copied must implement 'java.io.Serializable' interface\n")
+                                     .append( consOT ).append( OT_TAB ).append( var.getName() ).append( " = " )
+                                       .append( "DeepCopy.copy( " ).append( parent ).append( " );\n" )
+                                     .append( consOT ).append("} catch( Exception e ) { throw new SubtaskExecutionException(e); }\n" );
                         }
                     } else {
                         bufConstr.append( var.getName() ).append( " = " ).append( parent ).append( ";\n" );
