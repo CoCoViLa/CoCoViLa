@@ -21,7 +21,7 @@ public class DeepCopy {
      * Returns a copy of the object, or throws exception if the object cannot
      * be serialized.
      */
-    public static <T> T copy( T orig ) throws Exception {
+    public static <T> T copy( final T orig ) throws Exception {
 		count++;
         long _currTime = System.currentTimeMillis();
         
@@ -34,7 +34,24 @@ public class DeepCopy {
 
 		oos.close();
 
-		ObjectInputStream ois = new ObjectInputStream( bis );
+		ObjectInputStream ois = new ObjectInputStream( bis ) {
+      @Override
+      protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
+        
+        Class<?> result = null;
+        
+        try {
+          result = Class.forName(desc.getName(), false, orig.getClass().getClassLoader());
+        } catch(Throwable e) {
+          //ignore
+        }
+        
+        if(result == null)
+          result = super.resolveClass(desc);
+        
+        return result;
+      }
+		};
 
 		// Hide the ugly warning caused by the following unchecked cast
 		// as this is unavoidable under current Java type system.
