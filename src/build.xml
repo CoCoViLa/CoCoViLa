@@ -295,6 +295,8 @@
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
           <attribute name="Class-Path" value="lib/ecj.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Permissions" value="${project.permissions}"/>
+          <attribute name="Codebase" value="${project.codebase}"/>
           <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
           <attribute name="Implementation-Vendor" value="${project.vendor}"/>
           <attribute name="Implementation-Version" value="${project.version}"/>
@@ -308,6 +310,8 @@
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.iconeditor.IconEditor"/>
           <attribute name="Class-Path" value="${project.se.jar}"/>
+          <attribute name="Permissions" value="${project.permissions}"/>
+          <attribute name="Codebase" value="${project.codebase}"/>
           <attribute name="Implementation-Title" value="${project.title} ${project.title.ce}"/>
           <attribute name="Implementation-Vendor" value="${project.vendor}"/>
           <attribute name="Implementation-Version" value="${project.version}"/>
