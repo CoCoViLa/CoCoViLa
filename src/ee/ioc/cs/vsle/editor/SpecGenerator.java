@@ -159,35 +159,40 @@ public class SpecGenerator implements ISpecGenerator {
 						).append( rel.getEndPort().getName() ).append( ";\n");
 
 			} else if( rel.getBeginPort().isMulti() || rel.getEndPort().isMulti() ) {
-				
-				Port multi = rel.getBeginPort().isMulti() ? rel.getBeginPort() : rel.getEndPort();
-				Port simple = !rel.getBeginPort().isMulti() ? rel.getBeginPort() : rel.getEndPort();
-				
-				String multiport = ( multi.getObject().isSuperClass() ? ""
-                        : multi.getObject().getName() + "." ) + multi.getName();
-				String port = ( simple.getObject().isSuperClass() ? ""
-                        : simple.getObject().getName() + "." ) + simple.getName();
-				
-				List<String> list = multiRels.get( multiport );
-				if( list == null ) {
-					list = new ArrayList<String>(); 
-	                multiRels.put( multiport, list );
-				} 
-				list.add( port );
-			} else {
-				String startObjName = 
-				    TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.getBeginPort().getName() ) 
-				        ? rel.getBeginPort().getObject().getName()
-				        : ( rel.getBeginPort().getObject().isSuperClass() ) 
-						    ? rel.getBeginPort().getName()
-							: rel.getBeginPort().getObject().getName() + "." + rel.getBeginPort().getName();
-										
-				String endObjName = 
-				    TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.getEndPort().getName() ) 
-                        ? rel.getEndPort().getObject().getName()
-                        : ( rel.getEndPort().getObject().isSuperClass() )
-							? rel.getEndPort().getName()
-							: rel.getEndPort().getObject().getName() + "." + rel.getEndPort().getName();
+      
+        Port multi = rel.getBeginPort().isMulti() ? rel.getBeginPort() : rel.getEndPort();
+        Port simple = !rel.getBeginPort().isMulti() ? rel.getBeginPort() : rel.getEndPort();
+      
+        String multiport = ( multi.getObject().isSuperClass() 
+                             ? ""
+                             : multi.getObject().getName() + "." )
+                           + multi.getName();
+        String port = TypeUtil.TYPE_THIS.equalsIgnoreCase( simple.getName() )
+                        ? simple.getObject().getName()
+                        : (( simple.getObject().isSuperClass() 
+                            ? ""
+                            : simple.getObject().getName() + "." ) 
+                           + simple.getName());
+        List<String> list = multiRels.get( multiport );
+        if( list == null ) {
+          list = new ArrayList<String>(); 
+          multiRels.put( multiport, list );
+          } 
+        list.add( port );
+      } else {
+        String startObjName = 
+            TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.getBeginPort().getName() ) 
+              ? rel.getBeginPort().getObject().getName()
+              : ( rel.getBeginPort().getObject().isSuperClass() ) 
+                  ? rel.getBeginPort().getName()
+                  : rel.getBeginPort().getObject().getName() + "." + rel.getBeginPort().getName();
+                  
+        String endObjName = 
+            TypeUtil.TYPE_THIS.equalsIgnoreCase( rel.getEndPort().getName() ) 
+              ? rel.getEndPort().getObject().getName()
+              : ( rel.getEndPort().getObject().isSuperClass() )
+                  ? rel.getEndPort().getName()
+                  : rel.getEndPort().getObject().getName() + "." + rel.getEndPort().getName();
 				
 				s.append( OFFSET2 ).append( endObjName ).append( " = " ).append( startObjName ).append( ";\n" );
 			}
