@@ -70,6 +70,8 @@ public class ClassField implements Cloneable, Serializable {
 	 * If a field is hidden it mean that it will not be shown in the Object Properties window
 	 */
 	private boolean hidden = false;
+
+  private boolean schemeObject;
 	
 	/**
 	 * Class constructor.
@@ -373,5 +375,13 @@ public class ClassField implements Cloneable, Serializable {
      */
     public void setHidden( boolean hidden ) {
         this.hidden = hidden;
+    }
+
+    public boolean isSchemeObject() {
+      return schemeObject;
+  }
+    
+    public void setSchemeObject( boolean schemeObject ) {
+      this.schemeObject = schemeObject; 
     }
 }

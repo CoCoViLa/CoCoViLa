@@ -444,6 +444,7 @@ public class SpecParser {
                             // exists on a given scheme
                             if ( schemeObjects != null && specClass && ( className == TYPE_THIS )
                                     && schemeObjects.contains( vars[ i ] ) ) {
+                                var.setSchemeObject(true);
                                 String s = vars[ i ] + "." + CodeGenerator.SPEC_OBJECT_NAME;
                                 String meth = s + " = " + "\"" + vars[ i ] + "\"";
 

@@ -82,6 +82,9 @@ public class ProblemCreator {
             
             problem.addVar( var );
             
+            if( cf.isConstant() || cf.isSchemeObject() ) {
+              problem.getCurrentContext().getKnownVars().add( var );
+            }
             //String type;
             
             if ( classes.getType( /*type =*/ cf.getType() ) != null ) {
@@ -107,10 +110,6 @@ public class ProblemCreator {
                 //}
                 
                 continue;
-            }
-            
-            if( cf.isConstant() ) {
-                problem.getCurrentContext().getKnownVars().add( var );
             }
             
             if( cf.isAliasLength() && cf.getValue() == null ) {
