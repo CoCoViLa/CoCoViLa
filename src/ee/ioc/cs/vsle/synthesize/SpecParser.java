@@ -399,7 +399,7 @@ public class SpecParser {
                         LineType.Assignment statement = ( LineType.Assignment)lt.getStatement();
                         classRelation.addOutput( statement.getName(), annClass.getFields() );
                         classRelation.setMethod( statement.getName() + " = " + statement.getValue() );
-                        checkAnyType( statement.getName(), statement.getValue(), annClass.getFields() );
+                        checkAnyType( getVar(statement.getName(), annClass.getFields()), statement.getValue(), annClass, classList );
                         annClass.addClassRelation( classRelation );
                         if ( RuntimeProperties.isLogDebugEnabled() )
                             db.p( classRelation );
@@ -596,8 +596,9 @@ public class SpecParser {
 
                             ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, lt.getOrigSpecLine() );
 
-                            classRelation.addOutput( out, annClass.getFields() );
-
+                            ClassField output = getVarWithType( out, annClass, classList );
+                            classRelation.addOutput( output );
+                            
                             // checkAliasLength( inputs, annClass.getFields(), className );
                             for ( int i = 0; i < inputs.length; i++ ) {
                                 String initial = inputs[ i ];
@@ -610,7 +611,7 @@ public class SpecParser {
                             }
                             method = method.replaceAll( "\\$" + out + "\\$", out );
 
-                            checkAnyType( out, inputs, annClass.getFields() );
+                            checkAnyType( output, inputs, annClass, classList );
 
                             if ( !inputs[ 0 ].equals( "" ) ) {
                                 classRelation.addInputs( inputs, annClass.getFields() );
@@ -789,23 +790,25 @@ public class SpecParser {
         return specClass;
     }
 
-    private static void checkAnyType( String output, String input, Collection<ClassField> vars ) throws UnknownVariableException {
-        checkAnyType( output, new String[] { input }, vars );
+    private static void checkAnyType( ClassField output, String input, AnnotatedClass parentClass, ClassList classes ) throws UnknownVariableException {
+        checkAnyType( output, new String[] { input }, parentClass, classes );
     }
 
     // TODO - implement _any_!!!
-    private static void checkAnyType( String output, String[] inputs, Collection<ClassField> vars )
+    private static void checkAnyType( ClassField out, String[] inputs, AnnotatedClass parentClass, ClassList classes )
             throws UnknownVariableException {
-        ClassField out = getVar( output, vars );
 
-        if ( out == null || !out.getType().equals( TYPE_ANY ) ) {
+        if ( out == null 
+             || (!out.isAny() && !TYPE_ANY.equals( getVarType(out.getName(), parentClass, classes) ))) {
             return;
         }
-
+        
+        Collection<ClassField> vars = parentClass.getFields();
+        
         String newType = TYPE_ANY;
 
         for ( int i = 0; i < inputs.length; i++ ) {
-            ClassField in = getVar( inputs[ i ], vars );
+            ClassField in = getVarWithType( inputs[i], parentClass, classes );
 
             if ( in == null ) {
                 try {
@@ -850,6 +853,24 @@ public class SpecParser {
         	out.setAnySpecificType( newType );
     }
 
+    private static String getVarType(String var, AnnotatedClass parentClass, ClassList classes) {
+        return getVarWithType( var, parentClass, classes ).getType();
+    }
+    
+    private static ClassField getVarWithType(String var, AnnotatedClass parentClass, ClassList classes) {
+        String[] split = var.split( "\\." );
+        if(split.length > 1) {
+            String type = "";
+            for(int i = 0; i < split.length; i++) {
+                ClassField cf = parentClass.getFieldByName( split[i] );
+                type = cf.getType();
+                parentClass = classes.getType( type );
+            }
+            return new ClassField( var, type );
+        }
+        return parentClass.getFieldByName( var );
+    }
+    
     private static void checkAliasLength( String inputs[], AnnotatedClass thisClass, String className )
             throws UnknownVariableException {
         for ( int i = 0; i < inputs.length; i++ ) {

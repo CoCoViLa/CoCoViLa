@@ -239,6 +239,9 @@ public class ProgramRunner {
     }
 
     private static void reportException(Throwable e) {
+        if(RuntimeProperties.isLogDebugEnabled())
+            e.printStackTrace();
+        
         String msg;
         if( e instanceof UnknownVariableException ) {
             UnknownVariableException uve = (UnknownVariableException)e;
@@ -281,7 +284,8 @@ public class ProgramRunner {
                 msg = sw.toString();
             }
             ErrorWindow.showErrorMessage( msg );
-            e.printStackTrace();
+            if(!RuntimeProperties.isLogDebugEnabled())
+                e.printStackTrace();
         }
     }
 

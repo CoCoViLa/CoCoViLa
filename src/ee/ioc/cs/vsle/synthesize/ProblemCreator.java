@@ -14,6 +14,8 @@ public class ProblemCreator {
     private Map<String, Var> aliasLengths = new HashMap<String, Var>();
     private Map<String, Var> aliasElements = new HashMap<String, Var>();
     private List<Var> parentVars = new ArrayList<Var>();
+    //"any" class fields that need to be bound with a concrete type 
+    private Map<String, List<Map<String, String>>> unboundAnyTypeVars = new LinkedHashMap<String, List<Map<String, String>>>();
     //the list of classes that exist in the problem setting.
     private ClassList classes;
     private static int aliasCounter = 0;
@@ -690,20 +692,19 @@ public class ProblemCreator {
 
     private Var checkVarExistance(Problem problem, Var parentVar,
             ClassField field, Map<String, String> substitutions, boolean checkAnyType) throws SpecParseException {
-
-        String varName = parentVar.getFullNameForConcat() + field.getName();
-        Var var = problem.getVar(varName);
+        
+        final String varName = parentVar.getFullNameForConcat() + field.getName();
+        final Var var = problem.getVar(varName);
         
         if (var == null) {
-
             // --------alias element access--------
             if (aliasElements.containsKey(varName)) {
                 Var aliasEl = aliasElements.get(varName); 
                 if(substitutions != null)
-                		substitutions.put( field.getName(), aliasEl.getFullName() );
+                    substitutions.put( field.getName(), aliasEl.getFullName() );
                 return aliasEl;
             }
-
+            
             Matcher matcher = PATTERN_ALIAS_ELEMENT_ACCESS.matcher(varName);
             if (matcher.find()) {
                 String aliasVarName = matcher.group(1);
@@ -713,19 +714,69 @@ public class ProblemCreator {
                 Var aliasEl =  getAliasElementVar(problem, varName, aliasVarName,
                         element, subelement, parentVar, type);
                 if(substitutions != null)
-                		substitutions.put( field.getName(), aliasEl.getFullName() );
+                    substitutions.put( field.getName(), aliasEl.getFullName() );
                 return aliasEl;
             }
             // ------end of alias element access------
 
             throw new UnknownVariableException(varName);
             
-        } else if(checkAnyType && var.getField().isAny()) {
-        		substitutions.put( var.getFullName(), 
-        				CodeGeneratorUtil.getAnyTypeSubstitution(var.getFullName(), var.getField().getAnySpecificType()));
-        }
+        } 
 
-        return problem.getVar(varName);
+        checkAny( var, field, substitutions, checkAnyType );
+
+        return var;
+    }
+
+    /**
+     * @param var
+     * @param varName
+     * @param field
+     * @param substitutions
+     * @param checkAnyType
+     */
+    private void checkAny( final Var var, 
+                           final ClassField field, 
+                           Map<String, String> substitutions,
+                           boolean checkAnyType ) {
+        
+        final String varName = var.getFullName();
+        ClassField varField = var.getField(); 
+        if(varField.isAny()) {
+            String type = null;
+            if(varField.isAnyTypeBound()) {
+                type = varField.getAnySpecificType();
+            }
+            else if(field.isAnyTypeBound()) {
+                type = field.getAnySpecificType();
+                varField.setAnySpecificType( type );
+            } else if(checkAnyType) {
+                //specific type is still unknown, lets try a bit later
+                List<Map<String, String>> listOfPostponedSubstitutions = unboundAnyTypeVars.get( varName );
+                if(listOfPostponedSubstitutions == null) {
+                    listOfPostponedSubstitutions = new ArrayList<Map<String, String>>();
+                    unboundAnyTypeVars.put( varName, listOfPostponedSubstitutions );
+                }
+                if(!listOfPostponedSubstitutions.contains( substitutions ))
+                    listOfPostponedSubstitutions.add(substitutions);
+            }
+            
+            if(type != null) {
+                String substitution = CodeGeneratorUtil.getAnyTypeSubstitution(varName, type);
+                if(checkAnyType) {
+                    substitutions.put(varName, substitution);
+                }
+                //finally, lets check if there are any substitutions waiting for bound type of this var
+                List<Map<String, String>> listOfPostponedSubstitutions = unboundAnyTypeVars.remove( varName );
+                if(listOfPostponedSubstitutions != null) {
+                    for ( Map<String, String> substs : listOfPostponedSubstitutions ) {
+                        if(substs.containsKey( varName ))
+                            throw new IllegalStateException( "'any' var " + varName + " already in substitution list");
+                        substs.put( varName, substitution );
+                    }
+                }
+            }
+        }
     }
 
     /**

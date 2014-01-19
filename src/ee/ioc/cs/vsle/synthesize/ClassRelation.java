@@ -135,25 +135,28 @@ class ClassRelation  {
 	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
 	 */
 	void addOutput(String output, Collection<ClassField> vars) throws UnknownVariableException {
-		ClassField f = getVar(output, vars);
-
-		if (f != null) {
-			outputs.add(f);
+		ClassField cf = getVar(output, vars);
+		if (cf == null) {
+		    if (output.indexOf(".") >= 1) {
+		        cf = new ClassField( output );
+		    }
+		    else if (output.startsWith("*.")) {
+		        cf = new ClassField( output );
+		    }
+		    else {
+		        throw new UnknownVariableException(output);
+		    }
 		}
-		else if (output.indexOf(".") >= 1) {
-			ClassField cf = new ClassField( output );
-
-			outputs.add(cf);
-		} else if (output.startsWith("*.")) {
-			ClassField cf = new ClassField( output );
-
-			outputs.add(cf);
-		}
-		else {
-			throw new UnknownVariableException(output);
-		}
+		outputs.add(cf);
 	} // setOutput
 
+	void addOutput(ClassField cf) {
+	    if(cf == null)
+	        throw new NullPointerException();
+	    
+	    outputs.add( cf );
+	}
+	
 	/**
 	 * @param _outputs String[]
 	 * @param varList ArrayList
