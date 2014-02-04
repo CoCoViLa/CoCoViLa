@@ -207,6 +207,7 @@ public class RuleInputDialog extends JDialog {
         this.rule = r;
         
         cboxVar.setSelectedItem( rule.getField() );
+        cboxVar.setEnabled( false );
         cboxCond.setSelectedItem( ConditionItem.getItem( rule.getCondition(), rule.isNegative() ) );
         
         if( rule.getValue() != null ) {
