@@ -627,7 +627,9 @@ public class CodeGenerator {
         private String getMaxType(Collection<Var> _inputs) {
 
             for ( Var var : _inputs ) {
-            			String type = var.getField().isAny() ? var.getField().getAnySpecificType() : var.getType();
+                String type = var.getField().isAny() && var.getField().isAnyTypeBound() 
+                                ? var.getField().getAnySpecificType() 
+                                : var.getType();
                 if (!TYPE_INT.equals(type)) {
                     return TYPE_DOUBLE;
                 }
@@ -790,7 +792,9 @@ public class CodeGenerator {
         	}
         	StringBuilder sb = new StringBuilder();
         	if(var.getField().isAny())
-        		sb.append(CodeGeneratorUtil.getAnyTypeSubstitution(var.getFullName(), var.getField().getAnySpecificType()));
+        		sb.append(CodeGeneratorUtil.getAnyTypeSubstitution(
+        		                                var.getFullName(), 
+        		                                var.getField().isAnyTypeBound() ? var.getField().getAnySpecificType() : "Object"));
         	else
         		sb.append(var.getFullName());
         	
