@@ -1,18 +1,34 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import ee.ioc.cs.vsle.table.*;
-import ee.ioc.cs.vsle.util.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ANY;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_DOUBLE;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_INT;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
-
-import ee.ioc.cs.vsle.vclass.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.equations.EquationSolver;
-import ee.ioc.cs.vsle.equations.EquationSolver.*;
-import static ee.ioc.cs.vsle.util.TypeUtil.*;
+import ee.ioc.cs.vsle.equations.EquationSolver.Relation;
+import ee.ioc.cs.vsle.table.Table;
+import ee.ioc.cs.vsle.util.FileFuncs;
+import ee.ioc.cs.vsle.util.TypeToken;
+import ee.ioc.cs.vsle.util.TypeUtil;
+import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.Alias;
+import ee.ioc.cs.vsle.vclass.AliasLength;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**
  * This class takes care of parsing the specification and translating it into a
@@ -65,8 +81,6 @@ public class SpecParser {
             }
         } catch ( Exception e ) {
             db.p( e );
-        } catch ( SpecParseException e ) {
-            e.printStackTrace();
         }
     }
 
@@ -794,7 +808,7 @@ public class SpecParser {
     }
 
     // TODO - implement _any_!!!
-    private static void checkAnyType( String output, String[] inputs, Collection<ClassField> vars )
+    public static void checkAnyType( String output, String[] inputs, Collection<ClassField> vars )
             throws UnknownVariableException {
         ClassField out = getVar( output, vars );
 
@@ -857,7 +871,7 @@ public class SpecParser {
         }
     }
 
-    private static String checkAliasLength( String input, AnnotatedClass thisClass, String className )
+    public static String checkAliasLength( String input, AnnotatedClass thisClass, String className )
             throws UnknownVariableException {
         // check if inputs contain <alias>.lenth variable
         if ( input.endsWith( ".length" ) ) {
@@ -993,7 +1007,7 @@ public class SpecParser {
      * @param varList ArrayList
      * @return ClassField
      */
-    static ClassField getVar( String varName, Collection<ClassField> varList ) {
+    public static ClassField getVar( String varName, Collection<ClassField> varList ) {
 
         for ( ClassField var : varList ) {
             if ( var.getName().equals( varName ) ) {

@@ -1,25 +1,71 @@
 package ee.ioc.cs.vsle.editor;
 
-import static ee.ioc.cs.vsle.util.TypeUtil.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_BOOLEAN;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_BYTE;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_CHAR;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_DOUBLE;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_FLOAT;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_INT;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_LONG;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_SHORT;
 
-import java.awt.*;
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
+import java.awt.BorderLayout;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.lang.reflect.Array;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.TreeMap;
 
-import javax.swing.*;
-import javax.swing.tree.*;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.SwingUtilities;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreeNode;
 
-import ee.ioc.cs.vsle.api.*;
+import ee.ioc.cs.vsle.api.ComputeModelException;
+import ee.ioc.cs.vsle.api.RerunProgramException;
+import ee.ioc.cs.vsle.api.RunningProgramException;
 import ee.ioc.cs.vsle.api.Scheme;
-import ee.ioc.cs.vsle.ccl.*;
-import ee.ioc.cs.vsle.event.*;
-import ee.ioc.cs.vsle.synthesize.*;
-import ee.ioc.cs.vsle.table.*;
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.util.FileFuncs.*;
-import ee.ioc.cs.vsle.vclass.*;
+import ee.ioc.cs.vsle.api.TerminateProgramException;
+import ee.ioc.cs.vsle.ccl.CCL;
+import ee.ioc.cs.vsle.ccl.CompileException;
+import ee.ioc.cs.vsle.event.EventSystem;
+import ee.ioc.cs.vsle.parser.SpecificationParser;
+import ee.ioc.cs.vsle.synthesize.ClassList;
+import ee.ioc.cs.vsle.synthesize.CodeGenerator;
+import ee.ioc.cs.vsle.synthesize.EquationException;
+import ee.ioc.cs.vsle.synthesize.LineErrorException;
+import ee.ioc.cs.vsle.synthesize.MutualDeclarationException;
+import ee.ioc.cs.vsle.synthesize.SpecParseException;
+import ee.ioc.cs.vsle.synthesize.SpecParser;
+import ee.ioc.cs.vsle.synthesize.Synthesizer;
+import ee.ioc.cs.vsle.synthesize.UnknownVariableException;
+import ee.ioc.cs.vsle.synthesize.Var;
+import ee.ioc.cs.vsle.table.TableManager;
+import ee.ioc.cs.vsle.util.FileFuncs.FileSystemStorage;
+import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
+import ee.ioc.cs.vsle.util.FileFuncs.MemoryStorage;
+import ee.ioc.cs.vsle.util.TypeUtil;
+import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.ClassField;
+import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.ObjectList;
+import ee.ioc.cs.vsle.vclass.VPackage;
 
 /**
  * This class is used for invoking planning, compiling and other procedures. It
@@ -225,8 +271,9 @@ public class ProgramRunner {
             for (GObj gObj : schemeContainer.getObjectList()) {
                 schemeObjects.add( gObj.getName() );
             }
-
-            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+            
+            classList = SpecificationParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+//            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
             getAssumptions().clear();
 
             return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, this );

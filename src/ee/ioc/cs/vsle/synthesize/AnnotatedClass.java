@@ -1,8 +1,9 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import ee.ioc.cs.vsle.vclass.ClassField;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 
-import java.util.*;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**
  * <p>Title: ee.ioc.cs.editor.synthesize.AnnotatedClass</p>
@@ -28,7 +29,7 @@ public class AnnotatedClass {
 	 * Class constructor.
 	 * @param name String
 	 */ 
-	AnnotatedClass(String name) {
+	public AnnotatedClass(String name) {
 		this.name = name;
 	} // ee.ioc.cs.editor.synthesize.AnnotatedClass
 
@@ -36,7 +37,7 @@ public class AnnotatedClass {
 	 * Adds a new field to the ArrayList of fields.
 	 * @param field ClassField - a field to be appended to the list of fields.
 	 */ 
-	 void addField(ClassField field) {
+	 public void addField(ClassField field) {
 		classFields.add(field);
 		allFields.add(field);
 	} // addField
@@ -54,7 +55,7 @@ public class AnnotatedClass {
 	 * Adds a new class relation to the list of class relations.
 	 * @param classRelation ClassRelation - a class relation to be added to the list of class relations.
 	 */
-	void addClassRelation(ClassRelation classRelation) {
+	public void addClassRelation(ClassRelation classRelation) {
 		classRelations.add(classRelation);
 	} // addClassRelation
 
@@ -92,7 +93,7 @@ public class AnnotatedClass {
 		return null;
 	}
 
-	String getName() {
+	public String getName() {
 		return name;
 	}
 
@@ -110,7 +111,7 @@ public class AnnotatedClass {
 		return relations;
 	}
 
-	Collection<ClassField> getFields() {
+	public Collection<ClassField> getFields() {
 		return allFields;
 	}
 
@@ -118,7 +119,7 @@ public class AnnotatedClass {
 		return classFields;
 	}
 	
-	void addSuperClass( AnnotatedClass clas ) {
+	public void addSuperClass( AnnotatedClass clas ) {
 		
 		for( ClassField cf : clas.getFields() ) {
 			if( !CodeGenerator.SPEC_OBJECT_NAME.equals( cf.getName() ) ) {
