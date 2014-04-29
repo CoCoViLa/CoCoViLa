@@ -34,11 +34,41 @@ public class RelObj extends GObj {
 
 	@Override
 	public boolean contains(int pointX, int pointY) {
-		float f = VMath.pointDistanceFromLine(getX(), getY(), getEndX(), getEndY(), pointX, pointY);
-		if (f < getHeight() + 4) {
-			return true;
+		double sinAngle = Math.sin(getAngle());
+		double cosAngle = Math.cos(getAngle());
+		double sinAngleP2 = Math.sin(getAngle()+Math.PI/2);
+		double cosAngleP2 = Math.cos(getAngle()+Math.PI/2);
+		Point p1 = new Point (getX(), getY());
+		Point p2 = new Point ((int)(getX()+getRealWidth()*cosAngle),
+				(int)(getY()+getRealWidth()*sinAngle));
+		Point p3 = new Point ((int)(getX()+getRealWidth()*cosAngle+getRealHeight()*cosAngleP2),
+				(int)(getY()+getRealWidth()*sinAngle+getRealHeight()*sinAngleP2));
+		Point p4 = new Point ((int)(getX()+getRealHeight()*cosAngleP2),
+				(int)(getY()+getRealHeight()*sinAngleP2));
+		if (startPort == endPort) {
+			// looping relation has zero width
+			p2.x += getRealHeight();
+			p3.x += getRealHeight();
 		}
-		return false;
+
+		Point ep1 = VMath.nearestPointOnLine(p1.x, p1.y, p2.x, p2.y, pointX, pointY);
+		float d1 = VMath.distanceBetweenPoints(ep1, pointX, pointY);
+
+		Point ep2 = VMath.nearestPointOnLine(p2.x, p2.y, p3.x, p3.y, pointX, pointY);
+		float d2 = VMath.distanceBetweenPoints(ep2, pointX, pointY);
+      
+		Point ep3 = VMath.nearestPointOnLine(p3.x, p3.y, p4.x, p4.y, pointX, pointY);
+		float d3 = VMath.distanceBetweenPoints(ep3, pointX, pointY);
+      
+		Point ep4 = VMath.nearestPointOnLine(p4.x, p4.y, p1.x, p1.y, pointX, pointY);
+		float d4 = VMath.distanceBetweenPoints(ep4, pointX, pointY);
+
+		if (d1+d3 <= VMath.distanceBetweenPoints(p2, p3)+1 &&
+      		d2+d4 <= VMath.distanceBetweenPoints(p1, p2)+1) {
+      	return true;
+      }
+
+      return false;
 	}
 
 	@Override
