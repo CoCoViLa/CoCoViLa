@@ -45,7 +45,6 @@ import ee.ioc.cs.vsle.api.TerminateProgramException;
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.event.EventSystem;
-import ee.ioc.cs.vsle.parser.SpecificationParser;
 import ee.ioc.cs.vsle.synthesize.ClassList;
 import ee.ioc.cs.vsle.synthesize.CodeGenerator;
 import ee.ioc.cs.vsle.synthesize.EquationException;
@@ -272,8 +271,14 @@ public class ProgramRunner {
                 schemeObjects.add( gObj.getName() );
             }
             
-            classList = SpecificationParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
-//            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+//            SpecificationLoader specificationLoader = new SpecificationLoader(schemeContainer.getWorkDir(), schemeObjects);
+//            specificationLoader.loadSpecification(fullSpec, TypeUtil.TYPE_THIS);
+//            Collection<AnnotatedClass> loaddedSpecificationList = specificationLoader.getLoaddedSpecificationList();
+//            classList = new ClassList();
+//            classList.addAll(loaddedSpecificationList);
+   
+            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+            
             getAssumptions().clear();
 
             return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, this );

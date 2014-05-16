@@ -1,12 +1,25 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import java.util.*;
-import java.util.regex.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
 
-import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.vclass.*;
-import static ee.ioc.cs.vsle.util.TypeUtil.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import ee.ioc.cs.vsle.editor.RuntimeProperties;
+import ee.ioc.cs.vsle.util.TypeUtil;
+import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.Alias;
+import ee.ioc.cs.vsle.vclass.AliasLength;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 public class ProblemCreator {
 

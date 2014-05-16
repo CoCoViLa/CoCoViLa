@@ -1,7 +1,11 @@
 package ee.ioc.cs.vsle.synthesize;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import ee.ioc.cs.vsle.vclass.ClassField;
 
@@ -21,9 +25,9 @@ public class AnnotatedClass {
 	//relations declared in the specification of this class and in specifications of superclasses
 	private Collection<ClassRelation> classRelations = new LinkedHashSet<ClassRelation>();
 	//fields declared in this annotated class
-	private Collection<ClassField> classFields = new LinkedHashSet<ClassField>();
+	private Map<String, ClassField> classFields = new LinkedHashMap<String, ClassField>();
 	//all fields declared here and in superclasses
-	private Collection<ClassField> allFields = new LinkedHashSet<ClassField>();
+	private Map<String, ClassField> allFields = new LinkedHashMap<String, ClassField>();
 	
 	/**
 	 * Class constructor.
@@ -38,18 +42,19 @@ public class AnnotatedClass {
 	 * @param field ClassField - a field to be appended to the list of fields.
 	 */ 
 	 public void addField(ClassField field) {
-		classFields.add(field);
-		allFields.add(field);
+		String name = field.getName();
+		classFields.put(name, field);
+		allFields.put(name, field);
 	} // addField
 
-	/**
-	 * Adds a list of variables to the ArrayList of fields.
-	 * @param v ArrayList - list of variables to be appended to the list of fields.
-	 */
-	void addFields(Collection<ClassField> v) {
-		classFields.addAll(v);
-		allFields.addAll(v);
-	} // addVars
+//	/**
+//	 * Adds a list of variables to the ArrayList of fields.
+//	 * @param v ArrayList - list of variables to be appended to the list of fields.
+//	 */
+//	void addFields(Collection<ClassField> v) {
+//		classFields.addAll(v);
+//		allFields.addAll(v);
+//	} // addVars
 
 	/**
 	 * Adds a new class relation to the list of class relations.
@@ -81,16 +86,12 @@ public class AnnotatedClass {
 		return name;
 	} // toString
 
-	boolean hasField(String fieldName) {
-		return getFieldByName(fieldName) != null;
+	public boolean hasField(String fieldName) {
+		return allFields.containsKey(fieldName);
 	}
 
 	public ClassField getFieldByName(String fieldName) {
-		for ( ClassField f : allFields ){
-			if (f.getName().equals(fieldName))
-				return f;
-		}
-		return null;
+		return allFields.get(fieldName);
 	}
 
 	public String getName() {
@@ -112,20 +113,23 @@ public class AnnotatedClass {
 	}
 
 	public Collection<ClassField> getFields() {
-		return allFields;
+		return allFields.values();
 	}
 
-	Collection<ClassField> getClassFields() {
-		return classFields;
+	public Collection<ClassField> getClassFields() {
+		return classFields.values();
 	}
 	
 	public void addSuperClass( AnnotatedClass clas ) {
-		
-		for( ClassField cf : clas.getFields() ) {
-			if( !CodeGenerator.SPEC_OBJECT_NAME.equals( cf.getName() ) ) {
-				allFields.add( cf );
-			}
+		Set<Entry<String, ClassField>> parentClassField = clas.allFields.entrySet();//TODO: refactor to not check every time field name
+		for (Entry<String, ClassField> entry : parentClassField) {
+			String name = entry.getKey();
+			if(CodeGenerator.SPEC_OBJECT_NAME.equals(name))
+				continue;
+			
+			allFields.put(name, entry.getValue());
 		}
+		
 		superClasses.add( clas );
 	}
 
@@ -142,4 +146,3 @@ public class AnnotatedClass {
         return allSuperClasses;
     }
 }
-

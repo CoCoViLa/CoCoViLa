@@ -20,17 +20,6 @@ public interface SpecificationParserListener extends ParseTreeListener {
 	void exitSubtask(@NotNull SpecificationParserParser.SubtaskContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link SpecificationParserParser#variableDeclarator}.
-	 * @param ctx the parse tree
-	 */
-	void enterVariableDeclarator(@NotNull SpecificationParserParser.VariableDeclaratorContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SpecificationParserParser#variableDeclarator}.
-	 * @param ctx the parse tree
-	 */
-	void exitVariableDeclarator(@NotNull SpecificationParserParser.VariableDeclaratorContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link SpecificationParserParser#expression}.
 	 * @param ctx the parse tree
 	 */
@@ -40,6 +29,17 @@ public interface SpecificationParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitExpression(@NotNull SpecificationParserParser.ExpressionContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SpecificationParserParser#inArrayVariableAssigner}.
+	 * @param ctx the parse tree
+	 */
+	void enterInArrayVariableAssigner(@NotNull SpecificationParserParser.InArrayVariableAssignerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationParserParser#inArrayVariableAssigner}.
+	 * @param ctx the parse tree
+	 */
+	void exitInArrayVariableAssigner(@NotNull SpecificationParserParser.InArrayVariableAssignerContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SpecificationParserParser#variableInitializer}.
@@ -75,17 +75,6 @@ public interface SpecificationParserListener extends ParseTreeListener {
 	void exitType(@NotNull SpecificationParserParser.TypeContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link SpecificationParserParser#exceptionList}.
-	 * @param ctx the parse tree
-	 */
-	void enterExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SpecificationParserParser#exceptionList}.
-	 * @param ctx the parse tree
-	 */
-	void exitExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link SpecificationParserParser#variableDeclaration}.
 	 * @param ctx the parse tree
 	 */
@@ -106,6 +95,17 @@ public interface SpecificationParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitMetaInterfase(@NotNull SpecificationParserParser.MetaInterfaseContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SpecificationParserParser#exceptionList}.
+	 * @param ctx the parse tree
+	 */
+	void enterExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationParserParser#exceptionList}.
+	 * @param ctx the parse tree
+	 */
+	void exitExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SpecificationParserParser#aliasDefinition}.
@@ -139,6 +139,17 @@ public interface SpecificationParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitEquation(@NotNull SpecificationParserParser.EquationContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SpecificationParserParser#variableAssigner}.
+	 * @param ctx the parse tree
+	 */
+	void enterVariableAssigner(@NotNull SpecificationParserParser.VariableAssignerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationParserParser#variableAssigner}.
+	 * @param ctx the parse tree
+	 */
+	void exitVariableAssigner(@NotNull SpecificationParserParser.VariableAssignerContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SpecificationParserParser#variableIdentifier}.
@@ -229,6 +240,17 @@ public interface SpecificationParserListener extends ParseTreeListener {
 	void exitPrimitiveType(@NotNull SpecificationParserParser.PrimitiveTypeContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link SpecificationParserParser#variableDeclaratorInitializer}.
+	 * @param ctx the parse tree
+	 */
+	void enterVariableDeclaratorInitializer(@NotNull SpecificationParserParser.VariableDeclaratorInitializerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationParserParser#variableDeclaratorInitializer}.
+	 * @param ctx the parse tree
+	 */
+	void exitVariableDeclaratorInitializer(@NotNull SpecificationParserParser.VariableDeclaratorInitializerContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link SpecificationParserParser#specification}.
 	 * @param ctx the parse tree
 	 */
@@ -251,6 +273,17 @@ public interface SpecificationParserListener extends ParseTreeListener {
 	void exitAliasDeclaration(@NotNull SpecificationParserParser.AliasDeclarationContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link SpecificationParserParser#variableAssignment}.
+	 * @param ctx the parse tree
+	 */
+	void enterVariableAssignment(@NotNull SpecificationParserParser.VariableAssignmentContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationParserParser#variableAssignment}.
+	 * @param ctx the parse tree
+	 */
+	void exitVariableAssignment(@NotNull SpecificationParserParser.VariableAssignmentContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link SpecificationParserParser#subtaskList}.
 	 * @param ctx the parse tree
 	 */
@@ -271,6 +304,17 @@ public interface SpecificationParserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitAxiom(@NotNull SpecificationParserParser.AxiomContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SpecificationParserParser#variableDeclaratorAssigner}.
+	 * @param ctx the parse tree
+	 */
+	void enterVariableDeclaratorAssigner(@NotNull SpecificationParserParser.VariableDeclaratorAssignerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationParserParser#variableDeclaratorAssigner}.
+	 * @param ctx the parse tree
+	 */
+	void exitVariableDeclaratorAssigner(@NotNull SpecificationParserParser.VariableDeclaratorAssignerContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SpecificationParserParser#array}.

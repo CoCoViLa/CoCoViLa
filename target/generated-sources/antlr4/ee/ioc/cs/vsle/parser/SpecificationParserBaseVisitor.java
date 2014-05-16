@@ -26,7 +26,7 @@ public class SpecificationParserBaseVisitor<T> extends AbstractParseTreeVisitor<
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitVariableDeclarator(@NotNull SpecificationParserParser.VariableDeclaratorContext ctx) { return visitChildren(ctx); }
+	@Override public T visitExpression(@NotNull SpecificationParserParser.ExpressionContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -34,7 +34,7 @@ public class SpecificationParserBaseVisitor<T> extends AbstractParseTreeVisitor<
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitExpression(@NotNull SpecificationParserParser.ExpressionContext ctx) { return visitChildren(ctx); }
+	@Override public T visitInArrayVariableAssigner(@NotNull SpecificationParserParser.InArrayVariableAssignerContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -66,14 +66,6 @@ public class SpecificationParserBaseVisitor<T> extends AbstractParseTreeVisitor<
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx) { return visitChildren(ctx); }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
-	 */
 	@Override public T visitVariableDeclaration(@NotNull SpecificationParserParser.VariableDeclarationContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -83,6 +75,14 @@ public class SpecificationParserBaseVisitor<T> extends AbstractParseTreeVisitor<
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
 	@Override public T visitMetaInterfase(@NotNull SpecificationParserParser.MetaInterfaseContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -107,6 +107,14 @@ public class SpecificationParserBaseVisitor<T> extends AbstractParseTreeVisitor<
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
 	@Override public T visitEquation(@NotNull SpecificationParserParser.EquationContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitVariableAssigner(@NotNull SpecificationParserParser.VariableAssignerContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -178,6 +186,14 @@ public class SpecificationParserBaseVisitor<T> extends AbstractParseTreeVisitor<
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
+	@Override public T visitVariableDeclaratorInitializer(@NotNull SpecificationParserParser.VariableDeclaratorInitializerContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
 	@Override public T visitSpecification(@NotNull SpecificationParserParser.SpecificationContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -194,6 +210,14 @@ public class SpecificationParserBaseVisitor<T> extends AbstractParseTreeVisitor<
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
+	@Override public T visitVariableAssignment(@NotNull SpecificationParserParser.VariableAssignmentContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
 	@Override public T visitSubtaskList(@NotNull SpecificationParserParser.SubtaskListContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -203,6 +227,14 @@ public class SpecificationParserBaseVisitor<T> extends AbstractParseTreeVisitor<
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
 	@Override public T visitAxiom(@NotNull SpecificationParserParser.AxiomContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitVariableDeclaratorAssigner(@NotNull SpecificationParserParser.VariableDeclaratorAssignerContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}

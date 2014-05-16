@@ -20,7 +20,7 @@ superMetaInterface
 	;
 	
 specification
-    :	((variableDeclaration /*| constantDeclaration | variableAssignment  */ | 
+    :	((variableDeclaration /*| constantDeclaration */ | variableAssignment 
     		| axiom | goal | aliasDeclaration | aliasDefinition | equation /*binding*/ ) ';' )*
     ;
 	
@@ -34,7 +34,8 @@ variableModifier
 	;
 
 variableDeclarator
-	:	IDENTIFIER ('=' variableInitializer)?
+	:	IDENTIFIER ('=' variableInitializer)?	# variableDeclaratorInitializer
+	|	IDENTIFIER ('=' variableAssigner)		# variableDeclaratorAssigner 
 	;
 
 //constantDeclaration
@@ -45,9 +46,9 @@ variableDeclarator
 //	:	IDENTIFIER '=' variableInitializer
 //	;
 
-//variableAssignment
-//	:	variableIdentifier '=' variableInitializer
-//	;
+variableAssignment
+	:	variableIdentifier '=' variableAssigner
+	;
 	
 axiom
 	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) ) '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' method = IDENTIFIER '}'
@@ -75,19 +76,19 @@ exceptionList
 	;
 	
 goal
-	:	variableIdentifierList? '->' variableIdentifierList	
+	:	inputVariables = variableIdentifierList? '->' outputVariables = variableIdentifierList	
 	;
 	
 aliasDeclaration
-	:	'alias' ('(' type')')? IDENTIFIER ( '=' aliasStructure)?
+	:	'alias' ('(' type')')? IDENTIFIER ('=' aliasStructure)?
 	;
 	
 aliasStructure
-	:	'(' ( variableIdentifierList | '*.'IDENTIFIER )')'
+	:	'(' ( variableAlias=variableIdentifierList | '*.'wildcardAlias=IDENTIFIER )')'
 	;
 
 aliasDefinition
-	:	IDENTIFIER '=' '[' variableIdentifierList ']'
+	:	variableIdentifier '=' aliasStructure
 	;
 
 type
@@ -125,23 +126,38 @@ expression
 	
 term
     :	NUMBER
-    |	STRING
     |	variableIdentifier
     ;
 
 array
-    :   '{' (variableInitializer (',' variableInitializer)* )? '}'
+    :   '{' (inArrayVariableAssigner (',' inArrayVariableAssigner)* )? '}'
     ;
+    
+inArrayVariableAssigner
+	:	variableAssigner | variableInitializer
+	;
 
+variableAssigner
+    :   array
+    |   'new' classType '(' expression (',' expression)* ')'
+    |	STRING
+    |	'true'
+    |	'false'
+    ;
+    
 variableInitializer
     :   array
     |   expression
     ;
 
 variableIdentifier
-	:	IDENTIFIER ('.' IDENTIFIER )*
+	:	IDENTIFIER ('.' IDENTIFIER )* ALIAS_ELEMENT_REF*  ('.' variableIdentifier)?
 	;
-
+	
+//aliasElementRef
+//	:	'.' ALIAS_ELEMENT_REF
+//	;
+	
 variableIdentifierList
 	:	variableIdentifier (',' variableIdentifier )*
 	;
@@ -162,6 +178,10 @@ IDENTIFIER
 	;
 fragment LETTER : [a-zA-Z$_];
 fragment LETTER_OR_DNUMBER : [a-zA-Z0-9$_];
+
+ALIAS_ELEMENT_REF
+	:	'.' NUMBER+
+	;
 
 WS : [ \t\r\n]+ -> skip ;
 COMMENT : '//' .*? '\r'? '\n' -> skip;

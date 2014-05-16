@@ -19,18 +19,18 @@ public interface SpecificationParserVisitor<T> extends ParseTreeVisitor<T> {
 	T visitSubtask(@NotNull SpecificationParserParser.SubtaskContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SpecificationParserParser#variableDeclarator}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVariableDeclarator(@NotNull SpecificationParserParser.VariableDeclaratorContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link SpecificationParserParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitExpression(@NotNull SpecificationParserParser.ExpressionContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SpecificationParserParser#inArrayVariableAssigner}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitInArrayVariableAssigner(@NotNull SpecificationParserParser.InArrayVariableAssignerContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SpecificationParserParser#variableInitializer}.
@@ -54,13 +54,6 @@ public interface SpecificationParserVisitor<T> extends ParseTreeVisitor<T> {
 	T visitType(@NotNull SpecificationParserParser.TypeContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SpecificationParserParser#exceptionList}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link SpecificationParserParser#variableDeclaration}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -73,6 +66,13 @@ public interface SpecificationParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitMetaInterfase(@NotNull SpecificationParserParser.MetaInterfaseContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SpecificationParserParser#exceptionList}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SpecificationParserParser#aliasDefinition}.
@@ -94,6 +94,13 @@ public interface SpecificationParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitEquation(@NotNull SpecificationParserParser.EquationContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SpecificationParserParser#variableAssigner}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVariableAssigner(@NotNull SpecificationParserParser.VariableAssignerContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SpecificationParserParser#variableIdentifier}.
@@ -152,6 +159,13 @@ public interface SpecificationParserVisitor<T> extends ParseTreeVisitor<T> {
 	T visitPrimitiveType(@NotNull SpecificationParserParser.PrimitiveTypeContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SpecificationParserParser#variableDeclaratorInitializer}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVariableDeclaratorInitializer(@NotNull SpecificationParserParser.VariableDeclaratorInitializerContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SpecificationParserParser#specification}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -166,6 +180,13 @@ public interface SpecificationParserVisitor<T> extends ParseTreeVisitor<T> {
 	T visitAliasDeclaration(@NotNull SpecificationParserParser.AliasDeclarationContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SpecificationParserParser#variableAssignment}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVariableAssignment(@NotNull SpecificationParserParser.VariableAssignmentContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SpecificationParserParser#subtaskList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -178,6 +199,13 @@ public interface SpecificationParserVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitAxiom(@NotNull SpecificationParserParser.AxiomContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SpecificationParserParser#variableDeclaratorAssigner}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVariableDeclaratorAssigner(@NotNull SpecificationParserParser.VariableDeclaratorAssignerContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SpecificationParserParser#array}.

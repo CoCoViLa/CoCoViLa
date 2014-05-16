@@ -1,15 +1,23 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import java.io.*;
-import java.util.*;
-import java.util.regex.*;
+import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
 
-import ee.ioc.cs.vsle.api.*;
-import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.*;
-import ee.ioc.cs.vsle.util.FileFuncs.*;
-import ee.ioc.cs.vsle.vclass.*;
-import static ee.ioc.cs.vsle.util.TypeUtil.*;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import ee.ioc.cs.vsle.api.ComputeModelException;
+import ee.ioc.cs.vsle.editor.ProgramRunner;
+import ee.ioc.cs.vsle.editor.RuntimeProperties;
+import ee.ioc.cs.vsle.util.FileFuncs;
+import ee.ioc.cs.vsle.util.FileFuncs.FileSystemStorage;
+import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
+import ee.ioc.cs.vsle.util.TypeUtil;
+import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**
  This class is responsible for managing the planning and code generation process.

@@ -30,19 +30,6 @@ public class SpecificationParserBaseListener implements SpecificationParserListe
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterVariableDeclarator(@NotNull SpecificationParserParser.VariableDeclaratorContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitVariableDeclarator(@NotNull SpecificationParserParser.VariableDeclaratorContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterExpression(@NotNull SpecificationParserParser.ExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -50,6 +37,19 @@ public class SpecificationParserBaseListener implements SpecificationParserListe
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitExpression(@NotNull SpecificationParserParser.ExpressionContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterInArrayVariableAssigner(@NotNull SpecificationParserParser.InArrayVariableAssignerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitInArrayVariableAssigner(@NotNull SpecificationParserParser.InArrayVariableAssignerContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -95,19 +95,6 @@ public class SpecificationParserBaseListener implements SpecificationParserListe
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterVariableDeclaration(@NotNull SpecificationParserParser.VariableDeclarationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -128,6 +115,19 @@ public class SpecificationParserBaseListener implements SpecificationParserListe
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitMetaInterfase(@NotNull SpecificationParserParser.MetaInterfaseContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitExceptionList(@NotNull SpecificationParserParser.ExceptionListContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -167,6 +167,19 @@ public class SpecificationParserBaseListener implements SpecificationParserListe
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitEquation(@NotNull SpecificationParserParser.EquationContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterVariableAssigner(@NotNull SpecificationParserParser.VariableAssignerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitVariableAssigner(@NotNull SpecificationParserParser.VariableAssignerContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -277,6 +290,19 @@ public class SpecificationParserBaseListener implements SpecificationParserListe
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterVariableDeclaratorInitializer(@NotNull SpecificationParserParser.VariableDeclaratorInitializerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitVariableDeclaratorInitializer(@NotNull SpecificationParserParser.VariableDeclaratorInitializerContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterSpecification(@NotNull SpecificationParserParser.SpecificationContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -303,6 +329,19 @@ public class SpecificationParserBaseListener implements SpecificationParserListe
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterVariableAssignment(@NotNull SpecificationParserParser.VariableAssignmentContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitVariableAssignment(@NotNull SpecificationParserParser.VariableAssignmentContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterSubtaskList(@NotNull SpecificationParserParser.SubtaskListContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -323,6 +362,19 @@ public class SpecificationParserBaseListener implements SpecificationParserListe
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitAxiom(@NotNull SpecificationParserParser.AxiomContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterVariableDeclaratorAssigner(@NotNull SpecificationParserParser.VariableDeclaratorAssignerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitVariableDeclaratorAssigner(@NotNull SpecificationParserParser.VariableDeclaratorAssignerContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
