@@ -1,4 +1,4 @@
-// Generated from SpecificationParser.g4 by ANTLR 4.1
+// Generated from SpecificationLanguage.g4 by ANTLR 4.1
 package ee.ioc.cs.vsle.parser;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.CharStream;
@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.*;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class SpecificationParserLexer extends Lexer {
+public class SpecificationLanguageLexer extends Lexer {
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
@@ -49,13 +49,13 @@ public class SpecificationParserLexer extends Lexer {
 		
 
 
-	public SpecificationParserLexer(CharStream input) {
+	public SpecificationLanguageLexer(CharStream input) {
 		super(input);
 		_interp = new LexerATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
 
 	@Override
-	public String getGrammarFileName() { return "SpecificationParser.g4"; }
+	public String getGrammarFileName() { return "SpecificationLanguage.g4"; }
 
 	@Override
 	public String[] getTokenNames() { return tokenNames; }

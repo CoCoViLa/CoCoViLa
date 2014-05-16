@@ -10,7 +10,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 
-import ee.ioc.cs.vsle.parser.SpecificationParserParser.MetaInterfaseContext;
+import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.MetaInterfaseContext;
 
 public class SpecificationParserTest {
 
@@ -23,10 +23,10 @@ public class SpecificationParserTest {
 			System.out.println("Parsing: " + file2.getName());
 			CharStream input = new ANTLRFileStream(file2.getAbsolutePath());
 			
-			SpecificationParserLexer lexer = new SpecificationParserLexer(input);
+			SpecificationLanguageLexer lexer = new SpecificationLanguageLexer(input);
 			
 			TokenStream token = new CommonTokenStream(lexer);
-			SpecificationParserParser parser = new SpecificationParserParser(token);
+			SpecificationLanguageParser parser = new SpecificationLanguageParser(token);
 			
 			MetaInterfaseContext metaInterfase = parser.metaInterfase();
 			System.out.println("DONE\n");		

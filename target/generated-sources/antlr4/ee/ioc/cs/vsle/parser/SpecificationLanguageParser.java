@@ -1,4 +1,4 @@
-// Generated from SpecificationParser.g4 by ANTLR 4.1
+// Generated from SpecificationLanguage.g4 by ANTLR 4.1
 package ee.ioc.cs.vsle.parser;
 import org.antlr.v4.runtime.atn.*;
 import org.antlr.v4.runtime.dfa.DFA;
@@ -10,7 +10,7 @@ import java.util.Iterator;
 import java.util.ArrayList;
 
 @SuppressWarnings({"all", "warnings", "unchecked", "unused", "cast"})
-public class SpecificationParserParser extends Parser {
+public class SpecificationLanguageParser extends Parser {
 	protected static final DFA[] _decisionToDFA;
 	protected static final PredictionContextCache _sharedContextCache =
 		new PredictionContextCache();
@@ -50,7 +50,7 @@ public class SpecificationParserParser extends Parser {
 	};
 
 	@Override
-	public String getGrammarFileName() { return "SpecificationParser.g4"; }
+	public String getGrammarFileName() { return "SpecificationLanguage.g4"; }
 
 	@Override
 	public String[] getTokenNames() { return tokenNames; }
@@ -64,7 +64,7 @@ public class SpecificationParserParser extends Parser {
 
 		
 
-	public SpecificationParserParser(TokenStream input) {
+	public SpecificationLanguageParser(TokenStream input) {
 		super(input);
 		_interp = new ParserATNSimulator(this,_ATN,_decisionToDFA,_sharedContextCache);
 	}
@@ -75,22 +75,22 @@ public class SpecificationParserParser extends Parser {
 		public SpecificationContext specification() {
 			return getRuleContext(SpecificationContext.class,0);
 		}
-		public TerminalNode IDENTIFIER() { return getToken(SpecificationParserParser.IDENTIFIER, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(SpecificationLanguageParser.IDENTIFIER, 0); }
 		public MetaInterfaseContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_metaInterfase; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterMetaInterfase(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterMetaInterfase(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitMetaInterfase(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitMetaInterfase(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitMetaInterfase(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitMetaInterfase(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -141,15 +141,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_superMetaInterface; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterSuperMetaInterface(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterSuperMetaInterface(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitSuperMetaInterface(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitSuperMetaInterface(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitSuperMetaInterface(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitSuperMetaInterface(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -239,15 +239,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_specification; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterSpecification(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterSpecification(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitSpecification(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitSpecification(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitSpecification(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitSpecification(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -348,15 +348,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_variableDeclaration; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterVariableDeclaration(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterVariableDeclaration(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitVariableDeclaration(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitVariableDeclaration(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitVariableDeclaration(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitVariableDeclaration(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -420,15 +420,15 @@ public class SpecificationParserParser extends Parser {
 		public StaticVariableContext(VariableModifierContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterStaticVariable(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterStaticVariable(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitStaticVariable(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitStaticVariable(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitStaticVariable(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitStaticVariable(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -436,15 +436,15 @@ public class SpecificationParserParser extends Parser {
 		public ConstantVariableContext(VariableModifierContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterConstantVariable(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterConstantVariable(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitConstantVariable(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitConstantVariable(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitConstantVariable(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitConstantVariable(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -496,42 +496,42 @@ public class SpecificationParserParser extends Parser {
 		}
 	}
 	public static class VariableDeclaratorInitializerContext extends VariableDeclaratorContext {
-		public TerminalNode IDENTIFIER() { return getToken(SpecificationParserParser.IDENTIFIER, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(SpecificationLanguageParser.IDENTIFIER, 0); }
 		public VariableInitializerContext variableInitializer() {
 			return getRuleContext(VariableInitializerContext.class,0);
 		}
 		public VariableDeclaratorInitializerContext(VariableDeclaratorContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterVariableDeclaratorInitializer(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterVariableDeclaratorInitializer(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitVariableDeclaratorInitializer(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitVariableDeclaratorInitializer(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitVariableDeclaratorInitializer(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitVariableDeclaratorInitializer(this);
 			else return visitor.visitChildren(this);
 		}
 	}
 	public static class VariableDeclaratorAssignerContext extends VariableDeclaratorContext {
-		public TerminalNode IDENTIFIER() { return getToken(SpecificationParserParser.IDENTIFIER, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(SpecificationLanguageParser.IDENTIFIER, 0); }
 		public VariableAssignerContext variableAssigner() {
 			return getRuleContext(VariableAssignerContext.class,0);
 		}
 		public VariableDeclaratorAssignerContext(VariableDeclaratorContext ctx) { copyFrom(ctx); }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterVariableDeclaratorAssigner(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterVariableDeclaratorAssigner(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitVariableDeclaratorAssigner(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitVariableDeclaratorAssigner(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitVariableDeclaratorAssigner(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitVariableDeclaratorAssigner(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -597,15 +597,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_variableAssignment; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterVariableAssignment(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterVariableAssignment(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitVariableAssignment(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitVariableAssignment(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitVariableAssignment(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitVariableAssignment(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -645,7 +645,7 @@ public class SpecificationParserParser extends Parser {
 		public ExceptionListContext exceptionList() {
 			return getRuleContext(ExceptionListContext.class,0);
 		}
-		public TerminalNode IDENTIFIER() { return getToken(SpecificationParserParser.IDENTIFIER, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(SpecificationLanguageParser.IDENTIFIER, 0); }
 		public List<VariableIdentifierListContext> variableIdentifierList() {
 			return getRuleContexts(VariableIdentifierListContext.class);
 		}
@@ -655,15 +655,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_axiom; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterAxiom(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterAxiom(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitAxiom(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitAxiom(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitAxiom(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitAxiom(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -745,15 +745,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_subtask; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterSubtask(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterSubtask(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitSubtask(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitSubtask(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitSubtask(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitSubtask(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -804,15 +804,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_subtaskList; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterSubtaskList(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterSubtaskList(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitSubtaskList(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitSubtaskList(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitSubtaskList(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitSubtaskList(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -867,15 +867,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_exceptionList; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterExceptionList(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterExceptionList(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitExceptionList(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitExceptionList(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitExceptionList(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitExceptionList(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -934,15 +934,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_goal; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterGoal(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterGoal(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitGoal(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitGoal(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitGoal(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitGoal(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -978,7 +978,7 @@ public class SpecificationParserParser extends Parser {
 	}
 
 	public static class AliasDeclarationContext extends ParserRuleContext {
-		public TerminalNode IDENTIFIER() { return getToken(SpecificationParserParser.IDENTIFIER, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(SpecificationLanguageParser.IDENTIFIER, 0); }
 		public TypeContext type() {
 			return getRuleContext(TypeContext.class,0);
 		}
@@ -991,15 +991,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_aliasDeclaration; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterAliasDeclaration(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterAliasDeclaration(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitAliasDeclaration(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitAliasDeclaration(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitAliasDeclaration(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitAliasDeclaration(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1048,7 +1048,7 @@ public class SpecificationParserParser extends Parser {
 	public static class AliasStructureContext extends ParserRuleContext {
 		public VariableIdentifierListContext variableAlias;
 		public Token wildcardAlias;
-		public TerminalNode IDENTIFIER() { return getToken(SpecificationParserParser.IDENTIFIER, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(SpecificationLanguageParser.IDENTIFIER, 0); }
 		public VariableIdentifierListContext variableIdentifierList() {
 			return getRuleContext(VariableIdentifierListContext.class,0);
 		}
@@ -1058,15 +1058,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_aliasStructure; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterAliasStructure(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterAliasStructure(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitAliasStructure(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitAliasStructure(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitAliasStructure(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitAliasStructure(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1121,15 +1121,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_aliasDefinition; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterAliasDefinition(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterAliasDefinition(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitAliasDefinition(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitAliasDefinition(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitAliasDefinition(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitAliasDefinition(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1169,15 +1169,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_type; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterType(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterType(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitType(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitType(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitType(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitType(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1240,24 +1240,24 @@ public class SpecificationParserParser extends Parser {
 
 	public static class ClassTypeContext extends ParserRuleContext {
 		public TerminalNode IDENTIFIER(int i) {
-			return getToken(SpecificationParserParser.IDENTIFIER, i);
+			return getToken(SpecificationLanguageParser.IDENTIFIER, i);
 		}
-		public List<TerminalNode> IDENTIFIER() { return getTokens(SpecificationParserParser.IDENTIFIER); }
+		public List<TerminalNode> IDENTIFIER() { return getTokens(SpecificationLanguageParser.IDENTIFIER); }
 		public ClassTypeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_classType; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterClassType(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterClassType(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitClassType(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitClassType(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitClassType(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitClassType(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1304,15 +1304,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_primitiveType; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterPrimitiveType(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterPrimitiveType(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitPrimitiveType(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitPrimitiveType(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitPrimitiveType(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitPrimitiveType(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1358,15 +1358,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_equation; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterEquation(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterEquation(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitEquation(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitEquation(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitEquation(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitEquation(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1404,7 +1404,7 @@ public class SpecificationParserParser extends Parser {
 		public ExpressionContext expression(int i) {
 			return getRuleContext(ExpressionContext.class,i);
 		}
-		public TerminalNode IDENTIFIER() { return getToken(SpecificationParserParser.IDENTIFIER, 0); }
+		public TerminalNode IDENTIFIER() { return getToken(SpecificationLanguageParser.IDENTIFIER, 0); }
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
 		}
@@ -1416,15 +1416,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_expression; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterExpression(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterExpression(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitExpression(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitExpression(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitExpression(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitExpression(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1554,22 +1554,22 @@ public class SpecificationParserParser extends Parser {
 		public VariableIdentifierContext variableIdentifier() {
 			return getRuleContext(VariableIdentifierContext.class,0);
 		}
-		public TerminalNode NUMBER() { return getToken(SpecificationParserParser.NUMBER, 0); }
+		public TerminalNode NUMBER() { return getToken(SpecificationLanguageParser.NUMBER, 0); }
 		public TermContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
 		@Override public int getRuleIndex() { return RULE_term; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterTerm(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterTerm(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitTerm(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitTerm(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitTerm(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitTerm(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1620,15 +1620,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_array; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterArray(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterArray(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitArray(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitArray(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitArray(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitArray(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1690,15 +1690,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_inArrayVariableAssigner; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterInArrayVariableAssigner(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterInArrayVariableAssigner(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitInArrayVariableAssigner(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitInArrayVariableAssigner(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitInArrayVariableAssigner(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitInArrayVariableAssigner(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1745,7 +1745,7 @@ public class SpecificationParserParser extends Parser {
 		public List<ExpressionContext> expression() {
 			return getRuleContexts(ExpressionContext.class);
 		}
-		public TerminalNode STRING() { return getToken(SpecificationParserParser.STRING, 0); }
+		public TerminalNode STRING() { return getToken(SpecificationLanguageParser.STRING, 0); }
 		public ArrayContext array() {
 			return getRuleContext(ArrayContext.class,0);
 		}
@@ -1755,15 +1755,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_variableAssigner; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterVariableAssigner(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterVariableAssigner(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitVariableAssigner(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitVariableAssigner(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitVariableAssigner(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitVariableAssigner(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1851,15 +1851,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_variableInitializer; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterVariableInitializer(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterVariableInitializer(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitVariableInitializer(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitVariableInitializer(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitVariableInitializer(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitVariableInitializer(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -1905,12 +1905,12 @@ public class SpecificationParserParser extends Parser {
 			return getRuleContext(VariableIdentifierContext.class,0);
 		}
 		public TerminalNode IDENTIFIER(int i) {
-			return getToken(SpecificationParserParser.IDENTIFIER, i);
+			return getToken(SpecificationLanguageParser.IDENTIFIER, i);
 		}
-		public List<TerminalNode> IDENTIFIER() { return getTokens(SpecificationParserParser.IDENTIFIER); }
-		public List<TerminalNode> ALIAS_ELEMENT_REF() { return getTokens(SpecificationParserParser.ALIAS_ELEMENT_REF); }
+		public List<TerminalNode> IDENTIFIER() { return getTokens(SpecificationLanguageParser.IDENTIFIER); }
+		public List<TerminalNode> ALIAS_ELEMENT_REF() { return getTokens(SpecificationLanguageParser.ALIAS_ELEMENT_REF); }
 		public TerminalNode ALIAS_ELEMENT_REF(int i) {
-			return getToken(SpecificationParserParser.ALIAS_ELEMENT_REF, i);
+			return getToken(SpecificationLanguageParser.ALIAS_ELEMENT_REF, i);
 		}
 		public VariableIdentifierContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1918,15 +1918,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_variableIdentifier; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterVariableIdentifier(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterVariableIdentifier(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitVariableIdentifier(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitVariableIdentifier(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitVariableIdentifier(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitVariableIdentifier(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -2005,15 +2005,15 @@ public class SpecificationParserParser extends Parser {
 		@Override public int getRuleIndex() { return RULE_variableIdentifierList; }
 		@Override
 		public void enterRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).enterVariableIdentifierList(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).enterVariableIdentifierList(this);
 		}
 		@Override
 		public void exitRule(ParseTreeListener listener) {
-			if ( listener instanceof SpecificationParserListener ) ((SpecificationParserListener)listener).exitVariableIdentifierList(this);
+			if ( listener instanceof SpecificationLanguageListener ) ((SpecificationLanguageListener)listener).exitVariableIdentifierList(this);
 		}
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SpecificationParserVisitor ) return ((SpecificationParserVisitor<? extends T>)visitor).visitVariableIdentifierList(this);
+			if ( visitor instanceof SpecificationLanguageVisitor ) return ((SpecificationLanguageVisitor<? extends T>)visitor).visitVariableIdentifierList(this);
 			else return visitor.visitChildren(this);
 		}
 	}

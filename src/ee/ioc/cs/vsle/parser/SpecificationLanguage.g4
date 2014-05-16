@@ -1,4 +1,4 @@
-grammar SpecificationParser;
+grammar SpecificationLanguage;
 
 
 options {

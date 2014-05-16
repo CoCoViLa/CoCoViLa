@@ -16,7 +16,7 @@ import org.antlr.v4.runtime.Recognizer;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import ee.ioc.cs.vsle.parser.SpecificationParserParser.MetaInterfaseContext;
+import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.MetaInterfaseContext;
 import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 import ee.ioc.cs.vsle.synthesize.SpecParseException;
 
@@ -51,9 +51,9 @@ public class SpecificationLoader {
 	}
 	
 	protected AnnotatedClass loadSpecification(CharStream input, String specificationName) {
-		SpecificationParserLexer lexer = new SpecificationParserLexer(input);
+		SpecificationLanguageLexer lexer = new SpecificationLanguageLexer(input);
 		TokenStream token = new CommonTokenStream(lexer);
-		SpecificationParserParser parser = new SpecificationParserParser(token);
+		SpecificationLanguageParser parser = new SpecificationLanguageParser(token);
 		parser.removeErrorListeners(); // remove ConsoleErrorListener
 		parser.addErrorListener(new UnderlineListener()); // add ours
 		
