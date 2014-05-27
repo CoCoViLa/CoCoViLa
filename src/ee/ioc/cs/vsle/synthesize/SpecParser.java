@@ -863,6 +863,10 @@ public class SpecParser {
             String type = "";
             for(int i = 0; i < split.length; i++) {
                 ClassField cf = parentClass.getFieldByName( split[i] );
+                if(cf.isAlias()) {
+                  //if it's alias element access, stop the search, ProblemCreater will handle it
+                  break;
+                }
                 type = cf.getType();
                 parentClass = classes.getType( type );
             }
