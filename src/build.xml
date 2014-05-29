@@ -1,0 +1,434 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="cocovila" default="compile" basedir="../" xmlns:ivy="antlib:org.apache.ivy.ant">
+  <description>
+    CoCoViLa - a Compiler Compiler for Visual Languages.
+    CoCoViLa provides a framework for developing visual specification languages.
+    It includes a visual editor for drawing the schemes and a synthesizer
+    for generating a Java program from the scheme and the class specifications.
+  </description>
+
+  <!--
+       The build process can be customized by changing values in
+       the build.properties file. Remember that Ant properties
+       are immutable.
+  -->
+  <property file="src/build.properties"/>
+
+  <property name="src" location="src"/>
+  <property name="src.tests" location="test"/>
+  <property name="lib" location="lib"/>
+  <property name="build" location="classes"/>
+  <property name="dist" location="dist"/>
+  <property name="webstart" location="webstart"/>
+  <property name="packages" location="packages"/>
+  <property name="reports" location="${dist}/reports"/>
+  <property name="reports.junit" location="${reports}/junit"/>
+  <property name="docs.api" location="${dist}/docs/api"/>
+
+  <property name="project.se.jar" value="${ant.project.name}-${project.version}.jar"/>
+  <property name="project.ce.jar" value="${ant.project.name}-ce-${project.version}.jar"/>
+  <property name="dist.name" value="${ant.project.name}-${project.version}"/>
+
+  <property name="encoding" value="UTF-8"/>
+  <property name="javasource" value="1.5"/>
+  <property name="javatarget" value="1.5"/>
+  <property name="compiler" value="javac1.5"/>
+  <property name="compile" value="compile-debug"/>
+
+  <path id="build.classpath">
+    <fileset dir="${lib}">
+      <include name="*.jar"/>
+    </fileset>
+  </path>
+
+  <target name="init">
+    <mkdir dir="${lib}"/>
+    <mkdir dir="${build}"/>
+    <mkdir dir="${dist}"/>
+  </target>
+
+  <!--
+      Dependency management.
+  -->
+  <target name="resolve" description="--> retrieve dependencies with ivy" depends="init-ivy">
+    <ivy:resolve file="src/ivy.xml"/>
+    <ivy:retrieve pattern="lib/[artifact].[ext]" type="jar"/>
+  </target>
+  
+  <target name="check-dep" depends="resolve">
+    <available file="${lib}/ecj.jar" type="file" property="dep.tools.present"/>
+    <available file="${lib}/jcommon.jar" type="file" property="dep.jcommon.present"/>
+    <available file="${lib}/jfreechart.jar" type="file" property="dep.jfreechart.present"/>
+  </target>
+
+  <property name="ivy.install.version" value="2.3.0" />
+  
+  <condition property="ivy.home" value="${env.IVY_HOME}">
+    <isset property="env.IVY_HOME" />
+  </condition>
+  <property name="ivy.home" value="${user.home}/.ant" />
+  <property name="ivy.jar.dir" value="${ivy.home}/lib" />
+  <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
+
+  <target name="download-ivy" unless="offline">
+
+    <mkdir dir="${ivy.jar.dir}" />
+    <!-- download Ivy from web site so that it can be used even without any special installation -->
+    <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" dest="${ivy.jar.file}" usetimestamp="true" />
+  </target>
+
+  <target name="init-ivy" depends="download-ivy">
+    <!-- try to load ivy here from ivy home, in case the user has not already dropped
+	          it into ant's lib dir (note that the latter copy will always take precedence).
+	          We will not fail as long as local lib dir exists (it may be empty) and
+	          ivy is in at least one of ant's lib dir or the local lib dir. -->
+    <path id="ivy.lib.path">
+      <fileset dir="${ivy.jar.dir}" includes="*.jar" />
+    </path>
+    <taskdef resource="org/apache/ivy/ant/antlib.xml" uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path" />
+  </target>
+  
+  <target name="build-dep" depends="check-dep">
+    <fail message="Cannot find ${lib}/ecj.jar" unless="dep.tools.present"/>
+
+    <echo message="Build dependencies are present"/>
+  </target>
+
+  <target name="runtime-dep" depends="check-dep">
+    <fail message="Cannot find ${lib}/ecj.jar" unless="dep.tools.present"/>
+    <fail message="Cannot find ${lib}/jcommon.jar" unless="dep.jcommon.present"/>
+    <fail message="Cannot find ${lib}/jfreechart.jar" unless="dep.jfreechart.present"/>
+
+    <echo message="Runtime dependencies are present"/>
+  </target>
+
+
+  <!--
+      Compilation
+  -->
+
+  <target name="compile" depends="clean,compile-debug,compile-normal"
+          description="Compile the program sources"/>
+
+  <target name="compile-debug" depends="init,build-dep"
+          if="javac.debug">
+
+    <echo message="Debug build"/>
+    <javac srcdir="${src}" destdir="${build}"
+            compiler="${compiler}"
+            debug="on"
+            debuglevel="lines,vars,source"
+            encoding="${encoding}"
+            source="${javasource}"
+            target="${javatarget}">
+
+      <classpath refid="build.classpath"/>
+
+      <compilerarg value="-Xlint:deprecation" />
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+  </target>
+
+  <target name="compile-normal" depends="init,build-dep"
+          unless="javac.debug">
+
+    <echo message="Optimized build"/>
+    <javac srcdir="${src}" destdir="${build}"
+            compiler="${compiler}"
+            debug="off"
+            optimize="on"
+            encoding="${encoding}"
+            source="${javasource}"
+            target="${javatarget}">
+
+      <classpath refid="build.classpath"/>
+    </javac>
+  </target>
+
+
+  <!--
+      Testing
+  -->
+
+  <target name="compile-tests" depends="compile">
+     <javac srcdir="${src.tests}" destdir="${build}"
+            compiler="${compiler}"
+            debug="on"
+            debuglevel="lines,vars,source"
+            encoding="${encoding}"
+            source="${javasource}"
+            target="${javatarget}">
+
+      <classpath refid="build.classpath"/>
+
+      <compilerarg value="-Xlint:deprecation" />
+      <compilerarg value="-Xlint:unchecked"/>
+    </javac>
+  </target>
+
+  <target name="test" depends="compile-tests" unless="test.junit.skip"
+          description="Runs JUnit tests">
+
+    <mkdir dir="${reports.junit}/xml"/>
+
+    <junit fork="yes" forkmode="once">
+      <classpath>
+        <path refid="build.classpath"/>
+        <pathelement location="${build}"/>
+      </classpath>
+      <formatter type="xml"/>
+
+      <batchtest todir="${reports.junit}/xml">
+        <fileset dir="${src.tests}">
+          <!--include name="**/*Test*.java"/-->
+          <exclude name="**/AllTests.java"/>
+        </fileset>
+      </batchtest>
+    </junit>
+  </target>
+
+  <target name="test-reports" depends="test" unless="test.junit.skip"
+          description="Generate test reports in HTML format">
+    <mkdir dir="${reports.junit}/html"/>
+
+    <junitreport todir="${reports.junit}/html">
+      <fileset dir="${reports.junit}/xml">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${reports.junit}/html"/>
+    </junitreport>
+
+    <echo message="JUnit test reports are in ${reports.junit}/html"/>
+  </target>
+
+
+  <!--
+      Documentation
+  -->
+
+  <target name="javadoc" description="Generate Javadoc">
+    <javadoc
+            sourcepath="${src}"
+            destdir="${docs.api}"
+            windowtitle="${ant.project.name} API Documentation">
+      <classpath refid="build.classpath"/>
+      <packageset dir="${src}" defaultexcludes="yes">
+        <include name="ee/**"/>
+      </packageset>
+
+      <bottom><![CDATA[<p>Version: ${project.version}</p>]]></bottom>
+
+    </javadoc>
+  </target>
+
+
+  <!--
+      Running
+  -->
+
+  <target name="copy-resources" depends="compile">
+    <copy todir="${build}">
+      <fileset dir="${src}">
+        <include name="*.xsd"/>
+        <include name="*.dtd"/>
+      </fileset>
+      <filterset>
+        <filter token="project.version" value="${project.version}"/>
+      </filterset>
+    </copy>
+    <copy todir="${build}">
+      <fileset dir="${src}">
+        <include name="images/*.gif"/>
+        <include name="images/*.png"/>
+      	<include name="images/control/*.png"/>
+      </fileset>
+    </copy>
+    <copy todir="${build}/resources">
+      <fileset dir="${src}/resources"/>
+    </copy>
+  </target>
+
+  <target name="run-se" description="Run CoCoViLa Scheme Editor"
+          depends="compile,copy-resources">
+    <java classname="ee.ioc.cs.vsle.editor.Editor"
+            fork="true"
+            dir="${basedir}"
+            >
+      <classpath>
+        <pathelement location="${build}"/>
+        <path refid="build.classpath"/>
+      </classpath>
+    	<jvmarg value="-Xss2048k"/>
+    	<jvmarg value="-Xms64m"/>
+    	<jvmarg value="-Xmx384m"/>
+    	<jvmarg value="-XX:+UseParallelGC"/>
+    </java>
+  </target>
+
+  <target name="run-ce" description="Run CoCoViLa Class Editor"
+          depends="compile,copy-resources">
+    <java classname="ee.ioc.cs.vsle.iconeditor.IconEditor"
+            fork="true"
+            dir="${basedir}"
+            >
+      <classpath>
+        <pathelement location="${build}"/>
+        <path refid="build.classpath"/>
+      </classpath>
+    </java>
+  </target>
+
+
+  <!--
+      Distribution
+  -->
+
+  <target name="dist" depends="runtime-dep,copy-resources"
+          description="Generate distribution files" >
+
+    <mkdir dir="${dist}/lib"/>
+
+    <jar destfile="${dist}/lib/${project.se.jar}"
+            basedir="${build}"
+            duplicate="fail">
+        <!--exclude name="**/*Test*.class"/-->
+        <manifest>
+          <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
+          <attribute name="Class-Path" value="lib/ecj.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Permissions" value="${project.permissions}"/>
+          <attribute name="Codebase" value="${project.codebase}"/>
+          <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+    <jar destfile="${dist}/lib/${project.ce.jar}"
+            basedir="${build}"
+            duplicate="fail">
+        <exclude name="**"/>
+        <manifest>
+          <attribute name="Main-Class" value="ee.ioc.cs.vsle.iconeditor.IconEditor"/>
+          <attribute name="Class-Path" value="${project.se.jar}"/>
+          <attribute name="Permissions" value="${project.permissions}"/>
+          <attribute name="Codebase" value="${project.codebase}"/>
+          <attribute name="Implementation-Title" value="${project.title} ${project.title.ce}"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+    <zip destfile="${dist}/${dist.name}.zip">
+      <zipfileset dir="${lib}" prefix="${dist.name}/lib"/>
+      <zipfileset dir="${packages}" prefix="${dist.name}/packages"/>
+      <zipfileset dir="${dist}/lib" includes="*.jar" prefix="${dist.name}"/>
+    </zip>
+  </target>
+
+
+  <!--
+      Web Start
+  -->
+	
+  <target name="webstart" depends="clean,check-ws-dirs,runtime-dep,copy-resources,genkey"
+          description="Generate distribution files" >
+
+    <jar destfile="${webstart}/cocovila-se.jar"
+            basedir="${build}"
+            duplicate="fail">
+    	<exclude name="ee/ioc/cs/vsle/iconeditor/**" />
+        <manifest>
+          <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
+          <attribute name="Class-Path" value="lib/ecj.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+    <jar destfile="${webstart}/cocovila-ce.jar"
+            basedir="${build}"
+            duplicate="fail"
+    	    >    	
+    	<include name="ee/ioc/cs/vsle/iconeditor/**" />
+        <manifest>
+          <attribute name="Main-Class" value="ee.ioc.cs.vsle.iconeditor.IconEditor"/>
+          <attribute name="Class-Path" value="${project.se.jar}"/>
+          <attribute name="Implementation-Title" value="${project.title} ${project.title.ce}"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+  	<jar destfile="${webstart}/packages.jar"
+            basedir="${packages}"
+            duplicate="fail">
+        <manifest>
+          <attribute name="Implementation-Title" value="${project.title} Packages"/>
+          <attribute name="Implementation-Vendor" value="${project.vendor}"/>
+          <attribute name="Implementation-Version" value="${project.version}"/>
+        </manifest>
+    </jar>
+
+  	<copy todir="${webstart}/lib">
+      <fileset dir="${lib}">
+        <include name="ecj.jar"/>
+      	<include name="jcommon.jar"/>
+        <include name="jfreechart.jar"/>
+      </fileset>
+    </copy>
+
+  	<signjar
+  		alias="${key-alias}" 
+  		keystore="${keystore.location}" 
+  		storepass="${keystore.password}"
+  	    preservelastmodified="true">
+  	  <fileset dir="${webstart}" includes="**/*.jar" />
+  	  <fileset dir="${webstart}/lib" includes="**/*.jar" />
+  	</signjar>
+
+  </target>
+
+	<target name="check-ws-dirs">
+		<mkdir dir="${webstart}"/>
+		<mkdir dir="${webstart}/lib"/>
+	</target>
+
+	<target name="genkey" depends="check-genkey,set-genkey-pass" if="need.genkey">
+		<genkey alias="${key-alias}" keystore="${keystore.location}" storepass="${keystore.password}" 
+		  		validity="365" dname="CN=Institute of Cybernetics, OU=Software Department, O=www.ioc.ee, C=EE"/>
+	</target>
+
+	<target name="check-genkey">
+		<property name="key.alias" value="CoCoViLa-Dev-Group"/>
+		<property name="keystore.location" value="${webstart}/${key.alias}.key"/>
+		
+		<condition property="need.genkey">
+			<not>
+				<available file="${keystore.location}"/>
+			</not>
+		</condition>
+	</target>
+	
+	<target name="set-genkey-pass">
+	  <input
+	    message="Please enter a key password for signing Web Start jar files:"
+	    addproperty="keystore.password"
+	  />
+	  <condition property="keystore.password.empty">
+	  	<length string="${keystore.password}" trim="true" length="0" />
+	  </condition>
+	  <fail if="keystore.password.empty">Key password cannot be empty, aborting.</fail>
+	</target>
+	
+  <!--
+      Clean up
+  -->
+
+  <target name="clean"
+          description="Remove all generated files">
+    <delete dir="${build}"/>
+    <delete dir="${dist}"/>
+  </target>
+
+</project>

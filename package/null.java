@@ -1,0 +1,5 @@
+class null {
+    /*@ specification null {
+    }@*/
+ 
+}

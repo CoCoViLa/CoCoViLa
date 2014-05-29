@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE package SYSTEM "package.dtd">
+<package>
+    <name>packTT</name>
+    <description>test</description>
+    <class static="false" type="class">
+        <name>ClassTT</name>
+        <description/>
+        <icon/>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16777216" filled="true" fixed="false"
+                height="73" linetype="0.0" stroke="1.0"
+                transparency="255" width="115" x="82" y="14"/>
+            <rect colour="-16777216" filled="true" fixed="false"
+                height="73" linetype="0.0" stroke="1.0"
+                transparency="255" width="115" x="82" y="14"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>blue</name>
+        <description>BLUE</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-13421569" filled="true" fixed="true"
+                height="58" linetype="0.0" stroke="1.0"
+                transparency="255" width="91" x="14" y="5"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>portTT</name>
+        <description>lalala</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16777216" filled="false" fixed="false"
+                height="74" linetype="0.0" stroke="1.0"
+                transparency="255" width="135" x="84" y="22"/>
+        </graphics>
+        <ports>
+            <port multi="false" name="ppt" portConnection=""
+                strict="true" type="double" x="10" y="22"/>
+        </ports>
+    </class>
+    <class static="false" type="class">
+        <name>shape</name>
+        <description>test</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <arc arcAngle="249" colour="-16777216" filled="true"
+                fixed="false" height="128" linetype="0.0"
+                startAngle="226" stroke="1.0" transparency="255"
+                width="124" x="40" y="21"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>ball</name>
+        <description>ball</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <oval colour="-16777216" filled="true" fixed="false"
+                height="131" linetype="0.0" stroke="1.0"
+                transparency="255" width="140" x="103" y="28"/>
+        </graphics>
+        <fields>
+            <field name="1" type="long" value="1"/>
+        </fields>
+    </class>
+    <class static="false" type="class">
+        <name>1</name>
+        <description>1</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16777216" filled="false" fixed="false"
+                height="89" linetype="0.0" stroke="1.0"
+                transparency="255" width="149" x="75" y="45"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>2</name>
+        <description>2</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16777216" filled="false" fixed="false"
+                height="74" linetype="0.0" stroke="1.0"
+                transparency="255" width="121" x="134" y="60"/>
+            <rect colour="-16777216" filled="false" fixed="false"
+                height="114" linetype="0.0" stroke="1.0"
+                transparency="255" width="133" x="346" y="274"/>
+            <rect colour="-16777216" filled="false" fixed="false"
+                height="34" linetype="0.0" stroke="1.0"
+                transparency="255" width="53" x="314" y="166"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>3</name>
+        <description>3</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16777216" filled="false" fixed="false"
+                height="72" linetype="0.0" stroke="1.0"
+                transparency="255" width="116" x="123" y="31"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>4</name>
+        <description>4</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16777216" filled="false" fixed="false"
+                height="102" linetype="0.0" stroke="1.0"
+                transparency="255" width="135" x="90" y="47"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>5</name>
+        <description>5</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16777216" filled="true" fixed="false"
+                height="60" linetype="0.0" stroke="1.0"
+                transparency="255" width="111" x="189" y="60"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>6</name>
+        <description>6</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16777216" filled="true" fixed="false"
+                height="56" linetype="0.0" stroke="1.0"
+                transparency="255" width="80" x="176" y="64"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>123</name>
+        <description>123</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <arc arcAngle="286" colour="-16777216" filled="true"
+                fixed="false" height="85" linetype="0.0" startAngle="30"
+                stroke="1.0" transparency="255" width="140" x="187" y="56"/>
+        </graphics>
+    </class>
+</package>

@@ -1,0 +1,65 @@
+<?xml version='1.0' encoding='us-ascii'?>
+<!ELEMENT scheme	((object|relobject)*, connection*, extended_spec?)>
+<!ELEMENT object 	(properties, fields*, extended_spec?)>
+<!ELEMENT relobject 	(relproperties?, fields*, extended_spec?)>
+<!ELEMENT fields 	(field*)>
+<!ELEMENT connection 	(breakpoints)>
+<!ELEMENT breakpoints	(point*)>
+<!ELEMENT field 	EMPTY>
+<!ELEMENT extended_spec 	(#PCDATA)>
+<!ELEMENT properties 	EMPTY>
+<!ELEMENT relproperties 	EMPTY>
+<!ELEMENT point		EMPTY>
+
+<!ATTLIST scheme
+	package		CDATA	#REQUIRED
+	superclass  CDATA   #IMPLIED>
+
+<!ATTLIST connection
+	obj1		CDATA	#REQUIRED
+	port1		CDATA	#REQUIRED
+	obj2		CDATA	#REQUIRED
+	port2		CDATA	#REQUIRED
+	strict		(true|false) "false" >
+
+<!ATTLIST relobject
+	name		CDATA	#REQUIRED
+	type		CDATA	#IMPLIED>
+
+<!ATTLIST object
+	name		CDATA	#REQUIRED
+	type		CDATA	#IMPLIED
+	static 		CDATA 	#IMPLIED>
+<!ATTLIST properties
+	x		CDATA	#IMPLIED
+	y		CDATA	#IMPLIED
+	width		CDATA	#IMPLIED
+	height		CDATA	#IMPLIED
+	xsize		CDATA	#IMPLIED
+	ysize		CDATA	#IMPLIED
+	strict		CDATA	#IMPLIED
+	angle		CDATA	#IMPLIED
+	>
+
+<!ATTLIST relproperties
+	x		CDATA	#IMPLIED
+	y		CDATA	#IMPLIED
+	endX		CDATA	#IMPLIED
+	endY		CDATA	#IMPLIED
+	angle		CDATA	#IMPLIED
+	width		CDATA	#IMPLIED
+	height		CDATA	#IMPLIED
+	xsize		CDATA	#IMPLIED
+	ysize		CDATA	#IMPLIED
+	strict		CDATA	#IMPLIED>
+
+
+<!ATTLIST field 
+        name		CDATA   #REQUIRED
+        type		CDATA   #IMPLIED
+        nature		(normal|input|goal)	"normal"
+        value		CDATA   #IMPLIED>
+<!ATTLIST point
+        x		CDATA   #REQUIRED
+        y		CDATA   #REQUIRED>
+

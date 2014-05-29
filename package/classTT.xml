@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xml>
+    <class static="false" type="class">
+        <name>qwerty</name>
+        <description>qwerty</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16777216" filled="true" fixed="false"
+                height="63" linetype="0.0" stroke="1.0"
+                transparency="255" width="111" x="197" y="75"/>
+        </graphics>
+        <ports>
+            <port multi="true" name="po9" portConnection=""
+                strict="false" type="int" x="0" y="0"/>
+        </ports>
+    </class>
+</xml>

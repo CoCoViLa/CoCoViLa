@@ -1,0 +1,5 @@
+class portTT {
+    /*@ specification portTT {
+    }@*/
+ 
+}

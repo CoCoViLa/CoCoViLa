@@ -1,0 +1,5 @@
+class qwerty {
+    /*@ specification qwerty {
+    }@*/
+ 
+}

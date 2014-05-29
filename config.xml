@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="static_font">Arial-italic-20</entry>
+<entry key="computeGoal">false</entry>
+<entry key="lastExecuted">Mon May 26 12:04:13 EEST 2014</entry>
+<entry key="show_algorithm">false</entry>
+<entry key="gridStep">15</entry>
+<entry key="spec_recursion">false;2</entry>
+<entry key="last.path">C:\Users\anna.molodezheva\workspace3\CoCoViLa-master\package</entry>
+<entry key="algorithm_font">Courier New-plain-12</entry>
+<entry key="openPackages">C:\Users\anna.molodezheva\Documents\test1.xml;</entry>
+<entry key="text_font">Courier New-plain-12</entry>
+<entry key="defaultLayout">javax.swing.plaf.metal.MetalLookAndFeel</entry>
+<entry key="object_names_font">Arial-plain-12</entry>
+<entry key="showGrid">true</entry>
+<entry key="schemeEditorWindowProps">-1336;222;769;576;0</entry>
+<entry key="snapToGrid">false</entry>
+<entry key="recentPackages">C:\Users\anna.molodezheva\Documents\test1.xml;</entry>
+<entry key="propagateValues">false</entry>
+<entry key="error_font">Courier New-plain-12</entry>
+<entry key="debugInfo">0</entry>
+<entry key="generatedFilesDirectory">generated</entry>
+<entry key="dumpGeneratedFiles">true</entry>
+<entry key="syntax_highlight">true</entry>
+<entry key="nudgeStep">1</entry>
+<entry key="compilationClasspath">lib/jcommon.jar;lib/jfreechart.jar</entry>
+<entry key="showControls">false</entry>
+<entry key="defaultzoom">1.0</entry>
+<entry key="antiAliasing">true</entry>
+</properties>
