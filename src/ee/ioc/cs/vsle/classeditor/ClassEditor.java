@@ -1012,9 +1012,17 @@ public class ClassEditor extends JFrame implements ChangeListener {
 //        String selection = dcd.getSelectedValue();        
         
         System.out.println("selection " + selection);
-        
+
         Canvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
+        /*   Clear pane on new import */
+        if(curCanvas != null){
+        	curCanvas.clearObjects();
+        }
         
+       /*for (int i = 0; i < curCanvas.getComponentCount(); i++){
+             	 curCanvas.getComponent(i);
+    	}*/
+                       
         int classX = ( curCanvas.drawingArea.getWidth() / 2 );
         int classY = ( curCanvas.drawingArea.getHeight() / 2 );
         
