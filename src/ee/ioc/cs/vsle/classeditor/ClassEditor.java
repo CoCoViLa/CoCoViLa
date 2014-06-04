@@ -126,6 +126,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
     
     ChooseClassDialog ccd = new ChooseClassDialog( packageClassNamesList );
     DeleteClassDialog dcd = new DeleteClassDialog( packageClassNamesList );
+    
     ClassImport ci;    
     
     /**
