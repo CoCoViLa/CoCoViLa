@@ -130,11 +130,11 @@ public class PackageClass implements Serializable {
 
 		// deep clone fields list
         for (ClassField field : specFields.values() ) {
-            ClassField newField = field.clone();
-            if( propFields.containsValue( field ) ) {
-                obj.addField( newField );
-            }
-            obj.addSpecField( newField );
+            obj.addSpecField(field.clone());
+        }
+        // Preserve the field order of the visual class
+        for (ClassField field: propFields.values()) {
+            obj.addField(obj.getSpecField(field.getName()));
         }
         
 		obj.setShapes( new ArrayList<Shape>(graphics.getShapes().size()) );
