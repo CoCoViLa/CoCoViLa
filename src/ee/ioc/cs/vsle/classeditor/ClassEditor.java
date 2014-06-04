@@ -1173,7 +1173,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
                 || ( ClassEditor.getClassIcon() != null && ClassEditor.getClassIcon().trim().length() == 0 ) ) {
             new ClassPropertiesDialog( dbrClassFields, false );
             //validateClassParamsForPropDialog();
-        }  //else return;
+        } 
     } // validateClassParams    
     
     public void saveToPackage() {
