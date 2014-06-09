@@ -30,6 +30,14 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 	public static final ClassGraphics DEFAULT_OPEN_GRAPHICS;
 	public static final ClassGraphics DEFAULT_CLOSED_GRAPHICS;
 	
+	public void setX(int x) {
+		this.x = x;
+	}
+
+	public void setY(int y) {
+		this.y = y;
+	}
+
 	static {
 	    DEFAULT_OPEN_GRAPHICS = new ClassGraphics();
 	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, createColor( 12632256, 255 ), true, 1.0f, 0, true ) );

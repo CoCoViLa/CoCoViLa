@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.packageparse;
 
+import static ee.ioc.cs.vsle.graphics.Shape.createColor;
+
 import java.awt.*;
 import java.io.*;
 import java.net.*;
@@ -342,15 +344,29 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         //open
         if( ( gr = getElementByName( portNode, EL_OPEN ) ) != null 
                 && ( gr = getElementByName( gr, EL_GRAPHICS )) != null ) {
-            newPort.setOpenGraphics( getGraphicsParser().parse( gr ) );
+        	ClassGraphics cg = getGraphicsParser().parse( gr );      
+        	if(cg.getShapes() != null && cg.getShapes().size()>0){
+        		cg.setBounds(cg.getShapes().get(0).getX(), cg.getShapes().get(0).getY(), cg.getShapes().get(0).getWidth(), cg.getShapes().get(0).getHeight());
+        		newPort.setOpenGraphics(cg);
+            }
         }
         
         //closed
         if( ( gr = getElementByName( portNode, EL_CLOSED ) ) != null 
                 && ( gr = getElementByName( gr, EL_GRAPHICS )) != null ) {
-            newPort.setClosedGraphics( getGraphicsParser().parse( gr ) );
+        	System.out.println("xmp parse" + gr.toString());
+        	ClassGraphics cg = getGraphicsParser().parse( gr );        	
+        	if(cg.getShapes() != null && cg.getShapes().size()>0){
+        		cg.setBounds(cg.getShapes().get(0).getX(), cg.getShapes().get(0).getY(), cg.getShapes().get(0).getWidth(), cg.getShapes().get(0).getHeight());
+        		newPort.setClosedGraphics(cg);
+        	}
         }
         
+        /*ClassGraphics cg1 = new ClassGraphics();
+ 	    cg1.addShape( new Rect(-4, -4, 8, 8, createColor( 0, 255 ),  true, 1.0f, 1) );
+ 	    cg1.setBounds( -4, -4, 8, 8 );
+        //newPort.setClosedGraphics(cg1);*/
+       
         newClass.addPort( newPort );
     }
 
@@ -554,6 +570,13 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                      */
                 }
                 
+              /* else if ( EL_GRAPHICS.equals( nodeName ) ) {
+                	 Dim dim =  getDim( node );
+                     Lineprops lp = getLineProps( node );
+                     shape =  new Rect( dim.x, dim.y, dim.width, dim.height, getColor( node ), isShapeFilled( node ), lp.strokeWidth, lp.lineType );
+                }*/
+                
+                
                 if( shape != null )
                     newGraphics.addShape( shape );
             }
@@ -675,6 +698,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         
         //ports
         List<Port> ports = pClass.getPorts();
+
         if( !ports.isEmpty() ) {
             Element portsEl = doc.createElement( EL_PORTS );
             classNode.appendChild( portsEl );

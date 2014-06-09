@@ -167,20 +167,28 @@ public class MouseOps extends MouseInputAdapter {
     } // drawPort
     
     public void drawPort( Port p, int xOffset, int yOffset ) {
+    	
+    	//xOffset = 0; yOffset = 0;
         ArrayList<Port> ports = new ArrayList<Port>();
+               
         ports.add(p);
+        //p.setX();
         
         GObj obj = new GObj();
         p.setObject(obj);
-        obj.setX(xOffset);
-        obj.setY(yOffset);
+        obj.setX(p.getX() + xOffset); // 
+        obj.setY(p.getY() + yOffset); // 
+        p.setX(0);
+        p.setY(0);        
         
         obj.setHeight(p.getHeight());
         obj.setWidth(p.getWidth());     
-        obj.setName("port");            
-        obj.setPorts(ports);
+        obj.setName("port");        
+    //    obj.set
+        obj.setPorts(ports);       
         
-        System.out.println("GObj " + obj.toString());
+        
+        System.out.println("GObj " + obj.toString() + "; x=" + obj.getX() + "; y=" + obj.getY());
 
         canvas.addObject(obj);
         canvas.repaint();
@@ -246,6 +254,11 @@ public class MouseOps extends MouseInputAdapter {
     
     public void addShape(Shape s, int xOffset, int yOffset) {
 
+    	
+    	/* test values
+    	 xOffset = 0; 
+    	 yOffset = 0;*/
+    	
         System.out.println("1. shape " + s.toText());
         System.out.println("2. addShape x " + s.getX() + " y " + s.getY() + " h " + s.getHeight() + " w " + s.getWidth());
 

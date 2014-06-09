@@ -1023,9 +1023,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
        /*for (int i = 0; i < curCanvas.getComponentCount(); i++){
              	 curCanvas.getComponent(i);
     	}*/
-                       
-        int classX = ( curCanvas.drawingArea.getWidth() / 2 );
-        int classY = ( curCanvas.drawingArea.getHeight() / 2 );
+        /* Temporary magic numbers */
+        int classX = ( curCanvas.drawingArea.getWidth() / 3 );
+        int classY = ( curCanvas.drawingArea.getHeight() / 3 );
         
         
         if ( selection == null )
@@ -1090,6 +1090,8 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					}
                 }
                 curCanvas.drawingArea.repaint();
+                Port temp = curCanvas.getObjectList().getPortById("1");
+                System.out.println("classEditor port check" + temp.toString());
                 classEditor.setPackageFile(file);
             }
         } catch ( Exception exc ) {
@@ -1213,8 +1215,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
             		System.out.println("ADD SHAPE - " + shape.toText());
 					cg.addShape(shape);
 				}
-            	for (Port port : obj.getPortList()) {
-            		pc.addPort(port);
+            	for (Port port : obj.getPortList()) {            		
+                    
+                    port.setX(obj.getX());
+                    port.setY(obj.getY());
+                    pc.addPort(port);
 				}            	
             }
             
