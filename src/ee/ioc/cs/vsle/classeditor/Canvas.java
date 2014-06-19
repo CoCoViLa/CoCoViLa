@@ -28,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.Scrollable;
 import javax.swing.event.UndoableEditEvent;
 import javax.swing.event.UndoableEditListener;
 import javax.swing.undo.AbstractUndoableEdit;
@@ -101,7 +102,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     UndoManager undoManager;
     UndoableEditSupport undoSupport;
     private boolean actionInProgress = false;
-    private JScrollPane areaScrollPane;
+    public JScrollPane areaScrollPane;
     private boolean drawPorts = true;
     private boolean showObjectNames = false;
     private String lastScheme;
@@ -622,7 +623,10 @@ public class Canvas extends JPanel implements ISchemeContainer {
         areaScrollPane = new JScrollPane( drawingArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED );
         setLayout( new BorderLayout() );
-        add( areaScrollPane, BorderLayout.CENTER );
+        
+        this.setAutoscrolls(true);
+        
+        this.add( areaScrollPane, BorderLayout.CENTER );
 
         infoPanel.add( posInfo );
         setStatusBarText( "-" );
@@ -1763,6 +1767,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         scheme.getObjectList().updateRelObjs();
         drawingArea.repaint();
     }
+    
 
     /**
      * Cancels connection adding action and clears the state.
@@ -2093,4 +2098,5 @@ public class Canvas extends JPanel implements ISchemeContainer {
         }
         return isBbPresent;
     }
+
 }

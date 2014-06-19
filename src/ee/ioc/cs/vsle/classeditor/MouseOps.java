@@ -1,7 +1,9 @@
 package ee.ioc.cs.vsle.classeditor;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
@@ -9,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JColorChooser;
+import javax.swing.JScrollPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 
@@ -479,6 +483,9 @@ public class MouseOps extends MouseInputAdapter {
         canvas.setActionInProgress( true );
     }
 
+    
+
+    
     @Override
     public void mouseDragged( MouseEvent e ) {
     	System.out.println("MouseOps mouseDragged " + state);
@@ -537,10 +544,45 @@ public class MouseOps extends MouseInputAdapter {
                     }
                 }
             }
-
+         
             canvas.moveObjects( moveX, moveY );
             canvas.mouseX += moveX;
             canvas.mouseY += moveY;
+            
+            
+            canvas.drawingArea.setAutoscrolls(true);
+            canvas.areaScrollPane.setAutoscrolls(true);
+            
+           
+
+            /* Scroll check */
+            
+            int compareHeight =  canvas.mouseY;
+            int compareWidth =  canvas.mouseX;
+            if (selected != null && selected.get(0) != null){
+            	compareHeight += selected.get(0).getHeight(); 
+            	compareWidth += selected.get(0).getWidth();
+            }
+            System.out.println("Scroll check vertical: " + canvas.areaScrollPane.getViewport().getSize().getHeight() + " < " + compareHeight);
+            System.out.println("Scroll check horizontal: " + canvas.areaScrollPane.getViewport().getSize().getWidth() + " < " + compareWidth);
+            
+            if(canvas.areaScrollPane.getViewport().getSize().getHeight() <  compareHeight || canvas.areaScrollPane.getViewport().getSize().getWidth() <  compareWidth){
+                 	//drawAreaSize
+            	Dimension drawAreaSize = new Dimension(10+compareWidth, 10+compareHeight);
+            	canvas.drawingArea.setPreferredSize(drawAreaSize);
+             	canvas.drawAreaSize.setSize(drawAreaSize);
+             	
+            	System.out.println("Drawing area new size: " + drawAreaSize.getWidth() + " " + drawAreaSize.getHeight());
+             	
+             	canvas.drawingArea.revalidate();
+            }
+           
+        	
+          /*  java.awt.Point vpp = canvas.areaScrollPane.getViewport().getViewPosition();
+            vpp.translate(canvas.mouseX , canvas.mouseY);
+            canvas.drawingArea.scrollRectToVisible(new Rectangle(vpp, canvas.areaScrollPane.getViewport().getSize()));*/                       
+           
+            
         } else if ( State.resize.equals( state ) ) {
             // Do not allow resizing of strictly connected objects as it
             // seems to be not very useful and creates problems such as
