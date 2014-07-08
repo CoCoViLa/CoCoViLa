@@ -115,6 +115,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
     private JCheckBoxMenuItem gridCheckBox;
     private JCheckBoxMenuItem showPortCheckBox;
+    private JCheckBoxMenuItem showPortOpenCheckBox;
     private JCheckBoxMenuItem showObjectNamesCheckBox;
     private JCheckBoxMenuItem snapToGridCheckBox;
     
@@ -301,6 +302,12 @@ public class ClassEditor extends JFrame implements ChangeListener {
         showPortCheckBox = new JCheckBoxMenuItem( Menu.SHOW_PORTS, true );
         showPortCheckBox.addActionListener( getActionListener() );
         menu.add( showPortCheckBox );
+
+        
+        showPortOpenCheckBox = new JCheckBoxMenuItem( Menu.SHOW_PORT_OPEN_CLOSE, true );
+        showPortOpenCheckBox.addActionListener( getActionListener() );
+        menu.add( showPortOpenCheckBox );
+        
         
         showObjectNamesCheckBox = new JCheckBoxMenuItem( Menu.SHOW_NAMES, false );
         showObjectNamesCheckBox.addActionListener( getActionListener() );
@@ -318,6 +325,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
                 gridCheckBox.setSelected( canvas.isGridVisible() );
                 snapToGridCheckBox.setSelected( RuntimeProperties.getSnapToGrid() );
                 showPortCheckBox.setSelected( canvas.isDrawPorts() );
+                showPortOpenCheckBox.setSelected( canvas.isDrawOpenPorts() );
                 showObjectNamesCheckBox.setSelected( canvas.isShowObjectNames() );
             }
 
@@ -1090,8 +1098,8 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					}
                 }
                 curCanvas.drawingArea.repaint();
-                Port temp = curCanvas.getObjectList().getPortById("1");
-                System.out.println("classEditor port check" + temp.toString());
+                /*Port temp = curCanvas.getObjectList().getPortById("1");     //// Test data.
+                System.out.println("classEditor port check" + temp.toString()); */
                 classEditor.setPackageFile(file);
             }
         } catch ( Exception exc ) {

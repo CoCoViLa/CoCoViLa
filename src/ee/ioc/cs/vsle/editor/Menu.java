@@ -52,6 +52,7 @@ public class Menu {
     public static final String SNAP_TO_GRID = "Snap to grid";
     public static final String SHOW_PORTS = "Ports";
     public static final String SHOW_NAMES = "Object Names";
+    public static final String SHOW_PORT_OPEN_CLOSE = "Opened Ports";
     public static final String CONTROL_PANEL = "Controls";
     
     // PACKAGE

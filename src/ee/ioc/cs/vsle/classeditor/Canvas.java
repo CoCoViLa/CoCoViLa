@@ -104,7 +104,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
     private boolean actionInProgress = false;
     public JScrollPane areaScrollPane;
     private boolean drawPorts = true;
-    private boolean showObjectNames = false;
+    private boolean drawOpenPorts = true;    
+	private boolean showObjectNames = false;
     private String lastScheme;
     private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
 
@@ -2061,6 +2062,20 @@ public class Canvas extends JPanel implements ISchemeContainer {
         this.scheme = scheme;
     }
 
+    public boolean isDrawOpenPorts() {
+		return drawOpenPorts;
+	}
+
+	public void setDrawOpenPorts(boolean drawOpenPorts) {
+		
+		this.drawOpenPorts = drawOpenPorts;		
+		for (GObj obj : scheme.getObjectList()) {
+		    obj.setDrawOpenPorts( drawOpenPorts );
+        }
+		drawingArea.repaint();
+	}
+
+    
     /**
      * Sets Status Bar text
      */

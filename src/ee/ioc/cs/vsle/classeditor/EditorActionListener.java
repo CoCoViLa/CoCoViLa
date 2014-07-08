@@ -167,6 +167,10 @@ public class EditorActionListener implements ActionListener {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
                 ClassEditor.getInstance().getCurrentCanvas().setDrawPorts( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
             }
+        } else if ( e.getActionCommand().equals( Menu.SHOW_PORT_OPEN_CLOSE ) ) {
+            if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
+                ClassEditor.getInstance().getCurrentCanvas().setDrawOpenPorts( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
+            }    
         } else if ( e.getActionCommand().equals( Menu.SHOW_NAMES ) ) {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
                 ClassEditor.getInstance().getCurrentCanvas().showObjectNames( ((JCheckBoxMenuItem)e.getSource()).isSelected() );

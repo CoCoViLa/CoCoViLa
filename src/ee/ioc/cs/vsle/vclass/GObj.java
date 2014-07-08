@@ -83,6 +83,7 @@ public class GObj implements Serializable, Cloneable,
     private double angle = 0d;
 
     private boolean drawPorts = true;
+    private boolean drawOpenPorts = true;
     private boolean drawInstanceName = false;
     
     private String extendedSpec;
@@ -370,13 +371,20 @@ public class GObj implements Serializable, Cloneable,
                 ClassGraphics graphics;
                 Port port = getPortList().get( i );
 
+                /*  Port is drawn opened or closed by openPort flag in View Menu  */
+                /*
                 if ( port.isSelected() || port.isConnected() || port.isHilighted() ) {
 
                     graphics = port.getClosedGraphics();
 
                 } else
                     graphics = port.getOpenGraphics();
-
+				*/
+                
+                if (isDrawOpenPorts() ) {
+                	graphics = port.getOpenGraphics();                    
+                } else
+                	graphics = port.getClosedGraphics();
                 graphics.draw( xModifier + (int) ( getXsize() * port.getX() ), 
                         yModifier + (int) ( getYsize() * port.getY() ), 
                         getXsize(), getYsize(), g2 );
@@ -886,4 +894,13 @@ public class GObj implements Serializable, Cloneable,
     public void setSpecText(String spec) {
         extendedSpec = spec;
     }
+
+	public boolean isDrawOpenPorts() {
+		return drawOpenPorts;
+	}
+
+	public void setDrawOpenPorts(boolean drawOpenPorts) {
+		this.drawOpenPorts = drawOpenPorts;
+	}
+    
 }

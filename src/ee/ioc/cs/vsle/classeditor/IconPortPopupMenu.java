@@ -23,6 +23,14 @@ public class IconPortPopupMenu
    */
   ClassEditor editor;
 
+  
+  /**
+   * Label Constants
+   */
+  
+  private String EDIT_OPEN = "Edit port open graphics";
+  private String EDIT_CLOSED = "Edit port closed graphics";
+  
   /**
    * Class constructor.
    * @param port IconPort - port reference. Selected in the IconEditor application.
@@ -33,6 +41,8 @@ public class IconPortPopupMenu
 	this.port = port;
 	this.editor = editor;
 	
+	
+	
 	this.add(ClassEditor.getInstance().deleteAction);
 
 	this.addSeparator();
@@ -40,6 +50,16 @@ public class IconPortPopupMenu
 	menuItem.addActionListener(this);
 	menuItem.setActionCommand(Menu.PROPERTIES);
 	this.add(menuItem);
+	
+	JMenuItem menuItemOP = new JMenuItem(EDIT_OPEN);
+	menuItemOP.addActionListener(this);
+	menuItemOP.setActionCommand(Menu.PROPERTIES);
+	this.add(menuItemOP);
+	
+	JMenuItem menuItemCP = new JMenuItem(EDIT_CLOSED);
+	menuItemCP.addActionListener(this);
+	menuItemCP.setActionCommand(Menu.PROPERTIES);
+	this.add(menuItemCP);
   } // IconPortPopupMenu constructor
 
   /**

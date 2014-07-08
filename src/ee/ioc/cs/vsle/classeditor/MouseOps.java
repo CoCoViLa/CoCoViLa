@@ -183,8 +183,10 @@ public class MouseOps extends MouseInputAdapter {
         obj.setX(p.getX() + xOffset); // 
         obj.setY(p.getY() + yOffset); // 
         p.setX(0);
-        p.setY(0);        
-        
+        p.setY(0);      
+
+        p.setDefaultGraphics(obj.isDrawOpenPorts());
+               
         obj.setHeight(p.getHeight());
         obj.setWidth(p.getWidth());     
         obj.setName("port");        

@@ -20,7 +20,7 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 	private int x;
 	private int y;
 	private boolean strict, area, isMulti;
-	private ClassGraphics openGraphics, closedGraphics;
+	private ClassGraphics openGraphics, closedGraphics, defaultGraphics;
 	private ArrayList<Connection> connections = new ArrayList<Connection>();
 	private boolean selected = false;
 	private boolean known = false, target = false;
@@ -61,9 +61,13 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 
 		this.strict = strict;
 		this.isMulti = multi;
-		
+				
 		setOpenGraphics( DEFAULT_OPEN_GRAPHICS );
 		setClosedGraphics( DEFAULT_CLOSED_GRAPHICS );
+		
+		/* set open as default */
+		defaultGraphics = openGraphics;
+
 	}
 
 	public ArrayList<Port> getStrictConnected() {
@@ -92,57 +96,73 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
         return getAbsoluteCenter().y;
 	}
 
-    public Point getAbsoluteCenter() {
+    public ClassGraphics getDefaultGraphics() {
+		return defaultGraphics;
+	}
+
+	public void setDefaultGraphics(ClassGraphics defaultGraphics) {
+		this.defaultGraphics = defaultGraphics;
+	}
+
+	public void setDefaultGraphics(boolean flag) {
+		if (flag){
+			this.defaultGraphics = this.openGraphics;
+		} else {
+			this.defaultGraphics = this.closedGraphics;
+		}
+	}
+	
+	public Point getAbsoluteCenter() {
         return obj.toCanvasSpace(Math.round(obj.getXsize() * x + obj.getX()),
                 Math.round(obj.getYsize() * y + obj.getY()));
     }
 
     public int getCenterX() {
 		return (int) (obj.getXsize()
-			* (x + openGraphics.getBoundX() + (openGraphics.getBoundWidth()) / 2));
+			* (x + defaultGraphics.getBoundX() + (defaultGraphics.getBoundWidth()) / 2));
 	}
 
 	public int getCenterY() {
 		return (int) (obj.getYsize()
-			* (y + openGraphics.getBoundY() + (openGraphics.getBoundHeight()) / 2));
+			* (y + defaultGraphics.getBoundY() + (defaultGraphics.getBoundHeight()) / 2));
 	}
 
 	public int getRealCenterX() {
 		return (int) (obj.getX() + obj.getXsize() 
-				* (x + openGraphics.getBoundX() + (openGraphics.getBoundWidth() / 2)));
+				* (x + defaultGraphics.getBoundX() + (defaultGraphics.getBoundWidth() / 2)));
 	}
 
 	public int getRealCenterY() {
 		return (int) (obj.getY() + obj.getYsize()
-				* (y + openGraphics.getBoundY() + (openGraphics.getBoundHeight() / 2)));
+				* (y + defaultGraphics.getBoundY() + (defaultGraphics.getBoundHeight() / 2)));
 	}
 
 	public int getStartX() {
-		return (int) (obj.getXsize() * (openGraphics.getBoundX() + x) + obj.getX());
+		return (int) (obj.getXsize() * (defaultGraphics.getBoundX() + x) + obj.getX());
 	}
 
 	public int getStartY() {
-		return (int) (obj.getYsize() * (openGraphics.getBoundY() + y) + obj.getY());
+		return (int) (obj.getYsize() * (defaultGraphics.getBoundY() + y) + obj.getY());
 	}
 
 	public int getWidth() {
-		return (int) (obj.getXsize() * openGraphics.getBoundWidth());
+		return (int) (obj.getXsize() * defaultGraphics.getBoundWidth());
 	}
 
 	public int getHeight() {
-		return (int) (obj.getYsize() * openGraphics.getBoundHeight());
+		return (int) (obj.getYsize() * defaultGraphics.getBoundHeight());
 	}
 
 	public boolean inBoundsX(int pointX) {
-		return (obj.getX() + obj.getXsize() * (x + openGraphics.getBoundX()) < pointX
-			&& (obj.getX() + obj.getXsize() * (x + openGraphics.getBoundX() + openGraphics.getBoundWidth()) > pointX));
+		return (obj.getX() + obj.getXsize() * (x + defaultGraphics.getBoundX()) < pointX
+			&& (obj.getX() + obj.getXsize() * (x + defaultGraphics.getBoundX() + defaultGraphics.getBoundWidth()) > pointX));
 	}
 
 	public boolean inBoundsY(int pointY) {
-		return (obj.getY() + (obj.getYsize() * (y + openGraphics.getBoundY())) < pointY
+		return (obj.getY() + (obj.getYsize() * (y + defaultGraphics.getBoundY())) < pointY
 			&& (obj.getY()
 			+ obj.getYsize()
-			* (y + openGraphics.getBoundY() + openGraphics.getBoundHeight()))
+			* (y + defaultGraphics.getBoundY() + defaultGraphics.getBoundHeight()))
 			> pointY);
 	}
 
@@ -341,7 +361,6 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 		this.openGraphics = openGraphics;
 	}
 
-
 	public void setConnections(ArrayList<Connection> connections) {
 		this.connections = connections;
 	}
@@ -367,7 +386,7 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 				return true;
 		}
 		return false;
-	}
+	}	
 
 	/**
 	 * Checks if this port can be connected at all. For example, the syntax
