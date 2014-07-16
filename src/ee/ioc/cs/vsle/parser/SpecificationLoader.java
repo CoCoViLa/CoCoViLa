@@ -13,6 +13,7 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.RecognitionException;
 import org.antlr.v4.runtime.Recognizer;
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
@@ -57,7 +58,7 @@ public class SpecificationLoader {
 		parser.removeErrorListeners(); // remove ConsoleErrorListener
 		parser.addErrorListener(new UnderlineListener()); // add ours
 		
-		SpecificationParserListenerImpl secificationListener = new SpecificationParserListenerImpl(this, specificationName);
+		SpecificatioLanguageListenerImpl secificationListener = new SpecificatioLanguageListenerImpl(this, specificationName);
 		MetaInterfaseContext metaInterfase = parser.metaInterfase();
 		ParseTreeWalker walker = new ParseTreeWalker();
 		walker.walk(secificationListener, metaInterfase);
@@ -87,27 +88,31 @@ public class SpecificationLoader {
 		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
 			System.err.println("line " + line + ":" + charPositionInLine + " " + msg);
 //			String message = underlineError(recognizer, (Token) offendingSymbol, line, charPositionInLine);
-			throw new SpecParseException("\n" + msg);
+			String errorLine = underlineError(recognizer, (Token)offendingSymbol, line, charPositionInLine);
+			msg = errorLine.concat("\n").concat(msg);
+			SpecParseException specParseException = new SpecParseException(msg);
+			specParseException.setLine(Integer.toString(line));
+			throw specParseException;
 		}
 
-//		protected String underlineError(Recognizer recognizer, Token offendingToken, int line, int charPositionInLine) {
-//			StringBuilder sb = new StringBuilder("\n");
-//			CommonTokenStream tokens = (CommonTokenStream) recognizer.getInputStream();
-//			String input = tokens.getTokenSource().getInputStream().toString();
-//			String[] lines = input.split("\n");
-//			String errorLine = lines[line - 1];
-//			sb.append(errorLine);
-//			sb.append("\n");
-//			for (int i = 0; i < charPositionInLine; i++)
-//				sb.append(" ");
-//			int start = offendingToken.getStartIndex();
-//			int stop = offendingToken.getStopIndex();
-//			if (start >= 0 && stop >= 0) {
-//				for (int i = start; i <= stop; i++)
-//					sb.append("^");
-//			}
-//			return sb.toString();
-//		}
+		protected String underlineError(Recognizer recognizer, Token offendingToken, int line, int charPositionInLine) {
+			StringBuilder sb = new StringBuilder("\n");
+			CommonTokenStream tokens = (CommonTokenStream) recognizer.getInputStream();
+			String input = tokens.getTokenSource().getInputStream().toString();
+			String[] lines = input.split("\n");
+			String errorLine = lines[line - 1];
+			sb.append(errorLine);
+			sb.append("\n");
+			for (int i = 0; i < charPositionInLine; i++)
+				sb.append(" ");
+			int start = offendingToken.getStartIndex();
+			int stop = offendingToken.getStopIndex();
+			if (start >= 0 && stop >= 0) {
+				for (int i = start; i <= stop; i++)
+					sb.append("^");
+			}
+			return sb.toString();
+		}
 		
 	}
 }

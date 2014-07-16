@@ -18,14 +18,6 @@ public class SpecificationLanguageBaseVisitor<T> extends AbstractParseTreeVisito
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx) { return visitChildren(ctx); }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
-	 */
 	@Override public T visitExpression(@NotNull SpecificationLanguageParser.ExpressionContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -34,7 +26,23 @@ public class SpecificationLanguageBaseVisitor<T> extends AbstractParseTreeVisito
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
+	@Override public T visitSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
 	@Override public T visitInArrayVariableAssigner(@NotNull SpecificationLanguageParser.InArrayVariableAssignerContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitSpecificationVariableDeclaration(@NotNull SpecificationLanguageParser.SpecificationVariableDeclarationContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -130,6 +138,22 @@ public class SpecificationLanguageBaseVisitor<T> extends AbstractParseTreeVisito
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
+	@Override public T visitSpecificationVariable(@NotNull SpecificationLanguageParser.SpecificationVariableContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitSpecificationVariableDeclarator(@NotNull SpecificationLanguageParser.SpecificationVariableDeclaratorContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
 	@Override public T visitVariableIdentifierList(@NotNull SpecificationLanguageParser.VariableIdentifierListContext ctx) { return visitChildren(ctx); }
 
 	/**
@@ -155,6 +179,22 @@ public class SpecificationLanguageBaseVisitor<T> extends AbstractParseTreeVisito
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
 	@Override public T visitGoal(@NotNull SpecificationLanguageParser.GoalContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitWildcardAlias(@NotNull SpecificationLanguageParser.WildcardAliasContext ctx) { return visitChildren(ctx); }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.
+	 */
+	@Override public T visitStatement(@NotNull SpecificationLanguageParser.StatementContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -234,7 +274,7 @@ public class SpecificationLanguageBaseVisitor<T> extends AbstractParseTreeVisito
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx) { return visitChildren(ctx); }
+	@Override public T visitArray(@NotNull SpecificationLanguageParser.ArrayContext ctx) { return visitChildren(ctx); }
 
 	/**
 	 * {@inheritDoc}
@@ -242,5 +282,5 @@ public class SpecificationLanguageBaseVisitor<T> extends AbstractParseTreeVisito
 	 * The default implementation returns the result of calling
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
-	@Override public T visitArray(@NotNull SpecificationLanguageParser.ArrayContext ctx) { return visitChildren(ctx); }
+	@Override public T visitVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx) { return visitChildren(ctx); }
 }

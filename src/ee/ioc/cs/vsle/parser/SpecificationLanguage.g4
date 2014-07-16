@@ -20,8 +20,12 @@ superMetaInterface
 	;
 	
 specification
-    :	((variableDeclaration /*| constantDeclaration */ | variableAssignment 
-    		| axiom | goal | aliasDeclaration | aliasDefinition | equation /*binding*/ ) ';' )*
+    :	( statement ';' )*
+    ;
+   
+statement
+    : variableDeclaration | variableAssignment | axiom
+    | goal | aliasDeclaration | aliasDefinition | equation 
     ;
 	
 variableDeclaration
@@ -34,17 +38,18 @@ variableModifier
 	;
 
 variableDeclarator
-	:	IDENTIFIER ('=' variableInitializer)?	# variableDeclaratorInitializer
-	|	IDENTIFIER ('=' variableAssigner)		# variableDeclaratorAssigner 
+	:	IDENTIFIER ('=' variableInitializer)?						# variableDeclaratorInitializer
+	|	IDENTIFIER ('=' variableAssigner)							# variableDeclaratorAssigner 
+	|	IDENTIFIER ('(' specificationVariableDeclaration ')')?		# specificationVariable
 	;
 
-//constantDeclaration
-//	:	'const' type constantDeclarator (',' constantDeclarator)*
-//	;
-//	
-//constantDeclarator
-//	:	IDENTIFIER '=' variableInitializer
-//	;
+specificationVariableDeclaration
+	:	specificationVariableDeclarator (',' specificationVariableDeclarator)*
+	;
+
+specificationVariableDeclarator
+	:	IDENTIFIER '=' expression
+	;
 
 variableAssignment
 	:	variableIdentifier '=' variableAssigner
@@ -53,15 +58,6 @@ variableAssignment
 axiom
 	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) ) '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' method = IDENTIFIER '}'
 	;
-	
-//simpleAxiom
-//	:	variableIdentifierList? '->' variableIdentifier
-//	;
-//
-//subtaskAxiom
-//	:	subtask (',' subtask)* (',' variableIdentifierList)? '->' variableIdentifierList //Is list OK?
-//	
-//	;
 	
 subtask
 	:	'[' (context = classType '|-')? inputVariables = variableIdentifierList '->' outputVariables = variableIdentifierList ']'
@@ -84,7 +80,11 @@ aliasDeclaration
 	;
 	
 aliasStructure
-	:	'(' ( variableAlias=variableIdentifierList | '*.'wildcardAlias=IDENTIFIER )')'
+	:	('('|'[') ( variableAlias=variableIdentifierList | wildcardAliasName = wildcardAlias )(')'|']')
+	;
+	
+wildcardAlias
+	:	'*.' IDENTIFIER
 	;
 
 aliasDefinition
@@ -151,19 +151,15 @@ variableInitializer
     ;
 
 variableIdentifier
-	:	IDENTIFIER ('.' IDENTIFIER )* ALIAS_ELEMENT_REF*  ('.' variableIdentifier)?
+	:	IDENTIFIER (('.' IDENTIFIER | '*') )* ALIAS_ELEMENT_REF*  ('.' variableIdentifier)?
 	;
-	
-//aliasElementRef
-//	:	'.' ALIAS_ELEMENT_REF
-//	;
 	
 variableIdentifierList
 	:	variableIdentifier (',' variableIdentifier )*
 	;
 
 NUMBER
-    : INTEGER ('.' INTEGER)?
+    : INTEGER ('.' INTEGER)? (('e' | 'E') ('-'|'+')?INTEGER+)?
     ;
 	
 INTEGER

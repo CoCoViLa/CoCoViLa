@@ -12,13 +12,6 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  */
 public interface SpecificationLanguageVisitor<T> extends ParseTreeVisitor<T> {
 	/**
-	 * Visit a parse tree produced by {@link SpecificationLanguageParser#subtask}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link SpecificationLanguageParser#expression}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -26,11 +19,25 @@ public interface SpecificationLanguageVisitor<T> extends ParseTreeVisitor<T> {
 	T visitExpression(@NotNull SpecificationLanguageParser.ExpressionContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SpecificationLanguageParser#subtask}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SpecificationLanguageParser#inArrayVariableAssigner}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitInArrayVariableAssigner(@NotNull SpecificationLanguageParser.InArrayVariableAssignerContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SpecificationLanguageParser#specificationVariableDeclaration}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSpecificationVariableDeclaration(@NotNull SpecificationLanguageParser.SpecificationVariableDeclarationContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SpecificationLanguageParser#variableInitializer}.
@@ -110,6 +117,20 @@ public interface SpecificationLanguageVisitor<T> extends ParseTreeVisitor<T> {
 	T visitVariableIdentifier(@NotNull SpecificationLanguageParser.VariableIdentifierContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SpecificationLanguageParser#specificationVariable}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSpecificationVariable(@NotNull SpecificationLanguageParser.SpecificationVariableContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SpecificationLanguageParser#specificationVariableDeclarator}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitSpecificationVariableDeclarator(@NotNull SpecificationLanguageParser.SpecificationVariableDeclaratorContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SpecificationLanguageParser#variableIdentifierList}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
@@ -136,6 +157,20 @@ public interface SpecificationLanguageVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitGoal(@NotNull SpecificationLanguageParser.GoalContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SpecificationLanguageParser#wildcardAlias}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitWildcardAlias(@NotNull SpecificationLanguageParser.WildcardAliasContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SpecificationLanguageParser#statement}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitStatement(@NotNull SpecificationLanguageParser.StatementContext ctx);
 
 	/**
 	 * Visit a parse tree produced by {@link SpecificationLanguageParser#superMetaInterface}.
@@ -201,16 +236,16 @@ public interface SpecificationLanguageVisitor<T> extends ParseTreeVisitor<T> {
 	T visitAxiom(@NotNull SpecificationLanguageParser.AxiomContext ctx);
 
 	/**
-	 * Visit a parse tree produced by {@link SpecificationLanguageParser#variableDeclaratorAssigner}.
-	 * @param ctx the parse tree
-	 * @return the visitor result
-	 */
-	T visitVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx);
-
-	/**
 	 * Visit a parse tree produced by {@link SpecificationLanguageParser#array}.
 	 * @param ctx the parse tree
 	 * @return the visitor result
 	 */
 	T visitArray(@NotNull SpecificationLanguageParser.ArrayContext ctx);
+
+	/**
+	 * Visit a parse tree produced by {@link SpecificationLanguageParser#variableDeclaratorAssigner}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx);
 }

@@ -17,19 +17,6 @@ public class SpecificationLanguageBaseListener implements SpecificationLanguageL
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterExpression(@NotNull SpecificationLanguageParser.ExpressionContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -43,6 +30,19 @@ public class SpecificationLanguageBaseListener implements SpecificationLanguageL
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterInArrayVariableAssigner(@NotNull SpecificationLanguageParser.InArrayVariableAssignerContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -50,6 +50,19 @@ public class SpecificationLanguageBaseListener implements SpecificationLanguageL
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitInArrayVariableAssigner(@NotNull SpecificationLanguageParser.InArrayVariableAssignerContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSpecificationVariableDeclaration(@NotNull SpecificationLanguageParser.SpecificationVariableDeclarationContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSpecificationVariableDeclaration(@NotNull SpecificationLanguageParser.SpecificationVariableDeclarationContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -199,6 +212,32 @@ public class SpecificationLanguageBaseListener implements SpecificationLanguageL
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
+	@Override public void enterSpecificationVariable(@NotNull SpecificationLanguageParser.SpecificationVariableContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSpecificationVariable(@NotNull SpecificationLanguageParser.SpecificationVariableContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterSpecificationVariableDeclarator(@NotNull SpecificationLanguageParser.SpecificationVariableDeclaratorContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitSpecificationVariableDeclarator(@NotNull SpecificationLanguageParser.SpecificationVariableDeclaratorContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
 	@Override public void enterVariableIdentifierList(@NotNull SpecificationLanguageParser.VariableIdentifierListContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -245,6 +284,32 @@ public class SpecificationLanguageBaseListener implements SpecificationLanguageL
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitGoal(@NotNull SpecificationLanguageParser.GoalContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterWildcardAlias(@NotNull SpecificationLanguageParser.WildcardAliasContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitWildcardAlias(@NotNull SpecificationLanguageParser.WildcardAliasContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterStatement(@NotNull SpecificationLanguageParser.StatementContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitStatement(@NotNull SpecificationLanguageParser.StatementContext ctx) { }
 
 	/**
 	 * {@inheritDoc}
@@ -368,19 +433,6 @@ public class SpecificationLanguageBaseListener implements SpecificationLanguageL
 	 * <p/>
 	 * The default implementation does nothing.
 	 */
-	@Override public void enterVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx) { }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
-	@Override public void exitVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx) { }
-
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation does nothing.
-	 */
 	@Override public void enterArray(@NotNull SpecificationLanguageParser.ArrayContext ctx) { }
 	/**
 	 * {@inheritDoc}
@@ -388,6 +440,19 @@ public class SpecificationLanguageBaseListener implements SpecificationLanguageL
 	 * The default implementation does nothing.
 	 */
 	@Override public void exitArray(@NotNull SpecificationLanguageParser.ArrayContext ctx) { }
+
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void enterVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx) { }
+	/**
+	 * {@inheritDoc}
+	 * <p/>
+	 * The default implementation does nothing.
+	 */
+	@Override public void exitVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx) { }
 
 	/**
 	 * {@inheritDoc}

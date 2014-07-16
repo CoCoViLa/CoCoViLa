@@ -9,17 +9,6 @@ import org.antlr.v4.runtime.tree.ParseTreeListener;
  */
 public interface SpecificationLanguageListener extends ParseTreeListener {
 	/**
-	 * Enter a parse tree produced by {@link SpecificationLanguageParser#subtask}.
-	 * @param ctx the parse tree
-	 */
-	void enterSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SpecificationLanguageParser#subtask}.
-	 * @param ctx the parse tree
-	 */
-	void exitSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link SpecificationLanguageParser#expression}.
 	 * @param ctx the parse tree
 	 */
@@ -31,6 +20,17 @@ public interface SpecificationLanguageListener extends ParseTreeListener {
 	void exitExpression(@NotNull SpecificationLanguageParser.ExpressionContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link SpecificationLanguageParser#subtask}.
+	 * @param ctx the parse tree
+	 */
+	void enterSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationLanguageParser#subtask}.
+	 * @param ctx the parse tree
+	 */
+	void exitSubtask(@NotNull SpecificationLanguageParser.SubtaskContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link SpecificationLanguageParser#inArrayVariableAssigner}.
 	 * @param ctx the parse tree
 	 */
@@ -40,6 +40,17 @@ public interface SpecificationLanguageListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitInArrayVariableAssigner(@NotNull SpecificationLanguageParser.InArrayVariableAssignerContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SpecificationLanguageParser#specificationVariableDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void enterSpecificationVariableDeclaration(@NotNull SpecificationLanguageParser.SpecificationVariableDeclarationContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationLanguageParser#specificationVariableDeclaration}.
+	 * @param ctx the parse tree
+	 */
+	void exitSpecificationVariableDeclaration(@NotNull SpecificationLanguageParser.SpecificationVariableDeclarationContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SpecificationLanguageParser#variableInitializer}.
@@ -163,6 +174,28 @@ public interface SpecificationLanguageListener extends ParseTreeListener {
 	void exitVariableIdentifier(@NotNull SpecificationLanguageParser.VariableIdentifierContext ctx);
 
 	/**
+	 * Enter a parse tree produced by {@link SpecificationLanguageParser#specificationVariable}.
+	 * @param ctx the parse tree
+	 */
+	void enterSpecificationVariable(@NotNull SpecificationLanguageParser.SpecificationVariableContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationLanguageParser#specificationVariable}.
+	 * @param ctx the parse tree
+	 */
+	void exitSpecificationVariable(@NotNull SpecificationLanguageParser.SpecificationVariableContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SpecificationLanguageParser#specificationVariableDeclarator}.
+	 * @param ctx the parse tree
+	 */
+	void enterSpecificationVariableDeclarator(@NotNull SpecificationLanguageParser.SpecificationVariableDeclaratorContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationLanguageParser#specificationVariableDeclarator}.
+	 * @param ctx the parse tree
+	 */
+	void exitSpecificationVariableDeclarator(@NotNull SpecificationLanguageParser.SpecificationVariableDeclaratorContext ctx);
+
+	/**
 	 * Enter a parse tree produced by {@link SpecificationLanguageParser#variableIdentifierList}.
 	 * @param ctx the parse tree
 	 */
@@ -205,6 +238,28 @@ public interface SpecificationLanguageListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitGoal(@NotNull SpecificationLanguageParser.GoalContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SpecificationLanguageParser#wildcardAlias}.
+	 * @param ctx the parse tree
+	 */
+	void enterWildcardAlias(@NotNull SpecificationLanguageParser.WildcardAliasContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationLanguageParser#wildcardAlias}.
+	 * @param ctx the parse tree
+	 */
+	void exitWildcardAlias(@NotNull SpecificationLanguageParser.WildcardAliasContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SpecificationLanguageParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void enterStatement(@NotNull SpecificationLanguageParser.StatementContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationLanguageParser#statement}.
+	 * @param ctx the parse tree
+	 */
+	void exitStatement(@NotNull SpecificationLanguageParser.StatementContext ctx);
 
 	/**
 	 * Enter a parse tree produced by {@link SpecificationLanguageParser#superMetaInterface}.
@@ -306,17 +361,6 @@ public interface SpecificationLanguageListener extends ParseTreeListener {
 	void exitAxiom(@NotNull SpecificationLanguageParser.AxiomContext ctx);
 
 	/**
-	 * Enter a parse tree produced by {@link SpecificationLanguageParser#variableDeclaratorAssigner}.
-	 * @param ctx the parse tree
-	 */
-	void enterVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx);
-	/**
-	 * Exit a parse tree produced by {@link SpecificationLanguageParser#variableDeclaratorAssigner}.
-	 * @param ctx the parse tree
-	 */
-	void exitVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx);
-
-	/**
 	 * Enter a parse tree produced by {@link SpecificationLanguageParser#array}.
 	 * @param ctx the parse tree
 	 */
@@ -326,4 +370,15 @@ public interface SpecificationLanguageListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	void exitArray(@NotNull SpecificationLanguageParser.ArrayContext ctx);
+
+	/**
+	 * Enter a parse tree produced by {@link SpecificationLanguageParser#variableDeclaratorAssigner}.
+	 * @param ctx the parse tree
+	 */
+	void enterVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx);
+	/**
+	 * Exit a parse tree produced by {@link SpecificationLanguageParser#variableDeclaratorAssigner}.
+	 * @param ctx the parse tree
+	 */
+	void exitVariableDeclaratorAssigner(@NotNull SpecificationLanguageParser.VariableDeclaratorAssignerContext ctx);
 }

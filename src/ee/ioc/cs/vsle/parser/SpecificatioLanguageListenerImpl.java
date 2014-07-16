@@ -23,6 +23,8 @@ import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.ConstantVariableContext
 import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.EquationContext;
 import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.GoalContext;
 import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.MetaInterfaseContext;
+import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.SpecificationVariableContext;
+import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.SpecificationVariableDeclaratorContext;
 import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.StaticVariableContext;
 import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.SubtaskContext;
 import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.SubtaskListContext;
@@ -52,7 +54,7 @@ import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.AliasLength;
 import ee.ioc.cs.vsle.vclass.ClassField;
 
-public class SpecificationParserListenerImpl extends SpecificationLanguageBaseListener {
+public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseListener {
 	
 	private final SpecificationLoader specificationLoader;
 	private AnnotatedClass annotatedClass;
@@ -60,7 +62,7 @@ public class SpecificationParserListenerImpl extends SpecificationLanguageBaseLi
 	private String specificationName;
 	private Alias currentAlias;
 	
-	public SpecificationParserListenerImpl(SpecificationLoader specificationLoader, String specificationName) {
+	public SpecificatioLanguageListenerImpl(SpecificationLoader specificationLoader, String specificationName) {
 		this.specificationLoader = specificationLoader;
 		this.specificationName = specificationName;
 	}
@@ -72,6 +74,8 @@ public class SpecificationParserListenerImpl extends SpecificationLanguageBaseLi
 		}
 		annotatedClass = new AnnotatedClass(specificationName);
 		classFieldDeclarator = new ClassFieldDeclarator();
+        ClassField specObjectName = new ClassField( CodeGenerator.SPEC_OBJECT_NAME, "String" );
+        annotatedClass.addField( specObjectName );
 	}
 	
 	@Override
@@ -137,6 +141,19 @@ public class SpecificationParserListenerImpl extends SpecificationLanguageBaseLi
 	@Override
 	public void enterVariableDeclaratorAssigner(VariableDeclaratorAssignerContext ctx) {
 		variableDeclarator(ctx.IDENTIFIER().getText(), ctx.variableAssigner().getText(), false);
+	}
+	
+	@Override
+	public void enterSpecificationVariable(SpecificationVariableContext ctx) {
+		String name = ctx.IDENTIFIER().getText();
+		classFieldDeclarator.addClassField(name);
+	}
+	
+	@Override
+	public void enterSpecificationVariableDeclarator(SpecificationVariableDeclaratorContext ctx) {
+		String fullVariableName = classFieldDeclarator.getName().concat(".").concat(ctx.IDENTIFIER().getText());
+		String equation = fullVariableName.concat("=").concat(ctx.expression().getText());
+		solveEquation(equation);
 	}
 	
 	@Override
@@ -320,7 +337,7 @@ public class SpecificationParserListenerImpl extends SpecificationLanguageBaseLi
 				i++;
 			}
 		}else{
-			vars[0] = ctx.wildcardAlias.getText();
+			vars[0] = ctx.wildcardAliasName.getText();
 		}
         
         currentAlias.addAll( vars, annotatedClass.getFields(), specificationLoader);
@@ -569,11 +586,15 @@ public class SpecificationParserListenerImpl extends SpecificationLanguageBaseLi
 
 	private class ClassFieldDeclarator{
 		private String type;
+		private String name;
 		private boolean isStatic = false;
 		private boolean isConstant = false;
 		private AnnotatedClass classFieldAnnotatedClass;
 
 		public void addClassField(String name) {
+			this.name = name;
+			if(isConstant)
+				throw new SpecParseException("Field '".concat(name).concat("' was declared as static, but have no value"));
 			ClassField classField = new ClassField(name, type, isSpecificationClass());
 			classField.setStatic(isStatic);
 			annotatedClass.addField(classField);
@@ -591,6 +612,7 @@ public class SpecificationParserListenerImpl extends SpecificationLanguageBaseLi
 		}
 
 		public void addClassField(String name, String value){
+			this.name = name;
 			ClassField classField = new ClassField(name, type, value, isConstant);
 			classField.setStatic(isStatic);
 			classField.setSchemeObject(isSpecificationClass());
@@ -636,5 +658,10 @@ public class SpecificationParserListenerImpl extends SpecificationLanguageBaseLi
 		public boolean isSpecificationClass() {
 			return classFieldAnnotatedClass != null;
 		}
+		
+		public String getName(){
+			return name;
+		}
+		
 	}
 }

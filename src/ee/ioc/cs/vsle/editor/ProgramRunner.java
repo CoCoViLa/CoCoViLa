@@ -45,6 +45,8 @@ import ee.ioc.cs.vsle.api.TerminateProgramException;
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.event.EventSystem;
+import ee.ioc.cs.vsle.parser.SpecificationLoader;
+import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 import ee.ioc.cs.vsle.synthesize.ClassList;
 import ee.ioc.cs.vsle.synthesize.CodeGenerator;
 import ee.ioc.cs.vsle.synthesize.EquationException;
@@ -271,14 +273,16 @@ public class ProgramRunner {
                 schemeObjects.add( gObj.getName() );
             }
             
-//            SpecificationLoader specificationLoader = new SpecificationLoader(schemeContainer.getWorkDir(), schemeObjects);
-//            specificationLoader.loadSpecification(fullSpec, TypeUtil.TYPE_THIS);
-//            Collection<AnnotatedClass> loaddedSpecificationList = specificationLoader.getLoaddedSpecificationList();
-//            classList = new ClassList();
-//            classList.addAll(loaddedSpecificationList);
-   
-            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+            long start = System.currentTimeMillis();
             
+            SpecificationLoader specificationLoader = new SpecificationLoader(schemeContainer.getWorkDir(), schemeObjects);
+            specificationLoader.loadSpecification(fullSpec, TypeUtil.TYPE_THIS);
+            Collection<AnnotatedClass> loaddedSpecificationList = specificationLoader.getLoaddedSpecificationList();
+            classList = new ClassList();
+            classList.addAll(loaddedSpecificationList);
+//            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+            
+            System.out.println("Done " + (System.currentTimeMillis() - start));
             getAssumptions().clear();
 
             return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, this );
