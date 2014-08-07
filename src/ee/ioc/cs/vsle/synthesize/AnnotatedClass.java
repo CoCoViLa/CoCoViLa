@@ -1,8 +1,13 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import ee.ioc.cs.vsle.vclass.ClassField;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
-import java.util.*;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**
  * <p>Title: ee.ioc.cs.editor.synthesize.AnnotatedClass</p>
@@ -20,15 +25,15 @@ public class AnnotatedClass {
 	//relations declared in the specification of this class and in specifications of superclasses
 	private Collection<ClassRelation> classRelations = new LinkedHashSet<ClassRelation>();
 	//fields declared in this annotated class
-	private Collection<ClassField> classFields = new LinkedHashSet<ClassField>();
+	private Map<String, ClassField> classFields = new LinkedHashMap<String, ClassField>();
 	//all fields declared here and in superclasses
-	private Collection<ClassField> allFields = new LinkedHashSet<ClassField>();
+	private Map<String, ClassField> allFields = new LinkedHashMap<String, ClassField>();
 	
 	/**
 	 * Class constructor.
 	 * @param name String
 	 */ 
-	AnnotatedClass(String name) {
+	public AnnotatedClass(String name) {
 		this.name = name;
 	} // ee.ioc.cs.editor.synthesize.AnnotatedClass
 
@@ -36,25 +41,26 @@ public class AnnotatedClass {
 	 * Adds a new field to the ArrayList of fields.
 	 * @param field ClassField - a field to be appended to the list of fields.
 	 */ 
-	 void addField(ClassField field) {
-		classFields.add(field);
-		allFields.add(field);
+	 public void addField(ClassField field) {
+		String name = field.getName();
+		classFields.put(name, field);
+		allFields.put(name, field);
 	} // addField
 
-	/**
-	 * Adds a list of variables to the ArrayList of fields.
-	 * @param v ArrayList - list of variables to be appended to the list of fields.
-	 */
-	void addFields(Collection<ClassField> v) {
-		classFields.addAll(v);
-		allFields.addAll(v);
-	} // addVars
+//	/**
+//	 * Adds a list of variables to the ArrayList of fields.
+//	 * @param v ArrayList - list of variables to be appended to the list of fields.
+//	 */
+//	void addFields(Collection<ClassField> v) {
+//		classFields.addAll(v);
+//		allFields.addAll(v);
+//	} // addVars
 
 	/**
 	 * Adds a new class relation to the list of class relations.
 	 * @param classRelation ClassRelation - a class relation to be added to the list of class relations.
 	 */
-	void addClassRelation(ClassRelation classRelation) {
+	public void addClassRelation(ClassRelation classRelation) {
 		classRelations.add(classRelation);
 	} // addClassRelation
 
@@ -80,19 +86,15 @@ public class AnnotatedClass {
 		return name;
 	} // toString
 
-	boolean hasField(String fieldName) {
-		return getFieldByName(fieldName) != null;
+	public boolean hasField(String fieldName) {
+		return allFields.containsKey(fieldName);
 	}
 
 	public ClassField getFieldByName(String fieldName) {
-		for ( ClassField f : allFields ){
-			if (f.getName().equals(fieldName))
-				return f;
-		}
-		return null;
+		return allFields.get(fieldName);
 	}
 
-	String getName() {
+	public String getName() {
 		return name;
 	}
 
@@ -110,21 +112,24 @@ public class AnnotatedClass {
 		return relations;
 	}
 
-	Collection<ClassField> getFields() {
-		return allFields;
+	public Collection<ClassField> getFields() {
+		return allFields.values();
 	}
 
-	Collection<ClassField> getClassFields() {
-		return classFields;
+	public Collection<ClassField> getClassFields() {
+		return classFields.values();
 	}
 	
-	void addSuperClass( AnnotatedClass clas ) {
-		
-		for( ClassField cf : clas.getFields() ) {
-			if( !CodeGenerator.SPEC_OBJECT_NAME.equals( cf.getName() ) ) {
-				allFields.add( cf );
-			}
+	public void addSuperClass( AnnotatedClass clas ) {
+		Set<Entry<String, ClassField>> parentClassField = clas.allFields.entrySet();//TODO: refactor to not check every time field name
+		for (Entry<String, ClassField> entry : parentClassField) {
+			String name = entry.getKey();
+			if(CodeGenerator.SPEC_OBJECT_NAME.equals(name))
+				continue;
+			
+			allFields.put(name, entry.getValue());
 		}
+		
 		superClasses.add( clas );
 	}
 
@@ -141,4 +146,3 @@ public class AnnotatedClass {
         return allSuperClasses;
     }
 }
-

@@ -3,7 +3,7 @@
  */
 package ee.ioc.cs.vsle.synthesize;
 
-import ee.ioc.cs.vsle.vclass.*;
+import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**
  * @author pavelg
@@ -39,14 +39,14 @@ public class SubtaskClassRelation extends ClassRelation {
 		return context;
 	}
 	
-	static SubtaskClassRelation createIndependentSubtask( String specLine, ClassField context ) {
+	public static SubtaskClassRelation createIndependentSubtask( String specLine, ClassField context ) {
 		if( context == null ) {
 			throw new IllegalStateException("Independent subtasks must have context!!!");
 		}
 		return new SubtaskClassRelation( specLine, context );
 	}
 	
-	static SubtaskClassRelation createDependentSubtask( String specLine ) {
+	public static SubtaskClassRelation createDependentSubtask( String specLine ) {
 		return new SubtaskClassRelation( specLine, null );
 	}
 

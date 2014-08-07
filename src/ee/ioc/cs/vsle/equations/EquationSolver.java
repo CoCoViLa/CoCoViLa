@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.equations;
 
-import java.util.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /*
  <expression>  ::=  [ "-" ] <term> [ [ "+" | "-" ] <term> ]...
@@ -10,9 +11,7 @@ import java.util.*;
  <factor>  ::=  <number>  |  "(" <expression> ")"
 
  */
-
 // ------------------------------------------------------------------------
-
 import ee.ioc.cs.vsle.synthesize.EquationException;
 
 public class EquationSolver {
@@ -294,7 +293,8 @@ public class EquationSolver {
             System.out.println(solver.readWord( new StringStack(string) ));
         }
 
-        StringStack expString = new StringStack("  r = (a+b+c+f)/(d+e+l) + (z+x+v)/(g+w) ");
+//        StringStack expString = new StringStack("  r = (a+b+c+f)/(d+e+l) + (z+x+v)/(g+w) ");
+        StringStack expString = new StringStack("a = - a + 2 *(sin(b)  + c)");
         expString.skipBlanks();
         ExpNode exp = solver.upperTree(expString);
         System.out.println(exp);
