@@ -191,10 +191,7 @@ public class ClassRelation {
 
 			Matcher matcher = PATTERN_EXCEPTION.matcher(output.trim());
 			if (matcher.find()) {
-				ClassField cf = new ClassField(matcher.group(1), "exception");
-
-				exceptions.add(cf);
-
+				addException(matcher.group(1));
 			} else {
 				addOutput(output, varList);
 			}
@@ -205,6 +202,12 @@ public class ClassRelation {
 			addOutput(output, varList);
 		}
 	} // addOutputs
+	
+	public void addException(String exceptionClass) {
+	  ClassField cf = new ClassField(exceptionClass, "exception");
+    exceptions.add(cf);
+	}
+	
 	/**
 	 * @param subtaskList
 	 *            ArrayList

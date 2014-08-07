@@ -271,10 +271,16 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
         if ( RuntimeProperties.isLogDebugEnabled() )
             db.p( classRelation );
 
+        if(ctx.exceptionList() != null) {
+          for(ClassTypeContext ct : ctx.exceptionList().classType()) {
+            classRelation.addException(ct.getText());
+          }
+        }
+        
         annotatedClass.addClassRelation( classRelation );
 	}
 	
-	@Override
+  @Override
 	public void enterAliasDeclaration(AliasDeclarationContext ctx) {
 		String aliasName = ctx.IDENTIFIER().getText();
 		TypeContext typeContext = ctx.type();
