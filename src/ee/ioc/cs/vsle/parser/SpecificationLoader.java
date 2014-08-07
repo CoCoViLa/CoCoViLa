@@ -17,7 +17,9 @@ import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.TokenStream;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
-import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.MetaInterfaseContext;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageLexer;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaseContext;
 import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 import ee.ioc.cs.vsle.synthesize.SpecParseException;
 

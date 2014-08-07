@@ -10,7 +10,9 @@ import org.antlr.v4.runtime.CharStream;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.TokenStream;
 
-import ee.ioc.cs.vsle.parser.SpecificationLanguageParser.MetaInterfaseContext;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageLexer;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaseContext;
 
 public class SpecificationParserTest {
 
