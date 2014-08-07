@@ -56,7 +56,7 @@ variableAssignment
 	;
 	
 axiom
-	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) ) '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' method = IDENTIFIER '}'
+	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) )? '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' method = IDENTIFIER '}'
 	;
 	
 subtask
