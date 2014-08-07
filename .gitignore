@@ -13,3 +13,4 @@
 .project
 .classpath
 .idea/
+src/ee/ioc/cs/vsle/parser/generated
