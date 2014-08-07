@@ -10,3 +10,6 @@
 /.settings
 /bin
 .DS_Store
+.project
+.classpath
+.idea/
