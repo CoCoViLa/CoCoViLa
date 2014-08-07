@@ -30,11 +30,15 @@
   <property name="dist.name" value="${ant.project.name}-${project.version}"/>
 
   <property name="encoding" value="UTF-8"/>
-  <property name="javasource" value="1.5"/>
-  <property name="javatarget" value="1.5"/>
-  <property name="compiler" value="javac1.5"/>
+  <property name="javasource" value="1.6"/>
+  <property name="javatarget" value="1.6"/>
+  <property name="compiler" value="javac1.6"/>
   <property name="compile" value="compile-debug"/>
 
+	<property name="spec.grammar.src.dir" value="${src}/ee/ioc/cs/vsle/parser"/>
+	<property name="spec.grammar.file"    value="${spec.grammar.src.dir}/SpecificationLanguage.g4"/>
+	<property name="spec.grammar.target.dir"    value="${spec.grammar.src.dir}/generated"/>
+	
   <path id="build.classpath">
     <fileset dir="${lib}">
       <include name="*.jar"/>
@@ -51,8 +55,8 @@
       Dependency management.
   -->
   <target name="resolve" description="--> retrieve dependencies with ivy" depends="init-ivy">
-    <ivy:resolve file="src/ivy.xml"/>
-    <ivy:retrieve pattern="lib/[artifact].[ext]" type="jar"/>
+    <ivy:resolve file="${src}/ivy.xml"/>
+    <ivy:retrieve pattern="${lib}/[artifact].[ext]" type="jar"/>
   </target>
   
   <target name="check-dep" depends="resolve">
@@ -145,7 +149,23 @@
     </javac>
   </target>
 
+	<target name="generate" description="Generates the lexer and parser from the ANTLR grammar.">
+      <echo>Generating the spec language lexer and parser...</echo>
+      <java classname="org.antlr.v4.Tool" fork="true" failonerror="true">
+          <arg value="-o"/>
+          <arg value="${spec.grammar.target.dir}"/>
+          <arg value="${spec.grammar.file}"/>
+          <arg value="-package" />
+          <arg value="ee.ioc.cs.vsle.parser.generated" />
+          <classpath refid="build.classpath"/>
+      </java>
 
+      <!-- 
+          compile the generated parser and lexer source file to see
+          if there's no illegal code inside these source files
+      -->
+      <antcall target="compile"/>
+  </target>
   <!--
       Testing
   -->
