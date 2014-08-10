@@ -7,11 +7,11 @@ package ee.ioc.cs.vsle.factoryStorage;
  * @author pavelg
  *
  */
-public interface IFactory {
+public interface IFactory<T> {
 	
-	public String getInterfaceInstance();
-	
-	public Object getInstance();
+  public Class<? super T> getInterfaceClass();
+  
+	public T getInstance();
 	
 	public String getDescription();
 }

@@ -42,14 +42,14 @@ public class SchemeSettingsDialog extends JDialog {
 		JPanel spec = new JPanel( );		
 		spec.setLayout(new BoxLayout(spec, BoxLayout.Y_AXIS));
 		
-		List<IFactory> specs = SpecGenFactory.getInstance().getAllInstances();
+		List<IFactory<ISpecGenerator>> specs = SpecGenFactory.getInstance().getAllInstances();
 		ButtonGroup group = new ButtonGroup();
-		for (final IFactory factory : specs) {
+		for (final IFactory<ISpecGenerator> factory : specs) {
 			JRadioButton button = new JRadioButton(factory.getDescription());
 			button.addActionListener(new ActionListener(){
 
 				public void actionPerformed(ActionEvent e) {
-					SpecGenFactory.getInstance().setCurrentSpecGen((ISpecGenerator)factory.getInstance());
+					SpecGenFactory.getInstance().setCurrentSpecGen(factory.getInstance());
 				}});
 			group.add(button);
 			JPanel flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );

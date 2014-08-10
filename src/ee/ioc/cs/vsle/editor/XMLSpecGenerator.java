@@ -69,23 +69,26 @@ public class XMLSpecGenerator implements ISpecGenerator {
 		FactoryStorage.register( new Factory() );
 	}
     
-    static class Factory implements IFactory {
+    static class Factory implements IFactory<XMLSpecGenerator> {
 
-    	private static ISpecGenerator instance;
+    	private static XMLSpecGenerator instance;
     	
-		public String getInterfaceInstance() {
-			return "\\SPECGEN\\XML";
-		}
-
-		public ISpecGenerator getInstance() {
+    @Override
+		public XMLSpecGenerator getInstance() {
 			if( instance == null ) {
 				instance = new XMLSpecGenerator();
 			}
 			return instance;
 		}
 		
+		@Override
 		public String getDescription() {
 			return "XML specification";
-		}	
+		}
+
+    @Override
+    public Class<ISpecGenerator> getInterfaceClass() {
+      return ISpecGenerator.class;
+    }	
 	}
 }

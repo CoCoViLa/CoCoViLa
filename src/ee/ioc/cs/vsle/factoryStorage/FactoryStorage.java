@@ -9,30 +9,23 @@ import java.util.*;
  * @author pavelg
  *
  */
-public abstract class FactoryStorage {
+public abstract class FactoryStorage<T> {
 
-	protected final static Hashtable<String, IFactory> s_storage = new Hashtable<String, IFactory>();
-	/**
-	 * 
-	 */
-	public FactoryStorage() {
-		super();
-	}
+	protected final static Hashtable<Class<?>, List<IFactory<?>>> s_storage = new Hashtable<Class<?>, List<IFactory<?>>>();
 
-	public static void register( IFactory factory ) {
-		s_storage.put( factory.getInterfaceInstance(), factory );
+	protected T currentInstance;
+	
+	public static <T> void register( IFactory<T> factory ) {
+	  List list;
+	  if((list = s_storage.get(factory.getInterfaceClass())) == null ) {
+	    list = new ArrayList();
+	    s_storage.put( factory.getInterfaceClass(), list );
+	  }
+	  list.add( factory );
 	}
 	
-	protected static List<IFactory> getAllInstances( String prefix ) {
-		ArrayList<IFactory> list = new ArrayList<IFactory>();
-		
-		for( Iterator<String> it = s_storage.keySet().iterator(); it.hasNext(); ) {
-			String key = it.next();
-			if ( key.startsWith( prefix ) ) {
-				list.add( s_storage.get( key ) );
-			}
-		}
-		
-		return list;
+	protected static <T> List<IFactory<T>> getAllInstances( Class<T> _class ) {
+	  List list = s_storage.get(_class);
+	  return (List<IFactory<T>>)list;
 	}
 }

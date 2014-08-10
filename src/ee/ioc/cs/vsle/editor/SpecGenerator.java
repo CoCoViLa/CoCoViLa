@@ -296,18 +296,12 @@ public class SpecGenerator implements ISpecGenerator {
 		FactoryStorage.register( new Factory() );
 	}
 	
-	static class Factory implements IFactory {
+	static class Factory implements IFactory<SpecGenerator> {
 		
-		private static ISpecGenerator instance;
-		private static String instanceName = SpecGenFactory.s_prefix + "\\SSP";
+		private static SpecGenerator instance;
 		
 		@Override
-		public String getInterfaceInstance() {
-			return instanceName;
-		}
-
-		@Override
-		public ISpecGenerator getInstance() {
+		public SpecGenerator getInstance() {
 			if( instance == null ) {
 				instance = new SpecGenerator();
 			}
@@ -317,7 +311,12 @@ public class SpecGenerator implements ISpecGenerator {
 		@Override
 		public String getDescription() {
 			return "SSP specification";
-		}		
+		}
+
+    @Override
+    public Class<ISpecGenerator> getInterfaceClass() {
+      return ISpecGenerator.class;
+    }		
 	}
 
 	@Override
