@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
-
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -54,7 +53,7 @@ import ee.ioc.cs.vsle.editor.SpecGenerator;
 import ee.ioc.cs.vsle.editor.XMLSpecGenerator;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.Shape;
-import ee.ioc.cs.vsle.iconeditor.ChooseClassDialog;
+
 import ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel;
 import ee.ioc.cs.vsle.iconeditor.ClassImport;
 import ee.ioc.cs.vsle.iconeditor.ClassPropertiesDialog;
@@ -125,10 +124,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
     ArrayList<ClassField> fields = new ArrayList<ClassField>();    
     ArrayList<String> packageClassNamesList = new ArrayList<String>();
     
-    ChooseClassDialog ccd = new ChooseClassDialog( packageClassNamesList );
+    ChooseClassDialog ccd = new ChooseClassDialog( packageClassNamesList, null );
     DeleteClassDialog dcd = new DeleteClassDialog( packageClassNamesList );
     
     ClassImport ci;    
+    ClassImport cig;
     
     /**
      * Class constructor [1].
@@ -997,14 +997,72 @@ public class ClassEditor extends JFrame implements ChangeListener {
         } catch ( Exception exc ) {
             exc.printStackTrace();
         }
-
+       
     }   
+    
+    public void loadPortGraphicClass(boolean openFlag, IconPort port) {
+        File f = selectFile();
+        if ( f != null ){
+        	
+        	cig = new ClassImport( f, packageClassNamesList, packageClassList );
+            
+            /**
+             *  @TODO new method to sort package list
+             *  */
+            
+/*            ArrayList<String> templist = new ArrayList<String>();
+            for (String name : packageClassNamesList) {
+				if(name)
+			}*/
+            //= packageClassNamesList
+            
+            ChooseClassDialog dialog = new ChooseClassDialog( packageClassNamesList, "Select Port Graphic Class" );
+            dialog.newJList( packageClassNamesList );
+            dialog.setLocationRelativeTo( rootPane );
+            dialog.setVisible( true );
+            dialog.repaint();
+            String selection = dialog.getSelectedValue();
+            System.out.println("selection " + selection);
+        	
+            importPortGraphics(f, selection, openFlag, port.getName());
+
+        }
+    }  
+    
+    public boolean savePortGraphicToXML(){
+    	return true;
+    }
     
     public void loadClass() {
         File f = selectFile();
         if ( f != null )
         	importClassFromPackage( f );
     }  
+    
+    
+    public void importPortGraphics(File file, String selection, boolean openFlag, String portName){
+    	
+    	if ( selection == null )
+             return;
+    	Canvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
+    	Port targetPort = curCanvas.getObjectList().getPortById(portName);
+    	if(targetPort == null)
+    		return;
+    	
+    	 try {
+    		 
+             VPackage pkg;
+             if ( (pkg = PackageXmlProcessor.load(file)) != null ) {
+            	 PackageClass pClass = pkg.getClass(selection);
+            	 
+            	 curCanvas.mListener.repaintPort(targetPort, pClass.getGraphics(), openFlag);
+             }
+    	
+    	 } catch ( Exception exc ) {
+             exc.printStackTrace();
+         }    	
+    	// curCanvas.repaint();
+    }
     
     public void importClassFromPackage( File file ) {
         
@@ -1014,11 +1072,6 @@ public class ClassEditor extends JFrame implements ChangeListener {
         ccd.setVisible( true );
         ccd.repaint();
         String selection = ccd.getSelectedValue();
-//        dcd.newJList( packageClassNamesList );
-//        dcd.setLocationRelativeTo( rootPane );
-//        dcd.setVisible( true );
-//        dcd.repaint();
-//        String selection = dcd.getSelectedValue();        
         
         System.out.println("selection " + selection);
 

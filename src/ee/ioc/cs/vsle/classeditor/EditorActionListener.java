@@ -260,7 +260,7 @@ public class EditorActionListener implements ActionListener {
             }
 	    } else if ( e.getActionCommand().equals( Menu.DELETE_FROM_PACKAGE ) ) {
 	    	ClassEditor.getInstance().deleteClass();
-	    }            
+	    }     
     }
 
 

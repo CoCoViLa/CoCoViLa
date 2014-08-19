@@ -23,14 +23,6 @@ public class IconPortPopupMenu
    */
   ClassEditor editor;
 
-  
-  /**
-   * Label Constants
-   */
-  
-  private String EDIT_OPEN = "Edit port open graphics";
-  private String EDIT_CLOSED = "Edit port closed graphics";
-  
   /**
    * Class constructor.
    * @param port IconPort - port reference. Selected in the IconEditor application.
@@ -51,14 +43,14 @@ public class IconPortPopupMenu
 	menuItem.setActionCommand(Menu.PROPERTIES);
 	this.add(menuItem);
 	
-	JMenuItem menuItemOP = new JMenuItem(EDIT_OPEN);
+	JMenuItem menuItemOP = new JMenuItem(Menu.EDIT_OPEN);
 	menuItemOP.addActionListener(this);
-	menuItemOP.setActionCommand(Menu.PROPERTIES);
+	menuItemOP.setActionCommand(Menu.EDIT_OPEN);
 	this.add(menuItemOP);
 	
-	JMenuItem menuItemCP = new JMenuItem(EDIT_CLOSED);
+	JMenuItem menuItemCP = new JMenuItem(Menu.EDIT_CLOSED);
 	menuItemCP.addActionListener(this);
-	menuItemCP.setActionCommand(Menu.PROPERTIES);
+	menuItemCP.setActionCommand(Menu.EDIT_CLOSED);
 	this.add(menuItemCP);
   } // IconPortPopupMenu constructor
 
@@ -67,7 +59,15 @@ public class IconPortPopupMenu
    * @param e ActionEvent - action event performed.
    */
   public void actionPerformed(ActionEvent e) {
-	  new PortPropertiesDialog(editor, port).setVisible( true );
+	  if ( e.getActionCommand().equals( Menu.PROPERTIES ) ) {
+		  new PortPropertiesDialog(editor, port).setVisible( true );  
+	  }
+	  else if ( e.getActionCommand().equals( Menu.EDIT_OPEN ) ) {
+	    	ClassEditor.getInstance().loadPortGraphicClass(true, port);
+	    }     	  
+	  else if ( e.getActionCommand().equals( Menu.EDIT_CLOSED ) ) {
+	    	ClassEditor.getInstance().loadPortGraphicClass(false, port);
+	    }     	  
   } // actionPerformed
 
 }

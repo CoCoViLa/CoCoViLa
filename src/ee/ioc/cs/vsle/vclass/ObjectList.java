@@ -197,7 +197,8 @@ public class ObjectList extends ArrayList<GObj> {
 						if (port.getId().equals(portId)) {
 							return port;
 						}
-					} else if (port.getName().equals(portId)) {
+					}
+					if (port.getName().equals(portId)) {
 						return port;
 					}
 				}			

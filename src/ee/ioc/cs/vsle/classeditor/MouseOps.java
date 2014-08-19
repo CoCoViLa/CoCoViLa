@@ -26,9 +26,11 @@ import ee.ioc.cs.vsle.graphics.Oval;
 import ee.ioc.cs.vsle.graphics.Rect;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
+import ee.ioc.cs.vsle.vclass.ClassGraphics;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.ObjectList;
+import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.Point;
 import ee.ioc.cs.vsle.vclass.Port;
 
@@ -200,6 +202,27 @@ public class MouseOps extends MouseInputAdapter {
         canvas.repaint();
     } // drawPort    
      
+    public void repaintPort( Port p, ClassGraphics graphics, boolean openFlag ) {
+    	
+    // cleanup graphics code	
+    
+     if(graphics.getShapes().get(0) != null){ 	
+    	 graphics.getShapes().get(0).setX(0);
+    	 graphics.getShapes().get(0).setY(0);
+     } else return;
+   	 
+     if(openFlag){            		 
+   		 p.setOpenGraphics(graphics);
+   	 } else {
+   		 p.setClosedGraphics(graphics);
+   	 }
+        p.setX(0);
+        p.setY(0);    
+        
+              
+        canvas.repaint();
+    } 
+    
     /**
      * Draws text on the drawing area of the IconEditor.
      * @param font Font - font used for drawing the text.

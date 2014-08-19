@@ -40,8 +40,7 @@ public class ClassImport {
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 
 		path = file.getParentFile().getAbsolutePath();
-		
-		factory.setValidating(true);
+				factory.setValidating(true);
 		
 		try {
 			SAXParser saxParser = factory.newSAXParser();

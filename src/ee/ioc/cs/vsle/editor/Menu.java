@@ -123,4 +123,11 @@ public class Menu {
     public static final String RELATION_DELETE = "RelationDelete";
     public static final String ADDBREAKPOINT = "AddBreakpoint";
     public static final String REMOVEBREAKPOINT = "RemoveBreakpoint";
+    
+    /**
+     * Port properties popup
+     */
+    public static final String EDIT_OPEN = "Edit port open graphics";
+    public static final String EDIT_CLOSED = "Edit port closed graphics";
+    
 }

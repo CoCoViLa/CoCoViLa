@@ -785,6 +785,17 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         portEl.setAttribute( ATR_STRICT, Boolean.toString( port.isStrict() ) );
         portEl.setAttribute( ATR_MULTI, Boolean.toString( port.isMulti() ) );
         
+        if(port.getClosedGraphics() != null){
+        	Element elopen = doc.createElement(EL_OPEN);   
+        	elopen.appendChild(generateGraphicsNode(doc, port.getOpenGraphics()));
+        	portEl.appendChild(elopen);
+        }
+        if(port.getClosedGraphics() != null){
+        	Element elclose = doc.createElement(EL_CLOSED);        	
+        	elclose.appendChild(generateGraphicsNode(doc, port.getClosedGraphics()));
+        	portEl.appendChild(elclose);
+        }
+                      
         return portEl;
     }
     
