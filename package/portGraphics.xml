@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE package SYSTEM "package.dtd">
+<package>
+    <name>portGraphics</name>
+    <description>Port Graphics</description>
+    <class static="false" type="class">
+        <name>marineSquare</name>
+        <description>port graphics</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <rect colour="-16737895" filled="true" fixed="false"
+                height="11" linetype="0.0" stroke="1.0"
+                transparency="255" width="12" x="288" y="35"/>
+        </graphics>
+    </class>
+    <class static="false" type="class">
+        <name>redDot</name>
+        <description>port graphics</description>
+        <icon>default.gif</icon>
+        <graphics>
+            <bounds height="0" width="0" x="0" y="0"/>
+            <oval colour="-65485" filled="true" fixed="false" height="9"
+                linetype="0.0" stroke="1.0" transparency="255"
+                width="10" x="320" y="37"/>
+        </graphics>
+    </class>
+</package>

@@ -1,0 +1,5 @@
+class redDot {
+    /*@ specification redDot {
+    }@*/
+ 
+}
