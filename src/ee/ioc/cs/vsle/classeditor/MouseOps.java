@@ -300,7 +300,7 @@ public class MouseOps extends MouseInputAdapter {
         obj.setHeight(s.getHeight());
         obj.setWidth(s.getWidth()); 
         
-        if (s instanceof Rect || s instanceof Oval || s instanceof Arc
+        if (s instanceof Rect || s instanceof Oval || s instanceof Arc || s instanceof Line
         		|| s instanceof BoundingBox) {
             if (s.getHeight() == 0 || s.getWidth() == 0) {
             	return;
@@ -467,8 +467,8 @@ public class MouseOps extends MouseInputAdapter {
     	System.out.println("MouseOps mousePressed " + state);
     	mouseState = "pressed";
         if ( !( state.equals( State.drawArc1 ) || state.equals( State.drawArc2 ) ) ) {
-            startX = e.getX();
-            startY = e.getY();
+            startX =  Math.round( e.getX() / canvas.getScale() );
+            startY =  Math.round( e.getY() / canvas.getScale() );
         }
         
         if ( state.equals( State.selection ) ) {
