@@ -49,6 +49,7 @@ public class RuntimeProperties {
     private static final String GRID_STEP = "gridStep";
     private static final String NUDGE_STEP = "nudgeStep";
     private static final String SNAP_TO_GRID = "snapToGrid";
+    private static final String SPEC_PARSER = "specParserKind";
     private static final String RECENT_PACKAGES = "recentPackages";
     // TODO Make sure that classpath entries do not contain semicolons
     // Also, clients of this class should not need to know how the entries are
@@ -90,6 +91,7 @@ public class RuntimeProperties {
         defaultProperties.put( GRID_STEP, Integer.toString( 15 ) );
         defaultProperties.put( NUDGE_STEP, Integer.toString( 1 ) );
         defaultProperties.put( SNAP_TO_GRID, Boolean.FALSE.toString() );
+        defaultProperties.put( SPEC_PARSER, SpecParserKind.REGEXP.name() );
         defaultProperties.put( RECENT_PACKAGES, "" );
         defaultProperties.put( ZOOM_LEVEL, Float.toString( 1.0f ) );
         defaultProperties.put( SYNTAX_HIGHLIGHT, Boolean.TRUE.toString() );
@@ -345,6 +347,14 @@ public class RuntimeProperties {
       return path;
     }
 
+    public static SpecParserKind getSpecParserKind() {
+      return SpecParserKind.valueOf(instance.runtimeProperties.getProperty(SPEC_PARSER));
+    }
+    
+    public static void setSpecParserKind(SpecParserKind kind) {
+      instance.runtimeProperties.setProperty(SPEC_PARSER, kind.name());
+    }
+    
     /**
      * @param genFileDir the genFileDir to set
      */
@@ -794,6 +804,21 @@ public class RuntimeProperties {
         return fontString;
     }
 
+    public enum SpecParserKind {
+      REGEXP {
+        @Override
+        public String toString() {
+          return "Regular Expressions";
+        }
+      }, 
+      ANTLR {
+        @Override
+        public String toString() {
+          return "Grammar-based";
+        }
+      }
+    }
+    
     public static enum Fonts {
 
         CODE( "text_font", "Java code and specifications", "Courier New-plain-12" ),

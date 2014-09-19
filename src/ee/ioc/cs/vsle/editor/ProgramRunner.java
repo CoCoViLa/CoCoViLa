@@ -275,12 +275,20 @@ public class ProgramRunner {
             
             long start = System.currentTimeMillis();
             
-            SpecificationLoader specificationLoader = new SpecificationLoader(schemeContainer.getWorkDir(), schemeObjects);
-            specificationLoader.loadSpecification(fullSpec, TypeUtil.TYPE_THIS);
-            Collection<AnnotatedClass> loaddedSpecificationList = specificationLoader.getLoaddedSpecificationList();
-            classList = new ClassList();
-            classList.addAll(loaddedSpecificationList);
-//            classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+            switch (RuntimeProperties.getSpecParserKind()) {
+            case REGEXP: {
+              classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+              break;
+            }
+            case ANTLR: {
+              SpecificationLoader specificationLoader = new SpecificationLoader(schemeContainer.getWorkDir(), schemeObjects);
+              specificationLoader.loadSpecification(fullSpec, TypeUtil.TYPE_THIS);
+              Collection<AnnotatedClass> loaddedSpecificationList = specificationLoader.getLoaddedSpecificationList();
+              classList = new ClassList();
+              classList.addAll(loaddedSpecificationList);
+              break;
+            }
+            }
             
             System.out.println("Done " + (System.currentTimeMillis() - start));
             getAssumptions().clear();

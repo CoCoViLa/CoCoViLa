@@ -33,11 +33,26 @@ public class SchemeSettingsDialog extends JDialog {
     	setVisible( true );
 	}
 
-	private void init() {
-		
-		setLocationRelativeTo( getParent() );
-		
-		JPanel spec_flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );
+  private void init() {
+
+    setLocationRelativeTo(getParent());
+
+    JPanel panel = new JPanel();
+    panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+    panel.add(createSpecSettingsPanel());
+    panel.add(createSpecParserPanel());
+    panel.add(createPlannerChooserPanel());
+
+    // Scheme background image
+    Canvas currentCanvas = Editor.getInstance().getCurrentCanvas();
+    if (currentCanvas != null)
+      panel.add(createBackgroundImageSettingsPanel(currentCanvas));
+
+    getContentPane().add(panel);
+  }
+
+  public JPanel createSpecSettingsPanel() {
+    JPanel spec_flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );
 		spec_flow.setBorder( BorderFactory.createTitledBorder("Specification"));
 		JPanel spec = new JPanel( );		
 		spec.setLayout(new BoxLayout(spec, BoxLayout.Y_AXIS));
@@ -87,8 +102,37 @@ public class SchemeSettingsDialog extends JDialog {
 		spec.add(specRec);
 		
 		spec_flow.add(spec);
-		
-		JPanel plan_flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );
+    return spec_flow;
+  }
+  
+  public JPanel createSpecParserPanel() {
+    JPanel spec_flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );
+    spec_flow.setBorder( BorderFactory.createTitledBorder("Specification Parser"));
+    JPanel spec = new JPanel( );    
+    spec.setLayout(new BoxLayout(spec, BoxLayout.Y_AXIS));
+    
+    ButtonGroup group = new ButtonGroup();
+    for (final RuntimeProperties.SpecParserKind kind : RuntimeProperties.SpecParserKind.values()) {
+      JRadioButton button = new JRadioButton(kind.toString());
+      button.addActionListener(new ActionListener(){
+
+        public void actionPerformed(ActionEvent e) {
+          RuntimeProperties.setSpecParserKind(kind);
+        }});
+      group.add(button);
+      JPanel flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );
+      flow.add( button );
+      spec.add( flow );
+      if( kind == RuntimeProperties.getSpecParserKind() ) {
+        button.setSelected( true );
+      }
+    }
+    spec_flow.add(spec);
+    return spec_flow;
+  }
+
+  public JPanel createPlannerChooserPanel() {
+    JPanel plan_flow = new JPanel( new FlowLayout(FlowLayout.LEFT) );
 		plan_flow.setBorder( BorderFactory.createTitledBorder("Planner"));
 		JPanel plan = new JPanel( );		
 		//plan.setLayout(new BoxLayout(plan, BoxLayout.Y_AXIS));
@@ -146,19 +190,8 @@ public class SchemeSettingsDialog extends JDialog {
 			}		
 		}		
 		plan_flow.add( plan );
-		
-		JPanel panel = new JPanel();
-		panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-		panel.add( spec_flow );
-		panel.add( plan_flow );
-
-        // Scheme background image
-        Canvas currentCanvas = Editor.getInstance().getCurrentCanvas();
-        if (currentCanvas != null)
-            panel.add(createBackgroundImageSettingsPanel(currentCanvas));
-		
-		getContentPane().add( panel );
-	}
+    return plan_flow;
+  }
     
     private JPanel createBackgroundImageSettingsPanel(final Canvas canvas) {
         final JPanel bgFlow = new JPanel();
