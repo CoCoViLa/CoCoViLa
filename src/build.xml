@@ -340,7 +340,7 @@
 
     <zip destfile="${dist}/${dist.name}.zip">
       <zipfileset dir="${lib}" prefix="${dist.name}/lib"/>
-      <zipfileset dir="${packages}" prefix="${dist.name}/packages"/>
+      <zipfileset dir="${packages}" prefix="${dist.name}/packages" erroronmissingdir="false" />
       <zipfileset dir="${dist}/lib" includes="*.jar" prefix="${dist.name}"/>
     </zip>
   </target>
