@@ -445,9 +445,7 @@ class MouseOps extends MouseInputAdapter {
 
         if ( port != null && currentPort == null ) {
             if ( curObj != null ) {
-                // hilight the second port only if its type is compatible
-                // with the first already connected port
-                if ( port.canBeConnectedTo( curObj.getStartPort() ) ) {
+                if ( port.canBeConnectedTo( curObj.getPortList().get(1) ) ) {
                     port.setSelected( true );
                     currentPort = port;
                 }
