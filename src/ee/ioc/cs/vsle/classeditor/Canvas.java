@@ -1415,6 +1415,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
             for (GObj obj : getObjectList()) {
                 obj.drawClassGraphics( g2, scale );
+               
 
                 if ( enableClassPainter && classPainters != null ) {
                     ClassPainter p = classPainters.get( obj );

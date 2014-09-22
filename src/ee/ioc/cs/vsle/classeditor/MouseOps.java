@@ -1,6 +1,5 @@
 package ee.ioc.cs.vsle.classeditor;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
@@ -11,8 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JColorChooser;
-import javax.swing.JScrollPane;
-import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.MouseInputAdapter;
 
@@ -29,8 +26,6 @@ import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.vclass.ObjectList;
-import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.Point;
 import ee.ioc.cs.vsle.vclass.Port;
 
@@ -284,11 +279,11 @@ public class MouseOps extends MouseInputAdapter {
     public void addShape(Shape s, int xOffset, int yOffset) {
 
     	
-    	/* test values
-    	 xOffset = 0; 
+    	/// test values
+   /* 	 xOffset = 0; 
     	 yOffset = 0;*/
     	
-        System.out.println("1. shape " + s.toText());
+        System.out.println("1. MouseOps.addShape() " + s.toText());
         System.out.println("2. addShape x " + s.getX() + " y " + s.getY() + " h " + s.getHeight() + " w " + s.getWidth());
 
         ArrayList<Shape> shapes = new ArrayList<Shape>();
