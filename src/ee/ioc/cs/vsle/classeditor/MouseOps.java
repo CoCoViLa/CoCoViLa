@@ -26,6 +26,7 @@ import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.ObjectList;
 import ee.ioc.cs.vsle.vclass.Point;
 import ee.ioc.cs.vsle.vclass.Port;
 
@@ -575,10 +576,20 @@ public class MouseOps extends MouseInputAdapter {
             
            
 
-            /* Scroll check */
+            /* Scroll check */            
             
-            int compareHeight =  canvas.mouseY;
-            int compareWidth =  canvas.mouseX;
+            int compareHeight =  Math.round( canvas.mouseY * canvas.getScale() ); 
+            int compareWidth =  Math.round( canvas.mouseX * canvas.getScale() ); 
+            
+            ObjectList olist = canvas.getObjectList();
+            for ( GObj obj : olist) {
+            	if ((obj.getX() + obj.getWidth()) > compareWidth) {
+            		compareWidth = obj.getX() + obj.getWidth();
+            	}
+            	if ((obj.getY() + obj.getHeight()) > compareHeight) {
+            		compareHeight = obj.getY() + obj.getHeight();
+            	}
+            }
             if (selected != null && selected.get(0) != null){
             	compareHeight += selected.get(0).getHeight(); 
             	compareWidth += selected.get(0).getWidth();
