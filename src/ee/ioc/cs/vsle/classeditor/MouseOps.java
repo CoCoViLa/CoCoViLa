@@ -412,7 +412,7 @@ public class MouseOps extends MouseInputAdapter {
         }
         // LISTEN RIGHT MOUSE BUTTON
         if ( SwingUtilities.isRightMouseButton( e ) ) {
-            GObj obj = canvas.getObjectList().checkInside( x, y );
+            GObj obj = canvas.getObjectList().checkInside( x, y, canvas.getScale() );
             if ( obj != null || canvas.getObjectList().getSelectedCount() > 1 ) {
             	if (obj.getPortList() != null && !obj.getPortList().isEmpty()) {
             		Port port = obj.getPortList().get(0);
@@ -432,7 +432,7 @@ public class MouseOps extends MouseInputAdapter {
                     canvas.getConnections().clearSelected();
                 }
                 
-                GObj obj = canvas.getObjectList().checkInside(x, y);
+                GObj obj = canvas.getObjectList().checkInside(x, y, canvas.getScale());
                 
              //   ObjectList testobj = canvas.getObjectList();
                 
@@ -473,7 +473,7 @@ public class MouseOps extends MouseInputAdapter {
             canvas.mouseY = Math.round( e.getY() / canvas.getScale() );
             Connection con = canvas.getConnectionNearPoint( canvas.mouseX, canvas.mouseY );
 
-            obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY);
+            obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, canvas.getScale());
 
             if ( obj != null ) {
                 if ( e.isShiftDown() ) {
@@ -860,7 +860,7 @@ public class MouseOps extends MouseInputAdapter {
 //        	drawDotOnClick( color );
         } else if ( state.equals( State.eraser ) ) {
         	// select obj and delete
-        	GObj obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY); 
+        	GObj obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, canvas.getScale()); 
         	if (obj != null) {
         		obj.setSelected(true);
         		canvas.deleteSelectedObjects();

@@ -59,14 +59,22 @@ public class ObjectList extends ArrayList<GObj> {
 	}
 
 
-	public GObj checkInside(int x, int y) {
-		return checkInside(x, y, null);
+	public GObj checkInside(int x, int y, float scale) {
+		return checkInside(x, y, null, scale);
 	}
 
-	public GObj checkInside(int x, int y, GObj asker) {
+	public GObj checkInside(int x, int y) {
+		return checkInside(x, y, null, 1);
+	}
+
+	
+	public GObj checkInside(int x, int y, GObj asker, float scale) {
+		/* scaling */
+		int scaledX = Math.round(x / scale); 
+		int scaledY = Math.round(y / scale); 
 		for (int i = this.size() - 1; i >= 0; i--) {
 			GObj obj = this.get(i);
-			if (obj.contains(x, y) && obj != asker) {
+			if (obj.contains(scaledX, scaledY) && obj != asker) {
 				return obj;
 			}
 		}
@@ -236,7 +244,7 @@ public class ObjectList extends ArrayList<GObj> {
 	 */
 	public Port getPort(int x, int y, GObj asker) {
 		Port port = null;
-		GObj obj = checkInside(x, y, asker);
+		GObj obj = checkInside(x, y, asker, 1);
 		if (obj != null)
 			port = obj.portContains(x, y);
 		return port;

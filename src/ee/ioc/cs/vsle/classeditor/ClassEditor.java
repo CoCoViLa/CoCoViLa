@@ -1017,7 +1017,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 			  ChooseClassDialog dialog = new ChooseClassDialog( packageClassNamesList, "Select Port Graphic Class" );
 			  dialog.newJList( packageClassNamesList );
-			  // dialog.setLocationRelativeTo( rootPane );
+			  dialog.setLocationRelativeTo( rootPane );
 			  dialog.setVisible( true );
 			  dialog.repaint();
 			  String selection = dialog.getSelectedValue();
@@ -1395,8 +1395,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			   for ( GObj obj : selectedObjects ) {
 				   obj.getShapes().get(0).setX(0);
 				   obj.getShapes().get(0).setY(0);
-			   }
-			   
+			   }		
 			   
 			   for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
 				   String fieldName = dbrClassFields.getValueAt( i, iNAME );

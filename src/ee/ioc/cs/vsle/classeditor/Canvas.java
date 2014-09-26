@@ -1510,7 +1510,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     public void setPosInfo( int x, int y ) {
         String message = x + ", " + y;
 
-        GObj obj = getObjectList().checkInside(x, y);
+        GObj obj = getObjectList().checkInside(x, y, scale);
 
         if( obj != null ) {
             
