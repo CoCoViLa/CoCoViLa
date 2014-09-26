@@ -74,7 +74,14 @@ public class ObjectList extends ArrayList<GObj> {
 		int scaledY = Math.round(y / scale); 
 		for (int i = this.size() - 1; i >= 0; i--) {
 			GObj obj = this.get(i);
-			if (obj.contains(scaledX, scaledY) && obj != asker) {
+			if(obj.getName().equals("port")) {
+				/* Port catchment area to be wider */
+				 System.out.println("checkInside() x=" + scaledX + "; y=" + scaledY + " port coords: "+ obj.getX()+ ", " + obj.getY());
+				if((((obj.getX() + 5) > scaledX && scaledX > (obj.getX() - 5)) && ((obj.getY() + 5) > scaledY && scaledY > (obj.getY() - 5))) ||  (obj.contains(scaledX, scaledY) && obj != asker) ){
+					return obj;
+				}
+			}
+			else if (obj.contains(scaledX, scaledY) && obj != asker) {
 				return obj;
 			}
 		}
