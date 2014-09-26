@@ -473,7 +473,7 @@ public class MouseOps extends MouseInputAdapter {
             canvas.mouseY = Math.round( e.getY() / canvas.getScale() );
             Connection con = canvas.getConnectionNearPoint( canvas.mouseX, canvas.mouseY );
 
-            obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, canvas.getScale());
+            obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, 1);
 
             if ( obj != null ) {
                 if ( e.isShiftDown() ) {
@@ -484,6 +484,7 @@ public class MouseOps extends MouseInputAdapter {
                         obj.setSelected( true );
                     }
                 }
+                System.out.println("IconMouseOps: " + SwingUtilities.isLeftMouseButton( e ) );
                 if ( SwingUtilities.isLeftMouseButton( e ) ) {
                     setState( State.drag );
                     draggedObject = obj;
