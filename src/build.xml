@@ -114,7 +114,7 @@
   <target name="compile" depends="clean,compile-debug,compile-normal"
           description="Compile the program sources"/>
 
-  <target name="compile-debug" depends="init,build-dep"
+  <target name="compile-debug" depends="init,build-dep,generate-spec-parser-if-needed"
           if="javac.debug">
 
     <echo message="Debug build"/>
@@ -133,7 +133,7 @@
     </javac>
   </target>
 
-  <target name="compile-normal" depends="init,build-dep"
+  <target name="compile-normal" depends="init,build-dep,generate-spec-parser-if-needed"
           unless="javac.debug">
 
     <echo message="Optimized build"/>
@@ -149,23 +149,28 @@
     </javac>
   </target>
 
-	<target name="generate" description="Generates the lexer and parser from the ANTLR grammar.">
-      <echo>Generating the spec language lexer and parser...</echo>
-      <java classname="org.antlr.v4.Tool" fork="true" failonerror="true">
-          <arg value="-o"/>
-          <arg value="${spec.grammar.target.dir}"/>
-          <arg value="${spec.grammar.file}"/>
-          <arg value="-package" />
-          <arg value="ee.ioc.cs.vsle.parser.generated" />
-          <classpath refid="build.classpath"/>
-      </java>
-
-      <!-- 
-          compile the generated parser and lexer source file to see
-          if there's no illegal code inside these source files
-      -->
-      <antcall target="compile"/>
+  <target name="generate-spec-parser-if-needed" depends="check-generated-dir" unless="spec.grammar.target.dir.exists">
+    <antcall target="generate-spec-parser" />
   </target>
+
+  <target name="check-generated-dir">
+    <condition property="spec.grammar.target.dir.exists">
+      <available file="${spec.grammar.target.dir}" type="dir"/>
+    </condition>
+  </target>
+
+  <target name="generate-spec-parser" description="Generates the lexer and parser from the ANTLR grammar.">
+    <echo>Generating the spec language lexer and parser...</echo>
+    <java classname="org.antlr.v4.Tool" fork="true" failonerror="true">
+      <arg value="-o"/>
+      <arg value="${spec.grammar.target.dir}"/>
+      <arg value="${spec.grammar.file}"/>
+      <arg value="-package" />
+      <arg value="ee.ioc.cs.vsle.parser.generated" />
+      <classpath refid="build.classpath"/>
+    </java>
+  </target>
+
   <!--
       Testing
   -->
@@ -278,10 +283,10 @@
         <pathelement location="${build}"/>
         <path refid="build.classpath"/>
       </classpath>
-    	<jvmarg value="-Xss2048k"/>
-    	<jvmarg value="-Xms64m"/>
-    	<jvmarg value="-Xmx384m"/>
-    	<jvmarg value="-XX:+UseParallelGC"/>
+      <jvmarg value="-Xss2048k"/>
+      <jvmarg value="-Xms64m"/>
+      <jvmarg value="-Xmx384m"/>
+      <jvmarg value="-XX:+UseParallelGC"/>
     </java>
   </target>
 
