@@ -215,11 +215,11 @@ public class ProgramRunner {
 
     private void generateProgramSource( final ProgramRunnerEvent event, final int operation, final boolean compute ) {
 
-        new Thread( "PlanningThread_" + System.currentTimeMillis() ) {
+        new TimedThread() {
 
             @Override
             public void run() {
-
+                setName( "PlanningThread_" + getStartTime() );
                 setWorking( true );
 
                 String programSource = null;
@@ -423,11 +423,11 @@ public class ProgramRunner {
         if ( genObject == null )
             return;
 
-        new Thread() {
+        new TimedThread() {
             
             @Override
             public void run() {
-                Thread.currentThread().setName( "RunningThread_" + System.currentTimeMillis() );
+                Thread.currentThread().setName( "RunningThread_" + this.getStartTime() );
 
                 boolean rerun = false;
 
@@ -484,9 +484,10 @@ public class ProgramRunner {
                             ex.printStackTrace();
                         }
                     } finally {
-                        RunningThreadManager.removeThread( ProgramRunner.this.getId(), false );
+                        long id = ProgramRunner.this.getId();
+                        RunningThreadManager.removeThread( id, false );
                         setWorking( false );
-                        db.p( "--> Finished!!! " + Thread.currentThread().getName() );
+                        db.p( "--> " + Thread.currentThread().getName() + " finished in " + getElapsedTime() + "ms." );
                     }
 
                     if ( sendFeedback ) {
@@ -502,7 +503,10 @@ public class ProgramRunner {
                     }
 
                 } catch ( Exception e ) {
+                  if( e.getMessage() != null ) {
                     ErrorWindow.showErrorMessage( e.getMessage() );
+                  }
+                  e.printStackTrace();
                 }
 
             }

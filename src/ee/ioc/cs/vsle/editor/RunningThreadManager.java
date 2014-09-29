@@ -16,19 +16,16 @@ import javax.swing.Timer;
  */
 public class RunningThreadManager {
 
-    private static HashMap<Long, Thread> threadsByID = new LinkedHashMap<Long, Thread>();
-    private static HashMap<Long, Long> threadsStartTime = new LinkedHashMap<Long, Long>();
+    private static HashMap<Long, TimedThread> threadsByID = new LinkedHashMap<Long, TimedThread>();
     private static ManagerDialog dialog;
 
     /**
      * @param ProgrammRunner's id
      * @param Thread thr
      */
-    public static void addThread( long id, Thread thr ) {
+    public static void addThread( long id, TimedThread thr ) {
 
         threadsByID.put( id, thr );
-
-        threadsStartTime.put( id, System.currentTimeMillis() );
 
         if ( dialog != null ) {
             dialog.onThreadAdded( id );
@@ -43,8 +40,7 @@ public class RunningThreadManager {
     @SuppressWarnings( "deprecation" )
     public static void removeThread( long id, boolean terminate ) {
 
-        Thread thread = threadsByID.remove( id );
-        threadsStartTime.remove( id );
+        TimedThread thread = threadsByID.remove( id );
 
         if ( thread != null ) {
 
@@ -154,7 +150,8 @@ public class RunningThreadManager {
         private PanelWithTimer createThreadPanel( final long id ) {
             final PanelWithTimer panel = new PanelWithTimer( new FlowLayout( FlowLayout.LEFT ) );
 
-            String threadName = threadsByID.get( id ).getName();
+            final TimedThread thread = threadsByID.get( id );
+            String threadName = thread.getName();
             final String s = threadName + "(alive for %1$tT)";
             final Calendar c = Calendar.getInstance( TimeZone.getTimeZone( "GMT" ) );
             c.setTimeInMillis( 0L );
@@ -165,10 +162,10 @@ public class RunningThreadManager {
             panel.add( but );
 
             ActionListener taskPerformer = new ActionListener() {
-                long secs = System.currentTimeMillis() - threadsStartTime.get( id );
+                long ms = thread.getElapsedTime();
 
                 public void actionPerformed( ActionEvent evt ) {
-                    c.setTimeInMillis( secs += 1000 );
+                    c.setTimeInMillis( ms += 1000 );
                     lbl.setText( String.format( s, c ) );
                 }
             };
