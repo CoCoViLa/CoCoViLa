@@ -30,9 +30,9 @@
   <property name="dist.name" value="${ant.project.name}-${project.version}"/>
 
   <property name="encoding" value="UTF-8"/>
-  <property name="javasource" value="1.6"/>
-  <property name="javatarget" value="1.6"/>
-  <property name="compiler" value="javac1.6"/>
+  <property name="javasource" value="1.7"/>
+  <property name="javatarget" value="1.7"/>
+  <property name="compiler" value="javac1.7"/>
   <property name="compile" value="compile-debug"/>
 
 	<property name="spec.grammar.src.dir" value="${src}/ee/ioc/cs/vsle/parser"/>
