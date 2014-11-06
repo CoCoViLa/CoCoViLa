@@ -114,6 +114,10 @@ public class Palette extends PaletteBase {
         selection.setSelected(true);
         toolPanel.add(selection);
 
+        JToggleButton use = createButton("images/mouse_inverted.gif",
+                "Use", State.use);
+        toolPanel.add(use);
+
         toolPanel.add(Box.createRigidArea(BUTTON_SPACE));
 
         JToggleButton relation = createButton("images/rel.gif",

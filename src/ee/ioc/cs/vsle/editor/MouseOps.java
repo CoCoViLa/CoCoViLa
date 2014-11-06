@@ -1,15 +1,27 @@
 package ee.ioc.cs.vsle.editor;
 
-import ee.ioc.cs.vsle.util.VMath;
-import ee.ioc.cs.vsle.vclass.*;
-
-import javax.swing.*;
-import javax.swing.event.MouseInputAdapter;
 import java.awt.Cursor;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.swing.SwingUtilities;
+import javax.swing.event.MouseInputAdapter;
+
+import ee.ioc.cs.vsle.util.FileFuncs.MemoryStorage;
+import ee.ioc.cs.vsle.util.VMath;
+import ee.ioc.cs.vsle.vclass.Connection;
+import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.PackageClass;
+import ee.ioc.cs.vsle.vclass.Point;
+import ee.ioc.cs.vsle.vclass.Port;
+import ee.ioc.cs.vsle.vclass.RelObj;
 
 /**
  * Mouse operations on Canvas.
@@ -61,6 +73,8 @@ class MouseOps extends MouseInputAdapter {
         } else if ( State.isAddObject( state ) ) {
             canvas.setCursor( Cursor.getPredefinedCursor( Cursor.HAND_CURSOR ) );
             canvas.startAddingObject();
+        } else if (State.use.equals(state)) {
+            canvas.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
         }
     }
 
@@ -106,7 +120,30 @@ class MouseOps extends MouseInputAdapter {
         canvas.mouseX = x;
         canvas.mouseY = y;
 
-        if ( SwingUtilities.isRightMouseButton( e ) ) {
+        if (State.use.equals(state)) {
+            GObj obj = canvas.getObjectList().checkInside(x, y);
+            if (obj != null) {
+                String className = obj.getClassName();
+                try (InputStream in = canvas.getPackage().getPackageClassLoader()
+                        .getResourceAsStream(className + ".js")) {
+                    if (in != null) {
+                        ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                        ClassLoader ccl = canvas.getPackage().newRunnerClassLoader(new MemoryStorage());
+                        Thread.currentThread().setContextClassLoader(ccl);
+                        ScriptEngineManager sem = new ScriptEngineManager();
+                        ScriptEngine js = sem.getEngineByName("ECMAScript");
+                        ScriptContext ctx = js.getContext();
+                        ctx.setAttribute("obj", obj, ScriptContext.ENGINE_SCOPE);
+                        ctx.setAttribute("scheme", canvas.getScheme(), ScriptContext.ENGINE_SCOPE);
+                        ctx.setAttribute("event", e, ScriptContext.ENGINE_SCOPE);
+                        js.eval(new InputStreamReader(in));
+                        Thread.currentThread().setContextClassLoader(cl);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        } else if (SwingUtilities.isRightMouseButton(e)) {
             if ( State.selection.equals( state ) ) {
                 Connection relation = canvas.getConnectionNearPoint( x, y );
                 if ( relation != null ) {

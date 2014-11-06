@@ -33,6 +33,7 @@ public class State {
     public static final String addPort = "?addPort";
     public static final String insertImage = "?image";
     public static final String cloneDrawing = "?cloneDrawing";
+    public static final String use = "?use";
 
     static final String addRelObjPrefix = "??";
     static final String statePrefix = "?";
