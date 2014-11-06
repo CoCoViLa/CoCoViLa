@@ -23,6 +23,8 @@ import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
 import ee.ioc.cs.vsle.util.SystemUtils;
 import ee.ioc.cs.vsle.util.db;
+import ee.ioc.cs.vsle.vclass.Canvas;
+import ee.ioc.cs.vsle.vclass.ClassObject;
 import ee.ioc.cs.vsle.vclass.VPackage;
 
 public class EditorActionListener implements ActionListener {
@@ -216,12 +218,12 @@ public class EditorActionListener implements ActionListener {
         	System.out.println(ClassEditor.getInstance().getClassFieldModel());
             new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true );
         } else if ( e.getActionCommand().equals( Menu.VIEWCODE ) ) {
-	        if ( ClassEditor.className == null ) {
+	        if ( ClassObject.className == null ) {
 	            JOptionPane.showMessageDialog( ClassEditor.getInstance(), "No class name found", "Error", JOptionPane.ERROR_MESSAGE );
 	            return;
 	        }	 
 	        Canvas canvas = ClassEditor.getInstance().getCurrentCanvas();
-	    	canvas.openClassCodeViewer( ClassEditor.className );
+	    	canvas.openClassCodeViewer( ClassObject.className );
 	    } else if ( e.getActionCommand().equals( Menu.EXPORT_TO_PACKAGE ) ) {
 	    	ClassEditor.getInstance().exportShapesToPackage(); // append the graphics to a package
 	    } else if ( e.getActionCommand().equals( Menu.IMPORT_FROM_PACKAGE ) ) {

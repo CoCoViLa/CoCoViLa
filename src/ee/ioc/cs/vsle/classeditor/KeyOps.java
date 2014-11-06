@@ -2,6 +2,9 @@ package ee.ioc.cs.vsle.classeditor;
 
 import java.awt.event.*;
 
+import ee.ioc.cs.vsle.common.ops.State;
+import ee.ioc.cs.vsle.vclass.Canvas;
+
 public class KeyOps implements KeyListener {
 
 	/**
@@ -47,7 +50,7 @@ public class KeyOps implements KeyListener {
 		}
 	} // keyReleased
 	
-	void destroy() {
+	public void destroy() {
 	    canvas = null;
 	}
 }

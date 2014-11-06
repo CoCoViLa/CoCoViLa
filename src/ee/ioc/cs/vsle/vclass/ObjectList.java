@@ -1,5 +1,7 @@
 package ee.ioc.cs.vsle.vclass;
 
+import ee.ioc.cs.vsle.graphics.BoundingBox;
+import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.util.*;
 
 import java.util.ArrayList;
@@ -36,8 +38,16 @@ public class ObjectList extends ArrayList<GObj> {
 	}
 
 	public void bringToFront(GObj obj) {
+		boolean bb = false;
+		bringToFront(obj, bb);
+	}
+	
+	public void bringToFront(GObj obj, boolean bb) {
 		this.remove(obj);
 		this.add(obj);
+		if(bb){
+			bbAlwaysToFront();
+		}
 	}
 
 	public void bringForward(GObj obj, int step) {
@@ -56,8 +66,21 @@ public class ObjectList extends ArrayList<GObj> {
 			this.remove(obj);
 			this.add(objIndex - step, obj);
 		}
+	}	
+	
+	public void bbAlwaysToFront(){
+		 GObj bbObj = null;
+	        for(GObj o : this){
+	        	for(Shape sh : o.getShapes()){
+	        		if( sh instanceof BoundingBox){
+	        			bbObj = o;
+	                }
+	        	}
+	        }
+	        if (bbObj != null){
+	        	this.bringToFront(bbObj);
+	        }
 	}
-
 
 	public GObj checkInside(int x, int y, float scale) {
 		return checkInside(x, y, null, scale);

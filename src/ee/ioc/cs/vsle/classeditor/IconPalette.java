@@ -15,8 +15,10 @@ import javax.swing.SpinnerModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import ee.ioc.cs.vsle.common.ops.State;
 import ee.ioc.cs.vsle.editor.PaletteBase;
 import ee.ioc.cs.vsle.util.FileFuncs;
+import ee.ioc.cs.vsle.vclass.Canvas;
 
 /**
  * Class Editor toolbar.
@@ -25,7 +27,7 @@ public class IconPalette extends PaletteBase {
 
 	ClassEditor editor;
 
-	protected Canvas canvas;
+	protected ClassCanvas canvas;
 	
     // Labels
     JLabel lblLineWidth = new JLabel(" Size: ");
@@ -56,7 +58,7 @@ public class IconPalette extends PaletteBase {
     JToggleButton image;
 
 //    public IconPalette(IconMouseOps mListener, ClassEditor ed, Canvas canv) {
-    public IconPalette(MouseOps mListener, ClassEditor ed, Canvas canv) {    	
+    public IconPalette(MouseOps mListener, ClassEditor ed, ClassCanvas canv) {    	
         super();
         
         this.canvas = canv;

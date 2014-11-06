@@ -61,6 +61,7 @@ public class IconPort implements Cloneable, Serializable {
 		return x;
 	} // getX
 
+
 	/**
 	 * Returns port y coordinate.
 	 * @return int - port y coordinate.

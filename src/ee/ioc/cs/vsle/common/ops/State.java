@@ -1,4 +1,4 @@
-package ee.ioc.cs.vsle.classeditor;
+package ee.ioc.cs.vsle.common.ops;
 
 /**
  * Central repository of all states used by the Mouse Operators and listened by the Listeners.

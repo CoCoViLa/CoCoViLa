@@ -9,14 +9,26 @@ public class BoundingBox extends Shape implements Serializable {
 
     public static final String name = "BoundingBox";
     private static final Color BB_COLOR = new Color( Color.lightGray.getRed(), Color.lightGray.getGreen(), Color.lightGray.getBlue(), 200 );
+    public int ownerClassId;
     
     public BoundingBox( int x, int y, int width, int height ) {
         super( x, y, width, height );
         this.setColor( BB_COLOR );
         this.setFilled( true );
-    } // BoundingBox
+    } // BoundingBox   
+    
+   
+	public int getOwnerClassId() {
+		return ownerClassId;
+	}
 
-    @Override
+
+	public void setOwnerClassId(int ownerClassId) {
+		this.ownerClassId = ownerClassId;
+	}
+
+
+	@Override
     public String getName() {
         return name;
     } // getName

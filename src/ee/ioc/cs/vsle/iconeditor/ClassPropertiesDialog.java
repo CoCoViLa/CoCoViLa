@@ -352,7 +352,7 @@ public class ClassPropertiesDialog extends JDialog {
 	 * on the Ok button.
 	 */
 	private void storeVariables() {
-		String className = fldClassName.getText();
+	/*	String className = fldClassName.getText();
 		if (className != null) className = className.trim();
 		ClassEditor.className = className;
 
@@ -366,7 +366,7 @@ public class ClassPropertiesDialog extends JDialog {
 		}
 		ClassEditor.setClassIcon( classIcon );
 
-		ClassEditor.componentType = (PackageClass.ComponentType)cboxCompType.getSelectedItem();
+		ClassEditor.componentType = (PackageClass.ComponentType)cboxCompType.getSelectedItem();*/
 	} // storeVariables.
 
 	/**

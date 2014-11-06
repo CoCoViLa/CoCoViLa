@@ -17,6 +17,7 @@ import org.xml.sax.helpers.AttributesImpl;
 
 import ee.ioc.cs.vsle.api.*;
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.editor.Canvas;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.StringUtil;

@@ -21,6 +21,7 @@ import javax.swing.WindowConstants;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.graphics.Image;
+import ee.ioc.cs.vsle.vclass.Canvas;
 
 public class ImageDialog extends JDialog implements ActionListener {
 
@@ -106,7 +107,7 @@ public class ImageDialog extends JDialog implements ActionListener {
         if ( evt.getSource() == bttnCancel ) {
             dispose();
         } else if ( evt.getSource() == bttnOk ) {
-        	Canvas canvas = editor.getCurrentCanvas();
+        	ClassCanvas canvas = editor.getCurrentCanvas();
             if( fullPath != null && fullPath.length() != 0 
                     && relativePath != null && relativePath.length() != 0 ) {
             	

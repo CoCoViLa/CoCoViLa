@@ -303,6 +303,7 @@ class MouseOps extends MouseInputAdapter {
                 moveY = Math.round( (float) ( obj.getY() + Math.round( (float) y / step ) * step - canvas.mouseY ) / step )
                         * step - obj.getY();
             } else {
+            	
                 moveX = x - canvas.mouseX;
                 moveY = y - canvas.mouseY;
             }

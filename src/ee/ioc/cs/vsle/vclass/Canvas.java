@@ -1,4 +1,4 @@
-package ee.ioc.cs.vsle.classeditor;
+package ee.ioc.cs.vsle.vclass;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -40,6 +40,10 @@ import javax.swing.undo.UndoableEditSupport;
 
 import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.ccl.PackageClassLoader;
+import ee.ioc.cs.vsle.classeditor.ClassEditor;
+import ee.ioc.cs.vsle.classeditor.IconPalette;
+import ee.ioc.cs.vsle.classeditor.KeyOps;
+import ee.ioc.cs.vsle.common.ops.MouseOps;
 import ee.ioc.cs.vsle.editor.CodeViewer;
 import ee.ioc.cs.vsle.editor.DiagnosticsCollector;
 import ee.ioc.cs.vsle.editor.FontChangeEvent;
@@ -56,55 +60,45 @@ import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
 import ee.ioc.cs.vsle.util.PrintUtilities;
 import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.vclass.ClassPainter;
-import ee.ioc.cs.vsle.vclass.Connection;
-import ee.ioc.cs.vsle.vclass.ConnectionList;
-import ee.ioc.cs.vsle.vclass.GObj;
-import ee.ioc.cs.vsle.vclass.ObjectList;
-import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
-import ee.ioc.cs.vsle.vclass.Point;
-import ee.ioc.cs.vsle.vclass.Port;
-import ee.ioc.cs.vsle.vclass.RelObj;
-import ee.ioc.cs.vsle.vclass.Scheme;
-import ee.ioc.cs.vsle.vclass.VPackage;
 
 /**
  */
 public class Canvas extends JPanel implements ISchemeContainer {
     
     private static final long serialVersionUID = 1L;
-    int mouseX; // Mouse X coordinate.
-    int mouseY; // Mouse Y coordinate.
+    public int mouseX; // Mouse X coordinate.
+    public int mouseY; // Mouse Y coordinate.
     private String workDir;
-    private VPackage vPackage;
-    Palette palette;
+    protected VPackage vPackage;
     
-    IconPalette iconPalette;
     
-    private Scheme scheme;
+    protected Palette palette;
+    public DrawingArea drawingArea;
+    
+    protected Scheme scheme;
     Map<GObj, ClassPainter> classPainters;
-    ClassPainter currentPainter;
+    public ClassPainter currentPainter;
     private GObj currentObj;
-    Connection currentCon;
+    public Connection currentCon;
     public MouseOps mListener;
     public KeyOps keyListener;
     boolean showGrid = RuntimeProperties.isShowGrid();
     boolean showCtrlPane = RuntimeProperties.isShowControls();
-    Dimension drawAreaSize = new Dimension( 600, 500 );
+    public Dimension drawAreaSize = new Dimension( 600, 500 );
     JPanel infoPanel;
     private JLabel posInfo;
-    DrawingArea drawingArea;
+   
     BufferedImage backgroundImage;
     ExecutorService executor;
     float scale = 1.0f;
     boolean enableClassPainter = true;
-    UndoManager undoManager;
-    UndoableEditSupport undoSupport;
-    private boolean actionInProgress = false;
+    public UndoManager undoManager;
+    protected UndoableEditSupport undoSupport;
+    protected boolean actionInProgress = false;
     public JScrollPane areaScrollPane;
     private boolean drawPorts = true;
-    private boolean drawOpenPorts = true;    
+
 	private boolean showObjectNames = false;
     private String lastScheme;
     private FontChangeEvent.Listener fontListener = new FontChangeEvent.Listener() {
@@ -169,7 +163,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * they had before the first move edit. The edit keeps track and takes care
      * of strict connections created or breaked during the movements.
      */
-    private static class MoveEdit extends AbstractUndoableEdit {
+    public static class MoveEdit extends AbstractUndoableEdit {
 
         private static final long serialVersionUID = 1L;
 
@@ -537,6 +531,15 @@ public class Canvas extends JPanel implements ISchemeContainer {
         FontChangeEvent.addFontChangeListener( fontListener );
         validate();
     }
+    
+    public Canvas(String workingDir ) {
+        super();
+        
+        setWorkDir( workingDir );
+        resetPalette();
+        FontChangeEvent.addFontChangeListener( fontListener );
+        validate();
+    }
 
     public void reloadCurrentPackage() {
         VPackage oldPackage = vPackage;
@@ -560,7 +563,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         this.lastScheme = lastScheme;
     }
     
-    private String m_canvasTitle;
+    protected String m_canvasTitle;
 
     public void setTitle( String title ) {
         m_canvasTitle = title;
@@ -603,9 +606,9 @@ public class Canvas extends JPanel implements ISchemeContainer {
         return getPackage().getSchemeClassName( getSchemeTitle() );
     }
     
-    void initialize() {
+    protected void initialize() {
         setScheme(new Scheme(this));
-        mListener = new MouseOps( this );
+       // mListener = new MouseOps( this );
         keyListener = new KeyOps( this );
         drawingArea = new DrawingArea();
         drawingArea.setOpaque( true );
@@ -614,8 +617,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
         drawingArea.setFocusable( true );
         infoPanel = new JPanel( new GridLayout( 1, 2 ) );
         posInfo = new JLabel();
-        drawingArea.addMouseListener( mListener );
-        drawingArea.addMouseMotionListener( mListener );
+        //drawingArea.addMouseListener( mListener );
+       // drawingArea.addMouseMotionListener( mListener );
         drawingArea.setPreferredSize( drawAreaSize );
 
         // Initializes key listeners, for keyboard shortcuts.
@@ -755,12 +758,18 @@ public class Canvas extends JPanel implements ISchemeContainer {
         ArrayList<GObj> selectedObjs = scheme.getSelectedObjects();
         ArrayList<Connection> created = null;
         ArrayList<Connection> deleted = null;
+      /*  moveX = 5;
+    	moveY = 5;*/
 
         for ( int i = 0; i < selectedObjs.size(); i++ ) {
             GObj obj = selectedObjs.get( i );
+            
+            System.out.println("MoveObj selected: " + obj.getX() + ", "+ obj.getY());
+            
             if ( ! ( obj instanceof RelObj ) )
                 obj.setPosition( obj.getX() + moveX, obj.getY() + moveY );
-
+                System.out.println("MoveObj selected new position: " + obj.getX() + ", "+ obj.getY());
+            
             if ( obj.isStrict() ) {
                 // remove broken strict connections
                 ArrayList<Connection> rc = getBrokenStrictConnections( obj );
@@ -844,7 +853,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
         setCurrentObj( null );
         currentPainter = null;
-        setActionInProgress( false );
+        actionInProgress = false;
     }
     
     public void addObject( GObj obj ) {
@@ -858,7 +867,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
         setCurrentObj( null );
         currentPainter = null;
-        setActionInProgress( false );
+        actionInProgress = false;
     }    
 
     /**
@@ -1278,7 +1287,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * built-in CodeViewer is started.
      * @param className the name of the metaclass to be edited
      */
-    void openClassCodeViewer( String className ) {
+    public void openClassCodeViewer( String className ) {
         String editor = RuntimeProperties.getDefaultEditor();
         if (editor == null) {
             CodeViewer cv = new CodeViewer(className, getWorkDir());
@@ -1363,7 +1372,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         return drawPorts;
     }
     
-    class DrawingArea extends JPanel {
+    public class DrawingArea extends JPanel {
         private static final long serialVersionUID = 1L;
 
         private final Stroke connectionStroke = new BasicStroke();
@@ -1389,6 +1398,9 @@ public class Canvas extends JPanel implements ISchemeContainer {
                 g.drawLine( vr.x, i, bx, i );
         }
 
+        /**
+         * Paint Canvas, background + grid.
+         */
         @Override
         protected void paintComponent( Graphics g ) {
 //        	System.out.println("Drawing area paintComponent " + mListener.state);
@@ -1422,9 +1434,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
                     if ( p != null )
                         p.paint( g2, scale );
                 }
-            }
-            // hide or show BoundingBox
-            iconPalette.boundingbox.setEnabled( !isBBPresent() );
+            }          
 
             g2.setColor( Color.blue );
             g2.setStroke(connectionStroke);
@@ -1434,72 +1444,12 @@ public class Canvas extends JPanel implements ISchemeContainer {
             }
 
             // a shape width negative height or width cannot be drawn
-            int rectX = Math.min( mListener.startX, mouseX );
+            /*   int rectX = Math.min( mListener.startX, mouseX );
             int rectY = Math.min( mListener.startY, mouseY );
             int width = Math.abs( mouseX - mListener.startX );
             int height = Math.abs( mouseY - mListener.startY );
-            
-            if ( mListener.state.equals( State.drawArc1 ) ) {
-                g.drawRect( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight );
-                g.drawLine( mListener.startX + mListener.arcWidth / 2, mListener.startY + mListener.arcHeight / 2, mouseX,
-                        mouseY );
-            } else if ( mListener.state.equals( State.drawArc2 ) ) {
-                if ( mListener.fill ) {
-                    g2.fillArc( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight,
-                            mListener.arcStartAngle, mListener.arcAngle );
-
-                } else {
-                    g2.drawArc( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight,
-                            mListener.arcStartAngle, mListener.arcAngle );
-                }
-            }
-            
-            if ( !mListener.mouseState.equals( "released" ) ) {
-
-            	if ( mListener.state.equals( State.dragBox ) 
-            			|| mListener.state.equals( State.boundingbox )) {
-	                g2.setColor( Color.gray );
-	                g2.drawRect( rectX, rectY, width, height );
-	            } else {
-	            	
-	                int red = mListener.color.getRed();
-	                int green = mListener.color.getGreen();
-	                int blue = mListener.color.getBlue();
-
-	                int alpha = mListener.getTransparency();
-	                g2.setColor( new Color( red, green, blue, alpha ) );
-
-	                if ( mListener.lineType > 0 ) {
-	                    g2.setStroke( new BasicStroke( mListener.strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND,
-	                            50, new float[] { mListener.lineType, mListener.lineType }, 0 ) );
-	                } else {
-	                    g2.setStroke( new BasicStroke( mListener.strokeWidth ) );
-	                }
-	                
-	                if ( mListener.state.equals( State.drawRect ) ) {
-		                g2.setColor( mListener.color );
-		                g2.drawRect( rectX, rectY, width, height );
-		            } else if ( mListener.state.equals( State.drawFilledRect ) ) {
-		                g2.setColor( mListener.color );
-		                g2.fillRect( rectX, rectY, width, height );    
-                    } else if ( mListener.state.equals( State.drawLine ) ) {
-                        g2.drawLine( mListener.startX, mListener.startY, mouseX, mouseY );		                
-		            } else if ( mListener.state.equals( State.drawOval ) ) {
-		            	g2.setColor( mListener.color );
-		                g2.drawOval( rectX, rectY, width, height );
-		            } else if ( mListener.state.equals( State.drawFilledOval ) ) {
-		            	g2.setColor( mListener.color );
-		                g2.fillOval( rectX, rectY, width, height );
-                    } else if ( mListener.state.equals( State.drawArc ) ) {
-                        g.drawRect( rectX, rectY, width, height );
-                    } else if ( mListener.state.equals( State.drawFilledArc ) ) {
-                        g.drawRect( rectX, rectY, width, height );
-                    }
-	            }
-            	
-            }
-                
-
+           /*
+            g2.drawRect( rectX, rectY, width, height );*/                 
             g2.scale( 1.0f / scale, 1.0f / scale );
         }
     }
@@ -1574,7 +1524,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     /**
      * @param workDir the workDir to set
      */
-    void setWorkDir( String workDir ) {
+    public void setWorkDir( String workDir ) {
         this.workDir = workDir;
     }
 
@@ -1754,7 +1704,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         endPort.setSelected( false );
         currentCon.getBeginPort().setSelected( false );
         currentCon = null;
-        setActionInProgress( false );
+        actionInProgress = false;
     }
 
     public void clearSelectedConnections() {
@@ -1781,7 +1731,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
             drawingArea.repaint();
         }
 
-        setActionInProgress( false );
+        actionInProgress = false;
     }
 
     /**
@@ -1790,7 +1740,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * @param port the first port of the connection
      */
     void startAddingConnection( Port port ) {
-        setActionInProgress( true );
+        actionInProgress = true;
         currentCon = new Connection( port );
     }
 
@@ -1799,7 +1749,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * 
      * @param port the first port of the relation object
      */
-    void startAddingRelObject( Port port ) {
+    protected void startAddingRelObject( Port port ) {
         assert currentObj == null;
         assert currentCon == null;
         assert currentPainter == null;
@@ -1808,8 +1758,6 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
         ( (RelObj) currentObj ).setStartPort( port );
         port.setSelected( true );
-
-        setActionInProgress( true );
     }
 
     public void startAddingObject() {
@@ -1825,29 +1773,6 @@ public class Canvas extends JPanel implements ISchemeContainer {
             createAndInitNewObject( State.getClassName( state ) );
     }
 
-    /**
-     * Sets actionInProgress. Actions that consist of more than one atomic step
-     * that cannot be interleaved with other actions should set this property
-     * and unset it after completion. For example, consider this scenario:
-     * <ol>
-     * <li>a new object is created</li>
-     * <li>a new connection is connected to the new object</li>
-     * <li>before connecting a second object the addition of the object is
-     * undone</li>
-     * </ol>
-     * This is a case when undo-redo should be disabled until either the
-     * connection is cancelled or the second end is connected.
-     * 
-     * @param newValue the actionInProgress value
-     */
-    public void setActionInProgress( boolean newValue ) {
-        if ( newValue != actionInProgress ) {
-            actionInProgress = newValue;
-            ClassEditor editor = ClassEditor.getInstance();
-            editor.deleteAction.setEnabled( !newValue );
-            editor.refreshUndoRedo();
-        }
-    }
 
     /**
      * Returns true if some non-atomic action that modifies the scheme is in
@@ -1870,7 +1795,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
             cancelAddingObject();
     }
 
-    private void cancelAddingObject() {
+    protected void cancelAddingObject() {
         if ( currentObj != null ) {
             if ( currentObj instanceof RelObj ) {
                 RelObj obj = (RelObj) currentObj;
@@ -1883,7 +1808,6 @@ public class Canvas extends JPanel implements ISchemeContainer {
 
         assert currentCon == null;
 
-        setActionInProgress( false );
     }
 
     /**
@@ -2062,57 +1986,30 @@ public class Canvas extends JPanel implements ISchemeContainer {
         }
         this.scheme = scheme;
     }
-
-    public boolean isDrawOpenPorts() {
-		return drawOpenPorts;
-	}
-
-	public void setDrawOpenPorts(boolean drawOpenPorts) {
-		
-		this.drawOpenPorts = drawOpenPorts;		
-		for (GObj obj : scheme.getObjectList()) {
-		    obj.setDrawOpenPorts( drawOpenPorts );
-        }
-		drawingArea.repaint();
-	}
-
     
     /**
      * Sets Status Bar text
      */
-    void setStatusBarText( String text ) {
+    public void setStatusBarText( String text ) {
         posInfo.setText( text );
     }
 
     /**
      * @param currentObj the currentObj to set
      */
-    void setCurrentObj( GObj currentObj ) {
+    public void setCurrentObj( GObj currentObj ) {
         this.currentObj = currentObj;
     }
 
     /**
      * @return the currentObj
      */
-    GObj getCurrentObj() {
+    public GObj getCurrentObj() {
         return currentObj;
     }
     
     public void setPackage(VPackage vPackage) {
     	this.vPackage = vPackage;
-    }
-    
-    public boolean isBBPresent() {
-        boolean isBbPresent = false;
-        for (GObj obj : getObjectList()) {
-            for (Shape shape : obj.getShapes()) {
-				if (shape instanceof BoundingBox) {
-					isBbPresent = true;
-					break;
-				}
-			}
-        }
-        return isBbPresent;
     }
 
 }

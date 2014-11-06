@@ -10,7 +10,8 @@ public class PackageClass implements Serializable {
         CLASS(GObj.class, "class", true), 
         REL(RelObj.class, "relation", true), 
         SCHEME(SchemeObj.class, "scheme", false),
-        TABLE(TableObj.class, "table", false); 
+        TABLE(TableObj.class, "table", false), 
+        PORTGR(PortGObj.class, "port-graphics", true);
         
         private Class<? extends GObj> _class;
         private final String xmlName;

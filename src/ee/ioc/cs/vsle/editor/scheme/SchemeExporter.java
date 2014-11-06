@@ -7,6 +7,7 @@ import java.util.*;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.editor.Canvas;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;

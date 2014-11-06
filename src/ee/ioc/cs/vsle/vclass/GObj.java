@@ -53,7 +53,7 @@ public class GObj implements Serializable, Cloneable,
     private int width;
 
     private int height;
-    private String className;
+    public String className;
     private String name;
     private boolean isStatic = false;
 
@@ -371,20 +371,18 @@ public class GObj implements Serializable, Cloneable,
                 ClassGraphics graphics;
                 Port port = getPortList().get( i );
 
-                /*  Port is drawn opened or closed by openPort flag in View Menu  */
-                /*
-                if ( port.isSelected() || port.isConnected() || port.isHilighted() ) {
+             /*   if ( port.isSelected() || port.isConnected() || port.isHilighted() ) {
 
                     graphics = port.getClosedGraphics();
 
                 } else
-                    graphics = port.getOpenGraphics();
-				*/
+                    graphics = port.getOpenGraphics();*/
                 
-                if (isDrawOpenPorts() ) {
-                	graphics = port.getOpenGraphics();                    
-                } else
-                	graphics = port.getClosedGraphics();
+                if(drawOpenPorts){
+                	 graphics = port.getOpenGraphics();
+                } else {
+                	 graphics = port.getClosedGraphics();
+                }
                 graphics.draw( xModifier + (int) ( getXsize() * port.getX() ), 
                         yModifier + (int) ( getYsize() * port.getY() ), 
                         getXsize(), getYsize(), g2 );
@@ -429,6 +427,27 @@ public class GObj implements Serializable, Cloneable,
     }
 
     private void drawSelectionMarks( Graphics g, float scale ) {
+    	
+    	/*  int scaledX =  Math.round(getX() / scale );
+    	  int scaledY =  Math.round(getY() / scale );*/
+    	
+        g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
+
+        g.fillRect( getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) ) + 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1,
+                CORNER_SIZE, CORNER_SIZE );
+
+        g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + (int) ( getYsize() * ( getPortOffsetY2() + getHeight() ) ) + 1,
+                CORNER_SIZE, CORNER_SIZE );
+
+        g.fillRect( getX() + (int) ( getXsize() * ( getPortOffsetX2() + getWidth() ) ) + 1, getY()
+                + (int) ( getYsize() * ( getPortOffsetY2() + getHeight() ) ) + 1, CORNER_SIZE, CORNER_SIZE );
+    }
+    
+    private void drawSelectionMarksPort( Graphics g, float scale ) {
+    	
+    	/*  int scaledX =  Math.round(getX() / scale );
+    	  int scaledY =  Math.round(getY() / scale );*/
+    	
         g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
 
         g.fillRect( getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) ) + 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1,

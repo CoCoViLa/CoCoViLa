@@ -180,7 +180,7 @@ public class ClassPropertiesDialog extends JDialog {
 
 		// Initialize fields with runtime values.
 		initialize();
-
+		
 		bttnDelField.setEnabled(false);
 
 		//////////////////////////////////////////////////////
@@ -351,13 +351,17 @@ public class ClassPropertiesDialog extends JDialog {
 	 * Initializes the property fields with runtime variables.
 	 */
 	private void initialize() {
-		System.out.println("ClassEditor.className " + ClassEditor.className);
+		
+		if (ClassObject.className != null) fldClassName.setText(ClassObject.className);
+		if (ClassObject.classDescription != null) fldClassDesc.setText(ClassObject.classDescription);
+		if (ClassObject.getClassIcon() != null) fldClassIcon.setText(ClassObject.getClassIcon());
+		cboxCompType.setSelectedItem( ClassObject.componentType );
+		
+		/**
+		 * 		System.out.println("ClassEditor.className " + ClassEditor.className);
 		System.out.println("ClassEditor.classDescription " + ClassEditor.classDescription);
 		System.out.println("ClassEditor.componentType " + ClassEditor.componentType);
-		if (ClassEditor.className != null) fldClassName.setText(ClassEditor.className);
-		if (ClassEditor.classDescription != null) fldClassDesc.setText(ClassEditor.classDescription);
-		if (ClassEditor.getClassIcon() != null) fldClassIcon.setText(ClassEditor.getClassIcon());
-		cboxCompType.setSelectedItem( ClassEditor.componentType );
+		 */
 	} // initialize
 
 	/**
@@ -366,20 +370,21 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private void storeVariables() {
 		String className = fldClassName.getText();
-		if (className != null) className = className.trim();
-		ClassEditor.className = className;
+		if (className != null) className = className.trim(); else className = "";		
 
 		String classTitle = fldClassDesc.getText();
 		if (classTitle != null) classTitle = classTitle.trim();
-		ClassEditor.classDescription = classTitle;
+		ClassObject.classDescription = classTitle;
 
 		String classIcon = fldClassIcon.getText();
 		if (classIcon != null) {
 			classIcon = classIcon.trim();
 		}
-		ClassEditor.setClassIcon( classIcon );
-
-		ClassEditor.componentType = (PackageClass.ComponentType)cboxCompType.getSelectedItem();
+		ClassObject.setClassIcon( classIcon );
+		
+		ClassEditor.classObject = new ClassObject(className, classTitle, classIcon,(PackageClass.ComponentType)cboxCompType.getSelectedItem());
+		
+		//ClassObject.componentType = (PackageClass.ComponentType)cboxCompType.getSelectedItem();
 	} // storeVariables.
 
 	/**
@@ -439,7 +444,7 @@ public class ClassPropertiesDialog extends JDialog {
             if (icon.length() > 0 && !(icon.endsWith(".gif") || icon.endsWith(".png"))) {
 				valid = false;
 				this.fldClassIcon.setText("");
-				ClassEditor.setClassIcon( "" );
+				ClassObject.setClassIcon( "" );
 				JOptionPane.showMessageDialog(null, "Only icons in GIF or PNG format allowed.",
                         "Invalid icon format", JOptionPane.INFORMATION_MESSAGE);
 				fldClassIcon.requestFocus();

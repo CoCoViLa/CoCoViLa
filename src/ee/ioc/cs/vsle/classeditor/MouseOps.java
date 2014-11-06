@@ -23,6 +23,7 @@ import ee.ioc.cs.vsle.graphics.Oval;
 import ee.ioc.cs.vsle.graphics.Rect;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
+import ee.ioc.cs.vsle.vclass.Canvas;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
@@ -33,14 +34,9 @@ import ee.ioc.cs.vsle.vclass.Port;
 /**
  * Mouse operations on Canvas.
  */
-public class MouseOps extends MouseInputAdapter {
+public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
-    String state = State.selection;
-    String mouseState = "";
-    int startX, startY;
-    boolean mouseOver;
-
-    public int arcWidth, arcHeight;
+	public int arcWidth, arcHeight;
     public boolean fill = false;
     public float strokeWidth = 1.0f;
     public int transparency = 255;
@@ -50,16 +46,15 @@ public class MouseOps extends MouseInputAdapter {
     boolean dragged = false;
     public int arcStartAngle;
     public int arcAngle;
+    public String mouseState;
     
-    private Canvas canvas;
-    private Point draggedBreakPoint;
-    private GObj draggedObject;
-    private int cornerClicked;
-    private Port currentPort;
-
-    public MouseOps( Canvas e ) {
-        this.canvas = e;
-    }
+    private ClassCanvas canvas;        
+    
+    public MouseOps(ClassCanvas e) {
+    	super(e);
+        mouseState = "";
+		this.canvas = e;
+	}
     
     public int getTransparency() {
         return this.transparency;
@@ -69,6 +64,10 @@ public class MouseOps extends MouseInputAdapter {
         return this.lineType;
     }    
 
+    /**
+     * Change Object Colors
+     * @param col
+     */
     public void changeObjectColors( Color col ) {
     	ArrayList<GObj> selectedObjs = canvas.getScheme().getObjectList().getSelected();
     	for (GObj gObj : selectedObjs) {
@@ -77,8 +76,9 @@ public class MouseOps extends MouseInputAdapter {
     			canvas.drawingArea.repaint();
 			}
 		}
-    } // change object colors
+    } 
     
+    @Override
     public void setState( String state ) {
     	System.out.println("MouseOps setState " + state);
     	
@@ -183,7 +183,7 @@ public class MouseOps extends MouseInputAdapter {
         p.setX(0);
         p.setY(0);      
 
-        p.setDefaultGraphics(obj.isDrawOpenPorts());
+   /*    p.setDefaultGraphics(obj.isDrawOpenPorts());*/
                
         obj.setHeight(p.getHeight());
         obj.setWidth(p.getWidth());     
@@ -212,6 +212,7 @@ public class MouseOps extends MouseInputAdapter {
    	 } else {
    		 p.setClosedGraphics(graphics);
    	 }
+     	
         p.setX(0);
         p.setY(0);    
         
@@ -329,6 +330,8 @@ public class MouseOps extends MouseInputAdapter {
 	            ((Line) s).setEndY(s.getHeight());
             }
         }        
+        
+       
 
         System.out.println("OBJECT X,Y,H,W " + obj.getX() + ", " + obj.getY()+ ", " + obj.getHeight()+ ", " + obj.getWidth());
         System.out.println("////////// shape " + s.toText());
@@ -344,31 +347,18 @@ public class MouseOps extends MouseInputAdapter {
         obj.setShapes(shapes);
 
         canvas.addObject(obj);
+        
+        /* Bounding box always on top AM 27.10*/
+        canvas.getObjectList().bbAlwaysToFront();
     }
-    /**
-     * Mouse entered event from the MouseMotionListener. Invoked when the mouse
-     * enters a component.
-     * 
-     * @param e MouseEvent - Mouse event performed.
-     */
-    @Override
-    public void mouseEntered( MouseEvent e ) {
-        mouseOver = true;
-    }
+    
 
-    /**
-     * Mouse exited event from the MouseMotionListener. Invoked when the mouse
-     * exits a component.
-     * 
-     * @param e MouseEvent - Mouse event performed.
-     */
-    @Override
     public void mouseExited( MouseEvent e ) {
         mouseOver = false;
         canvas.drawingArea.repaint();
     }
 
-    private void openObjectPopupMenu( GObj obj, int x, int y ) {
+    private void openObjectPopupMenu( GObj obj, int x, int y ) {   	
         ObjectPopupMenu popupMenu = new ObjectPopupMenu( obj, canvas );
         popupMenu.show( canvas, x, y );
     }
@@ -386,10 +376,12 @@ public class MouseOps extends MouseInputAdapter {
      */
     @Override
     public void mouseClicked( MouseEvent e ) {
-    	System.out.println("IconMouseOps mouseClicked: " + state );
+    	
         int x, y;
         x = e.getX();
         y = e.getY();
+        
+        System.out.println("ClassMouseOps mouseClicked: " + state + "; coords x=" + x + "; y=" + y);
 
         if ( state.equals( State.drawArc1 ) ) {
             setState( State.drawArc2 );
@@ -434,15 +426,17 @@ public class MouseOps extends MouseInputAdapter {
                 
                 GObj obj = canvas.getObjectList().checkInside(x, y, canvas.getScale());
                 
-             //   ObjectList testobj = canvas.getObjectList();
+                ObjectList testobj = canvas.getObjectList();
+                System.out.println("ClassMouseOps left button: " + testobj );
                 
                 if ( obj != null ) {
                     obj.setSelected( true );
                     if (SwingUtilities.isMiddleMouseButton(e)) {
-                    	if (ClassEditor.className != null)
+                    	canvas.setCurrentObj( obj );
+                    	/*if (ClassEditor.className != null)
                     	canvas.openClassCodeViewer(ClassEditor.className);
                     } else {
-                        canvas.setCurrentObj( obj );
+                        canvas.setCurrentObj( obj );*/
                     }
                 }
 
@@ -460,7 +454,9 @@ public class MouseOps extends MouseInputAdapter {
 
     @Override
     public void mousePressed( MouseEvent e ) {
-    	System.out.println("MouseOps mousePressed " + state);
+    	
+       System.out.println("ClassMouseOps mousePressed: " + state + "; coords x=" + e.getX() + "; y=" + e.getY());
+        
     	mouseState = "pressed";
         if ( !( state.equals( State.drawArc1 ) || state.equals( State.drawArc2 ) ) ) {
             startX =  Math.round( e.getX() / canvas.getScale() );
@@ -502,11 +498,10 @@ public class MouseOps extends MouseInputAdapter {
                 }
             }
         }
+        
+        System.out.println("ClassMouseOps mousePressed: " + state + "; canvas coords x=" + canvas.mouseX + "; y=" +canvas.mouseY);      
         canvas.setActionInProgress( true );
     }
-
-    
-
     
     @Override
     public void mouseDragged( MouseEvent e ) {
@@ -515,15 +510,14 @@ public class MouseOps extends MouseInputAdapter {
             return;
         }
         int x = Math.round( e.getX() / canvas.getScale() );
-        int y = Math.round( e.getY() / canvas.getScale() );
-
-        canvas.setPosInfo( x, y );
+        int y = Math.round( e.getY() / canvas.getScale() );        
 
         if ( State.drag.equals( state ) ) {
             int moveX, moveY;
 
             if ( RuntimeProperties.getSnapToGrid() ) {
                 GObj obj = draggedObject;
+                System.out.println("draggedObject: " + draggedObject.toString());
                 int step = RuntimeProperties.getGridStep();
 
                 // When snap to grid is on mouse coordinates are calculated
@@ -536,6 +530,9 @@ public class MouseOps extends MouseInputAdapter {
                 moveY = Math.round( (float) ( obj.getY() + Math.round( (float) y / step ) * step - canvas.mouseY ) / step )
                         * step - obj.getY();
             } else {
+            	
+            	System.out.println("ClassMouseOps mouseDragged: " + state + "; canvas coords x=" + canvas.mouseX + "; y=" +canvas.mouseY);
+            	
                 moveX = x - canvas.mouseX;
                 moveY = y - canvas.mouseY;
             }
@@ -567,7 +564,13 @@ public class MouseOps extends MouseInputAdapter {
                 }
             }
          
+            canvas.setPosInfo( x, y );
+            
+         /*   System.out.println("Mouse coords x=" + x + ";y=" + y);
+            System.out.println("MoveObj x=" + moveX + ";y=" + moveY);*/ 
             canvas.moveObjects( moveX, moveY );
+            
+            
             canvas.mouseX += moveX;
             canvas.mouseY += moveY;
             
@@ -892,7 +895,7 @@ public class MouseOps extends MouseInputAdapter {
             new ImageDialog( ClassEditor.getInstance(), null ).setVisible( true );
     } // openTextEditor    
 
-    void destroy() {
+    public void destroy() {
         canvas = null;
         draggedBreakPoint = null;
         draggedObject = null;
