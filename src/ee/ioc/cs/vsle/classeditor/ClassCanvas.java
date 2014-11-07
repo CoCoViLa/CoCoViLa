@@ -69,7 +69,9 @@ public class ClassCanvas extends Canvas{
 		        Graphics2D g2 = (Graphics2D) g;
 		        
 		        //     hide or show BoundingBox
-		        iconPalette.boundingbox.setEnabled( !isBBPresent() );
+		        if(iconPalette != null){
+		        	iconPalette.boundingbox.setEnabled( !isBBPresent() );
+		        }
 		        
 		        // coordinates
 		          int rectX = Math.min( mListener.startX, mouseX );
