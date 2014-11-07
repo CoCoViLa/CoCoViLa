@@ -18,7 +18,6 @@ import javax.swing.event.ChangeListener;
 import ee.ioc.cs.vsle.common.ops.State;
 import ee.ioc.cs.vsle.editor.PaletteBase;
 import ee.ioc.cs.vsle.util.FileFuncs;
-import ee.ioc.cs.vsle.vclass.Canvas;
 
 /**
  * Class Editor toolbar.

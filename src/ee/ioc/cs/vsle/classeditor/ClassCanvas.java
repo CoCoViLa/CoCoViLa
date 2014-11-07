@@ -4,7 +4,10 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.util.ArrayList;
+
+import javax.swing.JPanel;
 
 import ee.ioc.cs.vsle.editor.State;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
@@ -15,6 +18,7 @@ import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.Port;
 import ee.ioc.cs.vsle.vclass.RelObj;
 import ee.ioc.cs.vsle.vclass.VPackage;
+import ee.ioc.cs.vsle.vclass.Canvas.DrawingArea;
 import ee.ioc.cs.vsle.vclass.Canvas.MoveEdit;
 
 public class ClassCanvas extends Canvas{
@@ -41,91 +45,102 @@ public class ClassCanvas extends Canvas{
     protected void initialize() {
     	super.initialize();
         mListener = new MouseOps( this );     
-        drawingArea.addMouseListener( mListener );
+       //DrawingArea 
+     //  drawingArea =  getDrawingArea();
+       drawingArea.addMouseListener( mListener );
+     //   super.drawingArea.add
         drawingArea.addMouseMotionListener( mListener );
-        drawingArea.removeMouseListener( super.mListener );
-        drawingArea.removeMouseMotionListener( super.mListener );
+    }
+    
+    @Override
+    public DrawingArea getDrawingArea() {
+    	drawingArea = new DrawingArea();
+    	drawingArea.init();
+        return  (DrawingArea) drawingArea;
     }
 
-    
-    
-    public void paintComponent( Graphics g ){ 
-    	//super.paintComponent(g);
-    	Graphics2D g2 = (Graphics2D) g;
-    	
-    	// 	hide or show BoundingBox
-    	iconPalette.boundingbox.setEnabled( !isBBPresent() );
-    	
-    	// coordinates
-    	  int rectX = Math.min( mListener.startX, mouseX );
-          int rectY = Math.min( mListener.startY, mouseY );
-          int width = Math.abs( mouseX - mListener.startX );
-          int height = Math.abs( mouseY - mListener.startY );
-    	
-    	// Draw Shapes
-    	    	
-    	 if ( mListener.state.equals( State.drawArc1 ) ) {
-             g.drawRect( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight );
-             g.drawLine( mListener.startX + mListener.arcWidth / 2, mListener.startY + mListener.arcHeight / 2, mouseX,
-                     mouseY );
-         } else if ( mListener.state.equals( State.drawArc2 ) ) {
-             if ( mListener.fill ) {
-                 g2.fillArc( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight,
-                         mListener.arcStartAngle, mListener.arcAngle );
+    public class DrawingArea extends Canvas.DrawingArea {
+       
+		private static final long serialVersionUID = 7866172800421330602L;
 
-             } else {
-                 g2.drawArc( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight,
-                         mListener.arcStartAngle, mListener.arcAngle );
-             }
-         }
-    	 
-    	 if ( !mListener.mouseState.equals( "released" ) ) {
+		@Override        
+        protected void paintComponent( Graphics g ) {
+			super.paintComponent(g);
+		        Graphics2D g2 = (Graphics2D) g;
+		        
+		        //     hide or show BoundingBox
+		        iconPalette.boundingbox.setEnabled( !isBBPresent() );
+		        
+		        // coordinates
+		          int rectX = Math.min( mListener.startX, mouseX );
+		          int rectY = Math.min( mListener.startY, mouseY );
+		          int width = Math.abs( mouseX - mListener.startX );
+		          int height = Math.abs( mouseY - mListener.startY );
+		        
+		        // Draw Shapes
+		                
+		         if ( mListener.state.equals( State.drawArc1 ) ) {
+		             g.drawRect( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight );
+		             g.drawLine( mListener.startX + mListener.arcWidth / 2, mListener.startY + mListener.arcHeight / 2, mouseX,
+		                     mouseY );
+		         } else if ( mListener.state.equals( State.drawArc2 ) ) {
+		             if ( mListener.fill ) {
+		                 g2.fillArc( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight,
+		                         mListener.arcStartAngle, mListener.arcAngle );
 
-         	if ( mListener.state.equals( State.dragBox ) 
-         			|| mListener.state.equals( State.boundingbox )) {
-	                g2.setColor( Color.gray );
-	                g2.drawRect( rectX, rectY, width, height );
-	            } else {
-	            	
-	                int red = mListener.color.getRed();
-	                int green = mListener.color.getGreen();
-	                int blue = mListener.color.getBlue();
+		             } else {
+		                 g2.drawArc( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight,
+		                         mListener.arcStartAngle, mListener.arcAngle );
+		             }
 
-	                int alpha = mListener.getTransparency();
-	                g2.setColor( new Color( red, green, blue, alpha ) );
+			
+		}	
+		         if ( !mListener.mouseState.equals( "released" ) ) {
 
-	                if ( mListener.lineType > 0 ) {
-	                    g2.setStroke( new BasicStroke( mListener.strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND,
-	                            50, new float[] { mListener.lineType, mListener.lineType }, 0 ) );
-	                } else {
-	                    g2.setStroke( new BasicStroke( mListener.strokeWidth ) );
-	                }
-	                
-	                if ( mListener.state.equals( State.drawRect ) ) {
-		                g2.setColor( mListener.color );
-		                g2.drawRect( rectX, rectY, width, height );
-		            } else if ( mListener.state.equals( State.drawFilledRect ) ) {
-		                g2.setColor( mListener.color );
-		                g2.fillRect( rectX, rectY, width, height );    
-                 } else if ( mListener.state.equals( State.drawLine ) ) {
-                     g2.drawLine( mListener.startX, mListener.startY, mouseX, mouseY );		                
-		            } else if ( mListener.state.equals( State.drawOval ) ) {
-		            	g2.setColor( mListener.color );
-		                g2.drawOval( rectX, rectY, width, height );
-		            } else if ( mListener.state.equals( State.drawFilledOval ) ) {
-		            	g2.setColor( mListener.color );
-		                g2.fillOval( rectX, rectY, width, height );
-                 } else if ( mListener.state.equals( State.drawArc ) ) {
-                     g.drawRect( rectX, rectY, width, height );
-                 } else if ( mListener.state.equals( State.drawFilledArc ) ) {
-                     g.drawRect( rectX, rectY, width, height );
-                 }
-	            }
-         	
-         }
+		             if ( mListener.state.equals( State.dragBox ) 
+		                     || mListener.state.equals( State.boundingbox )) {
+		                    g2.setColor( Color.gray );
+		                    g2.drawRect( rectX, rectY, width, height );
+		                } else {
+		                    
+		                    int red = mListener.color.getRed();
+		                    int green = mListener.color.getGreen();
+		                    int blue = mListener.color.getBlue();
+
+		                    int alpha = mListener.getTransparency();
+		                    g2.setColor( new Color( red, green, blue, alpha ) );
+
+		                    if ( mListener.lineType > 0 ) {
+		                        g2.setStroke( new BasicStroke( mListener.strokeWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND,
+		                                50, new float[] { mListener.lineType, mListener.lineType }, 0 ) );
+		                    } else {
+		                        g2.setStroke( new BasicStroke( mListener.strokeWidth ) );
+		                    }
+		            
+		                    if ( mListener.state.equals( State.drawRect ) ) {
+		                        g2.setColor( mListener.color );
+		                        g2.drawRect( rectX, rectY, width, height );
+		                    } else if ( mListener.state.equals( State.drawFilledRect ) ) {
+		                        g2.setColor( mListener.color );
+		                        g2.fillRect( rectX, rectY, width, height );    
+		                 } else if ( mListener.state.equals( State.drawLine ) ) {
+		                     g2.drawLine( mListener.startX, mListener.startY, mouseX, mouseY );                        
+		                    } else if ( mListener.state.equals( State.drawOval ) ) {
+		                        g2.setColor( mListener.color );
+		                        g2.drawOval( rectX, rectY, width, height );
+		                    } else if ( mListener.state.equals( State.drawFilledOval ) ) {
+		                        g2.setColor( mListener.color );
+		                        g2.fillOval( rectX, rectY, width, height );
+		                 } else if ( mListener.state.equals( State.drawArc ) ) {
+		                     g.drawRect( rectX, rectY, width, height );
+		                 } else if ( mListener.state.equals( State.drawFilledArc ) ) {
+		                     g.drawRect( rectX, rectY, width, height );
+		        }        
+
+		                }
+		         }
+		}
     }
-
-    
     public void setDrawOpenPorts(boolean drawOpenPorts) {
 		
 		this.drawOpenPorts = drawOpenPorts;		

@@ -18,7 +18,6 @@ import ee.ioc.cs.vsle.editor.ProgramRunnerEvent;
 import ee.ioc.cs.vsle.event.EventSystem;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.util.TypeUtil;
-import ee.ioc.cs.vsle.vclass.Canvas;
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.RelObj;
 
@@ -158,7 +157,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         return submenuOrder;
     }
 
-    private Component makeSubmenuRotation( final GObj obj, final Canvas canv ) {
+    private Component makeSubmenuRotation( final GObj obj, final ClassCanvas canv ) {
         JMenu menu = new JMenu( Menu.ROTATION );
 
         JMenuItem itemRotCw = new JMenuItem( Menu.ROTATE_CW );

@@ -23,7 +23,6 @@ import ee.ioc.cs.vsle.graphics.Oval;
 import ee.ioc.cs.vsle.graphics.Rect;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
-import ee.ioc.cs.vsle.vclass.Canvas;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;

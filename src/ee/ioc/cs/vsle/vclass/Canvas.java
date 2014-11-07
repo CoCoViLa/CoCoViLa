@@ -43,6 +43,7 @@ import ee.ioc.cs.vsle.ccl.PackageClassLoader;
 import ee.ioc.cs.vsle.classeditor.ClassEditor;
 import ee.ioc.cs.vsle.classeditor.IconPalette;
 import ee.ioc.cs.vsle.classeditor.KeyOps;
+import ee.ioc.cs.vsle.classeditor.ClassCanvas.DrawingArea;
 import ee.ioc.cs.vsle.common.ops.MouseOps;
 import ee.ioc.cs.vsle.editor.CodeViewer;
 import ee.ioc.cs.vsle.editor.DiagnosticsCollector;
@@ -605,27 +606,31 @@ public class Canvas extends JPanel implements ISchemeContainer {
     public String getSchemeName() {
         return getPackage().getSchemeClassName( getSchemeTitle() );
     }
+
+    public DrawingArea getDrawingArea() {
+    	DrawingArea drawingArea =  new DrawingArea();
+    	drawingArea.init();
+        return drawingArea;
+    }    
     
     protected void initialize() {
         setScheme(new Scheme(this));
-       // mListener = new MouseOps( this );
+        mListener = new MouseOps( this );
         keyListener = new KeyOps( this );
-        drawingArea = new DrawingArea();
-        drawingArea.setOpaque( true );
-        drawingArea.setBackground( Color.white );
-        setGridVisible( RuntimeProperties.isShowGrid() );
-        drawingArea.setFocusable( true );
+        drawingArea =  getDrawingArea();
+        
+        drawingArea.addMouseMotionListener( mListener );
+        drawingArea.addMouseMotionListener( mListener );
+        
         infoPanel = new JPanel( new GridLayout( 1, 2 ) );
-        posInfo = new JLabel();
-        //drawingArea.addMouseListener( mListener );
-       // drawingArea.addMouseMotionListener( mListener );
-        drawingArea.setPreferredSize( drawAreaSize );
+        posInfo = new JLabel();       
 
         // Initializes key listeners, for keyboard shortcuts.
         drawingArea.addKeyListener( keyListener );
 
         areaScrollPane = new JScrollPane( drawingArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED );
+ 
         setLayout( new BorderLayout() );
         
         this.setAutoscrolls(true);
@@ -1376,8 +1381,17 @@ public class Canvas extends JPanel implements ISchemeContainer {
         private static final long serialVersionUID = 1L;
 
         private final Stroke connectionStroke = new BasicStroke();
+        
+        public void init(){
+        	drawingArea.setOpaque( true );
+        	drawingArea.setBackground( Color.white );
+        	setGridVisible( RuntimeProperties.isShowGrid() );
+        	drawingArea.setFocusable( true );
+            drawingArea.setPreferredSize( drawAreaSize );
+        }
 
-        protected void drawGrid( Graphics2D g ) {
+
+        public void drawGrid( Graphics2D g ) {
 
             Rectangle vr = g.getClipBounds();
 
@@ -1408,6 +1422,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
             Graphics2D g2 = (Graphics2D) g;
 
             g2.setBackground( getBackground() );
+            
 
             g2.scale( scale, scale );
 
