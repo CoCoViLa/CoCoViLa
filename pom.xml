@@ -10,6 +10,7 @@
 
   <properties>
     <parser.generated.src>${basedir}/src/main/java/ee/ioc/cs/vsle/parser/generated</parser.generated.src>
+    <parser.generated.package>ee.ioc.cs.vsle.parser.generated</parser.generated.package>
   </properties>
 
   <dependencies>
@@ -55,7 +56,7 @@
             <configuration>
               <arguments>
                 <argument>-package</argument>
-                <argument>ee.ioc.cs.vsle.parser.generated</argument>
+                <argument>${parser.generated.package}</argument>
               </arguments>
               <outputDirectory>${parser.generated.src}</outputDirectory>
             </configuration>
