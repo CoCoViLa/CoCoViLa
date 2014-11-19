@@ -252,11 +252,18 @@ public abstract class CCL extends URLClassLoader {
     protected IErrorHandlingPolicy getErrorHandlingPolicy() {
         return new IErrorHandlingPolicy() {
 
+            @Override
             public boolean proceedOnErrors() {
                 return true;
             }
 
+            @Override
             public boolean stopOnFirstError() {
+                return false;
+            }
+
+            @Override
+            public boolean ignoreAllErrors() {
                 return false;
             }
         };

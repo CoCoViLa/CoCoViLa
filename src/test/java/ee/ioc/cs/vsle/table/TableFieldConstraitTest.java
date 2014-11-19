@@ -1,18 +1,17 @@
 /**
- * 
- */
+*
+*/
 package ee.ioc.cs.vsle.table;
 
 import org.junit.*;
 
-import ee.ioc.cs.vsle.table.TableFieldConstraint.*;
-
+import static ee.ioc.cs.vsle.table.TableFieldConstraint.*;
 
 /**
- * @author pavelg
- *
- */
-public class TableFieldConstraitTests {
+* @author pavelg
+*
+*/
+public class TableFieldConstraitTest {
 
     @Test
     public void range() {
@@ -38,7 +37,7 @@ public class TableFieldConstraitTests {
         Assert.assertTrue(rc.verify( 5 ));
         Assert.assertFalse(rc.verify( 6 ));
     }
-    
+
     @Test
     public void list() {
         List lc = new List();
