@@ -620,7 +620,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         drawingArea =  getDrawingArea();
         
         drawingArea.addMouseMotionListener( mListener );
-        drawingArea.addMouseMotionListener( mListener );
+        drawingArea.addMouseListener( mListener );
         
         infoPanel = new JPanel( new GridLayout( 1, 2 ) );
         posInfo = new JLabel();       

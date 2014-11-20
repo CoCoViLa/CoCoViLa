@@ -68,7 +68,7 @@ import ee.ioc.cs.vsle.util.FileFuncs;
 import ee.ioc.cs.vsle.util.GraphicsExporter;
 import ee.ioc.cs.vsle.util.SystemUtils;
 import ee.ioc.cs.vsle.util.db;
-import ee.ioc.cs.vsle.vclass.Canvas;
+
 import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
 import ee.ioc.cs.vsle.vclass.ClassObject;
@@ -500,7 +500,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		String packageName = canvas.getPackage().getName();
 
 		for (Component canv : tabbedPane.getComponents()) {
-			if (canv instanceof Canvas && packageName.equals(((Canvas) canv).getPackage().getName())) {
+			if (canv instanceof ClassCanvas && packageName.equals(((ClassCanvas) canv).getPackage().getName())) {
 				count++;
 			}
 		}
@@ -713,7 +713,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	 public void updateWindowTitle() {
 		 String windowTitle = WINDOW_TITLE;
 
-		 Canvas canvas = getCurrentCanvas();
+		 ClassCanvas canvas = getCurrentCanvas();
 		 if ( canvas != null ) {
 			 String packageName = canvas.getPackage().getName();
 			 String schemeTitle = canvas.getSchemeTitle();
@@ -757,7 +757,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		 }
 	 }
 
-	 public Canvas newSchemeTab(VPackage pkg, InputStream inputStream) {
+	 public ClassCanvas newSchemeTab(VPackage pkg, InputStream inputStream) {
 		 assert SwingUtilities.isEventDispatchThread();
 
 		 ClassCanvas c = new ClassCanvas(pkg,
@@ -767,8 +767,8 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		 return c;
 	 }
 
-	 public Canvas newSchemeTab(VPackage pkg, String pathToScheme) {
-		 Canvas c;
+	 public ClassCanvas newSchemeTab(VPackage pkg, String pathToScheme) {
+		 ClassCanvas c;
 		 try {
 			 c = newSchemeTab( pkg, new FileInputStream( pathToScheme ) );
 			 c.setLastScheme( pathToScheme );
@@ -779,7 +779,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		 return c;
 	 }
 
-	 public void closeSchemeTab( Canvas canv ) {
+	 public void closeSchemeTab( ClassCanvas canv ) {
 		 if ( canv == null )
 			 return;
 		 canv.destroy();
@@ -792,7 +792,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	 /**
 	  * Closes the given tab
 	  */
-	  void closeCanvas( Canvas canv ) {
+	  void closeCanvas( ClassCanvas canv ) {
 		 RuntimeProperties.removeOpenPackage( canv.getPackage().getPath() );
 		 closeSchemeTab( canv );
 	  }
@@ -1005,6 +1005,20 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 	  }   
 
+	  public void  loadDefaultPortGraphic(boolean openFlag, IconPort port) {
+		  
+		  ClassGraphics defaultGraphics;
+		  if(openFlag){	  
+			  defaultGraphics = Port.DEFAULT_OPEN_GRAPHICS;
+			  } else defaultGraphics = Port.DEFAULT_CLOSED_GRAPHICS;
+		  Port targetPort = getCurrentCanvas().getObjectList().getPortById(port.getName());
+		  if(targetPort == null)
+			  return;
+ 
+		 getCurrentCanvas().mListener.repaintPort(targetPort, defaultGraphics, openFlag);  
+	  }
+	 
+	  
 	  public void loadPortGraphicClass(boolean openFlag, IconPort port) {
 		  File f = selectFile();
 		  if ( f != null ){
@@ -1078,7 +1092,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  ci = new ClassImport( file, packageClassNamesList, packageClassList );
 		  ccd.newJList( packageClassNamesList );
 		  ccd.setLocationRelativeTo( rootPane );
-		 // ccd.setListData(packageClassNamesList.toArray());
+		  // ccd.setListData(packageClassNamesList.toArray());
 		  //ccd.getRootPane().
 
 		  ccd.setVisible( true );
@@ -1088,19 +1102,30 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  System.out.println("selection " + selection);
 
 		  ClassCanvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
-		  /*   Clear pane on new import */
-		  /* if(curCanvas != null){
-			  curCanvas.clearObjects();
+		  
+		  /* Flag to fire extra checks for classProperties and bounding box in case this is NOT the only class on Canvas */		  
+		  boolean onlyClass = true;
+		  if(curCanvas != null && curCanvas.getObjectList().size() > 0){		  
+			  int clearOnImport = JOptionPane.showConfirmDialog( null, "Clear Working Area?" );			
+			  if ( clearOnImport == JOptionPane.CANCEL_OPTION ) {
+				  return;
+			  }
+			  if ( clearOnImport == JOptionPane.YES_OPTION ) {
+				  /*   Clear pane on new import */
+				  curCanvas.clearObjects();
+				  onlyClass = true;
+			  } else if (clearOnImport == JOptionPane.NO_OPTION){
+				  onlyClass = false;
+			  }
+ 
 		  }
-		  Removed CleanUp */
-
 		  /*for (int i = 0; i < curCanvas.getComponentCount(); i++){
              	 curCanvas.getComponent(i);
     	}*/
-		  
+
 		  /* Temporary magic numbers */
-		  int classX = ( curCanvas.drawingArea.getWidth() / 3 );
-		  int classY = ( curCanvas.drawingArea.getHeight() / 3 );      
+		  int classX = 7;//( curCanvas.drawingArea.getWidth() / 3 );
+		  int classY = 7;//( curCanvas.drawingArea.getHeight() / 3 );      
 
 		  System.out.println("start import " + classX);
 
@@ -1114,24 +1139,26 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 				  ClassEditor classEditor = ClassEditor.getInstance();
 				  PackageClass pClass = pkg.getClass(selection);
-				  
-				  classObject = new ClassObject( pClass.getName(), pClass.getDescription(),pClass.getIcon(),pClass.getComponentType());
-				 
-				  emptyClassFields();
-				//  fields.clear();  @CheckThis!!!
 
-				  if (curCanvas != null) {
+				  if(onlyClass && curCanvas != null){
+					  classObject = new ClassObject( pClass.getName(), pClass.getDescription(),pClass.getIcon(),pClass.getComponentType());
+					  emptyClassFields();
 					  classEditor.getCurrentCanvas().setPackage(pkg);
 					  classEditor.updateWindowTitle();
+					  //  fields.clear();  @CheckThis!!!
 				  }
-
 				  if (pClass.getGraphics() != null && pClass.getGraphics().getShapes() != null) {
 					  ClassGraphics classGraphics = pClass.getGraphics();
-					  BoundingBox box = new BoundingBox( classGraphics.getBoundX(), classGraphics.getBoundY(), 
-							  classGraphics.getBoundWidth(), classGraphics.getBoundHeight() );
+					  BoundingBox box = null;
+					  /* don't load 2nd boundingBox if !onlyClass */
+					  if(onlyClass){							
+						  box = new BoundingBox( classGraphics.getBoundX(), classGraphics.getBoundY(), 
+								  classGraphics.getBoundWidth(), classGraphics.getBoundHeight() );
+					  }
 					  if (box != null) {
-						  curCanvas.mListener.addShape(box, classX, classY);	
-						  curCanvas.iconPalette.boundingbox.setEnabled( false );
+						  curCanvas.mListener.addShape(box, classX, classY);							
+						  // @TODO BB button on palette - check!!!!
+						  // curCanvas.iconPalette.boundingbox.setEnabled( false );
 					  }                	
 
 					  ArrayList<Shape> shapes = classGraphics.getShapes();
@@ -1146,10 +1173,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					  }
 				  }
 
-				  if (pClass.getFields() != null) {
-					  
+				  if (onlyClass && pClass.getFields() != null) {
+
 					  dbrClassFields = classObject.setClassFields(pClass.getFields());	
-					  
+
 					  for (ClassField classField : classObject.fields) {
 						  ClassGraphics classGraphics = classField.getKnownGraphics();
 						  if (classGraphics != null) {
@@ -1160,11 +1187,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 						  }
 					  }
 				  }
-				  
+
 				  curCanvas.drawingArea.repaint();
 				  /*Port temp = curCanvas.getObjectList().getPortById("1");     //// Test data.
                 System.out.println("classEditor port check" + temp.toString()); */
-                classEditor.setPackageFile(file);
+				  classEditor.setPackageFile(file);
 			  }
 		  } catch ( Exception exc ) {
 			  exc.printStackTrace();
@@ -1197,7 +1224,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				  VPackage pkg;
 				  if ( (pkg = PackageXmlProcessor.load(file)) != null ) {
 					  RuntimeProperties.setLastPath( file.getAbsolutePath() );
-					  Canvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
+					  ClassCanvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
 					  ClassEditor classEditor = ClassEditor.getInstance();
 					  if (curCanvas != null) {
 						  classEditor.getCurrentCanvas().setPackage(pkg);
@@ -1225,7 +1252,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  
 		  if (getCurrentCanvas().isBBPresent()){
 			  
-			  	  if(classObject.componentType.getXmlName().equals("port-graphics")){
+			  	  if(classObject.componentType.getXmlName().equals("template")){
 			  		  savePortGraphics();
 			  	  } else {
 			  		  saveToPackage();

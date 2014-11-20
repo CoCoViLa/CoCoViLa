@@ -48,10 +48,20 @@ public class IconPortPopupMenu
 	menuItemOP.setActionCommand(Menu.EDIT_OPEN);
 	this.add(menuItemOP);
 	
+	JMenuItem menuItemDO = new JMenuItem(Menu.DEFAULT_OPEN);
+	menuItemDO.addActionListener(this);
+	menuItemDO.setActionCommand(Menu.DEFAULT_OPEN);
+	this.add(menuItemDO);	
+	
 	JMenuItem menuItemCP = new JMenuItem(Menu.EDIT_CLOSED);
 	menuItemCP.addActionListener(this);
 	menuItemCP.setActionCommand(Menu.EDIT_CLOSED);
 	this.add(menuItemCP);
+	
+	JMenuItem menuItemDC = new JMenuItem(Menu.DEFAULT_CLOSED);
+	menuItemDC.addActionListener(this);
+	menuItemDC.setActionCommand(Menu.DEFAULT_CLOSED);
+	this.add(menuItemDC);	
   } // IconPortPopupMenu constructor
 
   /**
@@ -64,10 +74,16 @@ public class IconPortPopupMenu
 	  }
 	  else if ( e.getActionCommand().equals( Menu.EDIT_OPEN ) ) {
 	    	ClassEditor.getInstance().loadPortGraphicClass(true, port);
-	    }     	  
+	    }   
+	  else if ( e.getActionCommand().equals( Menu.DEFAULT_OPEN ) ) {
+	    	ClassEditor.getInstance().loadDefaultPortGraphic(true, port);
+	    }   
 	  else if ( e.getActionCommand().equals( Menu.EDIT_CLOSED ) ) {
 	    	ClassEditor.getInstance().loadPortGraphicClass(false, port);
-	    }     	  
+	    }   
+	  else if ( e.getActionCommand().equals( Menu.DEFAULT_CLOSED ) ) {
+	    	ClassEditor.getInstance().loadDefaultPortGraphic(false, port);
+	    }   
   } // actionPerformed
 
 }

@@ -199,11 +199,12 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
      
     public void repaintPort( Port p, ClassGraphics graphics, boolean openFlag ) {
     	
-    // cleanup graphics code	
-    
-     if(graphics.getShapes().get(0) != null){ 	
-    	 graphics.getShapes().get(0).setX(0);
-    	 graphics.getShapes().get(0).setY(0);
+    // cleanup graphics code	    
+     if(graphics.getShapes() != null){ 
+		 for ( Shape s : graphics.getShapes() ) {    	 
+			 s.setX(0);
+			 s.setY(0);
+		 }
      } else return;
    	 
      if(openFlag){            		 

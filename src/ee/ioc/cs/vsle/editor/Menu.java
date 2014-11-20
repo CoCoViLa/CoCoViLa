@@ -128,6 +128,8 @@ public class Menu {
      * Port properties popup
      */
     public static final String EDIT_OPEN = "Edit port open graphics";
+    public static final String DEFAULT_OPEN = "Restore Default open Graphics";
     public static final String EDIT_CLOSED = "Edit port closed graphics";
+    public static final String DEFAULT_CLOSED = "Restore Default closed Graphics";
     
 }
