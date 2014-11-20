@@ -5,18 +5,20 @@ http://sourceforge.net/projects/cocovila/
 
 
 ### Building:
-(requires Apache Ant http://ant.apache.org)
+(requires Maven)
 
-`cd <path to CoCoViLa>/src`
+`cd <path to CoCoViLa>/`
 
-`ant compile`
+`mvn clean install`
 
 ### Running CoCoViLa Scheme Editor:
 
-`ant run-se`
+`ant run-se` (TODO: fix)
 
 ### Running CoCoViLa Class Editor:
 
-`ant run-ce`
+`ant run-ce` (TODO: fix)
 
 More info: http://www.cs.ioc.ee/cocovila/ant.php
+
+[![Build Status](https://travis-ci.org/MastaP/CoCoViLa.svg?branch=master)](https://travis-ci.org/MastaP/CoCoViLa)
