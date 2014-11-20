@@ -1,11 +1,10 @@
 # CoCoViLa (Compiler Compiler for Visual Languages) 
 is a framework for design and implementation of visual specification languages, where the visual specification could be directly translated into executable code.
 
-http://sourceforge.net/projects/cocovila/
-
+Homepage: http://www.cs.ioc.ee/cocovila
 
 ### Building:
-(requires Maven)
+(requires Apache Maven http://maven.apache.org/)
 
 `cd <path to CoCoViLa>/`
 
@@ -21,4 +20,5 @@ http://sourceforge.net/projects/cocovila/
 
 More info: http://www.cs.ioc.ee/cocovila/ant.php
 
+### Continuous Integration
 [![Build Status](https://travis-ci.org/MastaP/CoCoViLa.svg?branch=master)](https://travis-ci.org/MastaP/CoCoViLa)
