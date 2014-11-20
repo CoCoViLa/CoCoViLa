@@ -13,11 +13,11 @@ http://sourceforge.net/projects/cocovila/
 
 ### Running CoCoViLa Scheme Editor:
 
-`ant run-se` (TODO: fix)
+`mvn exec:java -Prun-se`
 
 ### Running CoCoViLa Class Editor:
 
-`ant run-ce` (TODO: fix)
+`mvn exec:java -Prun-ce`
 
 More info: http://www.cs.ioc.ee/cocovila/ant.php
 
