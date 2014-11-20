@@ -73,17 +73,26 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             this.add( itemViewCode );
         }
         
-        itemProperties = new JMenuItem( Menu.PROPERTIES, KeyEvent.VK_R );
-        itemProperties.addActionListener( this );
-        itemProperties.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK ) );
-        this.add( itemProperties );
-
-        if (object != null && object.getShapes() != null && object.getShapes().get(0) instanceof BoundingBox){
+        
+        if (object != null && object.getShapes() != null && object.getShapes().get(0) instanceof BoundingBox){    
+        	
+        	this.remove(0); /* This removes Clone action for Bounding Box */
+        	
+        	itemProperties = new JMenuItem( Menu.CLASS_PROPERTIES , KeyEvent.VK_R ); /* Item Property == ClassProperty for BB*/
+            itemProperties.addActionListener( this );
+            itemProperties.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK ) );
+            this.add( itemProperties );
+        	     	
         	itemOrder = new JMenuItem( Menu.MENU_ORDER );
         	enableDisableMenuItem(itemOrder, false);
         	this.add( itemOrder);
         	return;
         }
+        
+        itemProperties = new JMenuItem( Menu.PROPERTIES, KeyEvent.VK_R );
+        itemProperties.addActionListener( this );
+        itemProperties.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK ) );
+        this.add( itemProperties );
         
         if (object != null) {
             this.add(makeSubmenuOrder());
@@ -273,6 +282,8 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             canvas.setAsSuperClass( object, true );
         } else if ( Menu.UNSET_AS_SUPER.equals( cmd ) ) {
             canvas.setAsSuperClass( object, false );
+        } else if (Menu.CLASS_PROPERTIES.equals(cmd)){
+        	new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true );
         }
     }
 }
