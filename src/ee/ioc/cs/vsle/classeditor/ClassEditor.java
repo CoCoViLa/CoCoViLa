@@ -68,11 +68,11 @@ import ee.ioc.cs.vsle.util.FileFuncs;
 import ee.ioc.cs.vsle.util.GraphicsExporter;
 import ee.ioc.cs.vsle.util.SystemUtils;
 import ee.ioc.cs.vsle.util.db;
-
 import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
 import ee.ioc.cs.vsle.vclass.ClassObject;
 import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.ObjectList;
 import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
 import ee.ioc.cs.vsle.vclass.Port;
@@ -1124,8 +1124,24 @@ public class ClassEditor extends JFrame implements ChangeListener {
     	}*/
 
 		  /* Temporary magic numbers */
-		  int classX = 7;//( curCanvas.drawingArea.getWidth() / 3 );
-		  int classY = 7;//( curCanvas.drawingArea.getHeight() / 3 );      
+		  //( curCanvas.drawingArea.getWidth() / 3 );
+		  //( curCanvas.drawingArea.getHeight() / 3 );      
+		  
+		  /* Set offset for multiple imports */
+		  int classY = 5; /* basic offset*/
+		  int classX = 5;
+		  if(onlyClass){
+			  classY = 7; /* single class position */
+			  classX = 7;
+		  } else {
+		      ObjectList olist = curCanvas.getObjectList();
+	            for ( GObj obj : olist) {
+	            	if ((obj.getX() + obj.getWidth()) > classX) {
+	            		classX = obj.getX() + obj.getWidth();
+	            	}	            	
+	            }
+		  }
+		  
 
 		  System.out.println("start import " + classX);
 
