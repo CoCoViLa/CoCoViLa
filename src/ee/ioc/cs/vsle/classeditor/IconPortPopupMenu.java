@@ -36,12 +36,15 @@ public class IconPortPopupMenu
 	
 	
 	this.add(ClassEditor.getInstance().deleteAction);
+	this.add(ClassEditor.getInstance().cloneAction);
 
 	this.addSeparator();
 	JMenuItem menuItem = new JMenuItem(Menu.PROPERTIES, KeyEvent.VK_P);
 	menuItem.addActionListener(this);
 	menuItem.setActionCommand(Menu.PROPERTIES);
 	this.add(menuItem);
+	
+	this.addSeparator();
 	
 	JMenuItem menuItemOP = new JMenuItem(Menu.EDIT_OPEN);
 	menuItemOP.addActionListener(this);

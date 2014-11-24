@@ -42,6 +42,7 @@ import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.ccl.PackageClassLoader;
 import ee.ioc.cs.vsle.classeditor.ClassEditor;
 import ee.ioc.cs.vsle.classeditor.IconPalette;
+import ee.ioc.cs.vsle.classeditor.IconPort;
 import ee.ioc.cs.vsle.classeditor.KeyOps;
 import ee.ioc.cs.vsle.classeditor.ClassCanvas.DrawingArea;
 import ee.ioc.cs.vsle.common.ops.MouseOps;
@@ -1090,6 +1091,15 @@ public class Canvas extends JPanel implements ISchemeContainer {
         // clone every selected object
         for (GObj obj : scheme.getSelectedObjects()) {
             GObj newObj = obj.clone();
+            if (obj.getName().equals("port")) {
+            	String newName = JOptionPane.showInputDialog(this, "Cloned Port Name:");  
+            	if(newName == null || newName == ""){
+            		newName = "(cloned port)";
+            	}
+            	if(newObj.getPortList().get(0) != null){
+            		newObj.getPortList().get(0).setName(newName);            		
+            	} 
+            }
             newObj.setPosition( newObj.getX() + 20, newObj.getY() + 20 );
             newObjects.addAll( newObj.getComponents() );
 
@@ -1147,7 +1157,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
         }
 
         for ( GObj obj : newObjects )
-            obj.setName( genObjectName( vPackage.getClass( obj.getClassName() ), obj ) );
+        	
+        	/*DO NOT Generate new name for port */
+        	if(!obj.getName().equals("port")){
+        		obj.setName( genObjectName( vPackage.getClass( obj.getClassName() ), obj ) );
+        	}
 
         getObjectList().addAll( newObjects );
 

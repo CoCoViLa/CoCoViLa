@@ -170,6 +170,10 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 	public String getName() {
 		return name;
 	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
 
 	public String getNameWithObject() {
 	    
