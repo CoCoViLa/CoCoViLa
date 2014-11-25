@@ -55,7 +55,7 @@ public class CodeViewer extends JFrame implements ActionListener,
     }
     
 	private CodeViewer(String name, String path, String extension) {
-		this(new File( path + name + extension ));
+		this(new File( path + File.separator + name + extension ));
 	}
 
 	public CodeViewer(String name, String path) {

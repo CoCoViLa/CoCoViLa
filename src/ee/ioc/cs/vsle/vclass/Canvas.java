@@ -1307,12 +1307,12 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * @param className the name of the metaclass to be edited
      */
     public void openClassCodeViewer( String className ) {
-        String editor = RuntimeProperties.getDefaultEditor();
+        String editor = RuntimeProperties.getDefaultEditor();        
         if (editor == null) {
             CodeViewer cv = new CodeViewer(className, getWorkDir());
             cv.setLocationRelativeTo( ClassEditor.getInstance() );
             cv.open();
-        } else {
+       } else {       
             File wd = new File(getWorkDir());
             String editCmd = editor.replace("%f",
                     new File(className + ".java").getPath());

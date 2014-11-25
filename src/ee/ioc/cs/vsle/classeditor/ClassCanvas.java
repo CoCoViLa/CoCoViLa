@@ -2,16 +2,24 @@ package ee.ioc.cs.vsle.classeditor;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import ee.ioc.cs.vsle.editor.CodeViewer;
+import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.editor.State;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.Shape;
+import ee.ioc.cs.vsle.graphics.Text;
+import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Canvas;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
@@ -50,6 +58,50 @@ public class ClassCanvas extends Canvas{
        drawingArea.addMouseListener( mListener );
      //   super.drawingArea.add
         drawingArea.addMouseMotionListener( mListener );
+    }
+    
+    public void updateBoundingBox(){
+    	GObj bbObj = null;
+    	for (GObj obj : getObjectList()) {
+            for (Shape shape : obj.getShapes()) {
+				if (shape instanceof BoundingBox) {
+					bbObj = obj;
+				} 								 
+			}           
+        }    	
+    	if(bbObj != null){
+    		 for (Shape shape : bbObj.getShapes()) {
+ 				if (shape instanceof Text) {
+ 					((Text) shape).setText(getTextForBoundingBox());
+ 				} 								 
+ 			}  
+    		repaint();
+    	}
+    }
+    
+    public String getTextForBoundingBox(){
+    	String text = "ClassNameNotDefined";
+    	if (ClassEditor.classObject != null && ClassEditor.classObject.getClassName() != null &&  ClassEditor.classObject.getClassName() != ""){
+    		text =  ClassEditor.classObject.getClassName();
+    	}
+    	return text;
+    }
+    
+    public Shape drawTextForBoundingBox(int x, int y){    	
+    	return drawTextForBoundingBox(x, y, getTextForBoundingBox());
+    }
+    
+    public Shape drawTextForBoundingBox(int x, int y, String text){    
+    			 
+    	/* Magic number to position text on BB */
+    			 if(x < 100){
+    				 x = x/2;
+    			 } else {
+    				 x = x - 100;
+    			 }    			 
+    	    	 Shape sText = new Text( x, y + 15,
+    			 new Font("Arial", Font.BOLD, 13), Color.black, text);
+    	return sText;
     }
     
     @Override
@@ -186,6 +238,43 @@ public class ClassCanvas extends Canvas{
 				}
 			}
          return isBbTop;
+    }
+    
+    @Override
+    public void openClassCodeViewer( String className ) {
+    	if (className == null){
+    		  JOptionPane.showMessageDialog(this, 
+                      "View Code failed: no class name\n" +
+                      "\nYou may need to revise the application settings.",
+                      "Error Running External Editor",
+                      JOptionPane.ERROR_MESSAGE);
+    		return;
+    	}
+        String editor = RuntimeProperties.getDefaultEditor();        
+        if (editor == null) {
+            CodeViewer cv = new CodeViewer(className, RuntimeProperties.getLastPath()); /* java file is in same dir as Package*/
+            cv.setLocationRelativeTo( ClassEditor.getInstance() );
+            cv.open();
+       } else {
+       // if(editor != null && className != null) {
+            File wd = new File(getWorkDir());
+            String editCmd = editor.replace("%f",
+                    new File(className + ".java").getPath());
+
+            try {
+                Runtime.getRuntime().exec(editCmd, null, wd);
+            } catch (IOException ex) {
+                if (RuntimeProperties.isLogDebugEnabled()) {
+                    db.p(ex);
+                }
+                JOptionPane.showMessageDialog(this, 
+                        "Execution of the command \"" + editCmd
+                        + "\" failed:\n" + ex.getMessage() +
+                        "\nYou may need to revise the application settings.",
+                        "Error Running External Editor",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+        }
     }
     
     /**

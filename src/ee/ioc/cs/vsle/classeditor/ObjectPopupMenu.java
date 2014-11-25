@@ -44,6 +44,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
     JMenuItem itemShowValues;
     JMenuItem itemOrder;
 
+
     JMenu submenuOrder;
 
     private ClassCanvas canvas;
@@ -82,6 +83,11 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             itemProperties.addActionListener( this );
             itemProperties.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK ) );
             this.add( itemProperties );
+            
+            itemViewCode = new JMenuItem( Menu.VIEWCODE , KeyEvent.  VK_V ); 
+            itemViewCode.addActionListener( this );
+            itemViewCode.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK ) );
+            this.add( itemViewCode ); 
         	     	
         	itemOrder = new JMenuItem( Menu.MENU_ORDER );
         	enableDisableMenuItem(itemOrder, false);
@@ -271,7 +277,8 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
 //            csd.setLocationRelativeTo( canvas );
 //            csd.setVisible( true );
         } else if ( Menu.VIEWCODE.equals( cmd ) ) {
-            canvas.openClassCodeViewer( object.getClassName() );
+        	canvas.openClassCodeViewer( ClassEditor.classObject.getClassName());
+            //canvas.openClassCodeViewer( object.getClassName() );
         } else if ( Menu.OBJ_SPEC.equals( cmd ) ) {
             new CodeViewer( object );
         } else if ( Menu.SHOW_VALUES.equals( cmd ) ) {
@@ -284,6 +291,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             canvas.setAsSuperClass( object, false );
         } else if (Menu.CLASS_PROPERTIES.equals(cmd)){
         	new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true );
+        	 canvas.updateBoundingBox();        	
         }
     }
 }

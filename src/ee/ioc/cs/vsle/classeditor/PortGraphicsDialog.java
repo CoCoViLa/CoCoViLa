@@ -67,7 +67,7 @@ public class PortGraphicsDialog extends JDialog {
 		    this.cc = cc;
 		    
 			bttnPanel.add(bttnOk);
-			bttnPanel.add(bttnView);
+		//	bttnPanel.add(bttnView);
 			bttnPanel.add(bttnCancel);
 
 			jl.setListData(pc.toArray());
@@ -75,7 +75,7 @@ public class PortGraphicsDialog extends JDialog {
 			
 			previewPane.getViewport().setView(picture);
 			
-			Dimension minimumSize = new Dimension(300, 250);
+			Dimension minimumSize = new Dimension(400, 350);
 		    scrollPane.setMinimumSize(minimumSize);
 		    previewPane.setMinimumSize(minimumSize);
 			
@@ -176,14 +176,14 @@ public class PortGraphicsDialog extends JDialog {
 		 try {
 
 			  VPackage pkg;
-			  if ( (pkg = PackageXmlProcessor.load(file)) != null ) {
+			  if ( (pkg = PackageXmlProcessor.loadWOValidation(file)) != null ) {
 				  PackageClass pClass = pkg.getClass(name);	
 				  if ( pClass.getGraphics() != null && pClass.getGraphics().getShapes() != null){
 					    GObj obj = new GObj();		
 					 //   Shapes TODO resize!
 						obj.setShapes(pClass.getGraphics().getShapes());
-						obj.setX(25);
-						obj.setY(25);
+						obj.setX(20);
+						obj.setY(20);
 						cc.addObject(obj);						
 						cc.repaint();
 					  

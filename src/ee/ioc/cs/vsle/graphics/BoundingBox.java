@@ -10,6 +10,7 @@ public class BoundingBox extends Shape implements Serializable {
     public static final String name = "BoundingBox";
     private static final Color BB_COLOR = new Color( Color.lightGray.getRed(), Color.lightGray.getGreen(), Color.lightGray.getBlue(), 200 );
     public int ownerClassId;
+    public String ownerClassName;
     
     public BoundingBox( int x, int y, int width, int height ) {
         super( x, y, width, height );
@@ -20,8 +21,15 @@ public class BoundingBox extends Shape implements Serializable {
    
 	public int getOwnerClassId() {
 		return ownerClassId;
+	}	
+
+	public String getOwnerClassName() {
+		return ownerClassName;
 	}
 
+	public void setOwnerClassName(String ownerClassName) {
+		this.ownerClassName = ownerClassName;
+	}
 
 	public void setOwnerClassId(int ownerClassId) {
 		this.ownerClassId = ownerClassId;

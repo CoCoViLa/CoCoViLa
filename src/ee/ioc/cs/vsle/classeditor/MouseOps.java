@@ -335,6 +335,14 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
         System.out.println("OBJECT X,Y,H,W " + obj.getX() + ", " + obj.getY()+ ", " + obj.getHeight()+ ", " + obj.getWidth());
         System.out.println("////////// shape " + s.toText());
+        
+        
+        /* Bounding Box is special */
+        if(s instanceof BoundingBox){        
+        	 /*Shape sText = new Text((s.getX() + obj.getWidth()- 80), (s.getY() + 20),  
+        			 new Font("Arial", Font.BOLD, 13), Color.black, "ClassNameNotDefined");*/
+        	 shapes.add(canvas.drawTextForBoundingBox(s.getX() + obj.getWidth(), s.getY()));
+        }
   
         if (s instanceof Text) {
 //        	obj.setHeight(15);

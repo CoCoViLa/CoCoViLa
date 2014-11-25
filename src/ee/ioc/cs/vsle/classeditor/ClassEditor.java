@@ -1037,7 +1037,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 			  PopupCanvas popupCanvas = new PopupCanvas(getCurrentPackage(), f.getParent() + File.separator);
 
-		   	  PortGraphicsDialog dialog = new PortGraphicsDialog( packageClassNamesList, "Select Port Graphic Class", rootPane, popupCanvas, f, openFlag);
+		   	  PortGraphicsDialog dialog = new PortGraphicsDialog( packageClassNamesList, "Select Template", rootPane, popupCanvas, f, openFlag);
 
 			  dialog.newJList( packageClassNamesList );			  
 			  dialog.setVisible( true );
@@ -1057,8 +1057,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 	  public void loadClass() {
 		  File f = selectFile();
-		  if ( f != null )
-			  importClassFromPackage( f );
+		  if ( f != null ){
+			  importClassFromPackage( f);
+		  }
+			  
 	  }  
 
 
@@ -1087,17 +1089,26 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  // curCanvas.repaint();
 	  }
 
-	  public void importClassFromPackage( File file ) {
+	  public void importClassFromPackage( File file) {
 
 		  ci = new ClassImport( file, packageClassNamesList, packageClassList );
-		  ccd.newJList( packageClassNamesList );
-		  ccd.setLocationRelativeTo( rootPane );
-		  // ccd.setListData(packageClassNamesList.toArray());
-		  //ccd.getRootPane().
+		  
+		  PopupCanvas popupCanvas = new PopupCanvas(getCurrentPackage(), file.getParent() + File.separator);
+
+	   	  PortGraphicsDialog dialog = new PortGraphicsDialog( packageClassNamesList, "Import Class", rootPane, popupCanvas, file, true);
+
+		  dialog.newJList( packageClassNamesList );			  
+		  dialog.setVisible( true );
+		  dialog.repaint();
+		  
+		 /* ccd.newJList( packageClassNamesList );
+		   ccd.setLocationRelativeTo( rootPane );
+		   ccd.setListData(packageClassNamesList.toArray());
+		   ccd.getRootPane().
 
 		  ccd.setVisible( true );
-		  ccd.repaint();
-		  String selection = ccd.getSelectedValue();
+		  ccd.repaint();*/
+		  String selection = dialog.getSelectedValue();
 
 		  System.out.println("selection " + selection);
 
@@ -1263,7 +1274,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  
 		  if (classObject == null || !classObject.validateBasicProperties()){ 
 		 
-			  new ClassPropertiesDialog( dbrClassFields, false );
+			  new ClassPropertiesDialog( dbrClassFields, false );			 
 		  }
 		  
 		  if (getCurrentCanvas().isBBPresent()){
@@ -1403,6 +1414,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			  */
 			   int bX = 0; int bY = 0; int bW = 0; int bH = 0;   /*Use activeBB 02.10AM*/
 	
+			   //getCurrentCanvas().getBoundingBox();
 	
 			   for ( GObj obj : selectedObjects ) {
 				   for (Shape sh : obj.getShapes()) {
@@ -1465,6 +1477,8 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					   pc.addPort(port);
 				   }            	
 			   }
+			   
+			   
 
 			   if(needConfirm){
 				   int dropShapes = JOptionPane.showConfirmDialog( null, "Some shapes are out of bounds and will not be exported" );
@@ -1499,6 +1513,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 				   if ( fieldType != null ) {
 					   ClassField cf = new ClassField(fieldName, fieldType, fieldValue);
+					   fields.add(cf);
 					   pc.addField( cf );
 				   }
 			   }

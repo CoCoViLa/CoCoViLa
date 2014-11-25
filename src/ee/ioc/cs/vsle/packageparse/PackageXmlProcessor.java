@@ -1,7 +1,5 @@
 package ee.ioc.cs.vsle.packageparse;
 
-import static ee.ioc.cs.vsle.graphics.Shape.createColor;
-
 import java.awt.*;
 import java.io.*;
 import java.net.*;
@@ -127,6 +125,11 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
     
     @Override
     public VPackage parse() {
+    	return parse(true);
+    }
+    
+   
+    public VPackage parse(boolean validate) {
         
         if( RuntimeProperties.isLogDebugEnabled() )
             db.p( "Starting parsing package: " + xmlFile.getAbsolutePath() );
@@ -162,12 +165,13 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             }
         } 
         
-        try {
-            checkProblems(null);// "Error parsing package file " + xmlFile.getName() );
-        } catch( Exception e ) {
-            return null;
+        if(validate){
+        	try {
+        		checkProblems(null);// "Error parsing package file " + xmlFile.getName() );
+        	} catch( Exception e ) {
+        		return null;
+        	}
         }
-        
         return pack;
     }
     
@@ -894,6 +898,16 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         }
         
         return graphicsEl;
+    }
+    
+    public static VPackage loadWOValidation(File f) {
+    	PackageXmlProcessor pxp = new PackageXmlProcessor(f);
+    	   VPackage pack = pxp.parse(false);
+    	   pxp.collector = null;
+           pxp.xmlFile = null;
+           pxp.ERROR_HANDLER = null;
+           
+           return pack;
     }
     
     public static VPackage load(File f) {
