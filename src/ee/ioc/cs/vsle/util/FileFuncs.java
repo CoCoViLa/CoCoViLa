@@ -240,8 +240,9 @@ public class FileFuncs {
 		boolean status = false;
 		if (file != null && !file.isDirectory()) {
 			PrintWriter out = null;
-			try {
-				out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+			try {			
+				out = new PrintWriter(new FileOutputStream(file));
+				//out = new PrintWriter(new BufferedWriter(new FileWriter(file)));
 				out.print(text);
 				if (text != null && !text.endsWith("\n")) {
 				    out.println();
