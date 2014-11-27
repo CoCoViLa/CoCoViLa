@@ -18,3 +18,5 @@ src/main/java/ee/ioc/cs/vsle/parser/generated
 target
 *.iml
 rebel.xml
+dist.properties
+keystore

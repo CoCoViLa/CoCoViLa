@@ -74,20 +74,126 @@
         </configuration>
       </plugin>
 
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.5</version>
+        <configuration>
+          <archive>
+            <manifest>
+              <mainClass>ee.ioc.cs.vsle.editor.Editor</mainClass>
+            </manifest>
+          </archive>
+        </configuration>
+      </plugin>
+
       <!-- Setup clean -->
       <plugin>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>2.4.1</version>
+        <version>2.6.1</version>
         <configuration>
           <filesets>
             <fileset>
-              <directory>generated</directory>
               <directory>${parser.generated.src}</directory>
+            </fileset>
+            <fileset>
+              <directory>${basedir}/generated</directory>
             </fileset>
           </filesets>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>properties-maven-plugin</artifactId>
+        <version>1.0-alpha-2</version>
+        <executions>
+          <execution>
+            <phase>initialize</phase>
+            <goals>
+              <goal>read-project-properties</goal>
+            </goals>
+            <configuration>
+              <files>
+                <file>${basedir}/dist.properties</file>
+              </files>
+              <quiet>true</quiet>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+
+      <plugin>
+        <!-- Prepare Java Web Start stuff, use 'mvn deploy' and find the files under target/jnlp -->
+        <!--http://stackoverflow.com/questions/5195545/looking-for-webstart-maven-plugin-sample-application-->
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>webstart-maven-plugin</artifactId>
+        <version>1.0-beta-6</version>
+        <executions>
+          <execution>
+            <phase>deploy</phase>
+            <goals>
+              <goal>jnlp-inline</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <makeArchive>false</makeArchive>
+          <excludeTransitive>false</excludeTransitive>
+          <libPath>lib</libPath>
+          <updateManifestEntries>
+            <Permissions>all-permissions</Permissions>
+            <Codebase>*</Codebase>
+          </updateManifestEntries>
+          <jnlp>
+            <inputTemplateResourcePath>${project.basedir}</inputTemplateResourcePath>
+            <inputTemplate>src/main/jnlp/CoCoViLa.jnlp.vm</inputTemplate>
+            <outputFile>CoCoViLa.jnlp</outputFile>
+            <mainClass>ee.ioc.cs.vsle.editor.Editor</mainClass>
+            <j2seVersion>1.6+</j2seVersion>
+            <offlineAllowed>true</offlineAllowed>
+            <spec>6.0+</spec>
+          </jnlp>
+
+          <sign>
+            <keystore>${basedir}/keystore</keystore>
+            <keypass>${project.dist.keystore.keypass}</keypass>
+            <storepass>${project.dist.keystore.keypass}</storepass>
+            <alias>CoCoViLa</alias>
+            <validity>3650</validity>
+            <!-- only required for generating the keystore -->
+            <dnameCn>${project.dist.keystore.dnameCn}</dnameCn>
+            <dnameOu>Software Lab</dnameOu>
+            <dnameO>Institute of Cybernetics</dnameO>
+            <dnameL>Tallinn</dnameL>
+            <dnameSt>Harjumaa</dnameSt>
+            <dnameC>EE</dnameC>
+
+            <verify>true</verify>
+            <!-- KEYSTORE MANAGEMENT -->
+            <keystoreConfig>
+              <delete>true</delete>
+              <gen>true</gen>
+            </keystoreConfig>
+          </sign>
+          <!-- BUILDING PROCESS -->
+          <gzip>true</gzip>
+          <outputJarVersions>true</outputJarVersions>
+          <verbose>true</verbose>
+        </configuration>
+      </plugin>
     </plugins>
+
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <configuration>
+            <skip>true</skip>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
   </build>
 
   <profiles>
