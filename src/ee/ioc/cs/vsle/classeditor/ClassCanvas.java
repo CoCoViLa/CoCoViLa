@@ -21,13 +21,9 @@ import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Canvas;
-import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.Port;
-import ee.ioc.cs.vsle.vclass.RelObj;
 import ee.ioc.cs.vsle.vclass.VPackage;
-import ee.ioc.cs.vsle.vclass.Canvas.DrawingArea;
-import ee.ioc.cs.vsle.vclass.Canvas.MoveEdit;
 
 public class ClassCanvas extends Canvas{
 
@@ -89,6 +85,16 @@ public class ClassCanvas extends Canvas{
     
     public Shape drawTextForBoundingBox(int x, int y){    	
     	return drawTextForBoundingBox(x, y, getTextForBoundingBox());
+    }
+    
+    
+    public void clearObjects() {
+    	super.clearObjects();
+    	if(iconPalette.boundingbox.isSelected()){
+    		iconPalette.selection.setSelected(true);
+    		iconPalette.boundingbox.setSelected(false);
+    	}
+        drawingArea.repaint();
     }
     
     public Shape drawTextForBoundingBox(int x, int y, String text){    
