@@ -21,4 +21,4 @@ Homepage: http://www.cs.ioc.ee/cocovila
 More info: http://www.cs.ioc.ee/cocovila/ant.php
 
 ### Continuous Integration
-[![Build Status](https://travis-ci.org/MastaP/CoCoViLa.svg?branch=master)](https://travis-ci.org/MastaP/CoCoViLa)
+[![Build Status](https://travis-ci.org/InstituteOfCybernetics/CoCoViLa.svg?branch=master)](https://travis-ci.org/InstituteOfCybernetics/CoCoViLa)
