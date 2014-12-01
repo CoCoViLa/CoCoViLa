@@ -90,7 +90,7 @@ public class ClassCanvas extends Canvas{
     
     public void clearObjects() {
     	super.clearObjects();
-    	if(iconPalette.boundingbox.isSelected()){
+    	if(iconPalette != null && iconPalette.boundingbox.isSelected()){
     		iconPalette.selection.setSelected(true);
     		iconPalette.boundingbox.setSelected(false);
     	}
