@@ -21,7 +21,7 @@ import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasDeclarat
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasDefinitionContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasStructureContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AxiomContext;
-import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ClassTypeContext;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ClassOrInterfaceTypeContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ConstantVariableContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.EquationContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ExceptionListContext;
@@ -100,7 +100,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
 	@Override
 	public void enterSuperMetaInterface(SuperMetaInterfaceContext ctx) {
-		for (ClassTypeContext classTypeContext : ctx.classType()) {
+		for (ClassOrInterfaceTypeContext classTypeContext : ctx.classOrInterfaceType()) {
 			String superSpecificationName = classTypeContext.getText();
 				
 			AnnotatedClass superClass = specificationLoader.getSpecification(superSpecificationName);
@@ -272,7 +272,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
             db.p( classRelation );
 
         if(ctx.exceptionList() != null) {
-          for(ClassTypeContext ct : ctx.exceptionList().classType()) {
+          for(ClassOrInterfaceTypeContext ct : ctx.exceptionList().classOrInterfaceType()) {
             classRelation.addException(ct.getText());
           }
         }

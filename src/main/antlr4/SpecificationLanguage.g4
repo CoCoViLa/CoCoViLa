@@ -18,7 +18,7 @@ metaInterfase
 	;
 	
 superMetaInterface
-	:	'super' classType (',' classType)*
+	:	'super' classOrInterfaceType (',' classOrInterfaceType)*
 	;
 	
 specification
@@ -62,7 +62,7 @@ axiom
 	;
 	//(method = Identifier | lambda = lambdaExpression)
 subtask
-	:	'[' (context = classType '|-')? inputVariables = variableIdentifierList '->' outputVariables = variableIdentifierList ']'
+	:	'[' (context = classOrInterfaceType '|-')? inputVariables = variableIdentifierList '->' outputVariables = variableIdentifierList ']'
 	;
 	
 subtaskList
@@ -70,7 +70,7 @@ subtaskList
 	;
 
 exceptionList
-	:	'(' classType ')' (',' '(' classType ')')*
+	:	'(' classOrInterfaceType ')' (',' '(' classOrInterfaceType ')')*
 	;
 	
 goal
@@ -94,23 +94,10 @@ aliasDefinition
 	;
 
 type
-    :   (classType | primitiveType) ('[' ']')*
-    ;
-
-classType
-    :   Identifier ('.' Identifier )*
-    ;
-
-primitiveType
-    :   'boolean'
-    |   'char'
-    |   'byte'
-    |   'short'
-    |   'int'
-    |   'long'
-    |   'float'
-    |   'double'
-    ;
+	:	classOrInterfaceType ('[' ']')*
+	|	primitiveType ('[' ']')*
+	|	'void'
+	;
 
 equation
 	:	left = expression '=' right = expression
@@ -127,7 +114,7 @@ expression
 	;
 	
 term
-    :	FloatingPointLiteral
+    :	literal
     |	variableIdentifier
     ;
 
@@ -141,7 +128,7 @@ inArrayVariableAssigner
 
 variableAssigner
     :   array
-    |   'new' classType '(' expression (',' expression)* ')'
+    |   'new' classOrInterfaceType '(' expression (',' expression)* ')'
     |	StringLiteral
     |	'true'
     |	'false'
