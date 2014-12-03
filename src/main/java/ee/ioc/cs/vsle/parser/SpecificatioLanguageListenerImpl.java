@@ -73,7 +73,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	@Override
 	public void enterMetaInterfase(MetaInterfaseContext ctx) {
 		if (specificationName == null) {
-			specificationName = ctx.IDENTIFIER().getText();
+			specificationName = ctx.Identifier().getText();
 		}
 		annotatedClass = new AnnotatedClass(specificationName);
 		classFieldDeclarator = new ClassFieldDeclarator();
@@ -143,25 +143,25 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
 	@Override
 	public void enterVariableDeclaratorAssigner(VariableDeclaratorAssignerContext ctx) {
-		variableDeclarator(ctx.IDENTIFIER().getText(), ctx.variableAssigner().getText(), false);
+		variableDeclarator(ctx.Identifier().getText(), ctx.variableAssigner().getText(), false);
 	}
 	
 	@Override
 	public void enterSpecificationVariable(SpecificationVariableContext ctx) {
-		String name = ctx.IDENTIFIER().getText();
+		String name = ctx.Identifier().getText();
 		classFieldDeclarator.addClassField(name);
 	}
 	
 	@Override
 	public void enterSpecificationVariableDeclarator(SpecificationVariableDeclaratorContext ctx) {
-		String fullVariableName = classFieldDeclarator.getName().concat(".").concat(ctx.IDENTIFIER().getText());
+		String fullVariableName = classFieldDeclarator.getName().concat(".").concat(ctx.Identifier().getText());
 		String equation = fullVariableName.concat("=").concat(ctx.expression().getText());
 		solveEquation(equation);
 	}
 	
 	@Override
 	public void enterVariableDeclaratorInitializer(VariableDeclaratorInitializerContext ctx) {
-		String name = ctx.IDENTIFIER().getText();
+		String name = ctx.Identifier().getText();
 		VariableInitializerContext variableInitializerContext = ctx.variableInitializer();
 		if(variableInitializerContext==null){
 			classFieldDeclarator.addClassField(name);
@@ -282,7 +282,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
   @Override
 	public void enterAliasDeclaration(AliasDeclarationContext ctx) {
-		String aliasName = ctx.IDENTIFIER().getText();
+		String aliasName = ctx.Identifier().getText();
 		TypeContext typeContext = ctx.type();
 		String aliasType = typeContext != null ? typeContext.getText() : null;
 
@@ -301,7 +301,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 		boolean isLocalAlias = true;
 		
 		if(aliasClassField == null){//Go deeper 
-			List<TerminalNode> identifierList = ctx.variableIdentifier().IDENTIFIER();
+			List<TerminalNode> identifierList = ctx.variableIdentifier().Identifier();
 			int lastIndex = identifierList.size() - 1;
 			int i = 0;
 			AnnotatedClass parentClass = annotatedClass;

@@ -5,7 +5,7 @@ options {
   language = Java;
 }
 
-import Java8;
+import Java8Lambdas;
 
 @members{
 	
@@ -58,7 +58,7 @@ variableAssignment
 	;
 	
 axiom
-	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) )? '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' method = Identifier '}'
+	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) )? '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' (method = Identifier | lambda = lambdaExpression) '}'
 	;
 	//(method = Identifier | lambda = lambdaExpression)
 subtask
@@ -184,7 +184,7 @@ fragment LETTER_OR_DNUMBER : [a-zA-Z0-9$_];
 */
 
 ALIAS_ELEMENT_REF
-	:	'.' NUMBER+
+	:	'.' DecimalIntegerLiteral+
 	;
 
 //WS : [ \t\r\n]+ -> skip ;
