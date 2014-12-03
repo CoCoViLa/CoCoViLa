@@ -29,7 +29,7 @@
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4</artifactId>
-      <version>4.3</version>
+      <version>4.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -46,7 +46,7 @@
       <plugin>
         <groupId>org.antlr</groupId>
         <artifactId>antlr4-maven-plugin</artifactId>
-        <version>4.3</version>
+        <version>4.4-SNAPSHOT</version>
         <executions>
           <execution>
             <id>antlr</id>
@@ -54,6 +54,9 @@
               <goal>antlr4</goal>
             </goals>
             <configuration>
+              <includes>
+                <include>SpecificationLanguage.g4</include>
+              </includes>
               <arguments>
                 <argument>-package</argument>
                 <argument>${parser.generated.package}</argument>

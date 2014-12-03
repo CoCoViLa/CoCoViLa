@@ -5,13 +5,15 @@ options {
   language = Java;
 }
 
+import Java8;
+
 @members{
 	
 }
 
 
 metaInterfase
-    :	'specification' IDENTIFIER (superMetaInterface)?
+    :	'specification' Identifier (superMetaInterface)?
     	'{' specification '}'
 	;
 	
@@ -38,9 +40,9 @@ variableModifier
 	;
 
 variableDeclarator
-	:	IDENTIFIER ('=' variableInitializer)?						# variableDeclaratorInitializer
-	|	IDENTIFIER ('=' variableAssigner)							# variableDeclaratorAssigner 
-	|	IDENTIFIER ('(' specificationVariableDeclaration ')')?		# specificationVariable
+	:	Identifier ('=' variableInitializer)?						# variableDeclaratorInitializer
+	|	Identifier ('=' variableAssigner)							# variableDeclaratorAssigner 
+	|	Identifier ('(' specificationVariableDeclaration ')')?		# specificationVariable
 	;
 
 specificationVariableDeclaration
@@ -48,7 +50,7 @@ specificationVariableDeclaration
 	;
 
 specificationVariableDeclarator
-	:	IDENTIFIER '=' expression
+	:	Identifier '=' expression
 	;
 
 variableAssignment
@@ -56,9 +58,9 @@ variableAssignment
 	;
 	
 axiom
-	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) )? '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' method = IDENTIFIER '}'
+	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) )? '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' method = Identifier '}'
 	;
-	
+	//(method = Identifier | lambda = lambdaExpression)
 subtask
 	:	'[' (context = classType '|-')? inputVariables = variableIdentifierList '->' outputVariables = variableIdentifierList ']'
 	;
@@ -76,7 +78,7 @@ goal
 	;
 	
 aliasDeclaration
-	:	'alias' ('(' type')')? IDENTIFIER ('=' aliasStructure)?
+	:	'alias' ('(' type')')? Identifier ('=' aliasStructure)?
 	;
 	
 aliasStructure
@@ -84,7 +86,7 @@ aliasStructure
 	;
 	
 wildcardAlias
-	:	'*.' IDENTIFIER
+	:	'*.' Identifier
 	;
 
 aliasDefinition
@@ -96,7 +98,7 @@ type
     ;
 
 classType
-    :   IDENTIFIER ('.' IDENTIFIER )*
+    :   Identifier ('.' Identifier )*
     ;
 
 primitiveType
@@ -118,14 +120,14 @@ expression
 	:	term
 	|	'(' expression ')'
 	|	'-' expression
-	|	IDENTIFIER '(' expression ')'
+	|	Identifier '(' expression ')'
 	|	left = expression op=('*' | '/') right = expression
 	|	left = expression op=('+' | '-') right = expression
     |   expression '^' expression
 	;
 	
 term
-    :	NUMBER
+    :	FloatingPointLiteral
     |	variableIdentifier
     ;
 
@@ -140,7 +142,7 @@ inArrayVariableAssigner
 variableAssigner
     :   array
     |   'new' classType '(' expression (',' expression)* ')'
-    |	STRING
+    |	StringLiteral
     |	'true'
     |	'false'
     ;
@@ -151,13 +153,14 @@ variableInitializer
     ;
 
 variableIdentifier
-	:	IDENTIFIER (('.' IDENTIFIER | '*') )* ALIAS_ELEMENT_REF*  ('.' variableIdentifier)?
+	:	Identifier (('.' Identifier | '*') )* ALIAS_ELEMENT_REF*  ('.' variableIdentifier)?
 	;
 	
 variableIdentifierList
 	:	variableIdentifier (',' variableIdentifier )*
 	;
 
+/*
 NUMBER
     : INTEGER ('.' INTEGER)? (('e' | 'E') ('-'|'+')?INTEGER+)?
     ;
@@ -165,23 +168,28 @@ NUMBER
 INTEGER
     : '0'..'9'+
     ;
-	
+*/
+
+/*
 STRING :	'"' (ESC|.)*? '"' ;
 fragment ESC :	'\\"' | '\\\\' ;
+*/
 
-IDENTIFIER
+/*
+Identifier
 	:	LETTER LETTER_OR_DNUMBER*
 	;
 fragment LETTER : [a-zA-Z$_];
 fragment LETTER_OR_DNUMBER : [a-zA-Z0-9$_];
+*/
 
 ALIAS_ELEMENT_REF
 	:	'.' NUMBER+
 	;
 
-WS : [ \t\r\n]+ -> skip ;
-COMMENT : '//' .*? '\r'? '\n' -> skip;
-BLOCK_COMMENT : '/*' .*? '*/' -> skip;
+//WS : [ \t\r\n]+ -> skip ;
+//COMMENT : '//' .*? '\r'? '\n' -> skip;
+//BLOCK_COMMENT : '/*' .*? '*/' -> skip;
 
 JAVA_BEFORE_SPEC : .*? '/*@' -> skip;
 JAVA_AFTER_SPEC : '@*/' .*? -> skip;   	
