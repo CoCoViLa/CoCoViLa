@@ -3,7 +3,6 @@ package ee.ioc.cs.vsle.parser;
 import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 import ee.ioc.cs.vsle.synthesize.ClassRelation;
 import ee.ioc.cs.vsle.synthesize.RelType;
-import org.antlr.v4.runtime.CharStream;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -13,7 +12,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Pavel Grigorenko
  */
-public class SpecificationLoaderTest {
+public class VariableDeclarationTest {
 
   private SpecificationLoader specificationLoader;
 
@@ -34,21 +33,42 @@ public class SpecificationLoaderTest {
   }
 
   @Test
-  public void testJavaTypeDeclaration_withGenerics() {
-    String spec = "Set set;\n" +
-                  "List<String> list;";
+  public void testJavaTypeDeclaration() {
+    String spec = "Set set;";
     AnnotatedClass ac = specificationLoader.loadSpecification(wrapSpec(spec), null);
     checkVarAndType(ac, "set", "Set");
+  }
+
+  @Test
+  public void testJavaTypeDeclaration_withAssignment() {
+    String spec = "Integer i = new Integer(1);";
+    AnnotatedClass ac = specificationLoader.loadSpecification(wrapSpec(spec), null);
+    checkVarAndType(ac, "i", "Integer");
+  }
+
+  @Test
+  public void testJavaTypeDeclaration_withGenerics() {
+    String spec = "List<String> list = new ArrayList<>();";
+    AnnotatedClass ac = specificationLoader.loadSpecification(wrapSpec(spec), null);
     checkVarAndType(ac, "list", "List<String>");
   }
 
   @Test
-  public void testStringDeclaration() {
-    String spec = "String s = \"my string\";\n" +
-                  "String s2 = new String(\"my second string\");";
+  public void testStringDeclaration_literalAssignment() {
+    String spec = "String s = \"my string\";";
     AnnotatedClass ac = specificationLoader.loadSpecification(wrapSpec(spec), null);
     checkVarAndType(ac, "s", "String");
+  }
+
+  @Test
+  public void testStringDeclaration_newInstance() {
+    String spec = "String s2 = new String(\"my second string\");";
+    AnnotatedClass ac = specificationLoader.loadSpecification(wrapSpec(spec), null);
     checkVarAndType(ac, "s2", "String");
+    ClassRelation cr = ac.getClassRelations().iterator().next();
+    assertEquals(RelType.TYPE_EQUATION, cr.getType());
+    assertEquals("s2", cr.getOutput().getName());
+    assertEquals("s2 = new String(\"my second string\")", cr.getMethod());
   }
 
   private void checkVarAndType(AnnotatedClass ac, String var, String type) {

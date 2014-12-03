@@ -144,7 +144,16 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 	
 	@Override
 	public void enterVariableDeclaratorAssigner(VariableDeclaratorAssignerContext ctx) {
-		variableDeclarator(ctx.Identifier().getText(), ctx.variableAssigner().getText(), false);
+		SpecificationLanguageParser.VariableAssignerContext variableAssignerContext = ctx.variableAssigner();
+		SpecificationLanguageParser.CreatorContext creatorContext = variableAssignerContext.creator();
+		String value;
+		if(creatorContext != null) {
+			value = "new " + creatorContext.getText();
+		}
+		else {
+			value = variableAssignerContext.getText();
+		}
+		variableDeclarator(ctx.Identifier().getText(), value, false);
 	}
 	
 	@Override
@@ -177,7 +186,7 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 	}
 	
 	protected void assignVariable(String variableName, String variableValue){
-		String method = variableName.concat("=").concat(variableValue);
+		String method = variableName.concat(" = ").concat(variableValue);
         ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, method);
         classRelation.addOutput( variableName, annotatedClass.getFields() );
         classRelation.setMethod( method );

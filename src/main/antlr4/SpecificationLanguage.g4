@@ -114,7 +114,8 @@ expression
 	;
 	
 term
-    :	literal
+    :	IntegerLiteral
+    |	FloatingPointLiteral
     |	variableIdentifier
     ;
 
@@ -128,10 +129,12 @@ inArrayVariableAssigner
 
 variableAssigner
     :   array
-    |   'new' classOrInterfaceType '(' expression (',' expression)* ')'
     |	StringLiteral
+    //|	'new' 'String' '(' StringLiteral ')'
+//    |   'new' WS classOrInterfaceType '(' expression (',' expression)* ')'
     |	'true'
     |	'false'
+    |	'new' creator
     ;
     
 variableInitializer

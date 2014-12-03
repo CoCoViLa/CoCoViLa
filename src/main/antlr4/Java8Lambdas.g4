@@ -62,7 +62,7 @@ lambdaExpression
 
 lambdaParameters
 	:	Identifier
-	|	'(' formalParameterDecls? ')'
+	|	'(' formalParameterList? ')'
 	|	'(' inferredFormalParameterList ')'
 	;
 
