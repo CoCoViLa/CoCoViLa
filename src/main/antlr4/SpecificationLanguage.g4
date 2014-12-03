@@ -12,7 +12,7 @@ import Java8Lambdas;
 }
 
 
-metaInterfase
+metaInterface
     :	'specification' Identifier (superMetaInterface)?
     	'{' specification '}'
 	;
@@ -60,7 +60,7 @@ variableAssignment
 axiom
 	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) )? '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' (method = Identifier | lambda = lambdaExpression) '}'
 	;
-	//(method = Identifier | lambda = lambdaExpression)
+
 subtask
 	:	'[' (context = classOrInterfaceType '|-')? inputVariables = variableIdentifierList '->' outputVariables = variableIdentifierList ']'
 	;

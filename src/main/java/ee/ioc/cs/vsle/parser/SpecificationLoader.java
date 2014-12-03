@@ -19,7 +19,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageLexer;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser;
-import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaseContext;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaceContext;
 import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 import ee.ioc.cs.vsle.synthesize.SpecParseException;
 
@@ -60,17 +60,17 @@ public class SpecificationLoader {
 		parser.removeErrorListeners(); // remove ConsoleErrorListener
 		parser.addErrorListener(new UnderlineListener()); // add ours
 		
-		SpecificatioLanguageListenerImpl secificationListener = new SpecificatioLanguageListenerImpl(this, specificationName);
-		MetaInterfaseContext metaInterfase = parser.metaInterfase();
+		SpecificationLanguageListenerImpl specificationLanguageListener = new SpecificationLanguageListenerImpl(this, specificationName);
+		MetaInterfaceContext metaInterfase = parser.metaInterface();
 		ParseTreeWalker walker = new ParseTreeWalker();
-		walker.walk(secificationListener, metaInterfase);
+		walker.walk(specificationLanguageListener, metaInterfase);
 		
-		AnnotatedClass annotatedClass = secificationListener.getAnnotatedClass();
+		AnnotatedClass annotatedClass = specificationLanguageListener.getAnnotatedClass();
 		specificationByName.put(annotatedClass.getName(), annotatedClass);
 		return annotatedClass;
 	}
 	
-	public Collection<AnnotatedClass> getLoaddedSpecificationList(){
+	public Collection<AnnotatedClass> getLoadedSpecifications(){
 		return specificationByName.values();
 	}
 	

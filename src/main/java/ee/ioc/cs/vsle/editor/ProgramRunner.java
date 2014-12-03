@@ -283,9 +283,9 @@ public class ProgramRunner {
             case ANTLR: {
               SpecificationLoader specificationLoader = new SpecificationLoader(schemeContainer.getWorkDir(), schemeObjects);
               specificationLoader.loadSpecification(fullSpec, TypeUtil.TYPE_THIS);
-              Collection<AnnotatedClass> loaddedSpecificationList = specificationLoader.getLoaddedSpecificationList();
+              Collection<AnnotatedClass> loadedSpecifications = specificationLoader.getLoadedSpecifications();
               classList = new ClassList();
-              classList.addAll(loaddedSpecificationList);
+              classList.addAll(loadedSpecifications);
               break;
             }
             }

@@ -26,7 +26,7 @@ import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ConstantVaria
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.EquationContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ExceptionListContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.GoalContext;
-import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaseContext;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaceContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.SpecificationVariableContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.SpecificationVariableDeclaratorContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.StaticVariableContext;
@@ -57,7 +57,7 @@ import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.AliasLength;
 import ee.ioc.cs.vsle.vclass.ClassField;
 
-public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseListener {
+public class SpecificationLanguageListenerImpl extends SpecificationLanguageBaseListener {
 	
 	private final SpecificationLoader specificationLoader;
 	private AnnotatedClass annotatedClass;
@@ -65,13 +65,13 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	private String specificationName;
 	private Alias currentAlias;
 	
-	public SpecificatioLanguageListenerImpl(SpecificationLoader specificationLoader, String specificationName) {
+	public SpecificationLanguageListenerImpl(SpecificationLoader specificationLoader, String specificationName) {
 		this.specificationLoader = specificationLoader;
 		this.specificationName = specificationName;
 	}
 
 	@Override
-	public void enterMetaInterfase(MetaInterfaseContext ctx) {
+	public void enterMetaInterface(MetaInterfaceContext ctx) {
 		if (specificationName == null) {
 			specificationName = ctx.Identifier().getText();
 		}
