@@ -26,22 +26,33 @@ import ee.ioc.cs.vsle.synthesize.SpecParseException;
 
 public class SpecificationLoader {
 	private Map<String, AnnotatedClass> specificationByName;
-	private String basePath;
 	private Set<String> schemeObjectSet;
-	
-	public SpecificationLoader(String basePath, Set<String> schemeObjects) {
-		this.basePath = basePath;
+	private SpecificationSourceProvider sourceProvider;
+
+	public SpecificationLoader(final String basePath, Set<String> schemeObjects) {
+		this(new SpecificationSourceProvider() {
+			@Override
+			public CharStream getSource(String specificationName) {
+				try {
+					return new ANTLRFileStream(basePath.concat(specificationName).concat(".java"));
+				} catch (IOException e) {
+					throw new SpecificationNotFoundException("Unable to find specification ".concat(specificationName));
+			}
+			}
+		}, schemeObjects);
+	}
+
+	public SpecificationLoader(SpecificationSourceProvider sourceProvider, Set<String> schemeObjects) {
+		assert sourceProvider != null;
+
+		this.sourceProvider = sourceProvider;
 		this.schemeObjectSet = schemeObjects;
 		specificationByName = new HashMap<String, AnnotatedClass>();
 	}
 	//TODO: Recursive specifications...
 	public AnnotatedClass getSpecification(String specificationName) throws SpecificationNotFoundException{
 		if(!specificationByName.containsKey(specificationName)){
-			try {
-				loadSpecification(new ANTLRFileStream(basePath.concat(specificationName).concat(".java")), specificationName);
-			} catch (IOException e) {
-				throw new SpecificationNotFoundException("Unable to find specification ".concat(specificationName));
-			}
+			loadSpecification(sourceProvider.getSource(specificationName), specificationName);
 		}
 		
 		AnnotatedClass annotatedClass = specificationByName.get(specificationName);

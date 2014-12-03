@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -114,7 +115,7 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 	
 	@Override
 	public void enterVariableDeclaration(VariableDeclarationContext ctx) {
-		classFieldDeclarator.setType(ctx.type().getText());
+		classFieldDeclarator.setType(ctx.type());
 	}
 	
 	@Override
@@ -639,7 +640,14 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 			return type;
 		}
 
-		public void setType(String type) {
+		public void setType(TypeContext typeCtx) {
+			SpecificationLanguageParser.PrimitiveTypeContext primitiveTypeContext = typeCtx.primitiveType();
+			if(primitiveTypeContext != null) {
+				this.type = primitiveTypeContext.getText();
+				return;
+			}
+
+			String type = typeCtx.getText();
 			try{
 				classFieldAnnotatedClass = specificationLoader.getSpecification(type);
 			}catch(SpecificationNotFoundException e){

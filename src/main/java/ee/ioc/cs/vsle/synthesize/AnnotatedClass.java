@@ -102,7 +102,7 @@ public class AnnotatedClass {
 	 * need to keep relations up-to-date (i.e. not cache rels from superclasses because some relations
 	 * may be added into superclasses later
 	 */
-	Collection<ClassRelation> getClassRelations() {
+	public Collection<ClassRelation> getClassRelations() {
 	    Collection<ClassRelation> relations = new LinkedHashSet<ClassRelation>();
 	    for ( AnnotatedClass superclass : superClasses ) {
 	        relations.addAll( superclass.getClassRelations() );
