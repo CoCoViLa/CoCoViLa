@@ -652,7 +652,8 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 		public void setType(TypeContext typeCtx) {
 			SpecificationLanguageParser.PrimitiveTypeContext primitiveTypeContext = typeCtx.primitiveType();
 			if(primitiveTypeContext != null) {
-				this.type = primitiveTypeContext.getText();
+				//need to take outer context text to capture array braces
+				this.type = typeCtx.getText();
 				return;
 			}
 

@@ -130,11 +130,14 @@ inArrayVariableAssigner
 variableAssigner
     :   array
     |	StringLiteral
-    //|	'new' 'String' '(' StringLiteral ')'
-//    |   'new' WS classOrInterfaceType '(' expression (',' expression)* ')'
+    /*
+      FIXME - string literals as arguments don't work, that's because creator's subtree refs to 'expression' but it is overriden in this grammar,
+      if StringLiterals are enabled in 'term', equation solver will fail
+    */
+    //|   'new' classOrInterfaceType '(' expression (',' expression)* ')'
+    |	'new' creator
     |	'true'
     |	'false'
-    |	'new' creator
     ;
     
 variableInitializer
