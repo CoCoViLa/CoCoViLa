@@ -118,11 +118,12 @@ public class PortGraphicsDialog extends JDialog {
 	        jl.addListSelectionListener(new ListSelectionListener(){
 	        
 	          public void valueChanged(ListSelectionEvent e) {	 
-	        		try {  
+	        		if(jl != null && jl.getSelectedValue() != null){  
 	        			updateLabel(jl.getSelectedValue().toString());
-	        		} catch (NullPointerException ex) {
+	        		} else selectedValue = null; 
+	        		/*catch (NullPointerException ex) {
 	        			selectedValue = null;
-				}
+				}*/
 	          }
 	        });
 	        
@@ -178,7 +179,7 @@ public class PortGraphicsDialog extends JDialog {
 			  VPackage pkg;
 			  if ( (pkg = PackageXmlProcessor.loadWOValidation(file)) != null ) {
 				  PackageClass pClass = pkg.getClass(name);	
-				  if ( pClass.getGraphics() != null && pClass.getGraphics().getShapes() != null){
+				  if ( pClass!= null && pClass.getGraphics() != null && pClass.getGraphics().getShapes() != null){
 					    GObj obj = new GObj();		
 					 //   Shapes TODO resize!
 						obj.setShapes(pClass.getGraphics().getShapes());

@@ -4,11 +4,19 @@ import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.iNAME;
 import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.iTYPE;
 import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.iVALUE;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -21,13 +29,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.swing.AbstractButton;
 import javax.swing.Action;
 import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
 import javax.swing.InputMap;
+import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -40,6 +52,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
+import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.undo.UndoManager;
 
 import ee.ioc.cs.vsle.classeditor.EditorActionListener.CloneAction;
@@ -56,6 +69,7 @@ import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.editor.SpecGenerator;
 import ee.ioc.cs.vsle.editor.XMLSpecGenerator;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
+import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel;
 import ee.ioc.cs.vsle.iconeditor.ClassImport;
@@ -151,13 +165,18 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
 		addComponentListener( new ComponentResizer( ComponentResizer.CARE_FOR_MINIMUM ) );
 		tabbedPane = new DnDTabbedPane();
-		tabbedPane.setTabLayoutPolicy( JTabbedPane.SCROLL_TAB_LAYOUT );
+		tabbedPane.setTabLayoutPolicy( JTabbedPane.SCROLL_TAB_LAYOUT );	
 		tabbedPane.addChangeListener( this );
 		undoAction = new UndoAction();
 		redoAction = new RedoAction();
 		deleteAction = new DeleteAction();
 		cloneAction = new CloneAction();
-		makeMenu();
+		
+		makeMenu();		
+		
+		/*JButton newTab = new JButton("Add new Tab");
+		menuBar.add(newTab);*/
+		
 		getContentPane().add( tabbedPane );
 		initActions();
 	} // initialize
@@ -261,7 +280,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		menuItem = new JMenuItem( Menu.VIEWCODE, KeyEvent.VK_V );
 		menuItem.addActionListener( getActionListener() );
 		menu.add( menuItem );         
-
+				
 		final JCheckBoxMenuItem painterEnabled = new JCheckBoxMenuItem( Menu.CLASSPAINTER, true );
 		painterEnabled.addActionListener( getActionListener() );
 		menu.add( painterEnabled );
@@ -1446,9 +1465,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					    if(!(shape instanceof BoundingBox)){
 					    	
 					    	 if (!obj.isInside(bX, bY, bX+bW, bY + bH)){  
-					    		 needConfirm = true;
 					    		 if((obj.getX() > bX && obj.getX()< bX+bW) || (obj.getY() > bY && obj.getY()< bY+bH)){}
-					    		 else 					    		 break;
+					    		 else 	{
+						    		 needConfirm = true;
+					    			 break;
+					    		 }
 					    	 }
 					    	
 					    }
@@ -1458,9 +1479,13 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					    /**
 					     * Save coords relative to BB /AM 23.10
 					     */
-					    
-					   shape.setX(obj.getX() - bX);
-					   shape.setY(obj.getY() - bY);
+					   if (shape instanceof Line){
+						   shape.setX(obj.getX());
+						   shape.setY(obj.getY());
+					   } else {
+						   shape.setX(obj.getX() - bX);
+						   shape.setY(obj.getY() - bY);
+					   }
 					    
 					    
 					   System.out.println("ADD SHAPE - " + shape.toText());

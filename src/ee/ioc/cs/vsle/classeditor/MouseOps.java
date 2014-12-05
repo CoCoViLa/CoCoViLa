@@ -197,16 +197,62 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         canvas.repaint();
     } // drawPort    
      
+    /**
+     * Repaint Port
+     * @param p
+     * @param graphics
+     * @param openFlag
+     */
     public void repaintPort( Port p, ClassGraphics graphics, boolean openFlag ) {
     	
-    // cleanup graphics code	    
-     if(graphics.getShapes() != null){ 
-		 for ( Shape s : graphics.getShapes() ) {    	 
-			 s.setX(0);
-			 s.setY(0);
+    // Get port scale @TODO optimize this 
+    // float xSize = (float) 1.0;
+   //  float ySize = (float) 1.0;
+     
+   /*  for (GObj obj : canvas.getObjectList()) {
+
+			for (Port port : obj.getPortList()) {
+				if (port.getName().equals(p.getName())){
+					 xSize = obj.getXsize();
+					// ySize = obj.getYsize();
+				}
+			}			
+	}*/
+  // cleanup graphics code	
+          
+     int xx = 0; // max width for shape collection
+	 int startX = 0;
+	 int startY = 0;
+	 
+     if(graphics.getShapes() != null){
+    	// int trace = Math.abs(graphics.getShapes().get(0).getHeight());
+    	 
+		 for ( Shape s : graphics.getShapes() ) {    
+			 if((startX == 0) || (s.getX() < startX)){
+				 startX = s.getX();
+			 }			 
+			 if((startY == 0) || (s.getY() < startY)){
+				 startY = s.getY();
+			 }
+			 if(s.getWidth()+s.getX() > xx ){
+				 xx = s.getWidth()+s.getX();
+			 }			
 		 }
      } else return;
-   	 
+     
+     float scaleStep = (float)8/(xx - startX);    // 8 is default port size. Change that to sys param. AM @TODO
+     
+     for ( Shape s : graphics.getShapes() ) {
+    	 
+    	 System.out.println("Original shape: " + s + " >> x = " + s.getX() + ";y = " + s.getY() + ";w = "+ s.getWidth() + ";h = "+ s.getHeight());
+    	 s.setX((int)(Math.abs((s.getX() - startX) * scaleStep)));
+    	 s.setY((int)(Math.abs((s.getY() - startY) * scaleStep)));
+    	 s.setWidth(Math.round(s.getWidth() * scaleStep));//(int) xSize);	 
+    	 s.setHeight(Math.round(s.getHeight() * scaleStep));// (int)ySize);
+    	 System.out.println("Updated shape: x = " + s.getX() + ";y = " + s.getY() + ";w = "+ s.getWidth() + ";h = "+ s.getHeight());
+     }
+     
+   //	 graphics.setBounds(0, 0, (int)xSize, (int)ySize);
      if(openFlag){            		 
    		 p.setOpenGraphics(graphics);
    	 } else {
@@ -215,8 +261,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
      	
         p.setX(0);
         p.setY(0);    
-        
-              
+                    
         canvas.repaint();
     } 
     
@@ -633,7 +678,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             // disconnected but maybe that is not what the user is expecting.
             // Until this operation is proven necessary and is clearly specified
             // it is better to deny it.
-            if ( !draggedObject.isStrictConnected() ) {
+            if (draggedObject!= null && !draggedObject.isStrictConnected() ) {
                 int moveX = x - canvas.mouseX;
                 int moveY = y - canvas.mouseY;
                 canvas.resizeObjects( moveX, moveY, cornerClicked );
