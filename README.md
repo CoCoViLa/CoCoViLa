@@ -18,7 +18,6 @@ Homepage: http://www.cs.ioc.ee/cocovila
 
 `mvn exec:java -Prun-ce`
 
-More info: http://www.cs.ioc.ee/cocovila/ant.php
 
 ### Continuous Integration
-[![Build Status](https://travis-ci.org/InstituteOfCybernetics/CoCoViLa.svg?branch=master)](https://travis-ci.org/InstituteOfCybernetics/CoCoViLa)
+[![Build Status](https://travis-ci.org/CoCoViLa/CoCoViLa.svg?branch=master)](https://travis-ci.org/CoCoViLa/CoCoViLa)
