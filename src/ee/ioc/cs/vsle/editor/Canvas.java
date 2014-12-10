@@ -1783,7 +1783,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
      * @return true if a relation class is being added, false otherwise
      */
     public boolean isRelObjBeingAdded() {
-        return currentObj != null && currentObj instanceof RelObj && ( (RelObj) currentObj ).getStartPort() != null;
+      if( currentObj != null && currentObj instanceof RelObj ) {
+        RelObj relObj = (RelObj) currentObj;
+        return relObj.getStartPort() != null && relObj.getEndPort() == null;
+      }
+      return false;
     }
 
     /**
