@@ -51,24 +51,55 @@ public abstract class AbstractParserTest {
     fail("Class relation not found");
   }
 
-  static void assertClassRelation(AnnotatedClass ac, RelType rt, String[] inputs, String[] outputs, String method) {
-    outer:
+  static ClassRelation assertClassRelation(AnnotatedClass ac, RelType rt, String[] inputs, String[] outputs, String method) {
+    return assertClassRelation(ac, rt, inputs, outputs, new String[0], method);
+  }
+
+  static ClassRelation assertClassRelation(AnnotatedClass ac, RelType rt, String[] inputs, String[] outputs, String[] exceptions, String method) {
     for(ClassRelation cr : ac.getClassRelations()) {
-      if(rt != cr.getType()) { continue; }
-      if(!method.equals(cr.getMethod())) { continue; }
-      if(inputs.length != cr.getInputs().size()) { continue; }
-      int i = 0;
-      for(ClassField cf : cr.getInputs()) {
-        if(!cf.getName().equals(inputs[i++])) { continue outer; }
+      if(!checkClassRelation(cr, rt, inputs, outputs, exceptions, method)) {
+        continue;
       }
-      if(outputs.length != cr.getOutputs().size()) { continue; }
-      i = 0;
-      for(ClassField cf : cr.getOutputs()) {
-        if(!cf.getName().equals(outputs[i++])) { continue outer; }
-      }
-      return;//found
+      return cr;
     }
     fail("Class relation not found");
+    return null;
+  }
+
+  static void assertClassRelation(ClassRelation cr, RelType rt, String[] inputs, String[] outputs, String method) {
+    assertClassRelation(cr, rt, inputs, outputs, new String[0], method);
+  }
+
+  static void assertClassRelation(ClassRelation cr, RelType rt, String[] inputs, String[] outputs, String[] exceptions, String method) {
+    if(!checkClassRelation(cr, rt, inputs, outputs, exceptions, method)) {
+      fail("Class relation does not match");
+    }
+  }
+
+  static boolean checkClassRelation(ClassRelation cr, RelType rt, String[] inputs, String[] outputs, String[] exceptions, String method) {
+    if(rt != cr.getType()) { return false; }
+    if(method != null && !method.equals(cr.getMethod())) { return false; }
+    else if(method == null && cr.getMethod() != null) { return false; }
+    if(inputs.length != cr.getInputs().size()) { return false; }
+    int i = 0;
+    for(ClassField cf : cr.getInputs()) {
+      if(!cf.getName().equals(inputs[i++])) { return false; }
+    }
+    if(outputs.length != cr.getOutputs().size()) { return false; }
+    i = 0;
+    for(ClassField cf : cr.getOutputs()) {
+      if(!cf.getName().equals(outputs[i++])) { return false; }
+    }
+    if(exceptions.length != cr.getExceptions().size()) { return false; }
+    i = 0;
+    for(ClassField cf : cr.getExceptions()) {
+      if(!cf.getName().equals(exceptions[i++])) { return false; }
+    }
+    return true;
+  }
+
+  static String[] vars(String... vars) {
+    return vars;
   }
 
   static class TestSpecProvider implements SpecificationSourceProvider {
