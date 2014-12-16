@@ -12,11 +12,11 @@ Homepage: http://www.cs.ioc.ee/cocovila
 
 ### Running CoCoViLa Scheme Editor:
 
-`mvn exec:java -Prun-se`
+`mvn exec:exec -Prun-se`
 
 ### Running CoCoViLa Class Editor:
 
-`mvn exec:java -Prun-ce`
+`mvn exec:exec -Prun-ce`
 
 
 ### Continuous Integration
