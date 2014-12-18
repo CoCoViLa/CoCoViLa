@@ -767,7 +767,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	 */
 	 public void updateWindowTitle() {
 		 String windowTitle = WINDOW_TITLE;
-
+		 String prevTitle = getTitle();
 		 ClassCanvas canvas = getCurrentCanvas();
 		 if ( canvas != null ) {
 			 String packageName = canvas.getPackage().getName();
@@ -776,9 +776,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			 if( schemeTitle != null ) {
 				 windowTitle = schemeTitle + " - " + packageName + " - " + WINDOW_TITLE;
 				 tabbedPane.setTitleAt( idx, schemeTitle );
-			 } else {				 
-				 tabbedPane.setTabComponentAt(idx, createTabTitle(canvas, packageName));
-				 tabbedPane.setTitleAt( idx, packageName ); 
+			 } else {	
+				if(prevTitle.indexOf(packageName) == -1){				
+				   tabbedPane.setTabComponentAt(idx, createTabTitle(canvas, packageName));
+				}
+				// tabbedPane.setTitleAt( idx, packageName ); 
 				 windowTitle = packageName + " - " + WINDOW_TITLE;
 			 }
 		 }
