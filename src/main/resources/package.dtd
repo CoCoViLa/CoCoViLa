@@ -15,10 +15,11 @@
 	type=class is the usual case, 
 	type=relation defines a connection-line style visual appearance. 
 	type=scheme defines a scheme as a component and <scheme name>.syn file should exist in the package's folder
+	type=template defines template visual appearance
 	See package state for an example usage 
 -->
 <!ATTLIST class
-	type (relation|class|scheme)	"class"
+	type (relation|class|scheme|template)	"class"
 	static (true|false)	"false"
 >
 <!-- Field is an attribute of the rich component 
