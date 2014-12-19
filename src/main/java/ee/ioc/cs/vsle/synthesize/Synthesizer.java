@@ -16,7 +16,6 @@ import ee.ioc.cs.vsle.util.FileFuncs;
 import ee.ioc.cs.vsle.util.FileFuncs.FileSystemStorage;
 import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
 import ee.ioc.cs.vsle.util.TypeUtil;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.ClassField;
 
 /**

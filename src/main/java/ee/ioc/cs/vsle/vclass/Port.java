@@ -7,11 +7,16 @@ import java.util.List;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static ee.ioc.cs.vsle.graphics.Shape.*;
 
 public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LoggerFactory.getLogger(Port.class);
+
 	private String id;
 	private GObj obj;
 	private ClassField field;
@@ -234,8 +239,8 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 		this.obj = obj;
 		this.field = obj.getSpecField( name );
 		
-		if( this.field == null && RuntimeProperties.isLogDebugEnabled() ) {
-		    db.p( "Warning: Port " + name + " does not have the corresponding specification field" );
+		if( this.field == null ) {
+		    logger.warn( "Port " + name + " does not have the corresponding specification field" );
 		}
 	}
 

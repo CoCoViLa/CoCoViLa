@@ -20,7 +20,6 @@ import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.event.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.StringUtil;
-import ee.ioc.cs.vsle.util.db;
 
 /**
  * The scheme description

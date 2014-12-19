@@ -1,7 +1,6 @@
 package ee.ioc.cs.vsle.iconeditor;
 
 import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.util.db;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;

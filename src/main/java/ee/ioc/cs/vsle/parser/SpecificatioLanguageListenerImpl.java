@@ -52,7 +52,6 @@ import ee.ioc.cs.vsle.synthesize.UnknownVariableException;
 import ee.ioc.cs.vsle.table.Table;
 import ee.ioc.cs.vsle.util.TypeToken;
 import ee.ioc.cs.vsle.util.TypeUtil;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.AliasLength;
 import ee.ioc.cs.vsle.vclass.ClassField;

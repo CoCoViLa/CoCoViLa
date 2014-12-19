@@ -5,8 +5,6 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 
-import ee.ioc.cs.vsle.util.db;
-
 public class ErrorWindow extends JFrame {
 
     JTextArea textArea;

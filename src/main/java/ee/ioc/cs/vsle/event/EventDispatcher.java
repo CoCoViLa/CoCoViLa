@@ -1,8 +1,11 @@
 package ee.ioc.cs.vsle.event;
 
-import ee.ioc.cs.vsle.util.db;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 abstract public class EventDispatcher {
+
+	private static final Logger logger = LoggerFactory.getLogger(EventDispatcher.class);
 
 	private EventContainer m_container;
 
@@ -20,7 +23,7 @@ abstract public class EventDispatcher {
 
 			// We do the catch here, so we can recover and send the same
 			// event to other listeners.
-			db.p( "Ignored by event queue:  " + ex.getMessage()
+			logger.error( "Ignored by event queue:  " + ex.getMessage()
 								  + "\n    event listener =  " + listener
 								  + "\n    event = " + evt );
 		}

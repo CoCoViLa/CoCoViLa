@@ -16,7 +16,6 @@ import java.util.regex.Pattern;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.util.TypeUtil;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.AliasLength;
 import ee.ioc.cs.vsle.vclass.ClassField;

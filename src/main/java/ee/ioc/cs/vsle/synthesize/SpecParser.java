@@ -25,10 +25,11 @@ import ee.ioc.cs.vsle.table.Table;
 import ee.ioc.cs.vsle.util.FileFuncs;
 import ee.ioc.cs.vsle.util.TypeToken;
 import ee.ioc.cs.vsle.util.TypeUtil;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.AliasLength;
 import ee.ioc.cs.vsle.vclass.ClassField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class takes care of parsing the specification and translating it into a
@@ -37,6 +38,8 @@ import ee.ioc.cs.vsle.vclass.ClassField;
  * @author Ando Saabas, Pavel Grigorenko
  */
 public class SpecParser {
+
+    private static final Logger logger = LoggerFactory.getLogger(SpecParser.class);
 
     private static final Pattern PATTERN_SPEC = Pattern.compile(
                     ".*/\\*@.*specification [a-zA-Z_0-9-.]+ ?(super ([ a-zA-Z_0-9-,]+ ))? ?\\{ ?(.+) ?\\} ?@\\*/ ?" );
@@ -57,31 +60,6 @@ public class SpecParser {
     private static final Pattern PATTERN_ALIAS_FULL = Pattern.compile( "alias *(\\(( *[^\\(\\) ]+ *)\\))* *([^= ]+) *= *\\((.*)\\) *" );
 
     private SpecParser() {
-    }
-
-    public static void main( String[] args ) {
-
-        try {
-            // String s = new String( getStringFromFile( args[ 0 ] ) );
-            String ss = "class blah /*@ specification blah super ffff, fffdddd, gjjjh { spec } @*/";
-
-            ArrayList<String> a = getSpec( ss, false );
-
-            while ( !a.isEmpty() ) {
-                if ( ! ( a.get( 0 ) ).equals( "" ) ) {
-                    try {
-                        db.p( getLine( a ) );
-                    } catch ( SpecParseException e ) {
-                        e.printStackTrace();
-                    }
-                } else {
-                    a.remove( 0 );
-
-                }
-            }
-        } catch ( Exception e ) {
-            db.p( e );
-        }
     }
 
     public static String getClassName( String spec ) {
@@ -333,8 +311,7 @@ public class SpecParser {
         ClassList classes = parseSpecificationImpl( refineSpec( fullSpec ), TYPE_THIS, schemeObjects, path,
                 new LinkedHashSet<String>() );
 
-        if ( RuntimeProperties.isLogInfoEnabled() )
-            db.p( "Specification parsed in: " + ( System.currentTimeMillis() - start ) + "ms." );
+        logger.info("Specification parsed in: " + (System.currentTimeMillis() - start) + "ms.");
         
         /* ****** SPEC_OBJECT_NAME for scheme spec ? ****** */
         // AnnotatedClass _this = classes.getType( TYPE_THIS );
@@ -362,7 +339,6 @@ public class SpecParser {
      * @param spec a specfication to be parsed. If it includes a declaration of
      *                an annotated class, it will be recursively parsed.
      * @param className the name of the class being parsed
-     * @param parent
      * @param checkedClasses the list of classes that parser has started to
      *                check. Needed to prevent infinite loop in case of mutual
      *                declarations.
@@ -390,7 +366,7 @@ public class SpecParser {
                 if ( ( lt = getLine( specLines ) ) != null ) {
 
                     if ( RuntimeProperties.isLogDebugEnabled() )
-                        db.p( "Parsing: Class " + className + " " + lt );
+                        logger.info("Parsing: Class " + className + " " + lt);
 
                     if ( lt.getType() == LineType.TYPE_SUPERCLASSES ) {
                         LineType.Superclasses statement = ( LineType.Superclasses)lt.getStatement();
@@ -415,8 +391,7 @@ public class SpecParser {
                         classRelation.setMethod( statement.getName() + " = " + statement.getValue() );
                         checkAnyType( getVar(statement.getName(), annClass.getFields()), statement.getValue(), annClass, classList );
                         annClass.addClassRelation( classRelation );
-                        if ( RuntimeProperties.isLogDebugEnabled() )
-                            db.p( classRelation );
+                        logger.debug(classRelation.toString());
 
                     } else if ( lt.getType() == LineType.TYPE_CONST ) {
                         LineType.Constant statement = ( LineType.Constant)lt.getStatement();
@@ -429,8 +404,7 @@ public class SpecParser {
                         if ( file.exists() && isSpecClass( path, statement.getType() ) ) {
                             throw new SpecParseException( "Constant " + statement.getName() + " cannot be of type " + statement.getType() );
                         }
-                        if ( RuntimeProperties.isLogDebugEnabled() )
-                            db.p( "---===!!! " + statement.getType() + " " + statement.getName() + " = " + statement.getValue() );
+                        logger.debug( "---===!!! " + statement.getType() + " " + statement.getName() + " = " + statement.getValue() );
 
                         ClassField var = new ClassField( statement.getName(), statement.getType(), statement.getValue(), true );
 
@@ -564,8 +538,7 @@ public class SpecParser {
                         classRelation.addOutput( name, annClass.getFields() );
                         annClass.addClassRelation( classRelation );
 
-                        if ( RuntimeProperties.isLogDebugEnabled() )
-                            db.p( classRelation );
+                        logger.debug( classRelation.toString() );
 
                         if ( !alias.isWildcard() ) {
                             classRelation = new ClassRelation( RelType.TYPE_ALIAS, lt.getOrigSpecLine() );
@@ -573,8 +546,7 @@ public class SpecParser {
                             classRelation.setMethod( TypeUtil.TYPE_ALIAS );
                             classRelation.addInput( name, annClass.getFields() );
                             annClass.addClassRelation( classRelation );
-                            if ( RuntimeProperties.isLogDebugEnabled() )
-                                db.p( classRelation );
+                            logger.debug( classRelation.toString() );
                         }
 
                         alias.setInitialized( true );
@@ -584,8 +556,7 @@ public class SpecParser {
                         EquationSolver solver = new EquationSolver();
                         solver.solve( statement.getEq() );
                         next: for ( Relation rel : solver.getRelations() ) {
-                            if ( RuntimeProperties.isLogDebugEnabled() )
-                                db.p( "equation: " + rel );
+                            logger.debug( "equation: " + rel );
                             String[] pieces = rel.getRel().split( ":" );
                             String method = rel.getExp();
                             String out = pieces[ 2 ].trim();
@@ -593,7 +564,7 @@ public class SpecParser {
                             // cannot assign new values for constants
                             ClassField tmp = getVar( checkAliasLength( out, annClass, className ), annClass.getFields() );
                             if ( tmp != null && ( tmp.isConstant() || tmp.isAliasLength() ) ) {
-                                db.p( "Ignoring constant as equation output: " + tmp );
+                                logger.info("Ignoring constant as equation output: " + tmp);
                                 continue;
                             }
                             // if one variable is used on both sides of "=", we
@@ -601,8 +572,7 @@ public class SpecParser {
                             String[] inputs = pieces[ 1 ].trim().split( " " );
                             for ( int j = 0; j < inputs.length; j++ ) {
                                 if ( inputs[ j ].equals( out ) ) {
-                                    if ( RuntimeProperties.isLogDebugEnabled() )
-                                        db.p( " - unable use this equation because variable " + out
+                                    logger.debug( " - unable use this equation because variable " + out
                                                 + " appears on both sides of =" );
                                     continue next;
                                 }
@@ -632,8 +602,7 @@ public class SpecParser {
                             }
                             classRelation.setMethod( method );
                             annClass.addClassRelation( classRelation );
-                            if ( RuntimeProperties.isLogDebugEnabled() )
-                                db.p( "Equation: " + classRelation );
+                            logger.debug( "Equation: " + classRelation );
 
                         }
                     } else if ( lt.getType() == LineType.TYPE_AXIOM ) {
@@ -705,8 +674,7 @@ public class SpecParser {
                             classRelation.setType( RelType.TYPE_METHOD_WITH_SUBTASK );
                         }
 
-                        if ( RuntimeProperties.isLogDebugEnabled() )
-                            db.p( classRelation );
+                        logger.debug( classRelation.toString() );
 
                         annClass.addClassRelation( classRelation );
 
@@ -720,9 +688,8 @@ public class SpecParser {
                         classRelation.addInputs( statement.getInputs(), annClass.getFields() );
 
                         annClass.addClassRelation( classRelation );
-                        
-                        if ( RuntimeProperties.isLogDebugEnabled() )
-                            db.p( classRelation );
+
+                        logger.debug( classRelation.toString() );
                         
                     } else if ( lt.getType() == LineType.TYPE_ERROR ) {
                         throw new LineErrorException( lt.getOrigSpecLine() );
@@ -766,9 +733,8 @@ public class SpecParser {
      */
     private static boolean checkSpecClass( String parentClassName, String path, Set<String> checkedClasses, ClassList classList,
             String type ) throws IOException, SpecParseException {
-        
-        if ( RuntimeProperties.isLogDebugEnabled() )
-            db.p( "Checking existence of " + path + type + ".java" );
+
+        logger.debug( "Checking existence of " + path + type + ".java" );
         
         if(checkedClasses == null)
             checkedClasses = new LinkedHashSet<String>();
@@ -931,8 +897,7 @@ public class SpecParser {
     private static void getWildCards( ClassList classList, String output ) {
         String list[] = output.split( "\\." );
         for ( int i = 0; i < list.length; i++ ) {
-            if ( RuntimeProperties.isLogDebugEnabled() )
-                db.p( list[ i ] );
+            logger.debug( list[ i ] );
         }
     }
 
@@ -983,8 +948,7 @@ public class SpecParser {
                             //        alias.addVar( aliasCF );
                             //}
                         } catch ( UnknownVariableException e ) {
-                            if( RuntimeProperties.isLogInfoEnabled() )
-                                db.p("Line: " + e.getLine() + ", " + e.toString());
+                            logger.info("Line: " + e.getLine() + ", " + e.toString());
                         } catch ( AliasException e ) {
                         }
                     }
@@ -1017,7 +981,7 @@ public class SpecParser {
                 return true;
             }
         } catch ( IOException ioe ) {
-            db.p( ioe );
+            logger.info(null, ioe);
         }
         return false;
     }

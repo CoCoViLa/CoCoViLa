@@ -25,6 +25,8 @@ import org.eclipse.jdt.internal.compiler.problem.DefaultProblemFactory;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -34,6 +36,8 @@ import ee.ioc.cs.vsle.util.*;
  * Description: A CompilingClassLoader compiles Java source on-the-fly.
  */
 public abstract class CCL extends URLClassLoader {
+
+    private static final Logger logger = LoggerFactory.getLogger(CCL.class);
 
     public static final String 
             PROGRAM_CONTEXT = "ee.ioc.cs.vsle.api.ProgramContext";
@@ -158,7 +162,7 @@ public abstract class CCL extends URLClassLoader {
         try {
             return compile(name, (char[]) null);
         } catch (CompileException e) {
-            db.p(e);
+            logger.error(null, e);
         }
 
         // Failure
@@ -189,7 +193,7 @@ public abstract class CCL extends URLClassLoader {
                 try {
                     writeProblemLog(sb);
                 } catch (IOException e) {
-                    db.p(e);
+                    logger.error(null, e);
                 } finally {
                     clearProblems();
                 }
