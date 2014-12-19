@@ -365,6 +365,13 @@ public class EditorActionListener implements ActionListener {
                 JDialog ess = new ExpertSystemShellWelcomeDialog();
                 ess.setLocationRelativeTo( Editor.getInstance() );
                 ess.setVisible( true );
+            } else if ( e.getActionCommand().equals( Menu.ICON_EDITOR ) ) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        IconEditor.createAndOpen();
+                    }
+                });
             } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
                 new AboutDialog( Editor.getInstance() );
             } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
