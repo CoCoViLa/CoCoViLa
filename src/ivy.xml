@@ -5,5 +5,6 @@
 		<dependency org="org.eclipse.jdt.core.compiler" name="ecj" rev="4.2.1"/>
 		<dependency org="ch.qos.logback" name="logback-classic" rev="1.0.9"/>
 		<!-- <dependency org="com.incors" name="kunstoff-laf" rev="2.0.2"/> -->
+		<dependency org="org.antlr" name="antlr4" rev="4.3"/>
 	</dependencies>
 </ivy-module>

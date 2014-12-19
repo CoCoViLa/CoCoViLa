@@ -1,0 +1,4 @@
+#Create 'dist.properties' and define the following properties for jar signing
+project.dist.keystore.keypass=changeme
+project.dist.keystore.storepass=changeme
+project.dist.keystore.dnameCn=FirstName LastName

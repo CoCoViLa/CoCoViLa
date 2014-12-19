@@ -30,11 +30,15 @@
   <property name="dist.name" value="${ant.project.name}-${project.version}"/>
 
   <property name="encoding" value="UTF-8"/>
-  <property name="javasource" value="1.5"/>
-  <property name="javatarget" value="1.5"/>
-  <property name="compiler" value="javac1.5"/>
+  <property name="javasource" value="1.6"/>
+  <property name="javatarget" value="1.6"/>
+  <property name="compiler" value="javac1.6"/>
   <property name="compile" value="compile-debug"/>
 
+	<property name="spec.grammar.src.dir" value="${src}/ee/ioc/cs/vsle/parser"/>
+	<property name="spec.grammar.file"    value="${spec.grammar.src.dir}/SpecificationLanguage.g4"/>
+	<property name="spec.grammar.target.dir"    value="${spec.grammar.src.dir}/generated"/>
+	
   <path id="build.classpath">
     <fileset dir="${lib}">
       <include name="*.jar"/>
@@ -51,8 +55,8 @@
       Dependency management.
   -->
   <target name="resolve" description="--> retrieve dependencies with ivy" depends="init-ivy">
-    <ivy:resolve file="src/ivy.xml"/>
-    <ivy:retrieve pattern="lib/[artifact].[ext]" type="jar"/>
+    <ivy:resolve file="${src}/ivy.xml"/>
+    <ivy:retrieve pattern="${lib}/[artifact].[ext]" type="jar"/>
   </target>
   
   <target name="check-dep" depends="resolve">
@@ -89,13 +93,13 @@
   </target>
   
   <target name="build-dep" depends="check-dep">
-    <fail message="Cannot find ${lib}/ejc.jar" unless="dep.tools.present"/>
+    <fail message="Cannot find ${lib}/ecj.jar" unless="dep.tools.present"/>
 
     <echo message="Build dependencies are present"/>
   </target>
 
   <target name="runtime-dep" depends="check-dep">
-    <fail message="Cannot find ${lib}/ejc.jar" unless="dep.tools.present"/>
+    <fail message="Cannot find ${lib}/ecj.jar" unless="dep.tools.present"/>
     <fail message="Cannot find ${lib}/jcommon.jar" unless="dep.jcommon.present"/>
     <fail message="Cannot find ${lib}/jfreechart.jar" unless="dep.jfreechart.present"/>
 
@@ -107,10 +111,10 @@
       Compilation
   -->
 
-  <target name="compile" depends="compile-debug,compile-normal"
+  <target name="compile" depends="clean,compile-debug,compile-normal"
           description="Compile the program sources"/>
 
-  <target name="compile-debug" depends="init,build-dep"
+  <target name="compile-debug" depends="init,build-dep,generate-spec-parser-if-needed"
           if="javac.debug">
 
     <echo message="Debug build"/>
@@ -129,7 +133,7 @@
     </javac>
   </target>
 
-  <target name="compile-normal" depends="init,build-dep"
+  <target name="compile-normal" depends="init,build-dep,generate-spec-parser-if-needed"
           unless="javac.debug">
 
     <echo message="Optimized build"/>
@@ -145,6 +149,27 @@
     </javac>
   </target>
 
+  <target name="generate-spec-parser-if-needed" depends="check-generated-dir" unless="spec.grammar.target.dir.exists">
+    <antcall target="generate-spec-parser" />
+  </target>
+
+  <target name="check-generated-dir">
+    <condition property="spec.grammar.target.dir.exists">
+      <available file="${spec.grammar.target.dir}" type="dir"/>
+    </condition>
+  </target>
+
+  <target name="generate-spec-parser" description="Generates the lexer and parser from the ANTLR grammar.">
+    <echo>Generating the spec language lexer and parser...</echo>
+    <java classname="org.antlr.v4.Tool" fork="true" failonerror="true">
+      <arg value="-o"/>
+      <arg value="${spec.grammar.target.dir}"/>
+      <arg value="${spec.grammar.file}"/>
+      <arg value="-package" />
+      <arg value="ee.ioc.cs.vsle.parser.generated" />
+      <classpath refid="build.classpath"/>
+    </java>
+  </target>
 
   <!--
       Testing
@@ -258,10 +283,10 @@
         <pathelement location="${build}"/>
         <path refid="build.classpath"/>
       </classpath>
-    	<jvmarg value="-Xss2048k"/>
-    	<jvmarg value="-Xms64m"/>
-    	<jvmarg value="-Xmx384m"/>
-    	<jvmarg value="-XX:+UseParallelGC"/>
+      <jvmarg value="-Xss2048k"/>
+      <jvmarg value="-Xms64m"/>
+      <jvmarg value="-Xmx384m"/>
+      <jvmarg value="-XX:+UseParallelGC"/>
     </java>
   </target>
 
@@ -294,7 +319,9 @@
         <!--exclude name="**/*Test*.class"/-->
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
-          <attribute name="Class-Path" value="lib/ejc.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Class-Path" value="lib/ecj.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Permissions" value="${project.permissions}"/>
+          <attribute name="Codebase" value="${project.codebase}"/>
           <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
           <attribute name="Implementation-Vendor" value="${project.vendor}"/>
           <attribute name="Implementation-Version" value="${project.version}"/>
@@ -308,6 +335,8 @@
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.iconeditor.IconEditor"/>
           <attribute name="Class-Path" value="${project.se.jar}"/>
+          <attribute name="Permissions" value="${project.permissions}"/>
+          <attribute name="Codebase" value="${project.codebase}"/>
           <attribute name="Implementation-Title" value="${project.title} ${project.title.ce}"/>
           <attribute name="Implementation-Vendor" value="${project.vendor}"/>
           <attribute name="Implementation-Version" value="${project.version}"/>
@@ -316,7 +345,7 @@
 
     <zip destfile="${dist}/${dist.name}.zip">
       <zipfileset dir="${lib}" prefix="${dist.name}/lib"/>
-      <zipfileset dir="${packages}" prefix="${dist.name}/packages"/>
+      <zipfileset dir="${packages}" prefix="${dist.name}/packages" erroronmissingdir="false" />
       <zipfileset dir="${dist}/lib" includes="*.jar" prefix="${dist.name}"/>
     </zip>
   </target>
@@ -326,7 +355,7 @@
       Web Start
   -->
 	
-  <target name="webstart" depends="check-ws-dirs,runtime-dep,copy-resources,genkey"
+  <target name="webstart" depends="clean,check-ws-dirs,runtime-dep,copy-resources,genkey"
           description="Generate distribution files" >
 
     <jar destfile="${webstart}/cocovila-se.jar"
@@ -335,7 +364,7 @@
     	<exclude name="ee/ioc/cs/vsle/iconeditor/**" />
         <manifest>
           <attribute name="Main-Class" value="ee.ioc.cs.vsle.editor.Editor"/>
-          <attribute name="Class-Path" value="lib/ejc.jar lib/jfreechart.jar lib/jcommon.jar"/>
+          <attribute name="Class-Path" value="lib/ecj.jar lib/jfreechart.jar lib/jcommon.jar"/>
           <attribute name="Implementation-Title" value="${project.title} ${project.title.se}"/>
           <attribute name="Implementation-Vendor" value="${project.vendor}"/>
           <attribute name="Implementation-Version" value="${project.version}"/>
@@ -368,7 +397,7 @@
 
   	<copy todir="${webstart}/lib">
       <fileset dir="${lib}">
-        <include name="ejc.jar"/>
+        <include name="ecj.jar"/>
       	<include name="jcommon.jar"/>
         <include name="jfreechart.jar"/>
       </fileset>
