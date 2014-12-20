@@ -1,11 +1,16 @@
 package ee.ioc.cs.vsle.editor;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.awt.*;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
 
 public class ErrorWindow extends JFrame {
+
+    private static final Logger logger = LoggerFactory.getLogger(ErrorWindow.class);
 
     JTextArea textArea;
     JPanel errorText;
@@ -108,7 +113,7 @@ public class ErrorWindow extends JFrame {
         		instance.textArea.select(oldLen + firstErrorIndex,
         				oldLen + firstErrorIndex + 5);
         	} catch (BadLocationException e) {
-        		db.p(e);
+            logger.error(null, e);
         	}
         }
         

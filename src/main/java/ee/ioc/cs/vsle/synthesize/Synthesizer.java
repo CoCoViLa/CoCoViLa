@@ -17,12 +17,16 @@ import ee.ioc.cs.vsle.util.FileFuncs.FileSystemStorage;
 import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
 import ee.ioc.cs.vsle.util.TypeUtil;
 import ee.ioc.cs.vsle.vclass.ClassField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  This class is responsible for managing the planning and code generation process.
  @author Ando Saabas
  */
 public class Synthesizer {
+
+    private static final Logger logger = LoggerFactory.getLogger(Synthesizer.class);
 
 	public static final String RE_SPEC = "/\\*@.*specification[ \t\n]+" +
 			"[a-zA-Z_0-9-.]+[ \t\n]*(super ([ a-zA-Z_0-9-,]+ ))?" +
@@ -263,15 +267,15 @@ public class Synthesizer {
             makeProgram( prog, classList, mainClassName, path,
                     new FileSystemStorage(outputDir));
         } catch ( UnknownVariableException uve ) {
-            db.p("Fatal error: variable " + uve.getMessage() + " not declared");
+            logger.error("Fatal error: variable " + uve.getMessage() + " not declared");
         } catch ( LineErrorException lee ) {
-            db.p("Fatal error on line " + lee.getMessage());
+            logger.error("Fatal error on line " + lee.getMessage());
         } catch ( MutualDeclarationException lee ) {
-            db.p("Mutual recursion in specifications, between classes " + lee.getMessage());
+            logger.error("Mutual recursion in specifications, between classes " + lee.getMessage());
         } catch ( EquationException ee ) {
-            db.p(ee.getMessage());
+            logger.error(ee.getMessage());
         } catch ( SpecParseException spe ) {
-            db.p( spe );
+            logger.error( null, spe );
         } catch ( Exception ex ) {
             ex.printStackTrace();
         }

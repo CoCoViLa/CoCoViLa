@@ -17,6 +17,8 @@ import ee.ioc.cs.vsle.vclass.*;
 
 public class RuntimeProperties {
 
+    private static final Logger logger = LoggerFactory.getLogger( RuntimeProperties.class );
+
     private final static RuntimeProperties instance = new RuntimeProperties();
     
     public final static String SCHEME_DTD = "scheme.dtd";
@@ -299,7 +301,7 @@ public class RuntimeProperties {
 
         writeProperties( APP_PROPS_FILE_NAME, instance.runtimeProperties );
         
-        db.p( "Configuration saved" );
+        logger.info("Configuration saved");
     }
 
     /**
@@ -548,7 +550,7 @@ public class RuntimeProperties {
     }
 
     /**
-     * @param openPackage the openPackage to set
+     * @param pkg the openPackage to set
      */
     public static void addOpenPackage( VPackage pkg ) {
         instance.openPackages.add( pkg.getPath() );
@@ -640,8 +642,7 @@ public class RuntimeProperties {
                     in.close();
                 }
             } catch ( Exception e ) {
-                db.p( "Error reading configuration properties" );
-                e.printStackTrace();
+                logger.error( "Error reading configuration properties", e );
             }
         }
         
@@ -662,8 +663,7 @@ public class RuntimeProperties {
                 out.close();
             }
         } catch ( Exception e ) {
-            db.p( "Error writing configuration properties" );
-            e.printStackTrace();
+            logger.error( "Error writing configuration properties", e );
         }
     }
 
@@ -754,7 +754,7 @@ public class RuntimeProperties {
         // create the directory for generated files
         if (dumpGenerated) {
             if( FileFuncs.checkFolderAndCreate( getGenFileDir() ) && isLogDebugEnabled() ) {
-                db.p("Created genFileDir " + getGenFileDir() );
+                logger.debug("Created genFileDir " + getGenFileDir() );
             }
         }
 

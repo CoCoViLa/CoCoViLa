@@ -8,10 +8,13 @@ import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class LicenseDialog extends JDialog {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LoggerFactory.getLogger(LicenseDialog.class);
 
 	private JPanel pnlMain = new JPanel();
 	private JPanel pnlHeader = new JPanel();
@@ -111,7 +114,7 @@ public class LicenseDialog extends JDialog {
 			}
 			in.close();
 		} catch (IOException e) {
-			db.p(e);
+			logger.error(null, e);
 		}
 		return textBuffer.toString();
 	} // getLicenseText

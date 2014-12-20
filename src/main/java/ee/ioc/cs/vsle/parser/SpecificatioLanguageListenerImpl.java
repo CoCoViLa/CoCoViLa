@@ -55,9 +55,13 @@ import ee.ioc.cs.vsle.util.TypeUtil;
 import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.AliasLength;
 import ee.ioc.cs.vsle.vclass.ClassField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseListener {
-	
+
+  private static final Logger logger = LoggerFactory.getLogger(SpecificatioLanguageListenerImpl.class);
+
 	private final SpecificationLoader specificationLoader;
 	private AnnotatedClass annotatedClass;
 	private ClassFieldDeclarator classFieldDeclarator;
@@ -266,9 +270,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
         
         if (!subtaskContextList.isEmpty())
         	classRelation.setType( RelType.TYPE_METHOD_WITH_SUBTASK );
-
-        if ( RuntimeProperties.isLogDebugEnabled() )
-            db.p( classRelation );
+          logger.debug( classRelation.toString() );
 
         if(ctx.exceptionList() != null) {
           for(ClassTypeContext ct : ctx.exceptionList().classType()) {
@@ -357,8 +359,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
         classRelation.addOutput( currentAlias.getName(), annotatedClass.getFields() );
         annotatedClass.addClassRelation( classRelation );
 
-        if ( RuntimeProperties.isLogDebugEnabled() )
-            db.p( classRelation );
+        logger.debug( classRelation.toString() );
 
         if ( !currentAlias.isWildcard() ) {
             classRelation = new ClassRelation( RelType.TYPE_ALIAS, lineNext );
@@ -366,8 +367,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
             classRelation.setMethod( TypeUtil.TYPE_ALIAS );
             classRelation.addInput( currentAlias.getName(), annotatedClass.getFields() );
             annotatedClass.addClassRelation( classRelation );
-            if ( RuntimeProperties.isLogDebugEnabled() )
-                db.p( classRelation );
+            logger.debug( classRelation.toString() );
         }
 
         currentAlias.setInitialized( true );
@@ -441,8 +441,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
         EquationSolver solver = new EquationSolver();
         solver.solve( equation );
         next: for ( Relation rel : solver.getRelations() ) {
-            if ( RuntimeProperties.isLogDebugEnabled() )
-                db.p( "equation: " + rel );
+            logger.debug( "equation: " + rel );
             String[] pieces = rel.getRel().split( ":" );
             String method = rel.getExp();
             String out = pieces[ 2 ].trim();
@@ -450,7 +449,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
             // cannot assign new values for constants
             ClassField tmp = annotatedClass.getFieldByName(checkAliasLength(out));
             if ( tmp != null && ( tmp.isConstant() || tmp.isAliasLength() ) ) {
-                db.p( "Ignoring constant as equation output: " + tmp );
+            logger.debug( "Ignoring constant as equation output: " + tmp );
                 continue;
             }
             // if one variable is used on both sides of "=", we
@@ -458,8 +457,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
             String[] inputs = pieces[ 1 ].trim().split( " " );
             for ( int j = 0; j < inputs.length; j++ ) {
                 if ( inputs[ j ].equals( out ) ) {
-                    if ( RuntimeProperties.isLogDebugEnabled() )
-                        db.p( " - unable use this equation because variable " + out
+                    logger.debug( " - unable use this equation because variable " + out
                                 + " appears on both sides of =" );
                     continue next;
                 }
@@ -489,8 +487,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
             }
             classRelation.setMethod( method );
             annotatedClass.addClassRelation( classRelation );
-            if ( RuntimeProperties.isLogDebugEnabled() )
-                db.p( "Equation: " + classRelation );
+            logger.debug( "Equation: " + classRelation );
 
         }
 	}

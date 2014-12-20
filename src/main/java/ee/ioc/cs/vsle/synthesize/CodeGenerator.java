@@ -83,7 +83,7 @@ public class CodeGenerator {
 
         }
 
-        logger.info( "Code generation time: " + ( System.currentTimeMillis() - start ) + "ms" );
+        logger.info("Code generation time: " + (System.currentTimeMillis() - start) + "ms");
 
         return alg.toString();
     }
@@ -203,8 +203,7 @@ public class CodeGenerator {
         for ( int i = 0; i < subAlg.size(); i++ ) {
             PlanningResult res = subAlg.get( i );
             Rel trel = res.getRel();
-            if ( RuntimeProperties.isLogDebugEnabled() )
-                db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs() );
+            logger.debug( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs() );
             if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                 // recursion
                 genRelWithSubtasks( res, bufSbtBody, true, sbClassName, currentUsedVars, currentProblem );

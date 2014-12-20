@@ -1,6 +1,9 @@
 package ee.ioc.cs.vsle.iconeditor;
 
 import ee.ioc.cs.vsle.editor.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JScrollPane;
@@ -22,6 +25,7 @@ import java.io.InputStreamReader;
 public class AboutDialog extends JDialog {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LoggerFactory.getLogger(AboutDialog.class);
 
 	// Panels for the dialog components.
 	private JPanel pnlMain = new JPanel();
@@ -99,7 +103,7 @@ public class AboutDialog extends JDialog {
 			}
 			in.close();
 		} catch (IOException e) {
-			db.p(e);
+			logger.error(null, e);
 		}
 		return textBuffer.toString();
 	} // getLicenseText

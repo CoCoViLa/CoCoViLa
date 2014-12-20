@@ -13,6 +13,8 @@ import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
 import javax.xml.transform.stream.StreamResult;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.helpers.AttributesImpl;
 
 import ee.ioc.cs.vsle.api.*;
@@ -27,6 +29,8 @@ import ee.ioc.cs.vsle.util.StringUtil;
 public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExtendable {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(Scheme.class);
+
     private ObjectList objects;
 	private ConnectionList connections;
 	private ISchemeContainer canvas;
@@ -204,9 +208,9 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
                     }
                 });
             } catch (InterruptedException e) {
-                db.p(e);
+                logger.error(null, e);
             } catch (InvocationTargetException e) {
-                db.p(e);
+                logger.error(null, e);
             }
         }
     }
@@ -229,9 +233,9 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
                     }
                 });
             } catch (InterruptedException e) {
-                db.p(e);
+                logger.error(null, e);
             } catch (InvocationTargetException e) {
-                db.p(e);
+                logger.error(null, e);
             }
         }
         return c[0] == null ? null : c[0].getScheme();
@@ -274,7 +278,7 @@ public class Scheme implements Serializable, ee.ioc.cs.vsle.api.Scheme, ISpecExt
                 try {
                     output.close();
                 } catch ( IOException e ) {
-                    db.p( e );
+                    logger.error(null, e );
                 }
                 output = null;
             }

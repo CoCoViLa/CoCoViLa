@@ -66,6 +66,8 @@ import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.ObjectList;
 import ee.ioc.cs.vsle.vclass.VPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is used for invoking planning, compiling and other procedures. It
@@ -78,6 +80,8 @@ import ee.ioc.cs.vsle.vclass.VPackage;
  *
  */
 public class ProgramRunner {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProgramRunner.class);
 
     private final static Object s_lock = new Object();
     private volatile boolean isWorking = false;
@@ -208,7 +212,7 @@ public class ProgramRunner {
         pc.getMethod( "setScheme", Scheme.class ).invoke( null,
                 cont.getScheme() );
 
-        db.p( "Compilation time: " + (System.currentTimeMillis() - start) + "ms.");
+        logger.info( "Compilation time: " + (System.currentTimeMillis() - start) + "ms.");
         return object;
     }
 
@@ -263,8 +267,7 @@ public class ProgramRunner {
 
             mainClassName = SpecParser.getClassName( fullSpec );
 
-            if ( RuntimeProperties.isLogInfoEnabled() )
-                db.p( "Computing " + mainClassName );
+            logger.info( "Computing " + mainClassName );
 
             Set<String> schemeObjects = new HashSet<String>();
 
@@ -311,13 +314,13 @@ public class ProgramRunner {
             String line = uve.getLine();
             msg = "Fatal error: variable " + uve.getMessage() + " not declared"
                     + ( line != null ? ", line: " + line : "" );
-            db.p( msg );
+            logger.error(msg);
             ErrorWindow.showErrorMessage( msg );
         }
         else if( e instanceof  LineErrorException ) {
             LineErrorException lee = (LineErrorException)e;
             msg = "Syntax error on line '" + lee.getMessage() + "'";
-            db.p( msg );
+            logger.error(msg);
             ErrorWindow.showErrorMessage( msg );
         }
         else if( e instanceof  EquationException ) {
@@ -329,7 +332,7 @@ public class ProgramRunner {
             MutualDeclarationException lee = (MutualDeclarationException)e;
             msg = "Mutual recursion in specifications, between classes "
                 + lee.getMessage();
-            db.p( msg );
+            logger.error(msg);
             ErrorWindow.showErrorMessage( msg );
         }
         else if( e instanceof  SpecParseException ) {
@@ -337,7 +340,7 @@ public class ProgramRunner {
             String line = spe.getLine();
             msg = "Specification parsing error: " + spe.getMessage() 
                 + (line != null ? ", line: " + line : ""); 
-            db.p( msg );
+            logger.error(msg);
             ErrorWindow.showErrorMessage( msg );
         }
         else {
@@ -400,7 +403,7 @@ public class ProgramRunner {
                 }
             }
         } catch ( Exception e ) {
-            db.p( "Error propagating value: " + e.getClass().getCanonicalName() + " : " + e.getMessage() );
+            logger.error("Error propagating value: " + e.getClass().getCanonicalName() + " : " + e.getMessage());
             if ( RuntimeProperties.isLogDebugEnabled() ) {
                 e.printStackTrace( System.err );
             }
@@ -433,7 +436,7 @@ public class ProgramRunner {
                 try {
                     Object[] args = getArguments();
                     for ( int i = 0; i < args.length; i++ ) {
-                        db.p( args[i].getClass() + " " + args[i] );
+                        logger.debug(args[i].getClass() + " " + args[i]);
                     }
 
                     Class<?> clas = genObject.getClass();
@@ -441,7 +444,7 @@ public class ProgramRunner {
                     ClassLoader cl = clas.getClassLoader();
                     initProgramContext(ProgramRunner.this, cl);
                     Method method = clas.getMethod( "compute", Object[].class );
-                    db.p( "Running... ( NB! The thread is alive until the next message --> ) " + Thread.currentThread().getName() );
+                    logger.info("Running... ( NB! The thread is alive until the next message --> ) " + Thread.currentThread().getName());
 
                     setWorking( true );
 
@@ -486,7 +489,7 @@ public class ProgramRunner {
                         long id = ProgramRunner.this.getId();
                         RunningThreadManager.removeThread( id, false );
                         setWorking( false );
-                        db.p( "--> " + Thread.currentThread().getName() + " finished in " + getElapsedTime() + "ms." );
+                        logger.info("--> " + Thread.currentThread().getName() + " finished in " + getElapsedTime() + "ms.");
                     }
 
                     if ( sendFeedback ) {
@@ -585,8 +588,7 @@ public class ProgramRunner {
             ErrorWindow.showErrorMessage( "Computing model failed:\n " + ex.getMessage() );
             throw new ComputeModelException( "Error computing model " + contextClassName, ex );
         } finally {
-            if(RuntimeProperties.isLogDebugEnabled())
-                db.p( "Computed independent model in " + (System.currentTimeMillis() - start) + "ms." );
+            logger.info( "Computed independent model in " + (System.currentTimeMillis() - start) + "ms." );
         }
     }
     
