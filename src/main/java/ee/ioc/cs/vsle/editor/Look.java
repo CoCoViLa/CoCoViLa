@@ -7,11 +7,15 @@ import javax.swing.*;
 import javax.swing.UIManager.*;
 
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Look and feel handler.
  */
 public class Look {
+
+    private static final Logger logger = LoggerFactory.getLogger(Look.class);
 
     private static Look s_instance;
 
@@ -44,7 +48,7 @@ public class Look {
                 RuntimeProperties.setLnf( lnf );
             
         } catch ( Exception e ) {
-            db.p( "Unable to change Look And Feel: " + lnf );
+            logger.debug("Unable to change Look And Feel: " + lnf);
         }
     }
 
@@ -55,7 +59,7 @@ public class Look {
             UIManager.setLookAndFeel( RuntimeProperties.getLnf() );
 
         } catch ( Exception e ) {
-            db.p( "Unable to init default Look And Feel: " + RuntimeProperties.getLnf() );
+            logger.debug("Unable to init default Look And Feel: " + RuntimeProperties.getLnf());
         }
     }
 

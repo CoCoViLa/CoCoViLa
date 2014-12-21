@@ -19,8 +19,12 @@ import ee.ioc.cs.vsle.util.TypeUtil;
 import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.AliasLength;
 import ee.ioc.cs.vsle.vclass.ClassField;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProblemCreator {
+
+    private static final Logger logger = LoggerFactory.getLogger(ProblemCreator.class);
 
     private Map<SubtaskClassRelation, SubtaskRel> indpSubtasks;
     private Map<String, Var> aliasLengths = new HashMap<String, Var>();
@@ -58,11 +62,9 @@ public class ProblemCreator {
         
         makeProblemImpl( problem.getRootVar(), problem, /*new HashMap<String, Integer>(),*/ true );
         
-        if ( RuntimeProperties.isLogInfoEnabled() )
-            db.p( "Problem created in: " + ( System.currentTimeMillis() - start ) + "ms." );
+        logger.info( "Problem created in: " + ( System.currentTimeMillis() - start ) + "ms." );
         
-        if ( RuntimeProperties.isLogDebugEnabled() )
-            db.p( problem );
+        logger.debug( problem.toString() );
         
         return problem;
     }

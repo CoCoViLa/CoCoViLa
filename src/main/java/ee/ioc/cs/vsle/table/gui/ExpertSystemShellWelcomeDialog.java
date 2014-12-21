@@ -7,8 +7,12 @@ import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ExpertSystemShellWelcomeDialog extends JDialog {
+
+    private static final Logger logger = LoggerFactory.getLogger(ExpertSystemShellWelcomeDialog.class);
 
     public ExpertSystemShellWelcomeDialog() {
         super( Editor.getInstance(), "Expert System Shell", ModalityType.APPLICATION_MODAL );
@@ -102,7 +106,7 @@ public class ExpertSystemShellWelcomeDialog extends JDialog {
             UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 
         } catch ( Exception e ) {
-            db.p( "Unable to init default Look And Feel: " + UIManager.getSystemLookAndFeelClassName() );
+            logger.error( "Unable to init default Look And Feel: " + UIManager.getSystemLookAndFeelClassName() );
         }
         
         SwingUtilities.invokeLater( new Runnable() {

@@ -21,6 +21,8 @@ import ee.ioc.cs.vsle.table.TableInferenceEngine.InputFieldAndSelectedId;
 import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author pavelg
@@ -29,6 +31,8 @@ import ee.ioc.cs.vsle.vclass.*;
 public class ExpertConsultant extends JDialog {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(ExpertConsultant.class);
+    
     private JPanel jContentPane = null;
     private JPanel jpQuestionMain = null;
     private JPanel jpButtons = null;
@@ -224,7 +228,7 @@ public class ExpertConsultant extends JDialog {
             public void run() {
                 VPackage pack = PackageXmlProcessor.load( new File("/Users/pavelg/Dropbox/CoCoViLa_packages/MyTest/MyTest2.xml") );
                 if( pack == null ) {
-                    if (RuntimeProperties.isLogDebugEnabled()) db.p( "Package null, aborting" );
+                    logger.debug( "Package null, aborting" );
                     return;
                 }
                 Table table = (Table)TableManager.getTable( pack, 
@@ -260,7 +264,7 @@ public class ExpertConsultant extends JDialog {
         this.showResultPanel = showResultPanel;
         
 //        if( table != null )
-//            if (RuntimeProperties.isLogDebugEnabled()) db.p("Expert System Constant: " + table.getTableId() + " inputs: " + table.getInputFields().size()
+//            logger.debug("Expert System Constant: " + table.getTableId() + " inputs: " + table.getInputFields().size()
 //                    + " rows: " + table.getRowCount() + " cols: " + table.getColumnCount() 
 //                    + " hr: " + table.getHRules().size() + " vr: " + table.getVRules().size());
         initialize();
@@ -307,13 +311,13 @@ public class ExpertConsultant extends JDialog {
         
         if( firstInput == null ) {
             initState.isFinished = true;
-//            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: no inputs are required! Output: " + table.queryTable( null, false ) );
+//            logger.debug( "Consultant: no inputs are required! Output: " + table.queryTable( null, false ) );
             setResult( table.queryTable( null, false ), initState.inputsToValues );
             checkButtonStates();
             return;
         }
         
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: first input is " + firstInput.getId() );
+        logger.debug( "Consultant: first input is " + firstInput.getId() );
         
         initState.availableRowIds.addAll( table.getOrderedRowIds() );
         initState.availableColumnIds.addAll( table.getOrderedColumnIds() );
@@ -328,10 +332,10 @@ public class ExpertConsultant extends JDialog {
      */
     private void checkNextInput( InputTableField currentInput, Object val ) {
         
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: " + currentInput.getId() + " value is " + val );
+        logger.debug( "Consultant: " + currentInput.getId() + " value is " + val );
         
         State prevState = states.peek();
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Next! rows: " + prevState.availableRowIds + " cols: " + prevState.availableColumnIds );
+        logger.debug( "Next! rows: " + prevState.availableRowIds + " cols: " + prevState.availableColumnIds );
         
         State state = new State();
         state.inputsToValues.putAll( prevState.inputsToValues );
@@ -343,7 +347,7 @@ public class ExpertConsultant extends JDialog {
         InputTableField nextInput = null;
         
         //first, try horisontal rules
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "\nConsultant: horizontal" );
+        logger.debug( "\nConsultant: horizontal" );
         if( state.selectedRowId < 0 ) {
             InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
                 table.getHRules(), currentInput, state.inputsToValues, 
@@ -356,7 +360,7 @@ public class ExpertConsultant extends JDialog {
         }
 
         //next, vertical
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "\nConsultant: vertical" );
+        logger.debug( "\nConsultant: vertical" );
         if( state.selectedColId < 0 ) {
             InputFieldAndSelectedId res = TableInferenceEngine.getNextInputAndRelevantIds( 
                     table.getVRules(), currentInput, state.inputsToValues, 
@@ -368,12 +372,12 @@ public class ExpertConsultant extends JDialog {
                 nextInput = res.getInput();//if not, this could be next input (or null)
         }
 
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: Rows: " + state.availableRowIds + " selected: " + state.selectedRowId );
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: Cols: " + state.availableColumnIds + " selected: " + state.selectedColId );
-        if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultan: derived next input: " + nextInput );
+        logger.debug( "Consultant: Rows: " + state.availableRowIds + " selected: " + state.selectedRowId );
+        logger.debug( "Consultant: Cols: " + state.availableColumnIds + " selected: " + state.selectedColId );
+        logger.debug( "Consultan: derived next input: " + nextInput );
         
         if( nextInput != null ) {
-            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: next input is " + nextInput.getId() );
+            logger.debug( "Consultant: next input is " + nextInput.getId() );
             setNextInput( nextInput );
             return;
         } 
@@ -406,11 +410,11 @@ public class ExpertConsultant extends JDialog {
 
             state.isFinished = true;
             
-            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Consultant: no additional inputs are required! Output: " + output
+            logger.debug( "Consultant: no additional inputs are required! Output: " + output
                     + " row: " + state.selectedRowId + " col: " + state.selectedColId );
             setResult( output, state.inputsToValues );
         } else {
-            if (RuntimeProperties.isLogDebugEnabled()) db.p( "Dunno what to do next...");
+            logger.debug( "Dunno what to do next...");
             state.isFinished = true;
             setResult( null, state.inputsToValues );
         }
@@ -557,8 +561,8 @@ public class ExpertConsultant extends JDialog {
                     }
                     returnValue = null;
                     setQuestionPanel( inputPanels.peek() );
-                    if (RuntimeProperties.isLogDebugEnabled()) db.p("Back! " + inputPanels.peek().field.getId() );
-                    if (RuntimeProperties.isLogDebugEnabled()) db.p("State: " + states.peek().inputsToValues );
+                    logger.debug("Back! " + inputPanels.peek().field.getId() );
+                    logger.debug("State: " + states.peek().inputsToValues );
                 } else if( e.getSource() == getJbCancel() 
                         || ( returnOk = ( e.getSource() == getJbFinish() ) ) ) {
                     getJbNext().removeActionListener( this );
@@ -612,10 +616,10 @@ public class ExpertConsultant extends JDialog {
         private JComponent getInputComponent() {
             if( inputComp == null ) {
                 String type = field.getType();
-                if (RuntimeProperties.isLogDebugEnabled()) db.p( "Analyzing type: " + type + " of input " + field.getId() );
+                logger.debug( "Analyzing type: " + type + " of input " + field.getId() );
 
                 if( TypeUtil.isArray( type ) ) {
-                    if (RuntimeProperties.isLogDebugEnabled()) db.p("Array");
+                    logger.debug("Array");
                     //TODO implement more sophisticated array entry GUI
                     return inputComp = createInputTextField();
                 }
