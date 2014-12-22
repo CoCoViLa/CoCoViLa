@@ -738,12 +738,19 @@ public class IconEditor extends JFrame {
      */
     public void exitApplication() {
 
-        int confirmed = JOptionPane.showConfirmDialog( null, "Exit Application?", Menu.EXIT, JOptionPane.OK_CANCEL_OPTION );
+        boolean ws = RuntimeProperties.isFromWebstart();
+
+        int confirmed = JOptionPane.showConfirmDialog( null, (ws ? "Close" : "Exit") + " Application?", Menu.EXIT, JOptionPane.OK_CANCEL_OPTION );
         switch ( confirmed ) {
         case JOptionPane.CANCEL_OPTION:
             break;
         case JOptionPane.OK_OPTION:
-            System.exit( 0 );
+            if(ws) {
+                dispose();
+            }
+            else {
+                System.exit(0);
+            }
         }
     }
 
@@ -1656,11 +1663,14 @@ public class IconEditor extends JFrame {
 
         Editor.extractPackages();
 
+        createAndOpen();
+    }
+
+    public static void createAndOpen() {
         IconEditor window = new IconEditor();
         window.setTitle( null );
         window.setSize( 775, 600 );
         window.setVisible( true );
-
     }
 
     @Override
