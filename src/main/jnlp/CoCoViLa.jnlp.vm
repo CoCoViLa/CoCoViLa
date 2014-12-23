@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp spec="$jnlpspec" codebase="http://www.cs.ioc.ee/cocovila/webstart/"  >
+    <information>
+        <title>CoCoViLa</title>
+        <vendor>Institute of Cybernetics</vendor>
+        <description>CoCoViLa — Model-Based Software Development Platform</description>
+        <homepage href="http://www.cs.ioc.ee/cocovila/"/>
+        <shortcut online="true">
+            <desktop/>
+            <menu submenu="CoCoViLa"/>
+        </shortcut>
+        #if($offlineAllowed)
+        <offline-allowed/>
+        #end
+    </information>
+    #if($allPermissions)
+    <security>
+        <all-permissions/>
+    </security>
+    #end
+    <resources>
+        <j2se version="$j2seVersion"/>
+        $dependencies
+    </resources>
+    <application-desc main-class="$mainClass">
+        <argument>-webstart</argument>
+    </application-desc>
+</jnlp>
