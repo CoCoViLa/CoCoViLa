@@ -13,6 +13,8 @@ import javax.swing.event.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class is responsible for the whole planning
@@ -21,6 +23,8 @@ import ee.ioc.cs.vsle.util.*;
  * 
  */
 public class DepthFirstPlanner implements IPlanner {
+
+    private static final Logger logger = LoggerFactory.getLogger(DepthFirstPlanner.class);
 
     private int maxDepth = s_maxDepth;
     private final boolean isSubtaskRepetitionAllowed = s_isSubtaskRepetitionAllowed;
@@ -98,18 +102,18 @@ public class DepthFirstPlanner implements IPlanner {
         //start planning
         if ( problem.getRelsWithSubtasks().isEmpty() && linearForwardSearch( context, algorithm, computeAll ) ) {
             if ( isLinearLoggingOn() )
-                db.p( "Problem solved without subtasks" );
+                logger.debug("Problem solved without subtasks");
         } else if ( !problem.getRelsWithSubtasks().isEmpty() && subtaskPlanning( problem, algorithm ) ) {
             if ( isLinearLoggingOn() )
-                db.p( "Problem solved with subtasks" );
+                logger.debug("Problem solved with subtasks");
         } else if (!computeAll) {
             if ( isLinearLoggingOn() )
-                db.p( "Problem not solved" );
+                logger.debug("Problem not solved");
         }
 
-        if ( RuntimeProperties.isLogInfoEnabled() && !nested )
-            db.p( "Planning time: " + ( System.currentTimeMillis() - startTime ) + "ms." );
-
+        if ( !nested ) {
+            logger.info("Planning time: " + (System.currentTimeMillis() - startTime) + "ms.");
+        }
         return algorithm;
     }
 
@@ -136,10 +140,10 @@ public class DepthFirstPlanner implements IPlanner {
         boolean changed = true;
 
         if ( isLinearLoggingOn() )
-            db.p( "------Starting linear planning with (sub)goals: " + context.getRemainingGoals() + "--------" );
+            logger.debug("------Starting linear planning with (sub)goals: " + context.getRemainingGoals() + "--------");
 
         if ( isLinearLoggingOn() )
-            db.p( "Algorithm " + algorithm );
+            logger.debug("Algorithm " + algorithm);
 
         int counter = 1;
 
@@ -147,29 +151,29 @@ public class DepthFirstPlanner implements IPlanner {
                 || ( changed && _computeAll ) ) {
 
             if ( isLinearLoggingOn() )
-                db.p( "----Iteration " + counter + " ----" );
+                logger.debug("----Iteration " + counter + " ----");
 
             counter++;
             changed = false;
             
             // iterate through all knownvars
             if ( isLinearLoggingOn() )
-                db.p( "Known:" + context.getKnownVars() );
+                logger.debug("Known:" + context.getKnownVars());
 
             for ( Var var : context.getKnownVars() ) {
 
                 if ( isLinearLoggingOn() )
-                    db.p( "Current Known: " + var );
+                    logger.debug("Current Known: " + var);
 
                 // Check the relations of all components
                 for ( Rel rel : var.getRels() ) {
                     if ( isLinearLoggingOn() )
-                        db.p( "And its rel: " + rel );
+                        logger.debug("And its rel: " + rel);
                     if ( context.isAvailableRel( rel ) ) {
                         context.removeUnknownInput( rel, var );
 
                         if ( isLinearLoggingOn() )
-                            db.p( "problem contains it " + rel );
+                            logger.debug("problem contains it " + rel);
 
                         removableVars.add( var );
 
@@ -177,12 +181,12 @@ public class DepthFirstPlanner implements IPlanner {
                                 && rel.getType() != RelType.TYPE_METHOD_WITH_SUBTASK ) {
 
                             if ( isLinearLoggingOn() )
-                                db.p( "rel is ready to be used " + rel );
+                                logger.debug("rel is ready to be used " + rel);
 
                             boolean relIsNeeded = false;
 
                             if ( isLinearLoggingOn() )
-                                db.p( "tema outputsid " + rel.getOutputs() );
+                                logger.debug("its outputs " + rel.getOutputs());
 
                             for ( Var relVar : rel.getOutputs() ) {
 
@@ -195,12 +199,12 @@ public class DepthFirstPlanner implements IPlanner {
                                 relIsNeeded = true;
                             }
                             if ( isLinearLoggingOn() )
-                                db.p( "relIsNeeded " + relIsNeeded );
+                                logger.debug("relIsNeeded " + relIsNeeded);
 
                             if ( relIsNeeded ) {
 
                                 if ( isLinearLoggingOn() )
-                                    db.p( "ja vajati " + rel );
+                                    logger.debug("needed rel:  " + rel);
 
                                 if ( !rel.getOutputs().isEmpty() ) {
                                     relOutputs.clear();
@@ -210,7 +214,7 @@ public class DepthFirstPlanner implements IPlanner {
                                 }
                                 algorithm.addRel( rel );
                                 if ( isLinearLoggingOn() )
-                                    db.p( "algorithm " + algorithm );
+                                    logger.debug("algorithm " + algorithm);
                             }
 
                             context.removeRel( rel );
@@ -229,24 +233,24 @@ public class DepthFirstPlanner implements IPlanner {
             }
             
             if ( isLinearLoggingOn() )
-                db.p( "foundvars " + context.getFoundVars() );
+                logger.debug("foundvars " + context.getFoundVars());
 
             context.getKnownVars().addAll( newVars );
             context.getKnownVars().removeAll( removableVars );
             newVars.clear();
         }
         if ( isLinearLoggingOn() )
-            db.p( "algorithm " + algorithm );
+            logger.debug("algorithm " + algorithm);
 
         if ( !_computeAll ) {
             Optimizer.optimize( context, algorithm );
 
             if ( isLinearLoggingOn() )
-                db.p( "optimized algorithm " + algorithm );
+                logger.debug("optimized algorithm " + algorithm);
         }
 
         if ( isLinearLoggingOn() )
-            db.p( "\n---!!!Finished linear planning!!!---\n" );
+            logger.debug("\n---!!!Finished linear planning!!!---\n");
 
         return context.getRemainingGoals().isEmpty() 
                 || context.getFoundVars().containsAll( context.getAllGoals() );
@@ -255,11 +259,11 @@ public class DepthFirstPlanner implements IPlanner {
     private boolean subtaskPlanning( Problem problem, EvaluationAlgorithm algorithm ) {
 
         if ( isSubtaskLoggingOn() )
-            db.p( "!!!--------- Starting Planning With Subtasks ---------!!!" );
+            logger.debug("!!!--------- Starting Planning With Subtasks ---------!!!");
 
         final int maxDepthBackup = maxDepth;
         if( isSubtaskLoggingOn() )
-            db.p( "maxDepthBackup:" + maxDepthBackup + " sbt: " + problem.getRelsWithSubtasks().size() );
+            logger.debug("maxDepthBackup:" + maxDepthBackup + " sbt: " + problem.getRelsWithSubtasks().size());
         PlanningContext context = problem.getCurrentContext();
         
         try {
@@ -271,8 +275,8 @@ public class DepthFirstPlanner implements IPlanner {
 
                 while( incrementalDepth <= ( isSubtaskRepetitionAllowed ? maxDepthBackup: problem.getRelsWithSubtasks().size()-1 ) ) {
                     if( isSubtaskLoggingOn() )
-                        db.p( "Incremental dfs, with max depth " + ( incrementalDepth + 1 ) 
-                                + " and " + problem.getRelsWithSubtasks().size() + " subtasks to solve" );
+                        logger.debug("Incremental dfs, with max depth " + (incrementalDepth + 1)
+                                + " and " + problem.getRelsWithSubtasks().size() + " subtasks to solve");
                     
                     maxDepth = incrementalDepth++;
                     
@@ -280,16 +284,16 @@ public class DepthFirstPlanner implements IPlanner {
                     //the problem may be solved and there is no need to go any deeper.
                     if( subtaskPlanningImpl( context, relsWithSubtasks, algorithm, new LinkedList<Rel>(), 0 ) ) {
                         if( isSubtaskLoggingOn() )
-                            db.p( "The problem was solved during idfs after some intermediate MLB" );
+                            logger.debug("The problem was solved during idfs after some intermediate MLB");
                         return true;
                     }
 
                     if( isSubtaskLoggingOn() )
-                        db.p( "Unsolved subtask left: " + problem.getRelsWithSubtasks().size() );
+                        logger.debug("Unsolved subtask left: " + problem.getRelsWithSubtasks().size());
                 }
 
                 if( isSubtaskLoggingOn() )
-                    db.p( "Fininshed incremental dfs" );
+                    logger.debug("Fininshed incremental dfs");
 
             } else {
                 if ( !isSubtaskRepetitionAllowed ) {
@@ -297,25 +301,25 @@ public class DepthFirstPlanner implements IPlanner {
                 }
 
                 if ( isSubtaskLoggingOn() )
-                    db.p( "Starting subtask dfs with maxDepth: " + ( maxDepth + 1 ) );
+                    logger.debug("Starting subtask dfs with maxDepth: " + (maxDepth + 1));
 
                 if( subtaskPlanningImpl( context, relsWithSubtasks, algorithm, new LinkedList<Rel>(), 0 ) ) {
                     if( isSubtaskLoggingOn() )
-                        db.p( "The problem was solved during dfs after some intermediate MLB" );
+                        logger.debug("The problem was solved during dfs after some intermediate MLB");
                     return true;
                 }
             }
 
         } finally {
             if( isSubtaskLoggingOn() )
-                db.p( "Fininshed dfs" );
+                logger.debug("Fininshed dfs");
 
             maxDepth = maxDepthBackup;
             indSubtasks.clear();
         }
 
         if ( isSubtaskLoggingOn() )
-            db.p( "Invoking final linear planning" );
+            logger.debug("Invoking final linear planning");
         
         return linearForwardSearch( context, algorithm, computeAll );
     }
@@ -355,7 +359,7 @@ public class DepthFirstPlanner implements IPlanner {
                     print += "\n" + p( depth ) + " " + var.toString();
                 }
                 */
-                db.p( print );
+                logger.debug(print);
             }
 
             //if this is a first attempt to construct an MLB to solve a subtask(i.e. depth>0),
@@ -388,8 +392,8 @@ public class DepthFirstPlanner implements IPlanner {
                 Rel subtaskRel = subtaskRelIterator.next();
 
                 if ( isSubtaskLoggingOn() )
-                    db.p( p( depth ) + "OR: depth: " + ( depth + 1 ) + " rel - " + subtaskRel.getParent().getFullName() + " : "
-                            + subtaskRel.getDeclaration() );
+                    logger.debug(p(depth) + "OR: depth: " + (depth + 1) + " rel - " + subtaskRel.getParent().getFullName() + " : "
+                            + subtaskRel.getDeclaration());
                 
                 if ( subtaskRel.equals( subtaskRelsInPath.peekLast() )
                         || ( !context.isRelReadyToUse(subtaskRel) ) 
@@ -397,15 +401,15 @@ public class DepthFirstPlanner implements IPlanner {
                         || ( !isSubtaskRepetitionAllowed && subtaskRelsInPath.contains( subtaskRel ) )) {
                     
                     if ( isSubtaskLoggingOn() ) {
-                        db.p( p( depth ) + "skipped" );
+                        logger.debug(p(depth) + "skipped");
                         if ( !context.isRelReadyToUse(subtaskRel) ) {
-                            db.p( p( depth ) + "because it has unknown inputs" );//TODO print unknown
+                            logger.debug(p(depth) + "because it has unknown inputs");//TODO print unknown
                         } else if ( context.getFoundVars().containsAll( subtaskRel.getOutputs() ) ) {
-                            db.p( p( depth ) + "because all outputs in FoundVars" );
+                            logger.debug(p(depth) + "because all outputs in FoundVars");
                         } else if( subtaskRel.equals( subtaskRelsInPath.peekLast() ) ) {
-                            db.p( p( depth ) + "because it is nested in itself" );
+                            logger.debug(p(depth) + "because it is nested in itself");
                         } else if( !isSubtaskRepetitionAllowed && subtaskRelsInPath.contains( subtaskRel ) ) {
-                            db.p( p( depth ) + "This rel with subtasks is already in use, path: " + subtaskRelsInPath );
+                            logger.debug(p(depth) + "This rel with subtasks is already in use, path: " + subtaskRelsInPath);
                         }
                     }
                     continue OR;
@@ -421,18 +425,18 @@ public class DepthFirstPlanner implements IPlanner {
                 // and children
                 AND: for ( SubtaskRel subtask : subtaskRel.getSubtasks() ) {
                     if ( isSubtaskLoggingOn() )
-                        db.p( p( depth ) + "AND: subtask - " + subtask );
+                        logger.debug(p(depth) + "AND: subtask - " + subtask);
 
                     EvaluationAlgorithm sbtAlgorithm = null;
                     
                     //////////////////////INDEPENDENT SUBTASK////////////////////////////////////////
                     if ( subtask.isIndependent() ) {
                         if ( isSubtaskLoggingOn() )
-                            db.p( "Independent!!!" );
+                            logger.debug("Independent!!!");
 
                         if ( subtask.isSolvable() == null ) {
                             if ( isSubtaskLoggingOn() )
-                                db.p( "Start solving independent subtask " + subtask.getDeclaration() );
+                                logger.debug("Start solving independent subtask " + subtask.getDeclaration());
                             // independent subtask is solved only once
                             Problem problemContext = subtask.getContext();
                             DepthFirstPlanner planner = new DepthFirstPlanner();
@@ -445,26 +449,26 @@ public class DepthFirstPlanner implements IPlanner {
                                 subtask.setSolvable( Boolean.TRUE );
                                 indSubtasks.put( subtask, sbtAlgorithm );
                                 if ( isSubtaskLoggingOn() )
-                                    db.p( "Solved " + subtask.getDeclaration() );
+                                    logger.debug("Solved " + subtask.getDeclaration());
                             } else {
                                 subtask.setSolvable( Boolean.FALSE );
                                 if ( RuntimeProperties.isLogInfoEnabled() ) {
-                                    db.p( "Unable to solve " + subtask.getDeclaration() );
+                                    logger.debug("Unable to solve " + subtask.getDeclaration());
                                 }
                             }
                             allSolved &= solved;
                         } else if ( subtask.isSolvable() == Boolean.TRUE ) {
                             if ( isSubtaskLoggingOn() )
-                                db.p( "Already solved" );
+                                logger.debug("Already solved");
                             allSolved &= true;
                             sbtAlgorithm = indSubtasks.get( subtask );
                         } else {
                             if ( isSubtaskLoggingOn() )
-                                db.p( "Not solvable" );
+                                logger.debug("Not solvable");
                             allSolved &= false;
                         }
                         if ( isSubtaskLoggingOn() )
-                            db.p( "End of independent subtask " + subtask );
+                            logger.debug("End of independent subtask " + subtask);
                         
                         if ( !allSolved ) {
                             continue OR;
@@ -488,7 +492,7 @@ public class DepthFirstPlanner implements IPlanner {
 
                         if ( solved ) {
                             if ( isSubtaskLoggingOn() )
-                                db.p( p( depth ) + "SOLVED subtask: " + subtask );
+                                logger.debug(p(depth) + "SOLVED subtask: " + subtask);
                             
                             if( !isOptDisabled ) {
                                 //if a subtask has been solved, optimize its algorithm
@@ -500,17 +504,17 @@ public class DepthFirstPlanner implements IPlanner {
                             continue AND;
                         } else if ( !solved && ( depth == maxDepth ) ) {
                             if ( isSubtaskLoggingOn() )
-                                db.p( p( depth ) + "NOT SOLVED and cannot go any deeper, subtask: " + subtask );
+                                logger.debug(p(depth) + "NOT SOLVED and cannot go any deeper, subtask: " + subtask);
                             continue OR;
                         }
 
                         if ( isSubtaskLoggingOn() )
-                            db.p( p( depth ) + "Recursing deeper" );
+                            logger.debug(p(depth) + "Recursing deeper");
 
                         solved = subtaskPlanningImpl( newContext, relsWithSubtasks, sbtAlgorithm, newPath, depth + 1 );
 
                         if ( isSubtaskLoggingOn() )
-                            db.p( p( depth ) + "Back to depth " + ( depth + 1 ) );
+                            logger.debug(p(depth) + "Back to depth " + (depth + 1));
 
                         //the linear planning has been performed at the end of MLB on the depth+1,
                         //if the problem was solved, there is no need to run linear planning again
@@ -522,7 +526,7 @@ public class DepthFirstPlanner implements IPlanner {
                         }
                         
                         if ( isSubtaskLoggingOn() )
-                            db.p( p( depth ) + ( solved ? "" : "NOT" ) + " SOLVED subtask: " + subtask );
+                            logger.debug(p(depth) + (solved ? "" : "NOT") + " SOLVED subtask: " + subtask);
 
                         allSolved &= solved;
 
@@ -550,9 +554,9 @@ public class DepthFirstPlanner implements IPlanner {
                     subtaskRelIterator.remove();
 
                     if ( isSubtaskLoggingOn() ) {
-                        db.p( p( depth ) + "SOLVED ALL SUBTASKS for " + subtaskRel.getParent().getFullName() + " : "
-                                + subtaskRel.getDeclaration() );
-                        db.p( p( depth ) + "Updating the problem graph and continuing building new MLB" );
+                        logger.debug(p(depth) + "SOLVED ALL SUBTASKS for " + subtaskRel.getParent().getFullName() + " : "
+                                + subtaskRel.getDeclaration());
+                        logger.debug(p(depth) + "Updating the problem graph and continuing building new MLB");
                     }
 
                     //this is used for incremental dfs
@@ -564,8 +568,8 @@ public class DepthFirstPlanner implements IPlanner {
 
                 }
                 if ( isSubtaskLoggingOn() )
-                    db.p( p( depth ) + "NOT SOLVED ALL subtasks, removing from path " + subtaskRel.getParent().getFullName()
-                            + " : " + subtaskRel.getDeclaration() );
+                    logger.debug(p(depth) + "NOT SOLVED ALL subtasks, removing from path " + subtaskRel.getParent().getFullName()
+                            + " : " + subtaskRel.getDeclaration());
                 newPath.remove( subtaskRel );
             }//end OR
 
@@ -574,7 +578,7 @@ public class DepthFirstPlanner implements IPlanner {
             // (i.e. no more rels can introduce new variables into the
             // algorithm)
             if ( isSubtaskLoggingOn() )
-                db.p( p( depth ) + "No more MLB can be constructed" );
+                logger.debug(p(depth) + "No more MLB can be constructed");
             break MLB;
         }
         
@@ -628,8 +632,7 @@ public class DepthFirstPlanner implements IPlanner {
                 Integer value = (Integer) ( (JSpinner) e.getSource() ).getValue();
                 s_maxDepth = value - 1;
 
-                if ( RuntimeProperties.isLogDebugEnabled() )
-                    db.p( "maxDepth " + ( s_maxDepth + 1 ) );
+                logger.debug("maxDepth " + (s_maxDepth + 1));
             }
         } );
         final JRadioButton jrbMaxDepth = new JRadioButton( "Depth" );
@@ -669,8 +672,7 @@ public class DepthFirstPlanner implements IPlanner {
             public void stateChanged( ChangeEvent e ) {
                 s_maxRept = (Integer) ( (JSpinner) e.getSource() ).getValue();
 
-                if ( RuntimeProperties.isLogDebugEnabled() )
-                    db.p( "maxRept " + s_maxRept );
+                logger.debug("maxRept " + s_maxRept);
             }
         } );
         
@@ -752,8 +754,7 @@ public class DepthFirstPlanner implements IPlanner {
                 s_isSubtaskRepetitionAllowed = chboxRepeat.isSelected();
                 panel.setVisible( s_isSubtaskRepetitionAllowed );
                 
-                if ( RuntimeProperties.isLogDebugEnabled() )
-                    db.p( "m_isSubtaskRepetitionAllowed " + s_isSubtaskRepetitionAllowed );
+                logger.debug("m_isSubtaskRepetitionAllowed " + s_isSubtaskRepetitionAllowed);
             }
         } );
 
@@ -770,9 +771,8 @@ public class DepthFirstPlanner implements IPlanner {
                     return;
                 
                 s_isIncremental = chboxIncremental.isSelected();
-                
-                if ( RuntimeProperties.isLogDebugEnabled() )
-                    db.p( "isIncremental " + s_isIncremental );
+
+                logger.debug( "isIncremental " + s_isIncremental );
             }
         } );
                
@@ -787,9 +787,8 @@ public class DepthFirstPlanner implements IPlanner {
                     return;
                 
                 s_disableOptimizationInSubtasks = chboxOptimize.isSelected();
-                
-                if ( RuntimeProperties.isLogDebugEnabled() )
-                    db.p( "disableOptimizationInSubtasks " + s_disableOptimizationInSubtasks );
+
+                logger.debug( "disableOptimizationInSubtasks " + s_disableOptimizationInSubtasks );
             }
         } );
         

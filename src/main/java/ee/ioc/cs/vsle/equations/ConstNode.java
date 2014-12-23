@@ -60,8 +60,5 @@ class ConstNode extends ExpNode {
         return value;
     } // inFix
 
-    void postFix() {
-        db.p(value);
-    } // postFix
 }
 

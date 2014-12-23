@@ -12,11 +12,15 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class for collecting error messages
  */
 public class DiagnosticsCollector {
+
+    private static final Logger logger = LoggerFactory.getLogger(DiagnosticsCollector.class);
 
     private int fatalMessagesCount = 0;
     
@@ -28,8 +32,7 @@ public class DiagnosticsCollector {
      * @param msg
      */
     public void collectDiagnostic( String msg ) {
-        if ( RuntimeProperties.isLogDebugEnabled() )
-            db.p( msg );
+        logger.debug( msg );
 
         messages.add( msg );
     }

@@ -14,8 +14,12 @@ import ee.ioc.cs.vsle.table.gui.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.util.Console;
 import ee.ioc.cs.vsle.vclass.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EditorActionListener implements ActionListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(EditorActionListener.class);
 
     /*
      * For more information about Swing Actions see: "How to Use Actions"
@@ -46,7 +50,7 @@ public class EditorActionListener implements ActionListener {
                     JOptionPane.showMessageDialog( Editor.getInstance(),
                             "Undo failed. Please report the steps to reproduce this error.", "Cannot undo",
                             JOptionPane.WARNING_MESSAGE );
-                    db.p( e );
+                    logger.error(null, e);
                 }
                 Editor.getInstance().refreshUndoRedo();
                 canvas.drawingArea.repaint();
@@ -78,7 +82,7 @@ public class EditorActionListener implements ActionListener {
                     JOptionPane.showMessageDialog( Editor.getInstance(),
                             "Redo failed. Please report the steps to reproduce this error.", "Cannot redo",
                             JOptionPane.WARNING_MESSAGE );
-                    db.p( e );
+                    logger.error(null, e);
                 }
 
                 Editor.getInstance().refreshUndoRedo();
@@ -151,8 +155,7 @@ public class EditorActionListener implements ActionListener {
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File file = fc.getSelectedFile();
                     RuntimeProperties.setLastPath( file.getAbsolutePath() );
-                    if ( RuntimeProperties.isLogDebugEnabled() )
-                        db.p( "Loading scheme: " + file.getName() );
+                    logger.debug( "Loading scheme: " + file.getName() );
                     try {
                         if ( Editor.getInstance().getCurrentCanvas().loadScheme( file ) ) {
                             Editor.getInstance().updateWindowTitle();
@@ -172,7 +175,7 @@ public class EditorActionListener implements ActionListener {
                 }
                 File file = new File( Editor.getInstance().getCurrentCanvas().getLastScheme() );
                 if ( file.exists() ) {
-                    db.p( "Reloading scheme: " + file.getName() );
+                    logger.info( "Reloading scheme: " + file.getName() );
                     try {
                         Editor.getInstance().getCurrentCanvas().loadScheme( file );
                     } catch ( Exception exc ) {
@@ -191,7 +194,7 @@ public class EditorActionListener implements ActionListener {
                 if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                     File pack = fc.getSelectedFile();
 
-                    db.p( "Loading package: " + pack.getName() );
+                    logger.info( "Loading package: " + pack.getName() );
                     Editor.getInstance().openNewCanvasWithPackage( pack );
                     Editor.getInstance().updateWindowTitle();
                 }
@@ -365,6 +368,13 @@ public class EditorActionListener implements ActionListener {
                 JDialog ess = new ExpertSystemShellWelcomeDialog();
                 ess.setLocationRelativeTo( Editor.getInstance() );
                 ess.setVisible( true );
+            } else if ( e.getActionCommand().equals( Menu.ICON_EDITOR ) ) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        IconEditor.createAndOpen();
+                    }
+                });
             } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
                 new AboutDialog( Editor.getInstance() );
             } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
@@ -458,8 +468,7 @@ public class EditorActionListener implements ActionListener {
             }
 
             RuntimeProperties.setLastPath( file.getAbsolutePath() );
-            if ( RuntimeProperties.isLogInfoEnabled() )
-                db.p( "Saving scheme: " + file.getName() );
+            logger.info( "Saving scheme: " + file.getName() );
             editor.getCurrentCanvas().saveScheme( file );
             editor.updateWindowTitle();
         }

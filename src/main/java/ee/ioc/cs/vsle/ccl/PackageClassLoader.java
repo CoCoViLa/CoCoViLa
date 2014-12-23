@@ -12,6 +12,8 @@ import org.eclipse.jdt.internal.compiler.env.NameEnvironmentAnswer;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Package classloader.  Loads classes from the package directory and
@@ -19,6 +21,8 @@ import ee.ioc.cs.vsle.util.*;
  * are compiled on demand when needed.
  */
 public class PackageClassLoader extends CCL implements INameEnvironment {
+
+    private static final Logger logger = LoggerFactory.getLogger(PackageClassLoader.class);
 
     public PackageClassLoader(File pkgDir) {
         super(createPackageClassPath(pkgDir),
@@ -34,7 +38,7 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
             try {
                 fileNames.add(new File(u.toURI()).getAbsolutePath());
             } catch (URISyntaxException e) {
-                db.p(e);
+                logger.error(null, e);
             }
         }
 
@@ -67,7 +71,7 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
         try {
             urls.add(packagePath.toURI().toURL());
         } catch (MalformedURLException e) {
-            db.p(e);
+            logger.error(null, e);
         }
 
         // (3) jar and zip archives from the package top level directory
@@ -77,7 +81,7 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
                 try {
                     urls.add(f.toURI().toURL());
                 } catch (MalformedURLException e) {
-                    db.p(e);
+                    logger.error(null, e);
                 }
             }
         }
@@ -91,7 +95,7 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
                 try {
                     urls.add(file.toURI().toURL());
                 } catch (MalformedURLException e) {
-                    db.p(e);
+                    logger.error(null, e);
                 }
             }
         }

@@ -1,74 +1,28 @@
 package ee.ioc.cs.vsle.event;
 
-import java.util.Vector;
-
-import ee.ioc.cs.vsle.util.db;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EventContainer {
-	
-	private Vector<BaseEventListener> termListeners;
-	
-	EventContainer()
-	{
-		termListeners = new Vector<BaseEventListener>();
-	}
 
-	public void add( BaseEventListener lst )
-	{
-		termListeners.add( lst );
-	}
+  private List<BaseEventListener> termListeners;
 
-	public void traverseAll( BaseEvent ftoevent, EventDispatcher dispatcher )
-	{
+  EventContainer() {
+    termListeners = new CopyOnWriteArrayList<BaseEventListener>();
+  }
 
-		// during notifying lisntener can do unsubscribe
-		// use copy of array in for statement
-		Vector listenersCopy = (Vector) termListeners.clone();
+  public void add(BaseEventListener lst) {
+    termListeners.add(lst);
+  }
 
-		for ( int k = 0; k < listenersCopy.size(); k++ )
-		{
-			Object obj = listenersCopy.elementAt( k );
+  public void traverseAll(BaseEvent event, EventDispatcher dispatcher) {
+    for (BaseEventListener lst : termListeners) {
+      dispatcher.tryToCallListenerOnEvent(lst, event);
+    }
+  }
 
-			dispatcher.tryToCallListenerOnEvent( (BaseEventListener) obj, ftoevent );
-		}
-	}
-
-	public boolean delete( BaseEventListener listener )
-	{
-		return termListeners.remove( listener );
-	}
-
-	private boolean cleanup()
-	{
-
-		String  reason     = "no reason";
-		boolean canCleanup = true;
-
-		if ( ( termListeners != null ) && ( canCleanup ) )
-		{
-			canCleanup = termListeners.size() == 0;
-
-			if ( !canCleanup )
-			{
-				reason = "termListeners.size() == " + termListeners.size();
-			}
-		}
-
-		if ( canCleanup )
-		{
-
-			if ( termListeners != null )
-			{
-				termListeners.clear();
-			}
-
-		}
-		else
-		{
-			db.p( "cleanup disabled due to " + reason );
-		}
-
-		return canCleanup;
-	}
+  public boolean delete(BaseEventListener listener) {
+    return termListeners.remove(listener);
+  }
 
 }

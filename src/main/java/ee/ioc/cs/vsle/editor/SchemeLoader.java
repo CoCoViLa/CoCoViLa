@@ -5,6 +5,8 @@ import java.io.*;
 import javax.swing.*;
 import javax.xml.parsers.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
@@ -24,21 +26,22 @@ import ee.ioc.cs.vsle.vclass.*;
  */
 public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
 
-	private SAXParser parser;
-	private PackageHandler handler;
-	private VPackage vpackage;
-	private DiagnosticsCollector collector = new DiagnosticsCollector();
-	private boolean schemeLoaded;
-	private boolean schemeLoadingCancelled;
-	private String schemePath;
-	
-	/**
-	 * Sets the package description
-	 * @param vpackage package description
-	 */
-	public SchemeLoader(VPackage vpackage) {
-		this.vpackage = vpackage;
-	}
+  private static final Logger logger = LoggerFactory.getLogger(SchemeLoader.class);
+  private SAXParser parser;
+  private PackageHandler handler;
+  private VPackage vpackage;
+  private DiagnosticsCollector collector = new DiagnosticsCollector();
+  private boolean schemeLoaded;
+  private boolean schemeLoadingCancelled;
+  private String schemePath;
+
+  /**
+   * Sets the package description
+   * @param vpackage package description
+   */
+  public SchemeLoader(VPackage vpackage) {
+    this.vpackage = vpackage;
+  }
 
     /**
      * Indicates whether the scheme was successfully loaded.
@@ -58,52 +61,52 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
     }
     
     /**
-	 * Reads in the scheme description from a .syn file.
-	 * The setPackage() method must be called with a non-null argument
-	 * before attempting to load any schemes. The results can be asked
-	 * with get*() methods after this method returns.
-	 * 
-	 * @param file scheme file
-	 * @return true, if there were no fatal errors, false otherwise
-	 */
-	public boolean load(File file) {
-	    if (!checkInitLoad()) {
-	        return false;
-	    }
+   * Reads in the scheme description from a .syn file.
+   * The setPackage() method must be called with a non-null argument
+   * before attempting to load any schemes. The results can be asked
+   * with get*() methods after this method returns.
+   *
+   * @param file scheme file
+   * @return true, if there were no fatal errors, false otherwise
+   */
+  public boolean load(File file) {
+      if (!checkInitLoad()) {
+          return false;
+      }
 
-	    // Give a meaningful error message in case of empty files because
-	    // it has been possible to generate empty .syn files from Scheme
-	    // Editor. Named pipes etc also have zero length, ignore these.
-	    if (file.isFile() && file.length() == 0L) {
-	        collector.collectDiagnostic("The file " + file.getName() +
-	                " is empty!", true);
+      // Give a meaningful error message in case of empty files because
+      // it has been possible to generate empty .syn files from Scheme
+      // Editor. Named pipes etc also have zero length, ignore these.
+      if (file.isFile() && file.length() == 0L) {
+          collector.collectDiagnostic("The file " + file.getName() +
+                  " is empty!", true);
 
-	        return false;
-	    }
+          return false;
+      }
 
-	    schemePath = file.getAbsolutePath();
-	    
-	    InputStream input = null;
-	    try {
-	        input = new FileInputStream(file);
-	        schemeLoaded = parse(input);
-	    } catch (FileNotFoundException e) {
-	        collector.collectDiagnostic(e.getMessage());
-	        return false;
-	    } finally {
-	        // The stream must be explicitly closed, otherwise it is not
-	        // possible to delete the file on Windows.
-	        if (input != null) {
-	            try {
-	                input.close();
-	            } catch (IOException e) {
-	                db.p(e);
-	            }
-	            input = null;
-	        }
-	    }
-	    return schemeLoaded;
-	}
+      schemePath = file.getAbsolutePath();
+
+      InputStream input = null;
+      try {
+          input = new FileInputStream(file);
+          schemeLoaded = parse(input);
+      } catch (FileNotFoundException e) {
+          collector.collectDiagnostic(e.getMessage());
+          return false;
+      } finally {
+          // The stream must be explicitly closed, otherwise it is not
+          // possible to delete the file on Windows.
+          if (input != null) {
+              try {
+                  input.close();
+              } catch (IOException e) {
+                  logger.error(null, e);
+              }
+              input = null;
+          }
+      }
+      return schemeLoaded;
+  }
 
     public boolean load(InputStream input) {
         schemeLoaded = checkInitLoad() && parse(input);
@@ -131,7 +134,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
             try {
                 parser = factory.newSAXParser();
             } catch (Exception e) {
-                db.p(e);
+                logger.error(null, e);
                 return false;
             }
             handler = new PackageHandler();
@@ -155,11 +158,9 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
         try {
             parser.parse(input, handler);
 
-            if (RuntimeProperties.isLogDebugEnabled()) {
-                    db.p("Scheme parsing completed in "
-                            + (System.currentTimeMillis() - startParsing)
-                            + "ms.\n" );
-            }
+            logger.debug( "Scheme parsing completed in "
+                    + (System.currentTimeMillis() - startParsing)
+                    + "ms.\n" );
         } catch (SchemeLoaderException e) {
             collector.collectDiagnostic(e.getMessage());
             schemeLoadingCancelled = !e.isShowErrorMessage();
@@ -191,34 +192,34 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
         collector.collectDiagnostic(msg, isFatal);
     }
 
-	public ObjectList getObjectList() {
-		if (handler != null)
-			return handler.getObjects();
+  public ObjectList getObjectList() {
+    if (handler != null)
+      return handler.getObjects();
 
-		return null;
-	}
+    return null;
+  }
 
-	public ConnectionList getConnectionList() {
-		if (handler != null)
-			return handler.getConnections();
+  public ConnectionList getConnectionList() {
+    if (handler != null)
+      return handler.getConnections();
 
-		return null;
-	}
+    return null;
+  }
 
-	/**
-	 * Returns the list of diagnostic messages generated.
-	 * @return diagnostic messages
-	 */
-	public DiagnosticsCollector getDiagnostics() {
-	    return collector;
-	}
-	
-	// ===========================================================
-	// SAX DocumentHandler methods
-	// ===========================================================
-	class PackageHandler extends DefaultHandler {
+  /**
+   * Returns the list of diagnostic messages generated.
+   * @return diagnostic messages
+   */
+  public DiagnosticsCollector getDiagnostics() {
+      return collector;
+  }
 
-	    private static final String CONNECTION = "connection";
+  // ===========================================================
+  // SAX DocumentHandler methods
+  // ===========================================================
+  class PackageHandler extends DefaultHandler {
+
+      private static final String CONNECTION = "connection";
         private static final String GOAL = "goal";
         private static final String INPUT = "input";
         private static final String NATURE = "nature";
@@ -236,115 +237,114 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
         private static final String EXT_SPEC = "extended_spec";
         
         private ObjectList objects;
-		private ConnectionList connections;
-		private VPackage vPackage;
-		private String superClass;
+    private ConnectionList connections;
+    private VPackage vPackage;
+    private String superClass;
 
-		private Connection connection;
-		private GObj obj;
-		private PackageClass pclass;
-		private boolean ignoreCurrent;
-		private boolean readingExtSpec;
-		private String schemeExtSpec;
-		
-		@Override
-		public InputSource resolveEntity(String publicId, String systemId) {
-			InputSource is = null;
-			// order the DTD to be specified externally.
-			if (systemId != null && systemId.endsWith("dtd")) {
-				is = new InputSource(FileFuncs.getResource(
-						RuntimeProperties.SCHEME_DTD, false).toString());
-			}
-			return is;
-		}
+    private Connection connection;
+    private GObj obj;
+    private PackageClass pclass;
+    private boolean ignoreCurrent;
+    private boolean readingExtSpec;
+    private String schemeExtSpec;
 
-		@Override
-		public void error(SAXParseException spe) throws SAXParseException {
-			String msg = "Parsing error, line " + spe.getLineNumber()
-				+ ", uri " + spe.getSystemId();
-			db.p(msg);
-			collectDiagnostic(msg + "\n" + spe.getMessage());
+    @Override
+    public InputSource resolveEntity(String publicId, String systemId) {
+      InputSource is = null;
+      // order the DTD to be specified externally.
+      if (systemId != null && systemId.endsWith("dtd")) {
+        is = new InputSource(FileFuncs.getResource(
+            RuntimeProperties.SCHEME_DTD, false).toString());
+      }
+      return is;
+    }
 
-			// Use the contained exception, if any
-			Exception x = spe;
+    @Override
+    public void error(SAXParseException spe) throws SAXParseException {
+      String msg = "Parsing error, line " + spe.getLineNumber()
+        + ", uri " + spe.getSystemId();
+      collectDiagnostic(msg + "\n" + spe.getMessage());
 
-			if (spe.getException() != null)
-				x = spe.getException();
+      // Use the contained exception, if any
+      Exception x = spe;
 
-			db.p(x);
+      if (spe.getException() != null)
+        x = spe.getException();
 
-			throw spe; // One error is enough, abort.
-		}
+      logger.error(msg, x);
 
-		@Override
-		public void setDocumentLocator(Locator l) {
-			// ignored
-		}
+      throw spe; // One error is enough, abort.
+    }
 
-		@Override
-		public void startDocument() {
-			connections = new ConnectionList();
-			objects = new ObjectList();
+    @Override
+    public void setDocumentLocator(Locator l) {
+      // ignored
+    }
 
-			// the parser may be reused
-			superClass = null;
-			ignoreCurrent = false;
-			pclass = null;
-			obj = null;
-		}
+    @Override
+    public void startDocument() {
+      connections = new ConnectionList();
+      objects = new ObjectList();
 
-		@Override
-		public void endDocument() {
-			if (superClass != null 
-					&& objects.getByName(superClass) == null) {
-			    collectDiagnostic("Superclass " + superClass 
-						+ " not found.");
-				superClass = null;
-			}
-		}
+      // the parser may be reused
+      superClass = null;
+      ignoreCurrent = false;
+      pclass = null;
+      obj = null;
+    }
 
-		@Override
-		public void startElement(String namespaceURI, String lName,
-				String qName, Attributes attrs) throws SAXException {
+    @Override
+    public void endDocument() {
+      if (superClass != null
+          && objects.getByName(superClass) == null) {
+          collectDiagnostic("Superclass " + superClass
+            + " not found.");
+        superClass = null;
+      }
+    }
 
-			// skip to the end of current broken entry
-			if (ignoreCurrent)
-				return;
+    @Override
+    public void startElement(String namespaceURI, String lName,
+        String qName, Attributes attrs) throws SAXException {
 
-			String element = qName;
+      // skip to the end of current broken entry
+      if (ignoreCurrent)
+        return;
 
-			if (element.equals(OBJECT) || element.equals(RELOBJECT)) {
-				String name = attrs.getValue(NAME);
+      String element = qName;
 
-				// catch duplicate names
-				if (objects.getByName(name) != null) {
-				    collectDiagnostic("Duplicate class name: " + name
-							+ ". Discarding second instance.");
-					ignoreCurrent = true;
-					return;
-				}
+      if (element.equals(OBJECT) || element.equals(RELOBJECT)) {
+        String name = attrs.getValue(NAME);
 
-				String type = attrs.getValue(TYPE);
-				pclass = vPackage.getClass(type);
-				
-				if (pclass == null) {
-				    collectDiagnostic("The type " + type + " not found in "
-							+ "the package. Discarding class " + name + ".");
-					ignoreCurrent = true;
-					return;
-				}
+        // catch duplicate names
+        if (objects.getByName(name) != null) {
+            collectDiagnostic("Duplicate class name: " + name
+              + ". Discarding second instance.");
+          ignoreCurrent = true;
+          return;
+        }
 
-				obj = pclass.getNewInstance();
-				
-				obj.setName(name);
-				obj.setClassName(type);
-				obj.setStatic( Boolean.parseBoolean( attrs.getValue("static") ) );
-				objects.add(obj);
-			} else if (element.equals(SCHEME)) {
-				String type = attrs.getValue(PACKAGE);
+        String type = attrs.getValue(TYPE);
+        pclass = vPackage.getClass(type);
 
-				superClass = attrs.getValue(SUPERCLASS);
-				
+        if (pclass == null) {
+            collectDiagnostic("The type " + type + " not found in "
+              + "the package. Discarding class " + name + ".");
+          ignoreCurrent = true;
+          return;
+        }
+
+        obj = pclass.getNewInstance();
+
+        obj.setName(name);
+        obj.setClassName(type);
+        obj.setStatic( Boolean.parseBoolean( attrs.getValue("static") ) );
+        objects.add(obj);
+      } else if (element.equals(SCHEME)) {
+        String type = attrs.getValue(PACKAGE);
+
+        superClass = attrs.getValue(SUPERCLASS);
+
                 if ( !type.equals( vPackage.getName() ) ) {
                     
                     String msg = "Scheme was built with the package \""
@@ -385,67 +385,67 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
                 // The property "strict" is not used at all for relclasses?
                 // All these attributes should be ignored here.
             } else if (element.equals(FIELD)) {
-				String name = new String(attrs.getValue(NAME));
-				String type = new String(attrs.getValue(TYPE));
-				String value = attrs.getValue(VALUE);
+        String name = new String(attrs.getValue(NAME));
+        String type = new String(attrs.getValue(TYPE));
+        String value = attrs.getValue(VALUE);
 
-				if (!pclass.hasField(name, type)) {
-				    collectDiagnostic("The class " + obj.getName()
-							+ " has saved field " + name + "(" + type + ")"
-							+ " = " + value
-							+ " but there is no corresponding field in the"
-							+ " package. Discarding field value.");
-					return;
-				}
-				ClassField cf = obj.getField( name );
-				cf.setValue( value );
-				
-				String nature = attrs.getValue(NATURE);
-				if (INPUT.equals(nature))
-					cf.setInput(true);
-				else if (GOAL.equals(nature))
-					cf.setGoal(true);
+        if (!pclass.hasField(name, type)) {
+            collectDiagnostic("The class " + obj.getName()
+              + " has saved field " + name + "(" + type + ")"
+              + " = " + value
+              + " but there is no corresponding field in the"
+              + " package. Discarding field value.");
+          return;
+        }
+        ClassField cf = obj.getField( name );
+        cf.setValue( value );
 
-			} else if (element.equals(CONNECTION)) {
-				String obj1 = new String(attrs.getValue("obj1"));
-				String port1 = new String(attrs.getValue("port1"));
-				String obj2 = new String(attrs.getValue("obj2"));
-				String port2 = new String(attrs.getValue("port2"));
-				Port beginPort = objects.getPort(obj1, port1);
-				Port endPort = objects.getPort(obj2, port2);
-				boolean strict = Boolean.parseBoolean( attrs.getValue( "strict" ) );
+        String nature = attrs.getValue(NATURE);
+        if (INPUT.equals(nature))
+          cf.setInput(true);
+        else if (GOAL.equals(nature))
+          cf.setGoal(true);
 
-				if (beginPort == null || endPort == null) {
-				    collectDiagnostic("Discarding connection "
-							+ obj1 + "." + port1 + " = " 
-							+ obj2 + "." + port2
-							+ " because of missing object(s) or port(s): "
-							+ (beginPort == null ? (obj1 + "." + port1) : "")
-							+ (beginPort == null && endPort == null ? ", " : "")
-							+ (endPort == null ? obj2 + "." + port2 : "")
-							+ ".");
-					return;
-				}
+      } else if (element.equals(CONNECTION)) {
+        String obj1 = new String(attrs.getValue("obj1"));
+        String port1 = new String(attrs.getValue("port1"));
+        String obj2 = new String(attrs.getValue("obj2"));
+        String port2 = new String(attrs.getValue("port2"));
+        Port beginPort = objects.getPort(obj1, port1);
+        Port endPort = objects.getPort(obj2, port2);
+        boolean strict = Boolean.parseBoolean( attrs.getValue( "strict" ) );
 
-				connection = new Connection(beginPort, endPort, strict);
-				connections.add(connection);
-			} else if (element.equals("point")) {
-				// quietly ignore breakpoints if the connection is not valid
-				if (connection == null)
-					return;
+        if (beginPort == null || endPort == null) {
+            collectDiagnostic("Discarding connection "
+              + obj1 + "." + port1 + " = "
+              + obj2 + "." + port2
+              + " because of missing object(s) or port(s): "
+              + (beginPort == null ? (obj1 + "." + port1) : "")
+              + (beginPort == null && endPort == null ? ", " : "")
+              + (endPort == null ? obj2 + "." + port2 : "")
+              + ".");
+          return;
+        }
 
-				String x = new String(attrs.getValue("x"));
-				String y = new String(attrs.getValue("y"));
-				connection.addBreakPoint(new Point(Integer.parseInt(x),
-						Integer.parseInt(y)));
-			} else if ( EXT_SPEC.equals( qName ) ) {
-			    readingExtSpec = true;
-			}
+        connection = new Connection(beginPort, endPort, strict);
+        connections.add(connection);
+      } else if (element.equals("point")) {
+        // quietly ignore breakpoints if the connection is not valid
+        if (connection == null)
+          return;
 
-		}
+        String x = new String(attrs.getValue("x"));
+        String y = new String(attrs.getValue("y"));
+        connection.addBreakPoint(new Point(Integer.parseInt(x),
+            Integer.parseInt(y)));
+      } else if ( EXT_SPEC.equals( qName ) ) {
+          readingExtSpec = true;
+      }
 
-		@Override
-		public void endElement( String namespaceURI, String sName, String qName ) {
+    }
+
+    @Override
+    public void endElement( String namespaceURI, String sName, String qName ) {
 
             if ( qName.equals( OBJECT ) || qName.equals( RELOBJECT ) ) {
 
@@ -482,7 +482,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
             }
         }
 
-		@Override
+    @Override
         public void characters( char buf[], int offset, int len ) {
             if ( readingExtSpec ) {
                 String spec = new String( buf, offset, len );
@@ -494,42 +494,42 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
             }
         }
 
-		@Override
-		public void ignorableWhitespace(char buf[], int offset, int len) {
-			// Purposely ignore it.
-		}
+    @Override
+    public void ignorableWhitespace(char buf[], int offset, int len) {
+      // Purposely ignore it.
+    }
 
-		@Override
-		public void processingInstruction(String target, String data) {
-			// Purposely ignore it.
-		}
+    @Override
+    public void processingInstruction(String target, String data) {
+      // Purposely ignore it.
+    }
 
-		public void setVPackage(VPackage vp) {
-			vPackage = vp;
-		}
+    public void setVPackage(VPackage vp) {
+      vPackage = vp;
+    }
 
-		public ConnectionList getConnections() {
-			return connections;
-		}
+    public ConnectionList getConnections() {
+      return connections;
+    }
 
-		public ObjectList getObjects() {
-			return objects;
-		}
+    public ObjectList getObjects() {
+      return objects;
+    }
 
-		public String getSchemeExtSpec() {
-		    return schemeExtSpec;
-		}
-	}
-	
-	private class SchemeLoaderException extends RuntimeException {
+    public String getSchemeExtSpec() {
+        return schemeExtSpec;
+    }
+  }
 
-	    private static final long serialVersionUID = 1L;
-	    private boolean showErrorMessage;
+  private class SchemeLoaderException extends RuntimeException {
 
-	    public SchemeLoaderException(String message, boolean showErrorMessage) {
-	        super(message);
-	        this.showErrorMessage = showErrorMessage;
-	    }
+      private static final long serialVersionUID = 1L;
+      private boolean showErrorMessage;
+
+      public SchemeLoaderException(String message, boolean showErrorMessage) {
+          super(message);
+          this.showErrorMessage = showErrorMessage;
+      }
 
         /**
          * @return the showErrorMessage
@@ -537,7 +537,7 @@ public class SchemeLoader implements DiagnosticsCollector.Diagnosable {
         public boolean isShowErrorMessage() {
             return showErrorMessage;
         }
-	}
+  }
 
     /**
      * @return the schemePath

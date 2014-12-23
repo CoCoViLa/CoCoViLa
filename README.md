@@ -12,13 +12,12 @@ Homepage: http://www.cs.ioc.ee/cocovila
 
 ### Running CoCoViLa Scheme Editor:
 
-`mvn exec:java -Prun-se`
+`mvn exec:exec -Prun-se`
 
 ### Running CoCoViLa Class Editor:
 
-`mvn exec:java -Prun-ce`
+`mvn exec:exec -Prun-ce`
 
-More info: http://www.cs.ioc.ee/cocovila/ant.php
 
 ### Continuous Integration
-[![Build Status](https://travis-ci.org/InstituteOfCybernetics/CoCoViLa.svg?branch=master)](https://travis-ci.org/InstituteOfCybernetics/CoCoViLa)
+[![Build Status](https://travis-ci.org/CoCoViLa/CoCoViLa.svg?branch=master)](https://travis-ci.org/CoCoViLa/CoCoViLa)
