@@ -3,6 +3,7 @@ package ee.ioc.cs.vsle.parser;
 import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 import ee.ioc.cs.vsle.synthesize.ClassRelation;
 import ee.ioc.cs.vsle.synthesize.RelType;
+import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
@@ -10,6 +11,8 @@ import org.junit.Before;
 
 import java.util.HashMap;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -96,6 +99,28 @@ public abstract class AbstractParserTest {
       if(!cf.getName().equals(exceptions[i++])) { return false; }
     }
     return true;
+  }
+
+  protected void assertAlias(AnnotatedClass ac, String aliasName, String[] boundVars) {
+    assertAlias(ac, aliasName, boundVars, "Object");
+  }
+
+  protected void assertAlias(AnnotatedClass ac, String aliasName, String[] boundVars, String aliasType) {
+    assertAlias(ac, aliasName, boundVars, aliasType, false);
+  }
+
+  protected void assertAlias(AnnotatedClass ac, String aliasName, String[] boundVars, String aliasType, boolean isWildcard) {
+    assertNotNull("Alias type cannot be null", aliasType);
+    assertAliasType(ac, aliasName, aliasType);
+    assertClassRelation(ac, RelType.TYPE_ALIAS, boundVars, vars(aliasName), "alias");
+    if(!isWildcard) {
+      assertClassRelation(ac, RelType.TYPE_ALIAS, vars(aliasName), boundVars, "alias");
+    }
+  }
+
+  protected void assertAliasType(AnnotatedClass ac, String aliasName, String aliasType) {
+    Alias alias = (Alias)ac.getFieldByName(aliasName);
+    assertEquals("alias var type is incorrect", aliasType, alias.getVarType());
   }
 
   static String[] vars(String... vars) {
