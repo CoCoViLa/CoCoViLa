@@ -138,6 +138,12 @@ public class AxiomsTest extends AbstractParserTest {
     assertClassRelation(ac, RelType.TYPE_UNIMPLEMENTED, vars("a"), vars("b"), null);
   }
 
+  @Test(expected = SpecParseException.class)
+  public void testGoal_noOutput() {
+    String spec = "int a, b;\n a, b ->;";
+    loadSpec(spec);
+  }
+
   @Test(expected = UnknownVariableException.class)
   public void testAxiom_UndeclaredVars() {
     String spec = "a -> b {methodName};";
