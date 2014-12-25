@@ -1,16 +1,8 @@
 package ee.ioc.cs.vsle.parser;
 
 import ee.ioc.cs.vsle.synthesize.*;
-import ee.ioc.cs.vsle.vclass.Alias;
-import ee.ioc.cs.vsle.vclass.ClassField;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.Iterator;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 
 /**
 * @author Pavel Grigorenko
@@ -35,6 +27,20 @@ public class AliasTest extends AbstractParserTest {
 
   @Test
   @Ignore("redefining alias should not be allowed")//FIXME
+  /*
+int a = 0, b = 1, c = 2;
+void r;
+alias x = (a, b);
+x = (c);
+x->r{test};
+
+gives:
+Object[] alias_x_0 = new Object[3];
+alias_x_0[0] = a;
+alias_x_0[1] = b;
+alias_x_0[2] = c;
+test(alias_x_0);
+   */
   public void testAlias_redefine() {
     String spec = "int a, b, c;\n " +
             "alias x = (a, b);" +
@@ -145,5 +151,42 @@ public class AliasTest extends AbstractParserTest {
   public void testAlias_twoWildcards() {
     String spec = "alias x = (*.a, *.b);";
     loadSpec(spec);
+  }
+
+  @Test
+  public void testAlias_elemAccess() {
+    String spec = "int a, b, c, d;\n" +
+            "alias x = (a, b);\n" +
+            "alias y = (c, d);\n" +
+            "alias z = (x, y);\n" +
+            "z.0 = z.1;";
+    AnnotatedClass ac = loadSpec(spec);
+    assertClassRelation(ac, RelType.TYPE_EQUATION, vars("z.0"), vars("z.1"), "z.1= z.0");
+    assertClassRelation(ac, RelType.TYPE_EQUATION, vars("z.1"), vars("z.0"), "z.0= z.1");
+  }
+
+  @Test
+  @Ignore("works with regexp parser")//FIXME
+  public void testAlias_elemAccessWildcardIndices() {
+    String spec = "int a = 1, b, c = 2, d;\n" +
+            "alias x = (a, b);\n" +
+            "alias y = (c, d);\n" +
+            "alias z = (x, y);\n" +
+            "z.*.0 -> z.*.1 {test};";//(a, c) -> (b, d)
+    System.out.println(spec);
+    AnnotatedClass ac = loadSpec(spec);
+  }
+
+  @Test
+  @Ignore("works with regexp parser")//FIXME
+  public void testAlias_elemAccessWildcardVarNames() {
+    specificationSourceProvider.add("M", wrapSpec("int u, v;", "M"));
+    String spec = "M a, b;\n" +
+            "alias x = (a, b);\n" +
+            "a.u = 1;\n" +
+            "b.u = 2;\n" +
+            "x.*.u -> x.*.v {test};";//(a.u, b.u) -> (a.v, b.v)
+    System.out.println(spec);
+    AnnotatedClass ac = loadSpec(spec);
   }
 }
