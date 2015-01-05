@@ -199,6 +199,7 @@ public class SpecParser {
                 LineType.Axiom st = new LineType.Axiom();
                 
                 //check for subtasks
+                //FIXME - this pattern allows subtasks to be anywhere in the axiom, but they need to come before anything else
                 Matcher subMatcher = PATTERN_AXIOM_SUBTASKS.matcher( line );
 
                 while ( subMatcher.find() ) {
@@ -528,6 +529,11 @@ public class SpecParser {
                                         + ( e.getMessage() != null ? "\n" + e.getMessage() : "" ) );
                             }
                         } else {
+                            //empty declaration is not allowed, e.g. "alias x = ();".
+                            // note, however, it is possible to declare empty alias using two lines, e.g. "alias x; x = [];"
+                            if(statement.getComponents() == null || statement.getComponents().length == 0) {
+                                throw new SpecParseException( "Alias " + name + " does not bind any variables, line: " + lt.getOrigSpecLine() );
+                            }
                             alias = new Alias( name, statement.getComponentType() );
                         }
 
