@@ -5,22 +5,16 @@ import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_DOUBLE;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_INT;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.equations.EquationSolver;
 import ee.ioc.cs.vsle.equations.EquationSolver.Relation;
+import ee.ioc.cs.vsle.parser.SpecificationSourceProvider;
 import ee.ioc.cs.vsle.table.Table;
 import ee.ioc.cs.vsle.util.FileFuncs;
 import ee.ioc.cs.vsle.util.TypeToken;
@@ -28,6 +22,7 @@ import ee.ioc.cs.vsle.util.TypeUtil;
 import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.AliasLength;
 import ee.ioc.cs.vsle.vclass.ClassField;
+import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,7 +54,17 @@ public class SpecParser {
     private static final Pattern PATTERN_ALIAS_DECLARATION = Pattern.compile( "alias *(\\(( *[^\\(\\) ]+ *)\\))* *([^= ]+) *" );
     private static final Pattern PATTERN_ALIAS_FULL = Pattern.compile( "alias *(\\(( *[^\\(\\) ]+ *)\\))* *([^= ]+) *= *\\((.*)\\) *" );
 
-    private SpecParser() {
+    private final SpecificationSourceProvider<String> specSourceProvider;
+    private final String packagePath;
+
+    public SpecParser(String packagePath) {
+        this.packagePath = packagePath;
+        specSourceProvider = new FileSourceProvider();
+    }
+
+    public SpecParser(String packagePath, SpecificationSourceProvider specSourceProvider) {
+        this.specSourceProvider = specSourceProvider;
+        this.packagePath = packagePath;
     }
 
     public static String getClassName( String spec ) {
@@ -303,12 +308,12 @@ public class SpecParser {
         throw new SpecParseException( "Specification parsing error" );
     }
 
-    public static ClassList parseSpecification( String fullSpec, String mainClassName, Set<String> schemeObjects, String path )
+    public ClassList parseSpecification( String fullSpec, String mainClassName, Set<String> schemeObjects )
             throws IOException, SpecParseException, EquationException {
 
         long start = System.currentTimeMillis();
         
-        ClassList classes = parseSpecificationImpl( refineSpec( fullSpec ), TYPE_THIS, schemeObjects, path,
+        ClassList classes = parseSpecificationImpl( refineSpec( fullSpec ), TYPE_THIS, schemeObjects,
                 new LinkedHashSet<String>() );
 
         logger.info("Specification parsed in: " + (System.currentTimeMillis() - start) + "ms.");
@@ -343,7 +348,7 @@ public class SpecParser {
      *                check. Needed to prevent infinite loop in case of mutual
      *                declarations.
      */
-    private static ClassList parseSpecificationImpl( String spec, String className, Set<String> schemeObjects, String path,
+    private ClassList parseSpecificationImpl( String spec, String className, Set<String> schemeObjects,
             Set<String> checkedClasses ) throws IOException, SpecParseException, EquationException {
         
         AnnotatedClass annClass = new AnnotatedClass( className );
@@ -374,7 +379,7 @@ public class SpecParser {
                         for ( int i = 0; i < statement.getClassNames().length; i++ ) {
                             String name = statement.getClassNames()[ i ];
 
-                            if ( checkSpecClass( className, path, checkedClasses, classList, name ) ) {
+                            if ( checkSpecClass( className, checkedClasses, classList, name ) ) {
 
                                 AnnotatedClass superClass = classList.getType( name );
 
@@ -400,8 +405,7 @@ public class SpecParser {
                             throw new SpecParseException( "Variable " + statement.getName() + " declared more than once in class " + className );
                         }
 
-                        File file = new File( path + statement.getType() + ".java" );
-                        if ( file.exists() && isSpecClass( path, statement.getType() ) ) {
+                        if ( isSpecClass( statement.getType() ) ) {
                             throw new SpecParseException( "Constant " + statement.getName() + " cannot be of type " + statement.getType() );
                         }
                         logger.debug( "---===!!! " + statement.getType() + " " + statement.getName() + " = " + statement.getValue() );
@@ -415,7 +419,7 @@ public class SpecParser {
                         
                         boolean isStatic = statement.isStatic();
 
-                        boolean specClass = checkSpecClass( className, path, checkedClasses, classList, statement.getType() );
+                        boolean specClass = checkSpecClass( className, checkedClasses, classList, statement.getType() );
 
                         String[] vars = statement.getNames();
                         
@@ -648,7 +652,7 @@ public class SpecParser {
                                 // have to make sure that this class has
                                 // already been parsed
                                 if ( context != null ) {
-                                    if ( !checkSpecClass( className, path, checkedClasses, classList, context ) ) {
+                                    if ( !checkSpecClass( className, checkedClasses, classList, context ) ) {
                                         throw new SpecParseException(
                                                 "Unable to parse independent subtask's context specification "
                                                 + subtaskString );
@@ -717,12 +721,11 @@ public class SpecParser {
      */
     static void parseSpecClass(String className, String path, ClassList classList) throws IOException, SpecParseException {
 
-        checkSpecClass(null, path, null, classList, className);
+        new SpecParser(path).checkSpecClass(null, null, classList, className);
     }
     
     /**
      * @param parentClassName
-     * @param path
      * @param checkedClasses
      * @param classList
      * @param type
@@ -731,10 +734,10 @@ public class SpecParser {
      * @throws SpecParseException 
      * @throws SpecParseException
      */
-    private static boolean checkSpecClass( String parentClassName, String path, Set<String> checkedClasses, ClassList classList,
+    private boolean checkSpecClass( String parentClassName, Set<String> checkedClasses, ClassList classList,
             String type ) throws IOException, SpecParseException {
 
-        logger.debug( "Checking existence of " + path + type + ".java" );
+        logger.debug( "Checking existence of " + packagePath + type + ".java" );
         
         if(checkedClasses == null)
             checkedClasses = new LinkedHashSet<String>();
@@ -748,19 +751,18 @@ public class SpecParser {
             // do not need to parse already parsed class again
             return true;
         }
-        File file = new File( path + type + ".java" );
-        boolean specClass = false;
 
+        boolean specClass = false;
         // if a file by this name exists in the package directory and it
         // includes a specification, we're gonna check it
-        if ( file.exists() && isSpecClass( path, type ) ) {
+        if ( isSpecClass( type ) ) {
             specClass = true;
             if ( !classList.containsType( type ) ) {
                 checkedClasses.add( type );
-                String s = FileFuncs.getFileContents(file);
+                String s = specSourceProvider.getSource(type);
 
                 try {
-                    classList.addAll( parseSpecificationImpl( refineSpec( s ), type, null, path, checkedClasses ) );
+                    classList.addAll( parseSpecificationImpl( refineSpec( s ), type, null, checkedClasses ) );
                 } catch ( SpecParseException e ) {
                     throw new SpecParseException("Class \"" + type + "\": " + e.toString(), e);
                 }
@@ -895,7 +897,7 @@ public class SpecParser {
     }
 
     private static void getWildCards( ClassList classList, String output ) {
-        String list[] = output.split( "\\." );
+        String list[] = output.split("\\.");
         for ( int i = 0; i < list.length; i++ ) {
             logger.debug( list[ i ] );
         }
@@ -967,23 +969,10 @@ public class SpecParser {
         return fields.values();
     }
 
-    private static boolean isSpecClass( String path, String file ) {
-        try {
-            BufferedReader in = new BufferedReader( new FileReader( path + file + ".java" ) );
-            String lineString, fileString = new String();
+    private boolean isSpecClass( String type ) {
 
-            while ( ( lineString = in.readLine() ) != null ) {
-                fileString += lineString;
-            }
-            in.close();
-            if ( fileString.matches( ".*specification +" + file + ".*" ) ) {
-
-                return true;
-            }
-        } catch ( IOException ioe ) {
-            logger.info(null, ioe);
-        }
-        return false;
+        String source = specSourceProvider.getSource(type);
+        return source != null && source.matches( "(?s).*specification +" + type + ".*" );
     }
 
     private static boolean containsVar( Collection<ClassField> vars, String varName ) {
@@ -1005,4 +994,19 @@ public class SpecParser {
         }
         return null;
     } // getVar
+
+    private class FileSourceProvider implements SpecificationSourceProvider<String> {
+
+        @Override
+        public String getSource(String spec) {
+            String pathname = packagePath + spec + ".java";
+            File file = new File(pathname);
+            try {
+                return FileUtils.readFileToString(file);
+            }
+            catch(Exception e) {
+            }
+            return null;
+        }
+    }
 }

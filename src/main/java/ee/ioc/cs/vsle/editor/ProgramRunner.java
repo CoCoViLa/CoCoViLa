@@ -279,7 +279,7 @@ public class ProgramRunner {
             
             switch (RuntimeProperties.getSpecParserKind()) {
             case REGEXP: {
-              classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+              classList = new SpecParser(schemeContainer.getWorkDir()).parseSpecification( fullSpec, mainClassName, schemeObjects );
               break;
             }
             case ANTLR: {

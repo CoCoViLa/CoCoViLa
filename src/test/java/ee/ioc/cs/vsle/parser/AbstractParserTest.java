@@ -127,7 +127,7 @@ public abstract class AbstractParserTest {
     return vars;
   }
 
-  static class TestSpecProvider implements SpecificationSourceProvider {
+  static class TestSpecProvider implements AntlrSpecificationSourceProvider {
 
     private HashMap<String, String> map = new HashMap<String, String>();
 
@@ -140,7 +140,7 @@ public abstract class AbstractParserTest {
       if(map.containsKey(specificationName)) {
         return new ANTLRInputStream(map.get(specificationName));
       }
-      return SpecificationSourceProvider.NOP.getSource(specificationName);
+      return AntlrSpecificationSourceProvider.NOP.getSource(specificationName);
     }
   }
 }

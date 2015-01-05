@@ -260,7 +260,7 @@ public class Synthesizer {
 
             String mainClassName = SpecParser.getClassName( file );
             
-            ClassList classList = SpecParser.parseSpecification(file, mainClassName, null, path);
+            ClassList classList = new SpecParser(path).parseSpecification(file, mainClassName, null);
             String prog = makeProgramText( file, true, classList, mainClassName, null ); //changed to true
 
             String outputDir = RuntimeProperties.getGenFileDir();

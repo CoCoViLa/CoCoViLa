@@ -27,10 +27,10 @@ import ee.ioc.cs.vsle.synthesize.SpecParseException;
 public class SpecificationLoader {
 	private Map<String, AnnotatedClass> specificationByName;
 	private Set<String> schemeObjectSet;
-	private SpecificationSourceProvider sourceProvider;
+	private AntlrSpecificationSourceProvider sourceProvider;
 
 	public SpecificationLoader(final String basePath, Set<String> schemeObjects) {
-		this(new SpecificationSourceProvider() {
+		this(new AntlrSpecificationSourceProvider() {
 			@Override
 			public CharStream getSource(String specificationName) {
 				try {
@@ -42,7 +42,7 @@ public class SpecificationLoader {
 		}, schemeObjects);
 	}
 
-	public SpecificationLoader(SpecificationSourceProvider sourceProvider, Set<String> schemeObjects) {
+	public SpecificationLoader(AntlrSpecificationSourceProvider sourceProvider, Set<String> schemeObjects) {
 		assert sourceProvider != null;
 
 		this.sourceProvider = sourceProvider;
