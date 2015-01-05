@@ -4,11 +4,13 @@ import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 import ee.ioc.cs.vsle.synthesize.RelType;
 import ee.ioc.cs.vsle.synthesize.SpecParseException;
 import ee.ioc.cs.vsle.vclass.ClassField;
+import org.junit.Assume;
 import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Pavel Grigorenko
@@ -17,6 +19,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testPrimitiveTypeDeclaration_twoVarsInOneLine() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "int a = 2, b;";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "a", "int");
@@ -39,6 +43,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testJavaTypeDeclaration_withAssignment() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "Integer i = new Integer(1);";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "i", "Integer");
@@ -46,6 +52,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testJavaTypeDeclaration_fullyQualified() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "java.lang.Double d = 12D;";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "d", "java.lang.Double");
@@ -53,6 +61,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testJavaTypeDeclaration_withGenericsAndDiamond() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "List<String> list = new ArrayList<>();";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "list", "List<String>");
@@ -60,6 +70,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testStringDeclaration_literalAssignment() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "String s = \"my string\";";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "s", "String");
@@ -67,6 +79,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testStringDeclaration_literalAssignment_withNestedQuotes() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "String s = \"hello \\\"WORLD\\\"!\";";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "s", "String");
@@ -84,6 +98,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testPrimitiveArrayDeclaration_ints() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "int[] arr = new int[]{1,2,3};";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "arr", "int[]");
@@ -109,6 +125,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testMetaclassDeclaration_inlineAssignments() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     specificationSourceProvider.add("Metaclass", wrapSpec( "int a;\n int b = 2;\n" ));
     String spec = "Metaclass a (a=1), b;";
     AnnotatedClass ac = loadSpec(spec);
@@ -126,6 +144,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testMetaclassDeclaration_inlineAssignmentsWithExpressions() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     specificationSourceProvider.add("Metaclass", wrapSpec( "int a;\n int b = 2;\n" ));
     String spec = "Metaclass a (a=1+2, b=a*3);";
     AnnotatedClass ac = loadSpec(spec);
@@ -135,6 +155,8 @@ public class VariableDeclarationTest extends AbstractParserTest {
 
   @Test
   public void testStaticPrimitiveTypeDeclaration_twoVarsInOneLine() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "static int a = 2, b;";
     AnnotatedClass ac = loadSpec(spec);
     ClassField a = checkVarAndType(ac, "a", "int");

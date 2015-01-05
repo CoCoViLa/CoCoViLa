@@ -4,6 +4,8 @@ import ee.ioc.cs.vsle.synthesize.*;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static org.junit.Assume.assumeTrue;
+
 /**
 * @author Pavel Grigorenko
 */
@@ -88,6 +90,8 @@ test(alias_x_0);
 
   @Test
   public void testAlias_twoLineDecl() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "int a, b, c;\n " +
             "alias x;" +
             "x = (a, b, c);";
@@ -97,6 +101,8 @@ test(alias_x_0);
 
   @Test
   public void testAlias_twoLineDeclWithType() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "double a, b, c;\n " +
             "alias (double) x;" +
             "x = (a, b, c);";
@@ -115,6 +121,8 @@ test(alias_x_0);
 
   @Test(expected = AliasException.class)
   public void testAlias_twoLineDeclWithBadType() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "double a, b;" +
             "String c;\n " +
             "alias (double) x;" +
@@ -124,10 +132,22 @@ test(alias_x_0);
 
   @Test
   public void testAlias_twoLineDeclMixedTypes() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "double a, b;" +
             "String c;\n " +
             "alias x;" +
             "x = (a, b, c);";
+    AnnotatedClass ac = loadSpec(spec);
+    assertAlias(ac, "x", vars("a", "b", "c"), "Object");
+  }
+
+  @Test
+  public void testAlias_twoLineDeclMixedTypes_squareBrackets() {
+    String spec = "double a, b;" +
+            "String c;\n " +
+            "alias x;" +
+            "x = [a, b, c];";
     AnnotatedClass ac = loadSpec(spec);
     assertAlias(ac, "x", vars("a", "b", "c"), "Object");
   }
@@ -142,7 +162,7 @@ test(alias_x_0);
   @Test
   public void testAlias_wildcardTwoLineDecl() {
     String spec = "alias (String) x;" +
-            "x = (*.a);";
+            "x = [*.a];";
     AnnotatedClass ac = loadSpec(spec);
     assertAlias(ac, "x", vars("*.a"), "String", true);
   }

@@ -172,11 +172,14 @@ public abstract class AbstractParserTest {
     }
   }
 
-  interface TestSpecLoader {
-    AnnotatedClass loadSpec(String spec);
+  abstract static class TestSpecLoader {
+    abstract AnnotatedClass loadSpec(String spec);
+
+    public boolean isAntlrParser() { return false; }
+    public boolean isRegexParser() { return false; }
   }
 
-  static class AntlrTestSpecLoader implements TestSpecLoader {
+  static class AntlrTestSpecLoader extends TestSpecLoader {
 
     private final SpecificationLoader specificationLoader;
 
@@ -189,9 +192,11 @@ public abstract class AbstractParserTest {
     public AnnotatedClass loadSpec(String spec) {
       return specificationLoader.loadSpecification(wrapSpec(spec), null);
     }
+
+    public boolean isAntlrParser() { return true; }
   }
 
-  static class RegexParserTestSpecLoader implements TestSpecLoader {
+  static class RegexParserTestSpecLoader extends TestSpecLoader {
 
     private final SpecParser specParser;
 
@@ -207,5 +212,7 @@ public abstract class AbstractParserTest {
         throw new RuntimeException(e);
       }
     }
+
+    public boolean isRegexParser() { return true; }
   }
 }

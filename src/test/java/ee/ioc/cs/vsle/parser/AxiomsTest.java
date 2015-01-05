@@ -7,6 +7,7 @@ import org.junit.Test;
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
 
 /**
  * @author Pavel Grigorenko
@@ -114,12 +115,16 @@ public class AxiomsTest extends AbstractParserTest {
 
   @Test(expected = SpecParseException.class)
   public void testAxiom_withSubtaskBadOrder() {
+    assumeTrue(specificationLoader.isAntlrParser());
+    
     String spec = "int a, b, x, y, u, v;\n a, [u -> v] -> b {m};";
     loadSpec(spec);
   }
 
   @Test(expected = SpecParseException.class)
   public void testAxiom_withTwoSubtaskBadOrder() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "int a, b, x, y, u, v;\n [x -> y], a, [u -> v] -> b {m};";
     loadSpec(spec);
   }
