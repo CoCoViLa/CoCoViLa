@@ -1,14 +1,17 @@
 package ee.ioc.cs.vsle.parser;
 
-import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
-import ee.ioc.cs.vsle.synthesize.ClassRelation;
-import ee.ioc.cs.vsle.synthesize.RelType;
+import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CharStream;
 import org.junit.Before;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 
 import static org.junit.Assert.assertEquals;
@@ -18,19 +21,34 @@ import static org.junit.Assert.fail;
 /**
  * @author Pavel Grigorenko
  */
+@RunWith(Parameterized.class)
 public abstract class AbstractParserTest {
 
-  protected SpecificationLoader specificationLoader;
-  protected TestSpecProvider specificationSourceProvider;
+  @Parameterized.Parameter(value = 0)
+  public TestSpecLoader specificationLoader;
+  @Parameterized.Parameter(value = 1)
+  public TestSpecStorage specificationSourceProvider;
+  @Parameterized.Parameter(value = 2)
+  public String testRunId;
+
+  @Parameterized.Parameters(name = "{2}")
+  public static Collection<Object[]> data() {
+    AntlrSpecProvider antlrSpecProvider = new AntlrSpecProvider();
+    StringSpecProvider stringSpecProvider = new StringSpecProvider();
+
+    return Arrays.asList(new Object[][]{
+            { new AntlrTestSpecLoader(new SpecificationLoader(antlrSpecProvider, null)), antlrSpecProvider, "ANTLR parser" },
+            { new RegexParserTestSpecLoader(new SpecParser(null, stringSpecProvider)), stringSpecProvider, "REGEX parser" }});
+  }
 
   @Before
   public void init() {
-    specificationSourceProvider = new TestSpecProvider();
-    specificationLoader = new SpecificationLoader(specificationSourceProvider, null);
+//    specificationSourceProvider = new TestSpecProvider();
+//    specificationLoader = new SpecificationLoader(specificationSourceProvider, null);
   }
 
   AnnotatedClass loadSpec(String spec) {
-    return specificationLoader.loadSpecification(wrapSpec(spec), null);
+    return specificationLoader.loadSpec(wrapSpec(spec));
   }
 
   static String wrapSpec(String spec) {
@@ -127,13 +145,7 @@ public abstract class AbstractParserTest {
     return vars;
   }
 
-  static class TestSpecProvider implements AntlrSpecificationSourceProvider {
-
-    private HashMap<String, String> map = new HashMap<String, String>();
-
-    public void add(String className, String spec) {
-      map.put(className, wrapSpec(spec));
-    }
+  static class AntlrSpecProvider extends TestSpecStorage implements AntlrSpecificationSourceProvider {
 
     @Override
     public CharStream getSource(String specificationName) {
@@ -141,6 +153,59 @@ public abstract class AbstractParserTest {
         return new ANTLRInputStream(map.get(specificationName));
       }
       return AntlrSpecificationSourceProvider.NOP.getSource(specificationName);
+    }
+  }
+
+  static class StringSpecProvider extends TestSpecStorage implements SpecificationSourceProvider<String> {
+
+    @Override
+    public String getSource(String spec) {
+      return null;
+    }
+  }
+
+  static class TestSpecStorage {
+    protected HashMap<String, String> map = new HashMap<String, String>();
+
+    public void add(String className, String spec) {
+      map.put(className, wrapSpec(spec));
+    }
+  }
+
+  interface TestSpecLoader {
+    AnnotatedClass loadSpec(String spec);
+  }
+
+  static class AntlrTestSpecLoader implements TestSpecLoader {
+
+    private final SpecificationLoader specificationLoader;
+
+    AntlrTestSpecLoader(SpecificationLoader specificationLoader) {
+
+      this.specificationLoader = specificationLoader;
+    }
+
+    @Override
+    public AnnotatedClass loadSpec(String spec) {
+      return specificationLoader.loadSpecification(wrapSpec(spec), null);
+    }
+  }
+
+  static class RegexParserTestSpecLoader implements TestSpecLoader {
+
+    private final SpecParser specParser;
+
+    public RegexParserTestSpecLoader(SpecParser specParser) {
+      this.specParser = specParser;
+    }
+
+    @Override
+    public AnnotatedClass loadSpec(String spec) {
+      try {
+        return specParser.parseSpecification(spec, null, null).iterator().next();
+      } catch (IOException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 }
