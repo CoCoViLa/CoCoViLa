@@ -96,6 +96,10 @@ public class ClassPropertiesDialog extends JDialog {
 	public ClassPropertiesDialog(ClassFieldsTableModel cfTblModel,
 			boolean emptyValid) {
 		this.setTitle("Class Properties");
+		
+        setLocationByPlatform( true );
+        setModal(true);
+
 		initialCfTableModel = cfTblModel;
 		//make a copy of model
 		cfTableModel = new ClassFieldsTableModel(); 
@@ -273,7 +277,7 @@ public class ClassPropertiesDialog extends JDialog {
 
 		// Specify dialog size, resizability and modality.
 		setPreferredSize(new Dimension(410, 350));
-		setResizable(false);
+		setResizable(true);
 		setModal(true);
 		
 		// The following pack() call sets the real size to preferredSize
