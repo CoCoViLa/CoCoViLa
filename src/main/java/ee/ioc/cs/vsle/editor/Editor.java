@@ -528,7 +528,7 @@ public class Editor extends JFrame implements ChangeListener {
         JMenuItem menuItem = new JMenuItem( Menu.EXPERT_TABLE );
         menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
-        
+
         menuItem = new JCheckBoxMenuItem( Menu.SHOW_ALGORITHM, RuntimeProperties.isShowAlgorithm() );
         menuItem.setToolTipText( "If checked, after planning a window with the synthesized algorithm will be shown" );
         menuItem.addActionListener( getActionListener() );
