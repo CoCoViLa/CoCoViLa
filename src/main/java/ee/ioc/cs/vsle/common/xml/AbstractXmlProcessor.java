@@ -14,6 +14,8 @@ import javax.xml.transform.dom.*;
 import javax.xml.transform.stream.*;
 import javax.xml.validation.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
 import org.w3c.dom.ls.*;
 import org.xml.sax.*;
@@ -26,6 +28,8 @@ import ee.ioc.cs.vsle.util.*;
  *
  */
 public abstract class AbstractXmlProcessor implements DiagnosticsCollector.Diagnosable {
+
+    private static final Logger logger = LoggerFactory.getLogger(AbstractXmlProcessor.class);
 
     protected DiagnosticsCollector collector = new DiagnosticsCollector();
     protected File xmlFile;
@@ -193,7 +197,7 @@ public abstract class AbstractXmlProcessor implements DiagnosticsCollector.Diagn
                 try {
                     SwingUtilities.invokeAndWait( runnable );
                 } catch (Exception e) {
-                    db.p(e);
+                    logger.debug(null, e);
                 }
             }
             

@@ -1,1 +1,6 @@
 /bin
+.idea
+generated
+target
+.settings
+dist.properties

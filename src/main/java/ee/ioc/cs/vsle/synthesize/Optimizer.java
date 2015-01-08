@@ -4,13 +4,17 @@ import java.util.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class Optimizer {
-    
-    private Optimizer() {}
-    
+
+  private static final Logger logger = LoggerFactory.getLogger(Optimizer.class);
+
+  private Optimizer() {}
+
 	/**
 	 Takes an algorithm and optimizes it to only calculate the variables that are goals.
 	 @param algorithm an unoptimized algorithm
@@ -25,17 +29,14 @@ public class Optimizer {
 		PlanningResult res;
 		EvaluationAlgorithm removeThese = new EvaluationAlgorithm();
 		
-		if (RuntimeProperties.isLogDebugEnabled())
-			db.p( p + "!!!--------- Starting Optimization with targets: " + goals + " ---------!!!");
+		logger.debug(p + "!!!--------- Starting Optimization with targets: " + goals + " ---------!!!");
 		
 		for (int i = algorithm.size() - 1; i >= 0; i--) {
-			if (RuntimeProperties.isLogDebugEnabled())
-				db.p( p + "Reguired vars: " + goals );
+			logger.debug( p + "Reguired vars: " + goals );
 			
 			res = algorithm.get(i);
             rel = res.getRel();
-            if (RuntimeProperties.isLogDebugEnabled())
-    			db.p( p + "Rel from algorithm: " + rel );
+			logger.debug( p + "Rel from algorithm: " + rel );
 			boolean relIsNeeded = false;
 
 			Set<Var> outputs = new LinkedHashSet<Var>();
@@ -49,22 +50,18 @@ public class Optimizer {
 			}
 
 			if ( relIsNeeded ) {
-				if (RuntimeProperties.isLogDebugEnabled())
-					db.p( p + "Required");
+				logger.debug( p + "Required");
 				
 				if( rel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
 					Set<Var> tmpSbtInputs = new LinkedHashSet<Var>();
 					for (SubtaskRel subtask : rel.getSubtasks() ) {
-						if (RuntimeProperties.isLogDebugEnabled())
-							db.p( p + "Optimizing subtask: " + subtask );
+						logger.debug( p + "Optimizing subtask: " + subtask );
 						HashSet<Var> subGoals = new HashSet<Var>();
 						CodeGenerator.unfoldVarsToSet( subtask.getOutputs(), subGoals );
 						// the problem object is required only on the top level
 						optimize( null, res.getSubtaskAlgorithm( subtask ), subGoals, incPrefix( p ) );
-						if (RuntimeProperties.isLogDebugEnabled()) {
-							db.p( p + "Finished optimizing subtask: " + subtask );
-							db.p( p + "Required inputs from upper level: " + subGoals );
-						}
+						logger.debug(p + "Finished optimizing subtask: " + subtask);
+						logger.debug( p + "Required inputs from upper level: " + subGoals);
 
 						tmpSbtInputs.addAll(subGoals);
 					}
@@ -74,15 +71,12 @@ public class Optimizer {
                 CodeGenerator.unfoldVarsToSet(rel.getInputs(), inputs);
 				goals.addAll(inputs);
 			} else {
-				if (RuntimeProperties.isLogDebugEnabled())
-					db.p( p + "Removed");
+				logger.debug( p + "Removed");
 				removeThese.add(res);
 			}
 		}
-		if (RuntimeProperties.isLogDebugEnabled()) {
-			db.p( p + "Initial algorithm: " + algorithm + "\nRels to remove: " + removeThese );
-		}
-		
+		logger.debug( p + "Initial algorithm: " + algorithm + "\nRels to remove: " + removeThese );
+
 		//remove unneeded relations
 		for (PlanningResult resToRemove : removeThese) {
 			if( algorithm.indexOf( resToRemove ) > -1 ) {
@@ -100,8 +94,7 @@ public class Optimizer {
 			    context.getFoundVars().removeAll( outputs );
 			}
 		}
-		if (RuntimeProperties.isLogDebugEnabled())
-			db.p( p + "Optimized Algorithm: " + algorithm );
+		logger.debug( p + "Optimized Algorithm: " + algorithm );
 	}
 	
 	private static String incPrefix( String p ) {

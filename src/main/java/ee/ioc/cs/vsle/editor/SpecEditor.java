@@ -44,7 +44,7 @@ public class SpecEditor {
         if ( returnVal == JFileChooser.APPROVE_OPTION ) {
             File packFile = fc.getSelectedFile();
 
-            db.p( "Loading package: " + packFile.getName() );
+            System.out.println( "Loading package: " + packFile.getName() );
             VPackage pkg;
             if((pkg = PackageXmlProcessor.load(packFile)) != null ) {
 

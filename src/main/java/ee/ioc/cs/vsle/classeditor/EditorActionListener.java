@@ -22,12 +22,15 @@ import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
 import ee.ioc.cs.vsle.util.SystemUtils;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Canvas;
 import ee.ioc.cs.vsle.vclass.ClassObject;
 import ee.ioc.cs.vsle.vclass.VPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class EditorActionListener implements ActionListener {
+
+    private static final Logger logger = LoggerFactory.getLogger(EditorActionListener.class);
 
     /*
      * For more information about Swing Actions see: "How to Use Actions"
@@ -58,7 +61,7 @@ public class EditorActionListener implements ActionListener {
                     JOptionPane.showMessageDialog( ClassEditor.getInstance(),
                             "Undo failed. Please report the steps to reproduce this error.", "Cannot undo",
                             JOptionPane.WARNING_MESSAGE );
-                    db.p( e );
+                    logger.error(null, e );
                 }
                 ClassEditor.getInstance().refreshUndoRedo();
                 canvas.drawingArea.repaint();
@@ -90,7 +93,7 @@ public class EditorActionListener implements ActionListener {
                     JOptionPane.showMessageDialog( ClassEditor.getInstance(),
                             "Redo failed. Please report the steps to reproduce this error.", "Cannot redo",
                             JOptionPane.WARNING_MESSAGE );
-                    db.p( e );
+                    logger.error(null, e );
                 }
 
                 ClassEditor.getInstance().refreshUndoRedo();
@@ -235,8 +238,7 @@ public class EditorActionListener implements ActionListener {
             int returnVal = fc.showOpenDialog( ClassEditor.getInstance() );
             if ( returnVal == JFileChooser.APPROVE_OPTION ) {
                 File file = fc.getSelectedFile();
-                if ( RuntimeProperties.isLogDebugEnabled() )
-                    db.p( "Loading package: " + file.getName() );
+                logger.debug( "Loading package: " + file.getName() );
                 try {
                     VPackage pkg;
                     if ( (pkg = PackageXmlProcessor.load(file)) != null ) {

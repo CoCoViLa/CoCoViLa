@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.xml.parsers.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
 import org.xml.sax.*;
 
@@ -29,6 +31,8 @@ import ee.ioc.cs.vsle.vclass.*;
  * @author pavelg
  */
 public class PackageXmlProcessor extends AbstractXmlProcessor {
+
+    private static final Logger logger = LoggerFactory.getLogger(PackageXmlProcessor.class);
 
     private static final String ATR_ARC_ANGLE = "arcAngle";
     private static final String ATR_START_ANGLE = "startAngle";
@@ -131,8 +135,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
    
     public VPackage parse(boolean validate) {
         
-        if( RuntimeProperties.isLogDebugEnabled() )
-            db.p( "Starting parsing package: " + xmlFile.getAbsolutePath() );
+        logger.debug( "Starting parsing package: " + xmlFile.getAbsolutePath() );
         
         long startParsing = System.currentTimeMillis();
         VPackage pack = null;
@@ -156,8 +159,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                     pack.setPainters( true );
             }
             
-            if( RuntimeProperties.isLogDebugEnabled() )
-                db.p( "Package parsing finished in " + ( System.currentTimeMillis() - startParsing ) + "ms.\n");
+            logger.debug( "Package parsing finished in " + ( System.currentTimeMillis() - startParsing ) + "ms.\n");
         } catch ( Exception e ) {
             collector.collectDiagnostic( e.getMessage(), true );
             if(RuntimeProperties.isLogDebugEnabled()) {

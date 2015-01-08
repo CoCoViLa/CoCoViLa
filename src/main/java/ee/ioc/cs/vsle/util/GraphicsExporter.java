@@ -20,6 +20,8 @@ import javax.swing.event.PopupMenuListener;
 import ee.ioc.cs.vsle.editor.Editor;
 import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Class for exporting application window graphics as vector (SVG, EPS, ...)
@@ -36,6 +38,8 @@ import ee.ioc.cs.vsle.editor.RuntimeProperties;
  * (or something similar).
  */
 public final class GraphicsExporter {
+
+    private static final Logger logger = LoggerFactory.getLogger(GraphicsExporter.class);
 
     private static JMenu exportMenu;
 
@@ -133,9 +137,7 @@ public final class GraphicsExporter {
                 subMenuListener = new ExportActionListener(exportDialogClass,
                         menuItemFrameMap);
             } catch (ClassNotFoundException ex) {
-                if (RuntimeProperties.isLogDebugEnabled()) {
-                    db.p(ex);
-                }
+                logger.error(null, ex);
                 menu.removeAll();
                 menu.add(new JLabel("(function not available)"));
             } finally {
@@ -183,17 +185,17 @@ public final class GraphicsExporter {
                                     ? ((Frame) target).getTitle()
                                     : target.getName()));
             } catch (SecurityException e) {
-                db.p(e);
+                logger.error(null, e);
             } catch (NoSuchMethodException e) {
-                db.p(e);
+                logger.error(null, e);
             } catch (IllegalArgumentException e) {
-                db.p(e);
+                logger.error(null, e);
             } catch (IllegalAccessException e) {
-                db.p(e);
+                logger.error(null, e);
             } catch (InvocationTargetException e) {
-                db.p(e);
+                logger.error(null, e);
             } catch (InstantiationException e) {
-                db.p(e);
+                logger.error(null, e);
             } finally {
                 menuMap.clear();
             }

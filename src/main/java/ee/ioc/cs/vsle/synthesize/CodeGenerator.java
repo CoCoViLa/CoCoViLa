@@ -10,8 +10,12 @@ import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class CodeGenerator {
+
+    private static final Logger logger = LoggerFactory.getLogger(CodeGenerator.class);
 
     public static final String COMPUTE_ARG_NAME = "cocovilaArgs";
     public static final String SPEC_OBJECT_NAME = "cocovilaSpecObjectName";
@@ -51,8 +55,7 @@ public class CodeGenerator {
      */
     public String generate() {
 
-        if(RuntimeProperties.isLogDebugEnabled())
-            db.p( "Starting code generation" );
+        logger.debug( "Starting code generation" );
         long start = System.currentTimeMillis();
 
         StringBuilder alg = new StringBuilder();
@@ -80,7 +83,7 @@ public class CodeGenerator {
 
         }
 
-        db.p( "Code generation time: " + ( System.currentTimeMillis() - start ) + "ms" );
+        logger.info("Code generation time: " + (System.currentTimeMillis() - start) + "ms");
 
         return alg.toString();
     }
@@ -103,7 +106,7 @@ public class CodeGenerator {
     /**
      * Generates code for axiom with subtasks
      * 
-     * @param rel
+     * @param res
      * @param alg
      * @param isNestedSubtask
      * @param parentClassName
@@ -152,7 +155,6 @@ public class CodeGenerator {
 
     /**
      * Generates code for a subtask (both independent/dependent)
-     * @param bufSbtInst
      * @param bufSbtClass
      * @param parentClassName
      * @param usedVars
@@ -201,8 +203,7 @@ public class CodeGenerator {
         for ( int i = 0; i < subAlg.size(); i++ ) {
             PlanningResult res = subAlg.get( i );
             Rel trel = res.getRel();
-            if ( RuntimeProperties.isLogDebugEnabled() )
-                db.p( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs() );
+            logger.debug( "rel " + trel + " in " + trel.getInputs() + " out " + trel.getOutputs() );
             if ( trel.getType() == RelType.TYPE_METHOD_WITH_SUBTASK ) {
                 // recursion
                 genRelWithSubtasks( res, bufSbtBody, true, sbClassName, currentUsedVars, currentProblem );
