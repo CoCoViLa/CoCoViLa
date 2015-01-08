@@ -21,11 +21,12 @@ import ee.ioc.cs.vsle.event.EventSystem;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Canvas;
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.Port;
 import ee.ioc.cs.vsle.vclass.VPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClassCanvas extends Canvas{
 
@@ -33,6 +34,8 @@ public class ClassCanvas extends Canvas{
 	 * 
 	 */
 	private static final long serialVersionUID = 1290323197462938186L;
+    private static final Logger logger = LoggerFactory.getLogger(ClassCanvas.class);
+
 	public MouseOps mListener; 
     private boolean drawOpenPorts = true;    
     public IconPalette iconPalette;
@@ -272,10 +275,10 @@ public class ClassCanvas extends Canvas{
             try {
                 Runtime.getRuntime().exec(editCmd, null, wd);
             } catch (IOException ex) {
-                if (RuntimeProperties.isLogDebugEnabled()) {
-                    db.p(ex);
+                if(logger.isDebugEnabled()) {
+                    logger.error(null, ex);
                 }
-                JOptionPane.showMessageDialog(this, 
+                JOptionPane.showMessageDialog(this,
                         "Execution of the command \"" + editCmd
                         + "\" failed:\n" + ex.getMessage() +
                         "\nYou may need to revise the application settings.",
