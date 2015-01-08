@@ -8,6 +8,8 @@ import java.util.List;
 
 import javax.xml.transform.sax.TransformerHandler;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
@@ -19,6 +21,7 @@ public class GObj implements Serializable, Cloneable,
                                 ee.ioc.cs.vsle.api.SchemeObject, ISpecExtendable {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(GObj.class);
 
     private float Xsize = 1; // percentage for resizing, 1 means real size
     private float Ysize = 1;
@@ -476,7 +479,7 @@ public class GObj implements Serializable, Cloneable,
 
             return obj;
         } catch ( CloneNotSupportedException e ) {
-            db.p( "Unable to clone." );
+            logger.error( "Unable to clone." );
             return null;
         }
     }

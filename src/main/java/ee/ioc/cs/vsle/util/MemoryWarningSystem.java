@@ -6,8 +6,12 @@ import java.util.*;
 import javax.management.*;
 
 import ee.ioc.cs.vsle.editor.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class MemoryWarningSystem {
+
+	private static final Logger logger = LoggerFactory.getLogger(MemoryWarningSystem.class);
 
 	private final static MemoryWarningSystem s_instance = new MemoryWarningSystem();
 	
@@ -29,8 +33,7 @@ public final class MemoryWarningSystem {
 						MemoryNotificationInfo.MEMORY_THRESHOLD_EXCEEDED)) {
 					long maxMemory = tenuredGenPool.getUsage().getMax();
 					long usedMemory = tenuredGenPool.getUsage().getUsed();
-					if ( RuntimeProperties.isLogInfoEnabled() ) 
-			            db.p( "usedMemory: " + usedMemory + " maxMemory: " + maxMemory );
+					logger.info( "usedMemory: " + usedMemory + " maxMemory: " + maxMemory );
 					for (Listener listener : listeners) {
 						listener.memoryUsageLow(usedMemory, maxMemory);
 					}

@@ -14,6 +14,8 @@ import javax.imageio.stream.ImageOutputStream;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * User: Ando
@@ -21,6 +23,8 @@ import ee.ioc.cs.vsle.editor.*;
  * Time: 21:45:37
  */
 public class FileFuncs {
+
+    private static final Logger logger = LoggerFactory.getLogger(FileFuncs.class);
 
     /**
      * Buffer size for file read and write operations.
@@ -65,7 +69,7 @@ public class FileFuncs {
                     return getByteStreamContents(new FileInputStream(file), 
                             file.length() > BUFMAXSIZE ? BUFMAXSIZE : (int)file.length());
                 } catch (FileNotFoundException e) {
-                    db.p(e);
+                    logger.error(null, e);
                 }
             }
             return null;
@@ -97,9 +101,9 @@ public class FileFuncs {
                     return getCharStreamContents(new FileInputStream(file), 
                             file.length() > BUFMAXSIZE ? BUFMAXSIZE : (int)file.length());
             } catch (FileNotFoundException e) {
-                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
+                logger.error("FileSystemStorage.getCharFileContents(): " + e.getMessage());
             } catch (SecurityException e) {
-                db.p("FileSystemStorage.getCharFileContents(): " + e.getMessage());
+                logger.error("FileSystemStorage.getCharFileContents(): " + e.getMessage());
             }
             return null;
         }
@@ -188,9 +192,7 @@ public class FileFuncs {
      * or the empty string on error
      */
     public static String getFileContents(File file) {
-        if (RuntimeProperties.isLogDebugEnabled()) {
-            db.p("Retrieving " + file);
-        }
+        logger.debug("Retrieving " + file);
 
         StringBuilder fileString = null;
         if (file != null && file.exists() && !file.isDirectory()) {
@@ -198,7 +200,7 @@ public class FileFuncs {
             try {
                 long len = file.length();
                 if (len > Integer.MAX_VALUE) {
-                    db.p("File " + file.getAbsolutePath() + " is too large!");
+                    logger.warn("File " + file.getAbsolutePath() + " is too large!");
                     return "";
                 }
                 // StringBuilder can handle the value 0L for special files
@@ -212,13 +214,13 @@ public class FileFuncs {
                     fileString.append("\n");
                 }
             } catch (IOException ioe) {
-                db.p("Couldn't open file "+ file.getAbsolutePath());
+                logger.error("Couldn't open file " + file.getAbsolutePath());
             } finally {
                 if (in != null) {
                     try {
                         in.close();
                     } catch (IOException e) {
-                        db.p(e);
+                        logger.error(null, e);
                     }
                     in = null;
                 }
@@ -250,8 +252,7 @@ public class FileFuncs {
 				out = null;
 				status = true;
 			} catch (Exception e) {
-				db.p(e);
-				db.p("Couldn't write to file "+ file.getAbsolutePath());
+          logger.error("Couldn't write to file " + file.getAbsolutePath(), e);
 			} finally {
 				if (out != null) {
 					out.close();
@@ -279,7 +280,7 @@ public class FileFuncs {
             out.println( prog );
             out.close();
         } catch ( Exception e ) {
-            db.p( e );
+            logger.error(null, e);
         }
     }
     
@@ -384,7 +385,7 @@ public class FileFuncs {
                 }
             }
         } catch (IOException e) {
-            db.p(e);
+            logger.error(null, e);
             buf = null;
         } finally {
             try {
@@ -421,7 +422,7 @@ public class FileFuncs {
 			in.close();
 			out.close();
 		} catch (IOException e) {
-			db.p(e);
+			logger.error(null, e);
 		} 
     }
 
@@ -455,7 +456,7 @@ public class FileFuncs {
                 }
             }
         } catch (IOException e) {
-            db.p(e);
+            logger.error(null, e);
             buf = null;
         } finally {
             try {

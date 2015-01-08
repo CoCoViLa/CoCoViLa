@@ -12,13 +12,17 @@ import javax.swing.SwingUtilities;
 import ee.ioc.cs.vsle.editor.Editor;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author pavelg
  *
  */
 public class EventSystem {
-	
+
+	private static final Logger logger = LoggerFactory.getLogger(EventSystem.class);
+
 	private static EventSystem   s_instance = new EventSystem();
 
 	private EventQueue           m_eventQueue;
@@ -50,8 +54,7 @@ public class EventSystem {
     // is no need to bother users with cryptic warning messages.
     @SuppressWarnings("deprecation")
     private void restartQueue() {
-		if ( RuntimeProperties.isLogInfoEnabled() ) 
-			db.p( "The queue is restarting" );
+		logger.info( "The queue is restarting" );
 		System.gc();
 		m_eventQueue.stop();
 		shutdown();
@@ -106,13 +109,11 @@ public class EventSystem {
 			catch ( InterruptedException ex ) {}
 		}
 
-		if ( RuntimeProperties.isLogDebugEnabled() ) 
-			db.p( "The queue is running" );
+		logger.debug( "The queue is running" );
 		
 		MemoryWarningSystem.getInstance().addListener(new MemoryWarningSystem.Listener() {
 			public void memoryUsageLow(long usedMemory, long maxMemory) {
-				if ( RuntimeProperties.isLogInfoEnabled() ) 
-					db.p("Memory usage low!!!");
+				logger.info("Memory usage low!!!");
 				restartQueue();
 				displayWarning();
 			}
@@ -178,7 +179,7 @@ public class EventSystem {
 		}
 		catch ( EventQueueException ex )
 		{
-			db.p( "Cannot add an event to the queue: " + ex.getMessage() );
+			logger.error( "Cannot add an event to the queue: " + ex.getMessage() );
 		}
 	}
 }
