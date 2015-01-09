@@ -186,9 +186,10 @@ test(alias_x_0);
   }
 
   @Test
-  @Ignore("works with regexp parser")//FIXME
   public void testAlias_elemAccessWildcardIndices() {
-    String spec = "int a = 1, b, c = 2, d;\n" +
+    String spec = "int a, b, c, d;\n" +
+            "a = 1;\n" +
+            "c = 2;\n" +
             "alias x = (a, b);\n" +
             "alias y = (c, d);\n" +
             "alias z = (x, y);\n" +
@@ -198,7 +199,6 @@ test(alias_x_0);
   }
 
   @Test
-  @Ignore("works with regexp parser")//FIXME
   public void testAlias_elemAccessWildcardVarNames() {
     specificationSourceProvider.add("M", wrapSpec("int u, v;", "M"));
     String spec = "M a, b;\n" +

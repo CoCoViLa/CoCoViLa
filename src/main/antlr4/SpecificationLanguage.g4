@@ -146,7 +146,9 @@ variableInitializer
     ;
 
 variableIdentifier
-	:	Identifier (('.' Identifier | '*') )* ALIAS_ELEMENT_REF*  ('.' variableIdentifier)?
+	:	Identifier (('.' Identifier | '*') )* ALIAS_ELEMENT_REF*  ('.' variableIdentifier)?//orig
+	|	Identifier '.*' ALIAS_ELEMENT_REF+
+	|	Identifier '.*'  ('.' variableIdentifier)+
 	;
 	
 variableIdentifierList

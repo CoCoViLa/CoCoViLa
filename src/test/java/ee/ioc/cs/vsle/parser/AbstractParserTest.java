@@ -160,7 +160,7 @@ public abstract class AbstractParserTest {
 
     @Override
     public String getSource(String spec) {
-      return null;
+      return map.get(spec);
     }
   }
 
@@ -168,7 +168,7 @@ public abstract class AbstractParserTest {
     protected HashMap<String, String> map = new HashMap<String, String>();
 
     public void add(String className, String spec) {
-      map.put(className, wrapSpec(spec));
+      map.put(className, spec);
     }
   }
 
