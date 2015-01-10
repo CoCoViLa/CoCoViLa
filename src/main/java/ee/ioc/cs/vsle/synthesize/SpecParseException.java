@@ -2,8 +2,9 @@ package ee.ioc.cs.vsle.synthesize;
 
 public class SpecParseException extends RuntimeException {
 
-    private String line;
+    private String metaClass;
 
+    private String line;
     public SpecParseException(String message) {
         super(message);
     }
@@ -27,5 +28,13 @@ public class SpecParseException extends RuntimeException {
      */
     public void setLine(String line) {
         this.line = line;
+    }
+
+    public String getMetaClass() {
+        return metaClass;
+    }
+
+    public void setMetaClass(String metaClass) {
+        this.metaClass = metaClass;
     }
 }

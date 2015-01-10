@@ -5,11 +5,15 @@ import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_DOUBLE;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_INT;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
 
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.ATNConfigSet;
+import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -59,7 +63,7 @@ import ee.ioc.cs.vsle.vclass.ClassField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SpecificationLanguageListenerImpl extends SpecificationLanguageBaseListener {
+public class SpecificationLanguageListenerImpl extends SpecificationLanguageBaseListener implements ANTLRErrorListener {
 
   private static final Logger logger = LoggerFactory.getLogger(SpecificationLanguageListenerImpl.class);
 
@@ -597,6 +601,52 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 	
 	public AnnotatedClass getAnnotatedClass() {
 		return annotatedClass;
+	}
+
+	@Override
+	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+//			System.err.println("line " + line + ":" + charPositionInLine + " " + msg);
+//			String message = underlineError(recognizer, (Token) offendingSymbol, line, charPositionInLine);
+		String errorLine = underlineError(recognizer, (Token)offendingSymbol, line, charPositionInLine);
+		msg = errorLine.concat("\n").concat(msg);
+		SpecParseException specParseException = new SpecParseException(msg);
+		specParseException.setMetaClass(specificationName);
+		specParseException.setLine(Integer.toString(line));
+		throw specParseException;
+	}
+
+	protected String underlineError(Recognizer recognizer, Token offendingToken, int line, int charPositionInLine) {
+		StringBuilder sb = new StringBuilder("\n");
+		CommonTokenStream tokens = (CommonTokenStream) recognizer.getInputStream();
+		String input = tokens.getTokenSource().getInputStream().toString();
+		String[] lines = input.split("\n");
+		String errorLine = lines[line - 1];
+		sb.append(errorLine);
+		sb.append("\n");
+		for (int i = 0; i < charPositionInLine; i++)
+			sb.append(" ");
+		int start = offendingToken.getStartIndex();
+		int stop = offendingToken.getStopIndex();
+		if (start >= 0 && stop >= 0) {
+			for (int i = start; i <= stop; i++)
+				sb.append("^");
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public void reportAmbiguity(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, @NotNull ATNConfigSet configs) {
+
+	}
+
+	@Override
+	public void reportAttemptingFullContext(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, @NotNull ATNConfigSet configs) {
+
+	}
+
+	@Override
+	public void reportContextSensitivity(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, int prediction, @NotNull ATNConfigSet configs) {
+
 	}
 
 	private class ClassFieldDeclarator{

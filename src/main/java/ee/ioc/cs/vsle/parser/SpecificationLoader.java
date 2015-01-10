@@ -22,9 +22,14 @@ import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaceContext;
 import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 import ee.ioc.cs.vsle.synthesize.SpecParseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class SpecificationLoader {
+
+	private static final Logger logger = LoggerFactory.getLogger(SpecificationLoader.class);
+
 	private Map<String, AnnotatedClass> specificationByName;
 	private Set<String> schemeObjectSet;
 	private AntlrSpecificationSourceProvider sourceProvider;
@@ -69,12 +74,12 @@ public class SpecificationLoader {
 		TokenStream token = new CommonTokenStream(lexer);
 		SpecificationLanguageParser parser = new SpecificationLanguageParser(token);
 		parser.removeErrorListeners(); // remove ConsoleErrorListener
-		parser.addErrorListener(new UnderlineListener()); // add ours
-		
 		SpecificationLanguageListenerImpl specificationLanguageListener = new SpecificationLanguageListenerImpl(this, specificationName);
-		MetaInterfaceContext metaInterfase = parser.metaInterface();
+		parser.addErrorListener(specificationLanguageListener);
+
+		MetaInterfaceContext metaInterface = parser.metaInterface();
 		ParseTreeWalker walker = new ParseTreeWalker();
-		walker.walk(specificationLanguageListener, metaInterfase);
+		walker.walk(specificationLanguageListener, metaInterface);
 		
 		AnnotatedClass annotatedClass = specificationLanguageListener.getAnnotatedClass();
 		specificationByName.put(annotatedClass.getName(), annotatedClass);
@@ -97,35 +102,4 @@ public class SpecificationLoader {
 		
 	}
 	
-	public static class UnderlineListener extends BaseErrorListener {
-		public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
-			System.err.println("line " + line + ":" + charPositionInLine + " " + msg);
-//			String message = underlineError(recognizer, (Token) offendingSymbol, line, charPositionInLine);
-			String errorLine = underlineError(recognizer, (Token)offendingSymbol, line, charPositionInLine);
-			msg = errorLine.concat("\n").concat(msg);
-			SpecParseException specParseException = new SpecParseException(msg);
-			specParseException.setLine(Integer.toString(line));
-			throw specParseException;
-		}
-
-		protected String underlineError(Recognizer recognizer, Token offendingToken, int line, int charPositionInLine) {
-			StringBuilder sb = new StringBuilder("\n");
-			CommonTokenStream tokens = (CommonTokenStream) recognizer.getInputStream();
-			String input = tokens.getTokenSource().getInputStream().toString();
-			String[] lines = input.split("\n");
-			String errorLine = lines[line - 1];
-			sb.append(errorLine);
-			sb.append("\n");
-			for (int i = 0; i < charPositionInLine; i++)
-				sb.append(" ");
-			int start = offendingToken.getStartIndex();
-			int stop = offendingToken.getStopIndex();
-			if (start >= 0 && stop >= 0) {
-				for (int i = start; i <= stop; i++)
-					sb.append("^");
-			}
-			return sb.toString();
-		}
-		
-	}
 }

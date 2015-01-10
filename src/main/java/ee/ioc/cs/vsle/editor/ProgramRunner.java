@@ -338,7 +338,7 @@ public class ProgramRunner {
         else if( e instanceof  SpecParseException ) {
             SpecParseException spe = (SpecParseException)e;
             String line = spe.getLine();
-            msg = "Specification parsing error: " + spe.getMessage() 
+            msg = "Specification " + (spe.getMetaClass() != null ? "'" + spe.getMetaClass() + "' " : "") + "parsing error: " + spe.getMessage()
                 + (line != null ? ", line: " + line : ""); 
             logger.error(msg);
             ErrorWindow.showErrorMessage( msg );
