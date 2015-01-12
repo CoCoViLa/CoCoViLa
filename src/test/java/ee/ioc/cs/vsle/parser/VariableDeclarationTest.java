@@ -78,6 +78,16 @@ public class VariableDeclarationTest extends AbstractParserTest {
   }
 
   @Test
+  public void testStringDeclaration_literalAssignment_separateLine() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
+    String spec = "String s;\n" +
+            "s = \"my string\";";
+    AnnotatedClass ac = loadSpec(spec);
+    checkVarAndType(ac, "s", "String");
+  }
+
+  @Test
   public void testStringDeclaration_literalAssignment_withNestedQuotes() {
     assumeTrue(specificationLoader.isAntlrParser());
 
@@ -88,12 +98,22 @@ public class VariableDeclarationTest extends AbstractParserTest {
   }
 
   @Test
-  @Ignore //FIXME
-  public void testStringDeclaration_newInstance() {
+  public void testStringDeclaration_newInstance_oneLine() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "String s2 = new String(\"my second string\");";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "s2", "String");
     assertClassRelation(ac, RelType.TYPE_EQUATION, "s2", "s2 = new String(\"my second string\")");
+  }
+
+  @Test
+  public void testStringDeclaration_newInstance_separateDeclAndAssignment() {
+    String spec = "String s;\n" +
+            "s = new String(\"my second string\");";
+    AnnotatedClass ac = loadSpec(spec);
+    checkVarAndType(ac, "s", "String");
+    assertClassRelation(ac, RelType.TYPE_EQUATION, "s", "s = new String(\"my second string\")");
   }
 
   @Test
