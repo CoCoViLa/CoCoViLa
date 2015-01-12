@@ -27,26 +27,11 @@ public class AliasTest extends AbstractParserTest {
     assertAlias(ac, "x", vars("a", "b", "c"));
   }
 
-  @Test
-  @Ignore("redefining alias should not be allowed")//FIXME
-  /*
-int a = 0, b = 1, c = 2;
-void r;
-alias x = (a, b);
-x = (c);
-x->r{test};
-
-gives:
-Object[] alias_x_0 = new Object[3];
-alias_x_0[0] = a;
-alias_x_0[1] = b;
-alias_x_0[2] = c;
-test(alias_x_0);
-   */
+  @Test(expected = SpecParseException.class)
   public void testAlias_redefine() {
     String spec = "int a, b, c;\n " +
             "alias x = (a, b);" +
-            "x = (c);";
+            "x = [c];";
     AnnotatedClass ac = loadSpec(spec);
     assertAlias(ac, "x", vars("a", "b", "c"));
   }

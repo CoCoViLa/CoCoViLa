@@ -339,6 +339,9 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 			throw new UnknownVariableException(aliasFullName, ctx.getText());
 		if(aliasClassField instanceof Alias){
 			Alias alias = (Alias) aliasClassField;
+			if ( alias.isInitialized() ) {
+				throw new SpecParseException( "Alias " + alias.getName() + " has already been initialized and cannot be overriden, line: " + ctx.getText() );
+			}
 			if(!isLocalAlias){
 				alias = new Alias( aliasFullName, alias.getVarType() );
 				annotatedClass.addField(alias);
