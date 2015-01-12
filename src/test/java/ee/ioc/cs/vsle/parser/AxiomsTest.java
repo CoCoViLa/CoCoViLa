@@ -4,6 +4,7 @@ import ee.ioc.cs.vsle.synthesize.*;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collection;
 import java.util.Iterator;
 
 import static org.junit.Assert.*;
@@ -153,5 +154,33 @@ public class AxiomsTest extends AbstractParserTest {
   public void testAxiom_UndeclaredVars() {
     String spec = "a -> b {methodName};";
     loadSpec(spec);
+  }
+
+  @Test
+  public void testAxiom_withIndependentSubtask() {
+    specificationSourceProvider.add("M", wrapSpec( "int x, y;\n", "M" ));
+    String spec = "int a, b;\n" +
+            "M m;\n" +
+            "[M |- x -> y], a -> b {meth};";
+    AnnotatedClass ac = specificationLoader.isAntlrParser() ? loadSpec(spec) :  loadSpecs(spec).getType("this");
+    ClassRelation cr = assertClassRelation(ac, RelType.TYPE_METHOD_WITH_SUBTASK, vars("a"), vars("b"), "meth");
+    assertEquals(1, cr.getSubtasks().size());
+    SubtaskClassRelation subtask = cr.getSubtasks().iterator().next();
+    assertClassRelation(subtask, RelType.TYPE_SUBTASK, vars("x"), vars("y"), null);
+    assertTrue("Should be independent", subtask.isIndependent());
+  }
+
+  @Test
+  public void testAxiom_withIndependentSubtask_noInputs() {
+    specificationSourceProvider.add("M", wrapSpec( "int x, y;\n", "M" ));
+    String spec = "int a, b;\n" +
+            "M m;\n" +
+            "[M |- -> y] -> b {meth};";
+    AnnotatedClass ac = specificationLoader.isAntlrParser() ? loadSpec(spec) :  loadSpecs(spec).getType("this");
+    ClassRelation cr = assertClassRelation(ac, RelType.TYPE_METHOD_WITH_SUBTASK, vars(), vars("b"), "meth");
+    assertEquals(1, cr.getSubtasks().size());
+    SubtaskClassRelation subtask = cr.getSubtasks().iterator().next();
+    assertClassRelation(subtask, RelType.TYPE_SUBTASK, vars(), vars("y"), null);
+    assertTrue("Should be independent", subtask.isIndependent());
   }
 }

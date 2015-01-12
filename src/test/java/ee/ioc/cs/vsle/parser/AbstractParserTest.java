@@ -43,12 +43,16 @@ public abstract class AbstractParserTest {
 
   @Before
   public void init() {
-//    specificationSourceProvider = new TestSpecProvider();
-//    specificationLoader = new SpecificationLoader(specificationSourceProvider, null);
+    specificationSourceProvider.reset();
+    specificationLoader.reset();
   }
 
   AnnotatedClass loadSpec(String spec) {
     return specificationLoader.loadSpec(wrapSpec(spec));
+  }
+
+  ClassList loadSpecs(String spec) {
+    return specificationLoader.loadSpecs(wrapSpec(spec));
   }
 
   static String wrapSpec(String spec) {
@@ -170,10 +174,17 @@ public abstract class AbstractParserTest {
     public void add(String className, String spec) {
       map.put(className, spec);
     }
+
+    public void reset() {
+      map.clear();
+    }
   }
 
   abstract static class TestSpecLoader {
     abstract AnnotatedClass loadSpec(String spec);
+    abstract ClassList loadSpecs(String spec);
+
+    protected void reset() {}
 
     public boolean isAntlrParser() { return false; }
     public boolean isRegexParser() { return false; }
@@ -193,6 +204,17 @@ public abstract class AbstractParserTest {
       return specificationLoader.loadSpecification(wrapSpec(spec), null);
     }
 
+    @Override
+    public ClassList loadSpecs(String spec) {
+      specificationLoader.loadSpecification(spec, null);
+      return specificationLoader.getLoadedSpecifications();
+    }
+
+    @Override
+    protected void reset() {
+      specificationLoader.reset();
+    }
+
     public boolean isAntlrParser() { return true; }
   }
 
@@ -206,8 +228,13 @@ public abstract class AbstractParserTest {
 
     @Override
     public AnnotatedClass loadSpec(String spec) {
+      return loadSpecs(spec).iterator().next();
+    }
+
+    @Override
+    ClassList loadSpecs(String spec) {
       try {
-        return specParser.parseSpecification(spec, null, null).iterator().next();
+        return specParser.parseSpecification(spec, null, null);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }

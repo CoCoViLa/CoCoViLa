@@ -20,6 +20,10 @@ public class ClassList
 		super();
 	} // ee.ioc.cs.editor.synthesize.ClassList
 
+	public ClassList(Collection<AnnotatedClass> acs) {
+		super(acs);
+	}
+
 	/**
 	 * Returns the Annotated Class of a specified type.
 	 * @param type String - type of the Annotated Class to be returned.

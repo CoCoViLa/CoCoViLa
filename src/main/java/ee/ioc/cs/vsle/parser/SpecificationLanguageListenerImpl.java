@@ -252,7 +252,10 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
         
         for (SubtaskContext subtaskContext : subtaskContextList) {
         	String contextName = subtaskContext.context == null ? null : subtaskContext.context.getText();
-        	List<VariableIdentifierContext> subtaskInputVariableContextList = subtaskContext.inputVariables.variableIdentifier();
+        	List<VariableIdentifierContext> subtaskInputVariableContextList =
+									subtaskContext.inputVariables != null
+													? subtaskContext.inputVariables.variableIdentifier()
+													: Collections.<VariableIdentifierContext>emptyList();
         	List<VariableIdentifierContext> subtaskOutputVariableContextList = subtaskContext.outputVariables.variableIdentifier();
         	
         	Collection<ClassField> varsForSubtask = annotatedClass.getFields();

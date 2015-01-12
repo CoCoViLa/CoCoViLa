@@ -62,7 +62,10 @@ axiom
 	;
 
 subtask
-	:	'[' (context = classOrInterfaceType '|-')? inputVariables = variableIdentifierList '->' outputVariables = variableIdentifierList ']'
+	//dependent
+	:	'[' inputVariables = variableIdentifierList '->' outputVariables = variableIdentifierList ']'
+	//independent
+	|	'[' (context = classOrInterfaceType '|-')? (inputVariables = variableIdentifierList)? '->' outputVariables = variableIdentifierList ']'
 	;
 	
 subtaskList

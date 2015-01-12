@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import ee.ioc.cs.vsle.synthesize.ClassList;
 import org.antlr.v4.runtime.ANTLRFileStream;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.BaseErrorListener;
@@ -86,8 +87,8 @@ public class SpecificationLoader {
 		return annotatedClass;
 	}
 	
-	public Collection<AnnotatedClass> getLoadedSpecifications(){
-		return specificationByName.values();
+	public ClassList getLoadedSpecifications(){
+		return new ClassList(specificationByName.values());
 	}
 	
 	public boolean isSchemeObject(String objectName) {
@@ -100,6 +101,10 @@ public class SpecificationLoader {
 			super(message);
 		}
 		
+	}
+
+	public void reset() {
+		specificationByName.clear();
 	}
 	
 }
