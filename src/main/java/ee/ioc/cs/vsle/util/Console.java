@@ -5,25 +5,25 @@ package ee.ioc.cs.vsle.util;
  * 
  * Initially taken from
  * http://www.comweb.nl/java/Console/Console.html
- * 
- * TODO: does not work well for large amount of streaming data
  */
+import org.apache.commons.io.output.TeeOutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 
-public class Console extends WindowAdapter implements WindowListener,
-        ActionListener, Runnable {
+public class Console extends WindowAdapter implements ActionListener {
+    private static final Logger logger = LoggerFactory.getLogger(StreamFollower.class);
+
     private JFrame frame;
     private JTextArea textArea;
-    private Thread reader;
-    private Thread reader2;
-    private boolean quit;
+    private Thread sysOutFollower;
+    private Thread sysErrFollower;
+    private volatile boolean quit;
 
-    private final PipedInputStream pin = new PipedInputStream();
-    private final PipedInputStream pin2 = new PipedInputStream();
-    
     //backup
     private final static PrintStream systemOut = System.out;
     private final static PrintStream systemErr = System.err;
@@ -60,9 +60,10 @@ public class Console extends WindowAdapter implements WindowListener,
         frame.addWindowListener( this );
         button.addActionListener( this );
 
+        final PipedInputStream pin = new PipedInputStream();
         try {
-            PipedOutputStream pout = new PipedOutputStream( this.pin );
-            System.setOut( new PrintStream( pout, true ) );
+            PipedOutputStream pout = new PipedOutputStream( pin );
+            System.setOut( new PrintStream( new TeeOutputStream(systemOut, pout), true ) );
         } catch ( java.io.IOException io ) {
             textArea.append( "Couldn't redirect STDOUT to this console\n"
                     + io.getMessage() );
@@ -71,9 +72,10 @@ public class Console extends WindowAdapter implements WindowListener,
                     + se.getMessage() );
         }
 
+        final PipedInputStream pin2 = new PipedInputStream();
         try {
-            PipedOutputStream pout2 = new PipedOutputStream( this.pin2 );
-            System.setErr( new PrintStream( pout2, true ) );
+            PipedOutputStream pout2 = new PipedOutputStream( pin2 );
+            System.setErr( new PrintStream( new TeeOutputStream(systemErr, pout2), true ) );
         } catch ( java.io.IOException io ) {
             textArea.append( "Couldn't redirect STDERR to this console\n"
                     + io.getMessage() );
@@ -84,94 +86,49 @@ public class Console extends WindowAdapter implements WindowListener,
 
         quit = false; // signals the Threads that they should exit
 
-        // Starting two seperate threads to read from the PipedInputStreams				
+        sysOutFollower = new StreamFollower(pin, StreamRestorer.SYS_OUT, "Console_out" );
+        sysOutFollower.start();
         //
-        reader = new Thread( this, "Console_out" );
-        reader.setDaemon( true );
-        reader.start();
-        //
-        reader2 = new Thread( this, "Console_err" );
-        reader2.setDaemon( true );
-        reader2.start();
-
+        sysErrFollower = new StreamFollower(pin2, StreamRestorer.SYS_ERR, "Console_err" );
+        sysErrFollower.start();
     }
 
     @Override
-    public synchronized void windowClosed( WindowEvent evt ) {
+    public void windowClosed( WindowEvent evt ) {
         quit = true;
-        this.notifyAll(); // stop all threads
         try {
-            reader.join( 1000 );
-            pin.close();
+            sysOutFollower.interrupt();
+            sysOutFollower.join(1000);
         } catch ( Exception e ) {
+            e.printStackTrace();
         }
         try {
-            reader2.join( 1000 );
-            pin2.close();
+            sysErrFollower.interrupt();
+            sysErrFollower.join(1000);
         } catch ( Exception e ) {
+            e.printStackTrace();
         }
-        
         instance = null;
     }
 
     @Override
-    public synchronized void windowClosing( WindowEvent evt ) {
+    public void windowClosing( WindowEvent evt ) {
         frame.setVisible( false ); // default behaviour of JFrame	
         frame.dispose();
     }
 
     @Override
-    public synchronized void actionPerformed( ActionEvent evt ) {
+    public void actionPerformed( ActionEvent evt ) {
         textArea.setText( "" );
     }
 
-    @Override
-    public synchronized void run() {
-        try {
-            while ( Thread.currentThread() == reader ) {
-                try {
-                    this.wait( 100 );
-                } catch ( InterruptedException ie ) {
-                }
-                if ( quit ) {
-                    System.setOut( systemOut );
-                    return;
-                }
-                if ( pin.available() != 0 ) {
-                    String input = this.readLine( pin );
-                    textArea.append( input );
-                    scrollToBottom();
-                }
-            }
-
-            while ( Thread.currentThread() == reader2 ) {
-                try {
-                    this.wait( 100 );
-                } catch ( InterruptedException ie ) {
-                }
-                if ( quit ) {
-                    System.setErr( systemErr );
-                    return;
-                }
-                if ( pin2.available() != 0 ) {
-                    String input = this.readLine( pin2 );
-                    textArea.append( input );
-                    scrollToBottom();
-                }
-            }
-        } catch ( Exception e ) {
-            textArea.append( "\nConsole reports an Internal error." );
-            textArea.append( "The error is: " + e );
-            scrollToBottom();
+    private void scrollToBottom() {
+        if( textArea != null ) {
+            textArea.setCaretPosition(textArea.getDocument().getLength());
         }
     }
-
-    private void scrollToBottom() {
-        if( textArea != null )
-            textArea.setCaretPosition(textArea.getDocument().getLength());
-    }
     
-    public synchronized String readLine( PipedInputStream in )
+    public String readLine( PipedInputStream in )
             throws IOException {
         String input = "";
         do {
@@ -185,4 +142,73 @@ public class Console extends WindowAdapter implements WindowListener,
         return input;
     }
 
+    private void appendToConsole(final String s) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                textArea.append(s);
+                scrollToBottom();
+            }
+        });
+    }
+
+    private class StreamFollower extends Thread {
+
+        private final PipedInputStream pin;
+        private final StreamRestorer restorer;
+
+        StreamFollower(PipedInputStream pin, StreamRestorer restorer, String name) {
+            super(name);
+            setDaemon(true);
+            this.pin = pin;
+            this.restorer = restorer;
+        }
+
+        @Override
+        public void run() {
+            try {
+                while(!quit) {
+                    sleep(1);
+                    if (pin.available() != 0) {
+                        String input = readLine(pin);
+                        appendToConsole(input);
+                    }
+                }
+            }
+            catch (InterruptedException ie) {
+                //quit
+            }
+            catch ( Exception e ) {
+                appendToConsole("\nConsole reports an Internal error.");
+                appendToConsole("The error is: " + e);
+            }
+            finally {
+                try {
+                    pin.close();
+                } catch (IOException e) {
+                    logger.error("Error closing stream", e);
+                }
+                restorer.restore();
+            }
+        }
+    }
+
+    interface StreamRestorer {
+        void restore();
+        StreamRestorer SYS_OUT = new StreamRestorer() {
+
+            @Override
+            public void restore() {
+                System.setOut( systemOut );
+            }
+        };
+
+        StreamRestorer SYS_ERR = new StreamRestorer() {
+
+            @Override
+            public void restore() {
+                System.setErr(systemErr );
+            }
+        };
+    }
 }

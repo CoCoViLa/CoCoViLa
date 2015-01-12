@@ -279,15 +279,15 @@ public class ProgramRunner {
             
             switch (RuntimeProperties.getSpecParserKind()) {
             case REGEXP: {
-              classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
+              classList = new SpecParser(schemeContainer.getWorkDir()).parseSpecification( fullSpec, mainClassName, schemeObjects );
               break;
             }
             case ANTLR: {
               SpecificationLoader specificationLoader = new SpecificationLoader(schemeContainer.getWorkDir(), schemeObjects);
               specificationLoader.loadSpecification(fullSpec, TypeUtil.TYPE_THIS);
-              Collection<AnnotatedClass> loaddedSpecificationList = specificationLoader.getLoaddedSpecificationList();
+              Collection<AnnotatedClass> loadedSpecifications = specificationLoader.getLoadedSpecifications();
               classList = new ClassList();
-              classList.addAll(loaddedSpecificationList);
+              classList.addAll(loadedSpecifications);
               break;
             }
             }
@@ -338,7 +338,7 @@ public class ProgramRunner {
         else if( e instanceof  SpecParseException ) {
             SpecParseException spe = (SpecParseException)e;
             String line = spe.getLine();
-            msg = "Specification parsing error: " + spe.getMessage() 
+            msg = "Specification " + (spe.getMetaClass() != null ? "'" + spe.getMetaClass() + "' " : "") + "parsing error: " + spe.getMessage()
                 + (line != null ? ", line: " + line : ""); 
             logger.error(msg);
             ErrorWindow.showErrorMessage( msg );

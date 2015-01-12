@@ -1,4 +1,44 @@
-grammar ExampleGrammar;
+/*
+ [The "BSD licence"]
+ Copyright (c) 2013 Terence Parr, Sam Harwell
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+ 3. The name of the author may not be used to endorse or promote products
+    derived from this software without specific prior written permission.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
+/** A Java 1.7 grammar for ANTLR v4 derived from ANTLR v3 Java grammar.
+ *  Uses ANTLR v4's left-recursive expression notation.
+ *  It parses ECJ, Netbeans, JDK etc...
+ *
+ *  Sam Harwell cleaned this up significantly and updated to 1.7!
+ *
+ *  You can test with
+ *
+ *  $ antlr4 Java.g4
+ *  $ javac *.java
+ *  $ grun Java compilationUnit *.java
+ */
+grammar Java;
 
 // starting point for parsing a java file
 compilationUnit
@@ -480,19 +520,19 @@ expression
     |   expression '&&' expression
     |   expression '||' expression
     |   expression '?' expression ':' expression
-    |   expression
-        (   '='<assoc=right>
-        |   '+='<assoc=right>
-        |   '-='<assoc=right>
-        |   '*='<assoc=right>
-        |   '/='<assoc=right>
-        |   '&='<assoc=right>
-        |   '|='<assoc=right>
-        |   '^='<assoc=right>
-        |   '>>='<assoc=right>
-        |   '>>>='<assoc=right>
-        |   '<<='<assoc=right>
-        |   '%='<assoc=right>
+    |   <assoc=right> expression
+        (   '='
+        |   '+='
+        |   '-='
+        |   '*='
+        |   '/='
+        |   '&='
+        |   '|='
+        |   '^='
+        |   '>>='
+        |   '>>>='
+        |   '<<='
+        |   '%='
         )
         expression
     ;
@@ -567,7 +607,7 @@ arguments
 
 // LEXER
 
-// ง3.9 Keywords
+// ยง3.9 Keywords
 
 ABSTRACT      : 'abstract';
 ASSERT        : 'assert';
@@ -620,7 +660,7 @@ VOID          : 'void';
 VOLATILE      : 'volatile';
 WHILE         : 'while';
 
-// ง3.10.1 Integer Literals
+// ยง3.10.1 Integer Literals
 
 IntegerLiteral
     :   DecimalIntegerLiteral
@@ -750,7 +790,7 @@ BinaryDigitOrUnderscore
     |   '_'
     ;
 
-// ง3.10.2 Floating-Point Literals
+// ยง3.10.2 Floating-Point Literals
 
 FloatingPointLiteral
     :   DecimalFloatingPointLiteral
@@ -811,14 +851,14 @@ BinaryExponentIndicator
     :   [pP]
     ;
 
-// ง3.10.3 Boolean Literals
+// ยง3.10.3 Boolean Literals
 
 BooleanLiteral
     :   'true'
     |   'false'
     ;
 
-// ง3.10.4 Character Literals
+// ยง3.10.4 Character Literals
 
 CharacterLiteral
     :   '\'' SingleCharacter '\''
@@ -830,7 +870,7 @@ SingleCharacter
     :   ~['\\]
     ;
 
-// ง3.10.5 String Literals
+// ยง3.10.5 String Literals
 
 StringLiteral
     :   '"' StringCharacters? '"'
@@ -847,7 +887,7 @@ StringCharacter
     |   EscapeSequence
     ;
 
-// ง3.10.6 Escape Sequences for Character and String Literals
+// ยง3.10.6 Escape Sequences for Character and String Literals
 
 fragment
 EscapeSequence
@@ -873,13 +913,13 @@ ZeroToThree
     :   [0-3]
     ;
 
-// ง3.10.7 The Null Literal
+// ยง3.10.7 The Null Literal
 
 NullLiteral
     :   'null'
     ;
 
-// ง3.11 Separators
+// ยง3.11 Separators
 
 LPAREN          : '(';
 RPAREN          : ')';
@@ -891,7 +931,7 @@ SEMI            : ';';
 COMMA           : ',';
 DOT             : '.';
 
-// ง3.12 Operators
+// ยง3.12 Operators
 
 ASSIGN          : '=';
 GT              : '>';
@@ -929,7 +969,7 @@ LSHIFT_ASSIGN   : '<<=';
 RSHIFT_ASSIGN   : '>>=';
 URSHIFT_ASSIGN  : '>>>=';
 
-// ง3.8 Identifiers (must appear after all keywords in the grammar)
+// ยง3.8 Identifiers (must appear after all keywords in the grammar)
 
 Identifier
     :   JavaLetter JavaLetterOrDigit*

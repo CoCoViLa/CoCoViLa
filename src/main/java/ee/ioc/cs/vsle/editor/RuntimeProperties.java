@@ -96,7 +96,7 @@ public class RuntimeProperties {
         defaultProperties.put( GRID_STEP, Integer.toString( 15 ) );
         defaultProperties.put( NUDGE_STEP, Integer.toString( 1 ) );
         defaultProperties.put( SNAP_TO_GRID, Boolean.FALSE.toString() );
-        defaultProperties.put( SPEC_PARSER, SpecParserKind.REGEXP.name() );
+        defaultProperties.put( SPEC_PARSER, SpecParserKind.ANTLR.name() );
         defaultProperties.put( RECENT_PACKAGES, "" );
         defaultProperties.put( ZOOM_LEVEL, Float.toString( 1.0f ) );
         defaultProperties.put( SYNTAX_HIGHLIGHT, Boolean.TRUE.toString() );

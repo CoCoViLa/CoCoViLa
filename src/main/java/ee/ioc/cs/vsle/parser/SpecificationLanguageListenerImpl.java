@@ -5,10 +5,15 @@ import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_DOUBLE;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_INT;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
 
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.ATNConfigSet;
+import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
@@ -21,12 +26,12 @@ import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasDeclarat
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasDefinitionContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasStructureContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AxiomContext;
-import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ClassTypeContext;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ClassOrInterfaceTypeContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ConstantVariableContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.EquationContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ExceptionListContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.GoalContext;
-import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaseContext;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaceContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.SpecificationVariableContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.SpecificationVariableDeclaratorContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.StaticVariableContext;
@@ -58,30 +63,30 @@ import ee.ioc.cs.vsle.vclass.ClassField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseListener {
+public class SpecificationLanguageListenerImpl extends SpecificationLanguageBaseListener implements ANTLRErrorListener {
 
-  private static final Logger logger = LoggerFactory.getLogger(SpecificatioLanguageListenerImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(SpecificationLanguageListenerImpl.class);
 
 	private final SpecificationLoader specificationLoader;
 	private AnnotatedClass annotatedClass;
 	private ClassFieldDeclarator classFieldDeclarator;
 	private String specificationName;
 	private Alias currentAlias;
-	
-	public SpecificatioLanguageListenerImpl(SpecificationLoader specificationLoader, String specificationName) {
+
+	public SpecificationLanguageListenerImpl(SpecificationLoader specificationLoader, String specificationName) {
 		this.specificationLoader = specificationLoader;
 		this.specificationName = specificationName;
 	}
 
 	@Override
-	public void enterMetaInterfase(MetaInterfaseContext ctx) {
+	public void enterMetaInterface(MetaInterfaceContext ctx) {
 		if (specificationName == null) {
-			specificationName = ctx.IDENTIFIER().getText();
+			specificationName = ctx.Identifier().getText();
 		}
 		annotatedClass = new AnnotatedClass(specificationName);
 		classFieldDeclarator = new ClassFieldDeclarator();
         ClassField specObjectName = new ClassField( CodeGenerator.SPEC_OBJECT_NAME, "String" );
-        annotatedClass.addField( specObjectName );
+        annotatedClass.addField(specObjectName);
 	}
 	
 	@Override
@@ -103,7 +108,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
 	@Override
 	public void enterSuperMetaInterface(SuperMetaInterfaceContext ctx) {
-		for (ClassTypeContext classTypeContext : ctx.classType()) {
+		for (ClassOrInterfaceTypeContext classTypeContext : ctx.classOrInterfaceType()) {
 			String superSpecificationName = classTypeContext.getText();
 				
 			AnnotatedClass superClass = specificationLoader.getSpecification(superSpecificationName);
@@ -117,7 +122,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
 	@Override
 	public void enterVariableDeclaration(VariableDeclarationContext ctx) {
-		classFieldDeclarator.setType(ctx.type().getText());
+		classFieldDeclarator.setType(ctx.type());
 	}
 	
 	@Override
@@ -146,25 +151,34 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
 	@Override
 	public void enterVariableDeclaratorAssigner(VariableDeclaratorAssignerContext ctx) {
-		variableDeclarator(ctx.IDENTIFIER().getText(), ctx.variableAssigner().getText(), false);
+		SpecificationLanguageParser.VariableAssignerContext variableAssignerContext = ctx.variableAssigner();
+		SpecificationLanguageParser.CreatorContext creatorContext = variableAssignerContext.creator();
+		String value;
+		if(creatorContext != null) {
+			value = "new " + creatorContext.getText();
+		}
+		else {
+			value = variableAssignerContext.getText();
+		}
+		variableDeclarator(ctx.Identifier().getText(), value, false);
 	}
 	
 	@Override
 	public void enterSpecificationVariable(SpecificationVariableContext ctx) {
-		String name = ctx.IDENTIFIER().getText();
+		String name = ctx.Identifier().getText();
 		classFieldDeclarator.addClassField(name);
 	}
 	
 	@Override
 	public void enterSpecificationVariableDeclarator(SpecificationVariableDeclaratorContext ctx) {
-		String fullVariableName = classFieldDeclarator.getName().concat(".").concat(ctx.IDENTIFIER().getText());
+		String fullVariableName = classFieldDeclarator.getName().concat(".").concat(ctx.Identifier().getText());
 		String equation = fullVariableName.concat("=").concat(ctx.expression().getText());
 		solveEquation(equation);
 	}
 	
 	@Override
 	public void enterVariableDeclaratorInitializer(VariableDeclaratorInitializerContext ctx) {
-		String name = ctx.IDENTIFIER().getText();
+		String name = ctx.Identifier().getText();
 		VariableInitializerContext variableInitializerContext = ctx.variableInitializer();
 		if(variableInitializerContext==null){
 			classFieldDeclarator.addClassField(name);
@@ -175,11 +189,16 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
 	@Override
 	public void enterVariableAssignment(VariableAssignmentContext ctx) {
-		assignVariable(ctx.variableIdentifier().getText(), ctx.variableAssigner().getText());
+		assignVariable(ctx.variableIdentifier().getText(), ctx.variableAssigner());
 	}
-	
+
+	protected void assignVariable(String variableName, SpecificationLanguageParser.VariableAssignerContext varValueCtx){
+		SpecificationLanguageParser.CreatorContext creatorContext = varValueCtx.creator();
+		assignVariable(variableName, creatorContext != null ? "new " + creatorContext.getText() : varValueCtx.getText() );
+	}
+
 	protected void assignVariable(String variableName, String variableValue){
-		String method = variableName.concat("=").concat(variableValue);
+		String method = variableName.concat(" = ").concat(variableValue);
         ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, method);
         classRelation.addOutput( variableName, annotatedClass.getFields() );
         classRelation.setMethod( method );
@@ -238,7 +257,10 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
         
         for (SubtaskContext subtaskContext : subtaskContextList) {
         	String contextName = subtaskContext.context == null ? null : subtaskContext.context.getText();
-        	List<VariableIdentifierContext> subtaskInputVariableContextList = subtaskContext.inputVariables.variableIdentifier();
+        	List<VariableIdentifierContext> subtaskInputVariableContextList =
+									subtaskContext.inputVariables != null
+													? subtaskContext.inputVariables.variableIdentifier()
+													: Collections.<VariableIdentifierContext>emptyList();
         	List<VariableIdentifierContext> subtaskOutputVariableContextList = subtaskContext.outputVariables.variableIdentifier();
         	
         	Collection<ClassField> varsForSubtask = annotatedClass.getFields();
@@ -273,7 +295,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
           logger.debug( classRelation.toString() );
 
         if(ctx.exceptionList() != null) {
-          for(ClassTypeContext ct : ctx.exceptionList().classType()) {
+          for(ClassOrInterfaceTypeContext ct : ctx.exceptionList().classOrInterfaceType()) {
             classRelation.addException(ct.getText());
           }
         }
@@ -283,7 +305,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
   @Override
 	public void enterAliasDeclaration(AliasDeclarationContext ctx) {
-		String aliasName = ctx.IDENTIFIER().getText();
+		String aliasName = ctx.Identifier().getText();
 		TypeContext typeContext = ctx.type();
 		String aliasType = typeContext != null ? typeContext.getText() : null;
 
@@ -302,7 +324,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 		boolean isLocalAlias = true;
 		
 		if(aliasClassField == null){//Go deeper 
-			List<TerminalNode> identifierList = ctx.variableIdentifier().IDENTIFIER();
+			List<TerminalNode> identifierList = ctx.variableIdentifier().Identifier();
 			int lastIndex = identifierList.size() - 1;
 			int i = 0;
 			AnnotatedClass parentClass = annotatedClass;
@@ -325,6 +347,9 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 			throw new UnknownVariableException(aliasFullName, ctx.getText());
 		if(aliasClassField instanceof Alias){
 			Alias alias = (Alias) aliasClassField;
+			if ( alias.isInitialized() ) {
+				throw new SpecParseException( "Alias " + alias.getName() + " has already been initialized and cannot be overriden, line: " + ctx.getText() );
+			}
 			if(!isLocalAlias){
 				alias = new Alias( aliasFullName, alias.getVarType() );
 				annotatedClass.addField(alias);
@@ -589,6 +614,52 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 		return annotatedClass;
 	}
 
+	@Override
+	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+//			System.err.println("line " + line + ":" + charPositionInLine + " " + msg);
+//			String message = underlineError(recognizer, (Token) offendingSymbol, line, charPositionInLine);
+		String errorLine = underlineError(recognizer, (Token)offendingSymbol, line, charPositionInLine);
+		msg = errorLine.concat("\n").concat(msg);
+		SpecParseException specParseException = new SpecParseException(msg);
+		specParseException.setMetaClass(specificationName);
+		specParseException.setLine(Integer.toString(line));
+		throw specParseException;
+	}
+
+	protected String underlineError(Recognizer recognizer, Token offendingToken, int line, int charPositionInLine) {
+		StringBuilder sb = new StringBuilder("\n");
+		CommonTokenStream tokens = (CommonTokenStream) recognizer.getInputStream();
+		String input = tokens.getTokenSource().getInputStream().toString();
+		String[] lines = input.split("\n");
+		String errorLine = lines[line - 1];
+		sb.append(errorLine);
+		sb.append("\n");
+		for (int i = 0; i < charPositionInLine; i++)
+			sb.append(" ");
+		int start = offendingToken.getStartIndex();
+		int stop = offendingToken.getStopIndex();
+		if (start >= 0 && stop >= 0) {
+			for (int i = start; i <= stop; i++)
+				sb.append("^");
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public void reportAmbiguity(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, @NotNull ATNConfigSet configs) {
+
+	}
+
+	@Override
+	public void reportAttemptingFullContext(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, @NotNull ATNConfigSet configs) {
+
+	}
+
+	@Override
+	public void reportContextSensitivity(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, int prediction, @NotNull ATNConfigSet configs) {
+
+	}
+
 	private class ClassFieldDeclarator{
 		private String type;
 		private String name;
@@ -635,7 +706,15 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 			return type;
 		}
 
-		public void setType(String type) {
+		public void setType(TypeContext typeCtx) {
+			SpecificationLanguageParser.PrimitiveTypeContext primitiveTypeContext = typeCtx.primitiveType();
+			if(primitiveTypeContext != null) {
+				//need to take outer context text to capture array braces
+				this.type = typeCtx.getText();
+				return;
+			}
+
+			String type = typeCtx.getText();
 			try{
 				classFieldAnnotatedClass = specificationLoader.getSpecification(type);
 			}catch(SpecificationNotFoundException e){
