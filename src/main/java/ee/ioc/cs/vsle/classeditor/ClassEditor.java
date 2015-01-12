@@ -75,7 +75,6 @@ import ee.ioc.cs.vsle.synthesize.Synthesizer;
 import ee.ioc.cs.vsle.util.FileFuncs;
 import ee.ioc.cs.vsle.util.GraphicsExporter;
 import ee.ioc.cs.vsle.util.SystemUtils;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
 import ee.ioc.cs.vsle.vclass.ClassObject;
@@ -85,11 +84,14 @@ import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
 import ee.ioc.cs.vsle.vclass.Port;
 import ee.ioc.cs.vsle.vclass.VPackage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class ClassEditor extends JFrame implements ChangeListener {
 
 	private static final long serialVersionUID = 1L;
+	private static final Logger logger = LoggerFactory.getLogger(ClassEditor.class);
 
 	private static ClassEditor s_instance;
 
@@ -655,7 +657,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 			} else {
 
-				db.p( args[ 0 ] + " read from command line." );
+				logger.info( args[ 0 ] + " read from command line." );
 
 				File file = new File( directory + args[ 0 ] );
 
@@ -671,8 +673,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				File f = new File( packageFile );
 
 				if ( f.exists() ) {
-					if ( RuntimeProperties.isLogDebugEnabled() )
-						db.p( "Found package file name " + packageFile + " from the configuration file." );
+					logger.debug( "Found package file name " + packageFile + " from the configuration file." );
 					window.openNewCanvasWithPackage( f );
 				}
 			}

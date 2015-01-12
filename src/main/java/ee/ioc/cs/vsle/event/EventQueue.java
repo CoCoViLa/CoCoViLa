@@ -3,15 +3,18 @@
  */
 package ee.ioc.cs.vsle.event;
 
-import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import ee.ioc.cs.vsle.util.db;
+import java.util.Date;
 
 /**
  * @author pavelg
  *
  */
 public class EventQueue extends Thread {
+
+	private static final Logger logger = LoggerFactory.getLogger(EventQueue.class);
 
 	private int m_eventsAdded       = 0;
 	private int m_eventsConsumed    = 0;
@@ -209,7 +212,7 @@ public class EventQueue extends Thread {
 
 			if ( ( m_prevEventTime - m_newEventTime ) > m_maxTimeDelta )
 			{
-				db.p( "THE SYSTEM TIME IS JUMPED BACK : prev event time = "
+				logger.info( "THE SYSTEM TIME IS JUMPED BACK : prev event time = "
 						+ new Date( m_prevEventTime )
 						+ ", current event time = "
 						+ new Date( m_newEventTime ) );    //evt.getTimeStamp() ) );
@@ -247,7 +250,7 @@ public class EventQueue extends Thread {
 		}
 		catch ( Exception ex )
 		{
-			db.p( "Cannot dispatch the event: " + evt );
+			logger.info( "Cannot dispatch the event: " + evt );
 		}
 
 		m_eventsConsumed++;
@@ -278,7 +281,7 @@ public class EventQueue extends Thread {
 			}
 			catch ( EventQueueException ex )
 			{
-				db.p( "Ignored by event queue: " + ex );
+				logger.error( "Ignored by event queue: ", ex );
 			}
 
 			if ( evt == null )

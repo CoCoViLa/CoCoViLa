@@ -11,8 +11,12 @@ import ee.ioc.cs.vsle.editor.Canvas;
 import ee.ioc.cs.vsle.packageparse.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SchemeExporter {
+
+    private static final Logger logger = LoggerFactory.getLogger(SchemeExporter.class);
 
     public static void makeSchemeExportMenu( JMenu exportMenu,
             EditorActionListener aListener ) {
@@ -46,8 +50,7 @@ public class SchemeExporter {
             
             RuntimeProperties.setLastPath( file.getAbsolutePath() );
             
-            if ( RuntimeProperties.isLogInfoEnabled() )
-                db.p( "Exporting scheme specification into: " + file.getName() );
+            logger.info("Exporting scheme specification into: " + file.getName());
 
             String className = file.getName();
 

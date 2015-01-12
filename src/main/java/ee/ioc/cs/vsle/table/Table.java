@@ -12,6 +12,8 @@ import ee.ioc.cs.vsle.table.event.*;
 import ee.ioc.cs.vsle.table.exception.*;
 import ee.ioc.cs.vsle.table.gui.*;
 import ee.ioc.cs.vsle.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * 
@@ -25,7 +27,9 @@ import ee.ioc.cs.vsle.util.*;
  * @author pavelg
  */
 public final class Table implements IStructuralExpertTable {
-    
+
+    private static final Logger logger = LoggerFactory.getLogger(Table.class);
+
     public static final String TABLE_KEYWORD = "@table";
     public static final String TABLE_WITH_INPUT_MAPPING_KEYWORD = "@tablewithinputmapping";
     
@@ -625,7 +629,7 @@ public final class Table implements IStructuralExpertTable {
             try {
                 SwingUtilities.invokeAndWait( runnable );
             } catch ( Exception e ) {
-                db.p( e );
+                logger.error( null, e );
             }
         }
         

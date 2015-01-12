@@ -61,14 +61,17 @@ import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
 import ee.ioc.cs.vsle.util.PrintUtilities;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  */
 public class Canvas extends JPanel implements ISchemeContainer {
     
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(Canvas.class);
+
     public int mouseX; // Mouse X coordinate.
     public int mouseY; // Mouse Y coordinate.
     private String workDir;
@@ -682,10 +685,10 @@ public class Canvas extends JPanel implements ISchemeContainer {
                 pclass.setPainterPrototype((ClassPainter) painterClass.newInstance());
             } catch ( CompileException e ) {
                 success = false;
-                db.p( e ); // print compiler generated message
+                logger.error(null, e); // print compiler generated message
             } catch ( Exception e ) {
                 success = false;
-                db.p( e );
+                logger.error(null, e );
             } finally {
                 if (pcl != null && pcl.hasErrors()) {
                     pcl.clearProblems();
@@ -1281,11 +1284,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
         }
     }
 
-    /**
-     * Open the object properties dialog.
-     * 
-     * @param obj the object
-     */
+//    /**
+//     * Open the object properties dialog.
+//     *
+//     * @param obj the object
+//     */
 //    public void openPropertiesDialog( GObj obj ) {
 //        ObjectPropertiesEditor.show( obj, this );
 //    }
@@ -1320,10 +1323,8 @@ public class Canvas extends JPanel implements ISchemeContainer {
             try {
                 Runtime.getRuntime().exec(editCmd, null, wd);
             } catch (IOException ex) {
-                if (RuntimeProperties.isLogDebugEnabled()) {
-                    db.p(ex);
-                }
-                JOptionPane.showMessageDialog(this, 
+                logger.error(null,ex);
+                JOptionPane.showMessageDialog(this,
                         "Execution of the command \"" + editCmd
                         + "\" failed:\n" + ex.getMessage() +
                         "\nYou may need to revise the application settings.",

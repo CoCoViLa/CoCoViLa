@@ -9,9 +9,13 @@ import java.util.jar.*;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SystemUtils {
-	
+
+    private static final Logger logger = LoggerFactory.getLogger(SystemUtils.class);
+
 	public static void unpackPackages() {
 
         URL u = Thread.currentThread().getContextClassLoader().getResource(
@@ -68,8 +72,7 @@ public class SystemUtils {
                     continue;
                 }
 
-                if ( RuntimeProperties.isLogDebugEnabled() )
-                    db.p( "entryName=" + newFileName );
+                logger.debug( "entryName=" + newFileName );
 
                 // create input stream associated with the jar file entry
                 InputStream source = jarF.getInputStream( jarF
@@ -90,7 +93,7 @@ public class SystemUtils {
      * Copies data from a stream into a file
      * 
      * @param source
-     * @param targetFileName
+     * @param targetFile
      */
     public static void copyToFile( InputStream source, File targetFile ) {
         FileOutputStream target = null;
@@ -248,9 +251,7 @@ public class SystemUtils {
                 Desktop.getDesktop().browse(new URI(url));
             }
         } catch (Exception e) {
-            if (RuntimeProperties.isLogDebugEnabled()) {
-                db.p(e);
-            }
+            logger.debug(null, e);
 
             StringBuilder msg = new StringBuilder();
             msg.append("A browser could not be launched for opening ");

@@ -11,7 +11,6 @@ import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.graphics.Shape;
-import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Point;
 
 /**
@@ -799,8 +798,7 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
                     state = State.selection;
 
                 } else {
-                    db.p( this.getTransparency() );
-                    Rect rect = new Rect( Math.min( startX, editor.mouseX ), Math.min( startY, editor.mouseY ), width, height, 
+                    Rect rect = new Rect( Math.min( startX, editor.mouseX ), Math.min( startY, editor.mouseY ), width, height,
                             Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );
                     editor.shapeList.add( rect );
                 }
