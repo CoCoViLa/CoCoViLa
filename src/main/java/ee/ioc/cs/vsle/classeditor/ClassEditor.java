@@ -339,7 +339,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					return;
 
 				gridCheckBox.setSelected( canvas.isGridVisible() );
-				snapToGridCheckBox.setSelected( RuntimeProperties.getSnapToGrid() );
+			//	snapToGridCheckBox.setSelected( RuntimeProperties.getSnapToGrid() );
 				showPortCheckBox.setSelected( canvas.isDrawPorts() );
 				showPortOpenCheckBox.setSelected( canvas.isDrawOpenPorts() );
 				showObjectNamesCheckBox.setSelected( canvas.isShowObjectNames() );

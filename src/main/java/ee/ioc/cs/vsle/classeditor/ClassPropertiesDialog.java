@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.event.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.*;
 
@@ -42,6 +43,7 @@ public class ClassPropertiesDialog extends JDialog {
 
 	// Panels
 	private final JPanel pnlLabels = new JPanel();
+	private final JPanel pnlErrors = new JPanel();
 	private final JPanel pnlFields = new JPanel();
 	private final JPanel pnlProps = new JPanel();
 	private final JPanel pnlTable = new JPanel();
@@ -125,6 +127,9 @@ public class ClassPropertiesDialog extends JDialog {
 		// add buttons to the buttons' panel.
 		pnlButtons.add(bttnOk);
 		pnlButtons.add(bttnCancel);
+		
+		/* Error message placeholder*/
+    	pnlErrors.add(new JLabel(" "));
 
 		// Labels and fields are stored on separate panels and grouped by the pnlGroups panel.
 		pnlLabels.setPreferredSize(new Dimension(110, 90));
@@ -143,7 +148,7 @@ public class ClassPropertiesDialog extends JDialog {
 
 		// The class can be defined also as a relation. The checkbox is on a separate panel.
 		pnlRelation.setLayout(new BorderLayout());
-		pnlRelation.add(cboxCompType, BorderLayout.WEST);
+		pnlRelation.add(cboxCompType, BorderLayout.WEST);		
 		pnlRelation.add(new JLabel(" "), BorderLayout.CENTER);
 
 		// Fields are stored on a separate panel.
@@ -157,11 +162,14 @@ public class ClassPropertiesDialog extends JDialog {
 		pnlFields.add(pnlRelation);
 
 		// Group labels and fields.
-		pnlProps.setPreferredSize(new Dimension(360, 110));
+		/*pnlProps.setPreferredSize(new Dimension(360, 160));
 		pnlProps.setMinimumSize(pnlProps.getPreferredSize());
-		pnlProps.setMaximumSize(pnlProps.getPreferredSize());
-		pnlProps.add(pnlLabels);
-		pnlProps.add(pnlFields);
+		pnlProps.setMaximumSize(pnlProps.getPreferredSize());*/
+		pnlProps.setLayout(new BorderLayout());
+		pnlProps.setBorder(new EmptyBorder(5, 5, 5, 5) );
+		pnlProps.add(pnlLabels,BorderLayout.WEST);
+		pnlProps.add(pnlFields,BorderLayout.EAST);
+		pnlProps.add(pnlErrors, BorderLayout.SOUTH);
 
 		pnlTableButtons.setLayout(new GridLayout(1, 2));
 		pnlTableButtons.add(bttnNewField);
@@ -172,7 +180,7 @@ public class ClassPropertiesDialog extends JDialog {
 		pnlTable.setPreferredSize(new Dimension(300, 150));
 		pnlTable.setMinimumSize(pnlTable.getPreferredSize());
 		pnlTable.setMaximumSize(pnlTable.getPreferredSize());
-		pnlTable.setLayout(new BorderLayout());
+		pnlTable.setLayout(new BorderLayout());		
 		pnlTable.add(spTableScrollPane, BorderLayout.CENTER);
 		pnlTable.add(pnlTableButtons, BorderLayout.SOUTH);
 
@@ -197,9 +205,9 @@ public class ClassPropertiesDialog extends JDialog {
             public void actionPerformed(final ActionEvent evt) {
                 stopCellEditing();
                 // Store the defined properties in runtime variables.
-				storeVariables();
-				
+								
 				if( valuesValid() ) {
+					storeVariables();
 					dispose();
 				}
 			}
@@ -287,7 +295,15 @@ public class ClassPropertiesDialog extends JDialog {
 		setVisible(true);
 	} // ClassPropertiesDialog
 
-
+    private void addErrorPanel(String errorMessage){
+    	JLabel msg = new JLabel(errorMessage);
+    	msg.setFont( new Font("Arial", Font.BOLD, 13));
+    	msg.setForeground(Color.RED);
+    	pnlErrors.removeAll();
+    	pnlErrors.add(msg);
+    	pnlErrors.revalidate();
+    	getContentPane().repaint();
+    }
     /**
      * Stops cell editing if a cell is being edited to store the
      * value to the table model.
@@ -425,13 +441,24 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private boolean valuesValid() {
 		boolean valid = true;
-		if (!this.emptyValuesValid) {
-			if (this.fldClassName.getText() == null ||
+		/* Class name and component type are always mandatory */
+		if (this.fldClassName.getText() == null ||
 				(this.fldClassName != null && this.fldClassName.getText().trim().length() == 0)) {
 				valid = false;
-				JOptionPane.showMessageDialog(null, "Please define class name.", "Missing Property", JOptionPane.INFORMATION_MESSAGE);
+				addErrorPanel("Please define class name.");
+				//JOptionPane.showMessageDialog(null, "Please define class name.", "Missing Property", JOptionPane.INFORMATION_MESSAGE);
 				fldClassName.requestFocus();
-			} else if (this.fldClassDesc.getText() == null ||
+			}
+		else if (this.cboxCompType == null || (this.cboxCompType != null && this.cboxCompType.getSelectedItem() == null)) {
+				valid = false;
+				addErrorPanel("Please define component type.");
+				//JOptionPane.showMessageDialog(null, "Please define class name.", "Missing Property", JOptionPane.INFORMATION_MESSAGE);
+				cboxCompType.requestFocus();
+			}
+		
+		/* These fields depend on flag  */
+		if (!this.emptyValuesValid) {
+			 if (this.fldClassDesc.getText() == null ||
 				(this.fldClassDesc != null && this.fldClassDesc.getText().trim().length() == 0)) {
 				valid = false;
 				JOptionPane.showMessageDialog(null, "Please define class description.", "Missing Property", JOptionPane.INFORMATION_MESSAGE);
