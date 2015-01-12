@@ -113,7 +113,7 @@ public class VariableDeclarationTest extends AbstractParserTest {
             "s = new String(\"my second string\");";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "s", "String");
-    assertClassRelation(ac, RelType.TYPE_EQUATION, "s", "s = new String(\"my second string\")");
+    assertClassRelation(ac, RelType.TYPE_EQUATION, vars(), vars("s"), "s = new String(\"my second string\")");
   }
 
   @Test
@@ -127,8 +127,9 @@ public class VariableDeclarationTest extends AbstractParserTest {
   }
 
   @Test
-  @Ignore //FIXME
   public void testStringArrayDeclaration() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "String[] arr = new String[]{\"1\",\"2\",\"3\"};";
     AnnotatedClass ac = loadSpec(spec);
     checkVarAndType(ac, "arr", "String[]");

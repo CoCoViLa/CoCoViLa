@@ -86,7 +86,7 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 		annotatedClass = new AnnotatedClass(specificationName);
 		classFieldDeclarator = new ClassFieldDeclarator();
         ClassField specObjectName = new ClassField( CodeGenerator.SPEC_OBJECT_NAME, "String" );
-        annotatedClass.addField( specObjectName );
+        annotatedClass.addField(specObjectName);
 	}
 	
 	@Override
@@ -189,9 +189,14 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 	
 	@Override
 	public void enterVariableAssignment(VariableAssignmentContext ctx) {
-		assignVariable(ctx.variableIdentifier().getText(), ctx.variableAssigner().getText());
+		assignVariable(ctx.variableIdentifier().getText(), ctx.variableAssigner());
 	}
-	
+
+	protected void assignVariable(String variableName, SpecificationLanguageParser.VariableAssignerContext varValueCtx){
+		SpecificationLanguageParser.CreatorContext creatorContext = varValueCtx.creator();
+		assignVariable(variableName, creatorContext != null ? "new " + creatorContext.getText() : varValueCtx.getText() );
+	}
+
 	protected void assignVariable(String variableName, String variableValue){
 		String method = variableName.concat(" = ").concat(variableValue);
         ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, method);
