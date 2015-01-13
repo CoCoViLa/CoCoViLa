@@ -1336,8 +1336,8 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	  public void exportShapesToPackage() {
 		  
 		  if (classObject == null || !classObject.validateBasicProperties()){ 
-		 
-			  new ClassPropertiesDialog( dbrClassFields, false );			 
+		  
+			  new ClassPropertiesDialog( dbrClassFields, false );				  
 		  }
 		  
 		  if (getCurrentCanvas().isBBPresent()){
@@ -1487,22 +1487,45 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			  */
 			   int bX = 0; int bY = 0; int bW = 0; int bH = 0;   /*Use activeBB 02.10AM*/
 	
+			   /**
+			    *  Set real bounds, including shapes partially covered by BB
+			    */
+			   int rX = 10000; int rY = 10000; int rW = 0; int rH = 0;   
+			   
 			   //getCurrentCanvas().getBoundingBox();
 	
 			   for ( GObj obj : selectedObjects ) {
+				   GObj holder = null;
 				   for (Shape sh : obj.getShapes()) {
-					   System.out.println("SHAPE - "+ sh.getName() +" " + obj.getX());
+					   System.out.println("SHAPE - "+ sh.getName() +" x=" + obj.getX() + "; y=" + obj.getY());
+					   if(obj.getY() < rY){
+						   rY = obj.getY();						   
+					   }
+					   if(obj.getX() < rX){
+						   rX = obj.getX();
+					   }
 					   if (sh instanceof BoundingBox) {
 						   bX = obj.getX();
 						   bY = obj.getY();
 						   bW = sh.getWidth();
 						   bH = sh.getHeight();
+						   
+						   /* remove info text */
+						 
+							   holder = obj;							   
+						   
 						   break;
 					   }
 				   }
+				   /* remove info text part 2*/
+				   if(holder != null && holder.getShapes() != null && holder.getShapes().size() > 1 && holder.getShapes().get(1) instanceof Text){
+					   holder.getShapes().remove(1);
+				   }
 			   }
 			  
-			  
+			   System.out.println(" rx=" + rX + "; ry=" + rY);
+
+			   
 			   boolean needConfirm = false;  
 
 			   for ( GObj obj : selectedObjects ) {
@@ -1511,7 +1534,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				   ports.addAll(obj.getPortList());
 
 				   for (Shape shape : obj.getShapes()) {
-
+		  
 					   /**
 					    *  Check that at least part of shape is inside bounds
 					    * */       
@@ -1530,21 +1553,25 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					    	
 					    }
 					    
-					    if(shape instanceof Text && ((Text)shape).getText().equals(classObject.className)){
+					  /*  if(shape instanceof Text && ((Text)shape).getText().equals(classObject.className)){
 					    	break;
 					    	 //System.out.println("TEXT: inside ->" + obj.isInside(bX, bY, bX+bW, bY + bH) + " text = " + ((Text)shape).getText());
-					    }
+					    }*/
 					 /*  shape.setX(obj.getX());
 					   shape.setY(obj.getY());*/
 					    /**
 					     * Save coords relative to BB /AM 23.10
 					     */
 					   if (shape instanceof Line){
-						   shape.setX(obj.getX());
-						   shape.setY(obj.getY());
+						   shape.setX(obj.getX() - rX);						 
+						   shape.setY(obj.getY() - rY);
+						   ((Line) shape).setStartX(shape.getX());
+						   ((Line) shape).setEndX(((Line) shape).getEndX() + shape.getX() );
+						   ((Line) shape).setStartY(shape.getY());
+						   ((Line) shape).setEndY(((Line) shape).getEndY() + shape.getY() );
 					   } else {
-						   shape.setX(obj.getX() - bX);
-						   shape.setY(obj.getY() - bY);
+						   shape.setX(obj.getX() - rX);
+						   shape.setY(obj.getY() - rY);
 					   }
 					    
 					    
@@ -1557,8 +1584,8 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				   }
 				   for (Port port : obj.getPortList()) {            		
 
-					   port.setX(obj.getX() - bX);
-					   port.setY(obj.getY() - bY);
+					   port.setX(obj.getX() - rX);
+					   port.setY(obj.getY() - rY);
 					   pc.addPort(port);
 				   }            	
 			   }
@@ -1650,16 +1677,32 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			   /* CLEAR
 			    */
 			   cg = new ClassGraphics();
+			   GObj holder = null;
 			   for ( GObj obj : selectedObjects ) {
-				   for ( Shape s : obj.getShapes() ) {				   
-					   s.setX(0);
-					   s.setY(0);
+				   for ( Shape s : obj.getShapes() ) {
+					   if(s instanceof Line){
+						   ((Line) s).setEndX(((Line) s).getEndX() - s.getX() );
+						   ((Line) s).setEndY(((Line) s).getEndY() - s.getY() );
+						   ((Line) s).setStartX(0);		
+						   ((Line) s).setStartY(0);						   
+					    } else if(s instanceof BoundingBox){        				        	
+						   holder = obj;
+						   	s.setX(0);
+							s.setY(0);
+				        } else {
+				        	s.setX(0);
+							s.setY(0);
+				        }
 				   }
 				   for (Port p : obj.getPortList()) {            		
 					   p.setX(0);
 					   p.setY(0);				   
 				   }				   
 			   }		
+			    if(holder != null ){
+			 	   holder.getShapes().add(canv.drawTextForBoundingBox(holder.getWidth(), 0));
+			    }
+			   
 
 		  } else {
 			  JOptionPane.showMessageDialog( canv, "Nothing to export!" );

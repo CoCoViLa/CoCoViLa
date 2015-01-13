@@ -167,10 +167,12 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             }
         } 
         
-        try {
-            checkProblems( "Error parsing package file " + xmlFile.getName() );
-        } catch( Exception e ) {
-            return null;
+        if(validate){
+        	try {
+        		checkProblems( "Error parsing package file " + xmlFile.getName() );
+        	} catch( Exception e ) {
+        		return null;
+        	}
         }
         return pack;
     }
@@ -788,7 +790,21 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                 rectEl.setAttribute( ATR_STROKE, Float.toString( rect.getStroke().getLineWidth() ) );
                 rectEl.setAttribute( ATR_LINETYPE, Float.toString( rect.getLineType() ) );
                 rectEl.setAttribute( ATR_TRANSPARENCY, Integer.toString( rect.getTransparency() ) );
-            } else if( shape instanceof Text ) {
+            } else if( shape instanceof Line) {
+                Line line = (Line)shape;
+                Element lineEl = doc.createElement( EL_LINE );
+                graphicsEl.appendChild( lineEl );
+                lineEl.setAttribute( ATR_X1, Integer.toString( line.getStartX() ) );
+                lineEl.setAttribute( ATR_X2, Integer.toString( line.getEndX() ) );
+                lineEl.setAttribute( ATR_Y1, Integer.toString( line.getStartY() ) );
+                lineEl.setAttribute( ATR_Y2, Integer.toString( line.getEndY() ) );
+                //lineEl.setAttribute( ATR_X, Integer.toString( line.getX() ) );
+                //lineEl.setAttribute( ATR_Y, Integer.toString( line.getY() ) );
+                lineEl.setAttribute( ATR_COLOUR, Integer.toString( line.getColor().getRGB() ) );
+                lineEl.setAttribute( ATR_STROKE, Float.toString( line.getStroke().getLineWidth() ) );
+                lineEl.setAttribute( ATR_LINETYPE, Float.toString( line.getLineType() ) );
+                lineEl.setAttribute( ATR_TRANSPARENCY, Integer.toString( line.getTransparency() ) );     
+            }  else if( shape instanceof Text ) {
                 Text text = (Text)shape;
                 Element textEl = doc.createElement( EL_TEXT );
                 textEl.setAttribute( ATR_STRING, text.getText() );
@@ -800,7 +816,47 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                 textEl.setAttribute( ATR_TRANSPARENCY, Integer.toString( text.getTransparency() ) );
                 textEl.setAttribute( ATR_COLOUR, Integer.toString( text.getColor().getRGB() ) );
                 graphicsEl.appendChild( textEl );
-            } //TODO handle the rest of shapes
+            } else if( shape instanceof Oval ) {
+                Oval oval = (Oval)shape;
+                Element ovalEl = doc.createElement( EL_OVAL );
+                graphicsEl.appendChild( ovalEl );
+                ovalEl.setAttribute( ATR_X, Integer.toString( oval.getX() ) );
+                ovalEl.setAttribute( ATR_Y, Integer.toString( oval.getY() ) );
+                ovalEl.setAttribute( ATR_WIDTH, Integer.toString( oval.getWidth() ) );
+                ovalEl.setAttribute( ATR_HEIGHT, Integer.toString( oval.getHeight() ) );
+                ovalEl.setAttribute( ATR_COLOUR, Integer.toString( oval.getColor().getRGB() ) );
+                ovalEl.setAttribute( ATR_FILLED, Boolean.toString( oval.isFilled() ) );
+                ovalEl.setAttribute( ATR_FIXED, Boolean.toString( oval.isFixed() ) );
+                ovalEl.setAttribute( ATR_STROKE, Float.toString( oval.getStroke().getLineWidth() ) );
+                ovalEl.setAttribute( ATR_LINETYPE, Float.toString( oval.getLineType() ) );
+                ovalEl.setAttribute( ATR_TRANSPARENCY, Integer.toString( oval.getTransparency() ) ); 
+            } else if( shape instanceof Arc ) {
+            	Arc arc = (Arc)shape;
+                Element arclEl = doc.createElement( EL_ARC );
+                graphicsEl.appendChild( arclEl );
+                arclEl.setAttribute( ATR_X, Integer.toString( arc.getX() ) );
+                arclEl.setAttribute( ATR_Y, Integer.toString( arc.getY() ) );
+                arclEl.setAttribute( ATR_WIDTH, Integer.toString( arc.getWidth() ) );
+                arclEl.setAttribute( ATR_HEIGHT, Integer.toString( arc.getHeight() ) );
+                arclEl.setAttribute( ATR_START_ANGLE, Integer.toString( arc.getStartAngle() ) );
+                arclEl.setAttribute( ATR_ARC_ANGLE, Integer.toString( arc.getArcAngle() ) );
+                arclEl.setAttribute( ATR_COLOUR, Integer.toString( arc.getColor().getRGB() ) );
+                arclEl.setAttribute( ATR_FILLED, Boolean.toString( arc.isFilled() ) );
+                arclEl.setAttribute( ATR_FIXED, Boolean.toString( arc.isFixed() ) );
+                arclEl.setAttribute( ATR_STROKE, Float.toString( arc.getStroke().getLineWidth() ) );
+                arclEl.setAttribute( ATR_LINETYPE, Float.toString( arc.getLineType() ) );
+                arclEl.setAttribute( ATR_TRANSPARENCY, Integer.toString( arc.getTransparency() ) );
+            } else if( shape instanceof Image ) {
+            	Image image = (Image)shape;
+                Element imageEl = doc.createElement( EL_IMAGE );
+                graphicsEl.appendChild( imageEl );
+                imageEl.setAttribute( ATR_X, Integer.toString( image.getX() ) );
+                imageEl.setAttribute( ATR_Y, Integer.toString( image.getY() ) );
+                imageEl.setAttribute( ATR_WIDTH, Integer.toString( image.getWidth() ) );
+                imageEl.setAttribute( ATR_HEIGHT, Integer.toString( image.getHeight() ) );
+                imageEl.setAttribute( ATR_FIXED, Boolean.toString( image.isFixed() ) );
+                imageEl.setAttribute( ATR_PATH, image.getPath() );                 
+            } 
         }
         
         return graphicsEl;

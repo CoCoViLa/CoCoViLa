@@ -342,11 +342,16 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         obj.setHeight(s.getHeight());
         obj.setWidth(s.getWidth()); 
         
-        if (s instanceof Rect || s instanceof Oval || s instanceof Arc || s instanceof Line
-        		|| s instanceof BoundingBox) {
+        if (s instanceof Rect || s instanceof Oval || s instanceof Arc || s instanceof BoundingBox) {
             if (s.getHeight() == 0 || s.getWidth() == 0) {
             	return;
             }        	
+        }
+        
+        if( s instanceof Line) {
+        	if (s.getHeight() == 0 && s.getWidth() == 0) {
+            	return;
+            } 
         }
         
         if (s instanceof Rect || s instanceof Oval || s instanceof Arc
