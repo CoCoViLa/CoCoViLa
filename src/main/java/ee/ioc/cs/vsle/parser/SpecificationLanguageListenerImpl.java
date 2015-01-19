@@ -215,14 +215,20 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 	public void enterEquation(EquationContext ctx) {
 		solveEquation(ctx.getText());
 	}
-	
+
 	@Override
 	public void enterAxiom(AxiomContext ctx) {
 		SubtaskListContext subtaskListContext = ctx.subtaskList();
 		List<SubtaskContext> subtaskContextList = subtaskListContext == null ? Collections.<SubtaskContext>emptyList() : subtaskListContext.subtask();
 		List<VariableIdentifierContext> outputVariableContextList = ctx.outputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.outputVariables.variableIdentifier();
 		List<VariableIdentifierContext> iputVariableContextList = ctx.inputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.inputVariables.variableIdentifier();
-		String method = ctx.method.getText();
+		String method = null;
+		if (ctx.method != null) {
+			method = ctx.method.getText();
+		}
+		else if (ctx.lambda != null) {
+			method = ctx.lambda.getText();
+		}
 
 //        if ( statement.getOutputs().length > 0 ) {
 //            if ( statement.getOutputs()[ 0 ].indexOf( "*" ) >= 0 ) {
@@ -230,7 +236,7 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 //            }
 //        }
 		
-        ClassRelation classRelation = new ClassRelation( RelType.TYPE_JAVAMETHOD, ctx.getText());
+		ClassRelation classRelation = new ClassRelation( RelType.TYPE_JAVAMETHOD, ctx.getText());
 
         
 //TODO: handle this in lexer
