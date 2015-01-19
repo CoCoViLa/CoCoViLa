@@ -267,7 +267,7 @@ public class ProgramRunner {
 
             mainClassName = SpecParser.getClassName( fullSpec );
 
-            logger.info( "Computing " + mainClassName );
+            logger.info( "Parsing " + mainClassName );
 
             Set<String> schemeObjects = new HashSet<String>();
 
@@ -291,8 +291,8 @@ public class ProgramRunner {
               break;
             }
             }
-            
-            System.out.println("Done " + (System.currentTimeMillis() - start));
+
+            logger.info("Parsed in " + (System.currentTimeMillis() - start) + "ms.");
             getAssumptions().clear();
 
             return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, this );
