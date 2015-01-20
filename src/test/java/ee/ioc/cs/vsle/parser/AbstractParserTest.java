@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.parser;
 
 import ee.ioc.cs.vsle.synthesize.*;
+import ee.ioc.cs.vsle.util.TypeUtil;
 import ee.ioc.cs.vsle.vclass.Alias;
 import ee.ioc.cs.vsle.vclass.ClassField;
 import org.antlr.v4.runtime.ANTLRInputStream;
@@ -233,11 +234,7 @@ public abstract class AbstractParserTest {
 
     @Override
     ClassList loadSpecs(String spec) {
-      try {
-        return specParser.parseSpecification(spec, null, null);
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
+      return specParser.parseSpecification(spec, TypeUtil.TYPE_THIS, null);
     }
 
     public boolean isRegexParser() { return true; }

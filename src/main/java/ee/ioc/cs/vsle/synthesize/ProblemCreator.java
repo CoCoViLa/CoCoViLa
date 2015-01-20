@@ -53,12 +53,16 @@ public class ProblemCreator {
         
         this.indpSubtasks = indpSubtasks;
     }
-    
+
     Problem makeProblem() throws SpecParseException {
+        return makeProblem(TYPE_THIS);
+    }
+
+    Problem makeProblem(String rootClassName) throws SpecParseException {
         
         long start = System.currentTimeMillis();
         
-        Problem problem = new Problem( new Var( new ClassField( TYPE_THIS, TYPE_THIS ), null ) );
+        Problem problem = new Problem( new Var( new ClassField( TYPE_THIS, rootClassName ), null ) );
         
         makeProblemImpl( problem.getRootVar(), problem, /*new HashMap<String, Integer>(),*/ true );
         

@@ -83,7 +83,7 @@ public class SpecParser {
      * @param text Secification text as String
      * @throws SpecParseException 
      */
-    static ArrayList<String> getSpec( String text, boolean isRefinedSpec ) throws IOException, SpecParseException {
+    static ArrayList<String> getSpec( String text, boolean isRefinedSpec ) {
         if ( !isRefinedSpec ) {
             text = refineSpec( text );
         }
@@ -269,7 +269,7 @@ public class SpecParser {
      * @param fileString a (Java) file containing the specification
      * @throws SpecParseException 
      */
-    private static String refineSpec( String fileString ) throws IOException, SpecParseException {
+    private static String refineSpec( String fileString ) {
         Matcher matcher;
 
         // remove comments before removing line brake \n
@@ -309,12 +309,11 @@ public class SpecParser {
         throw new SpecParseException( "Specification parsing error" );
     }
 
-    public ClassList parseSpecification( String fullSpec, String mainClassName, Set<String> schemeObjects )
-            throws IOException, SpecParseException, EquationException {
+    public ClassList parseSpecification( String fullSpec, String mainClassName, Set<String> schemeObjects ) {
 
         long start = System.currentTimeMillis();
         
-        ClassList classes = parseSpecificationImpl( refineSpec( fullSpec ), TYPE_THIS, schemeObjects,
+        ClassList classes = parseSpecificationImpl( refineSpec( fullSpec ), mainClassName, schemeObjects,
                 new LinkedHashSet<String>() );
 
         logger.info("Specification parsed in: " + (System.currentTimeMillis() - start) + "ms.");
@@ -349,8 +348,7 @@ public class SpecParser {
      *                check. Needed to prevent infinite loop in case of mutual
      *                declarations.
      */
-    private ClassList parseSpecificationImpl( String spec, String className, Set<String> schemeObjects,
-            Set<String> checkedClasses ) throws IOException, SpecParseException, EquationException {
+    private ClassList parseSpecificationImpl( String spec, String className, Set<String> schemeObjects, Set<String> checkedClasses ) {
         
         AnnotatedClass annClass = new AnnotatedClass( className );
 
@@ -740,8 +738,7 @@ public class SpecParser {
      * @throws SpecParseException 
      * @throws SpecParseException
      */
-    private boolean checkSpecClass( String parentClassName, Set<String> checkedClasses, ClassList classList,
-            String type ) throws IOException, SpecParseException {
+    private boolean checkSpecClass( String parentClassName, Set<String> checkedClasses, ClassList classList, String type ) {
 
         logger.debug( "Checking existence of " + packagePath + type + ".java" );
         
