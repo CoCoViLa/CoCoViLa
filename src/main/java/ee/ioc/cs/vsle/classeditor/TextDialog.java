@@ -52,7 +52,7 @@ public class TextDialog extends JDialog {
 	private JPanel pnlButton = new JPanel();
 	private JPanel pnlFont = new JPanel();
 	private JPanel pnlText = new JPanel();
-	int mouseX, mouseY;
+	int mouseX, mouseY, width, height;
 
 	JScrollPane textScrollPane = new JScrollPane(taText,
 		ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -76,11 +76,13 @@ public class TextDialog extends JDialog {
 	// the calling environment.
 	Font font;
 
-	public TextDialog(ClassEditor editor, int x, int y) {
+	public TextDialog(ClassEditor editor, int x, int y, int w, int h) {
 		System.out.println("TextDialog editor " + editor);
 		this.editor = editor;
 		mouseX = x;
 		mouseY = y;
+		width = w;
+		height = h;
 
 		// Specify the dialog window title.
 		setTitle("Text Dialog");
@@ -256,7 +258,7 @@ public class TextDialog extends JDialog {
 		bttnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				if (evt.getSource() == bttnOk) {
-					drawText(mouseX, mouseY);
+					drawText(mouseX, mouseY, width, height);
 					dispose();
 				}
 			} // end actionPerformed
@@ -358,10 +360,16 @@ public class TextDialog extends JDialog {
 	/**
 	 * Draw displayed text on the drawing area in the IconEditor
 	 */
-	private void drawText(int x, int y) { 
-		editor.getCurrentCanvas().mListener.drawText(font, color, taText.getText(), x, y);
+	private void drawText(int x, int y, int h, int w) { 
+		editor.getCurrentCanvas().mListener.drawText(font, color, taText.getText(), x, y, h, w);
 	} // drawText
 
+	private void drawText(int x, int y) {
+		/* default case*/
+		int h = 15; 
+		int w = 50;
+		editor.getCurrentCanvas().mListener.drawText(font, color, taText.getText(), x, y, h, w);
+	}
 	/**
 	 * Set values to the combobox by removing the current values and
 	 * replacing them with the ones given in the "values" array.

@@ -124,8 +124,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         }        
     }
 
-    private void openTextEditor( int x, int y ) {
-        new TextDialog( ClassEditor.getInstance(), x, y ).setVisible( true );
+    private void openTextEditor( int x, int y, int w, int h) {
+        new TextDialog( ClassEditor.getInstance(), x, y, w, h ).setVisible( true );
     } // openTextEditor
     
     
@@ -271,8 +271,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
      * @param color Color - font color.
      * @param text String - the actual string of text drawn.
      */
-    public void drawText( Font font, Color color, String text, int x, int y ) {
-        Text t = new Text( x, y, font, Shape.createColorWithAlpha( color, getTransparency() ), text );
+    public void drawText( Font font, Color color, String text, int x, int y, int h, int w) {
+        Text t = new Text( x, y, w, h, font, Shape.createColorWithAlpha( color, getTransparency() ), text );
         addShape(t);
         
         canvas.drawingArea.repaint();
@@ -394,12 +394,12 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         	 shapes.add(canvas.drawTextForBoundingBox(s.getX() + obj.getWidth(), s.getY()));
         }
   
-        if (s instanceof Text) {
+       /* if (s instanceof Text) {
 //        	obj.setHeight(15);
 //            obj.setWidth(50); 
-        	obj.setHeight(75);
-            obj.setWidth(75); 
-        }
+        	obj.setHeight(s.getHeight());
+            obj.setWidth(s.getWidth()); 
+        }*/
         
         obj.setName(s.getClass().getName());
         obj.setShapes(shapes);
@@ -683,7 +683,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             // disconnected but maybe that is not what the user is expecting.
             // Until this operation is proven necessary and is clearly specified
             // it is better to deny it.
-            if (draggedObject!= null && !draggedObject.isStrictConnected() ) {
+            if (draggedObject!= null && !draggedObject.isStrictConnected() && !draggedObject.isFixed()) {
                 int moveX = x - canvas.mouseX;
                 int moveY = y - canvas.mouseY;
                 canvas.resizeObjects( moveX, moveY, cornerClicked );
@@ -929,7 +929,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         	}
             canvas.drawingArea.repaint();
         } else if ( state.equals( State.drawText ) ) {
-            openTextEditor( canvas.mouseX, canvas.mouseY );
+        	final int width = Math.abs( canvas.mouseX - startX );
+            final int height = Math.abs( canvas.mouseY - startY );
+            openTextEditor( canvas.mouseX, canvas.mouseY, width, height );
         } else if ( state.equals( State.addPort ) ) {
             openPortPropertiesDialog();
         } else if ( state.equals( State.insertImage ) ) {

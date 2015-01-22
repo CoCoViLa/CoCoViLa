@@ -632,6 +632,14 @@ public class GObj implements Serializable, Cloneable,
         return false;
     }
 
+    public boolean isFixed() {
+      /*  for ( Shape s : getShapes() ) {            
+               if ( s.isFixed() )
+                    return true;            
+        } // Always false for now 22.01.AM */
+        return false;
+    }
+    
     /**
      * Is this object the superclass of the scheme?
      * 

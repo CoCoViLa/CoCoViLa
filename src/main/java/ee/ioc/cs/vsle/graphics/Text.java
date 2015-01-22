@@ -15,12 +15,17 @@ public class Text extends Shape implements Serializable {
     private int fixedY;
     private String text;
     private Font font;
-    private int h; //* Height of the text.
-    private int w;//	 * Width of the text.
+    private int h; private int w;//	 *  Height / Width of the text.
 
     public Text( int x, int y, Font font, Color color, String s ) {
         this( x, y, font, color, s, false );
     } // Text
+    
+    public Text ( int x, int y, int h, int w, Font font, Color color, String s ) {
+    	  this( x, y, font, color, s, false );
+    	  this.height = h;
+    	  this.width = w;
+    }
 
     public Text( int x, int y, Font font, Color color, String s, boolean fixed ) {
         super( x, y );

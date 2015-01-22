@@ -17,6 +17,8 @@ import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.editor.ProgramRunnerEvent;
 import ee.ioc.cs.vsle.event.EventSystem;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
+import ee.ioc.cs.vsle.graphics.Image;
+import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.TypeUtil;
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.RelObj;
@@ -238,7 +240,13 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
     public void actionPerformed( ActionEvent e ) {
         String cmd = e.getActionCommand();
 
-        if ( Menu.PROPERTIES.equals( cmd ) ) {
+        if ( Menu.PROPERTIES.equals( cmd ) ) { 
+        	
+        	if(this.object.getShapes() != null && this.object.getShapes().get(0) instanceof Text){
+        		 new TextDialog( ClassEditor.getInstance(), this.object.getX(), this.object.getY(), this.object.getWidth(), this.object.getHeight() ).setVisible( true );
+        	} else if (this.object.getShapes() != null && this.object.getShapes().get(0) instanceof Image){
+        		  new ImageDialog( ClassEditor.getInstance(), this.object).setVisible( true );
+        	} else  new ShapePropertiesDialog(ClassEditor.getInstance(), this.object).setVisible( true );  
 //            canvas.openPropertiesDialog( object );
             /*
              * Disabled until needed and reimplemented

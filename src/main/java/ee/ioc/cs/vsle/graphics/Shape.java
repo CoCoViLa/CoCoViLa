@@ -8,8 +8,8 @@ public abstract class Shape implements Serializable, Cloneable {
 
     private int x;
     private int y;
-    private int width;
-    private int height;
+    protected int width;
+    protected int height;
     private boolean selected = false;
     private String name;
     private boolean fixed = false;
