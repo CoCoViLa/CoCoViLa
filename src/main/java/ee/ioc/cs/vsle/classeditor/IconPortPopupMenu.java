@@ -1,6 +1,7 @@
 package ee.ioc.cs.vsle.classeditor;
 
 import ee.ioc.cs.vsle.editor.Menu;
+import ee.ioc.cs.vsle.vclass.Port;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.ActionEvent;
@@ -16,7 +17,7 @@ public class IconPortPopupMenu
   /**
    * Port, for which the properties are set. Selected in the ClassEditor application.
    */
-  IconPort port;
+  Port port;
 
   /**
    * Reference to the ClassEditor application.
@@ -28,7 +29,7 @@ public class IconPortPopupMenu
    * @param port IconPort - port reference. Selected in the IconEditor application.
    * @param editor IconEditor - IconEditor application reference.
    */
-  IconPortPopupMenu(IconPort port, ClassEditor editor) {
+  IconPortPopupMenu(Port port, ClassEditor editor) {
 	super();
 	this.port = port;
 	this.editor = editor;

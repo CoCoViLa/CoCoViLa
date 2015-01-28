@@ -1068,7 +1068,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 */
 	  }   
 
-	  public void  loadDefaultPortGraphic(boolean openFlag, IconPort port) {
+	  public void  loadDefaultPortGraphic(boolean openFlag, Port port) {
 		  
 		  ClassGraphics defaultGraphics;
 		  if(openFlag){	  
@@ -1082,7 +1082,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	  }
 	 
 	  
-	  public void loadPortGraphicClass(boolean openFlag, IconPort port) {
+	  public void loadPortGraphicClass(boolean openFlag, Port port) {
 		  File f = selectFile();
 		  if ( f != null ){
 

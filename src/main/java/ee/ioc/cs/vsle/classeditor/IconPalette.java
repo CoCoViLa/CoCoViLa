@@ -4,11 +4,15 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.SpinnerModel;
@@ -16,8 +20,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import ee.ioc.cs.vsle.common.ops.State;
+import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.editor.PaletteBase;
+import ee.ioc.cs.vsle.graphics.Image;
+import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.FileFuncs;
+import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.Port;
 
 /**
  * Class Editor toolbar.
@@ -55,6 +64,7 @@ public class IconPalette extends PaletteBase {
     JToggleButton colors;
     JToggleButton addport;
     JToggleButton image;
+    JButton props;
 
 //    public IconPalette(IconMouseOps mListener, ClassEditor ed, Canvas canv) {
     public IconPalette(MouseOps mListener, ClassEditor ed, ClassCanvas canv) {    	
@@ -134,11 +144,14 @@ public class IconPalette extends PaletteBase {
         filledoval = createButton("images/filloval.gif", "Filled oval", State.drawFilledOval);
 //        freehand = createButton("images/freehand.gif", "Freehand drawing", State.freehand);
         eraser = createButton("images/eraser.gif", "Eraser", State.eraser);
-        colors = createButton("images/colorchooser.gif", "Color chooser", State.chooseColor);
+        colors = createButton("images/colorchooser.gif", "Color chooser", State.chooseColor);    
 
         for (JToggleButton b : buttons) {
             toolBar.add(b);
         }
+        
+        props = createBttnProp("images/prop.gif", "Selected Shape Properties");   
+        toolBar.add(props);
 
         lblLineWidth.setToolTipText("Line width or point size of a selected tool");
         toolBar.add(lblLineWidth);
@@ -169,6 +182,54 @@ public class IconPalette extends PaletteBase {
         canvas.revalidate();        
     }
 
+    protected JButton createBttnProp(String iconPath, String descr) {
+
+    	ImageIcon icon = FileFuncs.getImageIcon(iconPath, false);
+        JButton button = new JButton(icon);
+        button.setSelectedIcon(icon);      
+        button.setToolTipText(descr);
+
+        // Palette buttons should be smaller, that's what JToolBar is doing
+        button.setMargin(BUTTON_BORDER);
+
+        
+        button.addMouseListener(getButtonMouseListener());
+        
+        button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent evt) {
+				try {
+					if(canvas.getObjectList().getSelectedCount() == 1){
+						ArrayList<GObj> ol = canvas.getObjectList().getSelected();
+						Port port = null;
+						for ( GObj o : ol ) {
+								  if(o.getPortList() != null && o.getPortList().size() == 1){
+									  port = o.getPortList().get(0);									 
+								  }
+						} if (port != null){
+							new PortPropertiesDialog( ClassEditor.getInstance(), port ).setVisible( true );
+						} else {
+							GObj obj = canvas.getObjectList().getSelected().get(0);
+							if(obj.getShapes() != null && obj.getShapes().get(0) instanceof Text){
+								new TextDialog( ClassEditor.getInstance(), obj.getX(), obj.getY(), obj.getWidth(), obj.getHeight() ).setVisible( true );
+							} else if (obj.getShapes() != null && obj.getShapes().get(0) instanceof Image){
+								new ImageDialog( ClassEditor.getInstance(), obj).setVisible( true );
+							} else  new ShapePropertiesDialog(ClassEditor.getInstance(), obj).setVisible( true ); 						
+						}
+					}
+					else {
+						JOptionPane.showMessageDialog( null, "Please select single object", "Object undefined",
+								  JOptionPane.INFORMATION_MESSAGE );
+					}
+				} catch (NullPointerException e) {
+					
+				}
+				
+			}
+		});
+       
+        return button;
+    }
+    
     @Override
     protected ActionListener getZoomListener() {
         return new ActionListener() {

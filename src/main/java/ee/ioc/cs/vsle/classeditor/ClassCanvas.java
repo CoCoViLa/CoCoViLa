@@ -14,6 +14,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import ee.ioc.cs.vsle.editor.CodeViewer;
+import ee.ioc.cs.vsle.editor.ObjectPropertiesEditor;
 import ee.ioc.cs.vsle.editor.ProgramRunnerEvent;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.editor.State;
@@ -137,10 +138,11 @@ public class ClassCanvas extends Canvas{
 		        }
 		        
 		        // coordinates
-		          int rectX = Math.min( mListener.startX, mouseX );
-		          int rectY = Math.min( mListener.startY, mouseY );
-		          int width = Math.abs( mouseX - mListener.startX );
-		          int height = Math.abs( mouseY - mListener.startY );
+		        
+		          int rectX = (Math.min(Math.abs((int)(mListener.startX*getScale())), mouseX ));
+		          int rectY = (Math.min(Math.abs((int)(mListener.startY*getScale())), mouseY ));
+		          int width = Math.abs( mouseX - (Math.abs((int)(mListener.startX*getScale()))));
+		          int height = Math.abs( mouseY - (Math.abs((int)(mListener.startY*getScale()))));
 		        
 		        // Draw Shapes
 		                

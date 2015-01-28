@@ -421,7 +421,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         popupMenu.show( canvas, x, y );
     }
     
-    private void openPortPopupMenu( IconPort port, int x, int y ) {
+    private void openPortPopupMenu( Port port, int x, int y ) {
         IconPortPopupMenu popupMenu = new IconPortPopupMenu( port, ClassEditor.getInstance() );
         popupMenu.show( canvas, x, y );
     } // openPortPopupMenu    
@@ -465,10 +465,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             GObj obj = canvas.getObjectList().checkInside( x, y, canvas.getScale() );
             if ( obj != null || canvas.getObjectList().getSelectedCount() > 1 ) {
             	if (obj.getPortList() != null && !obj.getPortList().isEmpty()) {
-            		Port port = obj.getPortList().get(0);
-            		IconPort p = new IconPort(port.getName(), port.getX(), port.getY(), port.isArea(), port.isStrict(), port.isMulti());
-            		p.setType(port.getType());
-            		openPortPopupMenu( p, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
+            		Port port = obj.getPortList().get(0);            		
+            		openPortPopupMenu( port, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
             	} else { 
             		openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
             	}
@@ -513,10 +511,10 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     @Override
     public void mousePressed( MouseEvent e ) {
     	
-       System.out.println("ClassMouseOps mousePressed: " + state + "; coords x=" + e.getX() + "; y=" + e.getY());
+       System.out.println("ClassMouseOps mousePressed: " + state + "; mouse coords x=" + e.getX() + "; y=" + e.getY());
         
     	mouseState = "pressed";
-        if ( !( state.equals( State.drawArc1 ) || state.equals( State.drawArc2 ) ) ) {
+        if ( !( state.equals( State.drawArc1 ) || state.equals( State.drawArc2 )) ) {
             startX =  Math.round( e.getX() / canvas.getScale() );
             startY =  Math.round( e.getY() / canvas.getScale() );
         }
@@ -567,8 +565,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         if ( !SwingUtilities.isLeftMouseButton( e ) ) {
             return;
         }
-        int x = Math.round( e.getX() / canvas.getScale() );
-        int y = Math.round( e.getY() / canvas.getScale() );        
+        int x =  Math.round( e.getX() / canvas.getScale() );
+        int y =  Math.round( e.getY() / canvas.getScale() );        
 
         if ( State.drag.equals( state ) ) {
             int moveX, moveY;
@@ -691,11 +689,11 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                 canvas.mouseY += moveY;
             }
         } else if ( State.dragBox.equals( state ) ) {
-            canvas.mouseX = x;
-            canvas.mouseY = y;
+        	 canvas.mouseX = e.getX();
+             canvas.mouseY = e.getY();
         } else if ( state.equals( State.drawLine ) ) {
-            canvas.mouseX = x;
-            canvas.mouseY = y;
+        	 canvas.mouseX = e.getX();
+             canvas.mouseY = e.getY();
         } else if ( state.equals( State.drawArc ) || state.equals( State.drawFilledArc ) ) {
             fill = false;
             if ( state.equals( State.drawFilledArc ) ) {
@@ -717,15 +715,15 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             if ( state.equals( State.drawFilledRect ) ) {
                 fill = true;
             }
-            canvas.mouseX = x;
-            canvas.mouseY = y;
+            canvas.mouseX = e.getX();
+            canvas.mouseY = e.getY();
         } else if ( state.equals( State.drawOval ) || state.equals( State.drawFilledOval ) ) {
             fill = false;
             if ( state.equals( State.drawFilledOval ) ) {
                 fill = true;
             }
-            canvas.mouseX = x;
-            canvas.mouseY = y;
+            canvas.mouseX = e.getX();
+            canvas.mouseY = e.getY();
         } else {
             Connection c = canvas.getConnectionNearPoint(x, y);
             if (c != null) {
@@ -743,10 +741,11 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
     @Override
     public void mouseMoved( MouseEvent e ) {
-    	System.out.println("MouseOps mouseMoved " + state);
+
         int x = Math.round( e.getX() / canvas.getScale() );
         int y = Math.round( e.getY() / canvas.getScale() );
-
+        //System.out.println("MouseOps mouseMoved " + state + " x,y " + x + ", "+ y);
+        
         canvas.setPosInfo( x, y );
         
         if ( state.equals( State.drawArc2 ) ) {
@@ -850,7 +849,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
     @Override
     public void mouseReleased( MouseEvent e ) {
-    	System.out.println("MouseOps mouseReleased: " + state);
+    	System.out.println("MouseOps mouseReleased: " + state + "  mouse coords: x="+canvas.mouseX+", y="+canvas.mouseY);
     	mouseState = "released";
 
         if ( state.equals( State.drag ) ) {
@@ -861,10 +860,15 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         } else if ( state.equals( State.resize ) ) {
             state = State.selection;
         } else if ( state.equals( State.dragBox ) ) {
-            int x1 = Math.min( startX, canvas.mouseX );
+           /* int x1 = Math.min( startX, canvas.mouseX );
             int x2 = Math.max( startX, canvas.mouseX );
             int y1 = Math.min( startY, canvas.mouseY );
-            int y2 = Math.max( startY, canvas.mouseY );
+            int y2 = Math.max( startY, canvas.mouseY );*/
+            int x1 = Math.min((int) Math.abs(canvas.mouseX/canvas.getScale()), startX );
+            int x2 = Math.max((int) Math.abs(canvas.mouseX/canvas.getScale()), startX );
+            int y1 = Math.min((int) Math.abs(canvas.mouseY/canvas.getScale()), startY );
+            int y2 = Math.max((int) Math.abs(canvas.mouseY/canvas.getScale()), startY );
+            
             canvas.getObjectList().selectObjectsInsideBox(
                     x1, y1, x2, y2, e.isShiftDown());
             state = State.selection;
@@ -873,9 +877,19 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
         if ( state != null && state.equals( State.drawRect ) || state.equals( State.drawFilledRect )
                 || state.equals( State.boundingbox ) ) {
-            final int width = Math.abs( canvas.mouseX - startX );
-            final int height = Math.abs( canvas.mouseY - startY );
-
+        	
+        	int width = 0;
+   		 	int height = 0;
+   		 	
+        	if(canvas.getScale() != (float)1){
+        		width = (int) Math.abs(( canvas.mouseX/canvas.getScale()) - startX);        	
+        		height = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY);
+        	} else	{
+        		width = Math.abs( canvas.mouseX - startX );
+        		height = Math.abs( canvas.mouseY - startY );
+        	}
+            System.out.println("MouseOps mouseReleased startX, startY " + startX + ", " + this.startY);
+            
             if ( state.equals( State.boundingbox ) ) {
                 BoundingBox box = new BoundingBox( Math.min( startX, canvas.mouseX ), Math.min( startY, canvas.mouseY ), width, height );
                 addShape(box);
@@ -887,15 +901,34 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 //	            System.out.println(" Math.min( startY, canvas.mouseY ) " + Math.min( startY, canvas.mouseY ));
 //	            System.out.println("width, height " + width + "," + height);
 //	            System.out.println("fill, strokeWidth, lineType " + this.fill + ", " + this.strokeWidth + ", " + this.lineType);
-	            Rect rect = new Rect( Math.min( startX, canvas.mouseX ), Math.min( startY, canvas.mouseY ), width, height, 
+            //	if(canvas.getScale() < (float)1){
+            		int sx =  Math.min((int) Math.abs(canvas.mouseX/canvas.getScale()), startX );
+            		int sy =  Math.min((int) Math.abs(canvas.mouseY/canvas.getScale()), startY );
+            		Rect rect = new Rect( sx, sy, width, height, 
+    	                    Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );            	
+                		addShape(rect);
+                		
+            	/*} else {
+            		Rect rect = new Rect( Math.min( startX, canvas.mouseX ), Math.min( startY, canvas.mouseY ), width, height, 
 	                    Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );
-	            addShape(rect);
+            		System.out.println("MouseOps add shape: w=" + width + ", h="+height);
+            		addShape(rect);
+            	}*/
             }
             canvas.drawingArea.repaint();
         } else if ( state.equals( State.drawOval ) || state.equals( State.drawFilledOval ) ) {
-            int width = Math.abs( canvas.mouseX - startX );
-            int height = Math.abs( canvas.mouseY - startY );
-            Oval oval = new Oval( Math.min( startX, canvas.mouseX ), Math.min( startY, canvas.mouseY ), width, height, 
+        	int width = 0;
+            int height = 0;
+        	if(canvas.getScale() != (float)1){
+        		width = (int) Math.abs(( canvas.mouseX/canvas.getScale()) - startX);        	
+        		height = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY);
+        	} else	{
+        		width = Math.abs( canvas.mouseX - startX );
+        		height = Math.abs( canvas.mouseY - startY );
+        	}
+        	int sx =  Math.min((int) Math.abs(canvas.mouseX/canvas.getScale()), startX );
+    		int sy =  Math.min((int) Math.abs(canvas.mouseY/canvas.getScale()), startY );
+            Oval oval = new Oval( sx, sy, width, height, 
                     Shape.createColorWithAlpha( color, getTransparency() ),
                     fill, strokeWidth, lineType );
             addShape(oval);
@@ -905,13 +938,13 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             arcHeight = Math.abs( canvas.mouseY - startY );
             setState( State.drawArc1 );
         } else if ( state.equals( State.drawLine ) ) {
-            System.out.println("startX, startY " + startX + ", " + this.startY);
-            System.out.println("canvas.mouseX, canvas.mouseY " + canvas.mouseX + ", " + canvas.mouseY);
-//            System.out.println(" Math.min( startX, canvas.mouseX ) " +  Math.min( startX, canvas.mouseX ));
+         //   System.out.println("startX, startY " + startX + ", " + this.startY);
+       //     System.out.println("canvas.mouseX, canvas.mouseY " + canvas.mouseX + ", " + canvas.mouseY);
+//          //  System.out.println(" Math.min( startX, canvas.mouseX ) " +  Math.min( startX, canvas.mouseX ));
 //            System.out.println(" Math.min( startY, canvas.mouseY ) " + Math.min( startY, canvas.mouseY ));
-            System.out.println("fill, strokeWidth, lineType " + this.fill + ", " + this.strokeWidth + ", " + this.lineType);
-            
-            Line line = new Line( startX, startY, canvas.mouseX, canvas.mouseY, 
+          //  System.out.println("fill, strokeWidth, lineType " + this.fill + ", " + this.strokeWidth + ", " + this.lineType);
+          
+            Line line = new Line( startX, startY, (int) Math.abs(canvas.mouseX/canvas.getScale()), (int) Math.abs(canvas.mouseY/canvas.getScale()), 
                     Shape.createColorWithAlpha( color, getTransparency() ), strokeWidth, lineType );
             addShape( line );
             canvas.drawingArea.repaint();

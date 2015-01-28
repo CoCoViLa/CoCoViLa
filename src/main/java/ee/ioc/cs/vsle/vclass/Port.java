@@ -463,6 +463,22 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 		else 
 			return port1.getType().equals(port2.getType());
 	}
+	
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public void setStrict(boolean strict) {
+		this.strict = strict;
+	}
+
+	public void setMulti(boolean isMulti) {
+		this.isMulti = isMulti;
+	}
+	
+	public void setArea(boolean area) {
+		this.area = area;
+	}
 
 	/**
 	 * Returns true if this port contains the center point of the specified

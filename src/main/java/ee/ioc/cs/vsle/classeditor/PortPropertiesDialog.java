@@ -29,6 +29,7 @@ import javax.swing.WindowConstants;
 
 import ee.ioc.cs.vsle.util.StringUtil;
 import ee.ioc.cs.vsle.util.TypeUtil;
+import ee.ioc.cs.vsle.vclass.Port;
 
 public class PortPropertiesDialog extends JDialog implements ActionListener {
 
@@ -39,7 +40,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	private boolean isStrict;
 	private boolean isMulti;
 	
-	IconPort port;
+	Port port;
 
 	private JPanel pnlMain = new JPanel();
 	private JPanel pnlButtons = new JPanel();
@@ -64,11 +65,12 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 
 	ClassEditor editor;
 
-	PortPropertiesDialog(ClassEditor editor, IconPort port) {
+	PortPropertiesDialog(ClassEditor editor, Port port) {
 		super(editor);
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		this.setModal(true);
 		this.editor = editor;
+		this.port = port;
 		
 		pnlAttrs.setLayout(new GridLayout(0, 2));
 		pnlAttrs.add(lblPortName);
@@ -111,7 +113,8 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			setAreaConn(port.isArea());
 			setPortType(port.getType());
 			setMulti(port.isMulti());
-			this.port = port;
+			//this.port = 
+					
 		} else {
 			setTitle("Define Port Properties");
 		}
@@ -202,9 +205,9 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			} else {
 				port.setType(getPortType());
 				port.setName(getPortName());
-				port.area = isAreaConn();
-				port.strict = isStrict();
-				port.multi = isMulti();
+				port.setArea(isAreaConn());
+				port.setStrict(isStrict());
+				port.setMulti(isMulti());
 			}
 			setVisible(false);
 			dispose();
