@@ -1562,19 +1562,19 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					    /**
 					     * Save coords relative to BB /AM 23.10
 					     */
-					   if (shape instanceof Line){
+					   if (shape instanceof Line){						 
 						   shape.setX(obj.getX() - rX);						 
 						   shape.setY(obj.getY() - rY);
 						   ((Line) shape).setStartX(shape.getX());
 						   ((Line) shape).setEndX(((Line) shape).getEndX() + shape.getX() );
 						   ((Line) shape).setStartY(shape.getY());
 						   ((Line) shape).setEndY(((Line) shape).getEndY() + shape.getY() );
+						   ((Line) shape).setStringCoords();
 					   } else {
 						   shape.setX(obj.getX() - rX);
 						   shape.setY(obj.getY() - rY);
 					   }
-					    
-					    
+					    					    
 					   System.out.println("ADD SHAPE - " + shape.toText());
 
 					   System.out.println("Bounds: " + shape.getX() + " - " + cg.getBoundX() + ";"+  shape.getY() + " - " + cg.getBoundY());

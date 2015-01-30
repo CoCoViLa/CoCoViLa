@@ -11,6 +11,8 @@ import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.text.NumberFormat;
+import java.text.ParseException;
 
 import javax.naming.SizeLimitExceededException;
 import javax.swing.BorderFactory;
@@ -84,10 +86,10 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
  	private final JFormattedTextField fldLinetype = new JFormattedTextField();
  	private final JFormattedTextField fldStroke = new JFormattedTextField();
  	private final JFormattedTextField fldTransparency = new JFormattedTextField();
- 	private final JFormattedTextField fldStartX = new JFormattedTextField(); 
- 	private final JFormattedTextField fldStartY = new JFormattedTextField();
- 	private final JFormattedTextField fldEndX = new JFormattedTextField(); 
- 	private final JFormattedTextField fldEndY = new JFormattedTextField();
+ 	private final JTextField fldStartX = new JTextField(); 
+ 	private final JTextField fldStartY = new JTextField();
+ 	private final JTextField fldEndX = new JTextField(); 
+ 	private final JTextField fldEndY = new JTextField();
  	private final JFormattedTextField fldArcAngle = new JFormattedTextField();
  	private final JFormattedTextField fldStartAngle = new JFormattedTextField();
  	private final JTextField fldColour = new JTextField();
@@ -143,12 +145,12 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         
         pnlLabels.setPreferredSize(new Dimension(90, 210));
         pnlLabels.setLayout(new GridLayout(12, 1));
-        pnlLabels.setAlignmentX(RIGHT_ALIGNMENT);
-        pnlLabels.add(lblX);
-        pnlLabels.add(lblY);
+        pnlLabels.setAlignmentX(RIGHT_ALIGNMENT);       
         if(type != 2){
         	pnlLabels.add(lblWidth);
         	pnlLabels.add(lblHeight);
+        	pnlLabels.add(lblX);
+            pnlLabels.add(lblY);
         } else {
         	pnlLabels.add(lblStartX);
         	pnlLabels.add(lblStartY);
@@ -167,12 +169,12 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         pnlLabels.add(lblStroke);
         
         pnlFields.setPreferredSize(new Dimension(60, 210));
-        pnlFields.setLayout(new GridLayout(12, 1));
-        pnlFields.add(fldX);
-        pnlFields.add(fldY);
+        pnlFields.setLayout(new GridLayout(12, 1));        
         if(type != 2){
         	pnlFields.add(fldWidth);
         	pnlFields.add(fldHeight);
+        	pnlFields.add(fldX);
+            pnlFields.add(fldY);
         } else {
         	pnlFields.add(fldStartX);
         	pnlFields.add(fldStartY);
@@ -241,11 +243,13 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     			}
     			if(s instanceof Line){
     				lblTitle.setText("Line");
-    				 fldStartX.setValue(((Line)shape).getStartX());
-    				 fldStartY.setValue(((Line)shape).getStartY());
-    				 fldEndX.setValue(((Line)shape).getEndX());
-    				 fldEndY.setValue(((Line)shape).getEndY());
-    				 initGUI(2);
+    				((Line) shape).setStringCoords(obj);
+    				fldStartX.setText(((Line)shape).getStringX1());
+    				fldStartY.setText(((Line)shape).getStringY1());
+    				fldEndX.setText(((Line)shape).getStringX2());
+    				fldEndY.setText(((Line)shape).getStringY2());
+    					
+    				initGUI(2);
     			}
     			if(s instanceof Arc){
     				if(s.isFilled()){
@@ -324,11 +328,17 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         	if(col == null) col = shape.getColor();
         	shape.setColor( Shape.createColorWithAlpha( col, ((Number)fldTransparency.getValue()).intValue() ) );        	
         	
-        	if(shape instanceof Line){
-        		((Line)shape).setStartX(((Number)fldStartX.getValue()).intValue());
-        		((Line)shape).setStartY(((Number)fldStartY.getValue()).intValue());
-        		((Line)shape).setEndX(((Number)fldEndX.getValue()).intValue());
-        		((Line)shape).setEndY(((Number)fldEndY.getValue()).intValue());
+        	if(shape instanceof Line){        		
+        		((Line)shape).setStringX1(fldStartX.getText());
+        		obj.setX(tryParse(fldStartX.getText()));
+        		((Line)shape).setStringY1(fldStartY.getText());
+        		obj.setY(tryParse(fldStartY.getText()));
+        		((Line)shape).setEndX(tryParse(fldEndX.getText()));  
+        		obj.setWidth(tryParse(fldEndX.getText()));
+        		((Line)shape).setStringX2(fldEndX.getText());
+        		((Line)shape).setEndY(tryParse(fldEndY.getText()));
+        		((Line)shape).setStringY2(fldEndY.getText());
+        		obj.setHeight(tryParse(fldEndY.getText()));
         	}
         	if(shape instanceof Arc){
         		if(validateArcInput()){
@@ -342,6 +352,15 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
          }                   
     }
 
+    private int tryParse(String s){
+    	try {
+    		int i = ((Number)NumberFormat.getInstance().parse(s)).intValue();
+    		return i;
+    	} catch (ParseException e) {
+			return 1;
+		}
+    }
+    
     private void addErrorPanel(String errorMessage){
     	
     	JTextArea msg = new JTextArea(errorMessage);
@@ -357,4 +376,25 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     	getContentPane().repaint();
     }
 }
-
+/**
+ * if(((Line)shape).getStringX1() != null && ((Line)shape).getStringX1() != ""){
+    					fldStartX.setText(((Line)shape).getStringX1());
+    				} else {
+    					fldStartX.setText(obj.getX()+"");
+    				}    	
+    				if(((Line)shape).getStringY1() != null && ((Line)shape).getStringY1() != ""){
+    					fldStartY.setText(((Line)shape).getStringY1());
+    				} else {
+    					fldStartY.setText(obj.getY()+"");
+    				}  
+    				if(((Line)shape).getStringX2() != null && ((Line)shape).getStringX2() != ""){
+    					fldEndX.setText(((Line)shape).getStringX2());
+    				} else {
+    					fldEndX.setText(((Line)shape).getEndX()+"");
+    				}  
+    				if(((Line)shape).getStringY2() != null && ((Line)shape).getStringY2() != ""){
+    					fldEndY.setText(((Line)shape).getStringY2());
+    				} else {
+    					fldEndY.setText(((Line)shape).getEndY()+"");
+    				}      
+    				*/

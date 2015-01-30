@@ -14,12 +14,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import ee.ioc.cs.vsle.editor.CodeViewer;
-import ee.ioc.cs.vsle.editor.ObjectPropertiesEditor;
 import ee.ioc.cs.vsle.editor.ProgramRunnerEvent;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.editor.State;
 import ee.ioc.cs.vsle.event.EventSystem;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
+import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.vclass.Canvas;
@@ -191,7 +191,9 @@ public class ClassCanvas extends Canvas{
 		                        g2.setColor( mListener.color );
 		                        g2.fillRect( rectX, rectY, width, height );    
 		                 } else if ( mListener.state.equals( State.drawLine ) ) {
-		                     g2.drawLine( mListener.startX, mListener.startY, mouseX, mouseY );                        
+		                	 int sx = Math.abs((int)(mListener.startX*getScale()));
+		                	 int sy = Math.abs((int)(mListener.startY*getScale()));
+		                     g2.drawLine(sx, sy, mouseX, mouseY );                        
 		                    } else if ( mListener.state.equals( State.drawOval ) ) {
 		                        g2.setColor( mListener.color );
 		                        g2.drawOval( rectX, rectY, width, height );
@@ -288,6 +290,31 @@ public class ClassCanvas extends Canvas{
                         JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+    
+    public void finalizeResizeObjects() {
+        for (GObj obj : scheme.getObjectList()) {
+            if ( obj.isSelected() ){
+            	if(obj.getXsize() != (float)1){
+            		obj.setWidth((int)(obj.getWidth()*obj.getXsize()));
+            		for(Shape s: obj.getShapes()){
+            			if (s instanceof Line) ((Line)s).setEndX(obj.getWidth());
+            			s.setWidth(obj.getWidth());
+            		}            		
+            		obj.setXsize((float)1);
+            	}
+            	if(obj.getYsize() != (float)1){
+            		obj.setHeight((int)(obj.getHeight()*obj.getYsize()));
+            		for(Shape s: obj.getShapes()){
+            			if (s instanceof Line) ((Line)s).setEndY(obj.getHeight());
+            			s.setHeight(obj.getHeight());
+            		}            		
+            		obj.setYsize((float)1);
+            	}
+            }               
+        }
+        scheme.getObjectList().updateRelObjs();
+        drawingArea.repaint();
     }
     
     /**

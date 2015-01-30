@@ -2,6 +2,9 @@ package ee.ioc.cs.vsle.graphics;
 
 import java.awt.*;
 import java.io.*;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import ee.ioc.cs.vsle.vclass.GObj;
 
 public class Line extends Shape implements Serializable {
 
@@ -15,6 +18,10 @@ public class Line extends Shape implements Serializable {
     private int fixedX2;
     private int fixedY1;
     private int fixedY2;
+    private String stringX1;
+    private String stringX2;
+    private String stringY1;
+    private String stringY2;
 
     public Line( int x1, int y1, int x2, int y2, Color color, float strokeWidth, float lineType ) {
         super( Math.min( x1, x2 ), Math.min( y1, y2 ) );
@@ -133,6 +140,50 @@ public class Line extends Shape implements Serializable {
         setStartY( getStartY() + y );
     } // setPosition
 
+    public void setStringCoords(GObj obj){
+    	if(stringX1 == null || stringX1.isEmpty()){    		
+    		setStringX1(obj.getX()+"");
+    	}
+    	
+    	if(getStringY1() == null || getStringY1().isEmpty()){
+    		setStringY1(obj.getY()+"");
+    	}
+    	setStringY1(compareCoords(obj.getY(), stringY1));
+    	this.setCoordsCommon();
+    }
+    
+    public void setCoordsCommon(){
+    	if(getStringX2() == null || getStringX2().isEmpty()){
+    		setStringX2(getEndX()+"");
+    	}
+    	setStringX2(compareCoords(getEndX(), stringX2));
+    	if(getStringY2() == null || getStringY2().isEmpty()){
+    		setStringY2(getEndY()+"");
+    	}    	
+    	setStringY2(compareCoords(getEndY(), stringY2));
+    }
+    
+    public String compareCoords(int i, String s){
+    	int temp = tryParse(s); 
+    	if( temp != i){
+    		s = s.replace(temp+"", i+"");
+    		return s;
+    	}
+    	else return s;
+    }
+    
+    public void setStringCoords(){
+    	if(stringX1 == null || stringX1.isEmpty()){    		
+    		setStringX1(getX()+"");
+    	}
+    	setStringX1(compareCoords(getX(), stringX1));
+    	if(getStringY1() == null || getStringY1().isEmpty()){
+    		setStringY1(getY()+"");
+    	}
+    	setStringY1(compareCoords(getY(), stringY1));
+    	this.setCoordsCommon();
+    }
+    
     @Override
     public boolean contains( int pointX, int pointY ) {
         float distance = calcDistance( getStartX(), getStartY(), getEndX(), getEndY(), pointX, pointY );
@@ -334,6 +385,14 @@ public class Line extends Shape implements Serializable {
         return k;
     }    
 
+    private int tryParse(String s){
+    	try {
+    		int i = ((Number)NumberFormat.getInstance().parse(s)).intValue();
+    		return i;
+    	} catch (ParseException e) {
+			return 1;
+		}
+    }
     
     @Override
     public Shape getCopy() {
@@ -424,4 +483,37 @@ public class Line extends Shape implements Serializable {
         return fixedY2;
     }
 
+	public String getStringX1() {
+		return stringX1;
+	}
+
+	public void setStringX1(String stringX1) {
+		this.stringX1 = stringX1;
+	}
+
+	public String getStringX2() {
+		return stringX2;
+	}
+
+	public void setStringX2(String stringX2) {
+		this.stringX2 = stringX2;
+	}
+
+	public String getStringY1() {
+		return stringY1;
+	}
+
+	public void setStringY1(String stringY1) {
+		this.stringY1 = stringY1;
+	}
+
+	public String getStringY2() {
+		return stringY2;
+	}
+
+	public void setStringY2(String stringY2) {
+		this.stringY2 = stringY2;
+	}
+
+    
 }

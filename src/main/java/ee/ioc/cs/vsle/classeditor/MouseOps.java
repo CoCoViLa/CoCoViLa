@@ -858,6 +858,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                 return;
             state = State.selection;
         } else if ( state.equals( State.resize ) ) {
+        	canvas.finalizeResizeObjects();
             state = State.selection;
         } else if ( state.equals( State.dragBox ) ) {
            /* int x1 = Math.min( startX, canvas.mouseX );
@@ -949,6 +950,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             addShape( line );
             canvas.drawingArea.repaint();
         } else if ( state.equals( State.resize ) ) {
+        	canvas.finalizeResizeObjects();
             state = State.selection;
         } else if ( state.equals( State.freehand ) ) {
         	// TODO
