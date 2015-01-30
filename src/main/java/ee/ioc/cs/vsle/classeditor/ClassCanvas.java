@@ -147,17 +147,24 @@ public class ClassCanvas extends Canvas{
 		        // Draw Shapes
 		                
 		         if ( mListener.state.equals( State.drawArc1 ) ) {
-		             g.drawRect( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight );
-		             g.drawLine( mListener.startX + mListener.arcWidth / 2, mListener.startY + mListener.arcHeight / 2, mouseX,
-		                     mouseY );
+		        	 int mx = Math.abs((int)(mListener.startX*getScale()));		     
+		        	 int my = Math.abs((int)(mListener.startY*getScale()));
+		        	 int mw = Math.abs((int)(mListener.arcWidth*getScale()));		        	
+		        	 int mh = Math.abs((int)(mListener.arcHeight*getScale()));
+		             g.drawRect(mx, my, mw,  mh);
+		             g.drawLine( mx + mw / 2, my + mh / 2, (int) Math.abs(mouseX*getScale()),
+		            		 (int) Math.abs(mouseY*getScale()) );			             
 		         } else if ( mListener.state.equals( State.drawArc2 ) ) {
+		        	 int mx = Math.abs((int)(mListener.startX*getScale()));		     
+		        	 int my = Math.abs((int)(mListener.startY*getScale()));
+		        	 int mw = Math.abs((int)(mListener.arcWidth*getScale()));		        	
+		        	 int mh = Math.abs((int)(mListener.arcHeight*getScale()));
 		             if ( mListener.fill ) {
-		                 g2.fillArc( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight,
-		                         mListener.arcStartAngle, mListener.arcAngle );
+		            	 
+		            	 g2.fillArc( mx, my, mw, mh, mListener.arcStartAngle, mListener.arcAngle );
 
 		             } else {
-		                 g2.drawArc( mListener.startX, mListener.startY, mListener.arcWidth, mListener.arcHeight,
-		                         mListener.arcStartAngle, mListener.arcAngle );
+		            	 g2.drawArc( mx, my, mw, mh, mListener.arcStartAngle, mListener.arcAngle );		                
 		             }
 
 			
@@ -201,7 +208,7 @@ public class ClassCanvas extends Canvas{
 		                        g2.setColor( mListener.color );
 		                        g2.fillOval( rectX, rectY, width, height );
 		                 } else if ( mListener.state.equals( State.drawArc ) ) {
-		                     g.drawRect( rectX, rectY, width, height );
+		                     g.drawRect( rectX, rectY, width, height );		                   
 		                 } else if ( mListener.state.equals( State.drawFilledArc ) ) {
 		                     g.drawRect( rectX, rectY, width, height );
 		        }        

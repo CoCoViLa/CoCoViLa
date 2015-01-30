@@ -456,7 +456,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         }
         if ( state.equals( State.drawArc2 ) ) {
             Arc arc = new Arc( startX, startY, arcWidth, arcHeight, arcStartAngle, arcAngle, 
-                    Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );
+                    Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );            
+    		
             addShape( arc );
             setState( State.selection );
         }
@@ -699,8 +700,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             if ( state.equals( State.drawFilledArc ) ) {
                 fill = true;
             }
-            canvas.mouseX = x;
-            canvas.mouseY = y;
+            canvas.mouseX = e.getX();
+            canvas.mouseY = e.getY();
         } else if ( state.equals( State.drawText ) ) {
             startX = x;
             startY = y;
@@ -763,9 +764,11 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
             }
         }        
-        if ( state.equals( State.drawArc1 ) || state.equals( State.drawArc2 ) )
+        if ( state.equals( State.drawArc1 ) || state.equals( State.drawArc2 ) ){
+        	canvas.mouseX = e.getX();
+        	canvas.mouseY = e.getY();
         	canvas.drawingArea.repaint();
-        
+        }
         if ( State.isAddObject( state ) && canvas.getCurrentObj() != null ) {
             // if we're adding a new object...
 
@@ -935,9 +938,14 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             addShape(oval);
             canvas.drawingArea.repaint();
         } else if ( state.equals( State.drawArc ) || state.equals( State.drawFilledArc ) ) {
-            arcWidth = Math.abs( canvas.mouseX - startX );
-            arcHeight = Math.abs( canvas.mouseY - startY );
-            setState( State.drawArc1 );
+            /*arcWidth = Math.abs(  (int) Math.abs(canvas.mouseX/canvas.getScale()) - startX );
+            arcHeight = Math.abs( (int) Math.abs(canvas.mouseY/canvas.getScale()) - startY );*/
+        	/*  	
+    		height = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY); Math.abs( canvas.mouseY - startY );*/
+        	  arcWidth =(int) Math.abs(( canvas.mouseX/canvas.getScale()) - startX);
+              arcHeight = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY);
+              System.out.println("arcWidth , Height " + arcWidth + ", " + arcHeight);
+              setState( State.drawArc1 );
         } else if ( state.equals( State.drawLine ) ) {
          //   System.out.println("startX, startY " + startX + ", " + this.startY);
        //     System.out.println("canvas.mouseX, canvas.mouseY " + canvas.mouseX + ", " + canvas.mouseY);
