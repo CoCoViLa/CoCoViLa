@@ -723,7 +723,7 @@ public class SpecParser {
      * @throws IOException
      * @throws SpecParseException
      */
-    static void parseSpecClass(String className, String path, ClassList classList) throws IOException, SpecParseException {
+    public static void parseSpecClass(String className, String path, ClassList classList) throws SpecParseException {
 
         new SpecParser(path).checkSpecClass(null, null, classList, className);
     }

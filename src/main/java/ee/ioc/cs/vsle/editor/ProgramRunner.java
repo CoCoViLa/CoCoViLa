@@ -264,7 +264,7 @@ public class ProgramRunner {
             
             long start = System.currentTimeMillis();
 
-            ParsedSpecificationContext parsedSpecificationContext = SpecParserUtil.parseSpec(fullSpec, schemeContainer.getWorkDir(), schemeObjects);
+            ParsedSpecificationContext parsedSpecificationContext = SpecParserUtil.parseFromString(fullSpec, schemeContainer.getWorkDir(), schemeObjects);
             mainClassName = parsedSpecificationContext.mainClassName;
             classList = parsedSpecificationContext.classList;
 

@@ -75,6 +75,7 @@ public class SpecificationLoader {
 	}
 	
 	protected AnnotatedClass loadSpecification(CharStream input, String specificationName) {
+		logger.trace("Load specification '{}'", specificationName);
 		SpecificationLanguageLexer lexer = new SpecificationLanguageLexer(input);
 		TokenStream token = new CommonTokenStream(lexer);
 		SpecificationLanguageParser parser = new SpecificationLanguageParser(token);
@@ -96,7 +97,7 @@ public class SpecificationLoader {
 	}
 	
 	public boolean isSchemeObject(String objectName) {
-		return schemeObjectSet.contains(objectName);
+		return schemeObjectSet != null && schemeObjectSet.contains(objectName);
 	}
 	
 	public static class SpecificationNotFoundException extends SpecParseException{
