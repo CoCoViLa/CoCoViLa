@@ -68,11 +68,13 @@ public abstract class ClassPainter implements Cloneable {
     protected Scheme scheme;
     
     /**
-     * This method is called every time the scheme is repainted after
-     * drawing all the visual classes and connections.
+     * This method is called every time the scheme is being repainted.
      * It is possible to draw almost anything on the scheme without
      * any restrictions. However, long computations should be avoided
      * or the user interface will become unresponsive.
+     *
+     * To paint visual class's original graphics,
+     * call vclass.drawClassGraphics( graphics, scale );
      * 
      * @param graphics the graphics object in which the whole scheme is painted
      * @param scale the factor by which the scheme view is currently scaled
