@@ -57,6 +57,8 @@ public class SpecParser {
     private final SpecificationSourceProvider<String> specSourceProvider;
     private final String packagePath;
 
+    private String rootClassName;
+
     public SpecParser(String packagePath) {
         this.packagePath = packagePath;
         specSourceProvider = new FileSourceProvider();
@@ -311,6 +313,8 @@ public class SpecParser {
 
     public ClassList parseSpecification( String fullSpec, String mainClassName, Set<String> schemeObjects ) {
 
+        rootClassName = mainClassName;
+
         long start = System.currentTimeMillis();
         
         ClassList classes = parseSpecificationImpl( refineSpec( fullSpec ), mainClassName, schemeObjects,
@@ -433,7 +437,7 @@ public class SpecParser {
                             /* ****** SPEC_OBJECT_NAME ****** */
                             // add the following relation only if the object
                             // exists on a given scheme
-                            if ( schemeObjects != null && specClass && ( className == TYPE_THIS )
+                            if ( schemeObjects != null && specClass && ( className.equals(rootClassName) )
                                     && schemeObjects.contains( vars[ i ] ) ) {
                                 var.setSchemeObject(true);
                                 String s = vars[ i ] + "." + CodeGenerator.SPEC_OBJECT_NAME;

@@ -675,7 +675,7 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 			classField.setStatic(isStatic);
 			annotatedClass.addField(classField);
 			//If object of currient type is on scheme
-            if ( isSpecificationClass() && TYPE_THIS.equals(annotatedClass.getName())  && specificationLoader.isSchemeObject(name)) {
+            if ( isSpecificationClass() && annotatedClass.getName().equals(specificationName)  && specificationLoader.isSchemeObject(name)) {
                 String s = name + "." + CodeGenerator.SPEC_OBJECT_NAME;
                 String meth = s + " = " + "\"" + name + "\"";
 
