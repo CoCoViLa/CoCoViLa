@@ -58,7 +58,7 @@ public class Synthesizer {
     public static String makeProgramText( ParsedSpecificationContext context, boolean computeAll, ProgramRunner runner ) throws SpecParseException {
 
         // call the Problem Creator to create a problem from the specification
-        Problem problem = new ProblemCreator(context.classList).makeProblem(context.mainClassName);
+        Problem problem = new ProblemCreator(context.classList, context.mainClassName).makeProblem();
             
         // run the planner on the obtained problem
         EvaluationAlgorithm algorithm = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
@@ -224,7 +224,7 @@ public class Synthesizer {
                 contextClassName ).getFields();
         subtaskCR.addInputs( inputs, varsForSubtask );
         subtaskCR.addOutputs( outputs, varsForSubtask );
-        subtask = new ProblemCreator(classList).makeIndependentSubtask( subtaskCR );
+        subtask = new ProblemCreator(classList, null).makeIndependentSubtask( subtaskCR );
         //get problem graph
         Problem problemContext = subtask.getContext();
         //construct an algorithm

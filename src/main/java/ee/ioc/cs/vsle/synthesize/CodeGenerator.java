@@ -6,7 +6,6 @@ import java.util.*;
 import java.util.regex.*;
 
 import ee.ioc.cs.vsle.api.*;
-import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.table.*;
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
@@ -120,7 +119,7 @@ public class CodeGenerator {
         
         for ( SubtaskRel subtask : rel.getSubtasks() ) {
 
-            int subNum = subCount++;
+            int subNum = ++subCount;
             
             StringBuilder bufSbtClass = new StringBuilder();
             
@@ -246,8 +245,13 @@ public class CodeGenerator {
      * @return name of the generated class
      */
     static String genIndependentSubtask(SubtaskRel subtask, EvaluationAlgorithm subAlg, StringBuilder classCode) {
-        
-        return new CodeGenerator().genSubtask( subAlg, classCode, null, null, null, subtask, 0 );
+
+        final CodeGenerator codeGenerator = new CodeGenerator();
+        final String className = codeGenerator.genSubtask(subAlg, classCode, null, null, null, subtask, 0);
+        for(IndSubt subtaskCode : codeGenerator.independentSubtasks.values()) {
+            classCode.append(subtaskCode.code);
+        }
+        return className;
     }
     
     private String generateFieldDeclaration( String parentClassName, String sbName, Set<Var> usedVars, Problem _problem ) {
