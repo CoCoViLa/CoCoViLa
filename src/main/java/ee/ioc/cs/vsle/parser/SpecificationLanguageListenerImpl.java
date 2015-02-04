@@ -717,7 +717,8 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 			String type = typeCtx.getText();
 			try{
 				classFieldAnnotatedClass = specificationLoader.getSpecification(type);
-			}catch(SpecificationNotFoundException e){
+			}
+			catch(SpecificationNotFoundException e) {
 				//TODO: check if it is not java class and throw exception if it is so.
 			}
 			this.type = type;

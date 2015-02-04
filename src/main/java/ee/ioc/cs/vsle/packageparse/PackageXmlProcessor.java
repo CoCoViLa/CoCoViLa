@@ -160,7 +160,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                     pack.setPainters( true );
             }
             
-            logger.info( "Package parsing finished in " + ( System.currentTimeMillis() - startParsing ) + "ms.\n");
+            logger.info( "Parsing the package '{}' finished in {}ms.\n", pack.getName(), ( System.currentTimeMillis() - startParsing ));
         } catch ( Exception e ) {
             collector.collectDiagnostic( e.getMessage(), true );
             if(RuntimeProperties.isLogDebugEnabled()) {
