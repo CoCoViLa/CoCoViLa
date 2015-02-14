@@ -40,6 +40,7 @@ public class ClassRelation {
 	private Collection<SubtaskClassRelation> subtasks = new LinkedHashSet<SubtaskClassRelation>();
 	protected Collection<ClassField> outputs = new LinkedHashSet<ClassField>();
 	private Collection<ClassField> exceptions = new LinkedHashSet<ClassField>();
+  private Collection<StatementAnnotation> annotations;
 
 	/**
 	 * Type of the relation. 2 - javamethod 3 - equation(and assignment) 4 -
@@ -208,13 +209,6 @@ public class ClassRelation {
     exceptions.add(cf);
 	}
 	
-	/**
-	 * @param subtaskList
-	 *            ArrayList
-	 * @param varList
-	 *            ArrayList
-	 * @throws ee.ioc.cs.vsle.synthesize.UnknownVariableException
-	 */
 	public void addSubtask(SubtaskClassRelation subtask) {
 		subtasks.add(subtask);
 	} // addSubtasks
@@ -245,4 +239,11 @@ public class ClassRelation {
 				+ method + "][Type: " + type + "]";
 	} // toString
 
+  public Collection<StatementAnnotation> getAnnotations() {
+    return annotations;
+  }
+
+  public void setAnnotations(Collection<StatementAnnotation> annotations) {
+    this.annotations = annotations;
+  }
 }

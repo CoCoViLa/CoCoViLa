@@ -20,9 +20,13 @@ superMetaInterface
 	;
 	
 specification
-    :	( statement ';' )*
+    : ( annotatedStatement ';' )*
     ;
-   
+
+annotatedStatement
+   : annotation* statement
+   ;
+
 statement
     : variableDeclaration | variableAssignment | axiom
     | goal | aliasDeclaration | aliasDefinition | equation 
