@@ -316,7 +316,8 @@ public class Editor extends JFrame implements ChangeListener {
         menu.add( submenuRecent );
         final JMenu menuScheme = new JMenu( Menu.MENU_SCHEME );
         menuScheme.setMnemonic( KeyEvent.VK_S );
-
+        makeSchemeMenu( menuScheme );
+      
         menuScheme.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
 
             @Override
