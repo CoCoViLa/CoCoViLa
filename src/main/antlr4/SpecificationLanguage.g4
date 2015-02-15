@@ -60,8 +60,14 @@ variableAssignment
 	;
 	
 axiom
-	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) )? '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' (method = Identifier | lambda = lambdaExpression) '}'
+	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) )? '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' axiomRealization '}'
 	;
+
+axiomRealization
+    : Identifier        #method
+    | '@table'          #expertTable
+    | lambdaExpression  #lambda
+    ;
 
 subtask
 	//dependent

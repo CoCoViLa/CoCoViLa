@@ -203,21 +203,19 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 	public void enterEquation(EquationContext ctx) {
 		solveEquation(ctx.getText());
 	}
-	
-	@Override
-	public void enterAxiom(AxiomContext ctx) {
+
+  @Override
+  public void enterAxiom(AxiomContext ctx) {
     SubtaskListContext subtaskListContext = ctx.subtaskList();
-		List<SubtaskContext> subtaskContextList = subtaskListContext == null ? Collections.<SubtaskContext>emptyList() : subtaskListContext.subtask();
-		List<VariableIdentifierContext> outputVariableContextList = ctx.outputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.outputVariables.variableIdentifier();
-		List<VariableIdentifierContext> iputVariableContextList = ctx.inputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.inputVariables.variableIdentifier();
-		String method = ctx.method.getText();
+    List<SubtaskContext> subtaskContextList = subtaskListContext == null ? Collections.<SubtaskContext>emptyList() : subtaskListContext.subtask();
+    List<VariableIdentifierContext> outputVariableContextList = ctx.outputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.outputVariables.variableIdentifier();
+    List<VariableIdentifierContext> iputVariableContextList = ctx.inputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.inputVariables.variableIdentifier();
 
 //        if ( statement.getOutputs().length > 0 ) {
 //            if ( statement.getOutputs()[ 0 ].indexOf( "*" ) >= 0 ) {
 //                getWildCards( classList, statement.getOutputs()[ 0 ] );
 //            }
 //        }
-		
     ClassRelation classRelation = new ClassRelation( RelType.TYPE_JAVAMETHOD, ctx.getText());
     classRelation.setAnnotations(currentStatementAnnotations);
         
@@ -227,70 +225,77 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 //                    + className + ".\nAn axiom can not have an empty output." );
 //        }
 
-        for (VariableIdentifierContext oututVariableContext : outputVariableContextList) {
-        	classRelation.addOutput(oututVariableContext.getText(), annotatedClass.getFields() );
-		}
+    for (VariableIdentifierContext oututVariableContext : outputVariableContextList) {
+      classRelation.addOutput(oututVariableContext.getText(), annotatedClass.getFields() );
+    }
 
-		classRelation.setMethod(method);
+    final AxiomRealizationContext axiomRealizationContext = ctx.axiomRealization();
+    if (axiomRealizationContext instanceof MethodContext) {
+      String method = ((MethodContext)axiomRealizationContext).Identifier().getText();
+      classRelation.setMethod(method);
+    }
+    else if (axiomRealizationContext instanceof ExpertTableContext) {
+      classRelation.setMethod(Table.TABLE_KEYWORD);
+      classRelation.getExceptions().clear();
+      classRelation.getExceptions().add( new ClassField( "java.lang.Exception", "exception" ) );
+    }
+    else if (axiomRealizationContext instanceof LambdaContext) {
+      throw new IllegalStateException("Lambdas not implemented yet");
+    }
 
-        if( Table.TABLE_KEYWORD.equals( classRelation.getMethod() ) ) {
-            classRelation.getExceptions().clear();
-            classRelation.getExceptions().add( new ClassField( "java.lang.Exception", "exception" ) );
-        }
+    for (VariableIdentifierContext inputVariableContext : iputVariableContextList) {
+      String variableName = checkAliasLength(inputVariableContext.getText());
+      classRelation.addInput(variableName, annotatedClass.getFields() );
+    }
 
-        for (VariableIdentifierContext inputVariableContext : iputVariableContextList) {
-        	String variableName = checkAliasLength(inputVariableContext.getText());
-        	classRelation.addInput(variableName, annotatedClass.getFields() );
-		}
-        
-        for (SubtaskContext subtaskContext : subtaskContextList) {
-        	String contextName = subtaskContext.context == null ? null : subtaskContext.context.getText();
-        	List<VariableIdentifierContext> subtaskInputVariableContextList =
-									subtaskContext.inputVariables != null
-													? subtaskContext.inputVariables.variableIdentifier()
-													: Collections.<VariableIdentifierContext>emptyList();
-        	List<VariableIdentifierContext> subtaskOutputVariableContextList = subtaskContext.outputVariables.variableIdentifier();
-        	
-        	Collection<ClassField> varsForSubtask = annotatedClass.getFields();
-        	SubtaskClassRelation subtask;
-        	
-        	// this denotes independant subtask,
-        	// have to make sure that this class has
-        	// already been parsed
-        	if ( contextName != null ) {
-        		AnnotatedClass context = specificationLoader.getSpecification(contextName);
-        		varsForSubtask = context.getFields();
-        		
-        		ClassField contextCF = new ClassField( "_" + contextName.toLowerCase(), contextName, true );
-        		
-        		subtask = SubtaskClassRelation.createIndependentSubtask( subtaskContext.getText(), contextCF );
-        	} else {
-        		subtask = SubtaskClassRelation.createDependentSubtask( subtaskContext.getText() );
-        	}
-        	
-        	for (VariableIdentifierContext subtaskOutputVariable : subtaskOutputVariableContextList) {
-        		subtask.addOutput( subtaskOutputVariable.getText(), varsForSubtask );
-			}
-        	for (VariableIdentifierContext subtaskInputVariableContext : subtaskInputVariableContextList) {
-        		subtask.addInput(subtaskInputVariableContext.getText(), varsForSubtask );
-			}
-        	
-        	classRelation.addSubtask( subtask );
-		}
-        
-        if (!subtaskContextList.isEmpty())
-        	classRelation.setType( RelType.TYPE_METHOD_WITH_SUBTASK );
-          logger.debug( classRelation.toString() );
+    for (SubtaskContext subtaskContext : subtaskContextList) {
+      String contextName = subtaskContext.context == null ? null : subtaskContext.context.getText();
+      List<VariableIdentifierContext> subtaskInputVariableContextList =
+              subtaskContext.inputVariables != null
+                      ? subtaskContext.inputVariables.variableIdentifier()
+                      : Collections.<VariableIdentifierContext>emptyList();
+      List<VariableIdentifierContext> subtaskOutputVariableContextList = subtaskContext.outputVariables.variableIdentifier();
 
-        if(ctx.exceptionList() != null) {
-          for(ClassOrInterfaceTypeContext ct : ctx.exceptionList().classOrInterfaceType()) {
-            classRelation.addException(ct.getText());
-          }
-        }
-        
-        annotatedClass.addClassRelation( classRelation );
-	}
-	
+      Collection<ClassField> varsForSubtask = annotatedClass.getFields();
+      SubtaskClassRelation subtask;
+
+      // this denotes independant subtask,
+      // have to make sure that this class has
+      // already been parsed
+      if ( contextName != null ) {
+        AnnotatedClass context = specificationLoader.getSpecification(contextName);
+        varsForSubtask = context.getFields();
+
+        ClassField contextCF = new ClassField( "_" + contextName.toLowerCase(), contextName, true );
+
+        subtask = SubtaskClassRelation.createIndependentSubtask( subtaskContext.getText(), contextCF );
+      } else {
+        subtask = SubtaskClassRelation.createDependentSubtask( subtaskContext.getText() );
+      }
+
+      for (VariableIdentifierContext subtaskOutputVariable : subtaskOutputVariableContextList) {
+        subtask.addOutput( subtaskOutputVariable.getText(), varsForSubtask );
+      }
+      for (VariableIdentifierContext subtaskInputVariableContext : subtaskInputVariableContextList) {
+        subtask.addInput(subtaskInputVariableContext.getText(), varsForSubtask );
+      }
+
+      classRelation.addSubtask( subtask );
+    }
+
+    if (!subtaskContextList.isEmpty())
+      classRelation.setType( RelType.TYPE_METHOD_WITH_SUBTASK );
+    logger.debug( classRelation.toString() );
+
+    if(ctx.exceptionList() != null) {
+      for(ClassOrInterfaceTypeContext ct : ctx.exceptionList().classOrInterfaceType()) {
+        classRelation.addException(ct.getText());
+      }
+    }
+
+    annotatedClass.addClassRelation( classRelation );
+  }
+
   @Override
 	public void enterAliasDeclaration(AliasDeclarationContext ctx) {
 		String aliasName = ctx.Identifier().getText();
