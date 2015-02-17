@@ -194,6 +194,17 @@ public class VariableDeclarationTest extends AbstractParserTest {
     ClassField PI = checkVarAndType(ac, "PI", "double");
     assertTrue("Should be constant", PI.isConstant());
     assertEquals("3.14", PI.getValue());
+    assertTrue("Should be no class relations", ac.getClassRelations().size() == 0);
+  }
+
+  @Test
+  public void testConstantPrimitiveTypeDeclaration_withAssignmentFromExternalClass() {
+    String spec = "const double PI = Math.PI;";
+    AnnotatedClass ac = loadSpec(spec);
+    ClassField PI = checkVarAndType(ac, "PI", "double");
+    assertTrue("Should be constant", PI.isConstant());
+    assertEquals("Math.PI", PI.getValue());
+    assertTrue("Should be no class relations", ac.getClassRelations().size() == 0);
   }
 
   @Test(expected = SpecParseException.class)

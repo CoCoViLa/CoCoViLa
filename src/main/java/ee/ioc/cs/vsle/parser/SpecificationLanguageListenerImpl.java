@@ -121,21 +121,22 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 	public void enterConstantVariable(ConstantVariableContext ctx) {
 		classFieldDeclarator.setConstant(true);
 	}
-	
-	public void variableDeclarator(String name, String value, boolean solveEquation) {
-		if(classFieldDeclarator.isConstant){
-			classFieldDeclarator.addClassField(name, value);
-			if(solveEquation)
-				solveEquation(name.concat("=").concat(value));
-		}else{
-			classFieldDeclarator.addClassField(name);
-			if(solveEquation)
-				solveEquation(name.concat("=").concat(value));
-			else
-				assignVariable(name, value);
-		}
-	}
-	
+
+  public void variableDeclarator(String name, String value, boolean solveEquation) {
+    if (classFieldDeclarator.isConstant){
+      classFieldDeclarator.addClassField(name, value);
+    }
+    else {
+      classFieldDeclarator.addClassField(name);
+      if (solveEquation) {
+        solveEquation(name.concat("=").concat(value));
+      }
+      else {
+        assignVariable(name, value);
+      }
+    }
+  }
+
 	@Override
 	public void enterVariableDeclaratorAssigner(VariableDeclaratorAssignerContext ctx) {
 		VariableAssignerContext variableAssignerContext = ctx.variableAssigner();
