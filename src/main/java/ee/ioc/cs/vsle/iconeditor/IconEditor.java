@@ -1661,8 +1661,6 @@ public class IconEditor extends JFrame {
 
         Look.getInstance().initDefaultLnF();
 
-        Editor.extractPackages();
-
         createAndOpen();
     }
 

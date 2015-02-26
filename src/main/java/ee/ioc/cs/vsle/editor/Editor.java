@@ -317,7 +317,7 @@ public class Editor extends JFrame implements ChangeListener {
         final JMenu menuScheme = new JMenu( Menu.MENU_SCHEME );
         menuScheme.setMnemonic( KeyEvent.VK_S );
         makeSchemeMenu( menuScheme );
-      
+
         menuScheme.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
 
             @Override
@@ -693,8 +693,6 @@ public class Editor extends JFrame implements ChangeListener {
 
         Look.getInstance().initDefaultLnF();
 
-        extractPackages();
-        
         final Editor window = new Editor();
         s_instance = window;
         
@@ -764,22 +762,6 @@ public class Editor extends JFrame implements ChangeListener {
                 RuntimeProperties.setFromWebstart();
                 break;
             }
-        }
-    }
-    
-    public static void extractPackages()
-    {
-        //if apps was run for the first time from webstart
-        //ask user if he wants to unpack demo packages
-        if ( RuntimeProperties.isFromWebstart() && RuntimeProperties.isCleanInstall() ) {
-            int res = JOptionPane.showConfirmDialog( null,
-                    "Extract demo packages into \""
-                    + ( RuntimeProperties.getWorkingDirectory()
-                            + "packages" + File.separator ) + "\" ?",
-                            "", JOptionPane.YES_NO_OPTION );
-
-            if ( res == JOptionPane.YES_OPTION )
-                SystemUtils.unpackPackages();
         }
     }
 
