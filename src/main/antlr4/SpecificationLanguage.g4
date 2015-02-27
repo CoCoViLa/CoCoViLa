@@ -140,15 +140,13 @@ inArrayVariableAssigner
 
 variableAssigner
     :   array
-    |	StringLiteral
     /*
       FIXME - string literals as arguments don't work, that's because creator's subtree refs to 'expression' but it is overriden in this grammar,
       if StringLiterals are enabled in 'term', equation solver will fail
     */
     //|   'new' classOrInterfaceType '(' expression (',' expression)* ')'
     |	'new' creator
-    |	'true'
-    |	'false'
+    | literal
     ;
     
 variableInitializer
