@@ -194,6 +194,59 @@ public class VariableDeclarationTest extends AbstractParserTest {
     ClassField PI = checkVarAndType(ac, "PI", "double");
     assertTrue("Should be constant", PI.isConstant());
     assertEquals("3.14", PI.getValue());
+    assertTrue("Should be no class relations", ac.getClassRelations().size() == 0);
+  }
+
+  @Test
+  public void testPrimitiveCharTypeDeclaration_withAssignment() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
+    String spec = "char c = '+';";
+    AnnotatedClass ac = loadSpec(spec);
+    checkVarAndType(ac, "c", "char");
+    assertClassRelation(ac, RelType.TYPE_EQUATION, vars(), vars("c"), "c = '+'");
+  }
+
+  @Test
+  public void testPrimitiveCharTypeDeclaration_separateDeclAndAssignment() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
+    String spec = "char c;" +
+                  "c = '+';";
+    AnnotatedClass ac = loadSpec(spec);
+    checkVarAndType(ac, "c", "char");
+    assertClassRelation(ac, RelType.TYPE_EQUATION, vars(), vars("c"), "c = '+'");
+  }
+
+  @Test
+  public void testPrimitiveBooleanTypeDeclaration_withAssignment() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
+    String spec = "boolean b = true;";
+    AnnotatedClass ac = loadSpec(spec);
+    checkVarAndType(ac, "b", "boolean");
+    assertClassRelation(ac, RelType.TYPE_EQUATION, vars(), vars("b"), "b = true");
+  }
+
+  @Test
+  public void testPrimitiveBooleanTypeDeclaration_separateDeclAndAssignment() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
+    String spec = "boolean b;" +
+                  "b = false;";
+    AnnotatedClass ac = loadSpec(spec);
+    checkVarAndType(ac, "b", "boolean");
+    assertClassRelation(ac, RelType.TYPE_EQUATION, vars(), vars("b"), "b = false");
+  }
+
+  @Test
+  public void testConstantPrimitiveTypeDeclaration_withAssignmentFromExternalClass() {
+    String spec = "const double PI = Math.PI;";
+    AnnotatedClass ac = loadSpec(spec);
+    ClassField PI = checkVarAndType(ac, "PI", "double");
+    assertTrue("Should be constant", PI.isConstant());
+    assertEquals("Math.PI", PI.getValue());
+    assertTrue("Should be no class relations", ac.getClassRelations().size() == 0);
   }
 
   @Test(expected = SpecParseException.class)

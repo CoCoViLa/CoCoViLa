@@ -1,123 +1,133 @@
 grammar SpecificationLanguage;
 
-
 options {
   language = Java;
 }
 
-@members{
-	
-}
-
-
 metaInterface
-    :	'specification' Identifier (superMetaInterface)?
-    	'{' specification '}'
-	;
-	
-superMetaInterface
-	:	'super' classOrInterfaceType (',' classOrInterfaceType)*
-	;
-	
-specification
-    :	( statement ';' )*
+    :   'specification' Identifier (superMetaInterface)? '{' specification '}'
     ;
    
+superMetaInterface
+    :   'super' classOrInterfaceType (',' classOrInterfaceType)*
+    ;
+   
+specification
+    : ( annotatedStatement ';' )*
+    ;
+
+annotatedStatement
+    : annotation* statement
+    ;
+
 statement
     : variableDeclaration | variableAssignment | axiom
     | goal | aliasDeclaration | aliasDefinition | equation 
     ;
-	
+   
 variableDeclaration
-	:	variableModifier? type variableDeclarator (',' variableDeclarator)*
-	;
-	
+    :   variableModifier? type variableDeclarator (',' variableDeclarator)*
+    ;
+   
 variableModifier
-	:	'static'	# staticVariable
-	|	'const'		# constantVariable
-	;
+    :   'static'   # staticVariable
+    |   'const'    # constantVariable
+    ;
 
 variableDeclarator
-	:	Identifier ('=' variableInitializer)?						# variableDeclaratorInitializer
-	|	Identifier ('=' variableAssigner)							# variableDeclaratorAssigner 
-	|	Identifier ('(' specificationVariableDeclaration ')')?		# specificationVariable
-	;
+    :   Identifier ('=' variableInitializer)?                   # variableDeclaratorInitializer
+    |   Identifier ('=' variableAssigner)                       # variableDeclaratorAssigner
+    |   Identifier ('(' specificationVariableDeclaration ')')?  # specificationVariable
+    ;
 
 specificationVariableDeclaration
-	:	specificationVariableDeclarator (',' specificationVariableDeclarator)*
-	;
+    :   specificationVariableDeclarator (',' specificationVariableDeclarator)*
+    ;
 
 specificationVariableDeclarator
-	:	Identifier '=' expression
-	;
+    :   Identifier '=' expression
+    ;
 
 variableAssignment
-	:	variableIdentifier '=' variableAssigner
-	;
-	
+    :   variableIdentifier '=' variableAssigner
+    ;
+   
 axiom
-	:	( inputVariables = variableIdentifierList | subtaskList | (subtaskList ',' inputVariables = variableIdentifierList) )? '->' outputVariables = variableIdentifierList (',' exceptionList)? '{' (method = Identifier | lambda = lambdaExpression) '}'
-	;
+    :   ( inputVariables = variableIdentifierList
+        | subtaskList
+        | (subtaskList ',' inputVariables = variableIdentifierList)
+        )?
+        '->'
+        outputVariables = variableIdentifierList
+        (',' exceptionList)?
+        '{' axiomRealization '}'
+    ;
+
+axiomRealization
+    : Identifier        #method
+    | '@table'          #expertTable
+    | lambdaExpression  #lambda
+    ;
 
 subtask
-	//dependent
-	:	'[' inputVariables = variableIdentifierList '->' outputVariables = variableIdentifierList ']'
-	//independent
-	|	'[' (context = classOrInterfaceType '|-')? (inputVariables = variableIdentifierList)? '->' outputVariables = variableIdentifierList ']'
-	;
-	
+     //dependent
+    :   '[' inputVariables = variableIdentifierList '->' outputVariables = variableIdentifierList ']'
+    //independent
+    |   '[' (context = classOrInterfaceType '|-')? (inputVariables = variableIdentifierList)? '->' outputVariables = variableIdentifierList ']'
+    ;
+   
 subtaskList
-	:	subtask (',' subtask)*
-	;
+    :   subtask (',' subtask)*
+    ;
 
 exceptionList
-	:	'(' classOrInterfaceType ')' (',' '(' classOrInterfaceType ')')*
-	;
-	
+    :   '(' classOrInterfaceType ')' (',' '(' classOrInterfaceType ')')*
+    ;
+   
 goal
-	:	inputVariables = variableIdentifierList? '->' outputVariables = variableIdentifierList	
-	;
-	
+    :   inputVariables = variableIdentifierList? '->' outputVariables = variableIdentifierList
+    ;
+   
 aliasDeclaration
-	:	'alias' ('(' type')')? Identifier ('=' aliasStructure)?
-	;
-	
+    :   'alias' ('(' type')')? Identifier ('=' aliasStructure)?
+    ;
+   
 aliasStructure
-	:	('('|'[') ( variableAlias=variableIdentifierList | wildcardAliasName = wildcardAlias )(')'|']')
-	;
-	
+    :   ('('|'[') ( variableAlias=variableIdentifierList | wildcardAliasName = wildcardAlias )(')'|']')
+    ;
+   
 wildcardAlias
-	:	'*.' Identifier
-	;
+    :   '*.' Identifier
+    ;
 
 aliasDefinition
-	:	variableIdentifier '=' aliasStructure
-	;
+    :   variableIdentifier '=' aliasStructure
+    ;
 
 type
-	:	classOrInterfaceType ('[' ']')*
-	|	primitiveType ('[' ']')*
-	|	'void'
-	;
+    :   classOrInterfaceType ('[' ']')*
+    |   primitiveType ('[' ']')*
+    |   'void'
+    ;
 
 equation
-	:	left = expression '=' right = expression
-	;
+    :   left = expression '=' right = expression
+    ;
 
 expression
-	:	term
-	|	'(' expression ')'
-	|	'-' expression
-	|	Identifier '(' expression ')'
-	|	left = expression op=('*' | '/') right = expression
-	|	left = expression op=('+' | '-') right = expression
+    :   term
+    |   '(' expression ')'
+    |   '-' expression
+    |   Identifier '(' expression ')'
+    |   left = expression op=('*' | '/') right = expression
+    |   left = expression op=('+' | '-') right = expression
     |   expression '^' expression
-	;
-	
+    ;
+   
 term
-    :	IntegerLiteral
-    |	FloatingPointLiteral
-    |	variableIdentifier
+    :   IntegerLiteral
+    |   FloatingPointLiteral
+    |   variableIdentifier
     ;
 
 array
@@ -125,20 +135,18 @@ array
     ;
     
 inArrayVariableAssigner
-	:	variableAssigner | variableInitializer
-	;
+    :   variableAssigner | variableInitializer
+    ;
 
 variableAssigner
     :   array
-    |	StringLiteral
     /*
       FIXME - string literals as arguments don't work, that's because creator's subtree refs to 'expression' but it is overriden in this grammar,
       if StringLiterals are enabled in 'term', equation solver will fail
     */
     //|   'new' classOrInterfaceType '(' expression (',' expression)* ')'
-    |	'new' creator
-    |	'true'
-    |	'false'
+    |   'new' creator
+    | literal
     ;
     
 variableInitializer
@@ -147,70 +155,43 @@ variableInitializer
     ;
 
 variableIdentifier
-	:	Identifier (('.' Identifier | '*') )* ALIAS_ELEMENT_REF*  ('.' variableIdentifier)?//orig
-	|	Identifier '.*' ALIAS_ELEMENT_REF+
-	|	Identifier '.*'  ('.' variableIdentifier)+
-	;
-	
+    :   Identifier (('.' Identifier | '*') )* ALIAS_ELEMENT_REF*  ('.' variableIdentifier)?//orig
+    |   Identifier '.*' ALIAS_ELEMENT_REF+
+    |   Identifier '.*'  ('.' variableIdentifier)+
+    ;
+   
 variableIdentifierList
-	:	variableIdentifier (',' variableIdentifier )*
-	;
-
-/*
-NUMBER
-    : INTEGER ('.' INTEGER)? (('e' | 'E') ('-'|'+')?INTEGER+)?
+    :   variableIdentifier (',' variableIdentifier )*
     ;
-	
-INTEGER
-    : '0'..'9'+
-    ;
-*/
-
-/*
-STRING :	'"' (ESC|.)*? '"' ;
-fragment ESC :	'\\"' | '\\\\' ;
-*/
-
-/*
-Identifier
-	:	LETTER LETTER_OR_DNUMBER*
-	;
-fragment LETTER : [a-zA-Z$_];
-fragment LETTER_OR_DNUMBER : [a-zA-Z0-9$_];
-*/
 
 ALIAS_ELEMENT_REF
-	:	'.' DecimalIntegerLiteral+
-	;
-
-//WS : [ \t\r\n]+ -> skip ;
-//COMMENT : '//' .*? '\r'? '\n' -> skip;
-//BLOCK_COMMENT : '/*' .*? '*/' -> skip;
+    :   '.' DecimalIntegerLiteral+
+    ;
 
 JAVA_BEFORE_SPEC : .*? '/*@' -> skip;
-JAVA_AFTER_SPEC : '@*/' .*? -> skip;   	
+JAVA_AFTER_SPEC : '@*/' .*? -> skip;
 
 
 /* JAVA 8 GRAMMAR */
 
 lambdaExpression
-	:	lambdaParameters '->' lambdaBody
-	;
+    :   lambdaParameters '->' lambdaBody
+    ;
 
 lambdaParameters
-	:	Identifier
-	|	'(' formalParameterList? ')'
-	|	'(' inferredFormalParameterList ')'
-	;
+    :   Identifier
+    |   '(' formalParameterList? ')'
+    |   '(' inferredFormalParameterList ')'
+    ;
 
 inferredFormalParameterList
-	:	Identifier (',' Identifier)*
-	;
+    :   Identifier (',' Identifier)*
+    ;
 
 lambdaBody
-	:	javaexpression
-	|	block
-	;
+    :   javaexpression
+    |   block
+    ;
 
 /* JAVA 7 GRAMMAR */
 

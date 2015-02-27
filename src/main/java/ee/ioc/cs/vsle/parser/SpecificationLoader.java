@@ -65,12 +65,20 @@ public class SpecificationLoader {
 		return annotatedClass;
 	}
 	
+	public AnnotatedClass loadSpecification(String specificationCode) {
+		return loadSpecification(specificationCode, null);
+	}
+
 	public AnnotatedClass loadSpecification(String specificationCode, String specificationName) {
 		AnnotatedClass annotatedClass = loadSpecification(new ANTLRInputStream(specificationCode), specificationName);
 		return annotatedClass;
 	}
 	
 	protected AnnotatedClass loadSpecification(CharStream input, String specificationName) {
+		logger.trace("Load specification '{}'", specificationName);
+		if(!input.toString().contains("/*@")) {
+			throw new SpecificationNotFoundException(specificationName);
+		}
 		SpecificationLanguageLexer lexer = new SpecificationLanguageLexer(input);
 		TokenStream token = new CommonTokenStream(lexer);
 		SpecificationLanguageParser parser = new SpecificationLanguageParser(token);
@@ -92,7 +100,7 @@ public class SpecificationLoader {
 	}
 	
 	public boolean isSchemeObject(String objectName) {
-		return schemeObjectSet.contains(objectName);
+		return schemeObjectSet != null && schemeObjectSet.contains(objectName);
 	}
 	
 	public static class SpecificationNotFoundException extends SpecParseException{

@@ -8,6 +8,9 @@ import java.util.List;
 
 import javax.xml.parsers.*;
 
+import ee.ioc.cs.vsle.parser.ParsedSpecificationContext;
+import ee.ioc.cs.vsle.parser.SpecParserUtil;
+import ee.ioc.cs.vsle.parser.SpecificationLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.*;
@@ -119,6 +122,9 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         }
 
     };
+
+    private SpecificationLoader specificationLoader;
+
     /**
      * @param packageFile
      */
@@ -154,7 +160,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                     pack.setPainters( true );
             }
             
-            logger.debug( "Package parsing finished in " + ( System.currentTimeMillis() - startParsing ) + "ms.\n");
+            logger.info( "Parsing the package '{}' finished in {}ms.\n", pack.getName(), ( System.currentTimeMillis() - startParsing ));
         } catch ( Exception e ) {
             collector.collectDiagnostic( e.getMessage(), true );
             if(RuntimeProperties.isLogDebugEnabled()) {
@@ -186,13 +192,30 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         
         //parse all variables declared in the corresponding specification
         if( newClass.getComponentType().hasSpec() ) {
+            final String newClassName = newClass.getName();
             try {
-                Collection<ClassField> specFields = SpecParser.getFields( getPath(), newClass.getName(), ".java" );
-                newClass.setSpecFields( specFields );
-            } catch ( IOException e ) {
-                collector.collectDiagnostic( "Class " + newClass.getName() + " specified in package does not exist." );
+                switch (RuntimeProperties.getSpecParserKind()) {
+                    case REGEXP: {
+                        ClassList classList = new ClassList();
+                        SpecParser.parseSpecClass(newClassName, getPath(), classList);
+                        newClass.setSpecFields(classList.getType(newClassName).getFields());
+                        break;
+                    }
+                    case ANTLR: {
+                        if (specificationLoader == null) {
+                            specificationLoader = new SpecificationLoader(getPath(), null);
+                        }
+                        final AnnotatedClass annotatedClass = specificationLoader.getSpecification(newClassName);
+                        newClass.setSpecFields(annotatedClass.getFields());
+                        break;
+                    }
+                    default:
+                        throw new IllegalStateException("Undefined specification language parser");
+                }
             } catch ( SpecParseException e ) {
-                collector.collectDiagnostic( "Unable to parse the specification of class " + newClass.getName() );
+                final String msg = "Unable to parse the specification of class " + newClassName;
+                logger.error(msg, e);
+                collector.collectDiagnostic(msg + "\nReason: " + e.getMessage() + "\nLine: " + e.getLine());
             }
         }
         
