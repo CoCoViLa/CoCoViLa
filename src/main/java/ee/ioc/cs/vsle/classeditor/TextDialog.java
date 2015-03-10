@@ -27,9 +27,13 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.FileFuncs;
+import ee.ioc.cs.vsle.vclass.GObj;
 
 public class TextDialog extends JDialog {
+	
+
 
 	private JLabel lblFont = new JLabel("Font:");
 	private JLabel lblSize = new JLabel("Size:");
@@ -76,7 +80,25 @@ public class TextDialog extends JDialog {
 	// the calling environment.
 	Font font;
 
+	public TextDialog(ClassEditor editor, GObj obj){
+		
+		
+		 this(editor, obj.getX(), obj.getY(), obj.getWidth(), obj.getHeight(), getString(obj));
+	}
 	public TextDialog(ClassEditor editor, int x, int y, int w, int h) {
+		this(editor, x, y, w, h, null);
+	}
+	
+	private static String getString(GObj obj){
+		String textToEdit = null;
+		if(obj.getShapes() != null && obj.getShapes().size() > 0){
+			Text t = (Text) obj.getShapes().get(0);
+			if(t.getText() != null) textToEdit = t.getText();
+		}
+		return textToEdit;
+	}
+	
+	public TextDialog(ClassEditor editor, int x, int y, int w, int h, String textToEdit) {
 		System.out.println("TextDialog editor " + editor);
 		this.editor = editor;
 		mouseX = x;
@@ -167,7 +189,11 @@ public class TextDialog extends JDialog {
 		taText.setWrapStyleWord(true);
 		taText.setTextAntialiasing(true);
 		taText.setTabSize(4);
-
+		
+		if(textToEdit != null){
+			taText.setText(textToEdit);
+		}
+		
 		pnlText.setLayout(new BorderLayout());
 		pnlText.add(textScrollPane, BorderLayout.CENTER);
 
@@ -361,6 +387,10 @@ public class TextDialog extends JDialog {
 	 * Draw displayed text on the drawing area in the IconEditor
 	 */
 	private void drawText(int x, int y, int h, int w) { 
+		h = Integer.parseInt(this.spinner.getValue().toString());
+		double let = 0.7 * h;
+		w = (int)Math.round((taText.getText().getBytes().length)*let);
+
 		editor.getCurrentCanvas().mListener.drawText(font, color, taText.getText(), x, y, h, w);
 	} // drawText
 
@@ -368,6 +398,7 @@ public class TextDialog extends JDialog {
 		/* default case*/
 		int h = 15; 
 		int w = 50;
+
 		editor.getCurrentCanvas().mListener.drawText(font, color, taText.getText(), x, y, h, w);
 	}
 	/**

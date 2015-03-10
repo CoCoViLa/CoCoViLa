@@ -272,7 +272,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
      * @param text String - the actual string of text drawn.
      */
     public void drawText( Font font, Color color, String text, int x, int y, int h, int w) {
-        Text t = new Text( x, y, w, h, font, Shape.createColorWithAlpha( color, getTransparency() ), text );
+        Text t = new Text( x, y, h, w, font, Shape.createColorWithAlpha( color, getTransparency() ), text );
         addShape(t);
         
         canvas.drawingArea.repaint();
@@ -394,12 +394,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         	 shapes.add(canvas.drawTextForBoundingBox(s.getX() + obj.getWidth(), s.getY()));
         }
   
-       /* if (s instanceof Text) {
-//        	obj.setHeight(15);
-//            obj.setWidth(50); 
-        	obj.setHeight(s.getHeight());
-            obj.setWidth(s.getWidth()); 
-        }*/
+       if (s instanceof Text) {
+    	    s.setY(obj.getHeight());
+        }
         
         obj.setName(s.getClass().getName());
         obj.setShapes(shapes);
@@ -861,7 +858,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                 return;
             state = State.selection;
         } else if ( state.equals( State.resize ) ) {
-        	canvas.finalizeResizeObjects();
+        	//canvas.finalizeResizeObjects();
             state = State.selection;
         } else if ( state.equals( State.dragBox ) ) {
            /* int x1 = Math.min( startX, canvas.mouseX );
