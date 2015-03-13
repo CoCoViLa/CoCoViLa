@@ -43,8 +43,11 @@ public class AnnotatedClass {
 	 */ 
 	 public void addField(ClassField field) {
 		String name = field.getName();
-		classFields.put(name, field);
-		allFields.put(name, field);
+     if (hasField(name)) {
+       throw new SpecParseException( "Variable " + name + " declared more than once in class " + getName() );
+     }
+     classFields.put(name, field);
+     allFields.put(name, field);
 	} // addField
 
 //	/**

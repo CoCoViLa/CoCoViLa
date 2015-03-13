@@ -298,18 +298,21 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
   }
 
   @Override
-	public void enterAliasDeclaration(AliasDeclarationContext ctx) {
-		String aliasName = ctx.Identifier().getText();
-		TypeContext typeContext = ctx.type();
-		String aliasType = typeContext != null ? typeContext.getText() : null;
+  public void enterAliasDeclaration(AliasDeclarationContext ctx) {
+    String aliasName = ctx.Identifier().getText();
+    TypeContext typeContext = ctx.type();
+    String aliasType = typeContext != null ? typeContext.getText() : null;
 
-		if(annotatedClass.hasField(aliasType))
-            throw new SpecParseException( "Variable " + aliasName + " declared more than once in class "
-            		+ annotatedClass.getName() + ", line: " + ctx.getText() );
-		
-		currentAlias = new Alias(aliasName, aliasType);
-		annotatedClass.addField(currentAlias);
-	}
+    currentAlias = new Alias(aliasName, aliasType);
+
+    try {
+      annotatedClass.addField(currentAlias);
+    }
+    catch(SpecParseException e) {
+      e.setLine(ctx.getText());
+      throw e;
+    }
+  }
 	
 	@Override
 	public void enterAliasDefinition(AliasDefinitionContext ctx) {
@@ -723,7 +726,7 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 			classField.setSchemeObject(isSpecificationClass());
 			annotatedClass.addField(classField);
 		}
-		
+
 		public void cleanUp() {
 			type = null;
 			classFieldAnnotatedClass = null;

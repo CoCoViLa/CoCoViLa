@@ -542,7 +542,9 @@ public class SpecParser {
                         String[] vars = statement.getComponents();
                         
                         alias.addAll( vars, annClass.getFields(), classList );
-                        annClass.addField( alias );
+                        if (!containsVar( annClass.getFields(), name )) {
+                          annClass.addField(alias);
+                        }
                         ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS, lt.getOrigSpecLine() );
 
                         classRelation.addInputs( vars, annClass.getFields() );

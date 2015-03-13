@@ -262,6 +262,27 @@ public class VariableDeclarationTest extends AbstractParserTest {
     checkVarAndType(ac, "ready", "void");
   }
 
+  @Test(expected = SpecParseException.class)
+  public void testDoubleDeclaration_twoVars() {
+    String spec = "double x;" +
+            "int x;";
+    loadSpec(spec);
+  }
+
+  @Test(expected = SpecParseException.class)
+  public void testDoubleDeclaration_constAndVar() {
+    String spec = "const double x = 2.0;" +
+            "int x;";
+    loadSpec(spec);
+  }
+
+  @Test(expected = SpecParseException.class)
+  public void testDoubleDeclaration_varAndAlias() {
+    String spec = "double x;" +
+            "alias x;";
+    loadSpec(spec);
+  }
+
   private ClassField checkVarAndType(AnnotatedClass ac, String var, String type) {
     assertTrue("Variable '" + var + "' not found", ac.hasField(var));
     ClassField classField = ac.getFieldByName(var);
