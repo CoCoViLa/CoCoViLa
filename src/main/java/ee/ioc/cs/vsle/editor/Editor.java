@@ -672,19 +672,6 @@ public class Editor extends JFrame implements ChangeListener {
 
         logger.info( "Java Version: {}", version );
 
-        if ( version.compareTo( "1.6.0" ) < 0 ) {
-
-            String message = "CoCoViLa requires at least Java 1.6.0 to run!";
-            logger.error( message );
-            //for those who start the program w/o the console --
-            //try to show this error message in a dialog, not just die silently
-            try {
-                JOptionPane.showMessageDialog( null, message, "Error", JOptionPane.ERROR_MESSAGE );
-            } finally {
-                System.exit( 1 );
-            }
-        }
-
         String directory = RuntimeProperties.getWorkingDirectory();
 
         logger.info( "Working directory: {}", directory );
