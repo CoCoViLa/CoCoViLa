@@ -581,11 +581,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         executor = Executors.newSingleThreadExecutor();
 
         if ( vPackage.hasPainters() ) {
-            classPainters = new HashMap<GObj, ClassPainter>();
-            if ( !createPainterPrototypes() ) {
-                JOptionPane.showMessageDialog( this, "One or more errors occured. See the error log for details.", "Error",
-                        JOptionPane.ERROR_MESSAGE );
-            }
+            classPainters = new HashMap<>();
         }
 
         undoManager = new UndoManager();
@@ -598,36 +594,6 @@ public class Canvas extends JPanel implements ISchemeContainer {
             }
         } );
         setScale( RuntimeProperties.getZoomFactor() );
-    }
-
-    private boolean createPainterPrototypes() {
-        boolean success = true;
-        /* TODO Will be replaced by more general daemon stuff */
-        PackageClassLoader pcl = null;
-
-        for ( PackageClass pclass : vPackage.getClasses() ) {
-            if ( pclass.getPainterName() == null )
-                continue;
-
-            try {
-                if (pcl == null) {
-                    pcl = vPackage.getPackageClassLoader();
-                }
-                Class<?> painterClass = pcl.loadClass(pclass.getPainterName());
-                pclass.setPainterPrototype((ClassPainter) painterClass.newInstance());
-            } catch ( CompileException e ) {
-                success = false;
-                logger.error(null, e); // print compiler generated message
-            } catch ( Exception e ) {
-                success = false;
-                logger.error(null, e);
-            } finally {
-                if (pcl != null && pcl.hasErrors()) {
-                    pcl.clearProblems();
-                }
-            }
-        }
-        return success;
     }
 
     @Override

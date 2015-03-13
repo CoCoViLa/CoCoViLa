@@ -153,13 +153,19 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             
             NodeList list = root.getElementsByTagName( EL_CLASS );
 
+            boolean initPainters = false;
             for (int i=0; i<list.getLength(); i++) {
                 PackageClass pc = parseClass( (Element)list.item( i ) );
                 pack.getClasses().add( pc );
-                if( pc.getPainterName() != null )
-                    pack.setPainters( true );
+                if( pc.getPainterName() != null ) {
+                  initPainters = true;
+                }
             }
-            
+
+            if (initPainters) {
+              pack.initPainters();
+            }
+
             logger.info( "Parsing the package '{}' finished in {}ms.\n", pack.getName(), ( System.currentTimeMillis() - startParsing ));
         } catch ( Exception e ) {
             collector.collectDiagnostic( e.getMessage(), true );
