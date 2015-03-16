@@ -93,7 +93,7 @@ aliasDeclaration
     ;
    
 aliasStructure
-    :   ('('|'[') ( variableAlias=variableIdentifierList | wildcardAliasName = wildcardAlias )(')'|']')
+    :   ('('|'[') ( variableAlias=variableIdentifierList? | wildcardAliasName = wildcardAlias )(')'|']')
     ;
    
 wildcardAlias

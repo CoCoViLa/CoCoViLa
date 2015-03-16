@@ -356,44 +356,49 @@ public class SpecificationLanguageListenerImpl extends SpecificationLanguageBase
 			throw new AliasException("Variable '".concat(aliasFullName).concat("' is not an alias!"));
 	}
 
-	@Override
-	public void enterAliasStructure(AliasStructureContext ctx) {
-		String lineNext = ctx.getParent().getText();
-		String[] vars = new String[1];
-		if(ctx.variableAlias != null){
-			int i = 0;
-			List<VariableIdentifierContext> variableIdentifierList = ctx.variableAlias.variableIdentifier();
-			vars = new String[variableIdentifierList.size()];
-			for(VariableIdentifierContext variableIdentifierContext : variableIdentifierList){
-				vars[i] = variableIdentifierContext.getText();
-				i++;
-			}
-		}else{
-			vars[0] = ctx.wildcardAliasName.getText();
-		}
-        
-        currentAlias.addAll( vars, annotatedClass.getFields(), specificationLoader);
+  @Override
+  public void enterAliasStructure(AliasStructureContext ctx) {
+    String lineNext = ctx.getParent().getText();
+    String[] vars;
+    if (ctx.variableAlias != null){
+      int i = 0;
+      List<VariableIdentifierContext> variableIdentifierList = ctx.variableAlias.variableIdentifier();
+      vars = new String[variableIdentifierList.size()];
+      for (VariableIdentifierContext variableIdentifierContext : variableIdentifierList){
+        vars[i] = variableIdentifierContext.getText();
+        i++;
+      }
+    }
+    else if (ctx.wildcardAliasName != null) {
+      vars = new String[1];
+      vars[0] = ctx.wildcardAliasName.getText();
+    }
+    else {
+      vars = new String[0];
+    }
 
-        ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS, lineNext );
+    currentAlias.addAll( vars, annotatedClass.getFields(), specificationLoader);
+
+    ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS, lineNext );
     classRelation.setAnnotations(currentStatementAnnotations);
-        classRelation.addInputs( vars, annotatedClass.getFields() );
-        classRelation.setMethod( TypeUtil.TYPE_ALIAS );
-        classRelation.addOutput( currentAlias.getName(), annotatedClass.getFields() );
-        annotatedClass.addClassRelation( classRelation );
+    classRelation.addInputs( vars, annotatedClass.getFields() );
+    classRelation.setMethod( TypeUtil.TYPE_ALIAS );
+    classRelation.addOutput( currentAlias.getName(), annotatedClass.getFields() );
+    annotatedClass.addClassRelation( classRelation );
 
-        logger.debug( classRelation.toString() );
+    logger.debug( classRelation.toString() );
 
-        if ( !currentAlias.isWildcard() ) {
-            classRelation = new ClassRelation( RelType.TYPE_ALIAS, lineNext );
-          classRelation.setAnnotations(currentStatementAnnotations);
-            classRelation.addOutputs( vars, annotatedClass.getFields() );
-            classRelation.setMethod( TypeUtil.TYPE_ALIAS );
-            classRelation.addInput( currentAlias.getName(), annotatedClass.getFields() );
-            annotatedClass.addClassRelation( classRelation );
-            logger.debug( classRelation.toString() );
-        }
+    if ( !currentAlias.isWildcard() ) {
+      classRelation = new ClassRelation( RelType.TYPE_ALIAS, lineNext );
+      classRelation.setAnnotations(currentStatementAnnotations);
+      classRelation.addOutputs( vars, annotatedClass.getFields() );
+      classRelation.setMethod( TypeUtil.TYPE_ALIAS );
+      classRelation.addInput( currentAlias.getName(), annotatedClass.getFields() );
+      annotatedClass.addClassRelation( classRelation );
+      logger.debug( classRelation.toString() );
+    }
 
-        currentAlias.setInitialized( true );
+    currentAlias.setInitialized( true );
 	}
 	
 	@Override

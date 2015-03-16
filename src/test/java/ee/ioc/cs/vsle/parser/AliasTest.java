@@ -52,22 +52,34 @@ public class AliasTest extends AbstractParserTest {
     loadSpec(spec);
   }
 
-  @Test(expected = SpecParseException.class)//FIXME needs better error message
+  @Test
   public void testAlias_noVars() {
+    assumeTrue(specificationLoader.isAntlrParser());
+
     String spec = "alias x = ();";
     AnnotatedClass ac = loadSpec(spec);
     assertAlias(ac, "x", vars());
   }
 
   @Test
-  public void testAlias_empty() {
+  public void testAlias_declarationOnly() {
     String spec = "alias x;";
     AnnotatedClass ac = loadSpec(spec);
     assertAliasType(ac, "x", "Object");
   }
 
   @Test
-  public void testAlias_emptyWithType() {
+  public void testAlias_empty() {
+    String spec =
+            "alias x;\n" +
+            "x = [];";
+    AnnotatedClass ac = loadSpec(spec);
+    assertAlias(ac, "x", vars());
+    assertAliasType(ac, "x", "Object");
+  }
+
+  @Test
+  public void testAlias_declarationOnlyWithType() {
     String spec = "alias (int) x;";
     AnnotatedClass ac = loadSpec(spec);
     assertAliasType(ac, "x", "int");
