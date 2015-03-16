@@ -18,7 +18,7 @@ public class SchemeContainer implements ISchemeContainer {
         scheme = new Scheme( this, new ObjectList(), new ConnectionList() );
     }
 
-    void loadScheme( File schemeFile ) {
+    public void loadScheme( File schemeFile ) {
 
         SchemeLoader schemeLoader = new SchemeLoader( _package );
 
