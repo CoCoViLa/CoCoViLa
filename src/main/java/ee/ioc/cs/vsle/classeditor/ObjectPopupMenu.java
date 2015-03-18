@@ -242,8 +242,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
 
         if ( Menu.PROPERTIES.equals( cmd ) ) {        	      	
         	if(this.object.getShapes() != null && this.object.getShapes().get(0) instanceof Text){
-        		 new TextDialog( ClassEditor.getInstance(),this.object).setVisible( true );
-        		 canvas.getObjectList().remove(this.object);
+        		 new TextDialog( ClassEditor.getInstance(),this.object).setVisible( true );        		
         	} else if (this.object.getShapes() != null && this.object.getShapes().get(0) instanceof Image){
         		  new ImageDialog( ClassEditor.getInstance(), this.object).setVisible( true );
         	} else  new ShapePropertiesDialog(ClassEditor.getInstance(), this.object).setVisible( true );  

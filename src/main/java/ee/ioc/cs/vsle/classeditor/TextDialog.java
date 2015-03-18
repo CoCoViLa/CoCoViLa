@@ -57,6 +57,9 @@ public class TextDialog extends JDialog {
 	private JPanel pnlFont = new JPanel();
 	private JPanel pnlText = new JPanel();
 	int mouseX, mouseY, width, height;
+	
+	private boolean editMarker;
+	private final GObj obj;
 
 	JScrollPane textScrollPane = new JScrollPane(taText,
 		ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -83,7 +86,7 @@ public class TextDialog extends JDialog {
 	public TextDialog(ClassEditor editor, GObj obj){
 		
 		
-		 this(editor, obj.getX(), obj.getY(), obj.getWidth(), obj.getHeight(), getString(obj));
+		 this(editor, obj.getX(), obj.getY(), obj.getWidth(), obj.getHeight(), obj);
 	}
 	public TextDialog(ClassEditor editor, int x, int y, int w, int h) {
 		this(editor, x, y, w, h, null);
@@ -91,16 +94,20 @@ public class TextDialog extends JDialog {
 	
 	private static String getString(GObj obj){
 		String textToEdit = null;
-		if(obj.getShapes() != null && obj.getShapes().size() > 0){
+		if(obj != null && obj.getShapes() != null && obj.getShapes().size() > 0){
 			Text t = (Text) obj.getShapes().get(0);
 			if(t.getText() != null) textToEdit = t.getText();
 		}
 		return textToEdit;
 	}
 	
-	public TextDialog(ClassEditor editor, int x, int y, int w, int h, String textToEdit) {
+	public TextDialog(final ClassEditor editor, int x, int y, int w, int h, final GObj obj) {
+		
 		System.out.println("TextDialog editor " + editor);
+		String textToEdit = getString(obj);
 		this.editor = editor;
+		this.obj = obj;
+		if(textToEdit !=null)editMarker=true; else editMarker=false;
 		mouseX = x;
 		mouseY = y;
 		width = w;
@@ -275,7 +282,7 @@ public class TextDialog extends JDialog {
 
 		bttnCancel.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
-				if (evt.getSource() == bttnCancel) {
+				if (evt.getSource() == bttnCancel) {					
 					dispose();
 				}
 			} // end actionPerformed
@@ -284,6 +291,10 @@ public class TextDialog extends JDialog {
 		bttnOk.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
 				if (evt.getSource() == bttnOk) {
+					
+					if(editMarker){
+						editor.getCurrentCanvas().getObjectList().remove(obj);
+					}
 					drawText(mouseX, mouseY, width, height);
 					dispose();
 				}

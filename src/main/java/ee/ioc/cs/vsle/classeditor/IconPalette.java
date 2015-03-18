@@ -211,7 +211,6 @@ public class IconPalette extends PaletteBase {
 							GObj obj = canvas.getObjectList().getSelected().get(0);
 							if(obj.getShapes() != null && obj.getShapes().get(0) instanceof Text){
 								new TextDialog( ClassEditor.getInstance(), obj ).setVisible( true );
-								canvas.getObjectList().remove(obj);
 							} else if (obj.getShapes() != null && obj.getShapes().get(0) instanceof Image){
 								new ImageDialog( ClassEditor.getInstance(), obj).setVisible( true );
 							} else  new ShapePropertiesDialog(ClassEditor.getInstance(), obj).setVisible( true ); 						
