@@ -113,8 +113,9 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         
         initValues();
 
-        pack();
         setLocationRelativeTo( editor );
+        setResizable(false);
+        pack();
     }
     
     private JButton createColorButton() {

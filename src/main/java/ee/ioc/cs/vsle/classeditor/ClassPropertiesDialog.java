@@ -285,7 +285,7 @@ public class ClassPropertiesDialog extends JDialog {
 
 		// Specify dialog size, resizability and modality.
 		setPreferredSize(new Dimension(410, 350));
-		setResizable(true);
+		setResizable(false);
 		setModal(true);
 		
 		// The following pack() call sets the real size to preferredSize
