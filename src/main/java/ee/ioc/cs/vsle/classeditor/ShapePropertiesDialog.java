@@ -286,13 +286,13 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     		return false;
     	}
     	int arc = ((Number)fldArcAngle.getValue()).intValue();
-    	if(arc < 0 || arc > 360){
-    		addErrorPanel("Arc Angle value must be between 0 and 360 in Euclid geometry");
+    	if(arc < -360 || arc > 360){
+    		addErrorPanel("Arc Angle value must be between -360 and 360");
     		return false;
     	}
     	arc = ((Number)fldStartAngle.getValue()).intValue();
     	if(arc < 0 || arc > 360){
-    		addErrorPanel("Start Angle value must be between 0 and 360 in Euclid geometry");
+    		addErrorPanel("Start Angle value must be between 0 and 360");
     		return false;
     	}
     	return res;
