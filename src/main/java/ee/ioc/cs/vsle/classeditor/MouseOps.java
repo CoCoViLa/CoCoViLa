@@ -449,6 +449,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                 arcStartAngle = arcStartAngle + 360;
             if ( arcStartAngle > 360 )
                 arcStartAngle = arcStartAngle - 360;
+            arcAngle = 0;  //init;
             return;
         }
         if ( state.equals( State.drawArc2 ) ) {

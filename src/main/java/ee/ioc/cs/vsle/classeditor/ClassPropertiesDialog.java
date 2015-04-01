@@ -413,12 +413,21 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private void browseIcon() {
 		JFileChooser fc = new JFileChooser(RuntimeProperties.getLastPath());
+		
+		ImagePreviewPanel preview = new ImagePreviewPanel();
+		fc.setAccessory(preview);
+		fc.addPropertyChangeListener(preview);
+		
 		fc.setFileFilter(ClassEditor.getFileFilter("gif", "png"));
 		int returnVal = fc.showOpenDialog(null);
 		if (returnVal == JFileChooser.APPROVE_OPTION) {
 			File file = fc.getSelectedFile();
 			
-			String packageDir = ClassEditor.getPackageFile().getParent();
+			String packageDir = null; 
+					if(ClassEditor.getInstance().getCurrentCanvas().getPackage() != null){
+						 File packageFile = new File(ClassEditor.getInstance().getCurrentCanvas().getPackage().getPath());
+						packageDir = packageFile.getParent();
+					}
             
             if( packageDir == null || !file.getAbsolutePath().startsWith( packageDir ) ) {
                 JOptionPane.showMessageDialog( this, "Path is not relative to the package", "Error", JOptionPane.ERROR_MESSAGE );
