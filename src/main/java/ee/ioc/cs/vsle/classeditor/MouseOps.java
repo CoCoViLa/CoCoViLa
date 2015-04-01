@@ -749,17 +749,40 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         if ( state.equals( State.drawArc2 ) ) {
             double legOpp = startY + arcHeight / 2 - y;
             double legNear = x - ( startX + arcWidth / 2 );
-            arcAngle = (int) ( Math.atan( legOpp / legNear ) * 180 / Math.PI ) - arcStartAngle;
-            if ( legNear < 0 )
-                arcAngle = arcAngle + 180;
-            if ( legNear > 0 )
-                arcAngle = arcAngle + 360;
-            if ( arcAngle > 360 )
-                arcAngle = arcAngle - 360;
-            if ( arcAngle < 0 ) {
-                arcAngle += 360;
-
+            int angle = 0;
+            if ( legNear == 0 ) {
+                if ( legOpp < 0 )
+                    angle = -90;
+                else
+                    angle = 90;
             }
+            else
+                angle = (int) ( Math.atan( legOpp / legNear ) * 180 / Math.PI );
+            if ( legNear < 0 ) {
+                if ( angle <= 0 )
+                    angle = angle + 180;
+                else
+                    angle = angle - 180;
+            }
+            int endAngle = angle - arcStartAngle;
+            if ( endAngle > 180 )
+                endAngle -= 360;
+            else if ( endAngle <= -180 )
+                endAngle += 360;
+
+            if ( arcAngle > 90 && endAngle < 0 )
+                endAngle += 360;
+            else if ( arcAngle < -90 && endAngle > 0 )
+                endAngle -= 360;
+
+            if ( Math.abs( arcAngle - endAngle ) < 180 )
+                arcAngle = endAngle;
+            else if ( arcAngle > 0 )
+                arcAngle = 360;
+            else
+                arcAngle = -360;
+
+            //System.out.println("MouseOps mouseMoved " + state + " angle,endAngle,arcAngle " + angle + ", " + endAngle + ", " + arcAngle);
         }        
         if ( state.equals( State.drawArc1 ) || state.equals( State.drawArc2 ) ){
         	canvas.mouseX = e.getX();
