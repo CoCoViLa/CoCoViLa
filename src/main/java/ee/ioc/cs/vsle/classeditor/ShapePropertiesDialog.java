@@ -144,7 +144,7 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         JPanel pnlButtons = new JPanel();
         setTitle( "Edit Shape" );
         
-        pnlLabels.setPreferredSize(new Dimension(90, 210));
+        pnlLabels.setPreferredSize(new Dimension(100, 210));
         pnlLabels.setLayout(new GridLayout(12, 1));
         pnlLabels.setAlignmentX(RIGHT_ALIGNMENT);       
         if(type != 2){
@@ -169,7 +169,7 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         pnlLabels.add(lblTransparency);
         pnlLabels.add(lblStroke);
         
-        pnlFields.setPreferredSize(new Dimension(60, 210));
+        pnlFields.setPreferredSize(new Dimension(70, 210));
         pnlFields.setLayout(new GridLayout(12, 1));        
         if(type != 2){
         	pnlFields.add(fldWidth);
@@ -206,7 +206,7 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         //addSeparator();
         pnlTitle.add(lblTitle);
         
-       pnlErrors.setPreferredSize(new Dimension(150, 50));
+       pnlErrors.setPreferredSize(new Dimension(170, 50));
         
         pnlProps.setLayout(new BorderLayout());
      //  pnlProps.setPreferredSize(new Dimension(160, 300));
@@ -286,13 +286,13 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     		return false;
     	}
     	int arc = ((Number)fldArcAngle.getValue()).intValue();
-    	if(arc < 0 || arc > 360){
-    		addErrorPanel("Arc Angle value must be between 0 and 360 in Euclid geometry");
+    	if(arc < -360 || arc > 360){
+    		addErrorPanel("Arc Angle value must be between -360 and 360");
     		return false;
     	}
     	arc = ((Number)fldStartAngle.getValue()).intValue();
     	if(arc < 0 || arc > 360){
-    		addErrorPanel("Start Angle value must be between 0 and 360 in Euclid geometry");
+    		addErrorPanel("Start Angle value must be between 0 and 360");
     		return false;
     	}
     	return res;
