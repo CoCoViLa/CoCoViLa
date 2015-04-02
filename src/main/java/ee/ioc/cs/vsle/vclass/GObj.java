@@ -66,6 +66,8 @@ public class GObj implements Serializable, Cloneable,
     private int portOffsetX2 = 0;
     private int portOffsetY1 = 0;
     private int portOffsetY2 = 0;
+    
+    private  int selectOffset = 3;
 
     /**
      * The rotation of the object in radians
@@ -92,6 +94,16 @@ public class GObj implements Serializable, Cloneable,
         }
         return false;
     }
+    
+    public boolean isInsideSelect( int pointX, int pointY ) {
+        Point p = toObjectSpace( pointX, pointY );
+        if ( ( p.x >= getX() - selectOffset) && ( p.y >= - selectOffset ) && ( p.x <= getX() + getWidth() + selectOffset)
+        		 && ( p.y <= getY() + getHeight() + selectOffset)) {
+            return true;
+        }
+        return false;
+    }
+
 
     public boolean isInside( int x1, int y1, int x2, int y2 ) {
         if ( ( x1 < getX() + getPortOffsetX1() ) && ( y1 < getY() + getPortOffsetY1() ) ) {

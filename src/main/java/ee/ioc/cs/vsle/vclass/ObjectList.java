@@ -95,20 +95,26 @@ public class ObjectList extends ArrayList<GObj> {
 		/* scaling */
 		int scaledX = Math.round(x / scale); 
 		int scaledY = Math.round(y / scale); 
+		GObj selected = null;
 		for (int i = this.size() - 1; i >= 0; i--) {
 			GObj obj = this.get(i);
 			if(obj.getName().equals("port")) {
-				/* Port catchment area to be wider */
-				 System.out.println("checkInside() x=" + scaledX + "; y=" + scaledY + " port coords: "+ obj.getX()+ ", " + obj.getY());
+				/* Port catchment area to be wider */				
 				if((((obj.getX() + 5) > scaledX && scaledX > (obj.getX() - 5)) && ((obj.getY() + 5) > scaledY && scaledY > (obj.getY() - 5))) ||  (obj.contains(scaledX, scaledY) && obj != asker) ){
 					return obj;
 				}
-			}
+			}			
+			/**
+			 * Check for strict inside 1st
+			 * if no obj is found, than check for lax coords
+			 */
 			else if (obj.contains(scaledX, scaledY) && obj != asker) {
-				return obj;
+				selected =  obj;
+			} else if (obj. isInsideSelect(scaledX, scaledY) && obj != asker && selected == null) {
+				selected =  obj;
 			}
 		}
-		return null;
+		return selected;
 	}
 
 	public void selectObjectsInsideBox(int x1, int y1, int x2, int y2, boolean appendSelection) {
