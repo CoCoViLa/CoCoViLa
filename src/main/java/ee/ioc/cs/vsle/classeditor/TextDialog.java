@@ -4,7 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.GraphicsEnvironment;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -21,6 +23,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JToggleButton;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.TitledBorder;
@@ -46,8 +49,8 @@ public class TextDialog extends JDialog {
 	private JButton bttnColor;
 	private JButton bttnOk = new JButton("OK");
 	private JButton bttnCancel = new JButton("Cancel");
-	private JButton bttnBold;
-	private JButton bttnItalic;
+	private JToggleButton bttnBold;
+	private JToggleButton bttnItalic;
 	private JButton bttnUnderline;
 
 	private CustomTextArea taText = new CustomTextArea();
@@ -60,6 +63,7 @@ public class TextDialog extends JDialog {
 	
 	private boolean editMarker;
 	private final GObj obj;
+	public static final Insets BUTTON_BORDER = new Insets(2, 2, 2, 2);
 
 	JScrollPane textScrollPane = new JScrollPane(taText,
 		ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -84,8 +88,7 @@ public class TextDialog extends JDialog {
 	Font font;
 
 	public TextDialog(ClassEditor editor, GObj obj){
-		
-		
+				
 		 this(editor, obj.getX(), obj.getY(), obj.getWidth(), obj.getHeight(), obj);
 	}
 	public TextDialog(ClassEditor editor, int x, int y, int w, int h) {
@@ -101,10 +104,18 @@ public class TextDialog extends JDialog {
 		return textToEdit;
 	}
 	
+	private static Text getText(GObj obj){
+		if(obj != null && obj.getShapes() != null && obj.getShapes().size() > 0){
+			Text t = (Text) obj.getShapes().get(0);
+			if(t.getText() != null) return t;
+		}
+		return null;
+	}
+	
 	public TextDialog(final ClassEditor editor, int x, int y, int w, int h, final GObj obj) {
 		
 		System.out.println("TextDialog editor " + editor);
-		String textToEdit = getString(obj);
+		Text textToEdit = getText(obj);
 		this.editor = editor;
 		this.obj = obj;
 		if(textToEdit !=null)editMarker=true; else editMarker=false;
@@ -133,14 +144,17 @@ public class TextDialog extends JDialog {
 		// add color chooser tool
 		ImageIcon icon = FileFuncs.getImageIcon("images/colorchooser.gif", false );
 		bttnColor = new JButton(icon);
+		bttnColor.setMargin(BUTTON_BORDER);
 		bttnColor.setToolTipText("Color chooser");
 
 		icon = FileFuncs.getImageIcon("images/bold.gif", false );
-		bttnBold = new JButton(icon);
+		bttnBold = new JToggleButton(icon);
+		bttnBold.setMargin(BUTTON_BORDER);
 		bttnBold.setToolTipText("Bold");
 
 		icon = FileFuncs.getImageIcon("images/italic.gif", false );
-		bttnItalic = new JButton(icon);
+		bttnItalic = new JToggleButton(icon);
+		bttnItalic.setMargin(BUTTON_BORDER);
 		bttnItalic.setToolTipText("Italic");
 
 		icon = FileFuncs.getImageIcon("images/underline.gif", false );
@@ -155,7 +169,7 @@ public class TextDialog extends JDialog {
 		cbFont.setMinimumSize(cbFont.getPreferredSize());
 		cbFont.setMaximumSize(cbFont.getPreferredSize());
 
-		bttnColor.setPreferredSize(new Dimension(22, 22));
+	/*	bttnColor.setPreferredSize(new Dimension(22, 22));
 		bttnColor.setMinimumSize(bttnColor.getPreferredSize());
 		bttnColor.setMaximumSize(bttnColor.getPreferredSize());
 
@@ -166,7 +180,7 @@ public class TextDialog extends JDialog {
 		bttnItalic.setPreferredSize(new Dimension(22, 22));
 		bttnItalic.setMinimumSize(bttnItalic.getPreferredSize());
 		bttnItalic.setMaximumSize(bttnItalic.getPreferredSize());
-
+*/
 		// BUTTON DISABLED UNTIL FIGURED OUT HOW TO DISPLAY UNDERLINED TEXT
 		bttnUnderline.setPreferredSize(new Dimension(22, 22));
 		bttnUnderline.setMinimumSize(bttnUnderline.getPreferredSize());
@@ -177,18 +191,25 @@ public class TextDialog extends JDialog {
 		spinner.setBorder(BorderFactory.createEmptyBorder());
 		spinner.setValue("10");
 
-		setComboBoxValues(cbFont, getSystemFonts(), "Arial");
+		String fontName = "Arial";
+		if(textToEdit != null && textToEdit.getFont() != null &&  textToEdit.getFont().getFontName() != null){
+			fontName = textToEdit.getFont().getFontName();
+		}
+		
+		setComboBoxValues(cbFont, getSystemFonts(), fontName);
 		changeTextFont();
 
 		pnlFont.add(lblFont);
 		pnlFont.add(cbFont);
+		
+		pnlFont.add(lblSize);
+		pnlFont.add(spinner);
+		
 		pnlFont.add(bttnBold);
 		pnlFont.add(bttnItalic);
 
 		// pnlFont.add(bttnUnderline);
-		pnlFont.add(lblSize);
-		pnlFont.add(spinner);
-		pnlFont.add(lblColor);
+
 		pnlFont.add(bttnColor);
 
 		// Specify text area behaviours.
@@ -198,7 +219,22 @@ public class TextDialog extends JDialog {
 		taText.setTabSize(4);
 		
 		if(textToEdit != null){
-			taText.setText(textToEdit);
+			/* set taText for display and all inner properties for save */
+			taText.setText(textToEdit.getText());	
+			taText.setForeground(textToEdit.getColor());
+			taText.setFont(textToEdit.getFont());
+			
+			color = textToEdit.getColor();
+			font = textToEdit.getFont();
+			spinner.setValue(textToEdit.getFont().getSize()+"");			
+			if(textToEdit.getFont().isBold()) {
+				bttnBold.setSelected(true);
+				isBold = true;
+			}
+			if(textToEdit.getFont().isItalic()){
+				bttnItalic.setSelected(true);
+				isItalic = true;
+			}
 		}
 		
 		pnlText.setLayout(new BorderLayout());
@@ -398,11 +434,13 @@ public class TextDialog extends JDialog {
 	 * Draw displayed text on the drawing area in the IconEditor
 	 */
 	private void drawText(int x, int y, int h, int w) { 
-		h = Integer.parseInt(this.spinner.getValue().toString());
-		double let = 0.7 * h;
-		w = (int)Math.round((taText.getText().getBytes().length)*let);
-
-		editor.getCurrentCanvas().mListener.drawText(font, color, taText.getText(), x, y, h, w);
+		//h = Integer.parseInt(this.spinner.getValue().toString());
+		FontMetrics fontMetrics= editor.getCurrentCanvas().getFontMetrics(font);
+		//double let = 0.7 * h;
+		//w = (int)Math.round((taText.getText().getBytes().length)*let);
+		w =  fontMetrics.stringWidth( taText.getText());
+				
+		editor.getCurrentCanvas().mListener.drawText(font, color, taText.getText(), x, y, fontMetrics.getHeight(), w);
 	} // drawText
 
 	private void drawText(int x, int y) {
