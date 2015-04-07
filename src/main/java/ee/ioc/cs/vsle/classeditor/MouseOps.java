@@ -525,7 +525,19 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             Connection con = canvas.getConnectionNearPoint( canvas.mouseX, canvas.mouseY );
 
             obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, 1);
-
+            
+            /* check corners 1st*/
+            if ( con == null ) {
+                cornerClicked = canvas.getObjectList().controlRectContains(
+                        canvas.mouseX, canvas.mouseY);
+                if ( cornerClicked != 0 ) {
+                    setState( State.resize );
+                } else {
+                    setState( State.dragBox );
+                    startX = canvas.mouseX;
+                    startY = canvas.mouseY;
+                }
+            }
             if ( obj != null ) {
                 if ( e.isShiftDown() ) {
                     obj.setSelected( true );
@@ -541,17 +553,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                     draggedObject = obj;
                 }
                 canvas.drawingArea.repaint();
-            } else if ( con == null ) {
-                cornerClicked = canvas.getObjectList().controlRectContains(
-                        canvas.mouseX, canvas.mouseY);
-                if ( cornerClicked != 0 ) {
-                    setState( State.resize );
-                } else {
-                    setState( State.dragBox );
-                    startX = canvas.mouseX;
-                    startY = canvas.mouseY;
-                }
-            }
+            } 
         }
         
         System.out.println("ClassMouseOps mousePressed: " + state + "; canvas coords x=" + canvas.mouseX + "; y=" +canvas.mouseY);      
