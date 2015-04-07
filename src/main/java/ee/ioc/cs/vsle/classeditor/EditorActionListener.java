@@ -216,6 +216,10 @@ public class EditorActionListener implements ActionListener {
         } else if ( e.getActionCommand().equals( Menu.CLASS_PROPERTIES ) ) {
         	System.out.println(ClassEditor.getInstance().getClassFieldModel());
             new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true );
+            ClassCanvas canvas = ClassEditor.getInstance().getCurrentCanvas();
+            if ( canvas != null ) {
+            	   canvas.updateBoundingBox();   
+            }         
         } else if ( e.getActionCommand().equals( Menu.VIEWCODE ) ) {
 	        if ( ClassObject.className == null ) {
 	            JOptionPane.showMessageDialog( ClassEditor.getInstance(), "No class name found", "Error", JOptionPane.ERROR_MESSAGE );
