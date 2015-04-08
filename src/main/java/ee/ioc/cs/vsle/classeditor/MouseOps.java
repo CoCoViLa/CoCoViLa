@@ -532,10 +532,6 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                         canvas.mouseX, canvas.mouseY);
                 if ( cornerClicked != 0 ) {
                     setState( State.resize );
-                } else {
-                    setState( State.dragBox );
-                    startX = canvas.mouseX;
-                    startY = canvas.mouseY;
                 }
             }
             if ( obj != null ) {
@@ -553,7 +549,11 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                     draggedObject = obj;
                 }
                 canvas.drawingArea.repaint();
-            } 
+            }  else {
+                setState( State.dragBox );
+                startX = canvas.mouseX;
+                startY = canvas.mouseY;
+            }
         }
         
         System.out.println("ClassMouseOps mousePressed: " + state + "; canvas coords x=" + canvas.mouseX + "; y=" +canvas.mouseY);      
