@@ -532,6 +532,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                         canvas.mouseX, canvas.mouseY);
                 if ( cornerClicked != 0 ) {
                     setState( State.resize );
+                    canvas.setActionInProgress( true );return;
                 }
             }
             if ( obj != null ) {
