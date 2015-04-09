@@ -154,6 +154,11 @@ public class ImageDialog extends JDialog implements ActionListener {
         			}
         		} else {        		
         			image.setFixed(!m_jcbAllowResize.isSelected());
+        			image.setAllowResize(m_jcbAllowResize.isSelected());
+        			if(!m_jcbAllowResize.isSelected()){
+        				obj.setXsize(1);
+        				obj.setYsize(1);
+        			}
         			canvas.drawingArea.repaint();
                     editor.repaint();            
                     dispose();

@@ -14,6 +14,7 @@ public abstract class Shape implements Serializable, Cloneable {
     private String name;
     private boolean fixed = false;
     private boolean filled = false;
+    protected boolean allowResize = true;
     private Color color;
     private BasicStroke stroke;
 
@@ -52,7 +53,15 @@ public abstract class Shape implements Serializable, Cloneable {
         return this.y;
     } // getY
 
-    /**
+    public boolean isAllowResize() {
+		return allowResize;
+	}
+
+	public void setAllowResize(boolean allowResize) {
+		this.allowResize = allowResize;
+	}
+
+	/**
          * Returns width of the shape.
          * @return int - shape width.
          */

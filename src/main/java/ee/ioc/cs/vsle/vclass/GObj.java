@@ -14,6 +14,7 @@ import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.graphics.Image;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.util.*;
 
@@ -76,7 +77,7 @@ public class GObj implements Serializable, Cloneable,
 
     private boolean drawPorts = true;
     private boolean drawOpenPorts = true;
-    private boolean drawInstanceName = false;
+    private boolean drawInstanceName = false;    
     
     private String extendedSpec;
     
@@ -744,6 +745,14 @@ public class GObj implements Serializable, Cloneable,
             p.y = (int) Math.round( pointX * sin + pointY * cos + cy - cx * sin - cy * cos );
         }
         return p;
+    }
+    
+    public boolean resizable(){
+    	if (this.getShapes() != null && this.getShapes().size() > 0 ){
+    		if((this.getShapes().get(0) instanceof Image) && !this.getShapes().get(0).isAllowResize())
+    			return false;
+    	}
+    	return true;
     }
 
     /**

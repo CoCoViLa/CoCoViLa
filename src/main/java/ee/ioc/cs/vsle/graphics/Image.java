@@ -33,6 +33,7 @@ public class Image extends Shape {
         this.image = image;
         this.path = path;
         setFixed( fixed );
+        setAllowResize(!fixed);
     }
 
     public Image( int x, int y, java.awt.Image image, String path, boolean fixed ) {

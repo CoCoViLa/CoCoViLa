@@ -207,7 +207,7 @@ public class ObjectList extends ArrayList<GObj> {
 		int corner;
 		for (GObj obj: this) {
 			corner = obj.controlRectContains(x, y);
-			if (corner != 0) {
+			if (corner != 0 && obj.resizable()) {
 				return corner;
 			}
 		}
