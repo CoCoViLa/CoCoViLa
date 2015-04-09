@@ -16,6 +16,7 @@ import org.xml.sax.helpers.*;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.graphics.Image;
 import ee.ioc.cs.vsle.graphics.Shape;
+import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.*;
 
 public class GObj implements Serializable, Cloneable, 
@@ -749,7 +750,7 @@ public class GObj implements Serializable, Cloneable,
     
     public boolean resizable(){
     	if (this.getShapes() != null && this.getShapes().size() > 0 ){
-    		if((this.getShapes().get(0) instanceof Image) && !this.getShapes().get(0).isAllowResize())
+    		if(((this.getShapes().get(0) instanceof Image) || (this.getShapes().get(0) instanceof Text)) && !this.getShapes().get(0).isAllowResize())
     			return false;
     	}
     	return true;

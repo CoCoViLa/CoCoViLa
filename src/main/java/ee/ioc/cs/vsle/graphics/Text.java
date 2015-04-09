@@ -25,6 +25,7 @@ public class Text extends Shape implements Serializable {
     	  this( x, y, font, color, s, false );
     	  this.height = h;
     	  this.width = w;
+    	  this.setAllowResize(false); /* Text is not resizable */
     }
 
     public Text( int x, int y, Font font, Color color, String s, boolean fixed ) {
