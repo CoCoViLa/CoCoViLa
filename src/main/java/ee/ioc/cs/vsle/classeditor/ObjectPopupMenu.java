@@ -20,7 +20,9 @@ import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.Image;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.TypeUtil;
+import ee.ioc.cs.vsle.vclass.ClassObject;
 import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.RelObj;
 
 /**
@@ -67,15 +69,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         this.object = object;
 
         this.add(ClassEditor.getInstance().cloneAction);
-        this.add(ClassEditor.getInstance().deleteAction);
-
-        if (object != null && object.getClassName() != null) {
-            itemViewCode = new JMenuItem( Menu.VIEWCODE );
-            itemViewCode.addActionListener( this );
-            itemViewCode.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK ) );
-            this.add( itemViewCode );
-        }
-        
+        this.add(ClassEditor.getInstance().deleteAction);        
         
         if (object != null && object.getShapes() != null && object.getShapes().get(0) instanceof BoundingBox){    
         	
@@ -89,6 +83,9 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
             itemViewCode = new JMenuItem( Menu.VIEWCODE , KeyEvent.  VK_V ); 
             itemViewCode.addActionListener( this );
             itemViewCode.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_V, InputEvent.CTRL_DOWN_MASK ) );
+            if ( ClassObject.className != null && ClassObject.componentType != PackageClass.ComponentType.TEMPLATE){
+            	enableDisableMenuItem(itemViewCode, true);
+            } else enableDisableMenuItem(itemViewCode, false);
             this.add( itemViewCode ); 
         	     	
         	itemOrder = new JMenuItem( Menu.MENU_ORDER );

@@ -24,6 +24,7 @@ import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
 import ee.ioc.cs.vsle.util.SystemUtils;
 import ee.ioc.cs.vsle.vclass.Canvas;
 import ee.ioc.cs.vsle.vclass.ClassObject;
+import ee.ioc.cs.vsle.vclass.PackageClass;
 import ee.ioc.cs.vsle.vclass.VPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -224,7 +225,10 @@ public class EditorActionListener implements ActionListener {
 	        if ( ClassObject.className == null ) {
 	            JOptionPane.showMessageDialog( ClassEditor.getInstance(), "No class name found", "Error", JOptionPane.ERROR_MESSAGE );
 	            return;
-	        }	 
+	        } else if (ClassObject.componentType == PackageClass.ComponentType.TEMPLATE){
+	        	  JOptionPane.showMessageDialog( ClassEditor.getInstance(), "View Code not available for template", "Error", JOptionPane.ERROR_MESSAGE );
+		          return;
+	        }
 	        Canvas canvas = ClassEditor.getInstance().getCurrentCanvas();
 	    	canvas.openClassCodeViewer( ClassObject.className );
 	    } else if ( e.getActionCommand().equals( Menu.EXPORT_TO_PACKAGE ) ) {
