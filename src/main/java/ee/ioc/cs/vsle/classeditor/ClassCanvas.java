@@ -19,6 +19,7 @@ import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.editor.State;
 import ee.ioc.cs.vsle.event.EventSystem;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
+import ee.ioc.cs.vsle.graphics.Image;
 import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
@@ -413,4 +414,12 @@ public class ClassCanvas extends Canvas{
         setActionInProgress( false );
     }
 
+    public void openPropertiesDialog( GObj obj ) {
+
+    	if(obj.getShapes() != null && obj.getShapes().get(0) instanceof Text){
+   		 	new TextDialog( ClassEditor.getInstance(),obj).setVisible( true );        		
+    	} else if (obj.getShapes() != null && obj.getShapes().get(0) instanceof Image){
+   		  new ImageDialog( ClassEditor.getInstance(),obj).setVisible( true );
+    	} else  new ShapePropertiesDialog(ClassEditor.getInstance(),obj).setVisible( true );      	    	       
+    }
 }

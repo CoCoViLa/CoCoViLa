@@ -486,6 +486,15 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                 
                 if ( obj != null ) {
                     obj.setSelected( true );
+                    
+                    /* check for dbl click */
+                    if (SwingUtilities.isLeftMouseButton(e)
+                            && e.getClickCount() >= 2){
+                    	if (obj.getShapes() != null && obj.getShapes().get(0) instanceof BoundingBox){
+                    		new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true );
+                       	 	canvas.updateBoundingBox(); 
+                    	} else canvas.openPropertiesDialog(obj ); 
+                    }
                     if (SwingUtilities.isMiddleMouseButton(e)) {
                     	canvas.setCurrentObj( obj );
                     	/*if (ClassEditor.className != null)
@@ -537,7 +546,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             }
             if ( obj != null ) {
                 if ( e.isShiftDown() ) {
-                    obj.setSelected( true );
+                    obj.setSelected( true );                                     
                 } else {
                     if ( !obj.isSelected() ) {
                         canvas.getObjectList().clearSelected();
