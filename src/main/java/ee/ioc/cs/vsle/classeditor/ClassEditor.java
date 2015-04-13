@@ -66,7 +66,7 @@ import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel;
-import ee.ioc.cs.vsle.iconeditor.ClassImport;
+import ee.ioc.cs.vsle.classeditor.ClassImport;
 import ee.ioc.cs.vsle.classeditor.ClassPropertiesDialog;
 import ee.ioc.cs.vsle.iconeditor.DeleteClassDialog;
 import ee.ioc.cs.vsle.iconeditor.IconClass;
@@ -130,8 +130,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 	private ClassFieldsTableModel dbrClassFields = new ClassFieldsTableModel();
 
-	ArrayList<IconClass> packageClassList = new ArrayList<IconClass>();  
+	ArrayList<ClassObject> packageClassList = new ArrayList<ClassObject>();  
 	ArrayList<String> packageClassNamesList = new ArrayList<String>();
+	 ArrayList<String> templateNameList = new ArrayList<String>();
 
 	ChooseClassDialog ccd = new ChooseClassDialog( packageClassNamesList, null );
 	DeleteClassDialog dcd = new DeleteClassDialog( packageClassNamesList );
@@ -1086,23 +1087,13 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  File f = selectFile();
 		  if ( f != null ){
 
-			  cig = new ClassImport( f, packageClassNamesList, packageClassList );
-
-			  /**
-			   *  @TODO new method to sort package list
-			   *  */
-
-			  /*            ArrayList<String> templist = new ArrayList<String>();
-            for (String name : packageClassNamesList) {
-				if(name)
-			}*/
-			  //= packageClassNamesList
-
+			  cig = new ClassImport( f, packageClassNamesList, packageClassList, templateNameList );
+			 
 			  PopupCanvas popupCanvas = new PopupCanvas(getCurrentPackage(), f.getParent() + File.separator);
 
-		   	  PortGraphicsDialog dialog = new PortGraphicsDialog( packageClassNamesList, "Select Template", rootPane, popupCanvas, f, openFlag);
+		   	  PortGraphicsDialog dialog = new PortGraphicsDialog( templateNameList, "Select Template", rootPane, popupCanvas, f, openFlag);
 
-			  dialog.newJList( packageClassNamesList );			  
+			  dialog.newJList( templateNameList );			  
 			  dialog.setVisible( true );
 			  dialog.repaint();
 
@@ -1154,7 +1145,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 	  public void importClassFromPackage( File file) {
 
-		  ci = new ClassImport( file, packageClassNamesList, packageClassList );
+		  ci = new ClassImport( file, packageClassNamesList, packageClassList, templateNameList );
 		  
 		  PopupCanvas popupCanvas = new PopupCanvas(getCurrentPackage(), file.getParent() + File.separator);
 

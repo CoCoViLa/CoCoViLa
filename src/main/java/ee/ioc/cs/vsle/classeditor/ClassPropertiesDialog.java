@@ -400,7 +400,7 @@ public class ClassPropertiesDialog extends JDialog {
 		if (classIcon != null) {
 			classIcon = classIcon.trim();
 		}
-		ClassObject.setClassIcon( classIcon );
+		ClassObject.classIcon = classIcon;
 		
 		ClassEditor.classObject = new ClassObject(className, classTitle, classIcon,(PackageClass.ComponentType)cboxCompType.getSelectedItem());
 		
@@ -484,7 +484,7 @@ public class ClassPropertiesDialog extends JDialog {
             if (icon.length() > 0 && !(icon.endsWith(".gif") || icon.endsWith(".png"))) {
 				valid = false;
 				this.fldClassIcon.setText("");
-				ClassObject.setClassIcon( "" );
+				ClassObject.classIcon = "";
 				JOptionPane.showMessageDialog(null, "Only icons in GIF or PNG format allowed.",
                         "Invalid icon format", JOptionPane.INFORMATION_MESSAGE);
 				fldClassIcon.requestFocus();

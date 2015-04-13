@@ -1,18 +1,13 @@
 package ee.ioc.cs.vsle.vclass;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
-import ee.ioc.cs.vsle.graphics.Shape;
+import ee.ioc.cs.vsle.graphics.BoundingBox;
+import ee.ioc.cs.vsle.graphics.ShapeGroup;
 import ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel;
+import ee.ioc.cs.vsle.classeditor.IconPort;
 import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
 
 public class ClassObject implements Serializable {
@@ -27,8 +22,18 @@ public class ClassObject implements Serializable {
 		public static String className;
 		public static String classDescription;
 		public static String classIcon;
-		public static ComponentType componentType;		
+		public BoundingBox boundingbox;
+		public static ComponentType componentType;	
+		
 		public ArrayList<ClassField> fields = new ArrayList<ClassField>();  
+				
+		public ShapeGroup shapeList;
+		public ArrayList<IconPort> ports;
+
+		int maxWidth = 0, maxHeight = 0;
+
+		
+		
 		
     // Port Drawing Settings		
 
@@ -54,7 +59,7 @@ public class ClassObject implements Serializable {
 			return classDescription;
 		}
 
-		public static void setClassDescription(String classDescription) {
+		public void setClassDescription(String classDescription) {
 			ClassObject.classDescription = classDescription;
 		}
 
@@ -62,7 +67,7 @@ public class ClassObject implements Serializable {
 			return classIcon;
 		}
 
-		public static void setClassIcon(String classIcon) {
+		public void setClassIcon(String classIcon) {
 			ClassObject.classIcon = classIcon;
 		}
 
@@ -70,7 +75,7 @@ public class ClassObject implements Serializable {
 			return componentType;
 		}
 
-		public static void setComponentType(ComponentType componentType) {
+		public void setComponentType(ComponentType componentType) {
 			ClassObject.componentType = componentType;
 		}
 
@@ -82,6 +87,12 @@ public class ClassObject implements Serializable {
 		}
 		
 		
+		public ClassObject() {
+			this.shapeList = new ShapeGroup();
+			this.ports = new ArrayList<IconPort>();
+			this.fields = new ArrayList<ClassField>();
+		}
+
 		public ClassFieldsTableModel setClassFields( Collection<ClassField> cFields){
 		 		 
 
@@ -101,6 +112,29 @@ public class ClassObject implements Serializable {
 				valid = true;
 			}
 			return valid;
+		}
+
+		public int getMaxWidth() {
+			return maxWidth;
+		}
+
+		public void setMaxWidth(int maxWidth) {
+			this.maxWidth = maxWidth;
+		}
+
+		public int getMaxHeight() {
+			return maxHeight;
+		}
+
+		public void setMaxHeight(int maxHeight) {
+			this.maxHeight = maxHeight;
+		}
+		
+		public void setMax(int w, int h) {
+			if (w > maxWidth)
+				maxWidth = w;
+			if (h > maxHeight)
+				maxHeight = h;			
 		}
 		
 		/*@TODO Extra Validation
