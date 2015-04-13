@@ -1130,7 +1130,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  try {
 
 			  VPackage pkg;
-			  if ( (pkg = PackageXmlProcessor.load(file)) != null ) {
+			  if ( (pkg = PackageXmlProcessor.load(file, false)) != null ) {
 				  PackageClass pClass = pkg.getClass(selection);
 				  
 			//	  targetPort.set

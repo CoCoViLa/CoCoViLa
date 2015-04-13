@@ -923,4 +923,14 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         return pack;
     }
     
+    public static VPackage load(File f, boolean validate) {
+        PackageXmlProcessor pxp = new PackageXmlProcessor(f);
+        VPackage pack = pxp.parse(validate);
+        pxp.collector = null;
+        pxp.xmlFile = null;
+        pxp.ERROR_HANDLER = null;
+        
+        return pack;
+    }
+    
 }
