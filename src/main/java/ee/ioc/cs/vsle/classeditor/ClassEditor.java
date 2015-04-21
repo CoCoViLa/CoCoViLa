@@ -69,7 +69,6 @@ import ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel;
 import ee.ioc.cs.vsle.classeditor.ClassImport;
 import ee.ioc.cs.vsle.classeditor.ClassPropertiesDialog;
 import ee.ioc.cs.vsle.iconeditor.DeleteClassDialog;
-import ee.ioc.cs.vsle.iconeditor.IconClass;
 import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
 import ee.ioc.cs.vsle.synthesize.Synthesizer;
 import ee.ioc.cs.vsle.util.FileFuncs;
@@ -241,9 +240,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		menuItem.addActionListener( getActionListener() );
 		menu.add( menuItem );
 
-		menuItem = new JMenuItem( Menu.SELECT_PACKAGE );
+		/*menuItem = new JMenuItem( Menu.SELECT_PACKAGE );
 		menuItem.addActionListener( getActionListener() );
-		menu.add( menuItem );
+		menu.add( menuItem );*/
 
 		menu.addSeparator();
 		menuItem = new JMenuItem( Menu.PRINT, KeyEvent.VK_P );
@@ -1110,11 +1109,16 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	  }
 
 	  public void loadClass() {
-		  File f = selectFile();
+		  File f = selectFile(); 		  
 		  if ( f != null ){
-			  importClassFromPackage( f);
-		  }
-			  
+			  /* load canvas, if it wasn't loaded before */
+			  VPackage pkg;
+			  if(ClassEditor.getInstance().getCurrentCanvas() == null && (pkg = PackageXmlProcessor.load(f)) != null ){			   
+				  	ClassCanvas canvas = new ClassCanvas(pkg, f.getParent() + File.separator);
+					addCanvas(canvas);	
+			  } 
+			  importClassFromPackage( f);	
+	      } 		  
 	  }  
 
 
@@ -1147,6 +1151,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 		  ci = new ClassImport( file, packageClassNamesList, packageClassList, templateNameList );
 		  
+		  
+		  ClassCanvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
+		  	  		  
 		  PopupCanvas popupCanvas = new PopupCanvas(getCurrentPackage(), file.getParent() + File.separator);
 
 	   	  PortGraphicsDialog dialog = new PortGraphicsDialog( packageClassNamesList, "Import Class", rootPane, popupCanvas, file, true);
@@ -1166,7 +1173,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 		  System.out.println("selection " + selection);
 
-		  ClassCanvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
+		 // ClassCanvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
 		  
 		  /* Flag to fire extra checks for classProperties and bounding box in case this is NOT the only class on Canvas */		  
 		  boolean onlyClass = true;
