@@ -36,16 +36,19 @@ public class ClassCanvas extends Canvas{
 	 * 
 	 */
 	private static final long serialVersionUID = 1290323197462938186L;
-    private static final Logger logger = LoggerFactory.getLogger(ClassCanvas.class);
+	private static final Logger logger = LoggerFactory.getLogger(ClassCanvas.class);
+	
 
+	private static final int MINIMUM_STEP = 3; /*  SHAPES will not be resized smaller than this  */
+	
 	public MouseOps mListener; 
     private boolean drawOpenPorts = true;    
     public IconPalette iconPalette;
-	public BoundingBox boundingBox;
+	public BoundingBox boundingBox;	
     
 
     public ClassCanvas( VPackage _package, String workingDir ) {    	
-    	 super(workingDir);
+    	 super(workingDir);    	 
     	 vPackage = _package;
          m_canvasTitle = vPackage.getName();
          initialize();
@@ -300,31 +303,51 @@ public class ClassCanvas extends Canvas{
         }
     }
     
-    public void finalizeResizeObjects() {
-        for (GObj obj : scheme.getObjectList()) {
-            if ( obj.isSelected() ){
-            	if(obj.getXsize() != (float)1){
-            		obj.setWidth((int)(obj.getWidth()*obj.getXsize()));
-            		for(Shape s: obj.getShapes()){
-            			if (s instanceof Line) ((Line)s).setEndX(obj.getWidth());
-            			s.setWidth(obj.getWidth());
-            		}            		
-            		obj.setXsize((float)1);
-            	}
-            	if(obj.getYsize() != (float)1){
-            		obj.setHeight((int)(obj.getHeight()*obj.getYsize()));
-            		for(Shape s: obj.getShapes()){
-            			if (s instanceof Line) ((Line)s).setEndY(obj.getHeight());
-            			s.setHeight(obj.getHeight());
-            		}            		
-            		obj.setYsize((float)1);
-            	}
-            }               
-        }
-        scheme.getObjectList().updateRelObjs();
-        drawingArea.repaint();
-    }
-    
+	public void finalizeResizeObjects() {
+		for (GObj obj : scheme.getObjectList()) {
+			if (obj.isSelected()) {
+				if (obj.getXsize() != (float) 1) {
+					int calcWidth = (int) (obj.getWidth() * obj.getXsize());
+					for (Shape s : obj.getShapes()) {
+						if (s instanceof Line) { // check that width will not be
+													// negative
+							((Line) s).setEndX(calcWidth >= 0 ? calcWidth : 0);
+							s.setWidth(calcWidth >= 0 ? calcWidth : 0);
+							obj.setWidth(calcWidth >= 0 ? calcWidth : 0);
+						} else {
+							s.setWidth(calcWidth >= MINIMUM_STEP ? calcWidth : MINIMUM_STEP);
+							obj.setWidth(calcWidth >= MINIMUM_STEP ? calcWidth : MINIMUM_STEP);
+						}
+					}
+					obj.setXsize((float) 1);
+				}
+				if (obj.getYsize() != (float) 1) {
+					for (Shape s : obj.getShapes()) {
+						int calcHeight = (int) (obj.getHeight() * obj.getYsize());
+						if (s instanceof Line) { // check that height will not
+													// be negative
+							int newHeight;
+							if (s.getWidth() == 0)
+								newHeight = calcHeight > 0 ? calcHeight : 1; // at least one dimension
+																			 // has to be  >0
+							else
+								newHeight = calcHeight >= 0 ? calcHeight : 0;
+							((Line) s).setEndY(newHeight);
+							s.setHeight(newHeight);
+							obj.setHeight(newHeight);
+						} else {
+							s.setHeight(calcHeight  >= MINIMUM_STEP  ? calcHeight :MINIMUM_STEP );
+							obj.setHeight(calcHeight  >= MINIMUM_STEP  ? calcHeight :  MINIMUM_STEP );
+						}
+						obj.setYsize((float) 1);
+					}
+				}
+			}
+		}
+		scheme.getObjectList().updateRelObjs();
+		drawingArea.repaint();
+	}
+
     /**
      * Sets actionInProgress. Actions that consist of more than one atomic step
      * that cannot be interleaved with other actions should set this property

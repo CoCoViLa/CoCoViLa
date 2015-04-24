@@ -32,6 +32,8 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.plaf.multi.MultiListUI;
 
 import ee.ioc.cs.vsle.common.ops.State;
@@ -77,10 +79,11 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
  	private final JLabel lblStroke = new JLabel("Stroke:");
  	private final JLabel lblArcAngle = new JLabel("Arc Angle:");
  	private final JLabel lblStartAngle = new JLabel("Start Angle:");
+ 	private String label; //document onchange fire src
  	
  // Fields
- 	private final JFormattedTextField fldWidth = new JFormattedTextField();
- 	private final JFormattedTextField fldHeight = new JFormattedTextField();
+ 	private final JTextField fldWidth = new JTextField();
+ 	private final JTextField fldHeight = new JTextField();
  	private final JFormattedTextField fldX = new JFormattedTextField(); 
  	private final JFormattedTextField fldY = new JFormattedTextField();
  	private final JFormattedTextField fldLinetype = new JFormattedTextField();
@@ -152,11 +155,13 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         	pnlLabels.add(lblHeight);
         	pnlLabels.add(lblX);
             pnlLabels.add(lblY);
-        } else {
+        } else {        	
         	pnlLabels.add(lblStartX);
         	pnlLabels.add(lblStartY);
         	pnlLabels.add(lblEndX);
             pnlLabels.add(lblEndY);
+            pnlLabels.add(lblWidth);
+        	pnlLabels.add(lblHeight);
         }
         if(type == 3){
         	pnlLabels.add(lblArcAngle);
@@ -178,9 +183,17 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
             pnlFields.add(fldY);
         } else {
         	pnlFields.add(fldStartX);
+        	fldStartX.getDocument().addDocumentListener(new onChangeListner("width") );
         	pnlFields.add(fldStartY);
-        	pnlFields.add(fldEndX);
+        	fldStartY.getDocument().addDocumentListener(new onChangeListner("height") );
+        	pnlFields.add(fldEndX);        	        	
+        	fldEndX.getDocument().addDocumentListener(new onChangeListner("width") );        	
         	pnlFields.add(fldEndY);
+        	fldEndY.getDocument().addDocumentListener(new onChangeListner("height") );
+        	pnlFields.add(fldWidth);
+        	fldWidth.getDocument().addDocumentListener(new onChangeListner("x") );
+        	pnlFields.add(fldHeight);
+        	fldHeight.getDocument().addDocumentListener(new onChangeListner("y") );
         }
         if(type == 3){
         	pnlFields.add(fldArcAngle);
@@ -225,8 +238,8 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     private void initValues(){
     	if(obj.getX() != 0) fldX.setValue(obj.getX());
     	if(obj.getY() != 0) fldY.setValue(obj.getY());
-    	if(obj.getWidth() != 0) fldWidth.setValue(obj.getWidth());
-    	if(obj.getHeight() != 0) fldHeight.setValue(obj.getHeight());    	
+    	if(obj.getWidth() != 0) fldWidth.setText(obj.getWidth()+"");
+    	if(obj.getHeight() != 0) fldHeight.setText(obj.getHeight()+"");    	
     	if(obj.getShapes().size() > 0){
     		for(Shape s: obj.getShapes()){
     			this.shape = s;
@@ -244,11 +257,15 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     			}
     			if(s instanceof Line){
     				lblTitle.setText("Line");
-    				((Line) shape).setStringCoords(obj);
-    				fldStartX.setText(((Line)shape).getStringX1());
-    				fldStartY.setText(((Line)shape).getStringY1());
-    				fldEndX.setText(((Line)shape).getStringX2());
-    				fldEndY.setText(((Line)shape).getStringY2());
+    				//((Line) shape).setStringCoords(obj);
+    				
+    				if(obj.getWidth() == 0) fldWidth.setText(obj.getWidth()+""); // width or height can be 0 for Lines
+    				if(obj.getHeight() == 0) fldHeight.setText(obj.getHeight()+"");
+    				fldStartX.setText((obj.getX() + ((Line) shape).getStartX())+"");
+    				fldStartY.setText((obj.getY() + ((Line) shape).getStartY())+"");
+
+    				fldEndX.setText((obj.getX() + ((Line) shape).getEndX())+"");
+    				fldEndY.setText((obj.getY() + ((Line) shape).getEndY())+"");
     					
     				initGUI(2);
     			}
@@ -272,8 +289,43 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
    
     private boolean validateInput(){
     	boolean res = true;
+    	Integer v;
     	if(((Number)fldTransparency.getValue()).intValue()  > 255){
     		addErrorPanel("'Transparency'value must be between 0 and 255");
+    		res = false;
+    	}
+    	if(!((v = tryParseNull(fldWidth.getText())) != null && v > 0) || 
+    			!(( v = tryParseNull(fldHeight.getText())) != null && v > 0)){    			   		
+    		addErrorPanel("Negative or non numeric values not allowed");
+    		res = false;
+    	}
+    	
+    	//System.out.println("Validate = "+res+"; w = "+ tryParse(fldWidth.getText()));
+    	return res;
+    }
+    
+    private boolean validateCoords(){
+    	boolean res = true;
+    	Integer v;    	
+    	if(!((v = tryParseNull(fldX.getText())) != null && v > 0) || 
+    			!(( v = tryParseNull(fldY.getText())) != null && v > 0)){    			   		
+    		addErrorPanel("Negative or non numeric values not allowed");
+    		res = false;
+    	}
+    	
+    	//System.out.println("Validate = "+res+"; w = "+ tryParse(fldWidth.getText()));
+    	return res;
+    }
+    
+    
+    private boolean validateLineInput(){
+    	boolean res = true;
+    	Integer v;
+    	if(!((v = tryParseNull(fldStartX.getText())) != null && v > 0) ||
+    			!((v = tryParseNull(fldStartY.getText())) != null && v > 0) ||
+    			!((v = tryParseNull(fldEndX.getText())) != null && v > 0) ||
+    			!(( v = tryParseNull(fldEndY.getText())) != null && v > 0)){    			   		
+    		addErrorPanel("Negative or non numeric values not allowed");
     		res = false;
     	}
     	return res;
@@ -317,10 +369,10 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         else if ( evt.getSource() == bttnOk && validateInput()) {
         	
         	ClassCanvas canvas = editor.getCurrentCanvas();
-        	obj.setWidth(((Number)fldWidth.getValue()).intValue());
-        	shape.setWidth(((Number)fldWidth.getValue()).intValue());
-        	obj.setHeight(((Number)fldHeight.getValue()).intValue());
-        	shape.setHeight(((Number)fldHeight.getValue()).intValue());
+        	obj.setWidth(tryParse(fldWidth.getText()));
+        	shape.setWidth(obj.getWidth());
+        	obj.setHeight(tryParse(fldHeight.getText()));
+        	shape.setHeight(obj.getHeight());
         	obj.setX(((Number)fldX.getValue()).intValue());
         	obj.setY(((Number)fldY.getValue()).intValue());
         	shape.setLineType(((Number)fldLinetype.getValue()).floatValue());
@@ -329,18 +381,22 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         	if(col == null) col = shape.getColor();
         	shape.setColor( Shape.createColorWithAlpha( col, ((Number)fldTransparency.getValue()).intValue() ) );        	
         	
-        	if(shape instanceof Line){        		
-        		((Line)shape).setStringX1(fldStartX.getText());
-        		obj.setX(tryParse(fldStartX.getText()));
-        		((Line)shape).setStringY1(fldStartY.getText());
-        		obj.setY(tryParse(fldStartY.getText()));
-        		((Line)shape).setEndX(tryParse(fldEndX.getText()));  
-        		obj.setWidth(tryParse(fldEndX.getText()));
-        		((Line)shape).setStringX2(fldEndX.getText());
-        		((Line)shape).setEndY(tryParse(fldEndY.getText()));
-        		((Line)shape).setStringY2(fldEndY.getText());
-        		obj.setHeight(tryParse(fldEndY.getText()));
-        	}
+        	if(shape instanceof Line){
+        		if(validateLineInput()){
+        		int x1 = tryParse(fldStartX.getText()) ;
+        		int x2 = tryParse(fldEndX.getText());
+        		int y1 = tryParse(fldStartY.getText()) ;
+        		int y2 = tryParse(fldEndY.getText());
+
+        		((Line)shape).setStartX(x1>x2?obj.getWidth():0);
+        		((Line)shape).setEndX(x1<x2?obj.getWidth():0);
+        		((Line)shape).setStartY(0);
+        		((Line)shape).setEndY(obj.getHeight());
+        		
+        		obj.setX(Math.min(x1, x2));
+            	obj.setY(Math.min(y1, y2));
+        		} else return;
+         	}
         	if(shape instanceof Arc){
         		if(validateArcInput()){
         			((Arc)shape).setArcAngle(((Number)fldArcAngle.getValue()).intValue());
@@ -353,13 +409,55 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
          }                   
     }
 
+    /* safe parser*/
     private int tryParse(String s){
+    	if(s==""){
+    		return 1;
+    	}
     	try {
-    		int i = ((Number)NumberFormat.getInstance().parse(s)).intValue();
+    		int i = Integer.parseInt(s);
     		return i;
-    	} catch (ParseException e) {
+    	} catch (Exception e) {
 			return 1;
-		}
+		}  	
+    }
+    
+    /* Null parser*/
+    private Integer tryParseNull(String s){
+    	if(s==""){
+    		return null;
+    	}
+    	try {
+    		int i = Integer.parseInt(s);
+    		return i;
+    	} catch (Exception e) {
+			return null;
+		}  	
+    }
+    
+    
+    protected void updateLabel (String name) {    	
+    	if(validateInput() && validateLineInput()){    		
+    		clearAll();
+    		System.out.println("Text Width = "+ fldWidth.getText() + " int width = " + tryParse(fldWidth.getText()));	
+    	int x1 = tryParse(fldStartX.getText()) ;
+		int x2 = tryParse(fldEndX.getText());
+		
+    		if(name == "width" && !fldWidth.hasFocus()){
+    			
+    			fldWidth.setText(Math.max(x1, x2) - Math.min(x1, x2)+"");
+    		}
+    		if(name == "height" && !fldHeight.hasFocus()){
+    			fldHeight.setText((int) Math.abs(tryParse(fldStartY.getText()) - tryParse(fldEndY.getText()))+"");
+    		}
+    		if(name == "x" && fldWidth.hasFocus()){    	
+    			if(x1<x2) fldEndX.setText((int) (x1 + tryParse(fldWidth.getText())) + "");
+    			else fldEndX.setText((int) (x1 - tryParse(fldWidth.getText())) + "");  				
+    		}
+    		if(name == "y" && fldHeight.hasFocus()){
+    			fldEndY.setText((int) Math.abs(tryParse(fldStartY.getText()) + tryParse(fldHeight.getText())) + "");
+    		}    		
+    	} 
     }
     
     private void addErrorPanel(String errorMessage){
@@ -376,6 +474,29 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     	pnlErrors.revalidate();
     	getContentPane().repaint();
     }
+	
+    private void clearAll(){
+    	pnlErrors.removeAll();
+    	pnlErrors.revalidate();
+    	getContentPane().repaint();
+    }
+    
+	private class onChangeListner implements DocumentListener{
+		  String label;
+		  public void changedUpdate(DocumentEvent e) {
+		      //updateLabel(label);
+		  }
+		  public void removeUpdate(DocumentEvent e) {
+			  updateLabel(label);			  
+		  }
+		  public void insertUpdate(DocumentEvent e) {
+			 updateLabel(label);
+		  }
+		  public onChangeListner(String label){
+			  this.label = label;			  
+		  }
+	}
+	
 }
 /**
  * if(((Line)shape).getStringX1() != null && ((Line)shape).getStringX1() != ""){
