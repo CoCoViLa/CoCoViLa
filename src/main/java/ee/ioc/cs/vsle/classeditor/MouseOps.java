@@ -34,7 +34,7 @@ import ee.ioc.cs.vsle.vclass.Port;
  */
 public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
-	public int arcWidth, arcHeight;
+	public int arcWidth, arcHeight, arcStartX, arcStartY;
     public boolean fill = false;
     public float strokeWidth = 1.0f;
     public int transparency = 255;
@@ -452,7 +452,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             return;
         }
         if ( state.equals( State.drawArc2 ) ) {
-            Arc arc = new Arc( startX, startY, arcWidth, arcHeight, arcStartAngle, arcAngle, 
+            Arc arc = new Arc(arcStartX, arcStartY, arcWidth, arcHeight, arcStartAngle, arcAngle, 
                     Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );            
     		
             addShape( arc );
@@ -956,6 +956,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         	/*  	
     		height = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY); Math.abs( canvas.mouseY - startY );*/
         	  arcWidth =(int) Math.abs(( canvas.mouseX/canvas.getScale()) - startX);
+        	  arcStartX = (Math.min(startX, (int)(canvas.mouseX/canvas.getScale())));
+        	  arcStartY = (Math.min(startY, (int)(canvas.mouseY/canvas.getScale())));
               arcHeight = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY);
               System.out.println("arcWidth , Height " + arcWidth + ", " + arcHeight);
               setState( State.drawArc1 );

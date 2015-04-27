@@ -151,16 +151,18 @@ public class ClassCanvas extends Canvas{
 		        // Draw Shapes
 		                
 		         if ( mListener.state.equals( State.drawArc1 ) ) {
-		        	 int mx = Math.abs((int)(mListener.startX*getScale()));		     
-		        	 int my = Math.abs((int)(mListener.startY*getScale()));
+		        	 //int mx = Math.abs((int)(mListener.startX*getScale()));				        	      
+		        	 //int my = Math.abs((int)(mListener.startY*getScale()));
+		        	 int mx = Math.abs((int)(mListener.arcStartX*getScale()));
+		        	 int my = Math.abs((int)(mListener.arcStartY*getScale()));
 		        	 int mw = Math.abs((int)(mListener.arcWidth*getScale()));		        	
 		        	 int mh = Math.abs((int)(mListener.arcHeight*getScale()));
 		             g.drawRect(mx, my, mw,  mh);
 		             g.drawLine( mx + mw / 2, my + mh / 2, (int) Math.abs(mouseX*getScale()),
 		            		 (int) Math.abs(mouseY*getScale()) );			             
 		         } else if ( mListener.state.equals( State.drawArc2 ) ) {
-		        	 int mx = Math.abs((int)(mListener.startX*getScale()));		     
-		        	 int my = Math.abs((int)(mListener.startY*getScale()));
+		        	 int mx = Math.abs((int)(mListener.arcStartX*getScale()));		     
+		        	 int my = Math.abs((int)(mListener.arcStartY*getScale()));
 		        	 int mw = Math.abs((int)(mListener.arcWidth*getScale()));		        	
 		        	 int mh = Math.abs((int)(mListener.arcHeight*getScale()));
 		             if ( mListener.fill ) {
