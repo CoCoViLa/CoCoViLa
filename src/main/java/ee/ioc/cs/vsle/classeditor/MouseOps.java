@@ -11,7 +11,6 @@ import java.util.List;
 
 import javax.swing.JColorChooser;
 import javax.swing.SwingUtilities;
-import javax.swing.event.MouseInputAdapter;
 
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.editor.State;
@@ -972,12 +971,21 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         	// TODO
 //        	drawDotOnClick( color );
         } else if ( state.equals( State.eraser ) ) {
-        	// select obj and delete
-        	GObj obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, canvas.getScale()); 
-        	if (obj != null) {
-        		obj.setSelected(true);
-        		canvas.deleteSelectedObjects();
+        	GObj obj = null;
+        	int maxIndex = -1;
+        	// look for selected objects 1st        	
+        	for(GObj o:canvas.getObjectList()){
+        		if(o.contains(canvas.mouseX, canvas.mouseY)){
+        			  System.out.println("obj" + o.getName());
+        			if(o.isSelected()){
+        				canvas.deleteSelectedObjects(); break;
+        			} else if(canvas.getObjectList().indexOf(o) > maxIndex &&  (canvas.getObjectList().getSelected() == null || canvas.getObjectList().getSelected().isEmpty())){
+        				maxIndex = canvas.getObjectList().indexOf(o);
+        				obj = o; 
+        			}
+        		}
         	}
+        	if(obj != null) canvas.getObjectList().remove(obj);
             canvas.drawingArea.repaint();
         } else if ( state.equals( State.drawText ) ) {
         	final int width = Math.abs( canvas.mouseX - startX );
