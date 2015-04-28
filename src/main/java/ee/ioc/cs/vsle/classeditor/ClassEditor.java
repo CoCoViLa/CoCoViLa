@@ -168,8 +168,41 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  
 		newTab.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent evt) {
+				   if(getCurrentPackage()!= null){
 				   ClassCanvas canvas = new ClassCanvas(getCurrentPackage(), new File(getCurrentPackage().getPath()).getParent() + File.separator);
-				   addCanvas(canvas);				 
+				   addCanvas(canvas);				
+				   } else {
+
+			            JFileChooser fc = new JFileChooser( ( RuntimeProperties.getLastPath() != null && new File( RuntimeProperties
+			                    .getLastPath() ).exists() ) ? RuntimeProperties.getLastPath() : RuntimeProperties.getWorkingDirectory() );
+			            CustomFileFilter synFilter = new CustomFileFilter( CustomFileFilter.EXT.XML );
+			            fc.setFileFilter( synFilter );
+			            
+			            int returnVal = fc.showOpenDialog( ClassEditor.getInstance() );
+			            if ( returnVal == JFileChooser.APPROVE_OPTION ) {
+			                File file = fc.getSelectedFile();
+			                if ( RuntimeProperties.isLogDebugEnabled() )
+			                    logger.info( "Loading package: " + file.getName() );
+			                try {
+			                    VPackage pkg;
+			                    if ( (pkg = PackageXmlProcessor.load(file)) != null ) {
+			                        RuntimeProperties.setLastPath( file.getAbsolutePath() );
+			                        ClassCanvas curCanvas = getCurrentCanvas();			                      
+			                        if (curCanvas != null) {
+			                        	 curCanvas.setPackage(pkg);
+			                        	 curCanvas.setWorkDir(file.getParent()+File.separator);
+			                        	 updateWindowTitle();
+			                        } else {
+			                        	openNewCanvasWithPackage(file);
+			                        }
+			                        setPackageFile(file);
+			                    }
+			                } catch ( Exception exc ) {
+			                    exc.printStackTrace();
+			                }
+			            }
+				    
+				   }
 			}
 		});
 		
@@ -1117,6 +1150,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				  	ClassCanvas canvas = new ClassCanvas(pkg, f.getParent() + File.separator);
 					addCanvas(canvas);	
 			  } 
+			  System.out.println("Canvas " + ClassEditor.getInstance().getCurrentCanvas());
 			  importClassFromPackage( f);	
 	      } 		  
 	  }  
