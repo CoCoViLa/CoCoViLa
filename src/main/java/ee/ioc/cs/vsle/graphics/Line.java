@@ -61,6 +61,31 @@ public class Line extends Shape implements Serializable {
         }
         return false;
     } // isInsideRect
+    
+    public void flip(){    	
+    	
+    	System.out.println("flip incoming  y1 = " + getStartY() + ", y2 = "+ getEndY() + "; x1 = " + getStartX() + ", x2 = "+ getEndX());
+    	
+    	if(getStartX() == 0){
+    		setStartX(getEndX());
+    		setEndX(0);
+    	} else {
+    		setEndX(getStartX());
+    		setStartX(0);
+    	}    	    	
+    }
+
+ public void onResize(float xSize){    	
+    	
+    	if(getStartX() != 0){
+    		setStartX(Math.abs((int)(getStartX()*xSize)));
+    		setEndX(0);
+    	} else {
+    		setEndX(Math.abs((int)(getEndX()*xSize)));
+    		setStartX(0);
+    	}   
+    	if(xSize < 0) flip();
+    }
 
     /**
      * Set size using zoom multiplication.

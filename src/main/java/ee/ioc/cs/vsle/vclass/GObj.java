@@ -15,6 +15,7 @@ import org.xml.sax.helpers.*;
 
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.graphics.Image;
+import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.*;
@@ -116,6 +117,83 @@ public class GObj implements Serializable, Cloneable,
         }
         return false;
     }
+    
+    public void resizeLine( int changeX, int changeY, int corner ) {
+      
+        switch ( corner ) { // changeX
+        case 1: // top left
+        		if(getWidth() == 0) {
+        			setWidth(1);
+        			((Line) getShapes().get(0)).setEndX(1);
+        		}
+        		setXsize( getXsize() - (float) changeX / getWidth() );
+        		break;
+        case 3: // bottom left
+        	  if(getWidth() == 0) {
+    			setWidth(1);
+    			((Line) getShapes().get(0)).setStartX(1);
+    		  }	
+              setXsize( getXsize() - (float) changeX / getWidth() );       
+            break;
+        case 2: // top right
+        	if(getWidth() == 0) {
+    			setWidth(1);
+    			((Line) getShapes().get(0)).setStartX(1);
+    		  }	 setXsize( getXsize() + (float) changeX / getWidth() );
+              break;
+        case 4: // bottom right     
+        		if(getWidth() == 0) {
+        			setWidth(1);
+        			((Line) getShapes().get(0)).setEndX(1);
+        		}
+                setXsize( getXsize() + (float) changeX / getWidth() );
+            break;
+        default:
+            throw new IllegalArgumentException( "The argument corner can have values 1, 2, 3 or 4." );
+        }
+
+        switch ( corner ) { // changeY
+        case 1: // top left
+        	if(getHeight() == 0) {
+    			setHeight(1);
+    			((Line) getShapes().get(0)).setEndX(Math.max(((Line) getShapes().get(0)).getEndX(), ((Line) getShapes().get(0)).getStartX()));
+    			((Line) getShapes().get(0)).setStartX(0);
+    			((Line) getShapes().get(0)).setEndY(1);
+    		}
+        	 setYsize( getYsize() - (float) changeY / getHeight() );
+             break;
+        case 2: // top right
+        	if(getHeight() == 0) {
+    			setHeight(1);
+    			((Line) getShapes().get(0)).setStartX(Math.max(((Line) getShapes().get(0)).getEndX(), ((Line) getShapes().get(0)).getStartX()));
+    			((Line) getShapes().get(0)).setEndX(0);
+    			((Line) getShapes().get(0)).setEndY(1);
+    		}
+                setYsize( getYsize() - (float) changeY / getHeight() );
+            break;
+        case 3: // bottom left
+        	if(getHeight() == 0) {
+    			setHeight(1);
+    			((Line) getShapes().get(0)).setEndX(Math.max(((Line) getShapes().get(0)).getEndX(), ((Line) getShapes().get(0)).getStartX()));
+    			((Line) getShapes().get(0)).setStartX(0);
+    			((Line) getShapes().get(0)).setEndY(1);
+    		}
+            setYsize( getYsize() + (float) changeY / getHeight() );
+            break;
+        case 4: // bottom right
+        	if(getHeight() == 0) {
+    				setHeight(1);
+    				((Line) getShapes().get(0)).setEndX(Math.max(((Line) getShapes().get(0)).getEndX(), ((Line) getShapes().get(0)).getStartX()));
+    				((Line) getShapes().get(0)).setStartX(0);
+    				((Line) getShapes().get(0)).setEndY(1);
+    			}
+                setYsize( getYsize() + (float) changeY / getHeight() );
+            break;
+        default:
+            // an exception was already thrown in previous switch statement
+        }
+    }
+
 
     public void resize( int changeX, int changeY, int corner ) {
         /*
@@ -127,7 +205,7 @@ public class GObj implements Serializable, Cloneable,
         switch ( corner ) { // changeX
         case 1: // top left
         case 3: // bottom left
-            if ( changeX > 0 && ( getXsize() - changeX / getWidth() < MIN_SCALE ) )
+        	if ( changeX > 0 && ( getXsize() - changeX / getWidth() < MIN_SCALE ) )
                 changeX = (int) ( ( getXsize() - MIN_SCALE ) * getWidth() + .5 );
             if ( changeX != 0 ) {
                 setX( getX() + changeX );

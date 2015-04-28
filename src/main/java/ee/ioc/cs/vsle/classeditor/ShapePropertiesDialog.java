@@ -287,13 +287,14 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     	}    	
     }
    
-    private boolean validateInput(){
+    private boolean validateInput(boolean isLine){
     	boolean res = true;
     	Integer v;
     	if(((Number)fldTransparency.getValue()).intValue()  > 255){
     		addErrorPanel("'Transparency'value must be between 0 and 255");
     		res = false;
     	}
+    	if(isLine) return res;
     	if(!((v = tryParseNull(fldWidth.getText())) != null && v > 0) || 
     			!(( v = tryParseNull(fldHeight.getText())) != null && v > 0)){    			   		
     		addErrorPanel("Negative or non numeric values not allowed");
@@ -325,6 +326,11 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     			!((v = tryParseNull(fldStartY.getText())) != null && v > 0) ||
     			!((v = tryParseNull(fldEndX.getText())) != null && v > 0) ||
     			!(( v = tryParseNull(fldEndY.getText())) != null && v > 0)){    			   		
+    		addErrorPanel("Negative or non numeric values not allowed");
+    		res = false;
+    	}
+    	if(!((v = tryParseNull(fldWidth.getText())) != null && v >= 0) || 
+    			!(( v = tryParseNull(fldHeight.getText())) != null && v >= 0)){    			   		
     		addErrorPanel("Negative or non numeric values not allowed");
     		res = false;
     	}
@@ -366,7 +372,7 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         	 }
         	 fldColour.setText("#" + Integer.toHexString(col.getRed()) + Integer.toHexString(col.getGreen()) + Integer.toHexString(col.getBlue()));
         } 
-        else if ( evt.getSource() == bttnOk && validateInput()) {
+        else if ( evt.getSource() == bttnOk && validateInput(shape instanceof Line)) {
         	
         	ClassCanvas canvas = editor.getCurrentCanvas();
         	obj.setWidth(tryParse(fldWidth.getText()));
@@ -437,7 +443,7 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     
     
     protected void updateLabel (String name) {    	
-    	if(validateInput() && validateLineInput()){    		
+    	if(validateLineInput()){    		
     		clearAll();
     		System.out.println("Text Width = "+ fldWidth.getText() + " int width = " + tryParse(fldWidth.getText()));	
     	int x1 = tryParse(fldStartX.getText()) ;

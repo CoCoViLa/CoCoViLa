@@ -694,9 +694,20 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             if (draggedObject!= null && !draggedObject.isStrictConnected() && !draggedObject.isFixed()) {
                 int moveX = x - canvas.mouseX;
                 int moveY = y - canvas.mouseY;
-                canvas.resizeObjects( moveX, moveY, cornerClicked );
+                                
+                /**
+                 *  @TODO hardcore fix for Line. 
+                 */
+                for( Shape s : draggedObject.getShapes()){
+                	if(s instanceof Line){
+                		canvas.resizeLine( moveX, moveY, cornerClicked );
+                	}
+                  else {
+                       canvas.resizeObjects( moveX, moveY, cornerClicked );
+                  }
+                }
                 canvas.mouseX += moveX;
-                canvas.mouseY += moveY;
+                canvas.mouseY += moveY;               
             }
         } else if ( State.dragBox.equals( state ) ) {
         	 canvas.mouseX = e.getX();
@@ -893,7 +904,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                 return;
             state = State.selection;
         } else if ( state.equals( State.resize ) ) {
-        	//canvas.finalizeResizeObjects();
+        	canvas.finalizeResizeObjects();
             state = State.selection;
         } else if ( state.equals( State.dragBox ) ) {
            /* int x1 = Math.min( startX, canvas.mouseX );

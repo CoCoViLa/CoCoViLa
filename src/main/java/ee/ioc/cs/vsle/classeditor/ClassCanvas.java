@@ -311,11 +311,13 @@ public class ClassCanvas extends Canvas{
 				if (obj.getXsize() != (float) 1) {
 					int calcWidth = (int) (obj.getWidth() * obj.getXsize());
 					for (Shape s : obj.getShapes()) {
-						if (s instanceof Line) { // check that width will not be
-													// negative
-							((Line) s).setEndX(calcWidth >= 0 ? calcWidth : 0);
-							s.setWidth(calcWidth >= 0 ? calcWidth : 0);
-							obj.setWidth(calcWidth >= 0 ? calcWidth : 0);
+						if (s instanceof Line) {
+							((Line) s).onResize(obj.getXsize());
+							obj.setWidth(Math.abs(calcWidth));
+							s.setWidth(Math.abs(calcWidth));
+							if(calcWidth < 0 && obj.getX() > ((Line) s).getStartX()){
+								obj.setX(obj.getX() - obj.getWidth());							
+							} 							
 						} else {
 							s.setWidth(calcWidth >= MINIMUM_STEP ? calcWidth : MINIMUM_STEP);
 							obj.setWidth(calcWidth >= MINIMUM_STEP ? calcWidth : MINIMUM_STEP);
@@ -329,11 +331,17 @@ public class ClassCanvas extends Canvas{
 						if (s instanceof Line) { // check that height will not
 													// be negative
 							int newHeight;
-							if (s.getWidth() == 0)
+							if (calcHeight < 0){
+								newHeight = Math.abs(calcHeight);
+								obj.setY(obj.getY() - newHeight);
+								((Line) s).flip();
+								//if(obj.getY() < obj.get)
+							}
+							else if (s.getWidth() == 0)
 								newHeight = calcHeight > 0 ? calcHeight : 1; // at least one dimension
 																			 // has to be  >0
 							else
-								newHeight = calcHeight >= 0 ? calcHeight : 0;
+								newHeight = calcHeight;
 							((Line) s).setEndY(newHeight);
 							s.setHeight(newHeight);
 							obj.setHeight(newHeight);
@@ -349,7 +357,16 @@ public class ClassCanvas extends Canvas{
 		scheme.getObjectList().updateRelObjs();
 		drawingArea.repaint();
 	}
-
+	
+	 public void resizeLine( int dx, int dy, int corner ) {
+	        for (GObj obj : scheme.getObjectList()) {
+	            if ( obj.isSelected() )
+	                obj.resizeLine( dx, dy, corner );
+	        }
+	        scheme.getObjectList().updateRelObjs();
+	        drawingArea.repaint();
+	 }
+	 
     /**
      * Sets actionInProgress. Actions that consist of more than one atomic step
      * that cannot be interleaved with other actions should set this property
