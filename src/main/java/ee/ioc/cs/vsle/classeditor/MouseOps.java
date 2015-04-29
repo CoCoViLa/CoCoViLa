@@ -690,7 +690,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             // the connected ports could get misplaced and should be
             // disconnected but maybe that is not what the user is expecting.
             // Until this operation is proven necessary and is clearly specified
-            // it is better to deny it.
+            // it is better to deny it.        	        	        	
             if (draggedObject!= null && !draggedObject.isStrictConnected() && !draggedObject.isFixed()) {
                 int moveX = x - canvas.mouseX;
                 int moveY = y - canvas.mouseY;
@@ -972,7 +972,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
               arcHeight = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY);
               System.out.println("arcWidth , Height " + arcWidth + ", " + arcHeight);
               setState( State.drawArc1 );
-        } else if ( state.equals( State.drawLine ) && startX != canvas.mouseX && startY != canvas.mouseY) {               	
+        } else if ( state.equals( State.drawLine ) && (startX != canvas.mouseX || startY != canvas.mouseY)) {               	
             Line line = new Line( startX, startY, (int) Math.abs(canvas.mouseX/canvas.getScale()), (int) Math.abs(canvas.mouseY/canvas.getScale()), 
                     Shape.createColorWithAlpha( color, getTransparency() ), strokeWidth, lineType );
             addShape( line );
