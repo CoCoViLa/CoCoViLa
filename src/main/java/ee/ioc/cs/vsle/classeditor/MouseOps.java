@@ -489,10 +489,17 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                     /* check for dbl click */
                     if (SwingUtilities.isLeftMouseButton(e)
                             && e.getClickCount() >= 2){
-                    	if (obj.getShapes() != null && obj.getShapes().get(0) instanceof BoundingBox){
+                    	if (obj.getShapes() != null && obj.getShapes().size() > 0 && obj.getShapes().get(0) instanceof BoundingBox){
                     		new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true );
                        	 	canvas.updateBoundingBox(); 
-                    	} else canvas.openPropertiesDialog(obj ); 
+                    	} else if(obj.getName() == "port"){
+                    		Port port = null;
+							if(obj.getPortList() != null && obj.getPortList().size() == 1){
+								 port = obj.getPortList().get(0);									 
+							}
+						    if (port != null)
+						    	new PortPropertiesDialog( ClassEditor.getInstance(), port ).setVisible( true );
+                    	} else canvas.openPropertiesDialog(obj );
                     }
                     if (SwingUtilities.isMiddleMouseButton(e)) {
                     	canvas.setCurrentObj( obj );
