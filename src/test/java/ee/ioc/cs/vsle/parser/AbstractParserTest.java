@@ -61,8 +61,12 @@ public abstract class AbstractParserTest {
   }
 
   static String wrapSpec(String spec, String metaClassName) {
-    return "public class " + metaClassName + " {\n" +
-            "    /*@ specification " + metaClassName + " {\n" +
+    return wrapSpecWithSuper(spec, metaClassName, null);
+  }
+
+  static String wrapSpecWithSuper(String spec, String metaClassName, String superSpec) {
+    return "public class " + metaClassName + (superSpec != null && superSpec.length() > 0 ? " extends " + superSpec : "") + " {\n" +
+            "    /*@ specification " + metaClassName + (superSpec != null && superSpec.length() > 0 ? " super " + superSpec : "") + " {\n" +
             "       " + spec + "\n" +
             "    }@*/\n" +
             "}\n";

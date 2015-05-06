@@ -129,8 +129,9 @@ public class AnnotatedClass {
 			String name = entry.getKey();
 			if(CodeGenerator.SPEC_OBJECT_NAME.equals(name))
 				continue;
-			
-			allFields.put(name, entry.getValue());
+			//make a copy of the field as in case of alias, its state might be altered
+			//and other classes with the same superclass might see the altered state, lets avoid this.
+			allFields.put(name, entry.getValue().clone());
 		}
 		
 		superClasses.add( clas );

@@ -206,4 +206,19 @@ public class AliasTest extends AbstractParserTest {
     System.out.println(spec);
     AnnotatedClass ac = loadSpec(spec);
   }
+
+  @Test
+  public void testAliasInitInTwoSubclasses() {
+    specificationSourceProvider.add("Root", wrapSpec("alias (int) x;", "Root"));
+    specificationSourceProvider.add("A", wrapSpecWithSuper("int y; x = [y];", "A", "Root"));
+    specificationSourceProvider.add("B", wrapSpecWithSuper("int z; x = [z];", "B", "Root"));
+    String spec =
+            "A a;" +
+            "B b;";
+    final ClassList acs = loadSpecs(spec);
+    final AnnotatedClass a = acs.getType("A");
+    assertAlias(a, "x", vars("y"), "int");
+    final AnnotatedClass b = acs.getType("B");
+    assertAlias(b, "x", vars("z"), "int");
+  }
 }
