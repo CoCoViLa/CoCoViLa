@@ -3,6 +3,10 @@
 <!ELEMENT package	(name, description, daemon?, class*)>
 <!-- A single alphanumeric word - no separators allowed -->
 <!ELEMENT name	(#PCDATA)>
+<!-- specifies the location of a metainterface, default is "<name>.java" -->
+<!ELEMENT file	(#PCDATA)>
+<!-- fully qualified name of a Java class this specification extends -->
+<!ELEMENT extends	(#PCDATA)>
 <!-- Free text - may contain many sentences-->
 <!ELEMENT description	(#PCDATA)>
 <!-- A daemon is a program that controls execution and visualisation of the component -->
@@ -10,7 +14,7 @@
 <!-- A .png or .gif picture to be used in the toolbar -->
 <!ELEMENT icon	(#PCDATA)>
 <!-- A rich component - root node of a class -->
-<!ELEMENT class	(name, description, icon, daemon?, graphics, ports?, fields?)>
+<!ELEMENT class	(name, file?, extends?, description, icon, daemon?, graphics, ports?, fields?)>
 <!-- 
 	type=class is the usual case, 
 	type=relation defines a connection-line style visual appearance. 
