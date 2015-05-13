@@ -261,8 +261,8 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     				
     				if(obj.getWidth() == 0) fldWidth.setText(obj.getWidth()+""); // width or height can be 0 for Lines
     				if(obj.getHeight() == 0) fldHeight.setText(obj.getHeight()+"");
-    				fldStartX.setText((obj.getX() + ((Line) shape).getStartX())+"");
-    				fldStartY.setText((obj.getY() + ((Line) shape).getStartY())+"");
+    				fldStartX.setText((obj.getX() + ((Line) shape).getX())+"");
+    				fldStartY.setText((obj.getY() + ((Line) shape).getY())+"");
 
     				fldEndX.setText((obj.getX() + ((Line) shape).getEndX())+"");
     				fldEndY.setText((obj.getY() + ((Line) shape).getEndY())+"");
@@ -394,9 +394,9 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         		int y1 = tryParse(fldStartY.getText()) ;
         		int y2 = tryParse(fldEndY.getText());
 
-        		((Line)shape).setStartX(x1>x2?obj.getWidth():0);
+        		((Line)shape).setX(x1>x2?obj.getWidth():0);
         		((Line)shape).setEndX(x1<x2?obj.getWidth():0);
-        		((Line)shape).setStartY(0);
+        		((Line)shape).setY(0);
         		((Line)shape).setEndY(obj.getHeight());
         		
         		obj.setX(Math.min(x1, x2));

@@ -620,33 +620,41 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             
             /** Updated parseLine  AM 28.01
              */
-            String sx1 = lineNode.getAttribute( ATR_X1);
+            /*String sx1 = lineNode.getAttribute( ATR_X1);
             String sx2 = lineNode.getAttribute( ATR_X2);
             String sy1 = lineNode.getAttribute( ATR_Y1);
-            String sy2 = lineNode.getAttribute( ATR_Y2);
+            String sy2 = lineNode.getAttribute( ATR_Y2);*/
             try{
             	int x1 = ((Number)NumberFormat.getInstance().parse(lineNode.getAttribute( ATR_X1))).intValue();
             	int x2 = ((Number)NumberFormat.getInstance().parse(lineNode.getAttribute( ATR_X2))).intValue();
             	int y1 = ((Number)NumberFormat.getInstance().parse(lineNode.getAttribute( ATR_Y1))).intValue();
             	int y2 = ((Number)NumberFormat.getInstance().parse(lineNode.getAttribute( ATR_Y2))).intValue();
-            	Line newLine = new Line(x1, y1, x2, y2, getColor( lineNode ), lp.strokeWidth, lp.lineType);
-            	newLine.setStringX1(sx1);
+            	
+                System.out.println("x1 = " + x1 + "; x2 = " + x2 + "; y1 = " + y1);
+            	
+            	
+            	Line line = new Line (x1, y1, x2, y2, getColor( lineNode ), lp.strokeWidth, lp.lineType);
+            	line.setX(x1);
+            	line.setY(y1);
+            	line.setEndX(x2);    	
+                line.setEndY(y2);      
+            /*	newLine.setStringX1(sx1);
             	newLine.setStringX2(sx2);
             	newLine.setStringY1(sy1);
             	newLine.setStringY2(sy2);
             	/**
             	 *  old code, left for compatibility
             	 */
-            	newLine.setFixedX2( fc2.fx );
+            	/*newLine.setFixedX2( fc2.fx );
                 newLine.setFixedY1( fc1.fy );
                 newLine.setFixedY2( fc2.fy );
                 
                 newLine.setFixedX1( fc1.fx );
                 newLine.setFixedX2( fc2.fx );
                 newLine.setFixedY1( fc1.fy );
-                newLine.setFixedY2( fc2.fy );
+                newLine.setFixedY2( fc2.fy );*/
                 
-                return newLine;
+                return line;
             } catch (java.text.ParseException e) {
             	collector.collectDiagnostic("Line shape xml is invalid", true);
 			}
@@ -835,10 +843,10 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                 Line line = (Line)shape;
                 Element lineEl = doc.createElement( EL_LINE );
                 graphicsEl.appendChild( lineEl );
-                lineEl.setAttribute( ATR_X1, line.getStringX1()  );
-                lineEl.setAttribute( ATR_X2, line.getStringX2() );
-                lineEl.setAttribute( ATR_Y1, line.getStringY1() );
-                lineEl.setAttribute( ATR_Y2, line.getStringY2()  );
+                lineEl.setAttribute( ATR_X1,  Integer.toString(line.getX() ) );
+                lineEl.setAttribute( ATR_X2,  Integer.toString(line.getEndX()) );
+                lineEl.setAttribute( ATR_Y1,  Integer.toString(line.getY()) );
+                lineEl.setAttribute( ATR_Y2, Integer.toString(line.getEndY()));
                 //lineEl.setAttribute( ATR_X, Integer.toString( line.getX() ) );
                 //lineEl.setAttribute( ATR_Y, Integer.toString( line.getY() ) );
                 lineEl.setAttribute( ATR_COLOUR, Integer.toString( line.getColor().getRGB() ) );

@@ -58,6 +58,7 @@ import ee.ioc.cs.vsle.editor.SchemeLoader;
 import ee.ioc.cs.vsle.editor.State;
 import ee.ioc.cs.vsle.event.EventSystem;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
+import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
 import ee.ioc.cs.vsle.util.PrintUtilities;
@@ -436,7 +437,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
     /**
      * Undoable edit for cloning scheme objects.
      */
-    private static class CloneEdit extends AbstractUndoableEdit {
+    public static class CloneEdit extends AbstractUndoableEdit {
 
         private static final long serialVersionUID = 1L;
 
@@ -1284,11 +1285,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
         }
     }
 
-//    /**
-//     * Open the object properties dialog.
-//     *
-//     * @param obj the object
-//     */
+    /**
+     * Open the object properties dialog.
+     * 
+     * @param obj the object
+     */
 //    public void openPropertiesDialog( GObj obj ) {
 //        ObjectPropertiesEditor.show( obj, this );
 //    }

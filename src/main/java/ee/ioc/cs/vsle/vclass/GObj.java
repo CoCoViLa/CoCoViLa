@@ -28,8 +28,8 @@ public class GObj implements Serializable, Cloneable,
 
     private float Xsize = 1; // percentage for resizing, 1 means real size
     private float Ysize = 1;
-    protected static final int CORNER_SIZE = 6;
-    private static final float MIN_SCALE = 0.1f; // the minimal value for
+    public static final int CORNER_SIZE = 6;
+    public static final float MIN_SCALE = 0.1f; // the minimal value for
                                                     // X|Ysize
 
     // Default coordinates to be used when there are no better values 
@@ -89,9 +89,14 @@ public class GObj implements Serializable, Cloneable,
 
     public boolean contains( int pointX, int pointY ) {
         Point p = toObjectSpace( pointX, pointY );
-        if ( ( p.x > getX() + (int) ( getXsize() * getPortOffsetX1() ) ) && ( p.y > getY() + (int) ( getYsize() * getPortOffsetY1() ) ) ) {
+                       
+        if(getShapes() != null && getShapes().size() !=0 && getShapes().get(0) instanceof Line){
+         	return  containsLine(p);
+         } 
+        
+        if ( ( p.x >= getX() + (int) ( getXsize() * getPortOffsetX1() ) ) && ( p.y >= getY() + (int) ( getYsize() * getPortOffsetY1() ) ) ) {
             if ( ( p.x < getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) ) && ( p.y < getY()
-                    + (int) ( getYsize() * ( getHeight() + getPortOffsetY2() ) ) ) ) ) {
+                    + (int) ( getYsize() * ( getHeight() + getPortOffsetY2() ) ) ) ) ) {           	             	
                 return true;
             }
         }
@@ -119,79 +124,67 @@ public class GObj implements Serializable, Cloneable,
     }
     
     public void resizeLine( int changeX, int changeY, int corner ) {
-      
-        switch ( corner ) { // changeX
-        case 1: // top left
-        		if(getWidth() == 0) {
-        			setWidth(1);
-        			((Line) getShapes().get(0)).setEndX(1);
-        		}
-        		setXsize( getXsize() - (float) changeX / getWidth() );
-        		break;
-        case 3: // bottom left
-        	  if(getWidth() == 0) {
-    			setWidth(1);
-    			((Line) getShapes().get(0)).setStartX(1);
-    		  }	
-              setXsize( getXsize() - (float) changeX / getWidth() );       
-            break;
-        case 2: // top right
-        	if(getWidth() == 0) {
-    			setWidth(1);
-    			((Line) getShapes().get(0)).setStartX(1);
-    		  }	 setXsize( getXsize() + (float) changeX / getWidth() );
-              break;
-        case 4: // bottom right     
-        		if(getWidth() == 0) {
-        			setWidth(1);
-        			((Line) getShapes().get(0)).setEndX(1);
-        		}
-                setXsize( getXsize() + (float) changeX / getWidth() );
-            break;
-        default:
-            throw new IllegalArgumentException( "The argument corner can have values 1, 2, 3 or 4." );
-        }
-
-        switch ( corner ) { // changeY
-        case 1: // top left
+    	int temp = ((Line) getShapes().get(0)).getEndX();
+    	
+    	
+    	switch ( corner ) { // changeX
+        case 1: /* x1 */
         	if(getHeight() == 0) {
-    			setHeight(1);
-    			((Line) getShapes().get(0)).setEndX(Math.max(((Line) getShapes().get(0)).getEndX(), ((Line) getShapes().get(0)).getStartX()));
-    			((Line) getShapes().get(0)).setStartX(0);
+     			setHeight(1);
+     			((Line) getShapes().get(0)).setX(0);
     			((Line) getShapes().get(0)).setEndY(1);
-    		}
-        	 setYsize( getYsize() - (float) changeY / getHeight() );
-             break;
-        case 2: // top right
-        	if(getHeight() == 0) {
-    			setHeight(1);
-    			((Line) getShapes().get(0)).setStartX(Math.max(((Line) getShapes().get(0)).getEndX(), ((Line) getShapes().get(0)).getStartX()));
-    			((Line) getShapes().get(0)).setEndX(0);
-    			((Line) getShapes().get(0)).setEndY(1);
-    		}
-                setYsize( getYsize() - (float) changeY / getHeight() );
-            break;
-        case 3: // bottom left
-        	if(getHeight() == 0) {
-    			setHeight(1);
-    			((Line) getShapes().get(0)).setEndX(Math.max(((Line) getShapes().get(0)).getEndX(), ((Line) getShapes().get(0)).getStartX()));
-    			((Line) getShapes().get(0)).setStartX(0);
-    			((Line) getShapes().get(0)).setEndY(1);
-    		}
-            setYsize( getYsize() + (float) changeY / getHeight() );
-            break;
-        case 4: // bottom right
-        	if(getHeight() == 0) {
-    				setHeight(1);
-    				((Line) getShapes().get(0)).setEndX(Math.max(((Line) getShapes().get(0)).getEndX(), ((Line) getShapes().get(0)).getStartX()));
-    				((Line) getShapes().get(0)).setStartX(0);
-    				((Line) getShapes().get(0)).setEndY(1);
-    			}
-                setYsize( getYsize() + (float) changeY / getHeight() );
-            break;
-        default:
-            // an exception was already thrown in previous switch statement
-        }
+     		  }	
+        	
+        	 if(getWidth() == 0) {
+     			setWidth(1);
+     			((Line) getShapes().get(0)).setEndX(changeX > 0?0:1);
+     			((Line) getShapes().get(0)).setX(changeX > 0?1:0);
+     		  }	           	
+        	 if(((Line) getShapes().get(0)).getEndX() > getShapes().get(0).getX()){
+        		 
+        		 setX( getX() + changeX );
+        		 setY( getY() + changeY );
+        		 setXsize( getXsize() - (float) changeX / getWidth());     		 
+        		 setYsize( getYsize() - (float) changeY / getHeight() );
+        		// System.out.println("1.  x2 > x1 deltax = " + changeX);
+        		 
+        	 } else {  
+        		 if(changeX > 0 ){   
+        			 setXsize( getXsize() + (float) changeX / (getWidth()!=0?getWidth():(float)1));    
+        		 } else {
+        			 setXsize( getXsize() + (float) changeX / (getWidth()!=0?getWidth():(float)1));
+        		 }           		
+        		// System.out.println("1. x1 > x2  deltax = " + changeX);
+        		 setY( getY() + changeY );        		
+        		 setYsize( getYsize() - (float) changeY / getHeight() );	
+        	 }
+     	break; 
+        case 2: 
+        	/* x2 */
+    	if(getHeight() == 0) {
+ 			setHeight(1);
+			((Line) getShapes().get(0)).setEndY(1);
+ 		  }	
+    	if(getWidth() == 0) {
+ 			setWidth(1);
+ 			((Line) getShapes().get(0)).setEndX(changeX > 0?1:0);
+ 			((Line) getShapes().get(0)).setX(changeX > 0?0:1);
+ 		  }	  
+    	   	    	
+    	
+    	if(((Line) getShapes().get(0)).getEndX() < getShapes().get(0).getX()){
+    		
+    		setX( getX() + changeX );    		
+        	setXsize( getXsize() - (float) changeX / (getWidth()!=0?getWidth():(float)1));        	
+   		  	setYsize( getYsize() + (float) changeY / getHeight() );
+   		    //System.out.println("2.  x1 > x2 ");
+   		    
+   	 	 	} else {
+   	 	 //	 System.out.println("2.  x2 > x1 ");
+   	 	 		setXsize( getXsize() + (float) changeX / (getWidth()!=0?getWidth():(float)0.01 ));
+   	 	 		setYsize( getYsize() + (float) changeY / getHeight() );	
+   	 	 	}
+    	}
     }
 
 
@@ -258,8 +251,36 @@ public class GObj implements Serializable, Cloneable,
         return null;
     }
 
+    public boolean containsLine(Point p){
+    	
+    /*	x - xa/xb - xa	 = 	y - ya/yb - ya */
+    	
+    	Line l = (Line)getShapes().get(0);
+    	float step1 = (float)(p.x -  getX()) / (float)getWidth();
+		float step2 = (float)( p.y - getY()) / (float)getHeight();		
+		//System.out.println("Math s1 = "+ step1 +"; s2 = " + step2);
+		if (l.getX() == 0 ){
+    		int cX = (int) ((getWidth() * step2) + getX() +l.getX());
+    		//System.out.println("x = "+ cX +" for y = " + p.y);
+    		if (p.x >= cX-2 && p.x <= cX +2) return true;
+    	} else {    		
+    		int cY = (int) ( getY()+l.getEndY() - Math.abs((getHeight() * step1) ));
+    		//System.out.println("y = "+ cY +" for x = " + p.x + "; marker " + l.getColor());
+    		if (p.y >= cY-2 && p.y <= cY +2) return true;
+    	}
+    	
+    	//System.out.println("x = "+ (((float)getWidth() * step2) + getX()) + " for y = " + p.y);
+    	// System.out.println("Math s1 = "+ step1 +"; s2 = " + step2 + "; res: " + res + "; " + (res < 0.1)); 
+    	
+    	return false;
+    }
+    
     public int controlRectContains( int pointX, int pointY ) {
         Point p = toObjectSpace( pointX, pointY );
+        
+        if(getShapes() != null && getShapes().size() !=0 && getShapes().get(0) instanceof Line){        	 
+        	return ((Line) getShapes().get(0)).insideRectSelection(this, p);
+        }
 
         if ( ( p.x >= getX() + getPortOffsetX1() - CORNER_SIZE - 1 ) && ( p.y >= getY() + getPortOffsetY1() - CORNER_SIZE - 1 ) ) {
             if ( ( p.x <= getX() + getPortOffsetX1() - 1 ) && ( p.y <= getY() + getPortOffsetY1() - 1 ) ) {
@@ -287,6 +308,8 @@ public class GObj implements Serializable, Cloneable,
                 return 4;
             }
         }
+        
+        
         return 0;
     }
 
@@ -502,7 +525,10 @@ public class GObj implements Serializable, Cloneable,
 
         g2.setColor( Color.black );
         if ( isSelected() == true ) {
-            drawSelectionMarks( g2, scale );
+        	if(getShapes() != null && getShapes().size() != 0 && getShapes().get(0) instanceof Line){
+        		((Line)getShapes().get(0)).drawSelection(g2, scale, getX(), getY(), getXsize(), getYsize());
+        	}
+        	else drawSelectionMarks( g2, scale);
         }
 
         g2.setTransform( origTransform );
@@ -512,6 +538,7 @@ public class GObj implements Serializable, Cloneable,
     	
     	/*  int scaledX =  Math.round(getX() / scale );
     	  int scaledY =  Math.round(getY() / scale );*/
+    	
     	
         g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
 

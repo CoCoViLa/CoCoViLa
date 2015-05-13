@@ -7,10 +7,13 @@ import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.event.MouseInputAdapter;
 
+import ee.ioc.cs.vsle.common.gui.AboutDialog;
+import ee.ioc.cs.vsle.common.gui.LicenseDialog;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.graphics.*;
 import ee.ioc.cs.vsle.graphics.Shape;
+//import ee.ioc.cs.vsle.util.db;
 import ee.ioc.cs.vsle.vclass.Point;
 
 /**
@@ -20,7 +23,7 @@ import ee.ioc.cs.vsle.vclass.Point;
  * Time: 23:18:00
  */
 
-class IconMouseOps extends MouseInputAdapter implements ActionListener {
+public class IconMouseOps extends MouseInputAdapter implements ActionListener {
 
     IconEditor editor;
     int shapeCount;
@@ -65,6 +68,7 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
      * @param state String - state of the application.
      */
     public void setState( String state ) {
+    	System.out.println("IconMouseOps setState " + state);
         this.state = state;
 
         if (State.chooseColor.equals(state)) {
@@ -338,6 +342,7 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
      */
     @Override
     public void mouseClicked( MouseEvent e ) {
+    	System.out.println("IconMouseOps mouseClicked: " + state );
         int x, y;
         x = e.getX();
         y = e.getY();
@@ -463,6 +468,7 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
      */
     @Override
     public void mousePressed( MouseEvent e ) {
+    	System.out.println("IconMouseOps mousePressed: " + state );
         editor.mouseX = e.getX();
         editor.mouseY = e.getY();
         mouseState = "pressed";
@@ -753,6 +759,7 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
      */
     @Override
     public void mouseReleased( MouseEvent e ) {
+    	System.out.println("IconMouseOps mouseReleased: " + state );
         int x = e.getX();
         int y = e.getY();
         Cursor cursor = new Cursor( Cursor.DEFAULT_CURSOR );
@@ -798,7 +805,8 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
                     state = State.selection;
 
                 } else {
-                    Rect rect = new Rect( Math.min( startX, editor.mouseX ), Math.min( startY, editor.mouseY ), width, height,
+                  //  db.p( this.getTransparency() );
+                    Rect rect = new Rect( Math.min( startX, editor.mouseX ), Math.min( startY, editor.mouseY ), width, height, 
                             Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );
                     editor.shapeList.add( rect );
                 }

@@ -186,6 +186,10 @@ public class ClassImport {
 				
 				Line line = new Line(x, y, x2, y2, createColor( col, tr ), st, lt);
 				line.setFixed(fixed);
+				line.setX(x);
+            	line.setY(y);            	
+            	line.setEndX(x2);    	
+                line.setEndY(y2);     
 				shapeList.add(line);
 			}else if(element.equals("arc")){
 				x = getCoordinate(attrs.getValue("x"));

@@ -9,9 +9,10 @@ import java.awt.Stroke;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 
 import ee.ioc.cs.vsle.editor.CodeViewer;
 import ee.ioc.cs.vsle.editor.ProgramRunnerEvent;
@@ -24,8 +25,13 @@ import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.vclass.Canvas;
+import ee.ioc.cs.vsle.vclass.ClassPainter;
+import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.PackageClass;
+import ee.ioc.cs.vsle.vclass.Point;
 import ee.ioc.cs.vsle.vclass.Port;
+import ee.ioc.cs.vsle.vclass.RelObj;
 import ee.ioc.cs.vsle.vclass.VPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -312,11 +318,18 @@ public class ClassCanvas extends Canvas{
 					int calcWidth = (int) (obj.getWidth() * obj.getXsize());
 					for (Shape s : obj.getShapes()) {
 						if (s instanceof Line) {
-							((Line) s).onResize(obj.getXsize());
+							if(((Line) s).getX() < ((Line) s).getEndX()){								
+								((Line) s).setEndX(Math.abs(calcWidth));								
+							} else {							
+								((Line) s).setX(Math.abs(calcWidth));
+								((Line) s).setEndX(0);
+							}
+							 System.out.println("calc w " + calcWidth); 
 							obj.setWidth(Math.abs(calcWidth));
 							s.setWidth(Math.abs(calcWidth));
-							if(calcWidth < 0 && obj.getX() > ((Line) s).getStartX()){
-								obj.setX(obj.getX() - obj.getWidth());							
+							if(calcWidth < 0 && obj.getX() > ((Line) s).getX()){
+								obj.setX(obj.getX() - obj.getWidth());	
+								((Line) s).flip();
 							} 							
 						} else {
 							s.setWidth(calcWidth >= MINIMUM_STEP ? calcWidth : MINIMUM_STEP);
@@ -334,12 +347,16 @@ public class ClassCanvas extends Canvas{
 							if (calcHeight < 0){
 								newHeight = Math.abs(calcHeight);
 								obj.setY(obj.getY() - newHeight);
-								((Line) s).flip();
+								if(obj.getYsize() < 0){
+									((Line) s).flip();
+								}
 								//if(obj.getY() < obj.get)
 							}
-							else if (s.getWidth() == 0)
+							else if (s.getWidth() == 0){
 								newHeight = calcHeight > 0 ? calcHeight : 1; // at least one dimension
-																			 // has to be  >0
+								 											// has to be  >0
+								((Line) s).setEndY(newHeight);
+							}												
 							else
 								newHeight = calcHeight;
 							((Line) s).setEndY(newHeight);
@@ -358,14 +375,132 @@ public class ClassCanvas extends Canvas{
 		drawingArea.repaint();
 	}
 	
+	 public void cloneObject() {
+	        ArrayList<GObj> newObjects = new ArrayList<GObj>();
+	        Map<GObj, ClassPainter> newPainters = null;
+
+	        // clone every selected object
+	        for (GObj obj : scheme.getSelectedObjects()) {
+	        	if(obj.getName().contains("BoundingBox")){
+	        		break; // NO CLONING for BB
+	        	}        	
+	            GObj newObj = obj.clone();
+	            if (obj.getName().equals("port")) {
+	            	String newName = JOptionPane.showInputDialog(this, "Cloned Port Name:");  
+	            	if(newName == null || newName == ""){
+	            		newName = "(cloned port)";
+	            	}
+	            	if(newObj.getPortList().get(0) != null){
+	            		newObj.getPortList().get(0).setName(newName);            		
+	            	} 
+	            }
+	            newObj.setPosition( newObj.getX() + 20, newObj.getY() + 20 );
+	            newObjects.addAll( newObj.getComponents() );
+
+	            // create new and fresh class painter for cloned object
+	            if ( vPackage.hasPainters() ) {
+	                PackageClass pc = vPackage.getClass( obj.getClassName() );
+	                ClassPainter painter = pc.getPainterFor( scheme, newObj );
+	                if ( painter != null ) {
+	                    if ( newPainters == null )
+	                        newPainters = new HashMap<GObj, ClassPainter>();
+	                    newPainters.put( newObj, painter );
+	                }
+	            }
+
+	            obj.setSelected( false );
+	        }
+
+	        for ( GObj obj : newObjects ) {
+	            if ( obj instanceof RelObj ) {
+	                RelObj robj = (RelObj) obj;
+	                for ( GObj obj2 : newObjects ) {
+	                    if ( robj.getStartPort().getObject().getName().equals( obj2.getName() ) ) {
+	                        robj.getStartPort().setObject( obj2 );
+	                    }
+	                    if ( robj.getEndPort().getObject().getName().equals( obj2.getName() ) ) {
+	                        robj.getEndPort().setObject( obj2 );
+	                    }
+	                }
+	            }
+	        }
+
+	        // now the hard part - we have to clone all the connections
+	        ArrayList<Connection> newConnections = new ArrayList<Connection>();
+	        for ( Connection con : scheme.getConnectionList() ) {
+	            GObj beginObj = null;
+	            GObj endObj = null;
+
+	            for ( GObj obj : newObjects ) {
+	                if ( obj.getName().equals( con.getBeginPort().getObject().getName() ) )
+	                    beginObj = obj;
+	                if ( obj.getName().equals( con.getEndPort().getObject().getName() ) )
+	                    endObj = obj;
+
+	                if ( beginObj != null && endObj != null ) {
+	                    Connection newCon = new Connection( beginObj.getPortList().get( con.getBeginPort().getNumber() ), endObj.getPortList()
+	                            .get( con.getEndPort().getNumber() ), con.isStrict() );
+
+	                    for ( Point p : con.getBreakPoints() )
+	                        newCon.addBreakPoint( new Point( p.x + 20, p.y + 20 ) );
+
+	                    newConnections.add( newCon );
+	                    break;
+	                }
+	            }
+	        }
+
+	        getObjectList().addAll( newObjects );
+
+	        // New connections have to be added after the new objects have been
+	        // committed or new ports will not get connected properly.
+	        scheme.getConnectionList().addAll( newConnections );
+
+	        if ( classPainters != null && newPainters != null )
+	            classPainters.putAll( newPainters );
+
+	        undoSupport.postEdit( new CloneEdit( this, newObjects, newConnections, newPainters ) );
+
+	        drawingArea.repaint();
+	    }
+
+	 public void rotateMany(double angle){
+		 if(getObjectList().getSelectedCount() != 0 ) {
+				for(GObj o:getObjectList().getSelected()){
+					rotateOne(o, angle);
+				}
+		 }		 
+	 }
+	 public void rotateOne(GObj obj, double angle){
+		 obj.setAngle(  obj.getAngle() + Math.toRadians( angle ) );
+	 }
+	
 	 public void resizeLine( int dx, int dy, int corner ) {
 	        for (GObj obj : scheme.getObjectList()) {
-	            if ( obj.isSelected() )
-	                obj.resizeLine( dx, dy, corner );
+	            if ( obj.isSelected() ){	            	  
+	                obj.resizeLine( dx, dy, corner );	            
+	            }
 	        }
 	        scheme.getObjectList().updateRelObjs();
 	        drawingArea.repaint();
 	 }
+	 
+	 @Override
+	 public void resizeObjects( int dx, int dy, int corner ) {
+	        for (GObj obj : scheme.getObjectList()) {
+	            if ( obj.isSelected() )
+	            	for( Shape s : obj.getShapes()){
+	                 	if(s instanceof Line){
+	                 		resizeLine(dx, dy, corner);
+	                 	}
+	                 	else 	
+	                obj.resize( dx, dy, corner );
+	            	}
+	        }
+	        scheme.getObjectList().updateRelObjs();
+	        drawingArea.repaint();
+	    }
+	 
 	 
     /**
      * Sets actionInProgress. Actions that consist of more than one atomic step

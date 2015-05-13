@@ -1126,7 +1126,7 @@ public class IconEditor extends JFrame {
         }
                 
         // See if class already exists in package
-        ci = new ClassImport( getPackageFile(), packageClassNamesList, packageClassList );
+        ci = new ClassImport( getPackageFile(), packageClassNamesList, packageClassList, new ArrayList<String>() );
         for ( int i = 0; i < packageClassList.size(); i++ ) {
 
             // class exists, move changed class to the end
@@ -1760,7 +1760,7 @@ public class IconEditor extends JFrame {
      */
     public void importClassFromPackage( File f ) {
     	prevPackagePath = f.getParent();
-    	ci = new ClassImport( f, packageClassNamesList, packageClassList );
+    	ci = new ClassImport( f, packageClassNamesList, packageClassList, new ArrayList<String>() );
         // opens dialog with list of class names
         ccd.newJList( packageClassNamesList );
         ccd.setLocationRelativeTo( rootPane );
@@ -1838,7 +1838,7 @@ public class IconEditor extends JFrame {
         try {
             in = new BufferedReader( new FileReader( f ) );
 
-            ci = new ClassImport( f, packageClassNamesList, packageClassList );
+            ci = new ClassImport( f, packageClassNamesList, packageClassList, new ArrayList<String>() );
             dcd.newJList( packageClassNamesList );
             dcd.setLocationRelativeTo( rootPane );
             dcd.setVisible( true );

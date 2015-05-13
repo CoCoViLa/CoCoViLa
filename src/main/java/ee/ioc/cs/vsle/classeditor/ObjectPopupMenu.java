@@ -69,7 +69,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         this.object = object;
 
         this.add(ClassEditor.getInstance().cloneAction);
-        this.add(ClassEditor.getInstance().deleteAction);        
+        this.add(ClassEditor.getInstance().deleteAction).setEnabled(true);/** HARDCODED FIX  @TODO find proper solution**/        
         
         if (object != null && object.getShapes() != null && object.getShapes().get(0) instanceof BoundingBox){    
         	

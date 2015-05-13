@@ -9,17 +9,17 @@ import ee.ioc.cs.vsle.vclass.*;
  * Info about class (shapes, ports, descriptions, properties)
  */
 public class IconClass {
-	ShapeGroup shapeList;
-	ArrayList<IconPort> ports;
-	ArrayList<ClassField> fields;
-	String name;
-	String description;
-	private String iconName;
-	BoundingBox boundingbox;
+	public ShapeGroup shapeList;
+	public ArrayList<IconPort> ports;
+	public ArrayList<ClassField> fields;
+	public String name;
+	public String description;
+	public String iconName;
+	public BoundingBox boundingbox;
 	int maxWidth = 0, maxHeight = 0;
-	private PackageClass.ComponentType componentType = PackageClass.ComponentType.CLASS;
+	public PackageClass.ComponentType componentType = PackageClass.ComponentType.CLASS;
 	
-	IconClass(){
+	public IconClass(){
 		this.shapeList = new ShapeGroup();
 		this.ports = new ArrayList<IconPort>();
 		this.fields = new ArrayList<ClassField>();

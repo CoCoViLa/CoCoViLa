@@ -20,6 +20,7 @@ import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
 
 public class ClassImport {
 	ArrayList <String> pc;
+	ArrayList <String> templates;
 	ArrayList <IconClass>icons;
 	ShapeGroup shapeList;
 	IconClass classIcon;
@@ -30,13 +31,15 @@ public class ClassImport {
 /*
  * Takes the package file and gives a list of class names and a list of classes information
  */
-	public ClassImport(File file,  ArrayList <String> packageClasses, ArrayList <IconClass> icons){
+	public ClassImport(File file,  ArrayList <String> packageClasses, ArrayList <IconClass> icons, ArrayList <String> templates){
 		
 		this.pc = packageClasses;
+		this.templates = templates;
 		this.icons = icons;
 		DefaultHandler handler = new ClassHandler();
 		icons.clear();
 		packageClasses.clear();
+		templates.clear();
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 
 		path = file.getParentFile().getAbsolutePath();
@@ -59,6 +62,7 @@ public class ClassImport {
 	
 	class ClassHandler extends DefaultHandler {
 		boolean inClass = false;
+		boolean isTemplate = false;
 		boolean inName = false;
 		boolean inGraphics = false;
 		boolean inPort = false;
@@ -99,12 +103,13 @@ public class ClassImport {
 			int fontSize = 10;
 							
 			if(element.equals("class")){
-				inClass = true;
+				inClass = true;				
 				classIcon = new IconClass();
 				ports = new ArrayList<IconPort>();
 				fields = new ArrayList<ClassField>();
 				shapeList = new ShapeGroup();
                 type = attrs.getValue("type");
+                isTemplate = (type.equals("template"));
                 classIcon.setComponentType( ComponentType.getType( type ) );
 			} else if(element.equals("name") && inClass){
 				inName = true;
@@ -316,6 +321,7 @@ public class ClassImport {
 			if(element.equals("name") && inClass){
 				String name = charBuf.toString();
 				pc.add(name);
+				if(isTemplate) templates.add(name);
 				classIcon.setName(name);
 				inName = false;
 			}

@@ -1285,7 +1285,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 					  ArrayList<Shape> shapes = classGraphics.getShapes();
 					  for (Shape shape : shapes) {
-						  curCanvas.mListener.addShape(shape, classX, classY);
+						  if (shape instanceof Line )
+							  curCanvas.mListener.addShape(shape, classX+Math.min(shape.getX(), ((Line) shape).getEndX()), classY+shape.getY());
+						  else curCanvas.mListener.addShape(shape, classX, classY);
 					  }
 				  }
 				  if (pClass.getPorts() != null) {
@@ -1323,7 +1325,6 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	  }    
 
 	  public void createPackage() {
-		  System.out.println("classEditor createPackage()");
 		  PackagePropertiesDialog p = new PackagePropertiesDialog();
 		  p.setVisible( true );
 		  savePackage();
@@ -1733,14 +1734,16 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				    /**
 				     * Save coords relative to BB /AM 23.10
 				     */
-				   if (shape instanceof Line){						 
-					   shape.setX(obj.getX() - rX);						 
+				   if (shape instanceof Line){
 					   shape.setY(obj.getY() - rY);
-					   ((Line) shape).setStartX(shape.getX());
-					   ((Line) shape).setEndX(((Line) shape).getEndX() + shape.getX() );
-					   ((Line) shape).setStartY(shape.getY());
 					   ((Line) shape).setEndY(((Line) shape).getEndY() + shape.getY() );
-					   ((Line) shape).setStringCoords();
+					   if(shape.getX() == 0){
+						   shape.setX(obj.getX() - rX);						 						   
+						   ((Line) shape).setEndX(((Line) shape).getEndX() + shape.getX() );						   
+					   } else {
+						   shape.setX(obj.getX() - rX + shape.getX());						 						   
+						   ((Line) shape).setEndX(((Line) shape).getEndX() - rX + obj.getX());
+					   }
 				   } else {
 					   shape.setX(obj.getX() - rX);
 					   shape.setY(obj.getY() - rY);
@@ -1780,10 +1783,15 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		   for ( GObj obj : selectedObjects ) {
 			   for ( Shape s : obj.getShapes() ) {
 				   if(s instanceof Line){
-					   ((Line) s).setEndX(((Line) s).getEndX() - s.getX() );
-					   ((Line) s).setEndY(((Line) s).getEndY() - s.getY() );
-					   ((Line) s).setStartX(0);		
-					   ((Line) s).setStartY(0);						   
+					   if(s.getX() < ((Line)s).getEndX()){
+						   ((Line) s).setEndX(((Line) s).getEndX() - s.getX() );
+						   ((Line) s).setX(0);
+					   } else {
+						   ((Line) s).setX( s.getX() - ((Line) s).getEndX());
+						   ((Line) s).setEndX(0);						   
+					   }
+					  ((Line) s).setEndY(((Line) s).getEndY() - s.getY() );					  		
+					  ((Line) s).setY(0);						   
 				    } else if(s instanceof BoundingBox){        				        	
 					   holder = obj;
 					   	s.setX(0);

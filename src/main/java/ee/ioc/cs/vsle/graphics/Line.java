@@ -4,87 +4,59 @@ import java.awt.*;
 import java.io.*;
 import java.text.NumberFormat;
 import java.text.ParseException;
+
 import ee.ioc.cs.vsle.vclass.GObj;
+import ee.ioc.cs.vsle.vclass.Point;
 
 public class Line extends Shape implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
-    private int startX;
-    private int startY;
     private int endX;
-    private int endY;
-    private int fixedX1;
-    private int fixedX2;
-    private int fixedY1;
-    private int fixedY2;
-    private String stringX1;
-    private String stringX2;
-    private String stringY1;
-    private String stringY2;
+    private int endY;   
 
     public Line( int x1, int y1, int x2, int y2, Color color, float strokeWidth, float lineType ) {
-        super( Math.min( x1, x2 ), Math.min( y1, y2 ) );
-        this.setWidth( Math.max( x1, x2 ) - this.getX() ); // endX - startX;
-        this.setHeight( Math.max( y1, y2 ) - this.getY() ); // endY - startY;
-
-        setStartX( x1 );
-        setStartY( y1 );
-        setEndX( x2 );
-        setEndY( y2 );
+    	/* top to bottom direction */	
+    	super(x1 - Math.min( x1, x2 ), 0, Math.abs(x1-x2), Math.max( y1, y2 ) - Math.min( y1, y2 ) );
+    	setEndX(x2 - Math.min( x1, x2));    	
+        setEndY( height );
+        /* bottom to top direction */
+        if(y2<y1){
+        	  setX(x2 - Math.min( x1, x2 ));
+        	  setEndX(x1 - Math.min( x1, x2 ));
+    	}
         setColor( color );
-
         setStroke( strokeWidth, lineType );
     } // Line
 
+
+    
     @Override
     public boolean isInside( int x1, int y1, int x2, int y2 ) {
-        int minx = Math.min( getStartX(), getEndX() );
-        int miny = Math.min( getStartX(), getStartY() );
-        int maxx = Math.max( getStartX(), getEndX() );
-        int maxy = Math.max( getStartX(), getStartY() );
+       /* int minx = Math.min( getX(), getEndX() );
+        int miny = Math.min( getX(), getY() );
+        int maxx = Math.max( getX(), getEndX() );
+        int maxy = Math.max( getX(), getY() );
 
         if ( x1 > minx && y1 > miny && x2 < maxx && y2 < maxy ) {
             return true;
-        }
+        }*/
         return false;
     } // isInside
 
-    @Override
-    public boolean isInsideRect( int x1, int y1, int x2, int y2 ) {
-        int minx = Math.min( getStartX(), getEndX() );
-        int miny = Math.min( getStartY(), getEndY() );
-        int maxx = Math.max( getStartX(), getEndX() );
-        int maxy = Math.max( getEndY(), getStartY() );
-        if ( x1 < minx && y1 < miny && x2 > maxx && y2 > maxy ) {
-            return true;
-        }
-        return false;
-    } // isInsideRect
-    
+   
     public void flip(){    	
     	
-    	System.out.println("flip incoming  y1 = " + getStartY() + ", y2 = "+ getEndY() + "; x1 = " + getStartX() + ", x2 = "+ getEndX());
+    	 //	System.out.println("flip incoming  y1 = " + getY() + ", y2 = "+ getEndY() + "; x1 = " + getX() + ", x2 = "+ getEndX());
     	
-    	if(getStartX() == 0){
-    		setStartX(getEndX());
+   		if(getX() == 0){
+    		setX(getEndX());
     		setEndX(0);
     	} else {
-    		setEndX(getStartX());
-    		setStartX(0);
-    	}    	    	
-    }
-
- public void onResize(float xSize){    	
+    		setEndX(getX());
+    		setX(0);
+    	}
     	
-    	if(getStartX() != 0){
-    		setStartX(Math.abs((int)(getStartX()*xSize)));
-    		setEndX(0);
-    	} else {
-    		setEndX(Math.abs((int)(getEndX()*xSize)));
-    		setStartX(0);
-    	}   
-    	if(xSize < 0) flip();
     }
 
     /**
@@ -97,8 +69,8 @@ public class Line extends Shape implements Serializable {
      */
     @Override
     public void setMultSize( float s1, float s2 ) {
-        setStartX( getStartX() * (int) s1 / (int) s2 );
-        setStartY( getStartY() * (int) s1 / (int) s2 );
+        setX( getX() * (int) s1 / (int) s2 );
+        setY( getY() * (int) s1 / (int) s2 );
         setEndX( getEndX() * (int) s1 / (int) s2 );
         setEndY( getEndY() * (int) s1 / (int) s2 );
         setWidth( getWidth() * (int) s1 / (int) s2 );
@@ -125,8 +97,8 @@ public class Line extends Shape implements Serializable {
     public void resize( int deltaW, int deltaH, int cornerClicked ) {
         if ( !isFixed() ) {
             if ( cornerClicked == 1 ) { // TOP-LEFT
-                this.setStartX( this.getStartX() + deltaW );
-                this.setStartY( this.getStartY() + deltaH );
+                this.setX( this.getX() + deltaW );
+                this.setY( this.getY() + deltaH );
             } else if ( cornerClicked == 2 ) { // TOP-RIGHT
                 setEndX( getEndX() + deltaW );
                 setEndY( getEndY() + deltaH );
@@ -134,60 +106,17 @@ public class Line extends Shape implements Serializable {
         }
     } // resize
 
-    /**
-     * Returns the number representing a corner the mouse was clicked in. 1:
-     * top-left, 2: top-right, 3: bottom-left, 4: bottom-right. Returns 0 if the
-     * click was not in the corner.
-     * 
-     * @param pointX
-     *            int - mouse x coordinate.
-     * @param pointY
-     *            int - mouse y coordinate.
-     * @return int - corner number the mouse was clicked in.
-     */
-    @Override
-    public int controlRectContains( int pointX, int pointY ) {
-        //db.p( pointX + " " + pointY + " " + endX + " " + endY + " " + startX + " " + startY + " " );
-        if ( pointX >= getStartX() - 2 && pointY >= getStartY() - 2 && pointX <= getStartX() + 2 && pointY <= getStartY() + 2 ) {
-            return 1;
-        }
-        if ( pointX >= getEndX() - 2 && pointY >= getEndY() - 2 && pointX <= getEndX() + 2 && pointY <= getEndY() + 2 ) {
-            return 2;
-        }
-        return 0;
-    } // controlRectContains
-
+    
     @Override
     public void setPosition( int x, int y ) {
         setEndX( getEndX() + x );
-        setStartX( getStartX() + x );
+        setX( getX() + x );
         setEndY( getEndY() + y );
-        setStartY( getStartY() + y );
+        setY( getY() + y );
     } // setPosition
 
-    public void setStringCoords(GObj obj){
-    	if(stringX1 == null || stringX1.isEmpty()){    		
-    		setStringX1(obj.getX()+"");
-    	}
-    	
-    	if(getStringY1() == null || getStringY1().isEmpty()){
-    		setStringY1(obj.getY()+"");
-    	}
-    	setStringY1(compareCoords(obj.getY(), stringY1));
-    	this.setCoordsCommon();
-    }
-    
-    public void setCoordsCommon(){
-    	if(getStringX2() == null || getStringX2().isEmpty()){
-    		setStringX2(getEndX()+"");
-    	}
-    	setStringX2(compareCoords(getEndX(), stringX2));
-    	if(getStringY2() == null || getStringY2().isEmpty()){
-    		setStringY2(getEndY()+"");
-    	}    	
-    	setStringY2(compareCoords(getEndY(), stringY2));
-    }
-    
+   
+  
     public String compareCoords(int i, String s){
     	int temp = tryParse(s); 
     	if( temp != i){
@@ -196,22 +125,11 @@ public class Line extends Shape implements Serializable {
     	}
     	else return s;
     }
-    
-    public void setStringCoords(){
-    	if(stringX1 == null || stringX1.isEmpty()){    		
-    		setStringX1(getX()+"");
-    	}
-    	setStringX1(compareCoords(getX(), stringX1));
-    	if(getStringY1() == null || getStringY1().isEmpty()){
-    		setStringY1(getY()+"");
-    	}
-    	setStringY1(compareCoords(getY(), stringY1));
-    	this.setCoordsCommon();
-    }
+  
     
     @Override
     public boolean contains( int pointX, int pointY ) {
-        float distance = calcDistance( getStartX(), getStartY(), getEndX(), getEndY(), pointX, pointY );
+        float distance = calcDistance( getX(), getY(), getEndX(), getEndY(), pointX, pointY );
         if ( distance <= 3 ) {
             return true;
         }
@@ -258,55 +176,23 @@ public class Line extends Shape implements Serializable {
     } // pointDistanceFromLine
 
     void setLine( int x1, int y1, int x2, int y2 ) {
-        setStartX( x1 );
-        setStartY( y1 );
+        setX( x1 );
+        setY( y1 );
         setEndX( x2 );
         setEndY( y2 );
     } // setLine
 
-    public int getStartX() {
-        return startX;
-    } // getStartX
 
-    public int getStartY() {
-        return startY;
-    } // getStartY
-
-    /**
-     * Returns the line end x coordinate.
-     * 
-     * @return int - line end x coordinate.
-     */
+    
     public int getEndX() {
-        return endX;
-    } // getEndX
+		return endX;
+	}
 
-    /**
-     * Returns the line end y coordinate.
-     * 
-     * @return int - line end y coordinate.
-     */
-    public int getEndY() {
-        return endY;
-    } // getEndY
+	public int getEndY() {
+		return endY;
+	}
 
-    int getX1() {
-        return getStartX();
-    } // getX1
-
-    int getY1() {
-        return getStartY();
-    } // getY1
-
-    int getX2() {
-        return getEndX();
-    } // getX2
-
-    int getY2() {
-        return getEndY();
-    } // getY2
-
-    /**
+	/**
      * Return a specification of the shape to be written into a file in XML
      * format.
      * 
@@ -323,7 +209,7 @@ public class Line extends Shape implements Serializable {
         if ( getColor() != null )
             colorInt = getColor().getRGB();
 
-        return "<line x1=\"" + ( getStartX() - boundingboxX ) + "\" y1=\"" + ( getStartY() - boundingboxY ) + "\" x2=\"" + ( getEndX() - boundingboxX )
+        return "<line x1=\"" + ( getX() - boundingboxX ) + "\" y1=\"" + ( getY() - boundingboxY ) + "\" x2=\"" + ( getEndX() - boundingboxX )
                 + "\" y2=\"" + ( getEndY() - boundingboxY ) + "\" colour=\"" + colorInt + "\" fixed=\"" + isFixed() + "\" stroke=\""
                 + (int) getStroke().getLineWidth() + "\" linetype=\"" + this.getLineType() + "\" transparency=\"" + getTransparency()
                 + "\"/>\n";
@@ -334,24 +220,92 @@ public class Line extends Shape implements Serializable {
         int colorInt = 0;
         if ( getColor() != null )
             colorInt = getColor().getRGB();
-        return "LINE:" + getStartX() + ":" + getStartY() + ":" + getEndX() + ":" + getEndY() + ":" + colorInt + ":" + (int) getStroke().getLineWidth() + ":"
+        return "LINE:" + getX() + ":" + getY() + ":" + getEndX() + ":" + getEndY() + ":" + colorInt + ":" + (int) getStroke().getLineWidth() + ":"
                 + getLineType() + ":" + getTransparency() + ":" + isFixed();
     } // toText
 
-    /**
-     * Draw the selection markers if object selected.
-     * 
-     * @param g2
-     *            Graphics2D - shape graphics.
-     */
-    @Override
-    public void drawSelection( Graphics2D g2 ) {
-        g2.setStroke( new BasicStroke( 2 ) );
-        g2.setColor( Color.black );
-        g2.setStroke( new BasicStroke( (float) 1.0 ) );
-        g2.fillRect( getStartX() - 2, getStartY() - 2, 4, 4 );
-        g2.fillRect( getEndX() - 2, getEndY() - 2, 4, 4 );
-    } // drawSelection
+
+    public void drawSelection( Graphics2D g2, float scale ,int xModifier, int yModifier, float Xsize, float Ysize) {
+    	switch (getRatio()) {
+		case 1:
+		
+			g2.fillRect( (int) ( Xsize * getX()) + xModifier - GObj.CORNER_SIZE/2,  yModifier - GObj.CORNER_SIZE - 1, GObj.CORNER_SIZE, GObj.CORNER_SIZE );
+		
+			g2.fillRect(  (int) ( Xsize * getEndX() ) + xModifier - GObj.CORNER_SIZE/2,  yModifier + (int) ( Ysize * getEndY() ) + 2, GObj.CORNER_SIZE, GObj.CORNER_SIZE );
+			break;
+		case 2:	
+		
+			g2.fillRect( (int) ( Xsize * getX()) + xModifier - GObj.CORNER_SIZE - 1 + (getEndX() < getX()?GObj.CORNER_SIZE+2:0) ,  yModifier - GObj.CORNER_SIZE/2, GObj.CORNER_SIZE, GObj.CORNER_SIZE );
+		
+			g2.fillRect( (int) ( Xsize * getEndX() ) + xModifier + (getEndX() < getX()?-2:2),  (int)( Ysize * getEndY() ) + yModifier -  GObj.CORNER_SIZE/2, GObj.CORNER_SIZE, GObj.CORNER_SIZE );
+			
+			break;
+		default:
+			break;
+		}    
+    }
+    
+    public int insideRectSelection(GObj obj, Point p){
+    	/*case 1; top */
+    	if ( ( p.x >= obj.getX() +getX() - GObj.CORNER_SIZE/2 ) && ( p.y >= obj.getY() - GObj.CORNER_SIZE - 1 ) ) {
+            if ( ( p.y <=  obj.getY() + GObj.CORNER_SIZE + 1 )  &&  p.x <= obj.getX() + getX() + GObj.CORNER_SIZE/2) {
+                return 1;
+            }
+        } 
+    	  System.out.println("1 " + (obj.getX() - GObj.CORNER_SIZE/2) + " < " + p.x+ " < " + (obj.getX() + GObj.CORNER_SIZE/2));
+    	/* case 2; x1 > x2  top */
+    	if ( ( p.x >= obj.getX() - GObj.CORNER_SIZE - 1  ) && ( p.y >= obj.getY() - GObj.CORNER_SIZE/2 ) ) {
+            if ( ( p.y <=  obj.getY() + GObj.CORNER_SIZE/2 )  &&  p.x <= obj.getX() + 2) {
+                return 1;
+            }
+        }
+    	
+    	/*case 2; x2 > x1  top*/
+    	if ( ( p.x >= obj.getX() + getX() +1 ) && ( p.y >= obj.getY() - GObj.CORNER_SIZE/2 ) ) {
+            if ( ( p.y <=  obj.getY() + GObj.CORNER_SIZE/2 )  &&  p.x <= obj.getX()+ getX() + GObj.CORNER_SIZE + 2) {
+                return 1;
+            }
+        } 
+    	
+    	/*case 1; bottom */
+    	if ( ( p.x >= (obj.getX() + getEndX() -  GObj.CORNER_SIZE/2) ) && ( p.y >= obj.getY() + getEndY() + 2) ) {
+            if ( ( p.y <= obj.getY() + getEndY() + 2 + GObj.CORNER_SIZE)  &&  p.x <= (obj.getX() + getEndX() +  GObj.CORNER_SIZE/2)) {
+                return 2;
+            }
+        } 
+    	
+    	/* case 2; x1 > x2  bottom */
+    	if ( ( p.x >= (obj.getX() + Math.max(getX(), getEndX()) +1 ) ) && ( p.y >= obj.getY() + getEndY() -  GObj.CORNER_SIZE/2) ) {
+            if ( (  p.y <= obj.getY() + getEndY() +  GObj.CORNER_SIZE/2)  &&  p.x <= (obj.getX() + Math.max(getX(), getEndX()) +1 +  GObj.CORNER_SIZE)) {
+                return 2;
+            }
+        } 
+    	
+    	/*case 2; x2 > x1  bottom*/
+    	if ( ( p.x >= (obj.getX() + getEndX() - 2 ) ) && ( p.y >= obj.getY() + getEndY() -  GObj.CORNER_SIZE/2) ) {
+            if ( (  p.y <= obj.getY() + getEndY() +  GObj.CORNER_SIZE/2)  &&  p.x <= (obj.getX() + getEndX() - 2 +  GObj.CORNER_SIZE)) {
+                return 2;
+            }
+        } 
+    	
+    	return 0;
+    }
+    
+    
+    public int getRatio(){
+    	if(Math.abs(getX() - getEndX()) == 0)
+    			return 1;
+    	if(Math.abs(getY() - getEndY()) == 0)
+			return 2;
+    	
+    	/* mostly vertical */    
+    	if( ( (Math.abs(getX() - getEndX())) / Math.abs(getY() - getEndY())) < 1)
+    			return 1;
+    	/* mostly horizontal */
+    	if( ( (Math.abs(getX() - getEndX())) / Math.abs(getY() - getEndY())) >= 1)
+    		return 2;
+    	return 1;    	
+    }
 
     @Override
     public void draw( int xModifier, int yModifier, float Xsize, float Ysize, Graphics2D g2 ) {
@@ -359,26 +313,13 @@ public class Line extends Shape implements Serializable {
         g2.setStroke( getStroke() );
 
         int x1 = 0, y1 = 0, x2 = 0, y2 = 0;
-        if ( getFixedX1() == -1 )
-            x1 = xModifier + getStartX();
-        else
-            x1 = xModifier + (int) ( Xsize * getStartX() ) - getFixedX1();
-
-        if ( getFixedX2() == -1 )
-            x2 = xModifier + getEndX();
-        else
-            x2 = xModifier + (int) ( Xsize * getEndX() ) - getFixedX2();
-
-        if ( getFixedY1() == -1 )
-            y1 = yModifier + getStartY();
-        else
-            y1 = yModifier + (int) ( Ysize * getStartY() ) - getFixedY1();
-
-        if ( getFixedY2() == -1 )
-            y2 = yModifier + getEndY();
-        else
-            y2 = yModifier + (int) ( Ysize * getEndY() ) - getFixedY2();
-
+        
+        x1 = xModifier + (int) ( Xsize * getX() ) ;
+        x2 = xModifier + (int) ( Xsize * this.endX ) ;
+        y1 = yModifier + (int) ( Ysize * getY() ) ;
+        y2 = yModifier + (int) ( Ysize * this.endY ) ;
+      
+        
         g2.drawLine( x1, y1, x2, y2 );
 
         if ( isSelected() ) {
@@ -393,8 +334,8 @@ public class Line extends Shape implements Serializable {
     } // clone
 
     public void shift( int offsetX, int offsetY ) {
-        setStartX( getStartX() + offsetX );
-        setStartY( getStartY() + offsetY );
+        setX( getX() + offsetX );
+        setY( getY() + offsetY );
         setEndX( getEndX() + offsetX );
         setEndY( getEndY() + offsetY );
     }
@@ -403,7 +344,7 @@ public class Line extends Shape implements Serializable {
      * @return (endY - startY) / (endX - startX)
      */    
     public double getK() {
-        double k = (double) (getEndY() - getStartY()) / (getEndX() - getStartX());
+        double k = (double) (getEndY() - getY()) / (getEndX() - getX());
         if (Double.isInfinite(k) || Double.isNaN(k)) {
             k = 0;
         }
@@ -421,22 +362,9 @@ public class Line extends Shape implements Serializable {
     
     @Override
     public Shape getCopy() {
-        return new Line( getStartX(), getStartY(), getEndX(), getEndY(), getColor(), getStrokeWidth(), getLineType() );
+        return new Line( getX(), getY(), getEndX(), getEndY(), getColor(), getStrokeWidth(), getLineType() );
     }
-
-    /**
-     * @param startX the startX to set
-     */
-    public void setStartX( int startX ) {
-        this.startX = startX;
-    }
-
-    /**
-     * @param startY the startY to set
-     */
-    public void setStartY( int startY ) {
-        this.startY = startY;
-    }
+    
 
     /**
      * @param endX the endX to set
@@ -451,94 +379,4 @@ public class Line extends Shape implements Serializable {
     public void setEndY( int endY ) {
         this.endY = endY;
     }
-
-    /**
-     * @param fixedX1 the fixedX1 to set
-     */
-    public void setFixedX1( int fixedX1 ) {
-        this.fixedX1 = fixedX1;
-    }
-
-    /**
-     * @return the fixedX1
-     */
-    public int getFixedX1() {
-        return fixedX1;
-    }
-
-    /**
-     * @param fixedX2 the fixedX2 to set
-     */
-    public void setFixedX2( int fixedX2 ) {
-        this.fixedX2 = fixedX2;
-    }
-
-    /**
-     * @return the fixedX2
-     */
-    public int getFixedX2() {
-        return fixedX2;
-    }
-
-    /**
-     * @param fixedY1 the fixedY1 to set
-     */
-    public void setFixedY1( int fixedY1 ) {
-        this.fixedY1 = fixedY1;
-    }
-
-    /**
-     * @return the fixedY1
-     */
-    public int getFixedY1() {
-        return fixedY1;
-    }
-
-    /**
-     * @param fixedY2 the fixedY2 to set
-     */
-    public void setFixedY2( int fixedY2 ) {
-        this.fixedY2 = fixedY2;
-    }
-
-    /**
-     * @return the fixedY2
-     */
-    public int getFixedY2() {
-        return fixedY2;
-    }
-
-	public String getStringX1() {
-		return stringX1;
-	}
-
-	public void setStringX1(String stringX1) {
-		this.stringX1 = stringX1;
-	}
-
-	public String getStringX2() {
-		return stringX2;
-	}
-
-	public void setStringX2(String stringX2) {
-		this.stringX2 = stringX2;
-	}
-
-	public String getStringY1() {
-		return stringY1;
-	}
-
-	public void setStringY1(String stringY1) {
-		this.stringY1 = stringY1;
-	}
-
-	public String getStringY2() {
-		return stringY2;
-	}
-
-	public void setStringY2(String stringY2) {
-		this.stringY2 = stringY2;
-	}
-
-    
 }

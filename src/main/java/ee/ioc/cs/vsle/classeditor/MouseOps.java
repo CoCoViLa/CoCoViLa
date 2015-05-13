@@ -348,6 +348,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         }
         
         if( s instanceof Line) {
+        	obj.setX(xOffset);
+            obj.setY(yOffset);
         	if (s.getHeight() == 0 && s.getWidth() == 0) {
             	return;
             } 
@@ -359,8 +361,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 	        s.setY(0);
         }
         else if (s instanceof Line) {
-        	int minX = Math.min( ((Line) s).getStartX(), ((Line) s).getEndX() );
-        	int minY = Math.min( ((Line) s).getStartY(), ((Line) s).getEndY()  );
+        	int minX = Math.min( ((Line) s).getX(), ((Line) s).getEndX() );
+        	int minY = Math.min( ((Line) s).getY(), ((Line) s).getEndY()  );
         	
         	if (xOffset == 0) obj.setX(minX);
         	if (yOffset == 0) obj.setY(minY);
@@ -368,13 +370,13 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             double k = ((Line) s).getK();
 
             if (k >= 0) {
-	            ((Line) s).setStartX(0);
-	            ((Line) s).setStartY(0);
+	            ((Line) s).setX(0);
+	            ((Line) s).setY(0);
 	            ((Line) s).setEndX(s.getWidth());
 	            ((Line) s).setEndY(s.getHeight());
             } else {
-            	((Line) s).setStartX(s.getWidth());
-	            ((Line) s).setStartY(0);
+            	((Line) s).setX(s.getWidth());
+	            ((Line) s).setY(0);
 	            ((Line) s).setEndX(0);
 	            ((Line) s).setEndY(s.getHeight());
             }
@@ -431,17 +433,52 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     @Override
     public void mouseClicked( MouseEvent e ) {
     	
+    	if (SwingUtilities.isMiddleMouseButton(e)) {
+    		return;
+    	}
+    	    	
         int x, y;
         x = e.getX();
         y = e.getY();
         
-        System.out.println("ClassMouseOps mouseClicked: " + state + "; coords x=" + x + "; y=" + y);
-
-        if ( state.equals( State.drawArc1 ) ) {
+        // LISTEN RIGHT MOUSE BUTTON
+        if ( SwingUtilities.isRightMouseButton( e ) ) {
+        	GObj obj = null;        	
+        		int maxIndex = -1;    	
+        		for(GObj o:canvas.getObjectList()){
+        			if(o.contains(canvas.mouseX, canvas.mouseY) && o.isSelected()){
+        				obj = o;
+        				
+        			}
+        			else if(o.contains(canvas.mouseX, canvas.mouseY) && canvas.getObjectList().indexOf(o) > maxIndex){
+        				maxIndex = canvas.getObjectList().indexOf(o);
+        				obj = o; 
+        			}
+        		}
+        		if(obj != null) obj.setSelected(true);
+        		else {
+        			obj = canvas.getObjectList().checkInside( x, y, canvas.getScale() );
+        		}
+            if ( obj != null  && canvas.getObjectList().getSelectedCount() < 2 ) {
+            	 canvas.getObjectList().clearSelected();
+            	 obj.setSelected(true);
+            	if (obj.getPortList() != null && !obj.getPortList().isEmpty()) {
+            		Port port = obj.getPortList().get(0);            		
+            		openPortPopupMenu( port, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
+            	} else { 
+            		openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
+            	}
+            }
+            else if ( obj != null || canvas.getObjectList().getSelectedCount() > 1 ) {            	
+            	openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
+            } 
+        } // END OF LISTENING RIGHT MOUSE BUTTON
+        else {
+           if ( state.equals( State.drawArc1 ) ) {
             setState( State.drawArc2 );
             double legOpp = startY + arcHeight / 2 - y;
             double legNear = x - ( startX + arcWidth / 2 );
-            arcStartAngle = (int) ( Math.atan( legOpp / legNear ) * 180 / Math.PI );
+            arcStartAngle = (int) ( Math.atan2( legOpp,  legNear )); //* 180 / Math.PI );
             if ( legNear < 0 )
                 arcStartAngle = arcStartAngle + 180;
             if ( legNear > 0 )
@@ -453,24 +490,12 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         }
         if ( state.equals( State.drawArc2 ) ) {
             Arc arc = new Arc(arcStartX, arcStartY, arcWidth, arcHeight, arcStartAngle, arcAngle, 
-                    Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );            
-    		
+                    Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );                		
             addShape( arc );
             setState( State.selection );
         }
-        // LISTEN RIGHT MOUSE BUTTON
-        if ( SwingUtilities.isRightMouseButton( e ) ) {
-            GObj obj = canvas.getObjectList().checkInside( x, y, canvas.getScale() );
-            if ( obj != null || canvas.getObjectList().getSelectedCount() > 1 ) {
-            	if (obj.getPortList() != null && !obj.getPortList().isEmpty()) {
-            		Port port = obj.getPortList().get(0);            		
-            		openPortPopupMenu( port, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
-            	} else { 
-            		openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
-            	}
-            }        	
-        } // END OF LISTENING RIGHT MOUSE BUTTON
-        else {
+    
+       
             if ( state.equals( State.selection ) ) {
                 // **********Selecting objects code*********************
                 if ( !e.isShiftDown() ) {
@@ -501,13 +526,13 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 						    	new PortPropertiesDialog( ClassEditor.getInstance(), port ).setVisible( true );
                     	} else canvas.openPropertiesDialog(obj );
                     }
-                    if (SwingUtilities.isMiddleMouseButton(e)) {
+                   /* if (SwingUtilities.isMiddleMouseButton(e)) {
                     	canvas.setCurrentObj( obj );
                     	/*if (ClassEditor.className != null)
                     	canvas.openClassCodeViewer(ClassEditor.className);
                     } else {
                         canvas.setCurrentObj( obj );*/
-                    }
+                   // }
                 }
 
             } else {
@@ -528,6 +553,19 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
        System.out.println("ClassMouseOps mousePressed: " + state + "; mouse coords x=" + e.getX() + "; y=" + e.getY());
         
     	mouseState = "pressed";
+    	
+    	/* check for right click*/
+        if ( SwingUtilities.isRightMouseButton( e ) ) {
+        	GObj obj = canvas.getObjectList().checkInside( canvas.mouseX , canvas.mouseY , canvas.getScale() );
+        	if(obj == null){
+        		canvas.getObjectList().clearSelected();
+        		setState(State.selection);
+        	} 
+        	return;
+        } else if (SwingUtilities.isMiddleMouseButton(e)){        	 
+        	 return; // NO middleMouseButton actions
+        } 
+    	
         if ( !( state.equals( State.drawArc1 ) || state.equals( State.drawArc2 )) ) {
             startX =  Math.round( e.getX() / canvas.getScale() );
             startY =  Math.round( e.getY() / canvas.getScale() );
@@ -539,8 +577,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             canvas.mouseY = Math.round( e.getY() / canvas.getScale() );
             Connection con = canvas.getConnectionNearPoint( canvas.mouseX, canvas.mouseY );
 
-            obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, 1);
-            
+            obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, 1);          
             /* check corners 1st*/
             if ( con == null ) {
                 cornerClicked = canvas.getObjectList().controlRectContains(
@@ -562,7 +599,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                 System.out.println("IconMouseOps: " + SwingUtilities.isLeftMouseButton( e ) );
                 if ( SwingUtilities.isLeftMouseButton( e ) ) {
                     setState( State.drag );
-                    draggedObject = obj;
+                    draggedObject = obj;                  
                 }
                 canvas.drawingArea.repaint();
             }  else {
@@ -574,7 +611,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         
         System.out.println("ClassMouseOps mousePressed: " + state + "; canvas coords x=" + canvas.mouseX + "; y=" +canvas.mouseY);      
         canvas.setActionInProgress( true );
-    }
+    }    
     
     @Override
     public void mouseDragged( MouseEvent e ) {
@@ -904,7 +941,15 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     public void mouseReleased( MouseEvent e ) {
     	System.out.println("MouseOps mouseReleased: " + state + "  mouse coords: x="+canvas.mouseX+", y="+canvas.mouseY);
     	mouseState = "released";
-
+    	
+    	if (SwingUtilities.isMiddleMouseButton(e)) {
+    		return;
+    	}    	
+    	if (SwingUtilities.isRightMouseButton(e)) {
+    		return;  /* Already handled*/
+    	}    	
+    	
+    	
         if ( state.equals( State.drag ) ) {
         	
             if ( !SwingUtilities.isLeftMouseButton( e ) )
@@ -982,7 +1027,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         } else if ( state.equals( State.drawLine ) && (startX != canvas.mouseX || startY != canvas.mouseY)) {               	
             Line line = new Line( startX, startY, (int) Math.abs(canvas.mouseX/canvas.getScale()), (int) Math.abs(canvas.mouseY/canvas.getScale()), 
                     Shape.createColorWithAlpha( color, getTransparency() ), strokeWidth, lineType );
-            addShape( line );
+            addShape( line, Math.min(startX,(int) Math.abs(canvas.mouseX/canvas.getScale())), Math.min(startY,(int) Math.abs(canvas.mouseY/canvas.getScale())) );
             canvas.drawingArea.repaint();
         } else if ( state.equals( State.resize ) ) {
         	canvas.finalizeResizeObjects();
