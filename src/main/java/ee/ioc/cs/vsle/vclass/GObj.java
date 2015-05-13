@@ -260,10 +260,24 @@ public class GObj implements Serializable, Cloneable,
     /*	x - xa/xb - xa	 = 	y - ya/yb - ya */
     	
     	Line l = (Line)getShapes().get(0);
-    	float step1 = (float)(p.x -  getX()) / (float)getWidth();
-		float step2 = (float)( p.y - getY()) / (float)getHeight();		
-		//System.out.println("Math s1 = "+ step1 +"; s2 = " + step2);
-		if (l.getX() == 0 ){
+    	if(l.getWidth() == 0){
+			if(p.x >= getX()-2 && p.x  <= getX() +2 && p.y >= getY() && p.y <= l.getEndY() + getY()) return true;
+			else return false;
+		}    	
+    	if(l.getHeight() == 0){
+    		//System.out.println("h=0 p.y = " +p.y+"; y = " + getY() + "p.x = " + p.x + "; getX() = " + getX());
+			if(p.y >= getY()-2 && p.y  <= getY() +2 && p.x >= getX() && p.x <= getX() + Math.max(l.getEndX(), l.getX())) 
+				return true;
+			else return false;
+		}
+    
+    	float step1 = (float)(p.x -  getX()) / getWidth();
+		float step2 = (float)( p.y - getY()) / getHeight();		
+		if(getWidth() == 0){
+			if(p.x >= getX()-2 && p.x  <= getX() + 2 ) return true;
+		}
+		//System.out.println("w = " + l.getWidth());
+		if (l.getX() == 0){
     		int cX = (int) ((getWidth() * step2) + getX() +l.getX());
     		//System.out.println("x = "+ cX +" for y = " + p.y);
     		if (p.x >= cX-2 && p.x <= cX +2) return true;
