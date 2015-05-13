@@ -105,6 +105,10 @@ public class GObj implements Serializable, Cloneable,
     
     public boolean isInsideSelect( int pointX, int pointY ) {
         Point p = toObjectSpace( pointX, pointY );
+        
+        if(getShapes() != null && getShapes().size() !=0 && getShapes().get(0) instanceof Line){
+         	return  containsLine(p);
+         } 
         if ( ( p.x >= getX() - selectOffset) && ( p.y >= getY() - selectOffset ) && ( p.x <= getX() + getWidth() + selectOffset)
         		 && ( p.y <= getY() + getHeight() + selectOffset)) {
             return true;
