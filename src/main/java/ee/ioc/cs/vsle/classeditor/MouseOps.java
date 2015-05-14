@@ -447,8 +447,11 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         		int maxIndex = -1;    	
         		for(GObj o:canvas.getObjectList()){
         			if(o.contains(canvas.mouseX, canvas.mouseY) && o.isSelected()){
-        				obj = o;
-        				
+        				obj = o;       				
+        			}
+        			else if (o.contains(canvas.mouseX, canvas.mouseY) && canvas.getObjectList().getSelectedCount() > 0 && !o.isSelected()) {
+        				obj = o;  
+        				canvas.getObjectList().clearSelected();
         			}
         			else if(o.contains(canvas.mouseX, canvas.mouseY) && canvas.getObjectList().indexOf(o) > maxIndex){
         				maxIndex = canvas.getObjectList().indexOf(o);
