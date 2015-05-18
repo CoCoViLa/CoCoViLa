@@ -8,8 +8,7 @@ import java.util.List;
 
 import javax.xml.parsers.*;
 
-import ee.ioc.cs.vsle.parser.ParsedSpecificationContext;
-import ee.ioc.cs.vsle.parser.SpecParserUtil;
+import ee.ioc.cs.vsle.parser.PackageSpecSourceProvider;
 import ee.ioc.cs.vsle.parser.SpecificationLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +85,8 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
     private static final String ATR_X = "x";
     private static final String ATR_NAME = "name";
     private static final String EL_NAME = "name";
+    private static final String EL_FILE = "file";
+    private static final String EL_EXTENDS = "extends";
     private static final String ATR_ID = "id";
     private static final String EL_PORT = "port";
     private static final String EL_PORTS = "ports";
@@ -124,7 +125,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
     };
 
     private SpecificationLoader specificationLoader;
-
+    private VPackage _package;
     /**
      * @param packageFile
      */
@@ -136,37 +137,36 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
     @Override
     public VPackage parse() {
         
-        logger.debug( "Starting parsing package: " + xmlFile.getAbsolutePath() );
+        logger.debug("Starting parsing package: " + xmlFile.getAbsolutePath());
         
         long startParsing = System.currentTimeMillis();
-        VPackage pack = null;
+
         try {
             Document document = getDocument();
             Element root = document.getDocumentElement();
             
-            pack = new VPackage( xmlFile.getAbsolutePath() );
+            _package = new VPackage( xmlFile );
             
             Node name = root.getElementsByTagName( EL_NAME ).item( 0 );
-            pack.setName( name.getTextContent() );
+            _package.setName(name.getTextContent());
             Node descr = root.getElementsByTagName( EL_DESCRIPTION ).item( 0 );
-            pack.setDescription( descr.getTextContent() );
+            _package.setDescription(descr.getTextContent());
             
             NodeList list = root.getElementsByTagName( EL_CLASS );
 
             boolean initPainters = false;
             for (int i=0; i<list.getLength(); i++) {
                 PackageClass pc = parseClass( (Element)list.item( i ) );
-                pack.getClasses().add( pc );
                 if( pc.getPainterName() != null ) {
                   initPainters = true;
                 }
             }
 
             if (initPainters) {
-              pack.initPainters();
+              _package.initPainters();
             }
 
-            logger.info( "Parsing the package '{}' finished in {}ms.\n", pack.getName(), ( System.currentTimeMillis() - startParsing ));
+            logger.info( "Parsing the package '{}' finished in {}ms.\n", _package.getName(), ( System.currentTimeMillis() - startParsing ));
         } catch ( Exception e ) {
             collector.collectDiagnostic( e.getMessage(), true );
             if(RuntimeProperties.isLogDebugEnabled()) {
@@ -180,19 +180,30 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             return null;
         }
         
-        return pack;
+        return _package;
     }
     
     private Element getElementByName( Element root, String name ) {
         return (Element)root.getElementsByTagName( name ).item( 0 );
     }
-    
+
+    private String getElementStringByName( Element root, String name ) {
+        Element element;
+        return (element = getElementByName(root, name)) != null ? element.getTextContent() : null;
+    }
+
     private PackageClass parseClass( Element classNode ) {
         PackageClass newClass = new PackageClass();
-        
-        newClass.setComponentType( PackageClass.ComponentType.getType( classNode.getAttribute( ATR_TYPE ) ) );
-        newClass.setStatic( Boolean.parseBoolean( classNode.getAttribute( ATR_STATIC ) ) );
+        _package.getClasses().add( newClass );
+
+        newClass.setComponentType(PackageClass.ComponentType.getType(classNode.getAttribute(ATR_TYPE)));
+        newClass.setStatic(Boolean.parseBoolean(classNode.getAttribute(ATR_STATIC)));
         newClass.setName( getElementByName( classNode, EL_NAME ).getTextContent() );
+        final String source = getElementStringByName(classNode, EL_FILE);
+        if (source != null) {
+            newClass.setSource(source);
+        }
+        newClass.setTarget(getElementStringByName(classNode, EL_EXTENDS));
         newClass.setDescription( getElementByName( classNode, EL_DESCRIPTION ).getTextContent() );
         newClass.setIcon( getElementByName( classNode, EL_ICON ).getTextContent() );
         
@@ -203,13 +214,13 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                 switch (RuntimeProperties.getSpecParserKind()) {
                     case REGEXP: {
                         ClassList classList = new ClassList();
-                        SpecParser.parseSpecClass(newClassName, getPath(), classList);
+                        SpecParser.parseSpecClass(newClassName, getWorkingDir(), classList);
                         newClass.setSpecFields(classList.getType(newClassName).getFields());
                         break;
                     }
                     case ANTLR: {
                         if (specificationLoader == null) {
-                            specificationLoader = new SpecificationLoader(getPath(), null);
+                            specificationLoader = new SpecificationLoader(new PackageSpecSourceProvider(_package), null);
                         }
                         final AnnotatedClass annotatedClass = specificationLoader.getSpecification(newClassName);
                         newClass.setSpecFields(annotatedClass.getFields());
@@ -570,7 +581,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                     Dim dim =  getDim( node );
                     //image path should be relative to the package xml
                     String imgPath = node.getAttribute( ATR_PATH );
-                    String fullPath = FileFuncs.preparePathOS( getPath() + imgPath );
+                    String fullPath = FileFuncs.preparePathOS( getWorkingDir() + imgPath );
                     shape = new Image( dim.x, dim.y, 
                             fullPath, imgPath, isShapeFixed( node ) );
                     
@@ -813,5 +824,8 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         
         return pack;
     }
-    
+
+    protected String getWorkingDir() {
+        return _package.getDir();
+    }
 }

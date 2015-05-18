@@ -16,7 +16,6 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import ee.ioc.cs.vsle.equations.EquationSolver;
 import ee.ioc.cs.vsle.equations.EquationSolver.Relation;
-import ee.ioc.cs.vsle.parser.SpecificationLoader.SpecificationNotFoundException;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageBaseListener;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasDeclarationContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasDefinitionContext;

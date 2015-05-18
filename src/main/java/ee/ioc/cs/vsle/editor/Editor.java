@@ -77,7 +77,7 @@ public class Editor extends JFrame implements ChangeListener {
         deleteAction = new DeleteAction();
         cloneAction = new CloneAction();
         makeMenu();
-        getContentPane().add( tabbedPane );
+        getContentPane().add(tabbedPane);
         initActions();
     } // initialize
 
@@ -270,6 +270,11 @@ public class Editor extends JFrame implements ChangeListener {
         menuItem = new JMenuItem( Menu.INFO, KeyEvent.VK_I );
         menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
+        if (Desktop.isDesktopSupported()) {
+            menuItem = new JMenuItem(Menu.BROWSE_PACKAGE, KeyEvent.VK_B);
+            menuItem.addActionListener(getActionListener());
+            menu.add(menuItem);
+        }
         menuItem = new JMenuItem( Menu.CLOSE, KeyEvent.VK_C );
         menuItem.addActionListener( getActionListener() );
         menu.add( menuItem );
@@ -567,7 +572,7 @@ public class Editor extends JFrame implements ChangeListener {
         return false;
     }
 
-    private enum OS { WIN, MAC, UNIX };
+    public enum OS { WIN, MAC, UNIX };
     
     /**
      * Return operating system type. Uses isWin, isMac, isUnix methods for

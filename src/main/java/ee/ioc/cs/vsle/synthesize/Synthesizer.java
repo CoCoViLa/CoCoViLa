@@ -16,6 +16,8 @@ import ee.ioc.cs.vsle.util.FileFuncs.FileSystemStorage;
 import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
 import ee.ioc.cs.vsle.util.TypeUtil;
 import ee.ioc.cs.vsle.vclass.ClassField;
+import ee.ioc.cs.vsle.vclass.PackageClass;
+import ee.ioc.cs.vsle.vclass.VPackage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,7 +44,11 @@ public class Synthesizer {
      * @throws SpecParseException 
     */
     public static void makeProgram( String progText, ClassList classes, String mainClassName, String path, GenStorage storage ) throws SpecParseException {
-        generateSubclasses( mainClassName, classes, path, storage );
+        makeProgram(progText, classes, mainClassName, path, storage, null);
+    }
+
+    public static void makeProgram( String progText, ClassList classes, String mainClassName, String path, GenStorage storage, VPackage _package) throws SpecParseException {
+        generateSubclasses( mainClassName, classes, path, storage, _package );
         storage.writeFile( mainClassName + ".java", progText );
     }
 
@@ -138,55 +144,71 @@ public class Synthesizer {
      @throws SpecParseException
       * @param mainClassName
      * @param classes List of classes obtained from the ee.ioc.cs.editor.synthesize.SpecParser
+     * @param _package
      */
-    private static void generateSubclasses(String mainClassName, ClassList classes, String path, GenStorage storage) throws SpecParseException {
+    private static void generateSubclasses(String mainClassName, ClassList classes, String path, GenStorage storage, VPackage _package) throws SpecParseException {
 
-    	if( classes == null ) {
-    		throw new SpecParseException( "Empty Class list!!!" );
-    	}
-    	
+        if( classes == null ) {
+            throw new SpecParseException( "Empty Class list!!!" );
+        }
+
         String fileString;
         Pattern pattern;
         Matcher matcher;
 
         // for each class generate new one used in synthesis
-        for ( AnnotatedClass pClass : classes ) {
-            
-            if ( !pClass.getName().equals( mainClassName ) ) {
-                
-                fileString = FileFuncs.getFileContents(
-                        new File(path, pClass.getName() + ".java"));
+        for ( AnnotatedClass ac : classes ) {
+
+            final String name = ac.getName();
+            if ( !name.equals(mainClassName) ) {
+
+                StringBuilder fsb;
+                int indexToInsertDeclarations;
+
+                PackageClass pClass;
+                String targetClass = _package != null
+                                        ? (pClass = _package.getClass(name)) != null ? pClass.getInfo().getTarget() : null
+                                        : null;
+                if (targetClass != null) {
+                    fsb = new StringBuilder();
+                    fsb.append(String.format("public class %s extends %s {\n", name, targetClass));
+                    indexToInsertDeclarations = fsb.length();
+                    fsb.append(String.format("}\n", name, targetClass));
+                }
+                else {
+
+                    fileString = FileFuncs.getFileContents(new File(path, name + ".java"));
 
                     // find the class declaration
-                pattern = Pattern.compile( "class[ \t\n]+" + pClass.getName() 
-                		+ "|" + "public class[ \t\n]+" + pClass.getName());
-                matcher = pattern.matcher( fileString );
+                    pattern = Pattern.compile( "class[ \t\n]+" + name + "|" + "public class[ \t\n]+" + name);
+                    matcher = pattern.matcher(fileString);
 
-                StringBuilder fsb = new StringBuilder( fileString );
-                // be sure class is public
-                if ( matcher.find() ) {
-                    fsb.replace( matcher.start(), matcher.end(), "public class " + pClass.getName() );
+                    fsb = new StringBuilder( fileString );
+                    // be sure class is public
+                    if ( matcher.find() ) {
+                        fsb.replace( matcher.start(), matcher.end(), "public class " + name);
+                    }
+
+                    // find spec
+                    pattern = Pattern.compile(RE_SPEC, Pattern.DOTALL);
+                    matcher = pattern.matcher( fsb.toString() );
+                    if ( matcher.find() ) {
+                        indexToInsertDeclarations = matcher.start();
+                        fsb.insert( indexToInsertDeclarations++, "\n" ).delete(indexToInsertDeclarations, matcher.end() + 1);
+                    } else {
+                        throw new SpecParseException( "Unable to parse " + name + " specification" );
+                    }
                 }
-                
+
+                StringBuilder variableDeclarations = new StringBuilder();
+                for ( ClassField field : ac.getClassFields() ) {
+                    variableDeclarations.append(CodeGenerator.OT_TAB).append( TypeUtil.getDeclaration( field, "public" ) );
+                }
+                fsb.insert(indexToInsertDeclarations, variableDeclarations);
+
                 fsb.insert( 0, "import ee.ioc.cs.vsle.api.*;\n\n" );
-                
-                StringBuilder declars = new StringBuilder();
 
-                for ( ClassField field : pClass.getClassFields() ) {
-                    declars.append( CodeGenerator.OT_TAB ).append( TypeUtil.getDeclaration( field, "public" ) );
-				}
-
-                // find spec
-                pattern = Pattern.compile(RE_SPEC, Pattern.DOTALL);
-                matcher = pattern.matcher( fsb.toString() );
-                if ( matcher.find() ) {
-                    int matcherStart = matcher.start();
-                    fsb.insert( matcherStart++, "\n" ).delete( matcherStart, matcher.end()+1 ).insert( matcherStart, declars );
-                } else {
-                	throw new SpecParseException( "Unable to parse " + pClass.getName() + " specification" );
-                }
-
-                storage.writeFile( pClass.getName() + ".java", fsb.toString() );
+                storage.writeFile( name + ".java", fsb.toString() );
             }
         }
     }

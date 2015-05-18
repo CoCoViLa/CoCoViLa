@@ -3,7 +3,6 @@ package ee.ioc.cs.vsle.synthesize;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ANY;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_DOUBLE;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_INT;
-import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,6 +13,7 @@ import java.util.regex.Pattern;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.equations.EquationSolver;
 import ee.ioc.cs.vsle.equations.EquationSolver.Relation;
+import ee.ioc.cs.vsle.parser.JavaFileSourceProvider;
 import ee.ioc.cs.vsle.parser.SpecificationSourceProvider;
 import ee.ioc.cs.vsle.table.Table;
 import ee.ioc.cs.vsle.util.FileFuncs;
@@ -54,19 +54,16 @@ public class SpecParser {
     private static final Pattern PATTERN_ALIAS_DECLARATION = Pattern.compile( "alias *(\\(( *[^\\(\\) ]+ *)\\))* *([^= ]+) *" );
     private static final Pattern PATTERN_ALIAS_FULL = Pattern.compile( "alias *(\\(( *[^\\(\\) ]+ *)\\))* *([^= ]+) *= *\\((.*)\\) *" );
 
-    private final SpecificationSourceProvider<String> specSourceProvider;
-    private final String packagePath;
+    private final SpecificationSourceProvider specSourceProvider;
 
     private String rootClassName;
 
     public SpecParser(String packagePath) {
-        this.packagePath = packagePath;
-        specSourceProvider = new FileSourceProvider();
+        this(new JavaFileSourceProvider(packagePath));
     }
 
-    public SpecParser(String packagePath, SpecificationSourceProvider specSourceProvider) {
+    public SpecParser(SpecificationSourceProvider specSourceProvider) {
         this.specSourceProvider = specSourceProvider;
-        this.packagePath = packagePath;
     }
 
     public static String getClassName( String spec ) {
@@ -746,8 +743,6 @@ public class SpecParser {
      */
     private boolean checkSpecClass( String parentClassName, Set<String> checkedClasses, ClassList classList, String type ) {
 
-        logger.debug( "Checking existence of " + packagePath + type + ".java" );
-        
         if(checkedClasses == null)
             checkedClasses = new LinkedHashSet<String>();
         
@@ -1004,18 +999,4 @@ public class SpecParser {
         return null;
     } // getVar
 
-    private class FileSourceProvider implements SpecificationSourceProvider<String> {
-
-        @Override
-        public String getSource(String spec) {
-            String pathname = packagePath + spec + ".java";
-            File file = new File(pathname);
-            try {
-                return FileUtils.readFileToString(file);
-            }
-            catch(Exception e) {
-            }
-            return null;
-        }
-    }
 }

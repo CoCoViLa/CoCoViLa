@@ -95,7 +95,7 @@ public abstract class AbstractXmlProcessor implements DiagnosticsCollector.Diagn
         return builder;
     }
     
-    protected String getPath() {
+    protected String getWorkingDir() {
         return xmlFile.getParent() + File.separator;
     }
     

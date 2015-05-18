@@ -6,6 +6,7 @@ import java.util.*;
 import ee.ioc.cs.vsle.ccl.*;
 import ee.ioc.cs.vsle.editor.Editor;
 import ee.ioc.cs.vsle.util.FileFuncs.*;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +26,8 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
 
     private String name;
     private String description;
-    private String path;
+    private String pathToXml;
+    private String packageDir;
     private ArrayList<PackageClass> classes = new ArrayList<PackageClass>();
     private PackageClassLoader classLoader;
 
@@ -34,9 +36,14 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
      */
     private boolean painters;
 
-	public VPackage(String path) {
-        this.path = path;
-    }
+  public VPackage(String pathToXml) {
+    this.pathToXml = pathToXml;
+    this.packageDir = FilenameUtils.getFullPath(pathToXml);
+  }
+
+  public VPackage(File xml) {
+    this(xml.getAbsolutePath());
+  }
 
 	/**
 	 * Detects whether a package includes a specified class or not.
@@ -96,7 +103,7 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
 
         @Override
         public String getPath() {
-            return path;
+            return pathToXml;
         }
 
 		/**
@@ -180,7 +187,7 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
      */
     public PackageClassLoader getPackageClassLoader() {
         if (classLoader == null) {
-            File p = new File(path);
+            File p = new File(pathToXml);
             if (!p.isDirectory()) {
                 p = p.getParentFile();
             }
@@ -203,12 +210,12 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
 
     @Override
     public boolean equals( Object obj ) {
-        return path.equals( ((VPackage)obj).path );
+        return pathToXml.equals( ((VPackage)obj).pathToXml);
     }
 
     @Override
     public int hashCode() {
-        return path.hashCode();
+        return pathToXml.hashCode();
     }
 
     /**
@@ -235,6 +242,10 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
     @Override
     public String toString() {
         return "VPackage [name=" + name + ", description=" + description
-                + ", path=" + path + "]";
+                + ", pathToXml=" + pathToXml + "]";
     }
+
+  public String getDir() {
+    return packageDir;
+  }
 }

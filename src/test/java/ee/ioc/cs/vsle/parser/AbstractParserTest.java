@@ -39,7 +39,7 @@ public abstract class AbstractParserTest {
 
     return Arrays.asList(new Object[][]{
             { new AntlrTestSpecLoader(new SpecificationLoader(antlrSpecProvider, null)), antlrSpecProvider, "ANTLR parser" },
-            { new RegexParserTestSpecLoader(new SpecParser(null, stringSpecProvider)), stringSpecProvider, "REGEX parser" }});
+            { new RegexParserTestSpecLoader(new SpecParser(stringSpecProvider)), stringSpecProvider, "REGEX parser" }});
   }
 
   @Before
@@ -154,22 +154,22 @@ public abstract class AbstractParserTest {
     return vars;
   }
 
-  static class AntlrSpecProvider extends TestSpecStorage implements AntlrSpecificationSourceProvider {
+  static class AntlrSpecProvider extends TestSpecStorage implements SpecificationSourceProvider {
 
     @Override
-    public CharStream getSource(String specificationName) {
+    public String getSource(String specificationName) {
       if(map.containsKey(specificationName)) {
-        return new ANTLRInputStream(map.get(specificationName));
+        return map.get(specificationName);
       }
-      return AntlrSpecificationSourceProvider.NOP.getSource(specificationName);
+      throw new SpecificationNotFoundException("Not found: " + specificationName);
     }
   }
 
-  static class StringSpecProvider extends TestSpecStorage implements SpecificationSourceProvider<String> {
+  static class StringSpecProvider extends TestSpecStorage implements SpecificationSourceProvider {
 
     @Override
-    public String getSource(String spec) {
-      return map.get(spec);
+    public String getSource(String specificationName) {
+      return map.get(specificationName);
     }
   }
 

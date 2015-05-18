@@ -48,7 +48,7 @@ public class CodeViewer extends JFrame implements ActionListener,
         return textArea;
     }
 
-    private CodeViewer(File file) {
+    public CodeViewer(File file) {
         super();
         initLayout();
         openFile( file );
