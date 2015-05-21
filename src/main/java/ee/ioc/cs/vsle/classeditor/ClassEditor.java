@@ -90,6 +90,9 @@ import org.slf4j.LoggerFactory;
 public class ClassEditor extends JFrame implements ChangeListener {
 
 	private static final long serialVersionUID = 1L;
+	public static final String MENU_EDIT_PACKAGE = "Edit Package";	
+	public static final String MENU_SAVE_CURRENT_PACKAGE = "Save to current Package";	
+	
 	private static final Logger logger = LoggerFactory.getLogger(ClassEditor.class);
 
 	private static ClassEditor s_instance;
@@ -243,7 +246,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		setJMenuBar( menuBar );
 		menu = new JMenu( Menu.MENU_FILE );
 		menu.setMnemonic( KeyEvent.VK_F );
-
+		
+		menuItem = new JMenuItem(MENU_SAVE_CURRENT_PACKAGE );
+		menuItem.addActionListener( getActionListener() );
+		menu.add( menuItem );
+		
 		JMenu exportmenu = new JMenu( Menu.EXPORT_MENU );
 		exportmenu.setMnemonic( KeyEvent.VK_E );
 
@@ -277,6 +284,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		menuItem.addActionListener( getActionListener() );
 		menu.add( menuItem );*/
 
+		
+		menuItem = new JMenuItem(MENU_EDIT_PACKAGE);
+		menuItem.addActionListener( getActionListener() );
+		menu.add( menuItem );
+		
 		menu.addSeparator();
 		menuItem = new JMenuItem( Menu.PRINT, KeyEvent.VK_P );
 		menuItem.addActionListener( getActionListener() );
@@ -1324,6 +1336,14 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  repaint();
 	  }    
 
+
+	  public void editPackage() {
+		  PackagePropertiesDialog p = new PackagePropertiesDialog(getCurrentPackage().getName(), getCurrentPackage().getDescription());
+		  p.setVisible( true );
+		 // packageFile;
+		  savePackage();
+	  }
+	  
 	  public void createPackage() {
 		  PackagePropertiesDialog p = new PackagePropertiesDialog();
 		  p.setVisible( true );
@@ -1363,10 +1383,17 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	  } // savePackage  
 
 	  
+	  public void saveShapesToPackage(){
+		  commonShapesToPackage(false);
+	  }
+	  public void exportShapesToPackage() {
+		  commonShapesToPackage(true);
+	  }
+	  
 	  /**
 	   *  Validate ClassProperties, Class defined BoundingBox and any extras here
 	   */
-	  public void exportShapesToPackage() {
+	  public void commonShapesToPackage(boolean export) {
 		  
 		  if (classObject == null || !classObject.validateBasicProperties()){ 
 		  
@@ -1376,9 +1403,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  if (getCurrentCanvas().isBBPresent()){
 			  
 			  	  if(classObject.componentType.getXmlName().equals("template")){
-			  		  savePortGraphics();
+			  		  savePortGraphics(export);
 			  	  } else {
-			  		  saveToPackage();
+			  		  saveToPackage(export);
 			  	  }
 			  } else {
 				  JOptionPane.showMessageDialog( null, "Please define or select a bounding box.", "Bounding box undefined",
@@ -1400,7 +1427,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
     	return status;
     }*/
 
-	  public void savePortGraphics(){
+	  public void savePortGraphics(boolean export){
 		  
 		  File f = selectFile();
 		  ClassCanvas canv = getCurrentCanvas();
@@ -1490,13 +1517,16 @@ public class ClassEditor extends JFrame implements ChangeListener {
   
 	  }
 	  
-	  public void saveToPackage() {
+	  public void saveToPackage(boolean export) {
 
 		 
 		  ClassCanvas canv = getCurrentCanvas();
 		  File packageFile; 
-		  if(canv.getPackage() == null){
-			  
+		  if(canv.getPackage() == null && !export){
+			  JOptionPane.showMessageDialog( canv, "No package!" );
+			  return;
+		  }
+		  if(export){
 			  File f = selectFile();
 			  packageFile = f;
 			  /**

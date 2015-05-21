@@ -48,11 +48,22 @@ public class PackagePropertiesDialog extends JDialog {
   private static final JTextField fldName = new JTextField();
   private static final JTextField fldDesc = new JTextField();
 
+  // values to edit
+  private String pckName = null;
+  private String pckDesc = null;
+  
 
   /**
    * Class constructor.
    */
   public PackagePropertiesDialog() {
+	  new PackagePropertiesDialog(null, null);
+  }
+  public PackagePropertiesDialog(String name, String desc) {
+	 
+	this.pckName = name;
+	this.pckDesc = desc;
+	  
 	this.setTitle("Package Properties");
 
 	// add buttons to the buttons' panel.
@@ -73,6 +84,9 @@ public class PackagePropertiesDialog extends JDialog {
 	pnlFields.setMinimumSize(pnlFields.getPreferredSize());
 	pnlFields.setMaximumSize(pnlFields.getPreferredSize());
 	pnlFields.setLayout(new GridLayout(2,1));
+	if(pckName != null){
+		fldName.setText(pckName);
+	}
 	pnlFields.add(fldName);
 	pnlFields.add(fldDesc);
 

@@ -233,6 +233,8 @@ public class EditorActionListener implements ActionListener {
 	    	canvas.openClassCodeViewer( ClassObject.className );
 	    } else if ( e.getActionCommand().equals( Menu.EXPORT_TO_PACKAGE ) ) {
 	    	ClassEditor.getInstance().exportShapesToPackage(); // append the graphics to a package
+	    } else if ( e.getActionCommand().equals( ClassEditor.MENU_SAVE_CURRENT_PACKAGE ) ) {
+		    	ClassEditor.getInstance().saveShapesToPackage();     
 	    } else if ( e.getActionCommand().equals( Menu.IMPORT_FROM_PACKAGE ) ) {
 	    	ClassEditor.getInstance().loadClass();
 	    } else if ( e.getActionCommand().equals( Menu.CREATE_PACKAGE ) ) {
@@ -268,6 +270,8 @@ public class EditorActionListener implements ActionListener {
             }
 	    } else if ( e.getActionCommand().equals( Menu.DELETE_FROM_PACKAGE ) ) {
 	    	ClassEditor.getInstance().deleteClass();
+	    } else if ( e.getActionCommand().equals(ClassEditor.MENU_EDIT_PACKAGE) ) {
+	    	ClassEditor.getInstance().editPackage();
 	    }     
     }
 
