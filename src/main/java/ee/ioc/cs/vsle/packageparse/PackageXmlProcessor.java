@@ -184,7 +184,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
     }
     
     private PackageClass parseClass( Element classNode ) {
-        PackageClass newClass = new PackageClass();
+        PackageClass newClass = new PackageClass();   
         
         newClass.setComponentType( PackageClass.ComponentType.getType( classNode.getAttribute( ATR_TYPE ) ) );
         newClass.setStatic( Boolean.parseBoolean( classNode.getAttribute( ATR_STATIC ) ) );
@@ -224,7 +224,9 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         }
 
         //Fields
-        NodeList fields = classNode.getElementsByTagName( EL_FIELD );
+        
+        NodeList fields = classNode.getElementsByTagName( EL_FIELD );        
+       
         for ( int i = 0; i < fields.getLength(); i++ ) {
             parseField( newClass, (Element)fields.item( i ) );
         }
@@ -775,6 +777,11 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         
         fieldEl.setAttribute( ATR_NAME, field.getName() );
         fieldEl.setAttribute( ATR_TYPE, field.getType() );
+        if(field.getDescription() != null && !field.getDescription().isEmpty()){
+        	fieldEl.setAttribute( ATR_DESCRIPTION, field.getDescription() );
+        }        
+        
+        fieldEl.setAttribute( ATR_HIDDEN, String.valueOf(field.isHidden()) );
         
         if( field.isInput() )
             fieldEl.setAttribute( ATR_NATURE, "input" );

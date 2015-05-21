@@ -6,6 +6,7 @@ import java.awt.*;
 import java.awt.event.*;
 
 import javax.swing.event.*;
+import javax.swing.table.TableColumn;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.*;
@@ -36,6 +37,8 @@ public class ClassPropertiesDialog extends JDialog {
 
 	// Buttons
 	private final JButton bttnOk = new JButton("OK");
+	private final JButton bttnAdv = new JButton("Advanced Mode");
+	private final JButton bttnSimple = new JButton("Simple Mode");
 	private final JButton bttnCancel = new JButton("Cancel");
 	private final JButton bttnNewField = new JButton("Add New Field");
 	private final JButton bttnDelField = new JButton("Delete Selected Fields");
@@ -46,6 +49,7 @@ public class ClassPropertiesDialog extends JDialog {
 	private final JPanel pnlErrors = new JPanel();
 	private final JPanel pnlFields = new JPanel();
 	private final JPanel pnlProps = new JPanel();
+	private final JPanel pnlAdvLabel = new JPanel();
 	private final JPanel pnlTable = new JPanel();
 	private final JPanel pnlButtons = new JPanel();
 	private final JPanel pnlTableButtons = new JPanel();
@@ -81,11 +85,12 @@ public class ClassPropertiesDialog extends JDialog {
 
 	// Table for class fields.
 	private JTable tblClassFields;
-	private ClassFieldsTableModel initialCfTableModel;
-	private ClassFieldsTableModel cfTableModel;
+	private ClassFieldTable tableModel;
 
 	// Table selection model.
 	ListSelectionModel selectionModel;
+	
+	private Dialog dialog;
 
 	// Scrollpanes.
 	private JScrollPane spTableScrollPane;
@@ -95,22 +100,31 @@ public class ClassPropertiesDialog extends JDialog {
 	/**
 	 * Class constructor.
 	 */
-	public ClassPropertiesDialog(ClassFieldsTableModel cfTblModel,
+	public ClassPropertiesDialog(ClassFieldTable cfTblModel,
 			boolean emptyValid) {
 		this.setTitle("Class Properties");
 		
         setLocationByPlatform( true );
         setModal(true);
 
-		initialCfTableModel = cfTblModel;
+		tableModel = cfTblModel;
 		//make a copy of model
-		cfTableModel = new ClassFieldsTableModel(); 
-		cfTableModel.setDataVector( new Vector<Vector<String>>( cfTblModel.getDataVector() ) );
+		//cfTableModel = new ClassFieldTable(); 
+		//tableModel.setDataVector( new Vector<Vector<String>>( cfTblModel.getDataVector() ) );
 
 		setEmptyValuesValid(emptyValid);
 
 		// create class fields table
-		tblClassFields = new JTable(cfTableModel);
+		tblClassFields = new JTable(tableModel);
+		TableColumn natureColumn = tblClassFields.getColumnModel().getColumn(3);	 				 	
+		natureColumn.setCellEditor(new DefaultCellEditor(tableModel.natureElmt));
+		natureColumn.setPreferredWidth(50);
+		TableColumn descColumn = tblClassFields.getColumnModel().getColumn(4);
+		descColumn.setPreferredWidth(90); //description column is bigger
+		tblClassFields.getColumnModel().getColumn(5).setPreferredWidth(25);// boolean col's
+		tblClassFields.getColumnModel().getColumn(6).setPreferredWidth(25);
+		tblClassFields.getColumnModel().getColumn(7).setPreferredWidth(25);
+		
 		selectionModel = tblClassFields.getSelectionModel();
 		spTableScrollPane = new JScrollPane(tblClassFields,
 				ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -170,19 +184,23 @@ public class ClassPropertiesDialog extends JDialog {
 		pnlProps.add(pnlLabels,BorderLayout.WEST);
 		pnlProps.add(pnlFields,BorderLayout.EAST);
 		pnlProps.add(pnlErrors, BorderLayout.SOUTH);
-
+					
+		pnlAdvLabel.add(bttnAdv);
+		
+		
 		pnlTableButtons.setLayout(new GridLayout(1, 2));
 		pnlTableButtons.add(bttnNewField);
 		pnlTableButtons.add(bttnDelField);
 
 		// Set class fields table on its own panel together with the
 		// scrollpane the table is lying on and the button for adding a new field to the table.
-		pnlTable.setPreferredSize(new Dimension(300, 150));
+		pnlTable.setPreferredSize(new Dimension(400, 200));
 		pnlTable.setMinimumSize(pnlTable.getPreferredSize());
 		pnlTable.setMaximumSize(pnlTable.getPreferredSize());
-		pnlTable.setLayout(new BorderLayout());		
-		pnlTable.add(spTableScrollPane, BorderLayout.CENTER);
-		pnlTable.add(pnlTableButtons, BorderLayout.SOUTH);
+		pnlTable.setLayout(new BorderLayout());	
+		pnlTable.add(pnlAdvLabel, BorderLayout.NORTH);
+		/*pnlTable.add(spTableScrollPane, BorderLayout.CENTER);
+		pnlTable.add(pnlTableButtons, BorderLayout.SOUTH);*/
 
 		// Add group of labels and fields and a panel with buttons onto the content pane
 		getContentPane().setLayout(new BorderLayout());
@@ -191,6 +209,7 @@ public class ClassPropertiesDialog extends JDialog {
 		getContentPane().add(pnlButtons, BorderLayout.SOUTH);
 
 		// Initialize fields with runtime values.
+		dialog = this;
 		initialize();
 		
 		bttnDelField.setEnabled(false);
@@ -220,6 +239,40 @@ public class ClassPropertiesDialog extends JDialog {
 				dispose();
 			}
 		});
+		
+		// Switch to advanced mode
+				final ClassPropertiesDialog dialog = (ClassPropertiesDialog) this;
+				bttnAdv.addActionListener(new ActionListener() {					
+					@Override
+		            public void actionPerformed(ActionEvent evt) {
+						pnlTable.add(spTableScrollPane, BorderLayout.CENTER);
+						pnlTable.add(pnlTableButtons, BorderLayout.SOUTH);
+						pnlAdvLabel.remove(bttnAdv);
+						pnlAdvLabel.add(bttnSimple, BorderLayout.NORTH);
+						//getContentPane().add(pnlTable, BorderLayout.CENTER);
+						pnlTable.revalidate();
+						dialog.setPreferredSize(new Dimension(600, 500));
+						pack();
+						getContentPane().repaint();	//pack();					
+					}
+				});
+
+				bttnSimple.addActionListener(new ActionListener() {
+					@Override
+		            public void actionPerformed(ActionEvent evt) {
+						//pnlTable.setMinimumSize(new Dimension(600, 150));
+						//pnlTable.setMaximumSize(new Dimension(600, 150));
+						pnlTable.remove(spTableScrollPane);
+						pnlTable.remove(pnlTableButtons);
+						pnlAdvLabel.remove(bttnSimple);
+						pnlAdvLabel.add(bttnAdv, BorderLayout.NORTH);
+						//getContentPane().add(pnlTable, BorderLayout.CENTER);
+						pnlTable.revalidate();
+						dialog.setPreferredSize(new Dimension(430, 250));
+						pack();
+						getContentPane().repaint();	//					
+					}
+				});
 
 		// Icon browsing button pressed. Browse for the icon in GIF format
 		// and set the browsed path to the Class Icon text field.
@@ -284,7 +337,7 @@ public class ClassPropertiesDialog extends JDialog {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		// Specify dialog size, resizability and modality.
-		setPreferredSize(new Dimension(410, 350));
+		setPreferredSize(new Dimension(430, 250));
 		setResizable(false);
 		setModal(true);
 		
@@ -319,9 +372,10 @@ public class ClassPropertiesDialog extends JDialog {
 	 * Add an empty row to the end of the DBResult and scroll the added row visible.
 	 */
 	private void addEmptyClassField() {
-		String[] emptyRow = {"", "", "", ""};
+		Object[] emptyRow = { "", "", "", "", "", 
+			         new Boolean(false), new Boolean(false), new Boolean(false)};
 		
-		if (cfTableModel.getEmptyRowsCount() >= EMPTY_ROWS_LIMIT) {
+		if (tableModel.getEmptyRowsCount() >= EMPTY_ROWS_LIMIT) {
             JOptionPane.showMessageDialog(this,
                     "Too many empty rows.",
                     "Empty rows limit exceeded!", JOptionPane.WARNING_MESSAGE);
@@ -333,12 +387,12 @@ public class ClassPropertiesDialog extends JDialog {
 			
 			int rowIdx = tblClassFields.getSelectedRow() + tblClassFields.getSelectedRowCount();  
 			
-			cfTableModel.insertRow( rowIdx, emptyRow );
+			tableModel.insertRow( rowIdx, emptyRow );
 			tblClassFields.setRowSelectionInterval( rowIdx, rowIdx );
 		}
 		else
 		{
-			cfTableModel.addRow(emptyRow);
+			tableModel.addRow(emptyRow);
 			int idx = Math.max(tblClassFields.getSelectedRowCount(), tblClassFields.getRowCount() - 1);
 
 			tblClassFields.setRowSelectionInterval( idx, idx );
@@ -356,7 +410,7 @@ public class ClassPropertiesDialog extends JDialog {
 			
 			int selected = firstSelected;
 			while (selected > -1) {
-				cfTableModel.removeRow(selected);
+				tableModel.removeRow(selected);
 				selected = tblClassFields.getSelectedRow();
 			}
 			
@@ -499,9 +553,9 @@ public class ClassPropertiesDialog extends JDialog {
 		if (valid) {
 			if (classFieldsValid()) {
 				// Class fields valid. Remove empty rows from the DBResult.
-				cfTableModel.removeEmptyRows();
+				tableModel.removeEmptyRows();
 				
-				initialCfTableModel.setDataVector( new Vector<Vector<String>>( cfTableModel.getDataVector() ) );
+				tableModel.setDataVector( new Vector<Vector<Object>>( tableModel.getDataVector() ) );
 			}
 		}
 		return valid;
@@ -516,10 +570,10 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private boolean classFieldsValid() {
 		boolean valid = true;
-		for (int i = 0; i < cfTableModel.getRowCount(); i++) {
-			String fieldName = cfTableModel.getValueAt(i, iNAME);
-			String fieldType = cfTableModel.getValueAt(i, iTYPE);
-			String fieldValue = cfTableModel.getValueAt(i, iVALUE);
+		for (int i = 0; i < tableModel.getRowCount(); i++) {
+			String fieldName = (String)tableModel.getValueAt(i,0);
+			String fieldType = (String)tableModel.getValueAt(i, 1);
+			String fieldValue = (String) tableModel.getValueAt(i, 2);
 
 			boolean bFieldNameDefined = false;
 			boolean bFieldTypeDefined = false;
@@ -527,19 +581,19 @@ public class ClassPropertiesDialog extends JDialog {
 
 			if (fieldName != null) {
 				fieldName = fieldName.trim();
-				cfTableModel.setValueAt(fieldName, i, iNAME);
+				tableModel.setValueAt(fieldName, i, iNAME);
 				if (fieldName.length() > 0) bFieldNameDefined = true;
 			}
 
 			if (fieldType != null) {
 				fieldType = fieldType.trim();
-				cfTableModel.setValueAt(fieldType, i, iTYPE);
+				tableModel.setValueAt(fieldType, i, iTYPE);
 				if (fieldType.length() > 0) bFieldTypeDefined = true;
 			}
 
 			if (fieldValue != null) {
 				fieldValue = fieldValue.trim();
-				cfTableModel.setValueAt(fieldValue, i, iVALUE);
+				tableModel.setValueAt(fieldValue, i, iVALUE);
 				if (fieldValue.length() > 0) bFieldValueDefined = true;
 			}
 
@@ -591,11 +645,11 @@ public class ClassPropertiesDialog extends JDialog {
 	 * @param column index of the sort column
 	 */
 	void sortByField(int column) {
-		cfTableModel.sort(column);
+	//	tableModel.sort(column);
 	}
 	
 	public static void main(String[] args) {
-		JDialog d = new ClassPropertiesDialog(new ClassFieldsTableModel(), true );
+		JDialog d = new ClassPropertiesDialog(new ClassFieldTable(), true );
 		d.setVisible( true );
 	}
 } // end of class.

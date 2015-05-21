@@ -50,6 +50,11 @@ public class ClassField implements Cloneable, Serializable {
 
 	protected String description;
 
+	/**
+	 * If a field is hidden it mean that it will not be shown in the Object Properties window
+	 */
+	protected boolean hidden = false;
+	
 	protected boolean specField = false;
 
 	protected boolean isConstant = false;
@@ -69,7 +74,6 @@ public class ClassField implements Cloneable, Serializable {
 	/**
 	 * If a field is hidden it mean that it will not be shown in the Object Properties window
 	 */
-	private boolean hidden = false;
 
   private boolean schemeObject;
 	
@@ -88,6 +92,21 @@ public class ClassField implements Cloneable, Serializable {
 		this(name, type, value, false, false);
 	}
 
+	public ClassField(String name, String type, String value, String nature, String description, boolean hidden, ClassGraphics knownGraphic) {
+		this.name = name;
+		this.type = type;
+		this.description = description;
+		this.value = value;
+		if(nature.equals("Input")){
+			isInput = true;
+		} else if (nature.equals("Goal")){
+			isGoal = true;
+		}
+		this.hidden = hidden;
+		
+	}
+
+	
 	public ClassField(String name, String type, String value, boolean isConstant) {
 		this(name, type, value, false, isConstant);
 	}

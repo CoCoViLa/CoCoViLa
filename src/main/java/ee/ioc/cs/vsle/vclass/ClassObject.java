@@ -7,6 +7,7 @@ import java.util.Collection;
 import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.ShapeGroup;
 import ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel;
+import ee.ioc.cs.vsle.classeditor.ClassFieldTable;
 import ee.ioc.cs.vsle.classeditor.IconPort;
 import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
 
@@ -25,7 +26,7 @@ public class ClassObject implements Serializable {
 		public BoundingBox boundingbox;
 		public static ComponentType componentType;	
 		
-		public ArrayList<ClassField> fields = new ArrayList<ClassField>();  
+		public ArrayList<ClassField> fields;// = new ArrayList<ClassField>();  
 				
 		public ShapeGroup shapeList;
 		public ArrayList<IconPort> ports;
@@ -93,14 +94,15 @@ public class ClassObject implements Serializable {
 			this.fields = new ArrayList<ClassField>();
 		}
 
-		public ClassFieldsTableModel setClassFields( Collection<ClassField> cFields){
+		public ClassFieldTable setClassFields( Collection<ClassField> cFields){
 		 		 
 
-	      ClassFieldsTableModel dbrClassFields = new ClassFieldsTableModel();		
+	      ClassFieldTable dbrClassFields = new ClassFieldTable();		
 			
 		  this.fields = new ArrayList<ClassField>(cFields);
 		  for ( int i = 0; i < fields.size(); i++ ) {
-			  String[] row = { ( fields.get( i ) ).getName(), ( fields.get( i ) ).getType(), ( fields.get( i ) ).getValue() };
+			 Object[] row = { ( fields.get( i ) ).getName(), ( fields.get( i ) ).getType(), ( fields.get( i ) ).getValue(),
+					 ( fields.get( i ) ).isGoal?"Goal": ( fields.get( i ) ).isInput?"Input":"Normal" , ( fields.get( i ) ).getDescription() , fields.get(i).isHidden(), false, false };
 			  dbrClassFields.addRow( row );
 		  }		  
 		  return dbrClassFields;		  
@@ -108,7 +110,7 @@ public class ClassObject implements Serializable {
 		
 		public boolean validateBasicProperties(){
 			boolean valid = false;
-			if(className != null && classDescription != null){
+			if(className == null && classDescription != null && componentType != null){
 				valid = true;
 			}
 			return valid;

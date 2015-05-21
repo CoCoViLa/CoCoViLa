@@ -127,7 +127,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	private JCheckBoxMenuItem showObjectNamesCheckBox;
 	private JCheckBoxMenuItem snapToGridCheckBox;
 
-	private ClassFieldsTableModel dbrClassFields = new ClassFieldsTableModel();
+	private ClassFieldTable dbrClassFields = new ClassFieldTable();
 
 	ArrayList<ClassObject> packageClassList = new ArrayList<ClassObject>();  
 	ArrayList<String> packageClassNamesList = new ArrayList<String>();
@@ -908,7 +908,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  return aListener;
 	  }
 
-	  public ClassFieldsTableModel getClassFieldModel() {
+	  public ClassFieldTable getClassFieldModel() {
 		  return dbrClassFields;
 	  }   
 
@@ -1543,12 +1543,13 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			 
 			   
 			   for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
-				   String fieldName = dbrClassFields.getValueAt( i, iNAME );
-				   String fieldType = dbrClassFields.getValueAt( i, iTYPE );
-				   String fieldValue = dbrClassFields.getValueAt( i, iVALUE );
+				   String fieldName = (String)dbrClassFields.getValueAt( i, 0 );
+				   String fieldType = (String)dbrClassFields.getValueAt( i, 1 );
+				   String fieldValue = (String)dbrClassFields.getValueAt( i, 2 );
 
 				   if ( fieldType != null ) {
-					   ClassField cf = new ClassField(fieldName, fieldType, fieldValue);
+					   ClassField cf = new ClassField(fieldName, fieldType, fieldValue, (String)dbrClassFields.getValueAt( i, 3 ),
+							   (String)dbrClassFields.getValueAt( i, 4 ), Boolean.parseBoolean(String.valueOf(dbrClassFields.getValueAt( i, 5 ))), null);
 					   fields.add(cf);
 					   pc.addField( cf );
 				   }
@@ -1576,23 +1577,31 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			   if ( overwriteFile != JOptionPane.CANCEL_OPTION ) {
 
 				   if ( overwriteFile == JOptionPane.YES_OPTION ) {
-					   String fileText = null;
-					   if (prevJavaFile.exists()) {
-						   fileText = FileFuncs.getFileContents(prevJavaFile);
-					   } else {
-						   fileText = "class " + _className + " {";
+					   String fileText = "";			   
+					   		if (!prevJavaFile.exists()) {
+					   			fileText = "class " + _className + " {";					   		
+					   		}
 						   fileText += "\n    /*@ specification " + _className + " {\n";
 
 						   for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
-							   String fieldName = dbrClassFields.getValueAt( i, iNAME );
-							   String fieldType = dbrClassFields.getValueAt( i, iTYPE );
-
-							   if ( fieldType != null ) {
+							   String fieldName = (String)dbrClassFields.getValueAt( i, 0);
+							   String fieldType = (String)dbrClassFields.getValueAt( i, 1 );
+							   //String fieldValue = (String)dbrClassFields.getValueAt( i, 2 );
+							   
+							   if ( fieldType != null) {
 								   fileText += "    " + fieldType + " " + fieldName + ";\n";
 							   }
 						   }
-						   fileText += "    }@*/\n \n}";
-					   }
+						   if (!prevJavaFile.exists()) {
+								fileText += "    }@*/\n \n}";
+						   } else { 						   
+							   String tmp = FileFuncs.getFileContents(prevJavaFile);
+							   int start = tmp.indexOf("/*@ spec");
+							   int end = tmp.indexOf("  }@*/");
+							   String nonSpecFilePartStart = tmp.substring(0, start);
+							   String nonSpecFilePartEnd = tmp.substring(end);
+							   fileText = nonSpecFilePartStart + fileText + nonSpecFilePartEnd;
+						   }    
 					   FileFuncs.writeFile( javaFile, fileText );
 				   }
 
