@@ -252,7 +252,7 @@ public class Line extends Shape implements Serializable {
                 return 1;
             }
         } 
-    	  System.out.println("1 " + (obj.getX() - GObj.CORNER_SIZE/2) + " < " + p.x+ " < " + (obj.getX() + GObj.CORNER_SIZE/2));
+    	//  System.out.println("1 " + (obj.getX() - GObj.CORNER_SIZE/2) + " < " + p.x+ " < " + (obj.getX() + GObj.CORNER_SIZE/2));
     	/* case 2; x1 > x2  top */
     	if ( ( p.x >= obj.getX() - GObj.CORNER_SIZE - 1  ) && ( p.y >= obj.getY() - GObj.CORNER_SIZE/2 ) ) {
             if ( ( p.y <=  obj.getY() + GObj.CORNER_SIZE/2 )  &&  p.x <= obj.getX() + 2) {
