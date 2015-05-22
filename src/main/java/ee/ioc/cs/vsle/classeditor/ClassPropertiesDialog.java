@@ -7,6 +7,7 @@ import java.awt.event.*;
 
 import javax.swing.event.*;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.*;
@@ -115,15 +116,9 @@ public class ClassPropertiesDialog extends JDialog {
 		setEmptyValuesValid(emptyValid);
 
 		// create class fields table
-		tblClassFields = new JTable(tableModel);
-		TableColumn natureColumn = tblClassFields.getColumnModel().getColumn(3);	 				 	
-		natureColumn.setCellEditor(new DefaultCellEditor(tableModel.natureElmt));
-		natureColumn.setPreferredWidth(50);
-		TableColumn descColumn = tblClassFields.getColumnModel().getColumn(4);
-		descColumn.setPreferredWidth(90); //description column is bigger
-		tblClassFields.getColumnModel().getColumn(5).setPreferredWidth(25);// boolean col's
-		tblClassFields.getColumnModel().getColumn(6).setPreferredWidth(25);
-		tblClassFields.getColumnModel().getColumn(7).setPreferredWidth(25);
+		tblClassFields = new JTable(tableModel);		
+		
+		this.extraColunmsDown();
 		
 		selectionModel = tblClassFields.getSelectionModel();
 		spTableScrollPane = new JScrollPane(tblClassFields,
@@ -199,8 +194,8 @@ public class ClassPropertiesDialog extends JDialog {
 		pnlTable.setMaximumSize(pnlTable.getPreferredSize());
 		pnlTable.setLayout(new BorderLayout());	
 		pnlTable.add(pnlAdvLabel, BorderLayout.NORTH);
-		/*pnlTable.add(spTableScrollPane, BorderLayout.CENTER);
-		pnlTable.add(pnlTableButtons, BorderLayout.SOUTH);*/
+		pnlTable.add(spTableScrollPane, BorderLayout.CENTER);
+		pnlTable.add(pnlTableButtons, BorderLayout.SOUTH);
 
 		// Add group of labels and fields and a panel with buttons onto the content pane
 		getContentPane().setLayout(new BorderLayout());
@@ -245,10 +240,9 @@ public class ClassPropertiesDialog extends JDialog {
 				bttnAdv.addActionListener(new ActionListener() {					
 					@Override
 		            public void actionPerformed(ActionEvent evt) {
-						pnlTable.add(spTableScrollPane, BorderLayout.CENTER);
-						pnlTable.add(pnlTableButtons, BorderLayout.SOUTH);
 						pnlAdvLabel.remove(bttnAdv);
 						pnlAdvLabel.add(bttnSimple, BorderLayout.NORTH);
+						extraColunmsUp();
 						//getContentPane().add(pnlTable, BorderLayout.CENTER);
 						pnlTable.revalidate();
 						dialog.setPreferredSize(new Dimension(600, 500));
@@ -262,13 +256,12 @@ public class ClassPropertiesDialog extends JDialog {
 		            public void actionPerformed(ActionEvent evt) {
 						//pnlTable.setMinimumSize(new Dimension(600, 150));
 						//pnlTable.setMaximumSize(new Dimension(600, 150));
-						pnlTable.remove(spTableScrollPane);
-						pnlTable.remove(pnlTableButtons);
 						pnlAdvLabel.remove(bttnSimple);
 						pnlAdvLabel.add(bttnAdv, BorderLayout.NORTH);
+						extraColunmsDown();
 						//getContentPane().add(pnlTable, BorderLayout.CENTER);
 						pnlTable.revalidate();
-						dialog.setPreferredSize(new Dimension(430, 250));
+						dialog.setPreferredSize(new Dimension(410, 350));
 						pack();
 						getContentPane().repaint();	//					
 					}
@@ -337,7 +330,7 @@ public class ClassPropertiesDialog extends JDialog {
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 		// Specify dialog size, resizability and modality.
-		setPreferredSize(new Dimension(430, 250));
+		setPreferredSize(new Dimension(430, 350));
 		setResizable(false);
 		setModal(true);
 		
@@ -348,6 +341,27 @@ public class ClassPropertiesDialog extends JDialog {
 		setVisible(true);
 	} // ClassPropertiesDialog
 
+	private void extraColunmsDown(){
+		int i;
+		int l = tblClassFields.getColumnCount();
+		for(i=3;i<l;i++){
+			tblClassFields.getColumnModel().removeColumn(tblClassFields.getColumnModel().getColumn(3));  
+		}		
+	}
+	
+	private void extraColunmsUp(){
+
+		tblClassFields.setColumnModel(new JTable(tableModel).getColumnModel()); //restore model
+		TableColumn natureColumn = tblClassFields.getColumnModel().getColumn(3);	 				 	
+		natureColumn.setCellEditor(new DefaultCellEditor(tableModel.natureElmt));
+		natureColumn.setPreferredWidth(50);
+		TableColumn descColumn = tblClassFields.getColumnModel().getColumn(4);
+		descColumn.setPreferredWidth(90); //description column is bigger
+		tblClassFields.getColumnModel().getColumn(5).setPreferredWidth(30);// boolean col's
+		tblClassFields.getColumnModel().getColumn(6).setPreferredWidth(30);
+		tblClassFields.getColumnModel().getColumn(7).setPreferredWidth(30);
+		
+	}
     private void addErrorPanel(String errorMessage){
     	JLabel msg = new JLabel(errorMessage);
     	msg.setFont( new Font("Arial", Font.BOLD, 13));
