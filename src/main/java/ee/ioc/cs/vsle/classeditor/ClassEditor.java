@@ -1,12 +1,5 @@
 package ee.ioc.cs.vsle.classeditor;
 
-import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.iNAME;
-import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.iTYPE;
-import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.iVALUE;
-
-
-
-
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -1341,7 +1334,35 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  PackagePropertiesDialog p = new PackagePropertiesDialog(getCurrentPackage().getName(), getCurrentPackage().getDescription());
 		  p.setVisible( true );
 		 // packageFile;
-		//  savePackage();
+		  if (getCurrentCanvas().getPackage() != null && packageParamsOk ) {		
+			  
+			  File packageFile = new File(getCurrentCanvas().getPackage().getPath());			  			  
+			  String tmp = FileFuncs.getFileContents(packageFile);
+			  
+			  int start = tmp.indexOf("<package>\n");
+			  int end = tmp.indexOf("</description>");
+			  String nonSpecFilePartStart = tmp.substring(0, start);
+			  String nonSpecFilePartEnd = tmp.substring(end);
+			  String fileText = "<package>\n<name>" + packageName + "</name>\n";
+			  fileText += "<description>" + ClassEditor.getInstance().packageDesc  ;
+			  fileText = nonSpecFilePartStart + fileText + nonSpecFilePartEnd;
+		   
+			  
+			  try {
+				  FileOutputStream out = new FileOutputStream( packageFile );
+				  out.write( fileText.getBytes() );
+				  out.flush();
+				  out.close();
+				  JOptionPane.showMessageDialog( null, "Saved to: " + packageFile.getName(), "Saved",
+						  JOptionPane.INFORMATION_MESSAGE );
+				  
+				  getCurrentPackage().setName(packageName); getCurrentPackage().setDescription(packageDesc);
+				  updateWindowTitle();
+			  } catch ( Exception exc ) {
+				  exc.printStackTrace();
+			  }
+			  
+		  }
 	  }
 	  
 	  public void createPackage() {

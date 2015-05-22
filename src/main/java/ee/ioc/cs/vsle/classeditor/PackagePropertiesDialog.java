@@ -86,6 +86,7 @@ public class PackagePropertiesDialog extends JDialog {
 	pnlFields.setLayout(new GridLayout(2,1));
 	if(pckName != null){
 		fldName.setText(pckName);
+		fldDesc.setText(pckDesc);
 	}
 	pnlFields.add(fldName);
 	pnlFields.add(fldDesc);
