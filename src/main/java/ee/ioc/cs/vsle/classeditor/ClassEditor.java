@@ -1341,7 +1341,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  PackagePropertiesDialog p = new PackagePropertiesDialog(getCurrentPackage().getName(), getCurrentPackage().getDescription());
 		  p.setVisible( true );
 		 // packageFile;
-		  savePackage();
+		//  savePackage();
 	  }
 	  
 	  public void createPackage() {
