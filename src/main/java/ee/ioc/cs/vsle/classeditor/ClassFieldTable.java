@@ -1,13 +1,23 @@
 package ee.ioc.cs.vsle.classeditor;
 
+import java.io.File;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Vector;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
+
+import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
+import ee.ioc.cs.vsle.vclass.ClassGraphics;
+import ee.ioc.cs.vsle.vclass.PackageClass;
+import ee.ioc.cs.vsle.vclass.VPackage;
 
 public class ClassFieldTable extends  DefaultTableModel {
 
@@ -32,6 +42,7 @@ public class ClassFieldTable extends  DefaultTableModel {
 	 						 	"Hidden",
 	 						 	"Known",	 						 	
 	 						 	"Default"};
+	 	
 	 	String[] columnVars = {"FIELD", "TYPE", "VALUE", 
 					"Nature",
 				 	"Description",
@@ -42,6 +53,9 @@ public class ClassFieldTable extends  DefaultTableModel {
 		// this.dataVector and super.dataVector refer to the same instance.
 		private Vector<Vector<Object>> dataVector;
 
+		public ClassGraphics[] defaults = {};
+		public ClassGraphics[] knowns = {};
+		
 	//	private RowComparator comparator;
 		private String [] natureValues = {"Normal", "Input", "Goal"};
 		public JComboBox natureElmt = new JComboBox(natureValues);
@@ -53,6 +67,7 @@ public class ClassFieldTable extends  DefaultTableModel {
 			dataVector = new Vector<Vector<Object>>();
 			super.dataVector = dataVector;
 		} 
+		File f;
 
 		/**
 		 * Sorts values displayed in a table by a specified column.
@@ -148,6 +163,73 @@ public class ClassFieldTable extends  DefaultTableModel {
 			fireTableDataChanged();
 		}
 		
+		**/
+		public TableModelListener cfTableModelListener = new TableModelListener(){
+
+			@Override
+			public void tableChanged(TableModelEvent arg0) {
+				//default graphic
+				if(arg0.getColumn() == 7 || arg0.getColumn() == 6){
+					boolean marker = Boolean.valueOf(
+							getValueAt(arg0.getFirstRow(), arg0.getColumn()).toString());
+				//	System.out.println("Changed: " + marker + "; " + arg0.getSource().toString());
+					if(marker){	
+						String s = getGraphicSelection();
+						if(s != null){
+						
+							VPackage pkg;
+							if ( (pkg = PackageXmlProcessor.load(f, false)) != null ) {
+								ClassGraphics cg = pkg.getClass(s).getGraphics();	
+								if(arg0.getColumn() == 7){
+									updateGraphic(true, cg, arg0.getFirstRow());
+									JOptionPane.showMessageDialog(null, "Template '" + s + "' loaded from " +f.getName() + " "
+											+ "is set as default graphics for field = " + getValueAt(arg0.getFirstRow(),0),
+											  "", JOptionPane.INFORMATION_MESSAGE);									
+								} else{
+									updateGraphic(false, cg, arg0.getFirstRow());
+									JOptionPane.showMessageDialog(null, "Template '" + s + "' loaded from " +f.getName() + " "
+											+ "is set as known graphics for field = " + getValueAt(arg0.getFirstRow(),0),
+											  "", JOptionPane.INFORMATION_MESSAGE);		
+								}
+						 }
+					  //  System.out.println("f: " +f.getName() + "; selection = " + s);
+					   				    
+					} else {
+						// No graphic selected, rollback to false
+						setValueAt(false, arg0.getFirstRow(), arg0.getColumn());
+					}
+				} else {
+					if(arg0.getColumn() == 7 && defaults.length > arg0.getFirstRow()){						
+						defaults[arg0.getFirstRow()] = null;
+					} else if(arg0.getColumn() == 6 && knowns.length > arg0.getFirstRow()) {
+						knowns[arg0.getFirstRow()] = null;
+					}
+				}
+			}
+		}
+	};
+		
+		
+		public String getGraphicSelection(){
+			
+			 String selection = null;
+			
+		     f = ClassEditor.getInstance().selectFile();
+			 if(f != null){
+				 ClassImport ci = new ClassImport( f, ClassEditor.getInstance().packageClassNamesList, ClassEditor.getInstance().packageClassList, 
+						 ClassEditor.getInstance().templateNameList );
+				 PopupCanvas popupCanvas = new PopupCanvas(ClassEditor.getInstance().getCurrentPackage(), f.getParent() + File.separator);
+				 PortGraphicsDialog dialog = new  PortGraphicsDialog(ClassEditor.getInstance().templateNameList, "Select Template",null, popupCanvas, f, true);
+			 
+				 dialog.newJList( ClassEditor.getInstance().templateNameList);			  
+				 dialog.setVisible( true );
+				 dialog.repaint();
+				 selection = dialog.getSelectedValue();
+				 
+			 }
+			 return selection;
+		}
+		
 		/**
 		 * Returns number on empty rows
 		 */
@@ -169,6 +251,21 @@ public class ClassFieldTable extends  DefaultTableModel {
 			}
 			return emptyRows;
 		}		
+		
+		public void updateGraphic(boolean def, ClassGraphics cg, int index){
+			if(def){
+				if(defaults.length < index+1){
+					defaults = Arrays.copyOf(defaults, index+1);
+					defaults[index] = cg;
+				}
+			
+			} else {
+				if(knowns.length < index+1){
+					knowns = Arrays.copyOf(knowns, index+1);
+					knowns[index] = cg;
+				}
+			}
+		}
 
 		/**
 		 * Comparator for sorting row vectors by a column.

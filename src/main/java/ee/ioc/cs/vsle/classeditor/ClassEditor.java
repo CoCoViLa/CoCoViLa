@@ -1311,7 +1311,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 						  if (classGraphics != null) {
 							  ArrayList<Shape> cShapes = classGraphics.getShapes();
 							  for (Shape shape : cShapes) {
-								  curCanvas.mListener.addShape(shape, classX, classY);
+								//  curCanvas.mListener.addShape(shape, classX, classY); tmp fix
 							  }
 						  }
 					  }
@@ -1600,7 +1600,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 				   if ( fieldType != null ) {
 					   ClassField cf = new ClassField(fieldName, fieldType, fieldValue, (String)dbrClassFields.getValueAt( i, 3 ),
-							   (String)dbrClassFields.getValueAt( i, 4 ), Boolean.parseBoolean(String.valueOf(dbrClassFields.getValueAt( i, 5 ))), null);
+							   (String)dbrClassFields.getValueAt( i, 4 ), 
+							   Boolean.parseBoolean(String.valueOf(dbrClassFields.getValueAt( i, 5 ))), 
+							   dbrClassFields.knowns.length>=i+1?dbrClassFields.knowns[i]:null,
+							   dbrClassFields.defaults.length>=i+1?dbrClassFields.defaults[i]:null);
 					   fields.add(cf);
 					   pc.addField( cf );
 				   }

@@ -87,7 +87,7 @@ public class ClassPropertiesDialog extends JDialog {
 	// Table for class fields.
 	private JTable tblClassFields;
 	private ClassFieldTable tableModel;
-
+	
 	// Table selection model.
 	ListSelectionModel selectionModel;
 	
@@ -116,7 +116,9 @@ public class ClassPropertiesDialog extends JDialog {
 		setEmptyValuesValid(emptyValid);
 
 		// create class fields table
-		tblClassFields = new JTable(tableModel);		
+		tableModel.removeTableModelListener(tableModel.cfTableModelListener);
+		tableModel.addTableModelListener(tableModel.cfTableModelListener);
+		tblClassFields = new JTable(tableModel);
 		
 		this.extraColunmsDown();
 		
@@ -359,9 +361,9 @@ public class ClassPropertiesDialog extends JDialog {
 		descColumn.setPreferredWidth(90); //description column is bigger
 		tblClassFields.getColumnModel().getColumn(5).setPreferredWidth(30);// boolean col's
 		tblClassFields.getColumnModel().getColumn(6).setPreferredWidth(30);
-		tblClassFields.getColumnModel().getColumn(7).setPreferredWidth(30);
-		
+		tblClassFields.getColumnModel().getColumn(7).setPreferredWidth(30);		
 	}
+	
     private void addErrorPanel(String errorMessage){
     	JLabel msg = new JLabel(errorMessage);
     	msg.setFont( new Font("Arial", Font.BOLD, 13));
@@ -596,7 +598,7 @@ public class ClassPropertiesDialog extends JDialog {
 			if (fieldName != null) {
 				fieldName = fieldName.trim();
 				tableModel.setValueAt(fieldName, i, iNAME);
-				if (fieldName.length() > 0) bFieldNameDefined = true;
+				if (fieldName.trim().length() > 0) bFieldNameDefined = true;
 			}
 
 			if (fieldType != null) {

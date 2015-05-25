@@ -632,7 +632,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             	int y1 = ((Number)NumberFormat.getInstance().parse(lineNode.getAttribute( ATR_Y1))).intValue();
             	int y2 = ((Number)NumberFormat.getInstance().parse(lineNode.getAttribute( ATR_Y2))).intValue();
             	
-                System.out.println("x1 = " + x1 + "; x2 = " + x2 + "; y1 = " + y1);
+               // System.out.println("x1 = " + x1 + "; x2 = " + x2 + "; y1 = " + y1);
             	
             	
             	Line line = new Line (x1, y1, x2, y2, getColor( lineNode ), lp.strokeWidth, lp.lineType);
@@ -790,6 +790,18 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         
         if( field.getValue() != null )
             fieldEl.setAttribute( ATR_VALUE, field.getValue() );
+        
+        if(field.getKnownGraphics() != null){
+        	Element known = doc.createElement(EL_KNOWN);   
+        	known.appendChild(generateGraphicsNode(doc, field.getKnownGraphics()));
+        	fieldEl.appendChild(known);
+        }
+        
+        if(field.getDefaultGraphics() != null){
+        	Element def = doc.createElement(EL_DEFAULT);   
+        	def.appendChild(generateGraphicsNode(doc, field.getDefaultGraphics()));
+        	fieldEl.appendChild(def);
+        }
         
         return fieldEl;
     }

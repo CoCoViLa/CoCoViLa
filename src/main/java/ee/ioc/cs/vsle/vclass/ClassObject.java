@@ -98,12 +98,20 @@ public class ClassObject implements Serializable {
 		 		 
 
 	      ClassFieldTable dbrClassFields = new ClassFieldTable();		
-			
+	      	  
 		  this.fields = new ArrayList<ClassField>(cFields);
 		  for ( int i = 0; i < fields.size(); i++ ) {
 			 Object[] row = { ( fields.get( i ) ).getName(), ( fields.get( i ) ).getType(), ( fields.get( i ) ).getValue(),
-					 ( fields.get( i ) ).isGoal?"Goal": ( fields.get( i ) ).isInput?"Input":"Normal" , ( fields.get( i ) ).getDescription() , fields.get(i).isHidden(), false, false };
+					 ( fields.get( i ) ).isGoal?"Goal": ( fields.get( i ) ).isInput?"Input":"Normal" , ( fields.get( i ) ).getDescription() , fields.get(i).isHidden(), 
+							 ( fields.get( i ) ).getKnownGraphics() != null?true:false, ( fields.get( i ) ).getDefaultGraphics()!= null?true:false};
+			 
 			  dbrClassFields.addRow( row );
+			  if(( fields.get( i ) ).getKnownGraphics() != null){
+				  dbrClassFields.updateGraphic(false, ( fields.get( i ) ).getKnownGraphics(), i);
+			  }
+			  if(( fields.get( i ) ).getDefaultGraphics() != null){
+				  dbrClassFields.updateGraphic(true, ( fields.get( i ) ).getDefaultGraphics(), i);
+			  }
 		  }		  
 		  return dbrClassFields;		  
 		}

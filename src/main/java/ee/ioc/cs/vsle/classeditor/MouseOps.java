@@ -330,7 +330,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     	 yOffset = 0;*/
     	
         System.out.println("1. MouseOps.addShape() " + s.toText());
-        System.out.println("2. addShape x " + s.getX() + " y " + s.getY() + " h " + s.getHeight() + " w " + s.getWidth());
+    //    System.out.println("2. addShape x " + s.getX() + " y " + s.getY() + " h " + s.getHeight() + " w " + s.getWidth());
 
         ArrayList<Shape> shapes = new ArrayList<Shape>();
         shapes.add(s);
@@ -618,7 +618,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     
     @Override
     public void mouseDragged( MouseEvent e ) {
-    	System.out.println("MouseOps mouseDragged " + state);
+    	//System.out.println("MouseOps mouseDragged " + state);
         if ( !SwingUtilities.isLeftMouseButton( e ) ) {
             return;
         }
@@ -644,7 +644,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                         * step - obj.getY();
             } else {
             	
-            	System.out.println("ClassMouseOps mouseDragged: " + state + "; canvas coords x=" + canvas.mouseX + "; y=" +canvas.mouseY);
+            	//System.out.println("ClassMouseOps mouseDragged: " + state + "; canvas coords x=" + canvas.mouseX + "; y=" +canvas.mouseY);
             	
                 moveX = x - canvas.mouseX;
                 moveY = y - canvas.mouseY;
