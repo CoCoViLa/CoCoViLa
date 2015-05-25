@@ -279,7 +279,12 @@ public class Alias extends ClassField {
 	
 	@Override
     public Alias clone() {
-		return (Alias) super.clone();
+      final Alias newAlias = (Alias) super.clone();
+      newAlias.vars = new ArrayList<>(vars.size());
+      for (ClassField var : vars) {
+          newAlias.vars.add(var.clone());
+      }
+      return newAlias;
 	} // clone
 
 	public String getWildcardVar() {
