@@ -495,7 +495,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             Arc arc = new Arc(arcStartX, arcStartY, arcWidth, arcHeight, arcStartAngle, arcAngle, 
                     Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );                		
             addShape( arc );
-            setState( State.selection );
+            setState( fill?State.drawFilledArc:State.drawArc );
         }
     
        
