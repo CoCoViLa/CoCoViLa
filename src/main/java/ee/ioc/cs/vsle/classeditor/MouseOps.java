@@ -12,6 +12,9 @@ import java.util.List;
 import javax.swing.JColorChooser;
 import javax.swing.SwingUtilities;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.editor.State;
 import ee.ioc.cs.vsle.graphics.Arc;
@@ -33,6 +36,8 @@ import ee.ioc.cs.vsle.vclass.Port;
  * Mouse operations on Canvas.
  */
 public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
+	
+	private static Logger LOGGER = LoggerFactory.getLogger(MouseOps.class);
 
 	public int arcWidth, arcHeight, arcStartX, arcStartY;
     public boolean fill = false;
@@ -78,7 +83,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     
     @Override
     public void setState( String state ) {
-    	System.out.println("MouseOps setState " + state);
+    	if (LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("MouseOps setState {}", state);
+    	}
     	
         if (State.chooseColor.equals(state)) {
             Color col = JColorChooser.showDialog(ClassEditor.getInstance(), "Choose Color",
@@ -160,7 +167,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         obj.setWidth(p.getWidth());     
         obj.setName("port");            
         obj.setPorts(ports);
-        System.out.println("GObj " + obj.toString());
+    	if (LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("GObj {}", obj);
+    	}
         
         canvas.addObject(obj);  
         canvas.repaint();
@@ -189,8 +198,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     //    obj.set
         obj.setPorts(ports);       
         
-        
-        System.out.println("GObj " + obj.toString() + "; x=" + obj.getX() + "; y=" + obj.getY());
+    	if (LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("GObj {}; x={}; y={}", obj, obj.getX(), obj.getY());
+    	}
 
         canvas.addObject(obj);
         canvas.repaint();
@@ -243,12 +253,18 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
      
      for ( Shape s : graphics.getShapes() ) {
     	 
-    	 System.out.println("Original shape: " + s + " >> x = " + s.getX() + ";y = " + s.getY() + ";w = "+ s.getWidth() + ";h = "+ s.getHeight());
-    	 s.setX((int)(Math.abs((s.getX() - startX) * scaleStep)));
-    	 s.setY((int)(Math.abs((s.getY() - startY) * scaleStep)));
-    	 s.setWidth(Math.round(s.getWidth() * scaleStep));//(int) xSize);	 
-    	 s.setHeight(Math.round(s.getHeight() * scaleStep));// (int)ySize);
-    	 System.out.println("Updated shape: x = " + s.getX() + ";y = " + s.getY() + ";w = "+ s.getWidth() + ";h = "+ s.getHeight());
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Original shape: {} >> x = {};y = {};w = {};h = {}", s, s.getX(), s.getY(), s.getWidth(), s.getHeight());
+		}
+
+		s.setX((int)(Math.abs((s.getX() - startX) * scaleStep)));
+		s.setY((int)(Math.abs((s.getY() - startY) * scaleStep)));
+		s.setWidth(Math.round(s.getWidth() * scaleStep));//(int) xSize);	 
+		s.setHeight(Math.round(s.getHeight() * scaleStep));// (int)ySize);
+
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Updated shape: {} >> x = {};y = {};w = {};h = {}", s, s.getX(), s.getY(), s.getWidth(), s.getHeight());
+		}
      }
      
    //	 graphics.setBounds(0, 0, (int)xSize, (int)ySize);
@@ -329,8 +345,10 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
    /* 	 xOffset = 0; 
     	 yOffset = 0;*/
     	
-        System.out.println("1. MouseOps.addShape() " + s.toText());
-        System.out.println("2. addShape x " + s.getX() + " y " + s.getY() + " h " + s.getHeight() + " w " + s.getWidth());
+    	if (LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("1. MouseOps.addShape() {}", s.toText());
+    		LOGGER.debug("2. addShape x {} y {} h {} w {}", s.getX(), s.getY(), s.getHeight(), s.getWidth());
+    	}
 
         ArrayList<Shape> shapes = new ArrayList<Shape>();
         shapes.add(s);
@@ -384,9 +402,10 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         
        
 
-        System.out.println("OBJECT X,Y,H,W " + obj.getX() + ", " + obj.getY()+ ", " + obj.getHeight()+ ", " + obj.getWidth());
-        System.out.println("////////// shape " + s.toText());
-        
+    	if (LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("OBJECT X,Y,H,W {}, {}, {}, {}", obj.getX(), obj.getY(), obj.getHeight(), obj.getWidth());
+    		LOGGER.debug("////////// shape {}", s.toText());
+    	}
         
         /* Bounding Box is special */
         if(s instanceof BoundingBox){        
@@ -509,7 +528,10 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                 GObj obj = canvas.getObjectList().checkInside(x, y, canvas.getScale());
                 
                 ObjectList testobj = canvas.getObjectList();
-                System.out.println("ClassMouseOps left button: " + testobj );
+            	if (LOGGER.isDebugEnabled()) {
+            		LOGGER.debug("ClassMouseOps left button: {}", testobj);
+            	}
+                
                 
                 if ( obj != null ) {
                     obj.setSelected( true );
@@ -553,7 +575,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     @Override
     public void mousePressed( MouseEvent e ) {
     	
-       System.out.println("ClassMouseOps mousePressed: " + state + "; mouse coords x=" + e.getX() + "; y=" + e.getY());
+	   	if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("ClassMouseOps mousePressed: {}; mouse coords x={}; y={}", state, e.getX(), e.getY());
+		}
         
     	mouseState = "pressed";
     	
@@ -618,7 +642,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     
     @Override
     public void mouseDragged( MouseEvent e ) {
-    	System.out.println("MouseOps mouseDragged " + state);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("MouseOps mouseDragged {}", state);
+		}
         if ( !SwingUtilities.isLeftMouseButton( e ) ) {
             return;
         }
@@ -630,7 +656,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
             if ( RuntimeProperties.getSnapToGrid() ) {
                 GObj obj = draggedObject;
-                System.out.println("draggedObject: " + draggedObject.toString());
+        		if (LOGGER.isDebugEnabled()) {
+        			LOGGER.debug("draggedObject: {}", draggedObject);
+        		}
                 int step = RuntimeProperties.getGridStep();
 
                 // When snap to grid is on mouse coordinates are calculated
@@ -644,7 +672,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                         * step - obj.getY();
             } else {
             	
-            	System.out.println("ClassMouseOps mouseDragged: " + state + "; canvas coords x=" + canvas.mouseX + "; y=" +canvas.mouseY);
+        		if (LOGGER.isDebugEnabled()) {
+        			LOGGER.debug("ClassMouseOps mouseDragged: {}; canvas coords x={}; y={}", state, canvas.mouseX, canvas.mouseY);
+        		}
             	
                 moveX = x - canvas.mouseX;
                 moveY = y - canvas.mouseY;
@@ -942,7 +972,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
     @Override
     public void mouseReleased( MouseEvent e ) {
-    	System.out.println("MouseOps mouseReleased: " + state + "  mouse coords: x="+canvas.mouseX+", y="+canvas.mouseY);
+    	if (LOGGER.isDebugEnabled()) {
+    		LOGGER.debug("MouseOps mouseReleased: {}  mouse coords: x={}, y={}", state, canvas.mouseX, canvas.mouseY);
+    	}
     	mouseState = "released";
     	
     	if (SwingUtilities.isMiddleMouseButton(e)) {
