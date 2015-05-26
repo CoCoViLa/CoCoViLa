@@ -37,7 +37,9 @@ import ee.ioc.cs.vsle.vclass.Port;
  */
 public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 	
-	private static Logger LOGGER = LoggerFactory.getLogger(MouseOps.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(MouseOps.class);
+	private static final int HALF_TURN_DEGREES = 180;
+	private static final int TURN_DEGREES = 360;
 
 	public int arcWidth, arcHeight, arcStartX, arcStartY;
     public boolean fill = false;
@@ -84,7 +86,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     @Override
     public void setState( String state ) {
     	if (LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("MouseOps setState {}", state);
+    		LOGGER.debug("setState {}", state);
     	}
     	
         if (State.chooseColor.equals(state)) {
@@ -347,7 +349,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     	
     	if (LOGGER.isDebugEnabled()) {
     		LOGGER.debug("1. MouseOps.addShape() {}", s.toText());
-    		LOGGER.debug("2. addShape x {} y {} h {} w {}", s.getX(), s.getY(), s.getHeight(), s.getWidth());
+    		// LOGGER.debug("2. addShape x {} y {} h {} w {}", s.getX(), s.getY(), s.getHeight(), s.getWidth());
     	}
 
         ArrayList<Shape> shapes = new ArrayList<Shape>();
@@ -496,26 +498,18 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             } 
         } // END OF LISTENING RIGHT MOUSE BUTTON
         else {
-           if ( state.equals( State.drawArc1 ) ) {
-            setState( State.drawArc2 );
-            double legOpp = startY + arcHeight / 2 - y;
-            double legNear = x - ( startX + arcWidth / 2 );
-            arcStartAngle = (int) ( Math.atan2( legOpp,  legNear )); //* 180 / Math.PI );
-            if ( legNear < 0 )
-                arcStartAngle = arcStartAngle + 180;
-            if ( legNear > 0 )
-                arcStartAngle = arcStartAngle + 360;
-            if ( arcStartAngle > 360 )
-                arcStartAngle = arcStartAngle - 360;
-            arcAngle = 0;  //init;
-            return;
-        }
-        if ( state.equals( State.drawArc2 ) ) {
-            Arc arc = new Arc(arcStartX, arcStartY, arcWidth, arcHeight, arcStartAngle, arcAngle, 
-                    Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );                		
-            addShape( arc );
-            setState( fill?State.drawFilledArc:State.drawArc );
-        }
+        	if ( state.equals( State.drawArc1 ) ) {
+				setState( State.drawArc2 );
+				calculateStartAngle(x, y);
+				arcAngle = 0;  //init;
+				return;
+			}
+			if ( state.equals( State.drawArc2 ) ) {
+			    Arc arc = new Arc(arcStartX, arcStartY, arcWidth, arcHeight, arcStartAngle, arcAngle, 
+			            Shape.createColorWithAlpha( color, getTransparency() ), fill, strokeWidth, lineType );                		
+			    addShape( arc );
+			    setState( fill?State.drawFilledArc:State.drawArc );
+			}
     
        
             if ( state.equals( State.selection ) ) {
@@ -529,7 +523,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                 
                 ObjectList testobj = canvas.getObjectList();
             	if (LOGGER.isDebugEnabled()) {
-            		LOGGER.debug("ClassMouseOps left button: {}", testobj);
+            		LOGGER.debug("left button: {}", testobj);
             	}
                 
                 
@@ -570,13 +564,41 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
         canvas.drawingArea.repaint();
     }
-    
+
+	void calculateStartAngle(int x, int y) {
+		final double centerX = startX + arcWidth / 2;
+		final double centerY = startY + arcHeight / 2;
+		final double deltaX = x - centerX;  
+		final double deltaY = y - centerY;  
+		
+		double angleRad = Math.atan2(deltaY,  deltaX); //* 180 / Math.PI );
+		double angleDeg = angleRad * (180 / Math.PI);
+		
+		if (angleDeg < 0) {
+			angleDeg = angleDeg + 360;
+		}
+
+		// Convert to Graphics2D angle: positive angle is counter-clockwise turn,
+		// negative is clockwise turn.
+		if (angleDeg > 0 && angleDeg < HALF_TURN_DEGREES) {
+			angleDeg = -angleDeg;
+		} else if (angleDeg > HALF_TURN_DEGREES) {
+			angleDeg = TURN_DEGREES - angleDeg;
+		}
+		
+		arcStartAngle = (int) angleDeg;
+
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Calculated angle={}", arcStartAngle);
+		}
+	}
+
 
     @Override
     public void mousePressed( MouseEvent e ) {
     	
 	   	if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("ClassMouseOps mousePressed: {}; mouse coords x={}; y={}", state, e.getX(), e.getY());
+			LOGGER.debug("mousePressed: {}; mouse coords x={}; y={}", state, e.getX(), e.getY());
 		}
         
     	mouseState = "pressed";
@@ -623,7 +645,10 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                         obj.setSelected( true );
                     }
                 }
-                System.out.println("IconMouseOps: " + SwingUtilities.isLeftMouseButton( e ) );
+        	   	if (LOGGER.isDebugEnabled()) {
+        			LOGGER.debug("Left button down: ", SwingUtilities.isLeftMouseButton( e ) );
+        		}
+                
                 if ( SwingUtilities.isLeftMouseButton( e ) ) {
                     setState( State.drag );
                     draggedObject = obj;                  
@@ -636,14 +661,16 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             }
         }
         
-        System.out.println("ClassMouseOps mousePressed: " + state + "; canvas coords x=" + canvas.mouseX + "; y=" +canvas.mouseY);      
+	   	if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("mousePressed: {}; canvas coords x={}; y={}", state, canvas.mouseX, canvas.mouseY);
+		}
         canvas.setActionInProgress( true );
     }    
     
     @Override
     public void mouseDragged( MouseEvent e ) {
 		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("MouseOps mouseDragged {}", state);
+			LOGGER.debug("mouseDragged {}", state);
 		}
         if ( !SwingUtilities.isLeftMouseButton( e ) ) {
             return;
@@ -673,7 +700,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             } else {
             	
         		if (LOGGER.isDebugEnabled()) {
-        			LOGGER.debug("ClassMouseOps mouseDragged: {}; canvas coords x={}; y={}", state, canvas.mouseX, canvas.mouseY);
+        			LOGGER.debug("mouseDragged: {}; canvas coords x={}; y={}", state, canvas.mouseX, canvas.mouseY);
         		}
             	
                 moveX = x - canvas.mouseX;
@@ -741,8 +768,10 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             	compareHeight += selected.get(0).getHeight(); 
             	compareWidth += selected.get(0).getWidth();
             }
-            System.out.println("Scroll check vertical: " + canvas.areaScrollPane.getViewport().getSize().getHeight() + " < " + compareHeight);
-            System.out.println("Scroll check horizontal: " + canvas.areaScrollPane.getViewport().getSize().getWidth() + " < " + compareWidth);
+    	   	if (LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("Scroll check vertical: {} < {}", canvas.areaScrollPane.getViewport().getSize().getHeight(), compareHeight);
+    			LOGGER.debug("Scroll check horizontal: {} < {}", canvas.areaScrollPane.getViewport().getSize().getWidth(), compareWidth);
+    		}
             
             if(canvas.areaScrollPane.getViewport().getSize().getHeight() <  compareHeight || canvas.areaScrollPane.getViewport().getSize().getWidth() <  compareWidth){
                  	//drawAreaSize
@@ -750,7 +779,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             	canvas.drawingArea.setPreferredSize(drawAreaSize);
              	canvas.drawAreaSize.setSize(drawAreaSize);
              	
-            	System.out.println("Drawing area new size: " + drawAreaSize.getWidth() + " " + drawAreaSize.getHeight());
+        	   	if (LOGGER.isDebugEnabled()) {
+        			LOGGER.debug("Drawing area new size: {} {}", drawAreaSize.getWidth(), drawAreaSize.getHeight());
+        		}
              	
              	canvas.drawingArea.revalidate();
             }
@@ -973,7 +1004,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     @Override
     public void mouseReleased( MouseEvent e ) {
     	if (LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("MouseOps mouseReleased: {}  mouse coords: x={}, y={}", state, canvas.mouseX, canvas.mouseY);
+    		LOGGER.debug("mouseReleased: {}  mouse coords: x={}, y={}", state, canvas.mouseX, canvas.mouseY);
     	}
     	mouseState = "released";
     	
@@ -1019,7 +1050,10 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         		width = (int) Math.abs(( canvas.mouseX/canvas.getScale()) - startX);        	
         		height = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY);
         	} 
-            System.out.println("MouseOps mouseReleased startX, startY " + startX + ", " + this.startY);
+    	   	if (LOGGER.isDebugEnabled()) {
+    			LOGGER.debug("mouseReleased startX, startY: {}, {}", startX, startY);
+    		}
+         	
             
             if ( state.equals( State.boundingbox ) ) {
                 BoundingBox box = new BoundingBox( Math.min( startX, canvas.mouseX ), Math.min( startY, canvas.mouseY ), width, height );
@@ -1053,11 +1087,13 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             arcHeight = Math.abs( (int) Math.abs(canvas.mouseY/canvas.getScale()) - startY );*/
         	/*  	
     		height = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY); Math.abs( canvas.mouseY - startY );*/
-        	  arcWidth =(int) Math.abs(( canvas.mouseX/canvas.getScale()) - startX);
-        	  arcStartX = (Math.min(startX, (int)(canvas.mouseX/canvas.getScale())));
-        	  arcStartY = (Math.min(startY, (int)(canvas.mouseY/canvas.getScale())));
-              arcHeight = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY);
-              System.out.println("arcWidth , Height " + arcWidth + ", " + arcHeight);
+				arcWidth =(int) Math.abs(( canvas.mouseX/canvas.getScale()) - startX);
+				arcStartX = (Math.min(startX, (int)(canvas.mouseX/canvas.getScale())));
+				arcStartY = (Math.min(startY, (int)(canvas.mouseY/canvas.getScale())));
+				arcHeight = (int) Math.abs(( canvas.mouseY/canvas.getScale()) - startY);
+		  	   	if (LOGGER.isDebugEnabled()) {
+		  			LOGGER.debug("arcWidth , Height : {}, {}", arcWidth, arcHeight);
+		  		}
               setState( State.drawArc1 );
         } else if ( state.equals( State.drawLine ) && (startX != canvas.mouseX || startY != canvas.mouseY)) {               	
             Line line = new Line( startX, startY, (int) Math.abs(canvas.mouseX/canvas.getScale()), (int) Math.abs(canvas.mouseY/canvas.getScale()), 
@@ -1076,7 +1112,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         	// look for selected objects 1st        	
         	for(GObj o:canvas.getObjectList()){
         		if(o.contains(canvas.mouseX, canvas.mouseY)){
-        			  System.out.println("obj" + o.getName());
+      		  	   	if (LOGGER.isDebugEnabled()) {
+    		  			LOGGER.debug("obj{}", o.getName());
+    		  		}
         			if(o.isSelected()){
         				canvas.deleteSelectedObjects(); break;
         			} else if(canvas.getObjectList().indexOf(o) > maxIndex &&  (canvas.getObjectList().getSelected() == null || canvas.getObjectList().getSelected().isEmpty())){

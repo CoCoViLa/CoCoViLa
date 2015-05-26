@@ -92,7 +92,8 @@ public class ClassField implements Cloneable, Serializable {
 		this(name, type, value, false, false);
 	}
 
-	public ClassField(String name, String type, String value, String nature, String description, boolean hidden, ClassGraphics knownGraphic) {
+	public ClassField(String name, String type, String value, String nature, String description, boolean hidden, ClassGraphics knownGraphics,
+			ClassGraphics defaultGraphics) {
 		this.name = name;
 		this.type = type;
 		this.description = description;
@@ -103,7 +104,8 @@ public class ClassField implements Cloneable, Serializable {
 			isGoal = true;
 		}
 		this.hidden = hidden;
-		
+		this.knownGraphics = knownGraphics;
+		this.defaultGraphics = defaultGraphics;
 	}
 
 	

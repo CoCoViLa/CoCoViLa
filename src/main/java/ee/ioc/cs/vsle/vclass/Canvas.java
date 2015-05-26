@@ -774,11 +774,16 @@ public class Canvas extends JPanel implements ISchemeContainer {
         for ( int i = 0; i < selectedObjs.size(); i++ ) {
             GObj obj = selectedObjs.get( i );
             
-            System.out.println("MoveObj selected: " + obj.getX() + ", "+ obj.getY());
+            if (logger.isDebugEnabled()) {
+            	logger.debug("MoveObj selected: {}, {}", obj.getX(), obj.getY());
+            }
             
-            if ( ! ( obj instanceof RelObj ) )
+            if ( ! ( obj instanceof RelObj ) ) {
                 obj.setPosition( obj.getX() + moveX, obj.getY() + moveY );
-                System.out.println("MoveObj selected new position: " + obj.getX() + ", "+ obj.getY());
+                if (logger.isDebugEnabled()) {
+                	logger.debug("MoveObj selected new position: {}, {}", obj.getX() + moveX, obj.getY() + moveY);
+                }
+            }
             
             if ( obj.isStrict() ) {
                 // remove broken strict connections

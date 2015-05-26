@@ -33,14 +33,12 @@ import ee.ioc.cs.vsle.vclass.Point;
 import ee.ioc.cs.vsle.vclass.Port;
 import ee.ioc.cs.vsle.vclass.RelObj;
 import ee.ioc.cs.vsle.vclass.VPackage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ClassCanvas extends Canvas{
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1290323197462938186L;
 	private static final Logger logger = LoggerFactory.getLogger(ClassCanvas.class);
 	
@@ -324,7 +322,9 @@ public class ClassCanvas extends Canvas{
 								((Line) s).setX(Math.abs(calcWidth));
 								((Line) s).setEndX(0);
 							}
-							 System.out.println("calc w " + calcWidth); 
+				    	   	if (logger.isDebugEnabled()) {
+								logger.debug("calc w {}", calcWidth);
+				    		}
 							obj.setWidth(Math.abs(calcWidth));
 							s.setWidth(Math.abs(calcWidth));
 							if(calcWidth < 0 && obj.getX() > ((Line) s).getX()){
@@ -476,13 +476,17 @@ public class ClassCanvas extends Canvas{
 	 }
 	
 	 public void resizeLine( int dx, int dy, int corner ) {
-	        for (GObj obj : scheme.getObjectList()) {
-	            if ( obj.isSelected() ){	            	  
-	                obj.resizeLine( dx, dy, corner );	            
-	            }
-	        }
-	        scheme.getObjectList().updateRelObjs();
-	        drawingArea.repaint();
+		if (logger.isDebugEnabled()) {
+			logger.debug("resizeLine dx={}, dy={}, corner={}", dx, dy, corner);
+		}
+		
+		for (GObj obj : scheme.getObjectList()) {
+		    if ( obj.isSelected() ){	            	  
+		        obj.resizeLine( dx, dy, corner );
+		    }
+		}
+		scheme.getObjectList().updateRelObjs();
+		drawingArea.repaint();
 	 }
 	 
 	 @Override

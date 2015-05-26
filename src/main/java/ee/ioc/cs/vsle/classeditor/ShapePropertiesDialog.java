@@ -36,6 +36,9 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.multi.MultiListUI;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ee.ioc.cs.vsle.common.ops.State;
 import ee.ioc.cs.vsle.editor.PaletteBase;
 import ee.ioc.cs.vsle.graphics.Arc;
@@ -50,6 +53,7 @@ import ee.ioc.cs.vsle.vclass.GObj;
 public class ShapePropertiesDialog extends JDialog implements ActionListener {
 
     private static final long serialVersionUID = 1L;
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShapePropertiesDialog.class);
 
     private JButton bttnOk = new JButton( "OK" );
     private JButton bttnCancel = new JButton( "Cancel" );
@@ -445,7 +449,9 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     protected void updateLabel (String name) {    	
     	if(validateLineInput()){    		
     		clearAll();
-    		System.out.println("Text Width = "+ fldWidth.getText() + " int width = " + tryParse(fldWidth.getText()));	
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("Text Width = {} int width = {}", fldWidth.getText(), tryParse(fldWidth.getText()));
+			}
     	int x1 = tryParse(fldStartX.getText()) ;
 		int x2 = tryParse(fldEndX.getText());
 		

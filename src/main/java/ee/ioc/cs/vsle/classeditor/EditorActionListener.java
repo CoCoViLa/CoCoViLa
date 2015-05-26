@@ -120,7 +120,10 @@ public class EditorActionListener implements ActionListener {
         @Override
         public void actionPerformed( ActionEvent e ) {
             Canvas canvas = ClassEditor.getInstance().getCurrentCanvas();
-            System.out.println("here DeleteAction actionPerformed");
+			if (logger.isDebugEnabled()) {
+				logger.debug("here DeleteAction actionPerformed");
+			}
+
             if ( canvas != null )
                 canvas.deleteSelectedObjects();
         }
@@ -146,8 +149,10 @@ public class EditorActionListener implements ActionListener {
 
     @Override
     public void actionPerformed( ActionEvent e ) {
-        System.out.println("EditorActionListener actionPerformed " + e);
-        System.out.println( e.getActionCommand());
+		if (logger.isDebugEnabled()) {
+		   	logger.debug("EditorActionListener actionPerformed ", e);
+		   	logger.debug(e.getActionCommand());
+		}
         
         if ( e.getActionCommand().equals( Menu.PRINT ) ) {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {

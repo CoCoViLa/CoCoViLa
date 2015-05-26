@@ -17,6 +17,7 @@ import java.util.ArrayList;
 
 
 
+
 import javax.swing.Action;
 import javax.swing.ActionMap;
 import javax.swing.InputMap;
@@ -58,7 +59,6 @@ import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
-import ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel;
 import ee.ioc.cs.vsle.classeditor.ClassImport;
 import ee.ioc.cs.vsle.classeditor.ClassPropertiesDialog;
 import ee.ioc.cs.vsle.iconeditor.DeleteClassDialog;
@@ -73,9 +73,9 @@ import ee.ioc.cs.vsle.vclass.ClassObject;
 import ee.ioc.cs.vsle.vclass.GObj;
 import ee.ioc.cs.vsle.vclass.ObjectList;
 import ee.ioc.cs.vsle.vclass.PackageClass;
-import ee.ioc.cs.vsle.vclass.PackageClass.ComponentType;
 import ee.ioc.cs.vsle.vclass.Port;
 import ee.ioc.cs.vsle.vclass.VPackage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1135,7 +1135,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			  dialog.repaint();
 
 			  String selection = dialog.getSelectedValue();
-			  System.out.println("selection " + selection);
+			  if (logger.isDebugEnabled()) {
+				logger.debug("selection {}", selection);
+			  }
 
 			  importPortGraphics(f, selection, openFlag, port.getName());
 
@@ -1155,7 +1157,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				  	ClassCanvas canvas = new ClassCanvas(pkg, f.getParent() + File.separator);
 					addCanvas(canvas);	
 			  } 
-			  System.out.println("Canvas " + ClassEditor.getInstance().getCurrentCanvas());
+		      if (logger.isDebugEnabled()) {
+		    	logger.debug("Canvas {}", ClassEditor.getInstance().getCurrentCanvas());
+		      }
 			  importClassFromPackage( f);	
 	      } 		  
 	  }  
@@ -1210,7 +1214,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  ccd.repaint();*/
 		  String selection = dialog.getSelectedValue();
 
-		  System.out.println("selection " + selection);
+	      if (logger.isDebugEnabled()) {
+	    	logger.debug("selection {}", selection);
+	      }
 
 		 // ClassCanvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
 		  
@@ -1254,7 +1260,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  }
 		  
 
-		  System.out.println("start import " + classX);
+	      if (logger.isDebugEnabled()) {
+	    	logger.debug("start import {}", classX);
+	      }
+
 
 		  if ( selection == null )
 			  return;
@@ -1311,7 +1320,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 						  if (classGraphics != null) {
 							  ArrayList<Shape> cShapes = classGraphics.getShapes();
 							  for (Shape shape : cShapes) {
-								  curCanvas.mListener.addShape(shape, classX, classY);
+								//  curCanvas.mListener.addShape(shape, classX, classY); tmp fix
 							  }
 						  }
 					  }
@@ -1502,7 +1511,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				   shape.setY(obj.getY() - canv.getBoundingBox().getY());
 
 				    
-				   System.out.println("Port Graphics ADD SHAPE - " + shape.toText());
+			       if (logger.isDebugEnabled()) {
+				    	logger.debug("Port Graphics ADD SHAPE - {}", shape.toText());
+				   }
 				   cg.addShape(shape);
 				   if(canv.getBoundingBox() != null){
 					   if(canv.getBoundingBox().getHeight() != 0)
@@ -1576,7 +1587,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			  
 			   //System.out.println(" rx=" + rX + "; ry=" + rY);			 
 			
-			   System.out.println("cg SHAPES - " + cg.getShapes());			
+		       if (logger.isDebugEnabled()) {
+			    	logger.debug("cg SHAPES - {}", cg.getShapes());
+			   }
 
 			   pc.setIcon(ClassObject.getClassIcon() );
 			   pc.setDescription(ClassObject.getClassDescription());
@@ -1600,7 +1613,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 				   if ( fieldType != null ) {
 					   ClassField cf = new ClassField(fieldName, fieldType, fieldValue, (String)dbrClassFields.getValueAt( i, 3 ),
-							   (String)dbrClassFields.getValueAt( i, 4 ), Boolean.parseBoolean(String.valueOf(dbrClassFields.getValueAt( i, 5 ))), null);
+							   (String)dbrClassFields.getValueAt( i, 4 ), 
+							   Boolean.parseBoolean(String.valueOf(dbrClassFields.getValueAt( i, 5 ))), 
+							   dbrClassFields.knowns.length>=i+1?dbrClassFields.knowns[i]:null,
+							   dbrClassFields.defaults.length>=i+1?dbrClassFields.defaults[i]:null);
 					   fields.add(cf);
 					   pc.addField( cf );
 				   }
@@ -1734,7 +1750,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		   for ( GObj obj : selectedObjects ) {
 			   GObj holder = null;
 			   for (Shape sh : obj.getShapes()) {
-				   System.out.println("SHAPE - "+ sh.getName() +" x=" + obj.getX() + "; y=" + obj.getY());
+			       if (logger.isDebugEnabled()) {
+				    	logger.debug("SHAPE - {} x={}; y={}", sh.getName(), obj.getX(), obj.getY());
+				   }
+
 				   if(obj.getY() < rY){
 					   rY = obj.getY();						   
 				   }
@@ -1779,8 +1798,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				    * */       
 				   					  
 				    if(!(shape instanceof BoundingBox || shape instanceof Text)){
-				    	 System.out.println("CONFIRM test: x=" + obj.getX() + " - xEnd=" + (int)(obj.getX() + obj.getWidth()));
-				    	 System.out.println("CONFIRM test: inside ->" + obj.isInside(bX, bY, bX+bW, bY + bH));
+				 		 if (logger.isDebugEnabled()) {
+						   	logger.debug("CONFIRM test: x={} - xEnd={}", obj.getX(), (int)(obj.getX() + obj.getWidth()));
+						   	logger.debug("CONFIRM test: inside ->{}", obj.isInside(bX, bY, bX+bW, bY + bH));
+						 }
 				    	 if (!obj.isInside(bX, bY, bX+bW, bY + bH)){  
 				    		 if((obj.getX() > bX && obj.getX()< bX+bW) || (obj.getY() > bY && obj.getY()< bY+bH)){}
 				    		 else 	{
@@ -1809,9 +1830,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					   shape.setY(obj.getY() - rY);
 				   }
 				    					    
-				   System.out.println("ADD SHAPE - " + shape.toText());
-
-				   System.out.println("Bounds: " + shape.getX() + " - " + cg.getBoundX() + ";"+  shape.getY() + " - " + cg.getBoundY());
+			       if (logger.isDebugEnabled()) {
+				    	logger.debug("ADD SHAPE - {}", shape.toText());
+				    	logger.debug("Bounds: {} - {};{} - {}", shape.getX(), cg.getBoundX(), shape.getY(), cg.getBoundY());
+				   }
 
 				    cg.addShape(shape);
 				    

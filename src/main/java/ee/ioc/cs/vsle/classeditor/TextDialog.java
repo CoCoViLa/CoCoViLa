@@ -30,13 +30,20 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.FileFuncs;
 import ee.ioc.cs.vsle.vclass.GObj;
 
 public class TextDialog extends JDialog {
 	
-
+	/**
+	 * Default serialization version number.
+	 */
+	private static final long serialVersionUID = 1L;
+	private static final Logger LOGGER = LoggerFactory.getLogger(TextDialog.class);
 
 	private JLabel lblFont = new JLabel("Font:");
 	private JLabel lblSize = new JLabel("Size:");
@@ -114,7 +121,9 @@ public class TextDialog extends JDialog {
 	
 	public TextDialog(final ClassEditor editor, int x, int y, int w, int h, final GObj obj) {
 		
-		System.out.println("TextDialog editor " + editor);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("TextDialog editor {}", editor);
+		}
 		Text textToEdit = getText(obj);
 		this.editor = editor;
 		this.obj = obj;

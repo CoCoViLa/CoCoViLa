@@ -128,23 +128,28 @@ public class GObj implements Serializable, Cloneable,
     }
     
     public void resizeLine( int changeX, int changeY, int corner ) {
-    	int temp = ((Line) getShapes().get(0)).getEndX();
+    	Line line = (Line) getShapes().get(0);
     	
+		if (logger.isDebugEnabled()) {
+			logger.debug("Line before resize: {}", line.toText());
+			logger.debug("GObj after resize: {}", toText());
+		}
+
     	
     	switch ( corner ) { // changeX
         case 1: /* x1 */
         	if(getHeight() == 0) {
      			setHeight(1);
-     			((Line) getShapes().get(0)).setX(0);
-    			((Line) getShapes().get(0)).setEndY(1);
+     			line.setX(0);
+    			line.setEndY(1);
      		  }	
         	
         	 if(getWidth() == 0) {
      			setWidth(1);
-     			((Line) getShapes().get(0)).setEndX(changeX > 0?0:1);
-     			((Line) getShapes().get(0)).setX(changeX > 0?1:0);
+     			line.setEndX(changeX > 0?0:1);
+     			line.setX(changeX > 0?1:0);
      		  }	           	
-        	 if(((Line) getShapes().get(0)).getEndX() > getShapes().get(0).getX()){
+        	 if(line.getEndX() > getShapes().get(0).getX()){
         		 
         		 setX( getX() + changeX );
         		 setY( getY() + changeY );
@@ -167,16 +172,16 @@ public class GObj implements Serializable, Cloneable,
         	/* x2 */
     	if(getHeight() == 0) {
  			setHeight(1);
-			((Line) getShapes().get(0)).setEndY(1);
+			line.setEndY(1);
  		  }	
     	if(getWidth() == 0) {
  			setWidth(1);
- 			((Line) getShapes().get(0)).setEndX(changeX > 0?1:0);
- 			((Line) getShapes().get(0)).setX(changeX > 0?0:1);
+ 			line.setEndX(changeX > 0?1:0);
+ 			line.setX(changeX > 0?0:1);
  		  }	  
     	   	    	
     	
-    	if(((Line) getShapes().get(0)).getEndX() < getShapes().get(0).getX()){
+    	if(line.getEndX() < getShapes().get(0).getX()){
     		
     		setX( getX() + changeX );    		
         	setXsize( getXsize() - (float) changeX / (getWidth()!=0?getWidth():(float)1));        	
@@ -189,6 +194,11 @@ public class GObj implements Serializable, Cloneable,
    	 	 		setYsize( getYsize() + (float) changeY / getHeight() );	
    	 	 	}
     	}
+
+		if (logger.isDebugEnabled()) {
+			logger.debug("Line after resize: {}", line.toText());
+			logger.debug("GObj after resize: {}", toText());
+		}
     }
 
 
@@ -1064,5 +1074,9 @@ public class GObj implements Serializable, Cloneable,
 	public void setDrawOpenPorts(boolean drawOpenPorts) {
 		this.drawOpenPorts = drawOpenPorts;
 	}
-    
+
+	public String toText() {
+		return String.format("GObj: x-y/xsize-ysize/width-height/angle %d-%d/%f-%f/%d-%d/%f", getX(), getY(), getXsize(), getYsize(),
+				getWidth(), getHeight(), getAngle());
+	}
 }
