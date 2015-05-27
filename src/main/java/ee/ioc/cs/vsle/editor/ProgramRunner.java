@@ -45,18 +45,9 @@ import ee.ioc.cs.vsle.api.TerminateProgramException;
 import ee.ioc.cs.vsle.ccl.CCL;
 import ee.ioc.cs.vsle.ccl.CompileException;
 import ee.ioc.cs.vsle.event.EventSystem;
-import ee.ioc.cs.vsle.parser.SpecificationLoader;
-import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
-import ee.ioc.cs.vsle.synthesize.ClassList;
-import ee.ioc.cs.vsle.synthesize.CodeGenerator;
-import ee.ioc.cs.vsle.synthesize.EquationException;
-import ee.ioc.cs.vsle.synthesize.LineErrorException;
-import ee.ioc.cs.vsle.synthesize.MutualDeclarationException;
-import ee.ioc.cs.vsle.synthesize.SpecParseException;
-import ee.ioc.cs.vsle.synthesize.SpecParser;
-import ee.ioc.cs.vsle.synthesize.Synthesizer;
-import ee.ioc.cs.vsle.synthesize.UnknownVariableException;
-import ee.ioc.cs.vsle.synthesize.Var;
+import ee.ioc.cs.vsle.parser.ParsedSpecificationContext;
+import ee.ioc.cs.vsle.parser.SpecParserUtil;
+import ee.ioc.cs.vsle.synthesize.*;
 import ee.ioc.cs.vsle.table.TableManager;
 import ee.ioc.cs.vsle.util.FileFuncs.FileSystemStorage;
 import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
@@ -265,10 +256,6 @@ public class ProgramRunner {
         try {
             foundVars.clear();
 
-            mainClassName = SpecParser.getClassName( fullSpec );
-
-            logger.info( "Computing " + mainClassName );
-
             Set<String> schemeObjects = new HashSet<String>();
 
             for (GObj gObj : schemeContainer.getObjectList()) {
@@ -276,26 +263,15 @@ public class ProgramRunner {
             }
             
             long start = System.currentTimeMillis();
-            
-            switch (RuntimeProperties.getSpecParserKind()) {
-            case REGEXP: {
-              classList = SpecParser.parseSpecification( fullSpec, mainClassName, schemeObjects, schemeContainer.getWorkDir() );
-              break;
-            }
-            case ANTLR: {
-              SpecificationLoader specificationLoader = new SpecificationLoader(schemeContainer.getWorkDir(), schemeObjects);
-              specificationLoader.loadSpecification(fullSpec, TypeUtil.TYPE_THIS);
-              Collection<AnnotatedClass> loaddedSpecificationList = specificationLoader.getLoaddedSpecificationList();
-              classList = new ClassList();
-              classList.addAll(loaddedSpecificationList);
-              break;
-            }
-            }
-            
-            System.out.println("Done " + (System.currentTimeMillis() - start));
+
+            ParsedSpecificationContext parsedSpecificationContext = SpecParserUtil.parseFromString(fullSpec, schemeContainer.getWorkDir(), schemeObjects);
+            mainClassName = parsedSpecificationContext.mainClassName;
+            classList = parsedSpecificationContext.classList;
+
+            logger.info("Parsed '{}' in {}ms.", mainClassName, (System.currentTimeMillis() - start));
             getAssumptions().clear();
 
-            return Synthesizer.makeProgramText( fullSpec, computeAll, classList, mainClassName, this );
+            return Synthesizer.makeProgramText( parsedSpecificationContext, computeAll, this );
             
         } catch ( Throwable ex ) {
             reportException(ex);
@@ -338,7 +314,7 @@ public class ProgramRunner {
         else if( e instanceof  SpecParseException ) {
             SpecParseException spe = (SpecParseException)e;
             String line = spe.getLine();
-            msg = "Specification parsing error: " + spe.getMessage() 
+            msg = "Specification " + (spe.getMetaClass() != null ? "'" + spe.getMetaClass() + "' " : "") + "parsing error: " + spe.getMessage()
                 + (line != null ? ", line: " + line : ""); 
             logger.error(msg);
             ErrorWindow.showErrorMessage( msg );

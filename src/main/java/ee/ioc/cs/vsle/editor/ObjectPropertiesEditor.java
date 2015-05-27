@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.Point;
 import java.awt.event.*;
 import java.util.*;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -323,26 +324,30 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 			}
 		}
 
-		for (int i = 0; i < textFields.size(); i++) {
-			textField = textFields.get(i);
-			field = primitiveNameList.get(i);
-			if (!textField.getText().equals("")) {
-			try {
-				getValue(textField.getText(), field
-						.getType());
-				
-			} catch (NumberFormatException nfe) {
-				inputError = true;
-				JOptionPane.showMessageDialog(this,
-					    "The field "+field.getName()+" of type " +field.getType() + 
-					    		" cannot have the value \""+textField.getText()+"\"",
-					    "Input error",
-					    JOptionPane.ERROR_MESSAGE
-					    );
-				
-			}
-			}
-		}
+    final List<String> textFieldValues = new ArrayList<String>(textFields.size());
+    for (int i = 0; i < textFields.size(); i++) {
+      textField = textFields.get(i);
+      field = primitiveNameList.get(i);
+      if (!textField.getText().equals("")) {
+        try {
+          final String value = getValue(textField.getText(), field.getType());
+          textFieldValues.add(value);
+        }
+        catch (IllegalArgumentException e) {
+          inputError = true;
+          JOptionPane.showMessageDialog(this,
+                  "The field "+field.getName()+" of type " +field.getType() +
+                          " cannot have the value \""+textField.getText()+"\"",
+                  "Input error",
+                  JOptionPane.ERROR_MESSAGE
+          );
+
+        }
+      }
+      else {
+        textFieldValues.add(null);
+      }
+    }
 		if (!inputError) {
 
 		    // Apply checkbox values to class fields.
@@ -360,12 +365,7 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		        fld.setGoal(goalOutputs.get(i).isSelected());
 		            
 		        if (fld.isPrimitiveOrString()) { 
-		            textField = textFields.get(txtIdx);
-		            if (!textField.getText().trim().equals("")) {
-		                fld.setValue(textField.getText());
-		            } else {
-		                fld.setValue(null);
-		            }
+                fld.setValue(textFieldValues.get(txtIdx));
 		            txtIdx++;
 		        }
 		        i++;
@@ -443,33 +443,43 @@ public class ObjectPropertiesEditor extends JFrame implements ActionListener,
 		}
 	}
 
-	private String getValue(String text, String type)
-			throws NumberFormatException {
-		if (type.equals(TYPE_INT)) {
-
-			int i = Integer.parseInt(text);
-			return Integer.toString(i);
-
-		}
-		if (type.equals(TYPE_LONG)) {
-
-			long i = Long.parseLong(text);
-			return Long.toString(i);
-
-		}
-		if (type.equals(TYPE_DOUBLE)) {
-			double i = Double.parseDouble(text);
-			return Double.toString(i);
-
-		}
-		if (type.equals(TYPE_FLOAT)) {
-			float i = Float.parseFloat(text);
-			return Float.toString(i);
-
-		}
-		return text;
-		//TODO - add other types
-	}
+  private String getValue(String text, String type) {
+    if (type.equals(TYPE_INT)) {
+      int i = Integer.parseInt(text);
+      return Integer.toString(i);
+    }
+    if (type.equals(TYPE_LONG)) {
+      long i = Long.parseLong(text);
+      return Long.toString(i) + "L";
+    }
+    if (type.equals(TYPE_DOUBLE)) {
+      double i = Double.parseDouble(text);
+      return Double.toString(i) + "D";
+    }
+    if (type.equals(TYPE_FLOAT)) {
+      float i = Float.parseFloat(text);
+      return Float.toString(i) + "F";
+    }
+    if (type.equals(TYPE_SHORT)) {
+      final short s = Short.parseShort(text);
+      return Short.toString(s);
+    }
+    if (type.equals(TYPE_BYTE)) {
+      final byte b = Byte.parseByte(text);
+      return Byte.toString(b);
+    }
+    if (type.equals(TYPE_BOOLEAN)) {
+      boolean b = Boolean.parseBoolean(text);
+      return Boolean.toString(b);
+    }
+    if (type.equals(TYPE_CHAR)) {
+      if(text.length() != 1) {
+        throw new IllegalArgumentException("Cannot convert String \"" + text + "\" to a char");
+      }
+      return "'" + text.charAt(0) + "'";
+    }
+    return text;
+  }
 
 	private JComboBox getComboBox(JTextField jtf) {
 		for (JComboBox jcb : comboBoxes) {

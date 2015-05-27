@@ -680,8 +680,6 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 		Look.getInstance().initDefaultLnF();
 
-		extractPackages();
-
 		final ClassEditor window = new ClassEditor();
 		s_instance = window;
 
@@ -751,22 +749,6 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				RuntimeProperties.setFromWebstart();
 				break;
 			}
-		}
-	}
-
-	public static void extractPackages()
-	{
-		//if apps was run for the first time from webstart
-		//ask user if he wants to unpack demo packages
-		if ( RuntimeProperties.isFromWebstart() && RuntimeProperties.isCleanInstall() ) {
-			int res = JOptionPane.showConfirmDialog( null,
-					"Extract demo packages into \""
-							+ ( RuntimeProperties.getWorkingDirectory()
-									+ "packages" + File.separator ) + "\" ?",
-									"", JOptionPane.YES_NO_OPTION );
-
-			if ( res == JOptionPane.YES_OPTION )
-				SystemUtils.unpackPackages();
 		}
 	}
 

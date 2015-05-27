@@ -244,11 +244,11 @@ public abstract class CCL extends URLClassLoader {
         Map<String, String> settings = new HashMap<String, String>();
 
         settings.put(CompilerOptions.OPTION_Compliance,
-                CompilerOptions.VERSION_1_5);
+                CompilerOptions.VERSION_1_7);
         settings.put(CompilerOptions.OPTION_Source,
-                CompilerOptions.VERSION_1_5);
+                CompilerOptions.VERSION_1_7);
         settings.put(CompilerOptions.OPTION_TargetPlatform,
-                CompilerOptions.VERSION_1_5);
+                CompilerOptions.VERSION_1_7);
 
         return new CompilerOptions(settings);
     }

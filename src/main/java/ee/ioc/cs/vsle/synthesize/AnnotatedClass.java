@@ -43,8 +43,11 @@ public class AnnotatedClass {
 	 */ 
 	 public void addField(ClassField field) {
 		String name = field.getName();
-		classFields.put(name, field);
-		allFields.put(name, field);
+     if (hasField(name)) {
+       throw new SpecParseException( "Variable " + name + " declared more than once in class " + getName() );
+     }
+     classFields.put(name, field);
+     allFields.put(name, field);
 	} // addField
 
 //	/**
@@ -102,7 +105,7 @@ public class AnnotatedClass {
 	 * need to keep relations up-to-date (i.e. not cache rels from superclasses because some relations
 	 * may be added into superclasses later
 	 */
-	Collection<ClassRelation> getClassRelations() {
+	public Collection<ClassRelation> getClassRelations() {
 	    Collection<ClassRelation> relations = new LinkedHashSet<ClassRelation>();
 	    for ( AnnotatedClass superclass : superClasses ) {
 	        relations.addAll( superclass.getClassRelations() );
@@ -126,8 +129,9 @@ public class AnnotatedClass {
 			String name = entry.getKey();
 			if(CodeGenerator.SPEC_OBJECT_NAME.equals(name))
 				continue;
-			
-			allFields.put(name, entry.getValue());
+			//make a copy of the field as in case of alias, its state might be altered
+			//and other classes with the same superclass might see the altered state, lets avoid this.
+			allFields.put(name, entry.getValue().clone());
 		}
 		
 		superClasses.add( clas );

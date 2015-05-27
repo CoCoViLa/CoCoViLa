@@ -37,28 +37,30 @@ public class ProblemCreator {
     private static int aliasCounter = 0;
     private static final Pattern PATTERN_ALIAS_ELEMENT_ACCESS = Pattern
             .compile( "([^\\* ]+)\\.(\\*|[0-9]+)(\\.(\\(([a-zA-Z0-9_]+)\\))?([^\\.() ]+))?$");
-    
+    private final String rootClassName;
+
     ProblemCreator( ClassList classes ) {
+        this(classes, null);
+    }
+
+    ProblemCreator( ClassList classes, String rootClassName ) {
         assert classes != null;
         this.classes = classes;
-        
+        this.rootClassName = rootClassName;
         indpSubtasks = new HashMap<SubtaskClassRelation, SubtaskRel>();
     }
     
-    ProblemCreator( ClassList classes, Map<SubtaskClassRelation, SubtaskRel> indpSubtasks) {
-        
-        this(classes);
-        
+    ProblemCreator( ClassList classes, String rootClassName, Map<SubtaskClassRelation, SubtaskRel> indpSubtasks) {
+        this(classes, rootClassName);
         assert indpSubtasks != null;
-        
         this.indpSubtasks = indpSubtasks;
     }
-    
+
     Problem makeProblem() throws SpecParseException {
-        
+
         long start = System.currentTimeMillis();
         
-        Problem problem = new Problem( new Var( new ClassField( TYPE_THIS, TYPE_THIS ), null ) );
+        Problem problem = new Problem( new Var( new ClassField( TYPE_THIS, rootClassName ), null ) );
         
         makeProblemImpl( problem.getRootVar(), problem, /*new HashMap<String, Integer>(),*/ true );
         
@@ -328,7 +330,7 @@ public class ProblemCreator {
         newClassList.add(newAnnClass);
         for ( AnnotatedClass ac : classes ) {
             //do not add annotated class for current context...
-            if(TYPE_THIS.equals(ac.getName())
+            if(ac.getName().equals(rootClassName)
                   //[current context can be either THIS of the main scheme class 
                     //or another independent subtask]
                     || CodeGenerator.INDEPENDENT_SUBTASK.equals(ac.getName())) {
@@ -340,7 +342,7 @@ public class ProblemCreator {
         Problem contextProblem = 
             new Problem( new Var( new ClassField( TYPE_THIS, CodeGenerator.INDEPENDENT_SUBTASK ), null ) );
 
-        new ProblemCreator(newClassList, indpSubtasks).makeProblemImpl(
+        new ProblemCreator(newClassList, contextProblem.getRootVar().getType(), indpSubtasks).makeProblemImpl(
                 contextProblem.getRootVar(), contextProblem,
                 //new HashMap<String, Integer>(), 
                 true);

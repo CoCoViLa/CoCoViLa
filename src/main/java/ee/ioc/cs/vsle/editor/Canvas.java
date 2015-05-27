@@ -581,11 +581,7 @@ public class Canvas extends JPanel implements ISchemeContainer {
         executor = Executors.newSingleThreadExecutor();
 
         if ( vPackage.hasPainters() ) {
-            classPainters = new HashMap<GObj, ClassPainter>();
-            if ( !createPainterPrototypes() ) {
-                JOptionPane.showMessageDialog( this, "One or more errors occured. See the error log for details.", "Error",
-                        JOptionPane.ERROR_MESSAGE );
-            }
+            classPainters = new HashMap<>();
         }
 
         undoManager = new UndoManager();
@@ -598,36 +594,6 @@ public class Canvas extends JPanel implements ISchemeContainer {
             }
         } );
         setScale( RuntimeProperties.getZoomFactor() );
-    }
-
-    private boolean createPainterPrototypes() {
-        boolean success = true;
-        /* TODO Will be replaced by more general daemon stuff */
-        PackageClassLoader pcl = null;
-
-        for ( PackageClass pclass : vPackage.getClasses() ) {
-            if ( pclass.getPainterName() == null )
-                continue;
-
-            try {
-                if (pcl == null) {
-                    pcl = vPackage.getPackageClassLoader();
-                }
-                Class<?> painterClass = pcl.loadClass(pclass.getPainterName());
-                pclass.setPainterPrototype((ClassPainter) painterClass.newInstance());
-            } catch ( CompileException e ) {
-                success = false;
-                logger.error(null, e); // print compiler generated message
-            } catch ( Exception e ) {
-                success = false;
-                logger.error(null, e);
-            } finally {
-                if (pcl != null && pcl.hasErrors()) {
-                    pcl.clearProblems();
-                }
-            }
-        }
-        return success;
     }
 
     @Override
@@ -1342,17 +1308,12 @@ public class Canvas extends JPanel implements ISchemeContainer {
             }
 
             for (GObj obj : getObjectList()) {
-                obj.drawClassGraphics( g2, scale );
-
-                if ( enableClassPainter && classPainters != null ) {
-                    ClassPainter p = classPainters.get( obj );
-                    if ( p != null )
-                        p.paint( g2, scale );
-                }
+                paintGObj(obj, g2);
             }
 
             g2.setColor( Color.blue );
             g2.setStroke(connectionStroke);
+            
             for ( int i = 0; i < scheme.getConnectionList().size(); i++ ) {
                 rel = scheme.getConnectionList().get( i );
                 rel.drawRelation( g2 );
@@ -1361,17 +1322,20 @@ public class Canvas extends JPanel implements ISchemeContainer {
             if ( isConnectionBeingAdded() ) {
                 // adding connection, first port connected
                 currentCon.drawRelation( g2, mouseX, mouseY );
-            } else if ( isRelObjBeingAdded() ) {
+            }
+            else if ( isRelObjBeingAdded() ) {
                 // adding relation object, first port connected
 
                 RelObj obj = (RelObj) currentObj;
                 Point point = VMath.getRelClassStartPoint( obj.getStartPort(), mouseX, mouseY );
                 obj.setEndPoints( point.x, point.y, mouseX, mouseY );
 
-                currentObj.drawClassGraphics( g2, scale );
-            } else if ( currentObj != null && mListener.mouseOver ) {
-                currentObj.drawClassGraphics( g2, scale );
-            } else if ( mListener.state.equals( State.dragBox ) ) {
+                paintGObj(currentObj, g2);
+            }
+            else if ( currentObj != null && mListener.mouseOver ) {
+                paintGObj(currentObj, g2);
+            }
+            else if ( mListener.state.equals( State.dragBox ) ) {
                 g2.setColor( Color.gray );
                 // a shape width negative height or width cannot be drawn
                 int rectX = Math.min( mListener.startX, mouseX );
@@ -1382,6 +1346,17 @@ public class Canvas extends JPanel implements ISchemeContainer {
             }
 
             g2.scale( 1.0f / scale, 1.0f / scale );
+        }
+
+        private void paintGObj(GObj obj, Graphics2D g2) {
+            if (enableClassPainter && classPainters != null) {
+                ClassPainter p = classPainters.get(obj);
+                if (p != null) {
+                    p.paint(g2, scale);
+                    return;
+                }
+            }
+            obj.drawClassGraphics(g2, scale);
         }
     }
 

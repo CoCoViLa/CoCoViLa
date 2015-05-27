@@ -198,7 +198,8 @@ public class ClassField implements Cloneable, Serializable {
 	 */
 	@Override
 	public String toString() {
-		return getType() + " " + getName();
+		String _type = getType();
+		return (_type != null && type.length() > 0 ? _type + " " : "") + getName();
 	} // toString
 
 	/**

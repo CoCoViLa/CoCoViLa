@@ -1,7 +1,5 @@
 package ee.ioc.cs.vsle.synthesize;
 
-import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -12,6 +10,7 @@ import java.util.regex.Pattern;
 import ee.ioc.cs.vsle.api.ComputeModelException;
 import ee.ioc.cs.vsle.editor.ProgramRunner;
 import ee.ioc.cs.vsle.editor.RuntimeProperties;
+import ee.ioc.cs.vsle.parser.ParsedSpecificationContext;
 import ee.ioc.cs.vsle.util.FileFuncs;
 import ee.ioc.cs.vsle.util.FileFuncs.FileSystemStorage;
 import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
@@ -43,7 +42,7 @@ public class Synthesizer {
      * @throws SpecParseException 
     */
     public static void makeProgram( String progText, ClassList classes, String mainClassName, String path, GenStorage storage ) throws SpecParseException {
-        generateSubclasses( classes, path, storage );
+        generateSubclasses( mainClassName, classes, path, storage );
         storage.writeFile( mainClassName + ".java", progText );
     }
 
@@ -51,29 +50,24 @@ public class Synthesizer {
      * and planner and	returning compilable java source.
      * Creating a problem means parsing the specification(s recursively), unfolding it, and making
      * a flat representation of the specification (essentially a graph). Planning is run on this graph.
-     * @param fileString -
+     * @param context -
      * @param computeAll -
-     * @param classList -
-     * @param mainClassName -
      * @return String -
      * @throws SpecParseException -
      */
-    public static String makeProgramText( String fileString, boolean computeAll, ClassList classList,
-                                   String mainClassName, ProgramRunner runner ) throws SpecParseException {
+    public static String makeProgramText( ParsedSpecificationContext context, boolean computeAll, ProgramRunner runner ) throws SpecParseException {
 
-        Problem problem = null;
-        // call the packageParser to create a problem from the specification
-
-        problem = new ProblemCreator(classList).makeProblem();
+        // call the Problem Creator to create a problem from the specification
+        Problem problem = new ProblemCreator(context.classList, context.mainClassName).makeProblem();
             
         // run the planner on the obtained problem
         EvaluationAlgorithm algorithm = PlannerFactory.getInstance().getCurrentPlanner().invokePlaning( problem, computeAll );
         
         if( RuntimeProperties.isShowAlgorithm() ) {
-        	AlgorithmVisualizer.getInstance().addNewTab( mainClassName, algorithm );
+        	AlgorithmVisualizer.getInstance().addNewTab( context.mainClassName, algorithm );
         }
         
-        CodeGenerator cg = new CodeGenerator( algorithm, problem, mainClassName );
+        CodeGenerator cg = new CodeGenerator( algorithm, problem, context.mainClassName );
         String algorithmCode = cg.generate();
 
         if (runner != null) {
@@ -84,7 +78,7 @@ public class Synthesizer {
         StringBuilder prog = new StringBuilder();
         
         // start building the main source file.
-        AnnotatedClass ac = classList.getType( TYPE_THIS );
+        AnnotatedClass ac = context.classList.getType( context.mainClassName );
 
         // check all the fields and make declarations accordingly
         for ( ClassField field : ac.getClassFields() ) {
@@ -105,19 +99,20 @@ public class Synthesizer {
         
         prog.append( CodeGenerator.OT_TAB ).append( "public static void main( String[] args ) {\n" )
                 .append( CodeGenerator.OT_TAB ).append( CodeGenerator.OT_TAB )
-                .append( "new " ).append( mainClassName ).append( "().compute();\n" )
+                .append( "new " ).append( context.mainClassName ).append( "().compute();\n" )
                 .append( CodeGenerator.OT_TAB ).append( "}\n" );
         
         Pattern pattern;
         Matcher matcher;
 
         pattern = Pattern.compile("(?:public[ \t\n]+)?class[ \t\n]+" 
-        		+ mainClassName + "(?:[ \t\n]+extends[ \t\n]+([A-Za-z]\\w*))?");
-        
+        		+ context.mainClassName + "(?:[ \t\n]+extends[ \t\n]+([A-Za-z]\\w*))?");
+
+        String fileString = context.fullRootSpec;
         matcher = pattern.matcher( fileString );
 
         if ( matcher.find() ) {
-            fileString = matcher.replaceAll("public class " + mainClassName
+            fileString = matcher.replaceAll("public class " + context.mainClassName
             		+ (matcher.start(1) < matcher.end(1) 
             				? " extends " + matcher.group(1) : "")
             		+ " implements " + CodeGenerator.GENERATED_INTERFACE_NAME);
@@ -140,10 +135,11 @@ public class Synthesizer {
 
     /**
      Generates compilable java classes from the annotated classes that have been used in the specification.
-     @param classes List of classes obtained from the ee.ioc.cs.editor.synthesize.SpecParser
-     * @throws SpecParseException 
+     @throws SpecParseException
+      * @param mainClassName
+     * @param classes List of classes obtained from the ee.ioc.cs.editor.synthesize.SpecParser
      */
-    private static void generateSubclasses( ClassList classes, String path, GenStorage storage ) throws SpecParseException {
+    private static void generateSubclasses(String mainClassName, ClassList classes, String path, GenStorage storage) throws SpecParseException {
 
     	if( classes == null ) {
     		throw new SpecParseException( "Empty Class list!!!" );
@@ -156,7 +152,7 @@ public class Synthesizer {
         // for each class generate new one used in synthesis
         for ( AnnotatedClass pClass : classes ) {
             
-            if ( !pClass.getName().equals( TYPE_THIS ) ) {
+            if ( !pClass.getName().equals( mainClassName ) ) {
                 
                 fileString = FileFuncs.getFileContents(
                         new File(path, pClass.getName() + ".java"));
@@ -228,7 +224,7 @@ public class Synthesizer {
                 contextClassName ).getFields();
         subtaskCR.addInputs( inputs, varsForSubtask );
         subtaskCR.addOutputs( outputs, varsForSubtask );
-        subtask = new ProblemCreator(classList).makeIndependentSubtask( subtaskCR );
+        subtask = new ProblemCreator(classList, null).makeIndependentSubtask( subtaskCR );
         //get problem graph
         Problem problemContext = subtask.getContext();
         //construct an algorithm
@@ -260,12 +256,11 @@ public class Synthesizer {
 
             String mainClassName = SpecParser.getClassName( file );
             
-            ClassList classList = SpecParser.parseSpecification(file, mainClassName, null, path);
-            String prog = makeProgramText( file, true, classList, mainClassName, null ); //changed to true
+            ClassList classList = new SpecParser(path).parseSpecification(file, mainClassName, null);
+            String prog = makeProgramText( new ParsedSpecificationContext(file, classList, mainClassName), true, null ); //changed to true
 
             String outputDir = RuntimeProperties.getGenFileDir();
-            makeProgram( prog, classList, mainClassName, path,
-                    new FileSystemStorage(outputDir));
+            makeProgram( prog, classList, mainClassName, path, new FileSystemStorage(outputDir));
         } catch ( UnknownVariableException uve ) {
             logger.error("Fatal error: variable " + uve.getMessage() + " not declared");
         } catch ( LineErrorException lee ) {

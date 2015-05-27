@@ -3,9 +3,13 @@ package ee.ioc.cs.vsle.vclass;
 import java.io.File;
 import java.util.ArrayList;
 
-import ee.ioc.cs.vsle.ccl.PackageClassLoader;
-import ee.ioc.cs.vsle.ccl.RunnerClassLoader;
-import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
+import ee.ioc.cs.vsle.ccl.*;
+import ee.ioc.cs.vsle.editor.Editor;
+import ee.ioc.cs.vsle.util.FileFuncs.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.*;
 
 /**
  * <p>Title: ee.ioc.cs.editor.vclass.VPackage</p>
@@ -16,6 +20,8 @@ import ee.ioc.cs.vsle.util.FileFuncs.GenStorage;
  * @version 1.0
  */
 public class VPackage implements ee.ioc.cs.vsle.api.Package {
+
+  private static final Logger logger = LoggerFactory.getLogger(VPackage.class);
 
     private String name;
     private String description;
@@ -112,17 +118,57 @@ public class VPackage implements ee.ioc.cs.vsle.api.Package {
 		}
 
 		@Override
-        public String getName() {
-			return name;
-		}
+    public String getName() {
+      return name;
+    }
 
-        public boolean hasPainters() {
-            return painters;
-        }
+  public boolean hasPainters() {
+    return painters;
+  }
 
-        public void setPainters(boolean painters) {
-            this.painters = painters;
+  public void initPainters() {
+    this.painters = true;
+    createPainterPrototypes();
+  }
+
+  private boolean createPainterPrototypes() {
+    boolean success = true;
+        /* TODO Will be replaced by more general daemon stuff */
+    PackageClassLoader pcl = null;
+
+    for ( PackageClass pclass : getClasses() ) {
+      if ( pclass.getPainterName() == null )
+        continue;
+
+      try {
+        if (pcl == null) {
+          pcl = getPackageClassLoader();
         }
+        Class<?> painterClass = pcl.loadClass(pclass.getPainterName());
+        pclass.setPainterPrototype((ClassPainter) painterClass.newInstance());
+      }
+      catch ( CompileException e ) {
+        success = false;
+        logger.error(null, e); // print compiler generated message
+      }
+      catch ( Exception e ) {
+        success = false;
+        logger.error(null, e);
+      }
+      finally {
+        if (pcl != null && pcl.hasErrors()) {
+          pcl.clearProblems();
+        }
+      }
+    }
+
+    if (!success) {
+      JOptionPane.showMessageDialog(Editor.getInstance(), "One or more errors occured. See the error log for details.", "Error",
+              JOptionPane.ERROR_MESSAGE);
+    }
+
+    return success;
+  }
 
         /**
          * Returns the next serial number for the visual class used for

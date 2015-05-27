@@ -2,15 +2,15 @@ specification TestSpec super Other{
 final int a="12",b=12;
 //vars
 	//Simple
-	int a;							//VALID
-	int a,b,c;						//VALID
-//	int a,b,;						//NOT VALID
-	int a=12;						//VALID
-	java.lang.Double a=12;			//VALID
-	int a=12,b,c;					//VALID
-	String str = "hello \"WORLD\"!";				//VALID
-	int arr = {1,2,3};				//VALID
-	int arr = {"q","w","e"};				//VALID
+	int a;							//VALID, ok
+	int a,b,c;						//VALID, ok
+//	int a,b,;						//NOT VALID, ok
+	int a=12;						//VALID, ok
+	java.lang.Double a=12;			//VALID, ok
+	int a=12,b,c;					//VALID, ok
+	String str = "hello \"WORLD\"!";//VALID, ok
+	int arr = {1,2,3};				//VALID, ok
+	int arr = {"q","w","e"};		//VALID
 	
 	//Struct
 //	SomeStruct a;					//VALID

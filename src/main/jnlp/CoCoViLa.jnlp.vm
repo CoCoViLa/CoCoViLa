@@ -5,10 +5,6 @@
         <vendor>Institute of Cybernetics</vendor>
         <description>CoCoViLa — Model-Based Software Development Platform</description>
         <homepage href="http://www.cs.ioc.ee/cocovila/"/>
-        <shortcut online="true">
-            <desktop/>
-            <menu submenu="CoCoViLa"/>
-        </shortcut>
         #if($offlineAllowed)
         <offline-allowed/>
         #end
@@ -18,7 +14,8 @@
         <all-permissions/>
     </security>
     #end
-    <resources>
+  <update check="always" policy="always"/>
+  <resources>
         <j2se version="$j2seVersion"/>
         $dependencies
     </resources>

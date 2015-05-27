@@ -316,6 +316,7 @@ public class Editor extends JFrame implements ChangeListener {
         menu.add( submenuRecent );
         final JMenu menuScheme = new JMenu( Menu.MENU_SCHEME );
         menuScheme.setMnemonic( KeyEvent.VK_S );
+        makeSchemeMenu( menuScheme );
 
         menuScheme.getPopupMenu().addPopupMenuListener( new PopupMenuListener() {
 
@@ -665,19 +666,6 @@ public class Editor extends JFrame implements ChangeListener {
 
         logger.info( "Java Version: {}", version );
 
-        if ( version.compareTo( "1.6.0" ) < 0 ) {
-
-            String message = "CoCoViLa requires at least Java 1.6.0 to run!";
-            logger.error( message );
-            //for those who start the program w/o the console --
-            //try to show this error message in a dialog, not just die silently
-            try {
-                JOptionPane.showMessageDialog( null, message, "Error", JOptionPane.ERROR_MESSAGE );
-            } finally {
-                System.exit( 1 );
-            }
-        }
-
         String directory = RuntimeProperties.getWorkingDirectory();
 
         logger.info( "Working directory: {}", directory );
@@ -686,8 +674,6 @@ public class Editor extends JFrame implements ChangeListener {
 
         Look.getInstance().initDefaultLnF();
 
-        extractPackages();
-        
         final Editor window = new Editor();
         s_instance = window;
         
@@ -757,22 +743,6 @@ public class Editor extends JFrame implements ChangeListener {
                 RuntimeProperties.setFromWebstart();
                 break;
             }
-        }
-    }
-    
-    public static void extractPackages()
-    {
-        //if apps was run for the first time from webstart
-        //ask user if he wants to unpack demo packages
-        if ( RuntimeProperties.isFromWebstart() && RuntimeProperties.isCleanInstall() ) {
-            int res = JOptionPane.showConfirmDialog( null,
-                    "Extract demo packages into \""
-                    + ( RuntimeProperties.getWorkingDirectory()
-                            + "packages" + File.separator ) + "\" ?",
-                            "", JOptionPane.YES_NO_OPTION );
-
-            if ( res == JOptionPane.YES_OPTION )
-                SystemUtils.unpackPackages();
         }
     }
 

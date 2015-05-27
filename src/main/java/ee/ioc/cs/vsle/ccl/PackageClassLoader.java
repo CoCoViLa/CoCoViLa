@@ -5,6 +5,7 @@ import java.net.*;
 import java.util.*;
 import java.util.jar.*;
 
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jdt.internal.compiler.batch.CompilationUnit;
 import org.eclipse.jdt.internal.compiler.batch.FileSystem;
 import org.eclipse.jdt.internal.compiler.env.INameEnvironment;
@@ -163,7 +164,7 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
      */
     private static URL getLocalJarURL(URL url, Collection<String> systemLibs) {
         
-        String urlStrJar = SystemUtils.getJarPath( url );
+        String urlStrJar = getJarPath( url );
         
         //ignore if it is a system lib
         if(systemLibs.contains( urlStrJar ))
@@ -192,7 +193,7 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
             }
             tempJar = File.createTempFile(strippedName, ".jar");
             tempJar.deleteOnExit();
-            SystemUtils.copyToFile( inputStreamJar, tempJar );
+            FileUtils.copyInputStreamToFile(inputStreamJar, tempJar);
             return tempJar.toURI().toURL();
         } catch (Exception ioe) {
             ioe.printStackTrace();
@@ -205,6 +206,25 @@ public class PackageClassLoader extends CCL implements INameEnvironment {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns a path for a jar from a given url.
+     */
+    private static String getJarPath( URL url )
+    {
+        String urlString = url.getFile();
+
+        int idx;
+        if ((idx = urlString.indexOf( "!/" )) >= 0) {
+            urlString = urlString.substring(0, idx);
+        }
+
+        if (urlString.startsWith("file:")) {
+            return urlString.substring(5);
+        }
+
+        return urlString;
     }
 
     @Override

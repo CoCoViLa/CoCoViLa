@@ -1,18 +1,19 @@
 package ee.ioc.cs.vsle.parser;
 
+import static ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.*;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_ANY;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_DOUBLE;
 import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_INT;
-import static ee.ioc.cs.vsle.util.TypeUtil.TYPE_THIS;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import ee.ioc.cs.vsle.synthesize.*;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.atn.ATNConfigSet;
+import org.antlr.v4.runtime.dfa.DFA;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
 
-import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.equations.EquationSolver;
 import ee.ioc.cs.vsle.equations.EquationSolver.Relation;
 import ee.ioc.cs.vsle.parser.SpecificationLoader.SpecificationNotFoundException;
@@ -21,12 +22,11 @@ import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasDeclarat
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasDefinitionContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AliasStructureContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.AxiomContext;
-import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ClassTypeContext;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ClassOrInterfaceTypeContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ConstantVariableContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.EquationContext;
-import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.ExceptionListContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.GoalContext;
-import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaseContext;
+import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.MetaInterfaceContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.SpecificationVariableContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.SpecificationVariableDeclaratorContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.StaticVariableContext;
@@ -40,15 +40,6 @@ import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.VariableDecla
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.VariableDeclaratorInitializerContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.VariableIdentifierContext;
 import ee.ioc.cs.vsle.parser.generated.SpecificationLanguageParser.VariableInitializerContext;
-import ee.ioc.cs.vsle.synthesize.AliasException;
-import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
-import ee.ioc.cs.vsle.synthesize.ClassRelation;
-import ee.ioc.cs.vsle.synthesize.CodeGenerator;
-import ee.ioc.cs.vsle.synthesize.EquationException;
-import ee.ioc.cs.vsle.synthesize.RelType;
-import ee.ioc.cs.vsle.synthesize.SpecParseException;
-import ee.ioc.cs.vsle.synthesize.SubtaskClassRelation;
-import ee.ioc.cs.vsle.synthesize.UnknownVariableException;
 import ee.ioc.cs.vsle.table.Table;
 import ee.ioc.cs.vsle.util.TypeToken;
 import ee.ioc.cs.vsle.util.TypeUtil;
@@ -58,30 +49,31 @@ import ee.ioc.cs.vsle.vclass.ClassField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseListener {
+public class SpecificationLanguageListenerImpl extends SpecificationLanguageBaseListener implements ANTLRErrorListener {
 
-  private static final Logger logger = LoggerFactory.getLogger(SpecificatioLanguageListenerImpl.class);
+  private static final Logger logger = LoggerFactory.getLogger(SpecificationLanguageListenerImpl.class);
 
 	private final SpecificationLoader specificationLoader;
 	private AnnotatedClass annotatedClass;
+  private List<StatementAnnotation> currentStatementAnnotations;
 	private ClassFieldDeclarator classFieldDeclarator;
 	private String specificationName;
 	private Alias currentAlias;
-	
-	public SpecificatioLanguageListenerImpl(SpecificationLoader specificationLoader, String specificationName) {
+
+	public SpecificationLanguageListenerImpl(SpecificationLoader specificationLoader, String specificationName) {
 		this.specificationLoader = specificationLoader;
 		this.specificationName = specificationName;
 	}
 
 	@Override
-	public void enterMetaInterfase(MetaInterfaseContext ctx) {
+	public void enterMetaInterface(MetaInterfaceContext ctx) {
 		if (specificationName == null) {
-			specificationName = ctx.IDENTIFIER().getText();
+			specificationName = ctx.Identifier().getText();
 		}
 		annotatedClass = new AnnotatedClass(specificationName);
 		classFieldDeclarator = new ClassFieldDeclarator();
         ClassField specObjectName = new ClassField( CodeGenerator.SPEC_OBJECT_NAME, "String" );
-        annotatedClass.addField( specObjectName );
+        annotatedClass.addField(specObjectName);
 	}
 	
 	@Override
@@ -90,7 +82,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 		List<VariableIdentifierContext> iputVariableContextList = ctx.inputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.inputVariables.variableIdentifier();
         
 		ClassRelation classRelation = new ClassRelation( RelType.TYPE_UNIMPLEMENTED, ctx.getText() );
-        
+    classRelation.setAnnotations(currentStatementAnnotations);
         for (VariableIdentifierContext outputVariableContext : outputVariableContextList) {
         	classRelation.addOutput( outputVariableContext.getText(), annotatedClass.getFields() );
 		}
@@ -103,7 +95,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
 	@Override
 	public void enterSuperMetaInterface(SuperMetaInterfaceContext ctx) {
-		for (ClassTypeContext classTypeContext : ctx.classType()) {
+		for (ClassOrInterfaceTypeContext classTypeContext : ctx.classOrInterfaceType()) {
 			String superSpecificationName = classTypeContext.getText();
 				
 			AnnotatedClass superClass = specificationLoader.getSpecification(superSpecificationName);
@@ -117,7 +109,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
 	@Override
 	public void enterVariableDeclaration(VariableDeclarationContext ctx) {
-		classFieldDeclarator.setType(ctx.type().getText());
+		classFieldDeclarator.setType(ctx.type());
 	}
 	
 	@Override
@@ -129,42 +121,52 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	public void enterConstantVariable(ConstantVariableContext ctx) {
 		classFieldDeclarator.setConstant(true);
 	}
-	
-	public void variableDeclarator(String name, String value, boolean solveEquation) {
-		if(classFieldDeclarator.isConstant){
-			classFieldDeclarator.addClassField(name, value);
-			if(solveEquation)
-				solveEquation(name.concat("=").concat(value));
-		}else{
-			classFieldDeclarator.addClassField(name);
-			if(solveEquation)
-				solveEquation(name.concat("=").concat(value));
-			else
-				assignVariable(name, value);
-		}
-	}
-	
+
+  public void variableDeclarator(String name, String value, boolean solveEquation) {
+    if (classFieldDeclarator.isConstant){
+      classFieldDeclarator.addClassField(name, value);
+    }
+    else {
+      classFieldDeclarator.addClassField(name);
+      if (solveEquation) {
+        solveEquation(name.concat("=").concat(value));
+      }
+      else {
+        assignVariable(name, value);
+      }
+    }
+  }
+
 	@Override
 	public void enterVariableDeclaratorAssigner(VariableDeclaratorAssignerContext ctx) {
-		variableDeclarator(ctx.IDENTIFIER().getText(), ctx.variableAssigner().getText(), false);
+		VariableAssignerContext variableAssignerContext = ctx.variableAssigner();
+		CreatorContext creatorContext = variableAssignerContext.creator();
+		String value;
+		if(creatorContext != null) {
+			value = "new " + creatorContext.getText();
+		}
+		else {
+			value = variableAssignerContext.getText();
+		}
+		variableDeclarator(ctx.Identifier().getText(), value, false);
 	}
 	
 	@Override
 	public void enterSpecificationVariable(SpecificationVariableContext ctx) {
-		String name = ctx.IDENTIFIER().getText();
+		String name = ctx.Identifier().getText();
 		classFieldDeclarator.addClassField(name);
 	}
 	
 	@Override
 	public void enterSpecificationVariableDeclarator(SpecificationVariableDeclaratorContext ctx) {
-		String fullVariableName = classFieldDeclarator.getName().concat(".").concat(ctx.IDENTIFIER().getText());
+		String fullVariableName = classFieldDeclarator.getName().concat(".").concat(ctx.Identifier().getText());
 		String equation = fullVariableName.concat("=").concat(ctx.expression().getText());
 		solveEquation(equation);
 	}
 	
 	@Override
 	public void enterVariableDeclaratorInitializer(VariableDeclaratorInitializerContext ctx) {
-		String name = ctx.IDENTIFIER().getText();
+		String name = ctx.Identifier().getText();
 		VariableInitializerContext variableInitializerContext = ctx.variableInitializer();
 		if(variableInitializerContext==null){
 			classFieldDeclarator.addClassField(name);
@@ -175,17 +177,23 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	
 	@Override
 	public void enterVariableAssignment(VariableAssignmentContext ctx) {
-		assignVariable(ctx.variableIdentifier().getText(), ctx.variableAssigner().getText());
+		assignVariable(ctx.variableIdentifier().getText(), ctx.variableAssigner());
 	}
-	
-	protected void assignVariable(String variableName, String variableValue){
-		String method = variableName.concat("=").concat(variableValue);
-        ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, method);
-        classRelation.addOutput( variableName, annotatedClass.getFields() );
-        classRelation.setMethod( method );
-        //TODO: IMPLEMENT ANY
-        annotatedClass.addClassRelation( classRelation );
+
+	protected void assignVariable(String variableName, VariableAssignerContext varValueCtx){
+		CreatorContext creatorContext = varValueCtx.creator();
+		assignVariable(variableName, creatorContext != null ? "new " + creatorContext.getText() : varValueCtx.getText() );
 	}
+
+  protected void assignVariable(String variableName, String variableValue){
+    String method = variableName.concat(" = ").concat(variableValue);
+    ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, method);
+    classRelation.setAnnotations(currentStatementAnnotations);
+    classRelation.addOutput( variableName, annotatedClass.getFields() );
+    classRelation.setMethod( method );
+    //TODO: IMPLEMENT ANY
+    annotatedClass.addClassRelation( classRelation );
+  }
 	
 	@Override
 	public void exitVariableDeclaration(VariableDeclarationContext ctx) {
@@ -196,23 +204,21 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 	public void enterEquation(EquationContext ctx) {
 		solveEquation(ctx.getText());
 	}
-	
-	@Override
-	public void enterAxiom(AxiomContext ctx) {
-		SubtaskListContext subtaskListContext = ctx.subtaskList();
-		List<SubtaskContext> subtaskContextList = subtaskListContext == null ? Collections.<SubtaskContext>emptyList() : subtaskListContext.subtask();
-		List<VariableIdentifierContext> outputVariableContextList = ctx.outputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.outputVariables.variableIdentifier();
-		List<VariableIdentifierContext> iputVariableContextList = ctx.inputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.inputVariables.variableIdentifier();
-		String method = ctx.method.getText();
+
+  @Override
+  public void enterAxiom(AxiomContext ctx) {
+    SubtaskListContext subtaskListContext = ctx.subtaskList();
+    List<SubtaskContext> subtaskContextList = subtaskListContext == null ? Collections.<SubtaskContext>emptyList() : subtaskListContext.subtask();
+    List<VariableIdentifierContext> outputVariableContextList = ctx.outputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.outputVariables.variableIdentifier();
+    List<VariableIdentifierContext> iputVariableContextList = ctx.inputVariables == null ? Collections.<VariableIdentifierContext>emptyList() : ctx.inputVariables.variableIdentifier();
 
 //        if ( statement.getOutputs().length > 0 ) {
 //            if ( statement.getOutputs()[ 0 ].indexOf( "*" ) >= 0 ) {
 //                getWildCards( classList, statement.getOutputs()[ 0 ] );
 //            }
 //        }
-		
-        ClassRelation classRelation = new ClassRelation( RelType.TYPE_JAVAMETHOD, ctx.getText());
-
+    ClassRelation classRelation = new ClassRelation( RelType.TYPE_JAVAMETHOD, ctx.getText());
+    classRelation.setAnnotations(currentStatementAnnotations);
         
 //TODO: handle this in lexer
 //        if ( statement.getOutputs().length == 0 ) {
@@ -220,80 +226,93 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 //                    + className + ".\nAn axiom can not have an empty output." );
 //        }
 
-        for (VariableIdentifierContext oututVariableContext : outputVariableContextList) {
-        	classRelation.addOutput(oututVariableContext.getText(), annotatedClass.getFields() );
-		}
+    for (VariableIdentifierContext oututVariableContext : outputVariableContextList) {
+      classRelation.addOutput(oututVariableContext.getText(), annotatedClass.getFields() );
+    }
 
-		classRelation.setMethod(method);
+    final AxiomRealizationContext axiomRealizationContext = ctx.axiomRealization();
+    if (axiomRealizationContext instanceof MethodContext) {
+      String method = ((MethodContext)axiomRealizationContext).Identifier().getText();
+      classRelation.setMethod(method);
+    }
+    else if (axiomRealizationContext instanceof ExpertTableContext) {
+      classRelation.setMethod(Table.TABLE_KEYWORD);
+      classRelation.getExceptions().clear();
+      classRelation.getExceptions().add( new ClassField( "java.lang.Exception", "exception" ) );
+    }
+    else if (axiomRealizationContext instanceof LambdaContext) {
+      throw new IllegalStateException("Lambdas not implemented yet");
+    }
 
-        if( Table.TABLE_KEYWORD.equals( classRelation.getMethod() ) ) {
-            classRelation.getExceptions().clear();
-            classRelation.getExceptions().add( new ClassField( "java.lang.Exception", "exception" ) );
-        }
+    for (VariableIdentifierContext inputVariableContext : iputVariableContextList) {
+      String variableName = checkAliasLength(inputVariableContext.getText());
+      classRelation.addInput(variableName, annotatedClass.getFields() );
+    }
 
-        for (VariableIdentifierContext inputVariableContext : iputVariableContextList) {
-        	String variableName = checkAliasLength(inputVariableContext.getText());
-        	classRelation.addInput(variableName, annotatedClass.getFields() );
-		}
-        
-        for (SubtaskContext subtaskContext : subtaskContextList) {
-        	String contextName = subtaskContext.context == null ? null : subtaskContext.context.getText();
-        	List<VariableIdentifierContext> subtaskInputVariableContextList = subtaskContext.inputVariables.variableIdentifier();
-        	List<VariableIdentifierContext> subtaskOutputVariableContextList = subtaskContext.outputVariables.variableIdentifier();
-        	
-        	Collection<ClassField> varsForSubtask = annotatedClass.getFields();
-        	SubtaskClassRelation subtask;
-        	
-        	// this denotes independant subtask,
-        	// have to make sure that this class has
-        	// already been parsed
-        	if ( contextName != null ) {
-        		AnnotatedClass context = specificationLoader.getSpecification(contextName);
-        		varsForSubtask = context.getFields();
-        		
-        		ClassField contextCF = new ClassField( "_" + contextName.toLowerCase(), contextName, true );
-        		
-        		subtask = SubtaskClassRelation.createIndependentSubtask( subtaskContext.getText(), contextCF );
-        	} else {
-        		subtask = SubtaskClassRelation.createDependentSubtask( subtaskContext.getText() );
-        	}
-        	
-        	for (VariableIdentifierContext subtaskOutputVariable : subtaskOutputVariableContextList) {
-        		subtask.addOutput( subtaskOutputVariable.getText(), varsForSubtask );
-			}
-        	for (VariableIdentifierContext subtaskInputVariableContext : subtaskInputVariableContextList) {
-        		subtask.addInput(subtaskInputVariableContext.getText(), varsForSubtask );
-			}
-        	
-        	classRelation.addSubtask( subtask );
-		}
-        
-        if (!subtaskContextList.isEmpty())
-        	classRelation.setType( RelType.TYPE_METHOD_WITH_SUBTASK );
-          logger.debug( classRelation.toString() );
+    for (SubtaskContext subtaskContext : subtaskContextList) {
+      String contextName = subtaskContext.context == null ? null : subtaskContext.context.getText();
+      List<VariableIdentifierContext> subtaskInputVariableContextList =
+              subtaskContext.inputVariables != null
+                      ? subtaskContext.inputVariables.variableIdentifier()
+                      : Collections.<VariableIdentifierContext>emptyList();
+      List<VariableIdentifierContext> subtaskOutputVariableContextList = subtaskContext.outputVariables.variableIdentifier();
 
-        if(ctx.exceptionList() != null) {
-          for(ClassTypeContext ct : ctx.exceptionList().classType()) {
-            classRelation.addException(ct.getText());
-          }
-        }
-        
-        annotatedClass.addClassRelation( classRelation );
-	}
-	
+      Collection<ClassField> varsForSubtask = annotatedClass.getFields();
+      SubtaskClassRelation subtask;
+
+      // this denotes independant subtask,
+      // have to make sure that this class has
+      // already been parsed
+      if ( contextName != null ) {
+        AnnotatedClass context = specificationLoader.getSpecification(contextName);
+        varsForSubtask = context.getFields();
+
+        ClassField contextCF = new ClassField( "_" + contextName.toLowerCase(), contextName, true );
+
+        subtask = SubtaskClassRelation.createIndependentSubtask( subtaskContext.getText(), contextCF );
+      } else {
+        subtask = SubtaskClassRelation.createDependentSubtask( subtaskContext.getText() );
+      }
+
+      for (VariableIdentifierContext subtaskOutputVariable : subtaskOutputVariableContextList) {
+        subtask.addOutput( subtaskOutputVariable.getText(), varsForSubtask );
+      }
+      for (VariableIdentifierContext subtaskInputVariableContext : subtaskInputVariableContextList) {
+        subtask.addInput(subtaskInputVariableContext.getText(), varsForSubtask );
+      }
+
+      classRelation.addSubtask( subtask );
+    }
+
+    if (!subtaskContextList.isEmpty())
+      classRelation.setType( RelType.TYPE_METHOD_WITH_SUBTASK );
+    logger.debug( classRelation.toString() );
+
+    if(ctx.exceptionList() != null) {
+      for(ClassOrInterfaceTypeContext ct : ctx.exceptionList().classOrInterfaceType()) {
+        classRelation.addException(ct.getText());
+      }
+    }
+
+    annotatedClass.addClassRelation( classRelation );
+  }
+
   @Override
-	public void enterAliasDeclaration(AliasDeclarationContext ctx) {
-		String aliasName = ctx.IDENTIFIER().getText();
-		TypeContext typeContext = ctx.type();
-		String aliasType = typeContext != null ? typeContext.getText() : null;
+  public void enterAliasDeclaration(AliasDeclarationContext ctx) {
+    String aliasName = ctx.Identifier().getText();
+    TypeContext typeContext = ctx.type();
+    String aliasType = typeContext != null ? typeContext.getText() : null;
 
-		if(annotatedClass.hasField(aliasType))
-            throw new SpecParseException( "Variable " + aliasName + " declared more than once in class "
-            		+ annotatedClass.getName() + ", line: " + ctx.getText() );
-		
-		currentAlias = new Alias(aliasName, aliasType);
-		annotatedClass.addField(currentAlias);
-	}
+    currentAlias = new Alias(aliasName, aliasType);
+
+    try {
+      annotatedClass.addField(currentAlias);
+    }
+    catch(SpecParseException e) {
+      e.setLine(ctx.getText());
+      throw e;
+    }
+  }
 	
 	@Override
 	public void enterAliasDefinition(AliasDefinitionContext ctx) {
@@ -302,7 +321,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 		boolean isLocalAlias = true;
 		
 		if(aliasClassField == null){//Go deeper 
-			List<TerminalNode> identifierList = ctx.variableIdentifier().IDENTIFIER();
+			List<TerminalNode> identifierList = ctx.variableIdentifier().Identifier();
 			int lastIndex = identifierList.size() - 1;
 			int i = 0;
 			AnnotatedClass parentClass = annotatedClass;
@@ -325,6 +344,9 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 			throw new UnknownVariableException(aliasFullName, ctx.getText());
 		if(aliasClassField instanceof Alias){
 			Alias alias = (Alias) aliasClassField;
+			if ( alias.isInitialized() ) {
+				throw new SpecParseException( "Alias " + alias.getName() + " has already been initialized and cannot be overriden, line: " + ctx.getText() );
+			}
 			if(!isLocalAlias){
 				alias = new Alias( aliasFullName, alias.getVarType() );
 				annotatedClass.addField(alias);
@@ -334,43 +356,49 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 			throw new AliasException("Variable '".concat(aliasFullName).concat("' is not an alias!"));
 	}
 
-	@Override
-	public void enterAliasStructure(AliasStructureContext ctx) {
-		String lineNext = ctx.getParent().getText();
-		String[] vars = new String[1];
-		if(ctx.variableAlias != null){
-			int i = 0;
-			List<VariableIdentifierContext> variableIdentifierList = ctx.variableAlias.variableIdentifier();
-			vars = new String[variableIdentifierList.size()];
-			for(VariableIdentifierContext variableIdentifierContext : variableIdentifierList){
-				vars[i] = variableIdentifierContext.getText();
-				i++;
-			}
-		}else{
-			vars[0] = ctx.wildcardAliasName.getText();
-		}
-        
-        currentAlias.addAll( vars, annotatedClass.getFields(), specificationLoader);
+  @Override
+  public void enterAliasStructure(AliasStructureContext ctx) {
+    String lineNext = ctx.getParent().getText();
+    String[] vars;
+    if (ctx.variableAlias != null){
+      int i = 0;
+      List<VariableIdentifierContext> variableIdentifierList = ctx.variableAlias.variableIdentifier();
+      vars = new String[variableIdentifierList.size()];
+      for (VariableIdentifierContext variableIdentifierContext : variableIdentifierList){
+        vars[i] = variableIdentifierContext.getText();
+        i++;
+      }
+    }
+    else if (ctx.wildcardAliasName != null) {
+      vars = new String[1];
+      vars[0] = ctx.wildcardAliasName.getText();
+    }
+    else {
+      vars = new String[0];
+    }
 
-        ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS, lineNext );
+    currentAlias.addAll( vars, annotatedClass.getFields(), specificationLoader);
 
-        classRelation.addInputs( vars, annotatedClass.getFields() );
-        classRelation.setMethod( TypeUtil.TYPE_ALIAS );
-        classRelation.addOutput( currentAlias.getName(), annotatedClass.getFields() );
-        annotatedClass.addClassRelation( classRelation );
+    ClassRelation classRelation = new ClassRelation( RelType.TYPE_ALIAS, lineNext );
+    classRelation.setAnnotations(currentStatementAnnotations);
+    classRelation.addInputs( vars, annotatedClass.getFields() );
+    classRelation.setMethod( TypeUtil.TYPE_ALIAS );
+    classRelation.addOutput( currentAlias.getName(), annotatedClass.getFields() );
+    annotatedClass.addClassRelation( classRelation );
 
-        logger.debug( classRelation.toString() );
+    logger.debug( classRelation.toString() );
 
-        if ( !currentAlias.isWildcard() ) {
-            classRelation = new ClassRelation( RelType.TYPE_ALIAS, lineNext );
-            classRelation.addOutputs( vars, annotatedClass.getFields() );
-            classRelation.setMethod( TypeUtil.TYPE_ALIAS );
-            classRelation.addInput( currentAlias.getName(), annotatedClass.getFields() );
-            annotatedClass.addClassRelation( classRelation );
-            logger.debug( classRelation.toString() );
-        }
+    if ( !currentAlias.isWildcard() ) {
+      classRelation = new ClassRelation( RelType.TYPE_ALIAS, lineNext );
+      classRelation.setAnnotations(currentStatementAnnotations);
+      classRelation.addOutputs( vars, annotatedClass.getFields() );
+      classRelation.setMethod( TypeUtil.TYPE_ALIAS );
+      classRelation.addInput( currentAlias.getName(), annotatedClass.getFields() );
+      annotatedClass.addClassRelation( classRelation );
+      logger.debug( classRelation.toString() );
+    }
 
-        currentAlias.setInitialized( true );
+    currentAlias.setInitialized( true );
 	}
 	
 	@Override
@@ -436,8 +464,41 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 //                 }
 //         }
 	}
-	
-	protected void solveEquation(String equation) throws EquationException, UnknownVariableException{
+
+  @Override
+  public void enterAnnotatedStatement(@NotNull AnnotatedStatementContext asc) {
+    final List<AnnotationContext> annotationContextList = asc.annotation();
+    if (annotationContextList != null) {
+      currentStatementAnnotations = new ArrayList<StatementAnnotation>(annotationContextList.size());
+      for (AnnotationContext ctx : annotationContextList) {
+        String name = ctx.annotationName().getText();
+        final StatementAnnotation annotation = new StatementAnnotation(name);
+        currentStatementAnnotations.add(annotation);
+        final ElementValueContext elementValueContext = ctx.elementValue();
+        if (elementValueContext != null) {
+          final String value = elementValueContext.getText();
+          annotation.putValue(value);
+        }
+        final ElementValuePairsContext elementValuePairsContext = ctx.elementValuePairs();
+        if (elementValuePairsContext != null) {
+          final List<ElementValuePairContext> elementValuePairContexts = elementValuePairsContext.elementValuePair();
+          for (ElementValuePairContext pairContext : elementValuePairContexts) {
+            final String id = pairContext.Identifier().getText();
+            final String value = pairContext.elementValue().getText();
+            annotation.putValue(id, value);
+          }
+        }
+      }
+    }
+  }
+
+
+  @Override
+  public void exitAnnotatedStatement(@NotNull AnnotatedStatementContext ctx) {
+    currentStatementAnnotations = null;
+  }
+
+  protected void solveEquation(String equation) throws EquationException, UnknownVariableException{
         EquationSolver solver = new EquationSolver();
         solver.solve( equation );
         next: for ( Relation rel : solver.getRelations() ) {
@@ -464,7 +525,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
             }
 
             ClassRelation classRelation = new ClassRelation( RelType.TYPE_EQUATION, equation );
-
+            classRelation.setAnnotations(currentStatementAnnotations);
             classRelation.addOutput( out, annotatedClass.getFields() );
 
             // checkAliasLength( inputs, annClass.getFields(), className );
@@ -512,6 +573,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
                 if(!alias.isWildcard() && alias.isInitialized() ) {
                     String meth = aliasLengthName + " = " + length;
                     ClassRelation cr = new ClassRelation( RelType.TYPE_EQUATION, meth );
+                    cr.setAnnotations(currentStatementAnnotations);
                     cr.addOutput( aliasLengthName, annotatedClass.getFields() );
                     cr.setMethod( meth );
                     annotatedClass.addClassRelation( cr );
@@ -589,6 +651,52 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 		return annotatedClass;
 	}
 
+	@Override
+	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine, String msg, RecognitionException e) {
+//			System.err.println("line " + line + ":" + charPositionInLine + " " + msg);
+//			String message = underlineError(recognizer, (Token) offendingSymbol, line, charPositionInLine);
+		String errorLine = underlineError(recognizer, (Token)offendingSymbol, line, charPositionInLine);
+		msg = errorLine.concat("\n").concat(msg);
+		SpecParseException specParseException = new SpecParseException(msg);
+		specParseException.setMetaClass(specificationName);
+		specParseException.setLine(Integer.toString(line));
+		throw specParseException;
+	}
+
+	protected String underlineError(Recognizer recognizer, Token offendingToken, int line, int charPositionInLine) {
+		StringBuilder sb = new StringBuilder("\n");
+		CommonTokenStream tokens = (CommonTokenStream) recognizer.getInputStream();
+		String input = tokens.getTokenSource().getInputStream().toString();
+		String[] lines = input.split("\n");
+		String errorLine = lines[line - 1];
+		sb.append(errorLine);
+		sb.append("\n");
+		for (int i = 0; i < charPositionInLine; i++)
+			sb.append(" ");
+		int start = offendingToken.getStartIndex();
+		int stop = offendingToken.getStopIndex();
+		if (start >= 0 && stop >= 0) {
+			for (int i = start; i <= stop; i++)
+				sb.append("^");
+		}
+		return sb.toString();
+	}
+
+	@Override
+	public void reportAmbiguity(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, boolean exact, BitSet ambigAlts, @NotNull ATNConfigSet configs) {
+
+	}
+
+	@Override
+	public void reportAttemptingFullContext(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, BitSet conflictingAlts, @NotNull ATNConfigSet configs) {
+
+	}
+
+	@Override
+	public void reportContextSensitivity(@NotNull Parser recognizer, @NotNull DFA dfa, int startIndex, int stopIndex, int prediction, @NotNull ATNConfigSet configs) {
+
+	}
+
 	private class ClassFieldDeclarator{
 		private String type;
 		private String name;
@@ -604,7 +712,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 			classField.setStatic(isStatic);
 			annotatedClass.addField(classField);
 			//If object of currient type is on scheme
-            if ( isSpecificationClass() && TYPE_THIS.equals(annotatedClass.getName())  && specificationLoader.isSchemeObject(name)) {
+            if ( isSpecificationClass() && annotatedClass.getName().equals(specificationName)  && specificationLoader.isSchemeObject(name)) {
                 String s = name + "." + CodeGenerator.SPEC_OBJECT_NAME;
                 String meth = s + " = " + "\"" + name + "\"";
 
@@ -623,7 +731,7 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 			classField.setSchemeObject(isSpecificationClass());
 			annotatedClass.addField(classField);
 		}
-		
+
 		public void cleanUp() {
 			type = null;
 			classFieldAnnotatedClass = null;
@@ -635,10 +743,19 @@ public class SpecificatioLanguageListenerImpl extends SpecificationLanguageBaseL
 			return type;
 		}
 
-		public void setType(String type) {
+		public void setType(TypeContext typeCtx) {
+			PrimitiveTypeContext primitiveTypeContext = typeCtx.primitiveType();
+			if(primitiveTypeContext != null) {
+				//need to take outer context text to capture array braces
+				this.type = typeCtx.getText();
+				return;
+			}
+
+			String type = typeCtx.getText();
 			try{
 				classFieldAnnotatedClass = specificationLoader.getSpecification(type);
-			}catch(SpecificationNotFoundException e){
+			}
+			catch(SpecificationNotFoundException e) {
 				//TODO: check if it is not java class and throw exception if it is so.
 			}
 			this.type = type;
