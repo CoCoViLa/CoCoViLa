@@ -583,8 +583,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 			 al = new ActionListener() {
 			      public void actionPerformed(ActionEvent ae) {
-			        JButton btn = (JButton) ae.getSource();
-			        String s1 = btn.getActionCommand(); // for test				       
+			     //   JButton btn = (JButton) ae.getSource();		       
 			        closeSchemeTab(canvas);			       
 			      }
 			    };			 
@@ -1544,7 +1543,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			   new PackageXmlProcessor( packageFile ).addPackageClass( pc );			 
 			   
 			   /* clear */
-			   clearShapesAfterSave(selectedObjects, cg);
+			   clearShapesAfterSave(selectedObjects);
 		  }
   
 	  }
@@ -1582,6 +1581,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			  PackageClass pc = new PackageClass(classObject.getClassName());
 
 			  ClassGraphics cg = formatShapesForSave(selectedObjects, pc);
+			  
+			  if(cg == null){ // was cancelled by user
+				  clearShapesAfterSave(selectedObjects);
+				  return;
+			  }
 
 			  ArrayList<ClassField> fields = new ArrayList<ClassField>();
 			  
@@ -1677,7 +1681,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			   }			   			  
 
 			   /* clear */
-			   clearShapesAfterSave(selectedObjects, cg);
+			   clearShapesAfterSave(selectedObjects);
 			   
 		  } else {
 			  JOptionPane.showMessageDialog( canv, "Nothing to export!" );
@@ -1803,7 +1807,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 						   	logger.debug("CONFIRM test: inside ->{}", obj.isInside(bX, bY, bX+bW, bY + bH));
 						 }
 				    	 if (!obj.isInside(bX, bY, bX+bW, bY + bH)){  
-				    		 if((obj.getX() > bX && obj.getX()< bX+bW) || (obj.getY() > bY && obj.getY()< bY+bH)){}
+				    		 
+				    		 if(obj.getX() + obj.getWidth() > bX && obj.getX() < bX + bW 
+				    				 && obj.getY() + obj.getHeight() > bY && obj.getY() < bY + bH){/* o.x2 > b.x1 && o.x1 < b.x2*/}			    		 
+				    		 //else if((obj.getX() > bX && obj.getX()< bX+bW) || (obj.getY() > bY && obj.getY()< bY+bH)){}
 				    		 else 	{
 				    			
 					    		 needConfirm = true;
@@ -1857,10 +1864,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		   return cg;
 	  }
 	  
-	  private void clearShapesAfterSave(ArrayList<GObj>selectedObjects,  ClassGraphics cg){
+	  private void clearShapesAfterSave(ArrayList<GObj>selectedObjects){
 		  /* CLEAR
 		    */
-		   cg = new ClassGraphics();
+		   ClassGraphics cg = new ClassGraphics();
 		   GObj holder = null;
 		   for ( GObj obj : selectedObjects ) {
 			   for ( Shape s : obj.getShapes() ) {
