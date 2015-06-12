@@ -879,6 +879,9 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                 textEl.setAttribute( ATR_X, Integer.toString( text.getX() ) );
                 textEl.setAttribute( ATR_Y, Integer.toString( text.getY() ) );
                 textEl.setAttribute( ATR_FONTNAME, text.getFont().getName() );
+                //textEl.setAttribute( ATR_WIDTH, Integer.toString(text.getWidth()));
+                //textEl.setAttribute( ATR_HEIGHT, Integer.toString(text.getHeight()));
+                textEl.setAttribute( ATR_FIXED, Boolean.toString(text.isFixed()));
                 textEl.setAttribute( ATR_FONTSIZE, Integer.toString( text.getFont().getSize() ) );
                 textEl.setAttribute( ATR_FONTSTYLE, Integer.toString( text.getFont().getStyle() ) );
                 textEl.setAttribute( ATR_TRANSPARENCY, Integer.toString( text.getTransparency() ) );

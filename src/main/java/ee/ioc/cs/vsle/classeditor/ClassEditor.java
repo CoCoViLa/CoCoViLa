@@ -1300,6 +1300,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					  for (Shape shape : shapes) {
 						  if (shape instanceof Line )
 							  curCanvas.mListener.addShape(shape, classX+Math.min(shape.getX(), ((Line) shape).getEndX()), classY+shape.getY());
+						  if (shape instanceof Text ){
+							  curCanvas.mListener.addShape(curCanvas.mListener.setTextDimensions((Text) shape), classX, classY);
+							  
+						  }
 						  else curCanvas.mListener.addShape(shape, classX, classY);
 					  }
 				  }

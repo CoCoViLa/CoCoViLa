@@ -17,6 +17,7 @@ import java.awt.event.WindowFocusListener;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JColorChooser;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -59,7 +60,8 @@ public class TextDialog extends JDialog {
 	private JToggleButton bttnBold;
 	private JToggleButton bttnItalic;
 	private JButton bttnUnderline;
-
+	private JCheckBox bttnFixed;
+	
 	private CustomTextArea taText = new CustomTextArea();
 
 	private JPanel pnlMain = new JPanel();
@@ -195,6 +197,8 @@ public class TextDialog extends JDialog {
 		bttnUnderline.setMinimumSize(bttnUnderline.getPreferredSize());
 		bttnUnderline.setMaximumSize(bttnUnderline.getPreferredSize());
 
+		bttnFixed = new JCheckBox( "Fixed", false );       
+		
 		spinner.setPreferredSize(new Dimension(40, 22));
 		spinner.setMaximumSize(spinner.getPreferredSize());
 		spinner.setBorder(BorderFactory.createEmptyBorder());
@@ -221,6 +225,8 @@ public class TextDialog extends JDialog {
 
 		pnlFont.add(bttnColor);
 
+		pnlFont.add(bttnFixed);
+
 		// Specify text area behaviours.
 		taText.setLineWrap(true);
 		taText.setWrapStyleWord(true);
@@ -243,7 +249,8 @@ public class TextDialog extends JDialog {
 			if(textToEdit.getFont().isItalic()){
 				bttnItalic.setSelected(true);
 				isItalic = true;
-			}
+			}			
+			bttnFixed.setSelected(textToEdit.isFixed());
 		}
 		
 		pnlText.setLayout(new BorderLayout());
@@ -340,7 +347,7 @@ public class TextDialog extends JDialog {
 					if(editMarker){
 						editor.getCurrentCanvas().getObjectList().remove(obj);
 					}
-					drawText(mouseX, mouseY, width, height);
+					drawText(mouseX, mouseY, width, height, bttnFixed.isSelected());
 					dispose();
 				}
 			} // end actionPerformed
@@ -442,14 +449,12 @@ public class TextDialog extends JDialog {
 	/**
 	 * Draw displayed text on the drawing area in the IconEditor
 	 */
-	private void drawText(int x, int y, int h, int w) { 
+	private void drawText(int x, int y, int h, int w, boolean fixed) { 
 		//h = Integer.parseInt(this.spinner.getValue().toString());
-		FontMetrics fontMetrics= editor.getCurrentCanvas().getFontMetrics(font);
-		//double let = 0.7 * h;
-		//w = (int)Math.round((taText.getText().getBytes().length)*let);
-		w =  fontMetrics.stringWidth( taText.getText());
+	
+		editor.getCurrentCanvas().mListener.drawText(font, color, taText.getText(), x, y, fixed);
 				
-		editor.getCurrentCanvas().mListener.drawText(font, color, taText.getText(), x, y, fontMetrics.getHeight(), w);
+		
 	} // drawText
 
 	private void drawText(int x, int y) {

@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -294,6 +295,25 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         
         canvas.drawingArea.repaint();
     } // drawText   
+        
+    public Text setTextDimensions(Text text){
+    	
+        /* Calculate width and height here, it is Canvas scale dependent AM 12.06*/
+       	FontMetrics fontMetrics = canvas.getFontMetrics(text.getFont());	
+   		text.setWidth(fontMetrics.stringWidth(text.getText()));
+   		text.setHeight(text.getFont().getSize());		
+           	
+    	return text;
+    }
+    
+    public void drawText( Font font, Color color, String text, int x, int y, boolean fixed) {  	
+        Text t = new Text( x, y, font, Shape.createColorWithAlpha( color, getTransparency() ), text );
+        t.setFixed(fixed);
+        t = setTextDimensions(t);
+        addShape(t);
+        
+        canvas.drawingArea.repaint();
+    } // 
     
     public void changeTransparency( int transparencyPercentage ) {
     	this.transparency = transparencyPercentage;
