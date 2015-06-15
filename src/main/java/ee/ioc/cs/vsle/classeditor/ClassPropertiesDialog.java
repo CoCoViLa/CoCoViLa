@@ -143,7 +143,7 @@ public class ClassPropertiesDialog extends JDialog {
     	pnlErrors.add(new JLabel(" "));
 
 		// Labels and fields are stored on separate panels and grouped by the pnlGroups panel.
-		pnlLabels.setPreferredSize(new Dimension(110, 90));
+		pnlLabels.setPreferredSize(new Dimension(180, 90));
 		pnlLabels.setMinimumSize(pnlLabels.getPreferredSize());
 		pnlLabels.setMaximumSize(pnlLabels.getPreferredSize());
 		pnlLabels.setLayout(new GridLayout(4, 1));
@@ -163,7 +163,7 @@ public class ClassPropertiesDialog extends JDialog {
 		pnlRelation.add(new JLabel(" "), BorderLayout.CENTER);
 
 		// Fields are stored on a separate panel.
-		pnlFields.setPreferredSize(new Dimension(250, 90));
+		pnlFields.setPreferredSize(new Dimension(220, 90));
 		pnlFields.setMinimumSize(pnlFields.getPreferredSize());
 		pnlFields.setMaximumSize(pnlFields.getPreferredSize());
 		pnlFields.setLayout(new GridLayout(4, 1));
@@ -247,6 +247,8 @@ public class ClassPropertiesDialog extends JDialog {
 						extraColunmsUp();
 						//getContentPane().add(pnlTable, BorderLayout.CENTER);
 						pnlTable.revalidate();
+						pnlLabels.setPreferredSize(new Dimension(260, 90));
+						pnlFields.setPreferredSize(new Dimension(300, 90));						
 						dialog.setPreferredSize(new Dimension(600, 500));
 						pack();
 						getContentPane().repaint();	//pack();					
@@ -263,11 +265,15 @@ public class ClassPropertiesDialog extends JDialog {
 						extraColunmsDown();
 						//getContentPane().add(pnlTable, BorderLayout.CENTER);
 						pnlTable.revalidate();
+						pnlLabels.setPreferredSize(new Dimension(180, 90));
+						pnlLabels.revalidate();
+						pnlFields.setPreferredSize(new Dimension(210, 90));
+						//pnlRelation.setPreferredSize(new Dimension(220, 90));
 						dialog.setPreferredSize(new Dimension(410, 350));
 						pack();
 						getContentPane().repaint();	//					
 					}
-				});
+				});							
 
 		// Icon browsing button pressed. Browse for the icon in GIF format
 		// and set the browsed path to the Class Icon text field.
