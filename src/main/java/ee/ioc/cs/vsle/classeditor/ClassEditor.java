@@ -1652,30 +1652,43 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			   if ( overwriteFile != JOptionPane.CANCEL_OPTION ) {
 
 				   if ( overwriteFile == JOptionPane.YES_OPTION ) {
-					   String fileText = "";			   
-					   		if (!prevJavaFile.exists()) {
-					   			fileText = "class " + _className + " {";					   		
-					   		}
-						   fileText += "\n    /*@ specification " + _className + " {\n";
-
-						   for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
-							   String fieldName = (String)dbrClassFields.getValueAt( i, 0);
-							   String fieldType = (String)dbrClassFields.getValueAt( i, 1 );
-							   //String fieldValue = (String)dbrClassFields.getValueAt( i, 2 );
+					   
+					   /*   */
+					   
+					   boolean specExists = false;
+					   boolean classExists = false;
+					   String nonSpecFilePartStart = "";
+					   String nonSpecFilePartEnd = ""; 
 							   
-							   if ( fieldType != null) {
-								   fileText += "    " + fieldType + " " + fieldName + ";\n";
-							   }
+					   if (javaFile.exists()) {
+						   
+						   String tmp = FileFuncs.getFileContents(javaFile);
+						   classExists = tmp.indexOf("class") != -1;
+						   
+						   int start = tmp.indexOf("/*@ spec");
+						   int end = tmp.indexOf("  }@*/");
+						   specExists = start != -1;
+						  
+						   if(specExists && classExists){  /* test that file is correctly formatted */
+							   nonSpecFilePartStart = tmp.substring(0, start);
+							   nonSpecFilePartEnd = tmp.substring(end);
 						   }
-						   if (!prevJavaFile.exists()) {
-								fileText += "    }@*/\n \n}";
-						   } else { 						   
-							   String tmp = FileFuncs.getFileContents(prevJavaFile);
-							   int start = tmp.indexOf("/*@ spec");
-							   int end = tmp.indexOf("  }@*/");
-							   String nonSpecFilePartStart = tmp.substring(0, start);
-							   String nonSpecFilePartEnd = tmp.substring(end);
-							   fileText = nonSpecFilePartStart + fileText + nonSpecFilePartEnd;
+						   
+						 
+					   }  
+					   
+					   			
+					   
+					   String fileText = "";			   
+					   		if (!classExists) {
+					   			fileText = "class " + _className + " {";					   							   		
+					   			fileText += "\n    /*@ specification " + _className + " {\n";
+					   			fileText += this.fieldsToFile(selectedObjects);
+							    fileText += "    }@*/\n \n}";						  
+					   		}
+						    else { 						   							  						    	
+							   fileText = nonSpecFilePartStart + "\n    /*@ specification " + _className + " {\n" + 
+									   this.fieldsToFile(selectedObjects) + nonSpecFilePartEnd;
 						   }    
 					   FileFuncs.writeFile( javaFile, fileText );
 				   }
@@ -1692,6 +1705,32 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  }    	
 	  }
 
+	  private String fieldsToFile(ArrayList<GObj>selectedObjects){ // and ports
+		  
+		  String fileText = "";
+			for ( int i = 0; i < dbrClassFields.getRowCount(); i++ ) {
+				String fieldName = (String)dbrClassFields.getValueAt( i, 0);
+				String fieldType = (String)dbrClassFields.getValueAt( i, 1 );
+	    
+				if ( fieldType != null) {
+					fileText += "    " + fieldType + " " + fieldName + ";\n";
+				}
+			}	
+			for (GObj obj : selectedObjects){
+				if(obj.getPortList() != null){				
+					for ( int i = 0; i < obj.getPortList().size(); i++ ) {
+						String fieldName = obj.getPortList().get(i).getName();
+						String fieldType = obj.getPortList().get(i).getType();
+	    
+						if ( fieldType != null) {
+							fileText += "    " + fieldType + " " + fieldName + ";\n";
+						}
+					}	
+				}
+			}
+			return fileText;
+	  }
+	  
 	  /**
 	   *  drop out of bounds shapes. Removed 29.09.
 	   * 
