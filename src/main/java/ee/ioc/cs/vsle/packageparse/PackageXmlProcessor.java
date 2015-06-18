@@ -633,7 +633,12 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             	int y2 = ((Number)NumberFormat.getInstance().parse(lineNode.getAttribute( ATR_Y2))).intValue();
             	
                // System.out.println("x1 = " + x1 + "; x2 = " + x2 + "; y1 = " + y1);
-            	
+            	if(y2 < y1){
+            		int tmpx = x1;
+            		int tmpy = y1;
+            		y1 = y2; y2 = tmpy;
+            		x1 = x2; x2 = tmpx;
+            	}
             	
             	Line line = new Line (x1, y1, x2, y2, getColor( lineNode ), lp.strokeWidth, lp.lineType);
             	line.setX(x1);
