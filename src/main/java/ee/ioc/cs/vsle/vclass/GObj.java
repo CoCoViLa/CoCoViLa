@@ -556,6 +556,9 @@ public class GObj implements Serializable, Cloneable,
         	if(getShapes() != null && getShapes().size() != 0 && getShapes().get(0) instanceof Line){
         		((Line)getShapes().get(0)).drawSelection(g2, scale, getX(), getY(), getXsize(), getYsize());
         	}
+        	else if(getPorts()!= null && getPorts().size() > 0 ){
+        		drawSelectionMarksPort( g2, scale );
+        	}
         	else drawSelectionMarks( g2, scale);
         }
 
@@ -584,17 +587,18 @@ public class GObj implements Serializable, Cloneable,
     	
     	/*  int scaledX =  Math.round(getX() / scale );
     	  int scaledY =  Math.round(getY() / scale );*/
+    	int portSize = 4;
     	
-        g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
+        g.fillRect( getX() - portSize - CORNER_SIZE - 1, getY() - portSize - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
 
-        g.fillRect( getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) ) + 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1,
+        g.fillRect( getX() + (int) ( getXsize() * ( portSize  ) ) + 1, getY() - portSize - CORNER_SIZE - 1,
                 CORNER_SIZE, CORNER_SIZE );
 
-        g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + (int) ( getYsize() * ( getPortOffsetY2() + getHeight() ) ) + 1,
+        g.fillRect( getX() - portSize  - CORNER_SIZE - 1, getY() + (int) ( getYsize() * ( portSize ) ) + 1,
                 CORNER_SIZE, CORNER_SIZE );
 
-        g.fillRect( getX() + (int) ( getXsize() * ( getPortOffsetX2() + getWidth() ) ) + 1, getY()
-                + (int) ( getYsize() * ( getPortOffsetY2() + getHeight() ) ) + 1, CORNER_SIZE, CORNER_SIZE );
+        g.fillRect( getX() + (int) ( getXsize() * ( portSize) ) + 1, getY()
+                + (int) ( getYsize() *  portSize ) + 1, CORNER_SIZE, CORNER_SIZE );
     }
 
     @Override

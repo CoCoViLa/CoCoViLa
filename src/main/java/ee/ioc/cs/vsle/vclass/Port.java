@@ -45,8 +45,8 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 
 	static {
 	    DEFAULT_OPEN_GRAPHICS = new ClassGraphics();
-	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( 0, 0, 8, 8, createColor( 12632256, 255 ), true, 1.0f, 0, true ) );
-	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( 0, 0, 8, 8, createColor( 0, 255 ), false, 1.0f, 0, true ) );
+	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, createColor( 12632256, 255 ), true, 1.0f, 0, true ) );
+	    DEFAULT_OPEN_GRAPHICS.addShape( new Oval( -4, -4, 8, 8, createColor( 0, 255 ), false, 1.0f, 0, true ) );
 	    DEFAULT_OPEN_GRAPHICS.setBounds( -4, -4, 8, 8 );
 	    
 	    DEFAULT_CLOSED_GRAPHICS = new ClassGraphics();

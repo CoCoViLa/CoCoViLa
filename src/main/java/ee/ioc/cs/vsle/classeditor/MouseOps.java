@@ -159,6 +159,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         String portConnection = null;
         if (isAreaConn) portConnection = "area";
         Port p = new Port(portName, portType, 0, 0, portConnection, isStrict, isMulti);
+        p.setX(0); /* 8p default port size */
+        p.setY(0); 
         ports.add(p);
         
         GObj obj = new GObj();
@@ -260,17 +262,18 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 			LOGGER.debug("Original shape: {} >> x = {};y = {};w = {};h = {}", s, s.getX(), s.getY(), s.getWidth(), s.getHeight());
 		}
 
-		s.setX((int)(Math.abs((s.getX() - startX) * scaleStep)));
-		s.setY((int)(Math.abs((s.getY() - startY) * scaleStep)));
-		s.setWidth(Math.round(s.getWidth() * scaleStep));//(int) xSize);	 
-		s.setHeight(Math.round(s.getHeight() * scaleStep));// (int)ySize);
-
+		 s.setWidth(Math.round(s.getWidth() * scaleStep));//(int) xSize);	 
+    	 s.setHeight(Math.round(s.getHeight() * scaleStep));// (int)ySize);
+    	 s.setX( - s.getWidth()/2);
+    	 s.setY( - s.getHeight()/2);
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Updated shape: {} >> x = {};y = {};w = {};h = {}", s, s.getX(), s.getY(), s.getWidth(), s.getHeight());
 		}
      }
      
-   //	 graphics.setBounds(0, 0, (int)xSize, (int)ySize);
+   	 graphics.setBounds(-4, -4, 8, 8); // make it scaled AM @TODO
+     p.setX(0);
+     p.setY(0);    
      if(openFlag){            		 
    		 p.setOpenGraphics(graphics);
    	 } else {
