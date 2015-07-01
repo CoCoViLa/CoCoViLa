@@ -222,6 +222,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 	 if(graphics.getBoundHeight() != 0 && graphics.getBoundWidth() != 0 && !isDefault){
 		 graphics.setBounds(-graphics.getBoundWidth()/2, -graphics.getBoundHeight()/2, graphics.getBoundWidth(), graphics.getBoundHeight()); 
 		 obj.setWidth(graphics.getBoundWidth());
+		 obj.setHeight(graphics.getBoundHeight());
 	 } else	{
 		 graphics.setBounds(-4, -4, 8, 8);
 		 obj.setWidth(8);
@@ -234,8 +235,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     		s.setX(-4);
     		s.setY(-4);
     	} else {
-    		s.setX(s.getX() - s.getWidth()/2);
-    		s.setY(s.getY() - s.getHeight()/2);
+    		s.setX(s.getX() - obj.getWidth()/2);
+    		s.setY(s.getY() - obj.getHeight()/2);
     	}
      } 
  
