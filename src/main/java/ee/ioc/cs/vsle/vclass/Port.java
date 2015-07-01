@@ -31,6 +31,8 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 	private boolean known = false, target = false;
 	private boolean watched = false;
 	private boolean hilighted = false;
+	private boolean isDefault = true;
+	private boolean isDefaultClosed = true;
 
 	public static final ClassGraphics DEFAULT_OPEN_GRAPHICS;
 	public static final ClassGraphics DEFAULT_CLOSED_GRAPHICS;
@@ -93,6 +95,22 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 		return y;
 	}
 
+	public boolean isDefaultClosed() {
+		return isDefaultClosed;
+	}
+
+	public void setDefaultClosed(boolean isDefaultClosed) {
+		this.isDefaultClosed = isDefaultClosed;
+	}
+
+	public boolean isDefault() {
+		return isDefault;
+	}
+
+	public void setDefault(boolean isDefault) {
+		this.isDefault = isDefault;
+	}
+	
 	public int getAbsoluteX() {
         return getAbsoluteCenter().x;
 	}
@@ -155,6 +173,18 @@ public class Port implements ee.ioc.cs.vsle.api.Port, Cloneable, Serializable {
 	}
 
 	public int getHeight() {
+		return (int) (obj.getYsize() * defaultGraphics.getBoundHeight());
+	}
+	
+	public int getWidth(boolean open) {
+		if(open && !isDefault) return (int) (obj.getXsize() * openGraphics.getBoundWidth());
+		if(!open && !isDefaultClosed) return (int) (obj.getXsize() * closedGraphics.getBoundWidth());
+		return (int) (obj.getXsize() * defaultGraphics.getBoundWidth());
+	}
+
+	public int getHeight(boolean open) {
+		if(open && !isDefault) return (int) (obj.getYsize() * openGraphics.getBoundHeight());
+		if(!open && !isDefaultClosed) return (int) (obj.getYsize() * closedGraphics.getBoundHeight());
 		return (int) (obj.getYsize() * defaultGraphics.getBoundHeight());
 	}
 

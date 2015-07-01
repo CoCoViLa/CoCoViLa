@@ -251,6 +251,26 @@ public class ObjectList extends ArrayList<GObj> {
 		return null;
 	}
 	
+public GObj getObjectByPortId(String portId) {
+		
+		for (GObj obj : this) {
+
+				for (Port port : obj.getPortList()) {
+					if (port.getId() != null) {
+						if (port.getId().equals(portId)) {
+							return obj;
+						}
+					}
+					if (port.getName().equals(portId)) {
+						return obj;
+					}
+				}			
+		}
+
+		return null;
+	}
+	
+	
 	
 	/**
 	 * Returns the topmost port that contains the specified point.

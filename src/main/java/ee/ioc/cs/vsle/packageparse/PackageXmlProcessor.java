@@ -358,6 +358,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         	if(cg.getShapes() != null && cg.getShapes().size()>0){
         		cg.setBounds(cg.getShapes().get(0).getX(), cg.getShapes().get(0).getY(), cg.getShapes().get(0).getWidth(), cg.getShapes().get(0).getHeight());
         		newPort.setOpenGraphics(cg);
+        		newPort.setDefault(false);
             }
         }
         
@@ -369,6 +370,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         	if(cg.getShapes() != null && cg.getShapes().size()>0){
         		cg.setBounds(cg.getShapes().get(0).getX(), cg.getShapes().get(0).getY(), cg.getShapes().get(0).getWidth(), cg.getShapes().get(0).getHeight());
         		newPort.setClosedGraphics(cg);
+        		newPort.setDefaultClosed(false);
         	}
         }
         
@@ -822,17 +824,18 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         portEl.setAttribute( ATR_STRICT, Boolean.toString( port.isStrict() ) );
         portEl.setAttribute( ATR_MULTI, Boolean.toString( port.isMulti() ) );
         
-        if(port.getClosedGraphics() != null){
-        	Element elopen = doc.createElement(EL_OPEN);   
-        	elopen.appendChild(generateGraphicsNode(doc, port.getOpenGraphics()));
-        	portEl.appendChild(elopen);
+    /* don't save default graphics to xml */
+        if(!port.isDefault() && port.getClosedGraphics() != null){    	        	
+        		Element elopen = doc.createElement(EL_OPEN);   
+        		elopen.appendChild(generateGraphicsNode(doc, port.getOpenGraphics()));
+        		portEl.appendChild(elopen);
         }
-        if(port.getClosedGraphics() != null){
-        	Element elclose = doc.createElement(EL_CLOSED);        	
-        	elclose.appendChild(generateGraphicsNode(doc, port.getClosedGraphics()));
-        	portEl.appendChild(elclose);
-        }
-                      
+        if(!port.isDefaultClosed() && port.getClosedGraphics() != null){
+        		Element elclose = doc.createElement(EL_CLOSED);        	
+        		elclose.appendChild(generateGraphicsNode(doc, port.getClosedGraphics()));
+        		portEl.appendChild(elclose);
+        	
+        }             
         return portEl;
     }
     

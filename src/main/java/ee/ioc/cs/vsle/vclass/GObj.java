@@ -128,7 +128,8 @@ public class GObj implements Serializable, Cloneable,
     }
     
     public void resizeLine( int changeX, int changeY, int corner ) {
-    	Line line = (Line) getShapes().get(0);
+    	if(getShapes().size() < 1) return;
+		Line line = (Line) getShapes().get(0);
     	
 		if (logger.isDebugEnabled()) {
 			logger.debug("Line before resize: {}", line.toText());
@@ -587,7 +588,7 @@ public class GObj implements Serializable, Cloneable,
     	
     	/*  int scaledX =  Math.round(getX() / scale );
     	  int scaledY =  Math.round(getY() / scale );*/
-    	int portSize = 4;
+    	int portSize = Math.max(getWidth(), getHeight())/2;
     	
         g.fillRect( getX() - portSize - CORNER_SIZE - 1, getY() - portSize - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
 

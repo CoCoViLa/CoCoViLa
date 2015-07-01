@@ -192,13 +192,13 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         p.setObject(obj);
         obj.setX(p.getX() + xOffset); // 
         obj.setY(p.getY() + yOffset); // 
-        p.setX(0);
-        p.setY(0);      
+        p.setX(0); /* 8p default port size */
+        p.setY(0);     
 
    /*    p.setDefaultGraphics(obj.isDrawOpenPorts());*/
-               
-        obj.setHeight(p.getHeight());
-        obj.setWidth(p.getWidth());     
+
+        obj.setHeight(p.getHeight(canvas.isDrawOpenPorts()));
+        obj.setWidth(p.getWidth(canvas.isDrawOpenPorts()));     
         obj.setName("port");        
     //    obj.set
         obj.setPorts(ports);       
@@ -217,72 +217,37 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
      * @param graphics
      * @param openFlag
      */
-    public void repaintPort( Port p, ClassGraphics graphics, boolean openFlag ) {
-    	
-    // Get port scale @TODO optimize this 
-    // float xSize = (float) 1.0;
-   //  float ySize = (float) 1.0;
-     
-   /*  for (GObj obj : canvas.getObjectList()) {
-
-			for (Port port : obj.getPortList()) {
-				if (port.getName().equals(p.getName())){
-					 xSize = obj.getXsize();
-					// ySize = obj.getYsize();
-				}
-			}			
-	}*/
-  // cleanup graphics code	
-          
-     int xx = 0; // max width for shape collection
-	 int startX = 0;
-	 int startY = 0;
+    public void repaintPort( GObj obj, ClassGraphics graphics, boolean openFlag, boolean isDefault ) {
+  	 
+	 if(graphics.getBoundHeight() != 0 && graphics.getBoundWidth() != 0 && !isDefault){
+		 graphics.setBounds(-graphics.getBoundWidth()/2, -graphics.getBoundHeight()/2, graphics.getBoundWidth(), graphics.getBoundHeight()); 
+		 obj.setWidth(graphics.getBoundWidth());
+	 } else	{
+		 graphics.setBounds(-4, -4, 8, 8);
+		 obj.setWidth(8);
+		 obj.setHeight(8);
+	 }
 	 
-     if(graphics.getShapes() != null){
-    	// int trace = Math.abs(graphics.getShapes().get(0).getHeight());
+    for ( Shape s : graphics.getShapes() ) {
     	 
-		 for ( Shape s : graphics.getShapes() ) {    
-			 if((startX == 0) || (s.getX() < startX)){
-				 startX = s.getX();
-			 }			 
-			 if((startY == 0) || (s.getY() < startY)){
-				 startY = s.getY();
-			 }
-			 if(s.getWidth()+s.getX() > xx ){
-				 xx = s.getWidth()+s.getX();
-			 }			
-		 }
-     } else return;
-     
-     float scaleStep = (float)8/(xx - startX);    // 8 is default port size. Change that to sys param. AM @TODO
-     
-     for ( Shape s : graphics.getShapes() ) {
-    	 
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Original shape: {} >> x = {};y = {};w = {};h = {}", s, s.getX(), s.getY(), s.getWidth(), s.getHeight());
-		}
-
-		 s.setWidth(Math.round(s.getWidth() * scaleStep));//(int) xSize);	 
-    	 s.setHeight(Math.round(s.getHeight() * scaleStep));// (int)ySize);
-    	 s.setX( - s.getWidth()/2);
-    	 s.setY( - s.getHeight()/2);
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Updated shape: {} >> x = {};y = {};w = {};h = {}", s, s.getX(), s.getY(), s.getWidth(), s.getHeight());
-		}
-     }
-     
-   	 graphics.setBounds(-4, -4, 8, 8); // make it scaled AM @TODO
+		 if(isDefault){
+    		s.setX(-4);
+    		s.setY(-4);
+    	} else {
+    		s.setX(s.getX() - s.getWidth()/2);
+    		s.setY(s.getY() - s.getHeight()/2);
+    	}
+     } 
+ 
+ Port p = obj.getPortList().get(0);   	
      p.setX(0);
-     p.setY(0);    
+     p.setY(0); 
+     p.setDefault(isDefault);
      if(openFlag){            		 
    		 p.setOpenGraphics(graphics);
    	 } else {
    		 p.setClosedGraphics(graphics);
-   	 }
-     	
-        p.setX(0);
-        p.setY(0);    
-                    
+   	 }                    
         canvas.repaint();
     } 
     

@@ -1111,11 +1111,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  if(openFlag){	  
 			  defaultGraphics = Port.DEFAULT_OPEN_GRAPHICS;
 			  } else defaultGraphics = Port.DEFAULT_CLOSED_GRAPHICS;
-		  Port targetPort = getCurrentCanvas().getObjectList().getPortById(port.getName());
+		  GObj targetPort = getCurrentCanvas().getObjectList().getObjectByPortId(port.getName());
 		  if(targetPort == null)
 			  return;
  
-		 getCurrentCanvas().mListener.repaintPort(targetPort, defaultGraphics, openFlag);  
+		 getCurrentCanvas().mListener.repaintPort(targetPort, defaultGraphics, openFlag, true);  
 	  }
 	 
 	  
@@ -1169,8 +1169,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  if ( selection == null )
 			  return;
 		  ClassCanvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
-		  Port targetPort = curCanvas.getObjectList().getPortById(portName);
-		  if(targetPort == null)
+		 // Port targetPort = curCanvas.getObjectList().getPortById(portName);
+		  GObj portObject = curCanvas.getObjectList().getObjectByPortId(portName);
+		  if(portObject == null)
 			  return;
 
 		  try {
@@ -1180,7 +1181,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				  PackageClass pClass = pkg.getClass(selection);
 				  
 			//	  targetPort.set
-				  curCanvas.mListener.repaintPort(targetPort, pClass.getGraphics(), openFlag);
+				  curCanvas.mListener.repaintPort(portObject, pClass.getGraphics(), openFlag, false);				  
 			  }
 
 		  } catch ( Exception exc ) {
@@ -1479,7 +1480,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 			  PackageClass pc = new PackageClass(classObject.getClassName()); 
 			  
-			  ClassGraphics cg = new ClassGraphics();
+			  ClassGraphics cg = formatShapesForSave(selectedObjects, pc);
 
 			  ArrayList<Shape> shapes = new ArrayList<Shape>();
 			  GObj holder = null;
