@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -49,6 +50,7 @@ public class ClassCanvas extends Canvas{
     private boolean drawOpenPorts = true;    
     public IconPalette iconPalette;
 	public BoundingBox boundingBox;	
+	public List<Port> portList;
     
 
     public ClassCanvas( VPackage _package, String workingDir ) {    	
@@ -603,4 +605,16 @@ public class ClassCanvas extends Canvas{
    		  new ImageDialog( ClassEditor.getInstance(),obj).setVisible( true );
     	} else  new ShapePropertiesDialog(ClassEditor.getInstance(),obj).setVisible( true );      	    	       
     }
+
+
+	public List<Port> getPortList() {
+		portList = new ArrayList<Port>();
+		for(GObj o :getObjectList()){
+			if(o.getPortList().size() > 0){
+				portList.addAll(o.getPortList());
+			}
+		}
+		return portList;
+	}
+       
 }
