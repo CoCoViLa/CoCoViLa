@@ -205,10 +205,12 @@ public class ObjectList extends ArrayList<GObj> {
 
 	public int controlRectContains(int x, int y) {
 		int corner;
-		for (GObj obj: this) {
-			corner = obj.controlRectContains(x, y);
-			if (corner != 0 && obj.resizable()) {
-				return corner;
+		for (GObj obj: this) {		
+			if(obj.isSelected()){  // only selected objects have control rectangles
+				corner = obj.controlRectContains(x, y);
+				if (corner != 0 && obj.resizable()) {
+					return corner;
+				}
 			}
 		}
 		return 0;

@@ -617,7 +617,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
             obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, 1);          
             /* check corners 1st*/
-            if ( con == null ) {
+            if (canvas.getObjectList().getSelectedCount() > 0 && con == null ) {
                 cornerClicked = canvas.getObjectList().controlRectContains(
                         canvas.mouseX, canvas.mouseY);
                 if ( cornerClicked != 0 ) {
