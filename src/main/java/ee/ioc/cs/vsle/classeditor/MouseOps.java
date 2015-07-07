@@ -453,7 +453,16 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         
         // LISTEN RIGHT MOUSE BUTTON
         if ( SwingUtilities.isRightMouseButton( e ) ) {
-        	GObj obj = null;        	
+        	GObj obj = null;  
+        	/* 1st iteration only selected*/
+        	for(GObj o:canvas.getObjectList().getSelected()){
+        			if(o.contains(canvas.mouseX, canvas.mouseY)){
+        				obj = o;       				
+        			}
+        	}
+        
+        	/* 2nd iteration all objects*/
+            if(obj == null){	
         		int maxIndex = -1;    	
         		for(GObj o:canvas.getObjectList()){
         			if(o.contains(canvas.mouseX, canvas.mouseY) && o.isSelected()){
@@ -472,6 +481,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         		else {
         			obj = canvas.getObjectList().checkInside( x, y, canvas.getScale() );
         		}
+            }
             if ( obj != null  && canvas.getObjectList().getSelectedCount() < 2 ) {
             	 canvas.getObjectList().clearSelected();
             	 obj.setSelected(true);
