@@ -1213,6 +1213,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  ccd.setVisible( true );
 		  ccd.repaint();*/
 		  String selection = dialog.getSelectedValue();
+ 		  if(selection == null){
+			  /* nothing selected - abort */
+			  return;
+		  }
 
 	      if (logger.isDebugEnabled()) {
 	    	logger.debug("selection {}", selection);

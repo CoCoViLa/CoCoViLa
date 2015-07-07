@@ -400,7 +400,7 @@ public class ClassCanvas extends Canvas{
 	            newObjects.addAll( newObj.getComponents() );
 
 	            // create new and fresh class painter for cloned object
-	            if ( vPackage.hasPainters() ) {
+	            if ( vPackage.hasPainters() &&  obj.getClassName() != null) {
 	                PackageClass pc = vPackage.getClass( obj.getClassName() );
 	                ClassPainter painter = pc.getPainterFor( scheme, newObj );
 	                if ( painter != null ) {
