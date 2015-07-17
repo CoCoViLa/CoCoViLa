@@ -184,7 +184,7 @@ public class EditorActionListener implements ActionListener {
             }
         } else if ( e.getActionCommand().equals( Menu.CLEAR_ALL ) ) {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
-                ClassEditor.getInstance().getCurrentCanvas().clearObjects();
+                ClassEditor.getInstance().getCurrentCanvas().clearObjectsWarning();
             }
         } else if ( e.getActionCommand().equals( Menu.SELECT_ALL ) ) {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {

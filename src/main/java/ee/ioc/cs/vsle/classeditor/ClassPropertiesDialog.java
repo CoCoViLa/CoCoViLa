@@ -8,6 +8,7 @@ import java.awt.event.*;
 import javax.swing.event.*;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
+import javax.swing.table.TableModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.*;
@@ -431,7 +432,13 @@ public class ClassPropertiesDialog extends JDialog {
 			int firstSelected = tblClassFields.getSelectedRow();
 			
 			int selected = firstSelected;
-			while (selected > -1) {
+			while (selected > -1) {								
+				if (selected < tableModel.defaults.length){
+					tableModel.removeGraphic(true, selected);
+				}
+				if (selected < tableModel.knowns.length){
+					tableModel.removeGraphic(false, selected);
+				}
 				tableModel.removeRow(selected);
 				selected = tblClassFields.getSelectedRow();
 			}
@@ -566,18 +573,20 @@ public class ClassPropertiesDialog extends JDialog {
 				fldClassIcon.requestFocus();
 			}
 		}
-		if (valid) {
+		/*if (valid) {
 			if (!classFieldsValid()) {
 				// Class fields invalid. Allow the user to apply corrections.
 				valid = false;
 			}
-		}
+		}*/
 		if (valid) {
 			if (classFieldsValid()) {
 				// Class fields valid. Remove empty rows from the DBResult.
 				tableModel.removeEmptyRows();
 				
 				tableModel.setDataVector( new Vector<Vector<Object>>( tableModel.getDataVector() ) );
+			} else {
+				valid = false;
 			}
 		}
 		return valid;

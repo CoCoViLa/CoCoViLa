@@ -329,22 +329,13 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     	addShape(s, 0, 0);
     }
     
-    public void addShape(Shape s, int xOffset, int yOffset) {
-
-    	
-    	/// test values
-   /* 	 xOffset = 0; 
-    	 yOffset = 0;*/
-    	
-    	if (LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("1. MouseOps.addShape() {}", s.toText());
-    		// LOGGER.debug("2. addShape x {} y {} h {} w {}", s.getX(), s.getY(), s.getHeight(), s.getWidth());
-    	}
-
+    public void addShape(Shape s,int xOffset, int yOffset) {
+   	
         ArrayList<Shape> shapes = new ArrayList<Shape>();
         shapes.add(s);
-
-        GObj obj = new GObj();        
+      
+        GObj obj = new GObj();
+        
         obj.setX(s.getX() + xOffset);
         obj.setY(s.getY() + yOffset);
         obj.setHeight(s.getHeight());
@@ -491,7 +482,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             	} else { 
             		openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
             	}
-            }
+            }            
             else if ( obj != null || canvas.getObjectList().getSelectedCount() > 1 ) {            	
             	openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
             } 
@@ -533,7 +524,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                     if (SwingUtilities.isLeftMouseButton(e)
                             && e.getClickCount() >= 2){
                     	if (obj.getShapes() != null && obj.getShapes().size() > 0 && obj.getShapes().get(0) instanceof BoundingBox){
-                    		new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true );
+                    		new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true);
                        	 	canvas.updateBoundingBox(); 
                     	} else if(obj.getName() == "port"){
                     		Port port = null;
@@ -625,7 +616,17 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             canvas.mouseY = Math.round( e.getY() / canvas.getScale() );
             Connection con = canvas.getConnectionNearPoint( canvas.mouseX, canvas.mouseY );
 
-            obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, 1);          
+
+      	  /* 1st iteration only selected*/
+            for(GObj o:canvas.getObjectList().getSelected()){
+      			if(o.contains(canvas.mouseX, canvas.mouseY)){
+      				obj = o;          				 
+      			}
+            }          
+            if(obj == null){ // no selected objects were clicked
+            	obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, 1);
+            }
+         
             /* check corners 1st*/
             if (canvas.getObjectList().getSelectedCount() > 0 && con == null ) {
                 cornerClicked = canvas.getObjectList().controlRectContains(

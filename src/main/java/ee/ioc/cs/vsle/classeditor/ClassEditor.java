@@ -111,7 +111,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	// Class properties.
 	public static ClassObject classObject;
 
-	// Package properties
+	// Package properties 
 	public static String packageName;
 	public static String packageDesc;    
 
@@ -1326,10 +1326,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					  for (ClassField classField : classObject.fields) {
 						  ClassGraphics classGraphics = classField.getKnownGraphics();
 						  if (classGraphics != null) {
-							  ArrayList<Shape> cShapes = classGraphics.getShapes();
-							  for (Shape shape : cShapes) {
-								//  curCanvas.mListener.addShape(shape, classX, classY); tmp fix
-							  }
+							  graphicsToShapes(curCanvas, classGraphics, classField.getName(), false);							  
+						  }
+						  classGraphics = classField.getDefaultGraphics();
+						  if (classGraphics != null) {
+							  graphicsToShapes(curCanvas, classGraphics, classField.getName(), true);							  
 						  }
 					  }
 				  }
@@ -1346,7 +1347,21 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  repaint();
 	  }    
 
-
+	  public void graphicsToShapes(ClassCanvas canvas, ClassGraphics classGraphics, String name, boolean fieldDefault){		
+		  ArrayList<Shape> cShapes = classGraphics.getShapes();
+		  GObj obj = new GObj(); 		  
+		  for (Shape shape : cShapes) {
+		  		shape.setField(true);
+		  		shape.updateShapeAsField(shape, name, fieldDefault);
+		  		shape.setX(shape.getX());
+		  		//shape.setY(shape.getY() - obj.getHeight()/2);
+		  }
+		  	obj.setWidth(classGraphics.getBoundWidth());
+			obj.setHeight(classGraphics.getBoundHeight());
+			obj.setShapes(cShapes);
+			canvas.addObject(obj);
+	  }	  
+	  
 	  public void editPackage() {
 		  PackagePropertiesDialog p = new PackagePropertiesDialog(getCurrentPackage().getName(), getCurrentPackage().getDescription());
 		  p.setVisible( true );
@@ -1435,7 +1450,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  
 		  if (classObject == null || !classObject.validateBasicProperties()){ 
 		  
-			  new ClassPropertiesDialog( dbrClassFields, false );				  
+			  new ClassPropertiesDialog( dbrClassFields, false);				  
 		  }
 		  
 		  if (getCurrentCanvas().isBBPresent()){
@@ -1890,8 +1905,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				    	logger.debug("Bounds: {} - {};{} - {}", shape.getX(), cg.getBoundX(), shape.getY(), cg.getBoundY());
 				   }
 
-				    cg.addShape(shape);
-				    
+				   if(!shape.isField()){
+					   cg.addShape(shape);
+				   } 
 			   }
 
 			   if (pc != null){
@@ -1953,9 +1969,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	  /**
 	   * Empty the class fields table.
 	   */
-	  private void emptyClassFields() {
-		  if ( dbrClassFields != null )
+	  public void emptyClassFields() {
+		  if ( dbrClassFields != null ){		
+			  classObject.removeClassFieldsGraphics(dbrClassFields);
 			  dbrClassFields.setRowCount( 0 );
+		  }
 	  } // emptyClassFields 
 
 	  

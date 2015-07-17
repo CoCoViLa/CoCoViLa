@@ -104,13 +104,27 @@ public class ClassCanvas extends Canvas{
     }
     
     
+    public void clearObjectsWarning() {
+    	
+    	/* Warning that fields will be cleared as well */
+    	int clear = JOptionPane.showConfirmDialog( null, "Clear Working Area? \n Please note that all existing fields will be deleted.",  null, JOptionPane.OK_CANCEL_OPTION  );					  
+		  if ( clear == JOptionPane.YES_OPTION ) {
+			  this.clearObjects();	
+			  // clear fields
+			 ClassEditor.getInstance().emptyClassFields();
+		  } else if (clear == JOptionPane.CANCEL_OPTION){
+			  return;
+		  }
+    }
+    
     public void clearObjects() {
-    	super.clearObjects();
-    	if(iconPalette != null && iconPalette.boundingbox.isSelected()){
-    		iconPalette.selection.setSelected(true);
-    		iconPalette.boundingbox.setSelected(false);
-    	}
-        drawingArea.repaint();
+    	
+			  super.clearObjects();
+		    	if(iconPalette != null && iconPalette.boundingbox.isSelected()){
+		    		iconPalette.selection.setSelected(true);
+		    		iconPalette.boundingbox.setSelected(false);
+		    	}
+		        drawingArea.repaint();		  
     }
     
     public Shape drawTextForBoundingBox(int x, int y, String text){    
@@ -384,8 +398,13 @@ public class ClassCanvas extends Canvas{
 	        // clone every selected object
 	        for (GObj obj : scheme.getSelectedObjects()) {
 	        	if(obj.getName().contains("BoundingBox")){
+	        		obj.setSelected( false );
 	        		break; // NO CLONING for BB
-	        	}        	
+	        	}  
+	        	if(obj.getShapes().get(0) != null && obj.getShapes().get(0).isField()){
+	        		obj.setSelected( false );
+	        		break; // NO CLONING for fields
+	        	}  
 	            GObj newObj = obj.clone();
 	            if (obj.getName().equals("port")) {
 	            	String newName = JOptionPane.showInputDialog(this, "Cloned Port Name:");  
@@ -606,7 +625,18 @@ public class ClassCanvas extends Canvas{
     	} else  new ShapePropertiesDialog(ClassEditor.getInstance(),obj).setVisible( true );      	    	       
     }
 
-
+   public void removeObjectByName(String name, boolean def){
+	   GObj target = null;
+	   for(GObj obj:getObjectList()){
+		   if(obj.getShapes().size() > 0 && obj.getShapes().get(0).isField() && 
+				   obj.getShapes().get(0).getName().equals(name) && obj.getShapes().get(0).isFieldDefault() == def)
+			   target = obj;
+	   }
+	   if(target != null){
+		   getObjectList().remove(target);
+	   }
+   }
+   
 	public List<Port> getPortList() {
 		portList = new ArrayList<Port>();
 		for(GObj o :getObjectList()){

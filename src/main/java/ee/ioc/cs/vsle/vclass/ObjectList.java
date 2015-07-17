@@ -98,7 +98,7 @@ public class ObjectList extends ArrayList<GObj> {
 		GObj selected = null;
 		for (int i = this.size() - 1; i >= 0; i--) {
 			GObj obj = this.get(i);
-			if(obj.getName().equals("port")) {
+				if(obj.getName() != null && obj.getName().equals("port")) {
 				/* Port catchment area to be wider */				
 				if((((obj.getX() + 5) > scaledX && scaledX > (obj.getX() - 5)) && ((obj.getY() + 5) > scaledY && scaledY > (obj.getY() - 5))) ||  (obj.contains(scaledX, scaledY) && obj != asker) ){
 					return obj;

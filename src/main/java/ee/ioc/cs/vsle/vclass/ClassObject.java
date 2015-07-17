@@ -116,6 +116,20 @@ public class ClassObject implements Serializable {
 		  return dbrClassFields;		  
 		}
 		
+
+		public ClassFieldTable removeClassFieldsGraphics(ClassFieldTable dbrClassFields){
+		 		 
+		 if(this.fields != null){	
+				     
+			 for ( int i = 0; i < fields.size(); i++ ) {					
+				  dbrClassFields.removeGraphic(false, i);
+				  dbrClassFields.removeGraphic(true, i);			
+			 }		  
+		 }
+		  return dbrClassFields;		  
+		}
+		
+		
 		public boolean validateBasicProperties(){
 			boolean valid = false;
 			if(className == null && classDescription != null && componentType != null){
