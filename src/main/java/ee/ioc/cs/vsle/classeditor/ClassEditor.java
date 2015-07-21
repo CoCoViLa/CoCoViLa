@@ -134,6 +134,10 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 	ClassImport ci;    
 	ClassImport cig;
+	
+	private int deltaX = -1;
+	private int deltaY = -1;
+	
 
 	/**
 	 * Class constructor [1].
@@ -1349,15 +1353,24 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 	  public void graphicsToShapes(ClassCanvas canvas, ClassGraphics classGraphics, String name, boolean fieldDefault){		
 		  ArrayList<Shape> cShapes = classGraphics.getShapes();
-		  GObj obj = new GObj(); 		  
+		  GObj obj = new GObj(); 
+		  int x =  2147483647 ;
+		  int y =  2147483647 ;
 		  for (Shape shape : cShapes) {
 		  		shape.setField(true);
 		  		shape.updateShapeAsField(shape, name, fieldDefault);
-		  		shape.setX(shape.getX());
-		  		//shape.setY(shape.getY() - obj.getHeight()/2);
+		  		x = Math.min(x, shape.getX());
+		  		y = Math.min(y, shape.getY());	  	
 		  }
+		  for (Shape shape : cShapes) {		
+			  shape.setX(shape.getX()-x);
+			  shape.setY(shape.getY() - y);
+		  }
+			  
 		  	obj.setWidth(classGraphics.getBoundWidth());
 			obj.setHeight(classGraphics.getBoundHeight());
+			obj.setX(x);
+			obj.setY(y);
 			obj.setShapes(cShapes);
 			canvas.addObject(obj);
 	  }	  
@@ -1812,7 +1825,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		   /**
 		    *  Set real bounds, including shapes partially covered by BB
 		    */
-		   int rX = 10000; int rY = 10000; int rW = 0; int rH = 0;   			  
+		   int rX = 10000; int rY = 10000; 	  
 
 		   for ( GObj obj : selectedObjects ) {
 			   GObj holder = null;
@@ -1845,7 +1858,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				   holder.getShapes().remove(1);
 			   }
 		   }
-		  
+		   this.deltaX = rX;
+		   this.deltaY = rY;
+		   
 		   ClassGraphics cg = new  ClassGraphics();
 		   ArrayList<Shape> shapes = new ArrayList<Shape>();
 		   ArrayList<Port> ports = new ArrayList<Port>();
@@ -1864,7 +1879,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 				    *  Check that at least part of shape is inside bounds
 				    * */       
 				   					  
-				    if(!(shape instanceof BoundingBox || shape instanceof Text)){
+				    if(!(shape instanceof BoundingBox || shape instanceof Text || shape.isField())){
 				 		 if (logger.isDebugEnabled()) {
 						   	logger.debug("CONFIRM test: x={} - xEnd={}", obj.getX(), (int)(obj.getX() + obj.getWidth()));
 						   	logger.debug("CONFIRM test: inside ->{}", obj.isInside(bX, bY, bX+bW, bY + bH));
@@ -1895,6 +1910,9 @@ public class ClassEditor extends JFrame implements ChangeListener {
 						   shape.setX(obj.getX() - rX + shape.getX());						 						   
 						   ((Line) shape).setEndX(((Line) shape).getEndX() - rX + obj.getX());
 					   }
+				   } else if(shape.isField()){	
+						  shape.setX(obj.getX() - rX + shape.getX());
+						  shape.setY(obj.getY() - rY + shape.getY());
 				   } else {
 					   shape.setX(obj.getX() - rX);
 					   shape.setY(obj.getY() - rY);
@@ -1949,7 +1967,19 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					   holder = obj;
 					   	s.setX(0);
 						s.setY(0);
-			        } else {
+			   		} else if(s.isField()){
+			   			if(obj.getShapes().size() == 1 || (deltaX == -1 && deltaY == -1)){
+			   			// single shape in field obj
+			   			  s.setX(0);
+						  s.setY(0);
+			   			} else{
+			   			// multiple shapes in field obj
+			   				System.out.println("Clear SHAPE - s.getX() = " + s.getX() +"; obj.getX() = "+ obj.getX() + "; deltaX = "+ deltaX);
+			   				s.setX(s.getX() - obj.getX() + deltaX);
+			   				s.setY(s.getY() - obj.getY() + deltaY);
+			   			}
+			   		}
+				    else {
 			        	s.setX(0);
 						s.setY(0);
 			        }
@@ -1975,6 +2005,22 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			  dbrClassFields.setRowCount( 0 );
 		  }
 	  } // emptyClassFields 
+
+	public int getDeltaX() {
+		return deltaX;
+	}
+
+	public void setDeltaX(int deltaX) {
+		this.deltaX = deltaX;
+	}
+
+	public int getDeltaY() {
+		return deltaY;
+	}
+
+	public void setDeltaY(int deltaY) {
+		this.deltaY = deltaY;
+	}
 
 	  
 	  /**

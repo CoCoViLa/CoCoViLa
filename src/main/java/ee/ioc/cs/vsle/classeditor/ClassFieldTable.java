@@ -2,17 +2,14 @@ package ee.ioc.cs.vsle.classeditor;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+
 import java.util.Vector;
 
-import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
@@ -262,12 +259,14 @@ public class ClassFieldTable extends  DefaultTableModel {
 			if(def){
 				if(defaults.length < index+1){
 					defaults = Arrays.copyOf(defaults, index+1);
+				}					
 					defaults[index] = cg;
-				}
-			
+
 			} else {
 				if(knowns.length < index+1){
 					knowns = Arrays.copyOf(knowns, index+1);
+					knowns[index] = cg;
+				} else {
 					knowns[index] = cg;
 				}
 			}
