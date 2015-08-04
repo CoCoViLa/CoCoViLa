@@ -9,6 +9,7 @@ import java.awt.Stroke;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.vclass.Canvas;
+import ee.ioc.cs.vsle.vclass.ClassObject;
 import ee.ioc.cs.vsle.vclass.ClassPainter;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
@@ -51,9 +53,21 @@ public class ClassCanvas extends Canvas{
     public IconPalette iconPalette;
 	public BoundingBox boundingBox;	
 	public List<Port> portList;
-    
+	// Class properties.
+	//current
+	private ClassObject classObject;
+		
 
-    public ClassCanvas( VPackage _package, String workingDir ) {    	
+    public  ClassObject getClassObject() {
+		return classObject;
+	}
+
+	public void setClassObject(ClassObject classObject) {
+		this.classObject = classObject;
+	}
+
+
+	public ClassCanvas( VPackage _package, String workingDir ) {    	
     	 super(workingDir);    	 
     	 vPackage = _package;
          m_canvasTitle = vPackage.getName();
@@ -93,8 +107,8 @@ public class ClassCanvas extends Canvas{
     
     public String getTextForBoundingBox(){
     	String text = "ClassNameNotDefined";
-    	if (ClassEditor.classObject != null && ClassEditor.classObject.getClassName() != null &&  ClassEditor.classObject.getClassName() != ""){
-    		text =  ClassEditor.classObject.getClassName();
+    	if (classObject != null && classObject.getClassName() != null &&  classObject.getClassName() != ""){
+    		text =  classObject.getClassName();
     	}
     	return text;
     }
@@ -111,7 +125,7 @@ public class ClassCanvas extends Canvas{
 		  if ( clear == JOptionPane.YES_OPTION ) {
 			  this.clearObjects();	
 			  // clear fields
-			 ClassEditor.getInstance().emptyClassFields();
+			  getClassObject().removeClassFieldsGraphics();
 		  } else if (clear == JOptionPane.CANCEL_OPTION){
 			  return;
 		  }

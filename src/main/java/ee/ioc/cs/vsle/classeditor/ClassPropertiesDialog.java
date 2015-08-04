@@ -93,7 +93,7 @@ public class ClassPropertiesDialog extends JDialog {
 	ListSelectionModel selectionModel;
 	
 	private Dialog dialog;
-
+	
 	// Scrollpanes.
 	private JScrollPane spTableScrollPane;
 	
@@ -430,7 +430,7 @@ public class ClassPropertiesDialog extends JDialog {
 				&& tblClassFields.getSelectedRowCount() > 0) {
 
 			int firstSelected = tblClassFields.getSelectedRow();
-			
+						
 			int selected = firstSelected;
 			while (selected > -1) {								
 				if (selected < tableModel.defaults.length){
@@ -455,11 +455,13 @@ public class ClassPropertiesDialog extends JDialog {
 	 */
 	private void initialize() {
 		
-		if (ClassObject.className != null) fldClassName.setText(ClassObject.className);
-		if (ClassObject.classDescription != null) fldClassDesc.setText(ClassObject.classDescription);
-		if (ClassObject.getClassIcon() != null) fldClassIcon.setText(ClassObject.getClassIcon());
-		cboxCompType.setSelectedItem( ClassObject.componentType );
-		
+		ClassObject current = ClassEditor.getInstance().getCurrentCanvas().getClassObject();
+		if(current != null){
+			if (current.className != null) fldClassName.setText(current.className);
+			if (current.classDescription != null) fldClassDesc.setText(current.classDescription);
+			if (current.getClassIcon() != null) fldClassIcon.setText(current.getClassIcon());
+			cboxCompType.setSelectedItem( current.componentType );
+		}
 		/**
 		 * 		System.out.println("ClassEditor.className " + ClassEditor.className);
 		System.out.println("ClassEditor.classDescription " + ClassEditor.classDescription);
@@ -477,16 +479,22 @@ public class ClassPropertiesDialog extends JDialog {
 
 		String classTitle = fldClassDesc.getText();
 		if (classTitle != null) classTitle = classTitle.trim();
-		ClassObject.classDescription = classTitle;
+	
 
 		String classIcon = fldClassIcon.getText();
 		if (classIcon != null) {
 			classIcon = classIcon.trim();
+		}	
+		// new
+		if (ClassEditor.getInstance().getCurrentCanvas().getClassObject() == null){
+			ClassEditor.getInstance().getCurrentCanvas().setClassObject(new ClassObject(className, classTitle, classIcon,(PackageClass.ComponentType)cboxCompType.getSelectedItem()));
+			ClassEditor.getInstance().getCurrentCanvas().getClassObject().setDbrClassFields(tableModel);
 		}
-		ClassObject.classIcon = classIcon;
-		
-		ClassEditor.classObject = new ClassObject(className, classTitle, classIcon,(PackageClass.ComponentType)cboxCompType.getSelectedItem());
-		
+		else { //edit
+			ClassEditor.getInstance().getCurrentCanvas().getClassObject().setClassDescription(classTitle);
+			ClassEditor.getInstance().getCurrentCanvas().getClassObject().setClassIcon(classIcon);
+			ClassEditor.getInstance().getCurrentCanvas().getClassObject().setClassName(className);
+		}
 		//ClassObject.componentType = (PackageClass.ComponentType)cboxCompType.getSelectedItem();
 	} // storeVariables.
 
@@ -567,7 +575,7 @@ public class ClassPropertiesDialog extends JDialog {
             if (icon.length() > 0 && !(icon.endsWith(".gif") || icon.endsWith(".png"))) {
 				valid = false;
 				this.fldClassIcon.setText("");
-				ClassObject.classIcon = "";
+				//ClassObject.classIcon = "";
 				JOptionPane.showMessageDialog(null, "Only icons in GIF or PNG format allowed.",
                         "Invalid icon format", JOptionPane.INFORMATION_MESSAGE);
 				fldClassIcon.requestFocus();

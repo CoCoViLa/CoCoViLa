@@ -20,14 +20,16 @@ public class ClassObject implements Serializable {
 	
 	
 	// Class properties.
-		public static String className;
-		public static String classDescription;
-		public static String classIcon;
+		public String className;
+		public String classDescription;
+		public String classIcon;
 		public BoundingBox boundingbox;
-		public static ComponentType componentType;	
+		public ComponentType componentType;	
 		
 		public ArrayList<ClassField> fields;// = new ArrayList<ClassField>();  
-				
+
+		private ClassFieldTable dbrClassFields = new ClassFieldTable();
+		
 		public ShapeGroup shapeList;
 		public ArrayList<IconPort> ports;
 
@@ -52,39 +54,39 @@ public class ClassObject implements Serializable {
 			return className;
 		}
 
-		public void setClassName(String className) {
-			ClassObject.className = className;
-		}
-
-		public static String getClassDescription() {
+		public String getClassDescription() {
 			return classDescription;
 		}
 
 		public void setClassDescription(String classDescription) {
-			ClassObject.classDescription = classDescription;
+			this.classDescription = classDescription;
 		}
 
-		public static String getClassIcon() {
+		public String getClassIcon() {
 			return classIcon;
 		}
 
 		public void setClassIcon(String classIcon) {
-			ClassObject.classIcon = classIcon;
+			this.classIcon = classIcon;
 		}
 
-		public static ComponentType getComponentType() {
+		public ComponentType getComponentType() {
 			return componentType;
 		}
 
 		public void setComponentType(ComponentType componentType) {
-			ClassObject.componentType = componentType;
+			this.componentType = componentType;
+		}
+
+		public void setClassName(String className) {
+			this.className = className;
 		}
 
 		public ClassObject(String className,String classDescription,String classIcon,ComponentType componentType){
-			ClassObject.className = className;
-			ClassObject.classDescription = classDescription;
-			ClassObject.classIcon = classIcon;
-			ClassObject.componentType = componentType;
+			this.className = className;
+			this.classDescription = classDescription;
+			this.classIcon = classIcon;
+			this.componentType = componentType;
 		}
 		
 		
@@ -94,10 +96,19 @@ public class ClassObject implements Serializable {
 			this.fields = new ArrayList<ClassField>();
 		}
 
-		public ClassFieldTable setClassFields( Collection<ClassField> cFields){
+
+		public ClassFieldTable getDbrClassFields() {
+			return dbrClassFields;
+		}
+
+		public void setDbrClassFields(ClassFieldTable dbrClassFields) {
+			this.dbrClassFields = dbrClassFields;
+		}
+
+		public void setClassFields( Collection<ClassField> cFields){
 		 		 
 
-	      ClassFieldTable dbrClassFields = new ClassFieldTable();		
+	      this.dbrClassFields = new ClassFieldTable();		
 	      	  
 		  this.fields = new ArrayList<ClassField>(cFields);
 		  for ( int i = 0; i < fields.size(); i++ ) {
@@ -113,11 +124,11 @@ public class ClassObject implements Serializable {
 				  dbrClassFields.updateGraphic(true, ( fields.get( i ) ).getDefaultGraphics(), i);
 			  }
 		  }		  
-		  return dbrClassFields;		  
+		   
 		}
 		
 
-		public ClassFieldTable removeClassFieldsGraphics(ClassFieldTable dbrClassFields){
+		public ClassFieldTable removeClassFieldsGraphics(){
 		 		 
 		 if(this.fields != null){	
 				     
@@ -125,7 +136,8 @@ public class ClassObject implements Serializable {
 				  dbrClassFields.removeGraphic(false, i);
 				  dbrClassFields.removeGraphic(true, i);			
 			 }		  
-		 }
+		 }		 
+		  dbrClassFields.setRowCount( 0 );
 		  return dbrClassFields;		  
 		}
 		
@@ -160,6 +172,11 @@ public class ClassObject implements Serializable {
 			if (h > maxHeight)
 				maxHeight = h;			
 		}
+		
+		public ClassFieldTable getClassFieldModel() {
+			  return dbrClassFields;
+		  }   
+
 		
 		/*@TODO Extra Validation
 		 * 
