@@ -1473,7 +1473,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			  		  saveToPackage(export);
 			  	  }
 			  } else {
-				  JOptionPane.showMessageDialog( null, "Please define or select a bounding box.", "Bounding box undefined",
+				  JOptionPane.showMessageDialog( null, "Please define a bounding box.", "Bounding box undefined",
 						  JOptionPane.INFORMATION_MESSAGE );
 			  }
 		  

@@ -67,6 +67,17 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
 
         this.canvas = canvas;
         this.object = object;
+        
+        
+        if (object != null && object.getShapes() != null && object.getShapes().get(0).isField()){
+        	 /* Fields menu - only properties */
+        	 itemProperties = new JMenuItem( Menu.PROPERTIES, KeyEvent.VK_R );
+             itemProperties.addActionListener( this );
+             itemProperties.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK ) );
+             this.add( itemProperties );
+        	return;
+        	
+        }
 
         this.add(ClassEditor.getInstance().cloneAction);
         this.add(ClassEditor.getInstance().deleteAction).setEnabled(true);/** HARDCODED FIX  @TODO find proper solution**/        
@@ -92,7 +103,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
         	this.add( itemOrder);
         	return;
         }
-        
+                             
         itemProperties = new JMenuItem( Menu.PROPERTIES, KeyEvent.VK_R );
         itemProperties.addActionListener( this );
         itemProperties.setAccelerator( KeyStroke.getKeyStroke( KeyEvent.VK_R, InputEvent.CTRL_DOWN_MASK ) );
@@ -123,7 +134,7 @@ public class ObjectPopupMenu extends JPopupMenu implements ActionListener {
 //                tmp.addActionListener( this );
 //                this.add( tmp );
 //            }
-        }
+        }   
     }
 
     private Component makeSubmenuOrder() {
