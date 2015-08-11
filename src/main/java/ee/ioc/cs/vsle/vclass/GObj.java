@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
+import ee.ioc.cs.vsle.classeditor.ClassEditor;
 import ee.ioc.cs.vsle.editor.*;
 import ee.ioc.cs.vsle.graphics.Image;
 import ee.ioc.cs.vsle.graphics.Line;
@@ -452,10 +453,12 @@ public class GObj implements Serializable, Cloneable,
     }
 
     protected void draw( int xPos, int yPos, float _Xsize, float _Ysize, Graphics2D g2 ) {
-        Shape s;
-        for ( int i = 0; i < getShapes().size(); i++ ) {
+        Shape s;        
+        for ( int i = 0; i < getShapes().size(); i++ ) {        	
             s = getShapes().get( i );
-            s.draw( xPos, yPos, _Xsize, _Ysize, g2 );
+            //field shapes
+            if(s.isField() && !ClassEditor.getInstance().isViewFields()){}
+            else s.draw( xPos, yPos, _Xsize, _Ysize, g2 );
         }
     } // draw
 

@@ -120,9 +120,13 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	private JCheckBoxMenuItem gridCheckBox;
 	private JCheckBoxMenuItem showPortCheckBox;
 	private JCheckBoxMenuItem showPortOpenCheckBox;
+	private JCheckBoxMenuItem showAllFields;
+	//private JCheckBoxMenuItem showKnownFields;
 	private JCheckBoxMenuItem showObjectNamesCheckBox;
 	//private JCheckBoxMenuItem snapToGridCheckBox;
 
+	public boolean viewFields = true;
+	
 	//private ClassFieldTable dbrClassFields = new ClassFieldTable();
 
 	ArrayList<ClassObject> packageClassList = new ArrayList<ClassObject>();  
@@ -368,7 +372,14 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		showPortOpenCheckBox.addActionListener( getActionListener() );
 		menu.add( showPortOpenCheckBox );
 
-
+		showAllFields = new JCheckBoxMenuItem( Menu.SHOW_FIELDS, true );
+		showAllFields.addActionListener( getActionListener() );
+		menu.add( showAllFields);
+		
+		/*showKnownFields = new JCheckBoxMenuItem( Menu.SHOW_KNOWN, true );
+		showKnownFields.addActionListener( getActionListener() );
+		menu.add(showKnownFields);*/
+		
 		showObjectNamesCheckBox = new JCheckBoxMenuItem( Menu.SHOW_NAMES, false );
 		showObjectNamesCheckBox.addActionListener( getActionListener() );
 
@@ -386,6 +397,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			//	snapToGridCheckBox.setSelected( RuntimeProperties.getSnapToGrid() );
 				showPortCheckBox.setSelected( canvas.isDrawPorts() );
 				showPortOpenCheckBox.setSelected( canvas.isDrawOpenPorts() );
+				showAllFields.setSelected(isViewFields());
 				showObjectNamesCheckBox.setSelected( canvas.isShowObjectNames() );
 			}
 
@@ -1464,7 +1476,6 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  } else if (curCanvas.getClassObject() != null|| !curCanvas.getClassObject().validateBasicProperties()){
 			  new ClassPropertiesDialog(curCanvas.getClassObject().getDbrClassFields(), false);
 		  }
-		  
 		  if (getCurrentCanvas().isBBPresent()){
 			  
 			  	  if(curCanvas.getClassObject().componentType.getXmlName().equals("template")){
@@ -2009,6 +2020,15 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 	public void setDeltaY(int deltaY) {
 		this.deltaY = deltaY;
+	}
+
+	public boolean isViewFields() {
+		return viewFields;
+	}
+
+	public void setViewFields(boolean viewFields) {
+		this.viewFields = viewFields;
+		repaint();
 	}
 
 	  
