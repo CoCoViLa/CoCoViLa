@@ -1113,6 +1113,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         	int maxIndex = -1;
         	// look for selected objects 1st        	
         	for(GObj o:canvas.getObjectList()){
+        		if(o.getShapes() != null && o.getShapes().size() > 0 && o.getShapes().get(0).isField()){
+        			continue;
+        		}
         		if(o.contains(canvas.mouseX, canvas.mouseY)){
       		  	   	if (LOGGER.isDebugEnabled()) {
     		  			LOGGER.debug("obj{}", o.getName());

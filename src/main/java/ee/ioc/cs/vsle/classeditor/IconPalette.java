@@ -22,6 +22,7 @@ import javax.swing.event.ChangeListener;
 import ee.ioc.cs.vsle.common.ops.State;
 import ee.ioc.cs.vsle.editor.Menu;
 import ee.ioc.cs.vsle.editor.PaletteBase;
+import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.Image;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.FileFuncs;
@@ -209,7 +210,12 @@ public class IconPalette extends PaletteBase {
 							new PortPropertiesDialog( ClassEditor.getInstance(), port ).setVisible( true );
 						} else {
 							GObj obj = canvas.getObjectList().getSelected().get(0);
-							if(obj.getShapes() != null && obj.getShapes().get(0) instanceof Text){
+							if(obj.getShapes() != null && obj.getShapes().get(0) instanceof BoundingBox && canvas != null ){     
+					            if(canvas.getClassObject() != null)            	 
+					            	  new ClassPropertiesDialog( canvas.getClassObject().getDbrClassFields(), true );
+					            else  new ClassPropertiesDialog( new ClassFieldTable(), true );   
+					            	  canvas.updateBoundingBox();   
+							} else if(obj.getShapes() != null && obj.getShapes().get(0) instanceof Text){
 								new TextDialog( ClassEditor.getInstance(), obj ).setVisible( true );
 							} else if (obj.getShapes() != null && obj.getShapes().get(0) instanceof Image){
 								new ImageDialog( ClassEditor.getInstance(), obj).setVisible( true );
