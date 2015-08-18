@@ -1141,8 +1141,14 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         }
         
         List<GObj> selected = canvas.getObjectList().getSelected();
-        if ( selected != null && selected.size() > 0 )
-            canvas.setStatusBarText( "Selection: " + selected.toString() );
+        String text = "";
+        if ( selected != null && selected.size() > 0 ){
+        	text =  "Selection: ";
+        	for (GObj o:selected){
+        		text +=  o.getMessage() + "; ";
+        	}
+            canvas.setStatusBarText( text);
+        }
 
         canvas.setActionInProgress( false );
     }

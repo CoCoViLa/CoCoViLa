@@ -629,6 +629,25 @@ public class ClassCanvas extends Canvas{
     	super.cancelAddingObject();
         setActionInProgress( false );
     }
+    
+
+    /**
+     * Update mouse position in info label
+     */
+    public void setPosInfo( int x, int y ) {
+        String message = x + ", " + y;
+
+        GObj obj = getObjectList().checkInside(x, y, 1);
+
+        if( obj != null ) {
+            
+            message += " " + obj.getMessage();
+            
+        }
+        
+        setStatusBarText( message );
+    }
+
 
     public void openPropertiesDialog( GObj obj ) {
 

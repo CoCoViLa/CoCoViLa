@@ -15,8 +15,12 @@ import org.xml.sax.helpers.*;
 
 import ee.ioc.cs.vsle.classeditor.ClassEditor;
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.graphics.Arc;
+import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.Image;
 import ee.ioc.cs.vsle.graphics.Line;
+import ee.ioc.cs.vsle.graphics.Oval;
+import ee.ioc.cs.vsle.graphics.Rect;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.*;
@@ -895,6 +899,36 @@ public class GObj implements Serializable, Cloneable,
     			return false;
     	}
     	return true;
+    }
+    
+    public String getMessage(){
+    	if(getPorts() != null && getPorts().size() > 0){
+			 return "Port : " + getPorts().get(0).getType() + " " + getPorts().get(0).getName();
+    	}
+    	if (this.getShapes() != null && this.getShapes().size() > 0 ){
+    		
+    		if(getShapes().get(0).isField()){
+   			 	return "Field " + getShapes().get(0).getName(); 
+    		} else	if(this.getShapes().get(0) instanceof Image){
+    			return "Image";
+    		} else if (this.getShapes().get(0) instanceof Text){
+    			return "Text";
+    		} else if (this.getShapes().get(0) instanceof Rect){
+    			if(getShapes().get(0).isFilled()) return "Filled Rectangle";
+    			else return "Rectangle";
+    		}   else if (this.getShapes().get(0) instanceof Oval){
+    			if(getShapes().get(0).isFilled()) return "Filled Oval";
+    			else return "Oval";
+    		} else if (this.getShapes().get(0) instanceof BoundingBox){
+    			return "Bounding Box";
+    		}  else if (this.getShapes().get(0) instanceof Line){
+    			return "Line";
+    		}   else if (this.getShapes().get(0) instanceof Arc){
+    			if(getShapes().get(0).isFilled()) return "Filled Arc";
+    			else return "Arc";
+    		}    		
+    	}
+    	return "";
     }
 
     /**
