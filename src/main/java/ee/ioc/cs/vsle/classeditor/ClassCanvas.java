@@ -79,10 +79,7 @@ public class ClassCanvas extends Canvas{
     protected void initialize() {
     	super.initialize();
         mListener = new MouseOps( this );     
-       //DrawingArea 
-     //  drawingArea =  getDrawingArea();
-       drawingArea.addMouseListener( mListener );
-     //   super.drawingArea.add
+        drawingArea.addMouseListener( mListener );
         drawingArea.addMouseMotionListener( mListener );
     }
     
@@ -411,13 +408,13 @@ public class ClassCanvas extends Canvas{
 
 	        // clone every selected object
 	        for (GObj obj : scheme.getSelectedObjects()) {
-	        	if(obj.getName().contains("BoundingBox")){
+	        	if(obj.getShapes().get(0) != null && obj.getShapes().get(0) instanceof BoundingBox){
 	        		obj.setSelected( false );
-	        		break; // NO CLONING for BB
+	        		continue; // NO CLONING for BB
 	        	}  
 	        	if(obj.getShapes().get(0) != null && obj.getShapes().get(0).isField()){
 	        		obj.setSelected( false );
-	        		break; // NO CLONING for fields
+	        		continue; // NO CLONING for fields
 	        	}  
 	            GObj newObj = obj.clone();
 	            if (obj.getName().equals("port")) {
