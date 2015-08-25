@@ -11,7 +11,6 @@ import java.util.List;
 import javax.swing.*;
 
 import org.slf4j.*;
-
 import ee.ioc.cs.vsle.util.*;
 import ee.ioc.cs.vsle.vclass.*;
 
@@ -42,7 +41,7 @@ public class RuntimeProperties {
      */
     private static final String DOCUMENTATION_URL = "documentation.url";
     private static final String GENERATED_FILES_DIR = "generatedFilesDirectory";
-    private static final String OPEN_PACKAGES = "openPackages";
+    public static final String OPEN_PACKAGES = "openPackages";
     private static final String DEBUG_INFO = "debugInfo";
     private static final String DEFAULT_LNF = "defaultLayout";
     private static final String LAST_PATH = "last.path";
@@ -251,6 +250,11 @@ public class RuntimeProperties {
 
         instance.runtimeProperties.setProperty( LAST_EXECUTED, new java.util.Date().toString() );
 
+    }
+    
+    public static void saveProperty(String name, String value){
+    	instance.runtimeProperties.setProperty( name, value );
+    	writeProperties( APP_PROPS_FILE_NAME, instance.runtimeProperties );
     }
 
     public static void save() {

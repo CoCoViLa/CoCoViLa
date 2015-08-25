@@ -498,6 +498,8 @@ public class ClassEditor extends JFrame implements ChangeListener {
 					RuntimeProperties.setSchemeEditorWindowProps( getBounds(), state );
 
 					RuntimeProperties.save();
+					
+				    RuntimeProperties.saveProperty( RuntimeProperties.OPEN_PACKAGES, getOpenPackages() );
 
 					System.exit( 0 );
 				}
@@ -552,7 +554,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	void openNewCanvasWithPackage( File f ) {
 
 		VPackage pkg;
-		if((pkg = PackageXmlProcessor.load(f)) != null ) {
+		if((pkg = PackageXmlProcessor.load(f, false)) != null ) {
 			RuntimeProperties.setLastPath( f.getAbsolutePath() );
 			ClassCanvas canvas = new ClassCanvas( pkg, f.getParent() + File.separator );
 			RuntimeProperties.addOpenPackage( pkg );
@@ -1163,16 +1165,18 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  File f = selectFile(); 		  
 		  if ( f != null ){
 			  /* load canvas, if it wasn't loaded before */
-			  VPackage pkg;
-			  if(ClassEditor.getInstance().getCurrentCanvas() == null && (pkg = PackageXmlProcessor.load(f)) != null ){			   
-				  	ClassCanvas canvas = new ClassCanvas(pkg, f.getParent() + File.separator);
-					addCanvas(canvas);	
-			  } 
-		      if (logger.isDebugEnabled()) {
-		    	logger.debug("Canvas {}", ClassEditor.getInstance().getCurrentCanvas());
-		      }
-			  importClassFromPackage( f);	
-	      } 		  
+			  VPackage pkg = PackageXmlProcessor.load(f);
+			  if(pkg != null){ 
+				  if( ClassEditor.getInstance().getCurrentCanvas() == null ){			   
+				  		ClassCanvas canvas = new ClassCanvas(pkg, f.getParent() + File.separator);
+				  		addCanvas(canvas);
+				  }			  
+				  if (logger.isDebugEnabled()) {
+		    		logger.debug("Canvas {}", ClassEditor.getInstance().getCurrentCanvas());
+		      	   }
+				  importClassFromPackage( f, pkg);	
+			  } 		  
+		  }
 	  }  
 
 
@@ -1202,13 +1206,11 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  // curCanvas.repaint();
 	  }
 
-	  public void importClassFromPackage( File file) {
+	  public void importClassFromPackage( File file, VPackage pkg) {
 
 		  ci = new ClassImport( file, packageClassNamesList, packageClassList, templateNameList );
-		  
-		  
-		  ClassCanvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();
-		  	  		  
+		  		  
+		  ClassCanvas curCanvas = ClassEditor.getInstance().getCurrentCanvas();		  	  		  
 		  PopupCanvas popupCanvas = new PopupCanvas(getCurrentPackage(), file.getParent() + File.separator);
 
 	   	  PortGraphicsDialog dialog = new PortGraphicsDialog( packageClassNamesList, "Import Class", rootPane, popupCanvas, file, true);
@@ -1253,13 +1255,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			  }
  
 		  }
-		  /*for (int i = 0; i < curCanvas.getComponentCount(); i++){
-             	 curCanvas.getComponent(i);
-    	}*/
 
-		  /* Temporary magic numbers */
-		  //( curCanvas.drawingArea.getWidth() / 3 );
-		  //( curCanvas.drawingArea.getHeight() / 3 );      
 		  
 		  /* Set offset for multiple imports */
 		  int classY = 5; /* basic offset*/
@@ -1286,8 +1282,7 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			  return;
 
 		  try {
-			  VPackage pkg;
-			  if ( (pkg = PackageXmlProcessor.load(file)) != null ) {
+			  if ( pkg!= null ) {
 				  RuntimeProperties.setLastPath( file.getAbsolutePath() );
 
 				  ClassEditor classEditor = ClassEditor.getInstance();
@@ -1583,8 +1578,6 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			   pc.setDescription(canv.getClassObject().getClassDescription());
 			   pc.setComponentType(canv.getClassObject().getComponentType());
 			   
-			   
-
 			   pc.addGraphics( cg );
 			   // toXML
 			   new PackageXmlProcessor( packageFile ).addPackageClass( pc );			 
@@ -2005,6 +1998,16 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		   
 	  }
 	  	  	 
+	public String getOpenPackages(){
+		String openPackagesString = "";
+		
+		for (int i = 0; i < tabbedPane.getTabCount(); i++){
+			tabbedPane.setSelectedIndex(i);
+			ClassCanvas cc  = (ClassCanvas) tabbedPane.getSelectedComponent();
+			openPackagesString += cc.getPackage().getPath() + ";";
+		}
+		return openPackagesString;
+	}
 
 	public int getDeltaX() {
 		return deltaX;
