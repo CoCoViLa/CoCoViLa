@@ -1455,36 +1455,27 @@ public class ClassEditor extends JFrame implements ChangeListener {
 
 	  
 	  public void saveShapesToPackage(){
-		  commonShapesToPackage(false);
+		  saveToPackage(false);
 	  }
 	  public void exportShapesToPackage() {
-		  commonShapesToPackage(true);
+		  saveToPackage(true);
+		 // commonShapesToPackage(true);
 	  }
 	  
 	  /**
-	   *  Validate ClassProperties, Class defined BoundingBox and any extras here
-	   */
-	  public void commonShapesToPackage(boolean export) {
+	   *  Validate ClassProperties
+		*/
+	  private boolean  validateClassObject(){
 		  ClassCanvas curCanvas = getCurrentCanvas();
+		  ClassPropertiesDialog dialog = null;
 		  if (curCanvas.getClassObject() == null) { 
-			  new ClassPropertiesDialog(new ClassFieldTable(), false);
+			  dialog = new ClassPropertiesDialog(new ClassFieldTable(), false);
 		  } else if (curCanvas.getClassObject() != null|| !curCanvas.getClassObject().validateBasicProperties()){
-			  new ClassPropertiesDialog(curCanvas.getClassObject().getDbrClassFields(), false);
+			  dialog = new ClassPropertiesDialog(curCanvas.getClassObject().getDbrClassFields(), false);
 		  }
-		  if (getCurrentCanvas().isBBPresent()){
-			  
-			  	  if(curCanvas.getClassObject().componentType.getXmlName().equals("template")){
-			  		  savePortGraphics(export);
-			  	  } else {
-			  		  saveToPackage(export);
-			  	  }
-			  } else {
-				  JOptionPane.showMessageDialog( null, "Please define a bounding box.", "Bounding box undefined",
-						  JOptionPane.INFORMATION_MESSAGE );
-			  }
-		  
-	  } // exportShapesToPackage 
-
+		  if(dialog == null || dialog.isCancelled()) return false;
+		  else return true;
+	  }
 	  /**
 	   * Validate class params for save
 	   */
@@ -1589,8 +1580,16 @@ public class ClassEditor extends JFrame implements ChangeListener {
 	  }
 	  
 	  public void saveToPackage(boolean export) {
+		  
+		  /* Bounding box check */
+		  if (!getCurrentCanvas().isBBPresent()){
+			
+			  JOptionPane.showMessageDialog( null, "Please define a bounding box.", "Bounding box undefined",
+					  JOptionPane.INFORMATION_MESSAGE );
+			  return;
+		  }
 
-		 
+
 		  ClassCanvas canv = getCurrentCanvas();
 		  File packageFile; 
 		  if(canv.getPackage() == null && !export){
@@ -1612,10 +1611,22 @@ public class ClassEditor extends JFrame implements ChangeListener {
 			     packageFile = new File(canv.getPackage().getPath());
 		  }
 
-		  
+		  if(!validateClassObject())
+			  return;
 
 		  ArrayList<GObj> selectedObjects = canv.getObjectList();
-
+		  
+		  	  // template or class 
+		  if(getCurrentCanvas().getClassObject().componentType.getXmlName().equals("template")){
+			  /* NO ports for port graphic*/ 	
+			  for ( GObj obj : selectedObjects ) {
+				  if(obj.getPortList() != null && obj.getPortList().size() > 0){
+					  JOptionPane.showMessageDialog( canv, "Port Graphics can't contain port elements!" );
+					  return;
+				  }
+			 /* savePortGraphics(export); */
+		     } 
+		  }
 		  if ( selectedObjects.size() > 0 ) {
 
 			  PackageClass pc = new PackageClass(canv.getClassObject().getClassName());
