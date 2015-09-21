@@ -46,6 +46,10 @@ public class PortGraphicsDialog extends JDialog {
 	private JLabel picture = new JLabel();
 	private static final JScrollPane previewPane = new JScrollPane();
 	File file;
+	private VPackage pkg;
+	
+	
+	
 	//= new JScrollPane( drawingArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED,
     //        ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED );
 	//
@@ -79,6 +83,8 @@ public class PortGraphicsDialog extends JDialog {
 		    scrollPane.setMinimumSize(minimumSize);
 		    previewPane.setMinimumSize(minimumSize);
 			
+		    
+		    pkg = PackageXmlProcessor.loadWOValidation(file); // load previews ONCE
 			/*Shape shape =  new Rect(2, 2, 20, 13, new Color(65485), true, (float) 1.0, (float)0.0);
 			 ArrayList<Shape> shapes = new ArrayList<Shape>();
 		        shapes.add(shape);
@@ -174,10 +180,8 @@ public class PortGraphicsDialog extends JDialog {
 		 
 		 cc.clearObjects();
 		 
-		 try {
-
-			  VPackage pkg;
-			  if ( (pkg = PackageXmlProcessor.loadWOValidation(file)) != null ) {
+		 try {					
+			  if ( pkg != null ) {
 				  PackageClass pClass = pkg.getClass(name);	
 				  if ( pClass!= null && pClass.getGraphics() != null && pClass.getGraphics().getShapes() != null){
 					    GObj obj = new GObj();		

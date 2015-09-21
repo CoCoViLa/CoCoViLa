@@ -98,7 +98,7 @@ public class ObjectList extends ArrayList<GObj> {
 		GObj selected = null;
 		for (int i = this.size() - 1; i >= 0; i--) {
 			GObj obj = this.get(i);
-			if(obj.getName().equals("port")) {
+				if(obj.getName() != null && obj.getName().equals("port")) {
 				/* Port catchment area to be wider */				
 				if((((obj.getX() + 5) > scaledX && scaledX > (obj.getX() - 5)) && ((obj.getY() + 5) > scaledY && scaledY > (obj.getY() - 5))) ||  (obj.contains(scaledX, scaledY) && obj != asker) ){
 					return obj;
@@ -205,10 +205,12 @@ public class ObjectList extends ArrayList<GObj> {
 
 	public int controlRectContains(int x, int y) {
 		int corner;
-		for (GObj obj: this) {
-			corner = obj.controlRectContains(x, y);
-			if (corner != 0 && obj.resizable()) {
-				return corner;
+		for (GObj obj: this) {		
+			if(obj.isSelected()){  // only selected objects have control rectangles
+				corner = obj.controlRectContains(x, y);
+				if (corner != 0 && obj.resizable()) {
+					return corner;
+				}
 			}
 		}
 		return 0;
@@ -250,6 +252,26 @@ public class ObjectList extends ArrayList<GObj> {
 
 		return null;
 	}
+	
+public GObj getObjectByPortId(String portId) {
+		
+		for (GObj obj : this) {
+
+				for (Port port : obj.getPortList()) {
+					if (port.getId() != null) {
+						if (port.getId().equals(portId)) {
+							return obj;
+						}
+					}
+					if (port.getName().equals(portId)) {
+						return obj;
+					}
+				}			
+		}
+
+		return null;
+	}
+	
 	
 	
 	/**

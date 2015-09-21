@@ -7,13 +7,11 @@ import java.awt.event.*;
 
 import javax.swing.event.*;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.*;
 
 import ee.ioc.cs.vsle.editor.*;
-import ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel;
 import ee.ioc.cs.vsle.vclass.*;
 import static ee.ioc.cs.vsle.iconeditor.ClassFieldsTableModel.*;
 
@@ -81,6 +79,7 @@ public class ClassPropertiesDialog extends JDialog {
 	// filled before the dialog can be closed.
 	private boolean emptyValuesValid = true;
 
+	private String incClassName = "";
 	// Table selection listener.
 	ListSelectionListener listListener;
 
@@ -92,7 +91,9 @@ public class ClassPropertiesDialog extends JDialog {
 	ListSelectionModel selectionModel;
 	
 	private Dialog dialog;
-
+	
+	private boolean cancelled = false;
+	
 	// Scrollpanes.
 	private JScrollPane spTableScrollPane;
 	
@@ -143,7 +144,7 @@ public class ClassPropertiesDialog extends JDialog {
     	pnlErrors.add(new JLabel(" "));
 
 		// Labels and fields are stored on separate panels and grouped by the pnlGroups panel.
-		pnlLabels.setPreferredSize(new Dimension(110, 90));
+		pnlLabels.setPreferredSize(new Dimension(180, 90));
 		pnlLabels.setMinimumSize(pnlLabels.getPreferredSize());
 		pnlLabels.setMaximumSize(pnlLabels.getPreferredSize());
 		pnlLabels.setLayout(new GridLayout(4, 1));
@@ -163,7 +164,7 @@ public class ClassPropertiesDialog extends JDialog {
 		pnlRelation.add(new JLabel(" "), BorderLayout.CENTER);
 
 		// Fields are stored on a separate panel.
-		pnlFields.setPreferredSize(new Dimension(250, 90));
+		pnlFields.setPreferredSize(new Dimension(220, 90));
 		pnlFields.setMinimumSize(pnlFields.getPreferredSize());
 		pnlFields.setMaximumSize(pnlFields.getPreferredSize());
 		pnlFields.setLayout(new GridLayout(4, 1));
@@ -223,6 +224,12 @@ public class ClassPropertiesDialog extends JDialog {
                 // Store the defined properties in runtime variables.
 								
 				if( valuesValid() ) {
+					
+					if (!validateUniqueName()) return;
+					
+					// Fields are not saved for TEMPLATE, ask for confirmation
+					if (!noFieldsForTemplate()) return;
+					
 					storeVariables();
 					dispose();
 				}
@@ -233,6 +240,7 @@ public class ClassPropertiesDialog extends JDialog {
 		bttnCancel.addActionListener(new ActionListener() {
 			@Override
             public void actionPerformed(ActionEvent evt) {
+				cancelled = true;
 				dispose();
 			}
 		});
@@ -247,6 +255,8 @@ public class ClassPropertiesDialog extends JDialog {
 						extraColunmsUp();
 						//getContentPane().add(pnlTable, BorderLayout.CENTER);
 						pnlTable.revalidate();
+						pnlLabels.setPreferredSize(new Dimension(260, 90));
+						pnlFields.setPreferredSize(new Dimension(300, 90));						
 						dialog.setPreferredSize(new Dimension(600, 500));
 						pack();
 						getContentPane().repaint();	//pack();					
@@ -263,11 +273,15 @@ public class ClassPropertiesDialog extends JDialog {
 						extraColunmsDown();
 						//getContentPane().add(pnlTable, BorderLayout.CENTER);
 						pnlTable.revalidate();
+						pnlLabels.setPreferredSize(new Dimension(180, 90));
+						pnlLabels.revalidate();
+						pnlFields.setPreferredSize(new Dimension(210, 90));
+						//pnlRelation.setPreferredSize(new Dimension(220, 90));
 						dialog.setPreferredSize(new Dimension(410, 350));
 						pack();
 						getContentPane().repaint();	//					
 					}
-				});
+				});							
 
 		// Icon browsing button pressed. Browse for the icon in GIF format
 		// and set the browsed path to the Class Icon text field.
@@ -351,6 +365,32 @@ public class ClassPropertiesDialog extends JDialog {
 		}		
 	}
 	
+	private boolean validateUniqueName(){
+		 if (this.fldClassName.getText() != null && !this.fldClassName.getText().trim().equals(incClassName)) {
+				
+				for(String s : ClassEditor.getInstance().packageClassNamesList){
+					if(s.equals(fldClassName.getText().trim())){						
+						int confirmed = JOptionPane.showConfirmDialog( this, "Class already exists. Overwrite?", null, JOptionPane.OK_CANCEL_OPTION );
+						if(confirmed == JOptionPane.OK_OPTION){
+							return true;
+						} else return false;
+					}
+				}
+				}	
+		 return true;
+	}
+	
+	private boolean noFieldsForTemplate(){
+		if(cboxCompType.getSelectedItem().toString().equals("TEMPLATE") && tableModel.getRowCount() > 0){
+			int confirmed = JOptionPane.showConfirmDialog( this, "Fields will be dropped for TEMPLATE. Continue?", null, JOptionPane.OK_CANCEL_OPTION );
+			if(confirmed == JOptionPane.OK_OPTION){				
+				deleteAllClassField();
+				return true;
+			} else return false;
+		}
+		return true;
+	}
+	
 	private void extraColunmsUp(){
 
 		tblClassFields.setColumnModel(new JTable(tableModel).getColumnModel()); //restore model
@@ -423,9 +463,15 @@ public class ClassPropertiesDialog extends JDialog {
 				&& tblClassFields.getSelectedRowCount() > 0) {
 
 			int firstSelected = tblClassFields.getSelectedRow();
-			
+						
 			int selected = firstSelected;
-			while (selected > -1) {
+			while (selected > -1) {								
+				if (selected < tableModel.defaults.length){
+					tableModel.removeGraphic(true, selected);
+				}
+				if (selected < tableModel.knowns.length){
+					tableModel.removeGraphic(false, selected);
+				}
 				tableModel.removeRow(selected);
 				selected = tblClassFields.getSelectedRow();
 			}
@@ -436,17 +482,41 @@ public class ClassPropertiesDialog extends JDialog {
 				tblClassFields.setRowSelectionInterval( firstSelected, firstSelected );
 		}
 	} // delClassField
+	
+	
+	/**
+	 * Deletes all rows from the table.
+	 */
+	private void deleteAllClassField() {
+		if (tblClassFields.getRowCount() > 0) {
+
+			// clear shapes from Canvas
+			for (int i = 0; i < tblClassFields.getRowCount(); i ++){
+				
+				tableModel.removeShapes(true, tableModel.getDataVector().get(i).get(0).toString());
+				tableModel.removeShapes(false, tableModel.getDataVector().get(i).get(0).toString());
+				tableModel.removeRow(i);
+				
+			}					
+		}
+	}
+	
 
 	/**
 	 * Initializes the property fields with runtime variables.
 	 */
 	private void initialize() {
 		
-		if (ClassObject.className != null) fldClassName.setText(ClassObject.className);
-		if (ClassObject.classDescription != null) fldClassDesc.setText(ClassObject.classDescription);
-		if (ClassObject.getClassIcon() != null) fldClassIcon.setText(ClassObject.getClassIcon());
-		cboxCompType.setSelectedItem( ClassObject.componentType );
-		
+		ClassObject current = ClassEditor.getInstance().getCurrentCanvas().getClassObject();
+		if(current != null){
+			if (current.className != null){
+				fldClassName.setText(current.className);
+				this.incClassName = current.className;
+			}
+			if (current.classDescription != null) fldClassDesc.setText(current.classDescription);
+			if (current.getClassIcon() != null) fldClassIcon.setText(current.getClassIcon());
+			cboxCompType.setSelectedItem( current.componentType );
+		}
 		/**
 		 * 		System.out.println("ClassEditor.className " + ClassEditor.className);
 		System.out.println("ClassEditor.classDescription " + ClassEditor.classDescription);
@@ -464,16 +534,23 @@ public class ClassPropertiesDialog extends JDialog {
 
 		String classTitle = fldClassDesc.getText();
 		if (classTitle != null) classTitle = classTitle.trim();
-		ClassObject.classDescription = classTitle;
+	
 
 		String classIcon = fldClassIcon.getText();
 		if (classIcon != null) {
 			classIcon = classIcon.trim();
+		}	
+		// new
+		if (ClassEditor.getInstance().getCurrentCanvas().getClassObject() == null){
+			ClassEditor.getInstance().getCurrentCanvas().setClassObject(new ClassObject(className, classTitle, classIcon,(PackageClass.ComponentType)cboxCompType.getSelectedItem()));
+			ClassEditor.getInstance().getCurrentCanvas().getClassObject().setDbrClassFields(tableModel);
 		}
-		ClassObject.classIcon = classIcon;
-		
-		ClassEditor.classObject = new ClassObject(className, classTitle, classIcon,(PackageClass.ComponentType)cboxCompType.getSelectedItem());
-		
+		else { //edit
+			ClassEditor.getInstance().getCurrentCanvas().getClassObject().setClassDescription(classTitle);
+			ClassEditor.getInstance().getCurrentCanvas().getClassObject().setComponentType((PackageClass.ComponentType)cboxCompType.getSelectedItem());
+			ClassEditor.getInstance().getCurrentCanvas().getClassObject().setClassIcon(classIcon);
+			ClassEditor.getInstance().getCurrentCanvas().getClassObject().setClassName(className);
+		}
 		//ClassObject.componentType = (PackageClass.ComponentType)cboxCompType.getSelectedItem();
 	} // storeVariables.
 
@@ -527,8 +604,7 @@ public class ClassPropertiesDialog extends JDialog {
 				addErrorPanel("Please define class name.");
 				//JOptionPane.showMessageDialog(null, "Please define class name.", "Missing Property", JOptionPane.INFORMATION_MESSAGE);
 				fldClassName.requestFocus();
-			}
-		else if (this.cboxCompType == null || (this.cboxCompType != null && this.cboxCompType.getSelectedItem() == null)) {
+		}	else if (this.cboxCompType == null || (this.cboxCompType != null && this.cboxCompType.getSelectedItem() == null)) {
 				valid = false;
 				addErrorPanel("Please define component type.");
 				//JOptionPane.showMessageDialog(null, "Please define class name.", "Missing Property", JOptionPane.INFORMATION_MESSAGE);
@@ -554,24 +630,26 @@ public class ClassPropertiesDialog extends JDialog {
             if (icon.length() > 0 && !(icon.endsWith(".gif") || icon.endsWith(".png"))) {
 				valid = false;
 				this.fldClassIcon.setText("");
-				ClassObject.classIcon = "";
+				//ClassObject.classIcon = "";
 				JOptionPane.showMessageDialog(null, "Only icons in GIF or PNG format allowed.",
                         "Invalid icon format", JOptionPane.INFORMATION_MESSAGE);
 				fldClassIcon.requestFocus();
 			}
 		}
-		if (valid) {
+		/*if (valid) {
 			if (!classFieldsValid()) {
 				// Class fields invalid. Allow the user to apply corrections.
 				valid = false;
 			}
-		}
+		}*/
 		if (valid) {
 			if (classFieldsValid()) {
 				// Class fields valid. Remove empty rows from the DBResult.
 				tableModel.removeEmptyRows();
 				
 				tableModel.setDataVector( new Vector<Vector<Object>>( tableModel.getDataVector() ) );
+			} else {
+				valid = false;
 			}
 		}
 		return valid;
@@ -664,6 +742,11 @@ public class ClassPropertiesDialog extends JDialog {
 	//	tableModel.sort(column);
 	}
 	
+
+	public boolean isCancelled() {
+		return cancelled;
+	}
+
 	public static void main(String[] args) {
 		JDialog d = new ClassPropertiesDialog(new ClassFieldTable(), true );
 		d.setVisible( true );

@@ -153,7 +153,7 @@ public class EditorActionListener implements ActionListener {
 		   	logger.debug("EditorActionListener actionPerformed ", e);
 		   	logger.debug(e.getActionCommand());
 		}
-        
+        ClassCanvas canvas = ClassEditor.getInstance().getCurrentCanvas(); 
         if ( e.getActionCommand().equals( Menu.PRINT ) ) {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
                 ClassEditor.getInstance().getCurrentCanvas().print();
@@ -177,14 +177,18 @@ public class EditorActionListener implements ActionListener {
         } else if ( e.getActionCommand().equals( Menu.SHOW_PORT_OPEN_CLOSE ) ) {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
                 ClassEditor.getInstance().getCurrentCanvas().setDrawOpenPorts( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
-            }    
+            }
+        } else if ( e.getActionCommand().equals( Menu.SHOW_FIELDS ) ) {
+                if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
+                    ClassEditor.getInstance().setViewFields( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
+                }                
         } else if ( e.getActionCommand().equals( Menu.SHOW_NAMES ) ) {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
                 ClassEditor.getInstance().getCurrentCanvas().showObjectNames( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
             }
         } else if ( e.getActionCommand().equals( Menu.CLEAR_ALL ) ) {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
-                ClassEditor.getInstance().getCurrentCanvas().clearObjects();
+                ClassEditor.getInstance().getCurrentCanvas().clearObjectsWarning();
             }
         } else if ( e.getActionCommand().equals( Menu.SELECT_ALL ) ) {
             if ( ClassEditor.getInstance().getCurrentCanvas() != null ) {
@@ -201,8 +205,7 @@ public class EditorActionListener implements ActionListener {
 
         } else if ( e.getActionCommand().equals( Menu.SETTINGS ) ) {
             ClassEditor.getInstance().openOptionsDialog();
-        }  else if ( e.getActionCommand().equals( Menu.SAVE_SETTINGS ) ) {
-            Canvas canvas = ClassEditor.getInstance().getCurrentCanvas();
+        }  else if ( e.getActionCommand().equals( Menu.SAVE_SETTINGS ) ) {           
             if ( canvas != null ) {
                 RuntimeProperties.setZoomFactor( canvas.getScale() );
                 RuntimeProperties.setShowGrid( canvas.isGridVisible() );
@@ -214,28 +217,26 @@ public class EditorActionListener implements ActionListener {
             new AboutDialog( ClassEditor.getInstance() );
         } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
             new LicenseDialog( ClassEditor.getInstance() );
-        } else if ( e.getActionCommand().equals( Menu.CLASSPAINTER ) ) {
-            Canvas canvas = ClassEditor.getInstance().getCurrentCanvas();
+        } else if ( e.getActionCommand().equals( Menu.CLASSPAINTER ) ) {          
             if ( canvas != null ) {
                 canvas.setEnableClassPainter( !canvas.isEnableClassPainter() );
             }
-        } else if ( e.getActionCommand().equals( Menu.CLASS_PROPERTIES ) ) {
-        	System.out.println(ClassEditor.getInstance().getClassFieldModel());
-            new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true );
-            ClassCanvas canvas = ClassEditor.getInstance().getCurrentCanvas();
-            if ( canvas != null ) {
-            	   canvas.updateBoundingBox();   
-            }         
+        } else if ( e.getActionCommand().equals( Menu.CLASS_PROPERTIES ) ) {        	         	          
+             if ( canvas != null ) {            
+            	  if(canvas.getClassObject() != null)            	 
+            	  new ClassPropertiesDialog( canvas.getClassObject().getDbrClassFields(), true );
+            	  else  new ClassPropertiesDialog( new ClassFieldTable(), true );   
+            	  canvas.updateBoundingBox();   
+             }     
         } else if ( e.getActionCommand().equals( Menu.VIEWCODE ) ) {
-	        if ( ClassObject.className == null ) {
+	        if ( canvas.getClassObject().className == null ) {
 	            JOptionPane.showMessageDialog( ClassEditor.getInstance(), "No class name found", "Error", JOptionPane.ERROR_MESSAGE );
 	            return;
-	        } else if (ClassObject.componentType == PackageClass.ComponentType.TEMPLATE){
+	        } else if (canvas.getClassObject().componentType == PackageClass.ComponentType.TEMPLATE){
 	        	  JOptionPane.showMessageDialog( ClassEditor.getInstance(), "View Code not available for template", "Error", JOptionPane.ERROR_MESSAGE );
 		          return;
 	        }
-	        Canvas canvas = ClassEditor.getInstance().getCurrentCanvas();
-	    	canvas.openClassCodeViewer( ClassObject.className );
+	    	canvas.openClassCodeViewer( canvas.getClassObject().className );
 	    } else if ( e.getActionCommand().equals( Menu.EXPORT_TO_PACKAGE ) ) {
 	    	ClassEditor.getInstance().exportShapesToPackage(); // append the graphics to a package
 	    } else if ( e.getActionCommand().equals( ClassEditor.MENU_SAVE_CURRENT_PACKAGE ) ) {

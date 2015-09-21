@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -158,6 +159,8 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         String portConnection = null;
         if (isAreaConn) portConnection = "area";
         Port p = new Port(portName, portType, 0, 0, portConnection, isStrict, isMulti);
+        p.setX(0); /* 8p default port size */
+        p.setY(0); 
         ports.add(p);
         
         GObj obj = new GObj();
@@ -189,13 +192,13 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         p.setObject(obj);
         obj.setX(p.getX() + xOffset); // 
         obj.setY(p.getY() + yOffset); // 
-        p.setX(0);
-        p.setY(0);      
+        p.setX(0); /* 8p default port size */
+        p.setY(0);     
 
    /*    p.setDefaultGraphics(obj.isDrawOpenPorts());*/
-               
-        obj.setHeight(p.getHeight());
-        obj.setWidth(p.getWidth());     
+
+        obj.setHeight(p.getHeight(canvas.isDrawOpenPorts()));
+        obj.setWidth(p.getWidth(canvas.isDrawOpenPorts()));     
         obj.setName("port");        
     //    obj.set
         obj.setPorts(ports);       
@@ -214,71 +217,38 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
      * @param graphics
      * @param openFlag
      */
-    public void repaintPort( Port p, ClassGraphics graphics, boolean openFlag ) {
-    	
-    // Get port scale @TODO optimize this 
-    // float xSize = (float) 1.0;
-   //  float ySize = (float) 1.0;
-     
-   /*  for (GObj obj : canvas.getObjectList()) {
-
-			for (Port port : obj.getPortList()) {
-				if (port.getName().equals(p.getName())){
-					 xSize = obj.getXsize();
-					// ySize = obj.getYsize();
-				}
-			}			
-	}*/
-  // cleanup graphics code	
-          
-     int xx = 0; // max width for shape collection
-	 int startX = 0;
-	 int startY = 0;
+    public void repaintPort( GObj obj, ClassGraphics graphics, boolean openFlag, boolean isDefault ) {
+  	 
+	 if(graphics.getBoundHeight() != 0 && graphics.getBoundWidth() != 0 && !isDefault){
+		 graphics.setBounds(-graphics.getBoundWidth()/2, -graphics.getBoundHeight()/2, graphics.getBoundWidth(), graphics.getBoundHeight()); 
+		 obj.setWidth(graphics.getBoundWidth());
+		 obj.setHeight(graphics.getBoundHeight());
+	 } else	{
+		 graphics.setBounds(-4, -4, 8, 8);
+		 obj.setWidth(8);
+		 obj.setHeight(8);
+	 }
 	 
-     if(graphics.getShapes() != null){
-    	// int trace = Math.abs(graphics.getShapes().get(0).getHeight());
+    for ( Shape s : graphics.getShapes() ) {
     	 
-		 for ( Shape s : graphics.getShapes() ) {    
-			 if((startX == 0) || (s.getX() < startX)){
-				 startX = s.getX();
-			 }			 
-			 if((startY == 0) || (s.getY() < startY)){
-				 startY = s.getY();
-			 }
-			 if(s.getWidth()+s.getX() > xx ){
-				 xx = s.getWidth()+s.getX();
-			 }			
-		 }
-     } else return;
-     
-     float scaleStep = (float)8/(xx - startX);    // 8 is default port size. Change that to sys param. AM @TODO
-     
-     for ( Shape s : graphics.getShapes() ) {
-    	 
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Original shape: {} >> x = {};y = {};w = {};h = {}", s, s.getX(), s.getY(), s.getWidth(), s.getHeight());
-		}
-
-		s.setX((int)(Math.abs((s.getX() - startX) * scaleStep)));
-		s.setY((int)(Math.abs((s.getY() - startY) * scaleStep)));
-		s.setWidth(Math.round(s.getWidth() * scaleStep));//(int) xSize);	 
-		s.setHeight(Math.round(s.getHeight() * scaleStep));// (int)ySize);
-
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("Updated shape: {} >> x = {};y = {};w = {};h = {}", s, s.getX(), s.getY(), s.getWidth(), s.getHeight());
-		}
-     }
-     
-   //	 graphics.setBounds(0, 0, (int)xSize, (int)ySize);
+		 if(isDefault){
+    		s.setX(-4);
+    		s.setY(-4);
+    	} else {
+    		s.setX(s.getX() - obj.getWidth()/2);
+    		s.setY(s.getY() - obj.getHeight()/2);
+    	}
+     } 
+ 
+ Port p = obj.getPortList().get(0);   	
+     p.setX(0);
+     p.setY(0); 
+     p.setDefault(isDefault);
      if(openFlag){            		 
    		 p.setOpenGraphics(graphics);
    	 } else {
    		 p.setClosedGraphics(graphics);
-   	 }
-     	
-        p.setX(0);
-        p.setY(0);    
-                    
+   	 }                    
         canvas.repaint();
     } 
     
@@ -294,6 +264,25 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         
         canvas.drawingArea.repaint();
     } // drawText   
+        
+    public Text setTextDimensions(Text text){
+    	
+        /* Calculate width and height here, it is Canvas scale dependent AM 12.06*/
+       	FontMetrics fontMetrics = canvas.getFontMetrics(text.getFont());	
+   		text.setWidth(fontMetrics.stringWidth(text.getText()));
+   		text.setHeight(text.getFont().getSize());		
+           	
+    	return text;
+    }
+    
+    public void drawText( Font font, Color color, String text, int x, int y, boolean fixed) {  	
+        Text t = new Text( x, y, font, Shape.createColorWithAlpha( color, getTransparency() ), text );
+        t.setFixed(fixed);
+        t = setTextDimensions(t);
+        addShape(t);
+        
+        canvas.drawingArea.repaint();
+    } // 
     
     public void changeTransparency( int transparencyPercentage ) {
     	this.transparency = transparencyPercentage;
@@ -340,22 +329,13 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
     	addShape(s, 0, 0);
     }
     
-    public void addShape(Shape s, int xOffset, int yOffset) {
-
-    	
-    	/// test values
-   /* 	 xOffset = 0; 
-    	 yOffset = 0;*/
-    	
-    	if (LOGGER.isDebugEnabled()) {
-    		LOGGER.debug("1. MouseOps.addShape() {}", s.toText());
-    		// LOGGER.debug("2. addShape x {} y {} h {} w {}", s.getX(), s.getY(), s.getHeight(), s.getWidth());
-    	}
-
+    public void addShape(Shape s,int xOffset, int yOffset) {
+   	
         ArrayList<Shape> shapes = new ArrayList<Shape>();
         shapes.add(s);
-
-        GObj obj = new GObj();        
+      
+        GObj obj = new GObj();
+        
         obj.setX(s.getX() + xOffset);
         obj.setY(s.getY() + yOffset);
         obj.setHeight(s.getHeight());
@@ -464,7 +444,16 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         
         // LISTEN RIGHT MOUSE BUTTON
         if ( SwingUtilities.isRightMouseButton( e ) ) {
-        	GObj obj = null;        	
+        	GObj obj = null;  
+        	/* 1st iteration only selected*/
+        	for(GObj o:canvas.getObjectList().getSelected()){
+        			if(o.contains(canvas.mouseX, canvas.mouseY)){
+        				obj = o;       				
+        			}
+        	}
+        
+        	/* 2nd iteration all objects*/
+            if(obj == null){	
         		int maxIndex = -1;    	
         		for(GObj o:canvas.getObjectList()){
         			if(o.contains(canvas.mouseX, canvas.mouseY) && o.isSelected()){
@@ -483,6 +472,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         		else {
         			obj = canvas.getObjectList().checkInside( x, y, canvas.getScale() );
         		}
+            }
             if ( obj != null  && canvas.getObjectList().getSelectedCount() < 2 ) {
             	 canvas.getObjectList().clearSelected();
             	 obj.setSelected(true);
@@ -492,7 +482,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             	} else { 
             		openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
             	}
-            }
+            }            
             else if ( obj != null || canvas.getObjectList().getSelectedCount() > 1 ) {            	
             	openObjectPopupMenu( obj, e.getX() + canvas.drawingArea.getX(), e.getY() + canvas.drawingArea.getY() );
             } 
@@ -534,7 +524,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
                     if (SwingUtilities.isLeftMouseButton(e)
                             && e.getClickCount() >= 2){
                     	if (obj.getShapes() != null && obj.getShapes().size() > 0 && obj.getShapes().get(0) instanceof BoundingBox){
-                    		new ClassPropertiesDialog( ClassEditor.getInstance().getClassFieldModel(), true );
+                    		if(canvas.getClassObject() != null){
+                    			new ClassPropertiesDialog( canvas.getClassObject().getDbrClassFields(), true);
+                    		} else new ClassPropertiesDialog( new ClassFieldTable(), true);
                        	 	canvas.updateBoundingBox(); 
                     	} else if(obj.getName() == "port"){
                     		Port port = null;
@@ -626,9 +618,19 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
             canvas.mouseY = Math.round( e.getY() / canvas.getScale() );
             Connection con = canvas.getConnectionNearPoint( canvas.mouseX, canvas.mouseY );
 
-            obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, 1);          
+
+      	  /* 1st iteration only selected*/
+            for(GObj o:canvas.getObjectList().getSelected()){
+      			if(o.contains(canvas.mouseX, canvas.mouseY)){
+      				obj = o;          				 
+      			}
+            }          
+            if(obj == null){ // no selected objects were clicked
+            	obj = canvas.getObjectList().checkInside(canvas.mouseX, canvas.mouseY, 1);
+            }
+         
             /* check corners 1st*/
-            if ( con == null ) {
+            if (canvas.getObjectList().getSelectedCount() > 0 && con == null ) {
                 cornerClicked = canvas.getObjectList().controlRectContains(
                         canvas.mouseX, canvas.mouseY);
                 if ( cornerClicked != 0 ) {
@@ -1111,6 +1113,9 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         	int maxIndex = -1;
         	// look for selected objects 1st        	
         	for(GObj o:canvas.getObjectList()){
+        		if(o.getShapes() != null && o.getShapes().size() > 0 && o.getShapes().get(0).isField()){
+        			continue;
+        		}
         		if(o.contains(canvas.mouseX, canvas.mouseY)){
       		  	   	if (LOGGER.isDebugEnabled()) {
     		  			LOGGER.debug("obj{}", o.getName());
@@ -1136,8 +1141,14 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
         }
         
         List<GObj> selected = canvas.getObjectList().getSelected();
-        if ( selected != null && selected.size() > 0 )
-            canvas.setStatusBarText( "Selection: " + selected.toString() );
+        String text = "";
+        if ( selected != null && selected.size() > 0 ){
+        	text =  "Selection: ";
+        	for (GObj o:selected){
+        		text +=  o.getMessage() + "; ";
+        	}
+            canvas.setStatusBarText( text);
+        }
 
         canvas.setActionInProgress( false );
     }

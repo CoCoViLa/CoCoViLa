@@ -52,6 +52,8 @@ public class Menu {
     public static final String SHOW_PORTS = "Ports";
     public static final String SHOW_NAMES = "Object Names";
     public static final String SHOW_PORT_OPEN_CLOSE = "Opened Ports";
+    public static final String SHOW_FIELDS = "All Fields";
+    public static final String SHOW_KNOWN = "Known Fields";
     public static final String CONTROL_PANEL = "Controls";
     
     // PACKAGE

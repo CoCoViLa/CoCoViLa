@@ -9,7 +9,9 @@ import java.awt.Stroke;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.swing.JOptionPane;
@@ -25,6 +27,7 @@ import ee.ioc.cs.vsle.graphics.Line;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.vclass.Canvas;
+import ee.ioc.cs.vsle.vclass.ClassObject;
 import ee.ioc.cs.vsle.vclass.ClassPainter;
 import ee.ioc.cs.vsle.vclass.Connection;
 import ee.ioc.cs.vsle.vclass.GObj;
@@ -49,9 +52,22 @@ public class ClassCanvas extends Canvas{
     private boolean drawOpenPorts = true;    
     public IconPalette iconPalette;
 	public BoundingBox boundingBox;	
-    
+	public List<Port> portList;
+	// Class properties.
+	//current
+	private ClassObject classObject;
+		
 
-    public ClassCanvas( VPackage _package, String workingDir ) {    	
+    public  ClassObject getClassObject() {
+		return classObject;
+	}
+
+	public void setClassObject(ClassObject classObject) {
+		this.classObject = classObject;
+	}
+
+
+	public ClassCanvas( VPackage _package, String workingDir ) {    	
     	 super(workingDir);    	 
     	 vPackage = _package;
          m_canvasTitle = vPackage.getName();
@@ -63,10 +79,7 @@ public class ClassCanvas extends Canvas{
     protected void initialize() {
     	super.initialize();
         mListener = new MouseOps( this );     
-       //DrawingArea 
-     //  drawingArea =  getDrawingArea();
-       drawingArea.addMouseListener( mListener );
-     //   super.drawingArea.add
+        drawingArea.addMouseListener( mListener );
         drawingArea.addMouseMotionListener( mListener );
     }
     
@@ -91,8 +104,8 @@ public class ClassCanvas extends Canvas{
     
     public String getTextForBoundingBox(){
     	String text = "ClassNameNotDefined";
-    	if (ClassEditor.classObject != null && ClassEditor.classObject.getClassName() != null &&  ClassEditor.classObject.getClassName() != ""){
-    		text =  ClassEditor.classObject.getClassName();
+    	if (classObject != null && classObject.getClassName() != null &&  classObject.getClassName() != ""){
+    		text =  classObject.getClassName();
     	}
     	return text;
     }
@@ -102,13 +115,27 @@ public class ClassCanvas extends Canvas{
     }
     
     
+    public void clearObjectsWarning() {
+    	
+    	/* Warning that fields will be cleared as well */
+    	int clear = JOptionPane.showConfirmDialog( null, "Clear Working Area? \n Please note that all existing fields will be deleted.",  null, JOptionPane.OK_CANCEL_OPTION  );					  
+		  if ( clear == JOptionPane.YES_OPTION ) {
+			  this.clearObjects();	
+			  // clear fields
+			  getClassObject().removeClassFieldsGraphics();
+		  } else if (clear == JOptionPane.CANCEL_OPTION){
+			  return;
+		  }
+    }
+    
     public void clearObjects() {
-    	super.clearObjects();
-    	if(iconPalette != null && iconPalette.boundingbox.isSelected()){
-    		iconPalette.selection.setSelected(true);
-    		iconPalette.boundingbox.setSelected(false);
-    	}
-        drawingArea.repaint();
+    	
+			  super.clearObjects();
+		    	if(iconPalette != null && iconPalette.boundingbox.isSelected()){
+		    		iconPalette.selection.setSelected(true);
+		    		iconPalette.boundingbox.setSelected(false);
+		    	}
+		        drawingArea.repaint();		  
     }
     
     public Shape drawTextForBoundingBox(int x, int y, String text){    
@@ -381,9 +408,14 @@ public class ClassCanvas extends Canvas{
 
 	        // clone every selected object
 	        for (GObj obj : scheme.getSelectedObjects()) {
-	        	if(obj.getName().contains("BoundingBox")){
-	        		break; // NO CLONING for BB
-	        	}        	
+	        	if(obj.getShapes().get(0) != null && obj.getShapes().get(0) instanceof BoundingBox){
+	        		obj.setSelected( false );
+	        		continue; // NO CLONING for BB
+	        	}  
+	        	if(obj.getShapes().get(0) != null && obj.getShapes().get(0).isField()){
+	        		obj.setSelected( false );
+	        		continue; // NO CLONING for fields
+	        	}  
 	            GObj newObj = obj.clone();
 	            if (obj.getName().equals("port")) {
 	            	String newName = JOptionPane.showInputDialog(this, "Cloned Port Name:");  
@@ -398,7 +430,7 @@ public class ClassCanvas extends Canvas{
 	            newObjects.addAll( newObj.getComponents() );
 
 	            // create new and fresh class painter for cloned object
-	            if ( vPackage.hasPainters() ) {
+	            if ( vPackage.hasPainters() &&  obj.getClassName() != null) {
 	                PackageClass pc = vPackage.getClass( obj.getClassName() );
 	                ClassPainter painter = pc.getPainterFor( scheme, newObj );
 	                if ( painter != null ) {
@@ -594,6 +626,25 @@ public class ClassCanvas extends Canvas{
     	super.cancelAddingObject();
         setActionInProgress( false );
     }
+    
+
+    /**
+     * Update mouse position in info label
+     */
+    public void setPosInfo( int x, int y ) {
+        String message = x + ", " + y;
+
+        GObj obj = getObjectList().checkInside(x, y, 1);
+
+        if( obj != null ) {
+            
+            message += " " + obj.getMessage();
+            
+        }
+        
+        setStatusBarText( message );
+    }
+
 
     public void openPropertiesDialog( GObj obj ) {
 
@@ -603,4 +654,27 @@ public class ClassCanvas extends Canvas{
    		  new ImageDialog( ClassEditor.getInstance(),obj).setVisible( true );
     	} else  new ShapePropertiesDialog(ClassEditor.getInstance(),obj).setVisible( true );      	    	       
     }
+
+   public void removeObjectByName(String name, boolean def){
+	   GObj target = null;
+	   for(GObj obj:getObjectList()){
+		   if(obj.getShapes().size() > 0 && obj.getShapes().get(0).isField() && 
+				   obj.getShapes().get(0).getName().equals(name) && obj.getShapes().get(0).isFieldDefault() == def)
+			   target = obj;
+	   }
+	   if(target != null){
+		   getObjectList().remove(target);
+	   }
+   }
+   
+	public List<Port> getPortList() {
+		portList = new ArrayList<Port>();
+		for(GObj o :getObjectList()){
+			if(o.getPortList().size() > 0){
+				portList.addAll(o.getPortList());
+			}
+		}
+		return portList;
+	}
+       
 }

@@ -197,7 +197,11 @@ public class ClassImport {
 				w = Integer.parseInt(attrs.getValue("width"));
 				h = Integer.parseInt(attrs.getValue("height"));
 				classObj.setMax(w,h);
-				col = Integer.parseInt(attrs.getValue("colour"));
+				try{
+					col = Integer.parseInt(attrs.getValue("colour"));
+				} catch (NumberFormatException ex){
+					col = 0;
+				}
 				filled = Boolean.parseBoolean(attrs.getValue("filled"));
 				
 				strVal = attrs.getValue("stroke");

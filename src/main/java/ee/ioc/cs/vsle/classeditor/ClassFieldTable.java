@@ -2,21 +2,18 @@ package ee.ioc.cs.vsle.classeditor;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+
 import java.util.Vector;
 
-import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 
 import ee.ioc.cs.vsle.packageparse.PackageXmlProcessor;
 import ee.ioc.cs.vsle.vclass.ClassGraphics;
-import ee.ioc.cs.vsle.vclass.PackageClass;
+
 import ee.ioc.cs.vsle.vclass.VPackage;
 
 public class ClassFieldTable extends  DefaultTableModel {
@@ -180,17 +177,21 @@ public class ClassFieldTable extends  DefaultTableModel {
 							VPackage pkg;
 							if ( (pkg = PackageXmlProcessor.load(f, false)) != null ) {
 								ClassGraphics cg = pkg.getClass(s).getGraphics();	
+								ClassCanvas canvas = ClassEditor.getInstance().getCurrentCanvas();
 								if(arg0.getColumn() == 7){
 									updateGraphic(true, cg, arg0.getFirstRow());
+									ClassEditor.getInstance().graphicsToShapes(canvas, cg, getValueAt(arg0.getFirstRow(),0).toString(), true);
 									JOptionPane.showMessageDialog(null, "Template '" + s + "' loaded from " +f.getName() + " "
 											+ "is set as default graphics for field = " + getValueAt(arg0.getFirstRow(),0),
 											  "", JOptionPane.INFORMATION_MESSAGE);									
 								} else{
 									updateGraphic(false, cg, arg0.getFirstRow());
+									ClassEditor.getInstance().graphicsToShapes(canvas, cg, getValueAt(arg0.getFirstRow(),0).toString(), false);
 									JOptionPane.showMessageDialog(null, "Template '" + s + "' loaded from " +f.getName() + " "
 											+ "is set as known graphics for field = " + getValueAt(arg0.getFirstRow(),0),
 											  "", JOptionPane.INFORMATION_MESSAGE);		
 								}
+								canvas.repaint();
 						 }
 					  //  System.out.println("f: " +f.getName() + "; selection = " + s);
 					   				    
@@ -201,8 +202,10 @@ public class ClassFieldTable extends  DefaultTableModel {
 				} else {
 					if(arg0.getColumn() == 7 && defaults.length > arg0.getFirstRow()){						
 						defaults[arg0.getFirstRow()] = null;
+						removeShapes(true, getValueAt(arg0.getFirstRow(),0).toString());
 					} else if(arg0.getColumn() == 6 && knowns.length > arg0.getFirstRow()) {
 						knowns[arg0.getFirstRow()] = null;
+						removeShapes(false, getValueAt(arg0.getFirstRow(),0).toString());
 					}
 				}
 			}
@@ -256,16 +259,63 @@ public class ClassFieldTable extends  DefaultTableModel {
 			if(def){
 				if(defaults.length < index+1){
 					defaults = Arrays.copyOf(defaults, index+1);
+				}					
 					defaults[index] = cg;
-				}
-			
+
 			} else {
 				if(knowns.length < index+1){
 					knowns = Arrays.copyOf(knowns, index+1);
 					knowns[index] = cg;
+				} else {
+					knowns[index] = cg;
 				}
 			}
 		}
+		
+		public void removeGraphic(boolean def, int index){
+			int i;
+			if(def){
+				if(index < defaults.length){					 
+					ClassGraphics[] defaultscopy = Arrays.copyOf(defaults, defaults.length);	
+					for (i = 0;  i < defaultscopy.length; i++){		
+						if(i == index){
+							//delete this one
+							removeShapes(true, getDataVector().get(index).get(0).toString());
+						}
+						if(i > index){
+							defaults[i-1] = defaultscopy[i];
+						}
+					}
+					// not exactly the best way to handle array data, should be fixed in case array size will be >50
+					defaults = Arrays.copyOf(defaults, defaults.length-1);
+				}
+			
+			} else {
+				if(index < knowns.length){					 
+					ClassGraphics[] knownscopy = Arrays.copyOf(knowns, knowns.length);	
+					for (i = 0;  i < knownscopy.length; i++){	
+						if(i == index){
+							//delete this one
+							removeShapes(false, getDataVector().get(index).get(0).toString());
+						}
+						if(i > index){
+							knowns[i-1] = knownscopy[i];
+						}
+					}
+					// not exactly the best way to handle array data, should be fixed in case array size will be >50
+					knowns = Arrays.copyOf(knowns, knowns.length-1);
+				}
+				
+			}
+		}
+
+		public void removeShapes (boolean def, String name){
+			ClassCanvas canvas = ClassEditor.getInstance().getCurrentCanvas();
+			canvas.removeObjectByName(name, def);
+			canvas.repaint();
+		//	ClassEditor.getInstance().graphicsToShapes(canvas, cg, getValueAt(arg0.getFirstRow(),0).toString(), true);
+		}
+		
 
 		/**
 		 * Comparator for sorting row vectors by a column.

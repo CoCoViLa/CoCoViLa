@@ -6,7 +6,11 @@ import java.awt.*;
 
 public abstract class Shape implements Serializable, Cloneable {
 
-    private int x;
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = -7707715861477842170L;
+	private int x;
     private int y;
     protected int width;
     protected int height;
@@ -17,6 +21,8 @@ public abstract class Shape implements Serializable, Cloneable {
     protected boolean allowResize = true;
     private Color color;
     private BasicStroke stroke;
+    private boolean field = false;
+    private boolean fieldDefault = false;
 
     public Shape( int x, int y ) {
         this.setX( x );
@@ -28,8 +34,24 @@ public abstract class Shape implements Serializable, Cloneable {
         this.setWidth( width );
         this.setHeight( height );
     }
+    
+    public boolean isFieldDefault() {
+		return fieldDefault;
+	}
 
-    public ArrayList<Shape> getShapes() {
+	public void setFieldDefault(boolean fieldDefault) {
+		this.fieldDefault = fieldDefault;
+	}
+
+	public boolean isField() {
+		return field;
+	}
+
+	public void setField(boolean field) {
+		this.field = field;
+	}
+
+	public ArrayList<Shape> getShapes() {
         return null;
     }
 
@@ -390,4 +412,11 @@ public abstract class Shape implements Serializable, Cloneable {
                 : new Color( color.getRed(), color.getGreen(), color.getBlue(), alpha );
     }
 
+    
+    public void updateShapeAsField(Shape s, String name, boolean fieldDefault) {    
+    	s.setField(true);
+    	s.setFieldDefault(fieldDefault);
+    	s.setName(name);
+    }
+   
 }

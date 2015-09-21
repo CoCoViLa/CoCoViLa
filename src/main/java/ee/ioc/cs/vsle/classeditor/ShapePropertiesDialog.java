@@ -146,6 +146,7 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     	 * types 1 - standard (rect, oval)
     	 * 		 2 - line
     	 * 		 3 - arc
+    	 * 	     4 - field
     	 */
                
         JPanel pnlButtons = new JPanel();
@@ -171,14 +172,18 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         	pnlLabels.add(lblArcAngle);
         	pnlLabels.add(lblStartAngle);
         }
-        pnlLabels.add(lblFixed);      
-        pnlLabels.add(lblColour);
-        pnlLabels.add(lblColourPick);
-        pnlLabels.add(lblLinetype);
-        pnlLabels.add(lblTransparency);
-        pnlLabels.add(lblStroke);
+        if(type != 4){
+        	pnlLabels.add(lblFixed);      
+        	pnlLabels.add(lblColour);
+        	pnlLabels.add(lblColourPick);
+        	pnlLabels.add(lblLinetype);
+        	pnlLabels.add(lblTransparency);
+        	pnlLabels.add(lblStroke);
         
-        pnlFields.setPreferredSize(new Dimension(70, 210));
+        	pnlFields.setPreferredSize(new Dimension(70, 210));
+        } else {
+        	pnlFields.setPreferredSize(new Dimension(70, 160));        	
+        }
         pnlFields.setLayout(new GridLayout(12, 1));        
         if(type != 2){
         	pnlFields.add(fldWidth);
@@ -203,15 +208,19 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         	pnlFields.add(fldArcAngle);
         	pnlFields.add(fldStartAngle);
         }
-        pnlFields.add(c_Fixed);      
-        pnlFields.add(fldColour);
+        if(type != 4){
+        	pnlFields.add(c_Fixed);      
+        	pnlFields.add(fldColour);
         
-        pnlFields.add(colors);
+        	pnlFields.add(colors);
 
-        pnlFields.add(fldLinetype);
-        pnlFields.add(fldTransparency);
-        pnlFields.add(fldStroke);
-        
+        	pnlFields.add(fldLinetype);
+        	pnlFields.add(fldTransparency);
+        	pnlFields.add(fldStroke);
+        } else {
+        	fldWidth.setEditable(false);
+        	fldHeight.setEditable(false);
+        }
        
                         
         pnlButtons.add( bttnOk );
@@ -246,20 +255,24 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     	if(obj.getHeight() != 0) fldHeight.setText(obj.getHeight()+"");    	
     	if(obj.getShapes().size() > 0){
     		for(Shape s: obj.getShapes()){
-    			this.shape = s;
-    			if(s instanceof Rect){
+				this.shape = s;
+    			if(s.isField()){
+    				lblTitle.setText("Field " + s.getName() + (s.isFieldDefault()?" default":" known") + " graphics");
+    				initGUI(4);
+    			}
+    			else if(s instanceof Rect){
     				if(s.isFilled()){
     					lblTitle.setText("Filled Rectangle");
     				} else lblTitle.setText("Rectangle");
     				initGUI(1);
     			}
-    			if(s instanceof Oval){
+    			else if(s instanceof Oval){
     				if(s.isFilled()){
     					lblTitle.setText("Filled Oval");
     				} else lblTitle.setText("Oval");
     				initGUI(1);
     			}
-    			if(s instanceof Line){
+    			else if(s instanceof Line){
     				lblTitle.setText("Line");
     				//((Line) shape).setStringCoords(obj);
     				
@@ -273,7 +286,7 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
     					
     				initGUI(2);
     			}
-    			if(s instanceof Arc){
+    			else if(s instanceof Arc){
     				if(s.isFilled()){
     					lblTitle.setText("Filled Arc");
     				} else lblTitle.setText("Arc");
@@ -379,39 +392,40 @@ public class ShapePropertiesDialog extends JDialog implements ActionListener {
         else if ( evt.getSource() == bttnOk && validateInput(shape instanceof Line)) {
         	
         	ClassCanvas canvas = editor.getCurrentCanvas();
-        	obj.setWidth(tryParse(fldWidth.getText()));
-        	shape.setWidth(obj.getWidth());
-        	obj.setHeight(tryParse(fldHeight.getText()));
-        	shape.setHeight(obj.getHeight());
         	obj.setX(((Number)fldX.getValue()).intValue());
         	obj.setY(((Number)fldY.getValue()).intValue());
-        	shape.setLineType(((Number)fldLinetype.getValue()).floatValue());
-        	shape.setStrokeWidth(((Number)fldStroke.getValue()).floatValue());        	
-        	shape.setFixed(c_Fixed.isSelected());
-        	if(col == null) col = shape.getColor();
-        	shape.setColor( Shape.createColorWithAlpha( col, ((Number)fldTransparency.getValue()).intValue() ) );        	
-        	
-        	if(shape instanceof Line){
-        		if(validateLineInput()){
-        		int x1 = tryParse(fldStartX.getText()) ;
-        		int x2 = tryParse(fldEndX.getText());
-        		int y1 = tryParse(fldStartY.getText()) ;
-        		int y2 = tryParse(fldEndY.getText());
+        	if(!shape.isField()){
+        		obj.setWidth(tryParse(fldWidth.getText()));
+        		shape.setWidth(obj.getWidth());
+        		obj.setHeight(tryParse(fldHeight.getText()));
+        		shape.setHeight(obj.getHeight());        	
+        		shape.setLineType(((Number)fldLinetype.getValue()).floatValue());
+        		shape.setStrokeWidth(((Number)fldStroke.getValue()).floatValue());        	
+        		shape.setFixed(c_Fixed.isSelected());
+        		if(col == null) col = shape.getColor();
+        		shape.setColor( Shape.createColorWithAlpha( col, ((Number)fldTransparency.getValue()).intValue() ) );        	        	
+        		if(shape instanceof Line){
+        			if(validateLineInput()){
+        				int x1 = tryParse(fldStartX.getText()) ;
+        				int x2 = tryParse(fldEndX.getText());
+        				int y1 = tryParse(fldStartY.getText()) ;
+        				int y2 = tryParse(fldEndY.getText());
 
-        		((Line)shape).setX(x1>x2?obj.getWidth():0);
-        		((Line)shape).setEndX(x1<x2?obj.getWidth():0);
-        		((Line)shape).setY(0);
-        		((Line)shape).setEndY(obj.getHeight());
+        				((Line)shape).setX(x1>x2?obj.getWidth():0);
+        				((Line)shape).setEndX(x1<x2?obj.getWidth():0);
+        				((Line)shape).setY(0);
+        				((Line)shape).setEndY(obj.getHeight());
         		
-        		obj.setX(Math.min(x1, x2));
-            	obj.setY(Math.min(y1, y2));
+        				obj.setX(Math.min(x1, x2));
+        				obj.setY(Math.min(y1, y2));
         		} else return;
-         	}
-        	if(shape instanceof Arc){
-        		if(validateArcInput()){
-        			((Arc)shape).setArcAngle(((Number)fldArcAngle.getValue()).intValue());
-        			((Arc)shape).setStartAngle(((Number)fldStartAngle.getValue()).intValue());
-        		} else return;
+        		}
+        		if(shape instanceof Arc){
+        			if(validateArcInput()){
+        				((Arc)shape).setArcAngle(((Number)fldArcAngle.getValue()).intValue());
+        				((Arc)shape).setStartAngle(((Number)fldStartAngle.getValue()).intValue());
+        			} else return;
+        		}
         	}
             canvas.drawingArea.repaint();
             editor.repaint();

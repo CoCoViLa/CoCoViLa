@@ -384,6 +384,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         	if(cg.getShapes() != null && cg.getShapes().size()>0){
         		cg.setBounds(cg.getShapes().get(0).getX(), cg.getShapes().get(0).getY(), cg.getShapes().get(0).getWidth(), cg.getShapes().get(0).getHeight());
         		newPort.setOpenGraphics(cg);
+        		newPort.setDefault(false);
             }
         }
         
@@ -395,6 +396,7 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         	if(cg.getShapes() != null && cg.getShapes().size()>0){
         		cg.setBounds(cg.getShapes().get(0).getX(), cg.getShapes().get(0).getY(), cg.getShapes().get(0).getWidth(), cg.getShapes().get(0).getHeight());
         		newPort.setClosedGraphics(cg);
+        		newPort.setDefaultClosed(false);
         	}
         }
         
@@ -659,7 +661,12 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
             	int y2 = ((Number)NumberFormat.getInstance().parse(lineNode.getAttribute( ATR_Y2))).intValue();
             	
                // System.out.println("x1 = " + x1 + "; x2 = " + x2 + "; y1 = " + y1);
-            	
+            	if(y2 < y1){
+            		int tmpx = x1;
+            		int tmpy = y1;
+            		y1 = y2; y2 = tmpy;
+            		x1 = x2; x2 = tmpx;
+            	}
             	
             	Line line = new Line (x1, y1, x2, y2, getColor( lineNode ), lp.strokeWidth, lp.lineType);
             	line.setX(x1);
@@ -843,17 +850,18 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
         portEl.setAttribute( ATR_STRICT, Boolean.toString( port.isStrict() ) );
         portEl.setAttribute( ATR_MULTI, Boolean.toString( port.isMulti() ) );
         
-        if(port.getClosedGraphics() != null){
-        	Element elopen = doc.createElement(EL_OPEN);   
-        	elopen.appendChild(generateGraphicsNode(doc, port.getOpenGraphics()));
-        	portEl.appendChild(elopen);
+    /* don't save default graphics to xml */
+        if(!port.isDefault() && port.getClosedGraphics() != null){    	        	
+        		Element elopen = doc.createElement(EL_OPEN);   
+        		elopen.appendChild(generateGraphicsNode(doc, port.getOpenGraphics()));
+        		portEl.appendChild(elopen);
         }
-        if(port.getClosedGraphics() != null){
-        	Element elclose = doc.createElement(EL_CLOSED);        	
-        	elclose.appendChild(generateGraphicsNode(doc, port.getClosedGraphics()));
-        	portEl.appendChild(elclose);
-        }
-                      
+        if(!port.isDefaultClosed() && port.getClosedGraphics() != null){
+        		Element elclose = doc.createElement(EL_CLOSED);        	
+        		elclose.appendChild(generateGraphicsNode(doc, port.getClosedGraphics()));
+        		portEl.appendChild(elclose);
+        	
+        }             
         return portEl;
     }
     
@@ -905,6 +913,9 @@ public class PackageXmlProcessor extends AbstractXmlProcessor {
                 textEl.setAttribute( ATR_X, Integer.toString( text.getX() ) );
                 textEl.setAttribute( ATR_Y, Integer.toString( text.getY() ) );
                 textEl.setAttribute( ATR_FONTNAME, text.getFont().getName() );
+                //textEl.setAttribute( ATR_WIDTH, Integer.toString(text.getWidth()));
+                //textEl.setAttribute( ATR_HEIGHT, Integer.toString(text.getHeight()));
+                textEl.setAttribute( ATR_FIXED, Boolean.toString(text.isFixed()));
                 textEl.setAttribute( ATR_FONTSIZE, Integer.toString( text.getFont().getSize() ) );
                 textEl.setAttribute( ATR_FONTSTYLE, Integer.toString( text.getFont().getStyle() ) );
                 textEl.setAttribute( ATR_TRANSPARENCY, Integer.toString( text.getTransparency() ) );

@@ -13,9 +13,14 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.*;
 import org.xml.sax.helpers.*;
 
+import ee.ioc.cs.vsle.classeditor.ClassEditor;
 import ee.ioc.cs.vsle.editor.*;
+import ee.ioc.cs.vsle.graphics.Arc;
+import ee.ioc.cs.vsle.graphics.BoundingBox;
 import ee.ioc.cs.vsle.graphics.Image;
 import ee.ioc.cs.vsle.graphics.Line;
+import ee.ioc.cs.vsle.graphics.Oval;
+import ee.ioc.cs.vsle.graphics.Rect;
 import ee.ioc.cs.vsle.graphics.Shape;
 import ee.ioc.cs.vsle.graphics.Text;
 import ee.ioc.cs.vsle.util.*;
@@ -128,7 +133,8 @@ public class GObj implements Serializable, Cloneable,
     }
     
     public void resizeLine( int changeX, int changeY, int corner ) {
-    	Line line = (Line) getShapes().get(0);
+    	if(getShapes().size() < 1) return;
+		Line line = (Line) getShapes().get(0);
     	
 		if (logger.isDebugEnabled()) {
 			logger.debug("Line before resize: {}", line.toText());
@@ -451,10 +457,12 @@ public class GObj implements Serializable, Cloneable,
     }
 
     protected void draw( int xPos, int yPos, float _Xsize, float _Ysize, Graphics2D g2 ) {
-        Shape s;
-        for ( int i = 0; i < getShapes().size(); i++ ) {
+        Shape s;        
+        for ( int i = 0; i < getShapes().size(); i++ ) {        	
             s = getShapes().get( i );
-            s.draw( xPos, yPos, _Xsize, _Ysize, g2 );
+            //field shapes
+            if(s.isField() && !ClassEditor.getInstance().isViewFields()){}
+            else s.draw( xPos, yPos, _Xsize, _Ysize, g2 );
         }
     } // draw
 
@@ -556,6 +564,9 @@ public class GObj implements Serializable, Cloneable,
         	if(getShapes() != null && getShapes().size() != 0 && getShapes().get(0) instanceof Line){
         		((Line)getShapes().get(0)).drawSelection(g2, scale, getX(), getY(), getXsize(), getYsize());
         	}
+        	else if(getPorts()!= null && getPorts().size() > 0 ){
+        		drawSelectionMarksPort( g2, scale );
+        	}
         	else drawSelectionMarks( g2, scale);
         }
 
@@ -584,17 +595,18 @@ public class GObj implements Serializable, Cloneable,
     	
     	/*  int scaledX =  Math.round(getX() / scale );
     	  int scaledY =  Math.round(getY() / scale );*/
+    	int portSize = Math.max(getWidth(), getHeight())/2;
     	
-        g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
+        g.fillRect( getX() - portSize - CORNER_SIZE - 1, getY() - portSize - CORNER_SIZE - 1, CORNER_SIZE, CORNER_SIZE );
 
-        g.fillRect( getX() + (int) ( getXsize() * ( getWidth() + getPortOffsetX2() ) ) + 1, getY() + getPortOffsetY1() - CORNER_SIZE - 1,
+        g.fillRect( getX() + (int) ( getXsize() * ( portSize  ) ) + 1, getY() - portSize - CORNER_SIZE - 1,
                 CORNER_SIZE, CORNER_SIZE );
 
-        g.fillRect( getX() + getPortOffsetX1() - CORNER_SIZE - 1, getY() + (int) ( getYsize() * ( getPortOffsetY2() + getHeight() ) ) + 1,
+        g.fillRect( getX() - portSize  - CORNER_SIZE - 1, getY() + (int) ( getYsize() * ( portSize ) ) + 1,
                 CORNER_SIZE, CORNER_SIZE );
 
-        g.fillRect( getX() + (int) ( getXsize() * ( getPortOffsetX2() + getWidth() ) ) + 1, getY()
-                + (int) ( getYsize() * ( getPortOffsetY2() + getHeight() ) ) + 1, CORNER_SIZE, CORNER_SIZE );
+        g.fillRect( getX() + (int) ( getXsize() * ( portSize) ) + 1, getY()
+                + (int) ( getYsize() *  portSize ) + 1, CORNER_SIZE, CORNER_SIZE );
     }
 
     @Override
@@ -887,6 +899,36 @@ public class GObj implements Serializable, Cloneable,
     			return false;
     	}
     	return true;
+    }
+    
+    public String getMessage(){
+    	if(getPorts() != null && getPorts().size() > 0){
+			 return "Port : " + getPorts().get(0).getType() + " " + getPorts().get(0).getName();
+    	}
+    	if (this.getShapes() != null && this.getShapes().size() > 0 ){
+    		
+    		if(getShapes().get(0).isField()){
+   			 	return "Field " + getShapes().get(0).getName(); 
+    		} else	if(this.getShapes().get(0) instanceof Image){
+    			return "Image";
+    		} else if (this.getShapes().get(0) instanceof Text){
+    			return "Text";
+    		} else if (this.getShapes().get(0) instanceof Rect){
+    			if(getShapes().get(0).isFilled()) return "Filled Rectangle";
+    			else return "Rectangle";
+    		}   else if (this.getShapes().get(0) instanceof Oval){
+    			if(getShapes().get(0).isFilled()) return "Filled Oval";
+    			else return "Oval";
+    		} else if (this.getShapes().get(0) instanceof BoundingBox){
+    			return "Bounding Box";
+    		}  else if (this.getShapes().get(0) instanceof Line){
+    			return "Line";
+    		}   else if (this.getShapes().get(0) instanceof Arc){
+    			if(getShapes().get(0).isFilled()) return "Filled Arc";
+    			else return "Arc";
+    		}    		
+    	}
+    	return "";
     }
 
     /**

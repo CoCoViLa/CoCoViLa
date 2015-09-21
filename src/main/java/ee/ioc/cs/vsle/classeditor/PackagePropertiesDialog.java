@@ -31,6 +31,7 @@ public class PackagePropertiesDialog extends JDialog {
 
   // Buttons
   private static final JButton bttnOk = new JButton("OK");
+  private static final JButton bttnSave = new JButton("Save");
   private static final JButton bttnCancel = new JButton("Cancel");
 
   // Panels
@@ -67,7 +68,7 @@ public class PackagePropertiesDialog extends JDialog {
 	this.setTitle("Package Properties");
 
 	// add buttons to the buttons' panel.
-	pnlButtons.add(bttnOk);
+	pnlButtons.add(bttnSave);
 	pnlButtons.add(bttnCancel);
 
 	// Labels and fields are stored on separate panels and grouped by the pnlGroups panel.
@@ -87,6 +88,9 @@ public class PackagePropertiesDialog extends JDialog {
 	if(pckName != null){
 		fldName.setText(pckName);
 		fldDesc.setText(pckDesc);
+	} else {
+		fldName.setText("");
+		fldDesc.setText("");
 	}
 	pnlFields.add(fldName);
 	pnlFields.add(fldDesc);
@@ -114,7 +118,7 @@ public class PackagePropertiesDialog extends JDialog {
 	//////////////////////////////////////////////////////
 
 	// Ok button pressed, close the window and update class properties.
-	bttnOk.addActionListener(new ActionListener() {
+	bttnSave.addActionListener(new ActionListener() {
 	  public void actionPerformed(final ActionEvent evt) {
 		// Store the defined properties in runtime variables.
 		storeVariables();

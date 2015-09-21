@@ -236,8 +236,7 @@ public class Line extends Shape implements Serializable {
 		case 2:	
 		
 			g2.fillRect( (int) ( Xsize * getX()) + xModifier - GObj.CORNER_SIZE - 1 + (getEndX() < getX()?GObj.CORNER_SIZE+2:0) ,  yModifier - GObj.CORNER_SIZE/2, GObj.CORNER_SIZE, GObj.CORNER_SIZE );
-		
-			g2.fillRect( (int) ( Xsize * getEndX() ) + xModifier + (getEndX() < getX()?-2:2),  (int)( Ysize * getEndY() ) + yModifier -  GObj.CORNER_SIZE/2, GObj.CORNER_SIZE, GObj.CORNER_SIZE );
+			g2.fillRect( (int) ( Xsize * getEndX() ) + xModifier + (getEndX() < getX()?(-1 - GObj.CORNER_SIZE):2),  (int)( Ysize * getEndY() ) + yModifier -  GObj.CORNER_SIZE/2, GObj.CORNER_SIZE, GObj.CORNER_SIZE );
 			
 			break;
 		default:
@@ -264,6 +263,13 @@ public class Line extends Shape implements Serializable {
     	if ( ( p.x >= obj.getX() + getX() +1 ) && ( p.y >= obj.getY() - GObj.CORNER_SIZE/2 ) ) {
             if ( ( p.y <=  obj.getY() + GObj.CORNER_SIZE/2 )  &&  p.x <= obj.getX()+ getX() + GObj.CORNER_SIZE + 2) {
                 return 1;
+            }
+        } 
+    	
+    	/* extra*/
+    	if ( ( p.x >= obj.getX()  -  GObj.CORNER_SIZE - 1 ) && ( p.y >= obj.getY() + getEndY() - GObj.CORNER_SIZE/2 ) ) {
+            if ( ( p.y <=  obj.getY() + getEndY() + GObj.CORNER_SIZE/2 )  &&  p.x <= obj.getX()+ getX() -1 ) {
+                return 2;
             }
         } 
     	

@@ -151,6 +151,10 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			JOptionPane.showMessageDialog(this, "Please define port name.");
 			tfPortName.requestFocusInWindow();
 			valid = false;
+		} else if (!checkName( name )) {
+			JOptionPane.showMessageDialog(this, 
+					"The port name has to be unique.");
+			valid = false;
 		} else if (!checkIdentifier( name )) {
 			JOptionPane.showMessageDialog(this, 
 					"The port name is not a valid identifier.");
@@ -214,6 +218,16 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 		}
 	} // setPortProperties
 
+	
+	private boolean checkName( String name ) {
+		
+		for (Port p :editor.getCurrentCanvas().getPortList()){
+			if (p.getName().equals(name))return false;
+		}
+		
+		return true;
+	}
+	
 	private boolean checkIdentifier( String name ) {
 	    int idx = name.indexOf( '.' );
 	    if( idx < 0 )
