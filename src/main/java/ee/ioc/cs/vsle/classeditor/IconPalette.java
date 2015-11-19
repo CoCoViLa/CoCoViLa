@@ -2,6 +2,7 @@ package ee.ioc.cs.vsle.classeditor;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -151,7 +152,7 @@ public class IconPalette extends PaletteBase {
             toolBar.add(b);
         }
         
-        props = createBttnProp("images/prop.gif", "Selected Shape Properties");   
+        props = createBttnProp("images/compute_goal.png", "Selected Shape Properties");   
         toolBar.add(props);
 
         lblLineWidth.setToolTipText("Line width or point size of a selected tool");
@@ -175,12 +176,13 @@ public class IconPalette extends PaletteBase {
 
         toolBar.add(lblZoom);
         toolBar.add(createZoomPanel());
-
+        
         toolBar.add(lblLineType);
         toolBar.add(spinnerLineType);
-
+             
         canvas.add(toolBar, BorderLayout.PAGE_START);
-        canvas.revalidate();        
+    //    canvas.revalidate();        
+               
     }
 
     protected JButton createBttnProp(String iconPath, String descr) {
@@ -191,7 +193,7 @@ public class IconPalette extends PaletteBase {
         button.setToolTipText(descr);
 
         // Palette buttons should be smaller, that's what JToolBar is doing
-        button.setMargin(BUTTON_BORDER);
+        button.setMargin(new Insets(4, 4, 4, 4));
 
         
         button.addMouseListener(getButtonMouseListener());
