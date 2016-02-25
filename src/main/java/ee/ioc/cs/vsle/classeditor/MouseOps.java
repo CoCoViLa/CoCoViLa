@@ -412,7 +412,7 @@ public class MouseOps extends ee.ioc.cs.vsle.common.ops.MouseOps {
 
     public void mouseExited( MouseEvent e ) {
         mouseOver = false;
-        canvas.drawingArea.repaint();
+       // canvas.drawingArea.repaint();
     }
 
     private void openObjectPopupMenu( GObj obj, int x, int y ) {   	

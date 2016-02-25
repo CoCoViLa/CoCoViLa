@@ -64,6 +64,8 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 	private JButton bttnCancel = new JButton("Cancel");
 
 	ClassEditor editor;
+	
+	String incName = "";
 
 	PortPropertiesDialog(ClassEditor editor, Port port) {
 		super(editor);
@@ -113,7 +115,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			setAreaConn(port.isArea());
 			setPortType(port.getType());
 			setMulti(port.isMulti());
-			//this.port = 
+			incName = port.getName();
 					
 		} else {
 			setTitle("Define Port Properties");
@@ -151,7 +153,7 @@ public class PortPropertiesDialog extends JDialog implements ActionListener {
 			JOptionPane.showMessageDialog(this, "Please define port name.");
 			tfPortName.requestFocusInWindow();
 			valid = false;
-		} else if (!checkName( name )) {
+		} else if (!incName.equals(name) && !checkName( name )) {
 			JOptionPane.showMessageDialog(this, 
 					"The port name has to be unique.");
 			valid = false;

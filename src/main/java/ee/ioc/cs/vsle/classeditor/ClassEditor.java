@@ -1243,8 +1243,8 @@ public class ClassEditor extends JFrame implements ChangeListener {
 		  int classY = 5; /* basic offset*/
 		  int classX = 5;
 		  if(onlyClass){
-			  classY = 7; /* single class position */
-			  classX = 7;
+			  classY = 40; /* single class position */
+			  classX = 40;
 		  } else {
 		      ObjectList olist = curCanvas.getObjectList();
 	            for ( GObj obj : olist) {
