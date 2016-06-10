@@ -139,6 +139,7 @@ public abstract class AbstractParserTest {
   protected void assertAlias(AnnotatedClass ac, String aliasName, String[] boundVars, String aliasType, boolean isWildcard) {
     assertNotNull("Alias type cannot be null", aliasType);
     assertAliasType(ac, aliasName, aliasType);
+    assertAliasBoundVars(ac, aliasName, boundVars);
     assertClassRelation(ac, RelType.TYPE_ALIAS, boundVars, vars(aliasName), "alias");
     if(!isWildcard) {
       assertClassRelation(ac, RelType.TYPE_ALIAS, vars(aliasName), boundVars, "alias");
@@ -148,6 +149,16 @@ public abstract class AbstractParserTest {
   protected void assertAliasType(AnnotatedClass ac, String aliasName, String aliasType) {
     Alias alias = (Alias)ac.getFieldByName(aliasName);
     assertEquals("alias var type is incorrect", aliasType, alias.getVarType());
+  }
+
+  protected void assertAliasBoundVars(AnnotatedClass ac, String aliasName, String[] boundVars) {
+    Alias alias = (Alias)ac.getFieldByName(aliasName);
+    if (alias.isWildcard()) {
+      assertEquals("wildcard alias should have no bound vars", 0, alias.getVars().size());
+    }
+    else {
+      assertEquals("number of bound variables in alias is incorrect", boundVars.length, alias.getVars().size());
+    }
   }
 
   static String[] vars(String... vars) {
