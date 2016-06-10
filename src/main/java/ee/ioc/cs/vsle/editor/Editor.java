@@ -9,6 +9,8 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.undo.*;
 
+import ee.ioc.cs.vsle.util.SystemUtils;
+import org.apache.commons.lang3.*;
 import org.slf4j.*;
 
 import ee.ioc.cs.vsle.editor.EditorActionListener.CloneAction;
@@ -667,10 +669,8 @@ public class Editor extends JFrame implements ChangeListener {
          * will have default sandbox permissions.)
          */
         System.setSecurityManager( null );
-        
-        String version = System.getProperty( "java.version" );
 
-        logger.info( "Java Version: {}", version );
+        checkJavaVersion();
 
         String directory = RuntimeProperties.getWorkingDirectory();
 
@@ -741,6 +741,26 @@ public class Editor extends JFrame implements ChangeListener {
         /* ******************** Init Factories ******************** */
         SpecGenerator.init();
         XMLSpecGenerator.init();
+    }
+
+    /*
+     * Still likely to fail with "UnsupportedClassVersionError"
+     */
+    private static void checkJavaVersion() {
+        logger.info( "Java Version: {}", org.apache.commons.lang3.SystemUtils.JAVA_VERSION );
+
+        if ( !org.apache.commons.lang3.SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_1_8) ) {
+
+            String message = String.format("CoCoViLa requires at least Java %s to run!", JavaVersion.JAVA_1_8);
+            logger.error( message );
+            //for those who start the program w/o the console --
+            //try to show this error message in a dialog, not just die silently
+            try {
+                JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                System.exit( 1 );
+            }
+        }
     }
 
     public static void checkWebStart(String[] args) {
