@@ -33,27 +33,18 @@ public class SpecificationLoader {
 
 	private Map<String, AnnotatedClass> specificationByName;
 	private Set<String> schemeObjectSet;
-	private AntlrSpecificationSourceProvider sourceProvider;
+	private SpecificationSourceProvider sourceProvider;
 
 	public SpecificationLoader(final String basePath, Set<String> schemeObjects) {
-		this(new AntlrSpecificationSourceProvider() {
-			@Override
-			public CharStream getSource(String specificationName) {
-				try {
-					return new ANTLRFileStream(basePath.concat(specificationName).concat(".java"));
-				} catch (IOException e) {
-					throw new SpecificationNotFoundException("Unable to find specification ".concat(specificationName));
-			}
-			}
-		}, schemeObjects);
+		this(new JavaFileSourceProvider(basePath), schemeObjects);
 	}
 
-	public SpecificationLoader(AntlrSpecificationSourceProvider sourceProvider, Set<String> schemeObjects) {
+	public SpecificationLoader(SpecificationSourceProvider sourceProvider, Set<String> schemeObjects) {
 		assert sourceProvider != null;
 
 		this.sourceProvider = sourceProvider;
 		this.schemeObjectSet = schemeObjects;
-		specificationByName = new HashMap<String, AnnotatedClass>();
+		specificationByName = new HashMap<>();
 	}
 	//TODO: Recursive specifications...
 	public AnnotatedClass getSpecification(String specificationName) throws SpecificationNotFoundException{
@@ -103,14 +94,6 @@ public class SpecificationLoader {
 		return schemeObjectSet != null && schemeObjectSet.contains(objectName);
 	}
 	
-	public static class SpecificationNotFoundException extends SpecParseException{
-
-		public SpecificationNotFoundException(String message) {
-			super(message);
-		}
-		
-	}
-
 	public void reset() {
 		specificationByName.clear();
 	}

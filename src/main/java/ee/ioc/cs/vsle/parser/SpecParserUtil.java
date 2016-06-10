@@ -4,6 +4,7 @@ import ee.ioc.cs.vsle.editor.RuntimeProperties;
 import ee.ioc.cs.vsle.synthesize.AnnotatedClass;
 import ee.ioc.cs.vsle.synthesize.ClassList;
 import ee.ioc.cs.vsle.synthesize.SpecParser;
+import ee.ioc.cs.vsle.vclass.VPackage;
 
 import java.util.Set;
 
@@ -35,21 +36,17 @@ public class SpecParserUtil {
     return new ParsedSpecificationContext(null, classList, mainClassName);
   }
 
-  public static ParsedSpecificationContext parseFromString(String spec, String workingDir) {
-    return parseFromString(spec, workingDir, null);
-  }
-
-  public static ParsedSpecificationContext parseFromString(String spec, String workingDir, Set<String> schemeObjects) {
+  public static ParsedSpecificationContext parseFromString(String spec, VPackage _package, Set<String> schemeObjects) {
     String mainClassName;
     ClassList classList;
     switch (RuntimeProperties.getSpecParserKind()) {
       case REGEXP: {
         mainClassName = SpecParser.getClassName(spec);
-        classList = new SpecParser(workingDir).parseSpecification(spec, mainClassName, schemeObjects);
+        classList = new SpecParser(_package.getDir()).parseSpecification(spec, mainClassName, schemeObjects);
         break;
       }
       case ANTLR: {
-        SpecificationLoader specificationLoader = new SpecificationLoader(workingDir, schemeObjects);
+        SpecificationLoader specificationLoader = new SpecificationLoader(new PackageSpecSourceProvider(_package), schemeObjects);
         AnnotatedClass _this = specificationLoader.loadSpecification(spec);
         mainClassName = _this.getName();
         classList = new ClassList(specificationLoader.getLoadedSpecifications());

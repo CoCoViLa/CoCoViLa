@@ -1177,7 +1177,11 @@ public class Canvas extends JPanel implements ISchemeContainer {
     void openClassCodeViewer( String className ) {
         String editor = RuntimeProperties.getDefaultEditor();
         if (editor == null) {
-            CodeViewer cv = new CodeViewer(className, getWorkDir());
+            final PackageClass packageClass = vPackage.getClass(className);
+            final String sourceFile = packageClass.getInfo().getSource();
+            CodeViewer cv = sourceFile != null
+                                ? new CodeViewer(new File(vPackage.getDir(), sourceFile))
+                                : new CodeViewer(className, getWorkDir());
             cv.setLocationRelativeTo( Editor.getInstance() );
             cv.open();
             

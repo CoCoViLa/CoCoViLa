@@ -235,6 +235,16 @@ public class EditorActionListener implements ActionListener {
                     message = "No packages loaded";
                 }
                 JOptionPane.showMessageDialog( Editor.getInstance(), message );
+            } else if ( e.getActionCommand().equals( Menu.BROWSE_PACKAGE ) ) {
+                final VPackage currentPackage = Editor.getInstance().getCurrentPackage();
+                if ( notifyOnNullPackage(currentPackage) ) {
+                    return;
+                }
+                try {
+                    Desktop.getDesktop().open(new File(currentPackage.getPath()).getParentFile());
+                } catch (IOException e1) {
+                    Editor.getInstance().showInfoDialog("Unable to open package folder", currentPackage.getPath());
+                }
             } else if ( e.getActionCommand().equals( Menu.PRINT ) ) {
                 if ( Editor.getInstance().getCurrentCanvas() != null ) {
                     Editor.getInstance().getCurrentCanvas().print();
@@ -244,20 +254,20 @@ public class EditorActionListener implements ActionListener {
             } else if ( e.getActionCommand().equals( Menu.GRID ) ) {
                 if ( Editor.getInstance().getCurrentCanvas() != null ) {
                     Editor.getInstance().getCurrentCanvas().setGridVisible(
-                            !Editor.getInstance().getCurrentCanvas().isGridVisible() );
+                            !Editor.getInstance().getCurrentCanvas().isGridVisible());
                 }
             } else if ( e.getActionCommand().equals( Menu.CONTROL_PANEL ) ) {
                 if ( Editor.getInstance().getCurrentCanvas() != null ) {
                     Editor.getInstance().getCurrentCanvas().setCtrlPanelVisible(
-                            !Editor.getInstance().getCurrentCanvas().isCtrlPanelVisible() );
+                            !Editor.getInstance().getCurrentCanvas().isCtrlPanelVisible());
                 }
             } else if ( e.getActionCommand().equals( Menu.SHOW_PORTS ) ) {
                 if ( Editor.getInstance().getCurrentCanvas() != null ) {
-                    Editor.getInstance().getCurrentCanvas().setDrawPorts( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
+                    Editor.getInstance().getCurrentCanvas().setDrawPorts(((JCheckBoxMenuItem) e.getSource()).isSelected());
                 }
             } else if ( e.getActionCommand().equals( Menu.SHOW_NAMES ) ) {
                 if ( Editor.getInstance().getCurrentCanvas() != null ) {
-                    Editor.getInstance().getCurrentCanvas().showObjectNames( ((JCheckBoxMenuItem)e.getSource()).isSelected() );
+                    Editor.getInstance().getCurrentCanvas().showObjectNames(((JCheckBoxMenuItem) e.getSource()).isSelected());
                 }
             } else if ( e.getActionCommand().equals( Menu.CLEAR_ALL ) ) {
                 if ( Editor.getInstance().getCurrentCanvas() != null ) {
@@ -306,7 +316,7 @@ public class EditorActionListener implements ActionListener {
                     notifyOnNullPackage(null);
                 }
             } else if ( e.getActionCommand().equals( Menu.PROPAGATE_VALUES ) ) {
-                RuntimeProperties.setPropagateValues( checkIfSelected( e.getSource(), false ) );
+                RuntimeProperties.setPropagateValues(checkIfSelected(e.getSource(), false));
             } else if ( e.getActionCommand().equals( Menu.COMPUTE_GOAL ) ) {
                 RuntimeProperties.setComputeGoal( checkIfSelected( e.getSource(), false ) );
             } else if ( e.getActionCommand().equals( Menu.SCHEME_VALUES ) ) {
@@ -351,7 +361,7 @@ public class EditorActionListener implements ActionListener {
             } else if ( e.getActionCommand().equals( Menu.SETTINGS ) ) {
                 Editor.getInstance().openOptionsDialog();
             } else if ( e.getActionCommand().equals( Menu.FONTS ) ) {
-                RuntimeProperties.openFontChooser( Editor.getInstance() );
+                RuntimeProperties.openFontChooser(Editor.getInstance());
             }  else if ( e.getActionCommand().equals( Menu.SAVE_SETTINGS ) ) {
                 Canvas canvas = Editor.getInstance().getCurrentCanvas();
                 if ( canvas != null ) {
@@ -367,7 +377,7 @@ public class EditorActionListener implements ActionListener {
             } else if ( e.getActionCommand().equals( Menu.EXPERT_TABLE ) ) {
                 JDialog ess = new ExpertSystemShellWelcomeDialog();
                 ess.setLocationRelativeTo( Editor.getInstance() );
-                ess.setVisible( true );
+                ess.setVisible(true);
             } else if ( e.getActionCommand().equals( Menu.ICON_EDITOR ) ) {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override

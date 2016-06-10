@@ -6,7 +6,7 @@ import ee.ioc.cs.vsle.graphics.Shape;
 
 public class PackageClass implements Serializable {
     
-    public static enum ComponentType { 
+    public enum ComponentType {
         CLASS(GObj.class, "class", true), 
         REL(RelObj.class, "relation", true), 
         SCHEME(SchemeObj.class, "scheme", false),
@@ -16,7 +16,7 @@ public class PackageClass implements Serializable {
         private final String xmlName;
         private boolean hasSpec;
         
-        private ComponentType(Class<? extends GObj> _class, String name, boolean hasSpec) {
+        ComponentType(Class<? extends GObj> _class, String name, boolean hasSpec) {
             this._class = _class;
             this.xmlName = name;
             this.hasSpec = hasSpec;
@@ -52,20 +52,20 @@ public class PackageClass implements Serializable {
     }
     
     private static final long serialVersionUID = 1L;
-	private String name;
 	private String icon;
-	//fields declared in the xml
+    //fields declared in the xml
     private Map<String, ClassField> propFields = new LinkedHashMap<String, ClassField>();
     //fields declared in the specification of the corresponding java class
     private Map<String, ClassField> specFields = new LinkedHashMap<String, ClassField>();
-	private ClassGraphics graphics;
-	private ArrayList<Port> ports = new ArrayList<Port>();
-	private String description;
+    private ClassGraphics graphics;
+    private ArrayList<Port> ports = new ArrayList<Port>();
 	private ComponentType componentType = ComponentType.CLASS;
     private String painterName;
     private ClassPainter painterPrototype;
     private int sequence;
     private boolean isStatic; // should the class be static by default?
+
+    private final TextInfo info = new TextInfo();
 
 	public PackageClass(String name) {
 		this.setName( name );
@@ -204,7 +204,7 @@ public class PackageClass implements Serializable {
 	}
 
 	/**
-     * @param propFields the fields to set
+     * @param field the field to set
      */
     public void addField( ClassField field ) {
         this.propFields.put( field.getName(), field );
@@ -246,25 +246,33 @@ public class PackageClass implements Serializable {
     }
 
 	public void setDescription(String description) {
-		this.description = description;
+		info.description = description;
 	}
 
 	public String getDescription() {
-		return description;
+		return info.description;
 	}
 
     /**
      * @param name the name to set
      */
     public void setName( String name ) {
-        this.name = name;
+        info.name = name;
+    }
+
+    public void setSource( String source ) {
+        info.source = source;
+    }
+
+    public void setTarget( String target ) {
+        info.target = target;
     }
 
     /**
      * @return the name
      */
     public String getName() {
-        return name;
+        return info.name;
     }
 
     /**
@@ -289,7 +297,7 @@ public class PackageClass implements Serializable {
     }
 
     /**
-     * @param relation the relation to set
+     * @param type the component type to set
      */
     public void setComponentType( ComponentType type ) {
         if(type == null)
@@ -321,8 +329,36 @@ public class PackageClass implements Serializable {
 
     @Override
     public String toString() {
-        return "PackageClass [name=" + name + ", icon=" + icon
-                + ", description=" + description + ", componentType="
+        return "PackageClass [name=" + info.name + ", icon=" + icon
+                + ", description=" + info.description + ", componentType="
                 + componentType + ", isStatic=" + isStatic + "]";
+    }
+
+    public TextInfo getInfo() {
+        return info;
+    }
+
+    public class TextInfo {
+        private String name;
+        private String description;
+        private String source;
+        private String target;
+
+        public String getName() {
+            return name;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+
+        public String getSource() {
+            return source;
+        }
+
+        public String getTarget() {
+            return target;
+        }
+
     }
 }

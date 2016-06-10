@@ -59,6 +59,7 @@ public class Menu {
     public static final String CLOSE_ALL = "Close All";
     public static final String RELOAD = "Reload";
     public static final String INFO = "Info";
+    public static final String BROWSE_PACKAGE = Editor.getOsType() == Editor.OS.MAC ? "Open in Finder" : "Explore Folder";
     public static final String RECENT = "Recent";
 
     // SCHEME

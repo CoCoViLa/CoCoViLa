@@ -1,6 +1,8 @@
 package ee.ioc.cs.vsle.synthesize;
 
-public class SpecParseException extends RuntimeException {
+import ee.ioc.cs.vsle.api.CoCoViLaRuntimeException;
+
+public class SpecParseException extends CoCoViLaRuntimeException {
 
     private String metaClass;
 

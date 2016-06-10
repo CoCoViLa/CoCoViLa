@@ -172,7 +172,7 @@ public class ProgramRunner {
 
         try {
             GenStorage fs = getStorage();
-            Synthesizer.makeProgram( genCode, classList, mainClassName, schemeContainer.getWorkDir(), fs );
+            Synthesizer.makeProgram( genCode, classList, mainClassName, schemeContainer.getWorkDir(), fs, schemeContainer.getPackage() );
             genObject = compile( fs, schemeContainer, mainClassName );
         } catch ( NoClassDefFoundError e ) {
             JOptionPane.showMessageDialog( null, "Class not found:\n"
@@ -264,7 +264,7 @@ public class ProgramRunner {
             
             long start = System.currentTimeMillis();
 
-            ParsedSpecificationContext parsedSpecificationContext = SpecParserUtil.parseFromString(fullSpec, schemeContainer.getWorkDir(), schemeObjects);
+            ParsedSpecificationContext parsedSpecificationContext = SpecParserUtil.parseFromString(fullSpec, schemeContainer.getPackage(), schemeObjects);
             mainClassName = parsedSpecificationContext.mainClassName;
             classList = parsedSpecificationContext.classList;
 
