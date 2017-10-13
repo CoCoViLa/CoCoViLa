@@ -48,9 +48,6 @@ public class RuntimeProperties {
     public final static String PACKAGE_LOCATOR = "package.locator";
 
     public static final String APP_PROPS_FILE_NAME = "config.xml";
-    public static final String GPL_EN_SHORT_LICENSE_FILE_NAME = "resources/gpl_en_short.txt";
-    public static final String GPL_EN_LICENSE_FILE_NAME = "resources/gpl_en.txt";
-    public static final String GPL_EE_LICENSE_FILE_NAME = "resources/gpl_ee.txt";
 
     /**
      * Default minimum size for applicaion windows and dialogs

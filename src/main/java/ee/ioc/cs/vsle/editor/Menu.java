@@ -105,8 +105,6 @@ public class Menu {
 
     // HELP
     public static final String DOCS = "Docs";
-    public static final String LICENSE = "License";
-    public static final String ABOUT = "About";
 
     // Object popup menu item names.
     public static final String CLONE = "Clone";

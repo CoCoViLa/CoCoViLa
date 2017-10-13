@@ -933,10 +933,6 @@ class IconMouseOps extends MouseInputAdapter implements ActionListener {
                 } else {
                     editor.showInfoDialog( "Missing information", "No documentation URL defined in properties." );
                 }
-            } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
-                new LicenseDialog( editor );
-            } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
-                new AboutDialog( editor );
             } else if ( e.getActionCommand().equals( Menu.OBJECT_DELETE ) ) {
                 editor.deleteObjects();
             } else if ( e.getActionCommand().equals( Menu.BACKWARD ) ) {

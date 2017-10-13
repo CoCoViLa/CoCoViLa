@@ -295,17 +295,6 @@ public class IconEditor extends JFrame {
         menuItem = new JMenuItem( Menu.DOCS, KeyEvent.VK_D );
         menuItem.addActionListener( mListener );
         menu.add( menuItem );
-
-        menu.addSeparator();
-
-        menuItem = new JMenuItem( Menu.LICENSE, KeyEvent.VK_L );
-        menuItem.addActionListener( mListener );
-        menu.add( menuItem );
-
-        menuItem = new JMenuItem( Menu.ABOUT, KeyEvent.VK_A );
-        menuItem.addActionListener( mListener );
-        menu.add( menuItem );
-
     }
 
     public void fixShape() {

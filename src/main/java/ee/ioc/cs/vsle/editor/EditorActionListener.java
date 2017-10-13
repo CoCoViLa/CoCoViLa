@@ -405,10 +405,6 @@ public class EditorActionListener implements ActionListener {
                         IconEditor.createAndOpen();
                     }
                 });
-            } else if ( e.getActionCommand().equals( Menu.ABOUT ) ) {
-                new AboutDialog( Editor.getInstance() );
-            } else if ( e.getActionCommand().equals( Menu.LICENSE ) ) {
-                new LicenseDialog( Editor.getInstance() );
             } else if ( e.getActionCommand().equals( Menu.CLASSPAINTER ) ) {
                 Canvas canvas = Editor.getInstance().getCurrentCanvas();
                 if ( canvas != null ) {
