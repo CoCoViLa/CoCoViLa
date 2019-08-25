@@ -115,7 +115,7 @@ public class ClassPropertiesDialog extends JDialog {
 		initialCfTableModel = cfTblModel;
 		//make a copy of model
 		cfTableModel = new ClassFieldsTableModel(); 
-		cfTableModel.setDataVector( new Vector<Vector<String>>( cfTblModel.getDataVector() ) );
+		cfTableModel.setDataVector(new Vector<Vector<String>>(Vector.class.cast(cfTblModel.getDataVector())));
 
 		setEmptyValuesValid(emptyValid);
 
@@ -460,8 +460,8 @@ public class ClassPropertiesDialog extends JDialog {
 			if (classFieldsValid()) {
 				// Class fields valid. Remove empty rows from the DBResult.
 				cfTableModel.removeEmptyRows();
-				
-				initialCfTableModel.setDataVector( new Vector<Vector<String>>( cfTableModel.getDataVector() ) );
+
+				initialCfTableModel.setDataVector(new Vector<Vector<String>>(Vector.class.cast(cfTableModel.getDataVector())));
 			}
 		}
 		return valid;

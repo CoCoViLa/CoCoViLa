@@ -61,7 +61,7 @@ public class ClassFieldsTableModel extends DefaultTableModel {
 	 **/
 	public ClassFieldsTableModel() {
 		dataVector = new Vector<Vector<String>>();
-		super.dataVector = dataVector;
+		super.dataVector = Vector.class.cast(dataVector);
 	} // ClassFieldsTableModel
 
 	/**
@@ -115,8 +115,8 @@ public class ClassFieldsTableModel extends DefaultTableModel {
 		return String.class;
 	} // getColumnClass
 
-	public Vector<Vector<String>> getDataVector() {
-        return dataVector;
+	public Vector<Vector> getDataVector() {
+        return Vector.class.cast(dataVector);
     }
 	
 	public void setDataVector( Vector<Vector<String>> dataVector ) {
